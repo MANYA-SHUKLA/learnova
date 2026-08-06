@@ -13,6 +13,7 @@ const intlMiddleware = createMiddleware(routing);
 const PROTECTED_PATH_PREFIXES = [
   '/dashboard',
   '/sessions',
+  '/institution',
   '/student',
   '/faculty',
   '/admin',

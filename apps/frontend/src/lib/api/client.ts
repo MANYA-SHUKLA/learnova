@@ -3,7 +3,7 @@
  * Transport + error mapping. Always sends credentials for HttpOnly refresh cookie.
  */
 
-import type { ApiErrorResponse, ApiResponse } from '@learnova/types';
+import type { ApiErrorResponse, ApiResponse, PaginatedMeta } from '@learnova/types';
 import { HTTP_HEADERS } from '@learnova/constants';
 import { env } from '@/config/env';
 import { getAccessToken } from '@/lib/auth/jwt';
@@ -34,7 +34,15 @@ export interface RequestOptions extends Omit<RequestInit, 'body'> {
   requestId?: string;
 }
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+export interface ApiResultWithMeta<T> {
+  data: T;
+  meta?: PaginatedMeta;
+}
+
+async function requestRaw<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<ApiResultWithMeta<T>> {
   const { body, auth = true, requestId = createRequestId(), headers, ...rest } = options;
 
   const finalHeaders = new Headers(headers);
@@ -71,12 +79,19 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     );
   }
 
-  return json.data;
+  return { data: json.data, meta: json.meta };
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const result = await requestRaw<T>(path, options);
+  return result.data;
 }
 
 export const apiClient = {
   get: <T>(path: string, options?: RequestOptions) =>
     request<T>(path, { ...options, method: 'GET' }),
+  getWithMeta: <T>(path: string, options?: RequestOptions) =>
+    requestRaw<T>(path, { ...options, method: 'GET' }),
   post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     request<T>(path, { ...options, method: 'POST', body }),
   put: <T>(path: string, body?: unknown, options?: RequestOptions) =>
