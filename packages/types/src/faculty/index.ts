@@ -93,7 +93,7 @@ export interface FacultyStats {
   departments: number;
   newThisMonth: number;
   byDepartment: Array<{ departmentId: string | null; label: string; count: number }>;
-  byEmploymentType: Array<{ employmentType: FacultyEmploymentType; count: number }>;
+  byEmploymentType: Array<{ employmentType: string; count: number }>;
   byExperience: Array<{ bucket: string; count: number }>;
 }
 

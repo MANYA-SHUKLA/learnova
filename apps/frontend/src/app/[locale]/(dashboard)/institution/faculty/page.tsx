@@ -151,8 +151,15 @@ export default function FacultyListPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-          {(statsQuery.isLoading
-            ? Array.from({ length: 6 })
+          {statsQuery.isLoading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="rounded-2xl border-border/80">
+                  <CardContent className="p-4">
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="mt-3 h-8 w-12" />
+                  </CardContent>
+                </Card>
+              ))
             : [
                 { label: 'Total', value: stats?.total ?? 0 },
                 { label: 'Active', value: stats?.active ?? 0 },
@@ -160,35 +167,25 @@ export default function FacultyListPage() {
                 { label: 'On Leave', value: stats?.onLeave ?? 0 },
                 { label: 'Departments', value: stats?.departments ?? 0 },
                 { label: 'New this month', value: stats?.newThisMonth ?? 0 },
-              ]
-          ).map((card, i) => (
-            <motion.div
-              key={'label' in card ? card.label : i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
-            >
-              <Card className="rounded-2xl border-border/80">
-                <CardContent className="p-4">
-                  {statsQuery.isLoading ? (
-                    <>
-                      <Skeleton className="h-3 w-16" />
-                      <Skeleton className="mt-3 h-8 w-12" />
-                    </>
-                  ) : (
-                    <>
+              ].map((card, i) => (
+                <motion.div
+                  key={card.label}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03 }}
+                >
+                  <Card className="rounded-2xl border-border/80">
+                    <CardContent className="p-4">
                       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {(card as { label: string }).label}
+                        {card.label}
                       </p>
                       <p className="mt-2 font-display text-2xl font-semibold tabular-nums">
-                        {(card as { value: number }).value.toLocaleString()}
+                        {card.value.toLocaleString()}
                       </p>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
         </div>
 
         <Card className="rounded-2xl border-border/80">
@@ -269,7 +266,7 @@ export default function FacultyListPage() {
                   </Button>
                   <Button
                     size="sm"
-                    variant="destructive"
+                    variant="danger"
                     disabled={bulkArchive.isPending}
                     onClick={() => void bulkArchive.mutateAsync(selected).then(() => setSelected([]))}
                   >
@@ -500,7 +497,11 @@ export default function FacultyListPage() {
                     key={d.employmentType}
                     className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2 text-sm"
                   >
-                    <span>{formatEmploymentType(d.employmentType)}</span>
+                    <span>
+                      {formatEmploymentType(
+                        d.employmentType as Parameters<typeof formatEmploymentType>[0],
+                      )}
+                    </span>
                     <span className="tabular-nums font-medium">{d.count}</span>
                   </div>
                 ))}

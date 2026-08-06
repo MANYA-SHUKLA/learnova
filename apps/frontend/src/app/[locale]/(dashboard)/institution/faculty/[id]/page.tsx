@@ -245,13 +245,13 @@ export default function FacultyDetailPage() {
             ) : (
               auditQuery.data?.items.map((item) => (
                 <div
-                  key={String(item.id)}
+                  key={String(item['id'])}
                   className="rounded-xl border border-border/70 px-3 py-2 text-sm"
                 >
-                  <p className="font-medium">{String(item.event)}</p>
+                  <p className="font-medium">{String(item['event'])}</p>
                   <p className="text-xs text-muted-foreground">
-                    {String(item.createdAt)}
-                    {item.email ? ` · ${String(item.email)}` : ''}
+                    {String(item['createdAt'])}
+                    {item['email'] ? ` · ${String(item['email'])}` : ''}
                   </p>
                 </div>
               ))
