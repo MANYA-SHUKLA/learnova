@@ -12,39 +12,40 @@ import {
   Input,
   Spinner,
 } from '@learnova/ui';
-import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ApiClientError } from '@/lib/api/client';
-import { Link, useRouter } from '@/lib/i18n/routing';
+import { Link } from '@/lib/i18n/routing';
 import {
-  loginSchema,
-  type LoginFormValues,
-  useLoginMutation,
+  forgotPasswordSchema,
+  type ForgotPasswordFormValues,
+  useForgotPasswordMutation,
 } from '@/features/auth';
 
-export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const nextPath = searchParams.get('next') || '/dashboard';
-  const loginMutation = useLoginMutation();
+export default function ForgotPasswordPage() {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const mutation = useForgotPasswordMutation();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+  } = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: '' },
   });
 
   const onSubmit = handleSubmit(async (values) => {
+    setSuccessMessage(null);
     try {
-      await loginMutation.mutateAsync(values);
-      router.replace(nextPath as '/dashboard');
+      const result = await mutation.mutateAsync(values);
+      setSuccessMessage(result.message);
     } catch (err) {
       const message =
-        err instanceof ApiClientError ? err.message : 'Unable to sign in. Try again.';
+        err instanceof ApiClientError
+          ? err.message
+          : 'Unable to send reset link. Try again.';
       setError('root', { message });
     }
   });
@@ -53,8 +54,10 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center px-6 py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>Enter your credentials to access Learnova.</CardDescription>
+          <CardTitle>Forgot password</CardTitle>
+          <CardDescription>
+            Enter your email and we&apos;ll send a reset link if an account exists.
+          </CardDescription>
         </CardHeader>
         <form onSubmit={onSubmit} noValidate>
           <CardContent className="space-y-4">
@@ -64,6 +67,14 @@ export default function LoginPage() {
                 className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
               >
                 {errors.root.message}
+              </p>
+            ) : null}
+            {successMessage ? (
+              <p
+                role="status"
+                className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success"
+              >
+                {successMessage}
               </p>
             ) : null}
 
@@ -76,49 +87,31 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 placeholder="you@institution.edu"
-                disabled={loginMutation.isPending}
+                disabled={mutation.isPending}
                 {...register('email')}
               />
               {errors.email ? (
                 <p className="text-xs text-danger">{errors.email.message}</p>
               ) : null}
             </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                disabled={loginMutation.isPending}
-                {...register('password')}
-              />
-              {errors.password ? (
-                <p className="text-xs text-danger">{errors.password.message}</p>
-              ) : null}
-            </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? (
+            <Button type="submit" className="w-full" disabled={mutation.isPending}>
+              {mutation.isPending ? (
                 <>
                   <Spinner size="sm" />
-                  Signing in…
+                  Sending…
                 </>
               ) : (
-                'Sign in'
+                'Send reset link'
               )}
             </Button>
+            <Link
+              href="/login"
+              className="text-center text-sm text-muted-foreground hover:text-foreground"
+            >
+              Back to sign in
+            </Link>
           </CardFooter>
         </form>
       </Card>

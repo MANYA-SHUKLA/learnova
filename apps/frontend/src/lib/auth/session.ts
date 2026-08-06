@@ -1,6 +1,6 @@
 /**
- * Session manager — prepared scaffold.
- * Will hydrate from API / cookie when auth is implemented.
+ * Session manager — local probe helpers + destroy.
+ * Full hydration happens via AuthProvider + auth API.
  */
 
 import type { AuthUser, Session } from '@learnova/types';
@@ -22,7 +22,7 @@ export function getEmptySession(): SessionState {
 
 /**
  * Lightweight client session probe from stored JWT.
- * Does NOT call the API — foundation only.
+ * Does NOT call the API — useful as a fast pre-hydrate hint.
  */
 export function probeLocalSession(): SessionState {
   const token = getAccessToken();
@@ -45,14 +45,21 @@ export function probeLocalSession(): SessionState {
       permissions: payload.permissions,
       locale: 'en',
       avatarUrl: null,
+      isEmailVerified: true,
     },
     session: {
       id: payload.sessionId,
       userId: payload.sub,
+      deviceType: 'unknown',
       expiresAt: new Date(payload.exp * 1000).toISOString(),
       createdAt: new Date(payload.iat * 1000).toISOString(),
+      lastActivityAt: new Date().toISOString(),
       userAgent: null,
       ipAddress: null,
+      browser: null,
+      os: null,
+      country: null,
+      isCurrent: true,
     },
     isAuthenticated: true,
   };

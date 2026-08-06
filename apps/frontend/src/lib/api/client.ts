@@ -1,6 +1,6 @@
 /**
  * Typed API client foundation.
- * No endpoints implemented — transport + error mapping only.
+ * Transport + error mapping. Always sends credentials for HttpOnly refresh cookie.
  */
 
 import type { ApiErrorResponse, ApiResponse } from '@learnova/types';
@@ -54,6 +54,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
     ...rest,
+    credentials: 'include',
     headers: finalHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });

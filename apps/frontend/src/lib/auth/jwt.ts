@@ -1,6 +1,6 @@
 /**
- * JWT client utilities — prepared for auth implementation.
- * Token decode/store helpers only. No login flow.
+ * JWT client utilities.
+ * Access token lives in sessionStorage; refresh token is HttpOnly cookie.
  */
 
 import type { JwtPayload } from '@learnova/types';
@@ -8,10 +8,18 @@ import type { JwtPayload } from '@learnova/types';
 const ACCESS_TOKEN_KEY = 'learnova_access_token';
 const REFRESH_TOKEN_KEY = 'learnova_refresh_token';
 
-export function storeTokens(accessToken: string, refreshToken: string): void {
+/** Prefer this — refresh token is cookie-only */
+export function storeAccessToken(accessToken: string): void {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-  sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
+/**
+ * Stores access token only. Refresh argument is ignored (HttpOnly cookie).
+ */
+export function storeTokens(accessToken: string, _refreshToken?: string): void {
+  storeAccessToken(accessToken);
 }
 
 export function getAccessToken(): string | null {
@@ -19,6 +27,7 @@ export function getAccessToken(): string | null {
   return sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
+/** @deprecated Refresh is HttpOnly cookie — always returns null after migration */
 export function getRefreshToken(): string | null {
   if (typeof window === 'undefined') return null;
   return sessionStorage.getItem(REFRESH_TOKEN_KEY);

@@ -1,23 +1,18 @@
 import createMiddleware from 'next-intl/middleware';
-import type { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { routing } from '@/lib/i18n/routing';
 
 /**
- * Edge middleware — i18n routing + auth gate scaffolding.
- *
- * Auth is PREPARED only:
- * - Session cookie presence check is stubbed
- * - Protected route matcher is ready
- * - Role-based redirects will be wired when auth is implemented
- *
- * DO NOT implement login here.
+ * Edge middleware — i18n routing + auth gate via learnova_session cookie.
  */
 
 const intlMiddleware = createMiddleware(routing);
 
-/** Routes that require an authenticated session (prepared) */
+/** Routes that require an authenticated session */
 const PROTECTED_PATH_PREFIXES = [
   '/dashboard',
+  '/sessions',
   '/student',
   '/faculty',
   '/admin',
@@ -31,12 +26,17 @@ const PROTECTED_PATH_PREFIXES = [
   '/audit',
 ] as const;
 
-/** Auth-only routes (guest) — prepared */
-const AUTH_PATH_PREFIXES = ['/login', '/register', '/forgot-password'] as const;
+/** Auth-only routes (guest) */
+const AUTH_PATH_PREFIXES = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+] as const;
 
 function stripLocale(pathname: string): string {
   const segments = pathname.split('/');
-  // pathname: /en/dashboard → remove locale segment
   if (segments.length >= 2) {
     return '/' + segments.slice(2).join('/');
   }
@@ -50,28 +50,25 @@ function matchesPrefix(path: string, prefixes: readonly string[]): boolean {
   );
 }
 
-export default function middleware(request: NextRequest): NextResponse {
+export default function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const pathWithoutLocale = stripLocale(pathname);
+  const locale = pathname.split('/')[1] ?? 'en';
 
-  // Prepared: session token lookup (not validated until auth is implemented)
   const sessionToken = request.cookies.get('learnova_session')?.value;
   const isAuthenticated = Boolean(sessionToken);
 
   const isProtected = matchesPrefix(pathWithoutLocale, PROTECTED_PATH_PREFIXES);
   const isAuthRoute = matchesPrefix(pathWithoutLocale, AUTH_PATH_PREFIXES);
 
-  // Soft gate — when auth ships, uncomment redirect logic
   if (isProtected && !isAuthenticated) {
-    // Foundation only: allow through until auth is implemented
-    // const locale = pathname.split('/')[1] ?? 'en';
-    // return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    loginUrl.searchParams.set('next', pathWithoutLocale);
+    return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthRoute && isAuthenticated) {
-    // Foundation only: allow through until auth is implemented
-    // const locale = pathname.split('/')[1] ?? 'en';
-    // return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    return NextResponse.redirect(new URL(`/${locale}/sessions`, request.url));
   }
 
   const response = intlMiddleware(request);
