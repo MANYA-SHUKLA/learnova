@@ -209,8 +209,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
             Dashboard
           </h1>
@@ -218,7 +218,7 @@ export default function DashboardPage() {
             Institution structure, capacity, and academic pulse at a glance.
           </p>
         </div>
-        <Button asChild variant="outline" className="rounded-xl">
+        <Button asChild variant="outline" className="w-full rounded-xl sm:w-auto">
           <Link href={APP_ROUTES.INSTITUTION}>
             Open institution
             <ArrowRight className="size-4" />
