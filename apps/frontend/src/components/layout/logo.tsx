@@ -10,7 +10,7 @@ interface LogoProps {
   className?: string;
 }
 
-export function Logo({ collapsed = false, href = APP_ROUTES.DASHBOARD, className }: LogoProps) {
+export function Logo({ collapsed = false, href = APP_ROUTES.INSTITUTION_DASHBOARD, className }: LogoProps) {
   return (
     <Link
       href={href}

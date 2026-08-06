@@ -77,10 +77,10 @@ export default async function AboutPage({ params }: AboutPageProps) {
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href="/login">Get started</Link>
+                <Link href="/login">Institution Login</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                <Link href="/#features">Explore features</Link>
+                <Link href="/features">Explore Platform</Link>
               </Button>
             </div>
           </div>
@@ -124,7 +124,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
             </p>
             <div className="mt-10">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href="/login">Join Learnova</Link>
+                <Link href="/register-institution">Register Institution</Link>
               </Button>
             </div>
           </div>
