@@ -117,14 +117,14 @@ export default function InstitutionSettingsPage() {
       await updateMutation.mutateAsync({
         language,
         theme,
-        attendance: parsed.attendance,
-        gradingScale: parsed.gradingScale,
-        examRules: parsed.examRules,
-        certificateSettings: parsed.certificateSettings,
-        storageSettings: parsed.storageSettings,
-        aiSettings: parsed.aiSettings,
-        notificationSettings: parsed.notificationSettings,
-        securitySettings: parsed.securitySettings,
+        attendance: parsed['attendance'],
+        gradingScale: parsed['gradingScale'],
+        examRules: parsed['examRules'],
+        certificateSettings: parsed['certificateSettings'],
+        storageSettings: parsed['storageSettings'],
+        aiSettings: parsed['aiSettings'],
+        notificationSettings: parsed['notificationSettings'],
+        securitySettings: parsed['securitySettings'],
       });
       setMessage('Settings saved.');
     } catch (err) {

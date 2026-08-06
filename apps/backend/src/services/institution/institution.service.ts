@@ -78,17 +78,35 @@ function toDto<T extends { _id: Types.ObjectId; toObject?: () => Record<string, 
     _id: Types.ObjectId;
     __v?: number;
   };
+
+  const normalized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(rest)) {
+    if (value instanceof Types.ObjectId) {
+      normalized[key] = String(value);
+    } else if (value instanceof Date) {
+      normalized[key] = value.toISOString();
+    } else if (Array.isArray(value)) {
+      normalized[key] = value.map((item) => {
+        if (item instanceof Types.ObjectId) return String(item);
+        if (item instanceof Date) return item.toISOString();
+        if (item && typeof item === 'object') {
+          const obj = { ...(item as Record<string, unknown>) };
+          for (const [k, v] of Object.entries(obj)) {
+            if (v instanceof Types.ObjectId) obj[k] = String(v);
+            else if (v instanceof Date) obj[k] = v.toISOString();
+          }
+          return obj;
+        }
+        return item;
+      });
+    } else {
+      normalized[key] = value;
+    }
+  }
+
   return {
     id: String(_id),
-    ...rest,
-    createdAt:
-      rest.createdAt instanceof Date
-        ? rest.createdAt.toISOString()
-        : (rest.createdAt as string | undefined),
-    updatedAt:
-      rest.updatedAt instanceof Date
-        ? rest.updatedAt.toISOString()
-        : (rest.updatedAt as string | undefined),
+    ...normalized,
     deletedAt:
       rest.deletedAt instanceof Date
         ? rest.deletedAt.toISOString()

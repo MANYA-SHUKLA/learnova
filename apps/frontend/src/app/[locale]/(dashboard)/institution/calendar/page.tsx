@@ -150,7 +150,7 @@ export default function AcademicCalendarPage() {
     const body = {
       academicYearId: String(values['academicYearId'] ?? ''),
       name: String(values['name'] ?? ''),
-      status: String(values['status'] ?? 'active'),
+      status: (String(values['status'] ?? 'active') as 'active' | 'inactive' | 'archived'),
       events: events.map((e) => ({
         type: e.type,
         title: e.title.trim(),
