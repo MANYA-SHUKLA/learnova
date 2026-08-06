@@ -198,6 +198,9 @@ importers:
       '@learnova/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@learnova/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@learnova/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -520,9 +523,6 @@ importers:
       '@learnova/types':
         specifier: workspace:*
         version: link:../types
-      '@learnova/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@learnova/validation':
         specifier: workspace:*
         version: link:../validation
