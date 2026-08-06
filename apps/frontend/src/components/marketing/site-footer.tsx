@@ -1,5 +1,5 @@
 import { Link } from '@/lib/i18n/routing';
-import { LogoMark } from './site-header';
+import { LogoMark } from './logo-mark';
 
 const PRODUCT_LINKS = [
   { href: '/#features', label: 'Features' },

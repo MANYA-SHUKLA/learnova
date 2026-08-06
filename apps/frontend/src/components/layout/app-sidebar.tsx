@@ -18,7 +18,7 @@ import {
   BookOpen,
   Network,
   CalendarRange,
-  PanelLeftClose,
+  Grid3X3,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useEffect } from 'react';
@@ -59,7 +59,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: APP_ROUTES.INSTITUTION_PROGRAMS, label: 'Programs', icon: BookOpen },
       { href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, label: 'Academic Years', icon: CalendarRange },
       { href: APP_ROUTES.INSTITUTION_SEMESTERS, label: 'Semesters', icon: Layers3 },
-      { href: APP_ROUTES.INSTITUTION_SECTIONS, label: 'Sections', icon: PanelLeftClose },
+      { href: APP_ROUTES.INSTITUTION_SECTIONS, label: 'Sections', icon: Grid3X3 },
       { href: APP_ROUTES.INSTITUTION_BATCHES, label: 'Batches', icon: UsersRound },
       { href: APP_ROUTES.INSTITUTION_CALENDAR, label: 'Calendar', icon: CalendarDays },
     ],
@@ -158,7 +158,7 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
         )}
       >
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-          {(user?.firstName?.[0] ?? user?.email?.[0] ?? 'L').toUpperCase()}
+          {(user ? (user.firstName[0] ?? user.email[0] ?? 'L') : 'L').toUpperCase()}
         </div>
         {!collapsed ? (
           <div className="min-w-0 flex-1">
@@ -235,7 +235,9 @@ function MobileDrawer() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-[2px] lg:hidden"
-            onClick={() => setMobileNavOpen(false)}
+            onClick={() => {
+              setMobileNavOpen(false);
+            }}
             aria-hidden
           />
           <motion.aside
@@ -250,14 +252,21 @@ function MobileDrawer() {
               <Logo />
               <button
                 type="button"
-                onClick={() => setMobileNavOpen(false)}
+                onClick={() => {
+                  setMobileNavOpen(false);
+                }}
                 className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                 aria-label="Close navigation"
               >
                 <ChevronLeft className="size-4" />
               </button>
             </div>
-            <SidebarNav collapsed={false} onNavigate={() => setMobileNavOpen(false)} />
+            <SidebarNav
+              collapsed={false}
+              onNavigate={() => {
+                setMobileNavOpen(false);
+              }}
+            />
             <SidebarFooter collapsed={false} />
           </motion.aside>
         </>
