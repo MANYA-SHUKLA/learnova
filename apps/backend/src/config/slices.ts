@@ -5,20 +5,20 @@ import { env } from './env.js';
 export const databaseConfig = {
   uri: env.MONGODB_URI,
   dbName: env.MONGODB_DB_NAME,
-  maxPoolSize: env.MONGODB_MAX_POOL_SIZE ?? 20,
-  minPoolSize: env.MONGODB_MIN_POOL_SIZE ?? 2,
-  serverSelectionTimeoutMS: env.MONGODB_SERVER_SELECTION_TIMEOUT_MS ?? 10_000,
-  socketTimeoutMS: env.MONGODB_SOCKET_TIMEOUT_MS ?? 45_000,
-  retryAttempts: env.MONGODB_CONNECT_RETRY_ATTEMPTS ?? 5,
-  retryDelayMs: env.MONGODB_CONNECT_RETRY_DELAY_MS ?? 2000,
+  maxPoolSize: env.MONGODB_MAX_POOL_SIZE,
+  minPoolSize: env.MONGODB_MIN_POOL_SIZE,
+  serverSelectionTimeoutMS: env.MONGODB_SERVER_SELECTION_TIMEOUT_MS,
+  socketTimeoutMS: env.MONGODB_SOCKET_TIMEOUT_MS,
+  retryAttempts: env.MONGODB_CONNECT_RETRY_ATTEMPTS,
+  retryDelayMs: env.MONGODB_CONNECT_RETRY_DELAY_MS,
 } as const;
 
 export const redisConfig = {
   url: env.REDIS_URL,
   password: env.REDIS_PASSWORD,
-  connectTimeout: env.REDIS_CONNECT_TIMEOUT_MS ?? 10_000,
-  maxRetries: env.REDIS_MAX_RETRIES ?? 10,
-  keepAlive: env.REDIS_KEEP_ALIVE_MS ?? 30_000,
+  connectTimeout: env.REDIS_CONNECT_TIMEOUT_MS,
+  maxRetries: env.REDIS_MAX_RETRIES,
+  keepAlive: env.REDIS_KEEP_ALIVE_MS,
 } as const;
 
 export const jwtConfig = {
@@ -114,7 +114,7 @@ export const rateLimitConfig = {
 
 export const cookiesConfig = {
   secure: env.COOKIE_SECURE === 'true' || env.NODE_ENV === 'production',
-  sameSite: (env.COOKIE_SAME_SITE ?? 'lax') as 'strict' | 'lax' | 'none',
+  sameSite: (env.COOKIE_SAME_SITE ?? 'lax'),
   domain: env.COOKIE_DOMAIN,
   path: env.COOKIE_PATH ?? '/',
 } as const;

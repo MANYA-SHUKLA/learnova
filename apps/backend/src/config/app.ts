@@ -3,7 +3,7 @@ import { env } from './env.js';
 
 export const appConfig = {
   name: env.APP_NAME ?? 'Learnova API',
-  version: env.APP_VERSION ?? '0.1.0',
+  version: env.APP_VERSION,
   apiPrefix: API_PREFIX,
   env: env.NODE_ENV,
   commitSha: env.GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? 'unknown',

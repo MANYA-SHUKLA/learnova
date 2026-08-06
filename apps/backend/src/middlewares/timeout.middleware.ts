@@ -14,15 +14,15 @@ export function timeoutMiddleware(
           success: false,
           error: {
             code: 'REQUEST_TIMEOUT',
-            message: `Request timed out after ${ms}ms`,
+            message: `Request timed out after ${String(ms)}ms`,
           },
-          requestId: req.requestId ?? '',
+          requestId: req.requestId,
           timestamp: new Date().toISOString(),
         });
       }
     }, ms);
 
-    const clear = () => clearTimeout(timer);
+    const clear = () => { clearTimeout(timer); };
     res.on('finish', clear);
     res.on('close', clear);
     next();

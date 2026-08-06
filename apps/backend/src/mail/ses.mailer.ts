@@ -11,17 +11,19 @@ import type { IMailer, SendMailInput, SendMailResult } from './types.js';
 export class SesMailer implements IMailer {
   readonly driver = 'ses' as const;
 
-  async send(_input: SendMailInput): Promise<SendMailResult> {
-    throw new AppError(
-      'SERVICE_UNAVAILABLE',
-      'SES mailer is not wired yet. Use MAIL_DRIVER=console or smtp for foundation.',
-      503,
+  send(_input: SendMailInput): Promise<SendMailResult> {
+    return Promise.reject(
+      new AppError(
+        'SERVICE_UNAVAILABLE',
+        'SES mailer is not wired yet. Use MAIL_DRIVER=console or smtp for foundation.',
+        503,
+      ),
     );
   }
 
-  async isHealthy(): Promise<boolean> {
+  isHealthy(): Promise<boolean> {
     logger.debug({ from: env.MAIL_FROM }, 'SES health: adapter not wired');
-    return false;
+    return Promise.resolve(false);
   }
 
   /** Placeholder for future message id generation tests */

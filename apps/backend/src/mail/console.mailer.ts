@@ -11,7 +11,7 @@ function toList(value: string | string[]): string[] {
 export class ConsoleMailer implements IMailer {
   readonly driver = 'console' as const;
 
-  async send(input: SendMailInput): Promise<SendMailResult> {
+  send(input: SendMailInput): Promise<SendMailResult> {
     const accepted = toList(input.to);
     const messageId = `console-${createId()}`;
     logger.info(
@@ -27,10 +27,10 @@ export class ConsoleMailer implements IMailer {
       },
       'Email sent (console driver)',
     );
-    return { messageId, accepted, rejected: [], driver: this.driver };
+    return Promise.resolve({ messageId, accepted, rejected: [], driver: this.driver });
   }
 
-  async isHealthy(): Promise<boolean> {
-    return true;
+  isHealthy(): Promise<boolean> {
+    return Promise.resolve(true);
   }
 }

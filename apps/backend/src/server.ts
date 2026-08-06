@@ -64,18 +64,24 @@ async function bootstrap(): Promise<void> {
     );
   });
 
-  const shutdown = async (signal: string) => {
+  const shutdown = (signal: string): void => {
     logger.info({ signal }, 'Shutting down…');
-    httpServer.close(async () => {
-      await closeQueues();
-      await disconnectMongo();
-      await disconnectRedis();
-      process.exit(0);
+    httpServer.close(() => {
+      void (async () => {
+        await closeQueues();
+        await disconnectMongo();
+        await disconnectRedis();
+        process.exit(0);
+      })();
     });
   };
 
-  process.on('SIGTERM', () => void shutdown('SIGTERM'));
-  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => {
+    shutdown('SIGTERM');
+  });
+  process.on('SIGINT', () => {
+    shutdown('SIGINT');
+  });
 }
 
 bootstrap().catch((err: unknown) => {

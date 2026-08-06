@@ -28,39 +28,41 @@ export class S3CompatibleStorage implements IStorage {
     );
   }
 
-  async put(_input: PutObjectInput): Promise<StorageObject> {
-    this.notReady();
+  put(_input: PutObjectInput): Promise<StorageObject> {
+    return this.notReady();
   }
 
-  async get(_key: string): Promise<Buffer> {
-    this.notReady();
+  get(_key: string): Promise<Buffer> {
+    return this.notReady();
   }
 
-  async delete(_key: string): Promise<void> {
-    this.notReady();
+  delete(_key: string): Promise<void> {
+    return this.notReady();
   }
 
-  async exists(_key: string): Promise<boolean> {
-    this.notReady();
+  exists(_key: string): Promise<boolean> {
+    return this.notReady();
   }
 
-  async getPublicUrl(key: string): Promise<string> {
+  getPublicUrl(key: string): Promise<string> {
     const bucket = this.config.bucket ?? 'bucket';
     if (this.config.endpoint) {
       const base = this.config.endpoint.replace(/\/$/, '');
-      return this.config.forcePathStyle
-        ? `${base}/${bucket}/${key.replace(/^\/+/, '')}`
-        : `${base}/${key.replace(/^\/+/, '')}`;
+      return Promise.resolve(
+        this.config.forcePathStyle
+          ? `${base}/${bucket}/${key.replace(/^\/+/, '')}`
+          : `${base}/${key.replace(/^\/+/, '')}`,
+      );
     }
-    return `https://${bucket}.s3.amazonaws.com/${key.replace(/^\/+/, '')}`;
+    return Promise.resolve(`https://${bucket}.s3.amazonaws.com/${key.replace(/^\/+/, '')}`);
   }
 
-  async isHealthy(): Promise<boolean> {
-    return Boolean(this.config.bucket);
+  isHealthy(): Promise<boolean> {
+    return Promise.resolve(Boolean(this.config.bucket));
   }
 }
 
-/** @deprecated Use S3CompatibleStorage — kept for existing imports */
+/** Alias kept for existing imports — prefer S3CompatibleStorage */
 export class S3Storage extends S3CompatibleStorage {
   constructor(config: { bucket?: string; region?: string; endpoint?: string }) {
     super('s3', config);

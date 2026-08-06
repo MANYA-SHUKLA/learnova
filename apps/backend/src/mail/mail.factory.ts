@@ -35,9 +35,7 @@ export function createMailer(): IMailer {
 }
 
 export function getMailer(): IMailer {
-  if (!mailer) {
-    mailer = createMailer();
-  }
+  mailer ??= createMailer();
   return mailer;
 }
 

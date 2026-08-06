@@ -27,7 +27,7 @@ export interface MongoMetrics {
 }
 
 export async function connectMongo(): Promise<typeof mongoose> {
-  if (isConnected && mongoose.connection.readyState === 1) {
+  if (isConnected && mongoose.connection.readyState === mongoose.ConnectionStates.connected) {
     return mongoose;
   }
 
@@ -92,7 +92,7 @@ export async function connectMongo(): Promise<typeof mongoose> {
 }
 
 export async function disconnectMongo(): Promise<void> {
-  if (mongoose.connection.readyState === 0) return;
+  if (mongoose.connection.readyState === mongoose.ConnectionStates.disconnected) return;
   await mongoose.disconnect();
   isConnected = false;
   logger.domain('database', 'info', 'MongoDB disconnected cleanly');
@@ -103,11 +103,11 @@ export function getMongoConnection(): typeof mongoose.connection {
 }
 
 export function isMongoReady(): boolean {
-  return isConnected && mongoose.connection.readyState === 1;
+  return isConnected && mongoose.connection.readyState === mongoose.ConnectionStates.connected;
 }
 
 export function isMongoLive(): boolean {
-  return mongoose.connection.readyState !== 0;
+  return mongoose.connection.readyState !== mongoose.ConnectionStates.disconnected;
 }
 
 export function getMongoMetrics(): MongoMetrics {

@@ -41,8 +41,8 @@ export function getDlq(name: QueueName): Queue {
   throw new QueueError(`DLQ "${dlqName}" is not initialized`);
 }
 
-export async function initQueues(connection?: Redis): Promise<Map<QueueName, Queue>> {
-  if (queues.size > 0) return queues;
+export function initQueues(connection?: Redis): Promise<Map<QueueName, Queue>> {
+  if (queues.size > 0) return Promise.resolve(queues);
 
   const redis = connection ?? getRedis();
 
@@ -83,7 +83,7 @@ export async function initQueues(connection?: Redis): Promise<Map<QueueName, Que
     queues: [...queues.keys()],
     dlq: [...dlqQueues.keys()],
   });
-  return queues;
+  return Promise.resolve(queues);
 }
 
 export async function closeQueues(): Promise<void> {

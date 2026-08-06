@@ -3,9 +3,7 @@ import { backendEnvSchema, parseEnv, type BackendEnv } from '@learnova/config';
 let cached: BackendEnv | null = null;
 
 export function getEnv(): BackendEnv {
-  if (!cached) {
-    cached = parseEnv(backendEnvSchema);
-  }
+  cached ??= parseEnv(backendEnvSchema);
   return cached;
 }
 

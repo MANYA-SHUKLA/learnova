@@ -4,9 +4,6 @@ import { nodeConfig } from '@learnova/eslint-config/node';
 export default [
   ...nodeConfig,
   {
-    ignores: ['**/.gitkeep.ts'],
-  },
-  {
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -14,13 +11,5 @@ export default [
       },
     },
   },
-  {
-    files: [
-      'src/middlewares/auth.middleware.ts',
-      'src/middlewares/request-id.middleware.ts',
-    ],
-    rules: {
-      '@typescript-eslint/no-namespace': 'off',
-    },
-  },
 ];
+

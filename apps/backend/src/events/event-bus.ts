@@ -21,6 +21,7 @@ export type EventHandler<T = unknown> = (
  */
 class EventBus {
   private readonly emitter = new EventEmitter();
+  private readonly handlers = new Map<string, Set<EventHandler>>();
 
   constructor() {
     this.emitter.setMaxListeners(100);
@@ -51,27 +52,21 @@ class EventBus {
       actorId: meta?.actorId,
     };
 
-    const handlers = this.emitter.listeners(name) as EventHandler<T>[];
-    await Promise.all(
-      handlers.map(async (handler) => {
-        try {
-          await handler(event);
-        } catch (err) {
-          logger.error({ err, event: name }, 'Event handler failed');
-        }
-      }),
-    );
+    const run = async (handler: EventHandler<T>) => {
+      try {
+        await handler(event);
+      } catch (err) {
+        logger.error({ err, event: name }, 'Event handler failed');
+      }
+    };
 
-    const anyHandlers = this.emitter.listeners('*') as EventHandler[];
-    await Promise.all(
-      anyHandlers.map(async (handler) => {
-        try {
-          await handler(event as DomainEvent);
-        } catch (err) {
-          logger.error({ err, event: name }, 'Wildcard event handler failed');
-        }
-      }),
-    );
+    const named = [...(this.handlers.get(name) ?? [])] as EventHandler<T>[];
+    const wildcards = [...(this.handlers.get('*') ?? [])] as EventHandler<T>[];
+
+    await Promise.all([...named, ...wildcards].map((handler) => run(handler)));
+
+    this.emitter.emit(name, event);
+    this.emitter.emit('*', event);
 
     return event;
   }
@@ -81,22 +76,32 @@ class EventBus {
   }
 
   on<T = unknown>(name: EventName | '*', handler: EventHandler<T>): () => void {
-    this.emitter.on(name, handler as EventHandler);
+    const key = name;
+    let set = this.handlers.get(key);
+    if (!set) {
+      set = new Set();
+      this.handlers.set(key, set);
+    }
+    set.add(handler as EventHandler);
     return () => {
-      this.emitter.off(name, handler as EventHandler);
+      set.delete(handler as EventHandler);
     };
   }
 
   once<T = unknown>(name: EventName, handler: EventHandler<T>): void {
-    this.emitter.once(name, handler as EventHandler);
+    const wrap: EventHandler<T> = async (event) => {
+      this.off(name, wrap as EventHandler);
+      await handler(event);
+    };
+    this.on(name, wrap);
   }
 
   off(name: EventName | '*', handler: EventHandler): void {
-    this.emitter.off(name, handler);
+    this.handlers.get(name)?.delete(handler);
   }
 
   listenerCount(name: EventName | '*'): number {
-    return this.emitter.listenerCount(name);
+    return this.handlers.get(name)?.size ?? 0;
   }
 
   listRegistry() {

@@ -1,8 +1,6 @@
-import { API_ERROR_CODES, type ApiErrorCode, type ApiErrorDetail } from '@learnova/types';
+import { API_ERROR_CODES, type ApiErrorDetail } from '@learnova/types';
 
-export interface ErrorMetadata {
-  [key: string]: unknown;
-}
+export type ErrorMetadata = Record<string, unknown>;
 
 /**
  * Application error hierarchy — mapped to HTTP by global error handler.
@@ -13,9 +11,9 @@ export class AppError extends Error {
   public readonly metadata?: ErrorMetadata;
 
   constructor(
-    public readonly code: ApiErrorCode | string,
+    public readonly code: string,
     message: string,
-    public readonly statusCode: number = 500,
+    public readonly statusCode = 500,
     public readonly details?: ApiErrorDetail[],
     metadata?: ErrorMetadata,
   ) {

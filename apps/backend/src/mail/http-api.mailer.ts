@@ -15,12 +15,14 @@ export class HttpApiMailer implements IMailer {
     private readonly apiKey: string | undefined,
   ) {}
 
-  async send(input: SendMailInput): Promise<SendMailResult> {
+  send(input: SendMailInput): Promise<SendMailResult> {
     if (!this.apiKey) {
-      throw new AppError(
-        'SERVICE_UNAVAILABLE',
-        `${this.driver} selected but API key is not configured`,
-        503,
+      return Promise.reject(
+        new AppError(
+          'SERVICE_UNAVAILABLE',
+          `${this.driver} selected but API key is not configured`,
+          503,
+        ),
       );
     }
 
@@ -39,15 +41,15 @@ export class HttpApiMailer implements IMailer {
       `Email queued via ${this.driver} abstraction (HTTP adapter pending)`,
     );
 
-    return {
+    return Promise.resolve({
       messageId,
       accepted: toList(input.to),
       rejected: [],
       driver: this.driver,
-    };
+    });
   }
 
-  async isHealthy(): Promise<boolean> {
-    return Boolean(this.apiKey);
+  isHealthy(): Promise<boolean> {
+    return Promise.resolve(Boolean(this.apiKey));
   }
 }

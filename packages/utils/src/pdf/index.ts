@@ -21,7 +21,7 @@ export class PdfNotWiredError extends Error {
 }
 
 export const pdfPrep = {
-  async render(_input: PdfDocumentInput): Promise<Buffer> {
-    throw new PdfNotWiredError();
+  render(_input: PdfDocumentInput): Promise<Buffer> {
+    return Promise.reject(new PdfNotWiredError());
   },
 };

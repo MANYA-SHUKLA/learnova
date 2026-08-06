@@ -10,7 +10,7 @@ import type { RequestHandler } from 'express';
  */
 export function createRateLimiter(): RequestHandler {
   if (!rateLimitConfig.enabled) {
-    return (_req, _res, next) => next();
+    return (_req, _res, next) => { next(); };
   }
 
   const windowMs = rateLimitConfig.windowMs;
@@ -24,8 +24,13 @@ export function createRateLimiter(): RequestHandler {
       standardHeaders: true,
       legacyHeaders: false,
       store: new RedisStore({
-        sendCommand: (...args: string[]) =>
-          redis.call(args[0] as string, ...args.slice(1)) as Promise<number>,
+        sendCommand: (...args: string[]) => {
+          const [command, ...commandArgs] = args;
+          if (!command) {
+            return Promise.reject(new Error('Redis rate-limit command is required'));
+          }
+          return redis.call(command, ...commandArgs) as Promise<number>;
+        },
       }),
       handler: () => {
         throw new RateLimitError();

@@ -83,8 +83,8 @@ export async function disconnectRedis(): Promise<void> {
 export async function isRedisReady(): Promise<boolean> {
   try {
     const redis = getRedis();
-    const pong = await redis.ping();
-    return pong === 'PONG';
+    await redis.ping();
+    return true;
   } catch {
     return false;
   }

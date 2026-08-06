@@ -8,12 +8,18 @@ export interface CursorMeta {
   limit: number;
 }
 
+function requestIdFrom(res: Response, explicit?: string): string {
+  if (explicit !== undefined) return explicit;
+  const header = res.getHeader('x-request-id');
+  return header === undefined ? '' : String(header);
+}
+
 /**
  * Centralized response wrapper — all controllers use these helpers.
  */
-export function sendSuccess<T>(
+export function sendSuccess(
   res: Response,
-  data: T,
+  data: unknown,
   options?: {
     status?: number;
     message?: string;
@@ -21,37 +27,37 @@ export function sendSuccess<T>(
     requestId?: string;
   },
 ): Response {
-  const body: ApiSuccessResponse<T> = {
+  const body: ApiSuccessResponse<unknown> = {
     success: true,
     data,
     message: options?.message,
     meta: options?.meta,
-    requestId: options?.requestId ?? (res.getHeader('x-request-id') as string) ?? '',
+    requestId: requestIdFrom(res, options?.requestId),
     timestamp: new Date().toISOString(),
   };
   return res.status(options?.status ?? 200).json(body);
 }
 
-export function sendCreated<T>(
+export function sendCreated(
   res: Response,
-  data: T,
+  data: unknown,
   options?: { message?: string; requestId?: string },
 ): Response {
   return sendSuccess(res, data, { ...options, status: 201 });
 }
 
-export function sendPaginated<T>(
+export function sendPaginated(
   res: Response,
-  items: T[],
+  items: unknown[],
   meta: PaginatedMeta,
   options?: { message?: string; requestId?: string },
 ): Response {
   return sendSuccess(res, { items }, { ...options, meta });
 }
 
-export function sendCursorPage<T>(
+export function sendCursorPage(
   res: Response,
-  items: T[],
+  items: unknown[],
   cursor: CursorMeta,
   options?: { message?: string; requestId?: string },
 ): Response {
@@ -60,7 +66,7 @@ export function sendCursorPage<T>(
     data: { items },
     cursor,
     message: options?.message,
-    requestId: options?.requestId ?? (res.getHeader('x-request-id') as string) ?? '',
+    requestId: requestIdFrom(res, options?.requestId),
     timestamp: new Date().toISOString(),
   });
 }
@@ -101,7 +107,7 @@ export function sendError(
       details: options.details,
       ...(options.metadata ? { metadata: options.metadata } : {}),
     },
-    requestId: options.requestId ?? (res.getHeader('x-request-id') as string) ?? '',
+    requestId: requestIdFrom(res, options.requestId),
     timestamp: new Date().toISOString(),
   };
   return res.status(options.status).json(body);

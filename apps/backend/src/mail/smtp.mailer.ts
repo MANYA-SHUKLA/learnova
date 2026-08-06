@@ -55,7 +55,7 @@ export class SmtpMailer implements IMailer {
     };
   }
 
-  async isHealthy(): Promise<boolean> {
-    return Boolean(env.SMTP_HOST);
+  isHealthy(): Promise<boolean> {
+    return Promise.resolve(Boolean(env.SMTP_HOST));
   }
 }

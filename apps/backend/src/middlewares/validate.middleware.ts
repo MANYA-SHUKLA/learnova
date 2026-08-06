@@ -7,7 +7,7 @@ type RequestTarget = 'body' | 'query' | 'params';
 /**
  * Validation middleware factory — Zod schemas as the validation layer.
  */
-export function validate(schema: ZodSchema, target: RequestTarget = 'body') {
+export function validate(schema: ZodSchema<unknown>, target: RequestTarget = 'body') {
   return (req: Request, _res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req[target]);
     if (!result.success) {
@@ -23,7 +23,13 @@ export function validate(schema: ZodSchema, target: RequestTarget = 'body') {
       );
       return;
     }
-    req[target] = result.data;
+    if (target === 'body') {
+      req.body = result.data;
+    } else if (target === 'query') {
+      req.query = result.data as Request['query'];
+    } else {
+      req.params = result.data as Request['params'];
+    }
     next();
   };
 }

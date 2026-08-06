@@ -27,9 +27,7 @@ export function createStorage(): IStorage {
 }
 
 export function getStorage(): IStorage {
-  if (!storage) {
-    storage = createStorage();
-  }
+  storage ??= createStorage();
   return storage;
 }
 

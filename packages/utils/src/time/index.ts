@@ -35,8 +35,12 @@ export function parseTtl(ttl: string): number {
   if (!match) {
     throw new Error(`Invalid TTL: ${ttl}`);
   }
-  const value = Number(match[1]);
+  const rawValue = match[1];
   const unit = match[2];
+  if (rawValue === undefined || unit === undefined) {
+    throw new Error(`Invalid TTL: ${ttl}`);
+  }
+  const value = Number(rawValue);
   switch (unit) {
     case 'ms':
       return value;

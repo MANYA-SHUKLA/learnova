@@ -16,10 +16,10 @@ export interface EnqueueOptions {
   priority?: number;
 }
 
-async function addJob<T extends { correlationId?: string }>(
+async function addJob(
   queueName: QueueName,
   jobName: string,
-  payload: T,
+  payload: { correlationId?: string },
   opts?: EnqueueOptions,
 ): Promise<string | undefined> {
   const queue = getQueue(queueName);

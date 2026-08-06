@@ -64,9 +64,9 @@ export class LocalStorage implements IStorage {
     }
   }
 
-  async getPublicUrl(key: string): Promise<string> {
+  getPublicUrl(key: string): Promise<string> {
     // Local driver — path reference only (serve via static/CDN later)
-    return `file://${this.resolve(key)}`;
+    return Promise.resolve(`file://${this.resolve(key)}`);
   }
 
   async isHealthy(): Promise<boolean> {

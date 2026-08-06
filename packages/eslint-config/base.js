@@ -35,7 +35,17 @@ export const baseConfig = [
     },
   },
   {
-    ignores: ['dist/**', 'build/**', '.next/**', 'node_modules/**', 'coverage/**'],
+    ignores: [
+      'dist/**',
+      'build/**',
+      '.next/**',
+      'node_modules/**',
+      'coverage/**',
+      'eslint.config.mjs',
+      '**/*.config.mjs',
+      '**/*.config.js',
+      '**/*.config.cjs',
+    ],
   },
 ];
 

@@ -88,9 +88,7 @@ export const ROLE_DEFINITIONS: Record<Role, RoleDefinition> = {
   },
 };
 
-export const ACTIVE_ROLES: readonly Role[] = (
-  Object.values(ROLE_DEFINITIONS) as RoleDefinition[]
-)
+export const ACTIVE_ROLES: readonly Role[] = Object.values(ROLE_DEFINITIONS)
   .filter((d) => d.isActive)
   .map((d) => d.role);
 
