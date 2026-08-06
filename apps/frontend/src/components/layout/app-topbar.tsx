@@ -109,13 +109,13 @@ export function AppTopbar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border/80 bg-background/85 backdrop-blur-md">
-      <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
+    <header className="sticky top-0 z-20 w-full min-w-0 border-b border-border/80 bg-background/85 backdrop-blur-md">
+      <div className="flex h-14 min-w-0 items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-5 lg:px-6">
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="shrink-0 lg:hidden"
           aria-label="Open navigation"
           onClick={() => {
             setMobileNavOpen(true);
@@ -124,7 +124,10 @@ export function AppTopbar() {
           <Menu />
         </Button>
 
-        <nav aria-label="Breadcrumb" className="hidden min-w-0 flex-1 items-center gap-1 md:flex">
+        <nav
+          aria-label="Breadcrumb"
+          className="hidden min-w-0 flex-1 items-center gap-1 overflow-hidden md:flex"
+        >
           {breadcrumbs.map((crumb, index) => {
             const isLast = index === breadcrumbs.length - 1;
             return (
@@ -137,7 +140,7 @@ export function AppTopbar() {
                 ) : (
                   <Link
                     href={crumb.href}
-                    className="truncate text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    className="max-w-[8rem] truncate text-sm text-muted-foreground transition-colors hover:text-foreground xl:max-w-[12rem]"
                   >
                     {crumb.label}
                   </Link>
@@ -147,13 +150,13 @@ export function AppTopbar() {
           })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-          <div className="relative hidden w-52 lg:block xl:w-64">
+        <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-1.5">
+          <div className="relative hidden min-w-0 flex-1 md:block lg:max-w-[14rem] xl:max-w-[18rem]">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               readOnly
               placeholder="Search…"
-              className="h-9 cursor-default rounded-xl border-border/80 bg-muted/40 pl-9 text-sm shadow-none"
+              className="h-9 w-full min-w-0 cursor-default rounded-xl border-border/80 bg-muted/40 pl-9 text-sm shadow-none"
               aria-label="Search (coming soon)"
             />
           </div>
@@ -228,7 +231,7 @@ export function AppTopbar() {
               </span>
             </Button>
             {profileOpen ? (
-              <div className="absolute right-0 top-[calc(100%+6px)] z-50 w-56 overflow-hidden rounded-xl border border-border bg-popover shadow-soft-md">
+              <div className="absolute right-0 top-[calc(100%+6px)] z-50 w-[min(100vw-1.5rem,14rem)] overflow-hidden rounded-xl border border-border bg-popover shadow-soft-md">
                 <div className="border-b border-border px-3 py-2.5">
                   <p className="truncate text-sm font-medium">{user?.email ?? 'Account'}</p>
                   <p className="truncate text-xs text-muted-foreground">
@@ -262,9 +265,9 @@ export function AppTopbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 border-t border-border/60 px-4 py-2 md:hidden">
-        <UserRound className="size-3.5 text-muted-foreground" />
-        <p className="truncate text-xs text-muted-foreground">
+      <div className="flex min-w-0 items-center gap-2 border-t border-border/60 px-3 py-2 sm:px-4 md:hidden">
+        <UserRound className="size-3.5 shrink-0 text-muted-foreground" />
+        <p className="min-w-0 truncate text-xs text-muted-foreground">
           {breadcrumbs.map((c) => c.label).join(' / ') || 'Dashboard'}
         </p>
       </div>

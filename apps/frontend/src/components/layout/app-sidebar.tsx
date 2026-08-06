@@ -178,9 +178,9 @@ function DesktopSidebar() {
   return (
     <motion.aside
       initial={false}
-      animate={{ width: collapsed ? 72 : 272 }}
+      animate={{ width: collapsed ? '4.5rem' : 'min(17rem, 100%)' }}
       transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-      className="sticky top-0 z-30 hidden h-svh shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex"
+      className="sticky top-0 z-30 hidden h-svh w-[min(17rem,100%)] shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex"
     >
       <div
         className={cn(
@@ -246,7 +246,7 @@ function MobileDrawer() {
             animate={{ x: 0 }}
             exit={{ x: -320 }}
             transition={{ type: 'spring', stiffness: 360, damping: 36 }}
-            className="fixed inset-y-0 left-0 z-50 flex w-[min(100%,288px)] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-soft-lg lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex w-[min(100vw-2.5rem,18rem)] max-w-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-soft-lg lg:hidden"
           >
             <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
               <Logo />
