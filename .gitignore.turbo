@@ -1,0 +1,11 @@
+# Learn more: https://turbo.build/repo/docs/reference/configuration#globalgitignore
+.DS_Store
+node_modules
+.next
+dist
+.turbo
+coverage
+*.log
+.env
+.env.*
+!.env.example

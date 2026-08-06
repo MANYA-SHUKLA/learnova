@@ -1,0 +1,11 @@
+{
+  "extends": "@learnova/tsconfig/react-library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@learnova/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*", "tailwind.preset.ts"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,30 @@
+# Production skeleton — prefer managed K8s / ECS / Cloud Run over compose.
+# This file documents the service graph for ops reference.
+services:
+  api:
+    image: learnova/api:${IMAGE_TAG:-latest}
+    restart: always
+    env_file:
+      - ../../apps/backend/.env.production
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  worker:
+    image: learnova/worker:${IMAGE_TAG:-latest}
+    restart: always
+    env_file:
+      - ../../apps/worker/.env.production
+    deploy:
+      replicas: 2
+
+  frontend:
+    image: learnova/frontend:${IMAGE_TAG:-latest}
+    restart: always
+    env_file:
+      - ../../apps/frontend/.env.production
+    deploy:
+      replicas: 2

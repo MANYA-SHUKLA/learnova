@@ -1,0 +1,29 @@
+/** Permission string constants — mirror @learnova/types Permission union */
+
+export const PERMISSIONS = {
+  LMS_READ: 'lms:read',
+  LMS_WRITE: 'lms:write',
+  LMS_MANAGE: 'lms:manage',
+  ERP_READ: 'erp:read',
+  ERP_WRITE: 'erp:write',
+  ERP_MANAGE: 'erp:manage',
+  EXAMINATION_READ: 'examination:read',
+  EXAMINATION_WRITE: 'examination:write',
+  EXAMINATION_MANAGE: 'examination:manage',
+  EXAMINATION_PROCTOR: 'examination:proctor',
+  CODING_READ: 'coding:read',
+  CODING_WRITE: 'coding:write',
+  CODING_SUBMIT: 'coding:submit',
+  IDE_ACCESS: 'ide:access',
+  IDEATION_READ: 'ideation:read',
+  IDEATION_WRITE: 'ideation:write',
+  ANALYTICS_READ: 'analytics:read',
+  ANALYTICS_EXPORT: 'analytics:export',
+  AUDIT_READ: 'audit:read',
+  USERS_READ: 'users:read',
+  USERS_MANAGE: 'users:manage',
+  ROLES_MANAGE: 'roles:manage',
+  INSTITUTION_MANAGE: 'institution:manage',
+} as const;
+
+export type PermissionConstant = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

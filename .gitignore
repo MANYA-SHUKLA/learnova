@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/
+.npm/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.*.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Docker
+docker-data/
+*.pid
+
+# Misc
+*.pem
+*.key
+.cache/
+.tmp/
+.temp/
+.eslintcache
+.stylelintcache
+.prettiercache
+
+# Uploads / local storage
+uploads/
+tmp/
+
+# Generated
+*.generated.ts
+storybook-static/

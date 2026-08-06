@@ -1,0 +1,43 @@
+{
+  "common": {
+    "appName": "Learnova",
+    "tagline": "Enterprise AI Learning Platform",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "back": "Back",
+    "search": "Search",
+    "settings": "Settings",
+    "logout": "Log out",
+    "language": "Language"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "lms": "Learning",
+    "erp": "ERP",
+    "examination": "Examinations",
+    "coding": "Coding",
+    "ide": "Cloud IDE",
+    "ideation": "AI Ideation",
+    "analytics": "Analytics",
+    "audit": "Audit Logs"
+  },
+  "home": {
+    "headline": "Learn. Build. Excel.",
+    "subtitle": "The enterprise learning platform for modern institutions.",
+    "cta": "Get started"
+  },
+  "auth": {
+    "login": "Sign in",
+    "register": "Create account",
+    "forgotPassword": "Forgot password?"
+  },
+  "roles": {
+    "student": "Student",
+    "faculty": "Faculty",
+    "institution_admin": "Institution Admin"
+  }
+}
