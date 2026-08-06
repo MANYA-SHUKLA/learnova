@@ -23,18 +23,16 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
         />
         <span>
           by{' '}
-          <span className="font-medium text-foreground">Manya Shukla</span>
-          {' · '}
           <a
             href="https://wa.me/918005586588"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium text-foreground underline-offset-2 hover:underline"
           >
-            8005586588
+            Manya Shukla
           </a>
           {' · '}
-          2026 · SOE JNU Minor Project
+          8005586588 · 2026 · SOE JNU Minor Project
         </span>
       </p>
     </footer>
