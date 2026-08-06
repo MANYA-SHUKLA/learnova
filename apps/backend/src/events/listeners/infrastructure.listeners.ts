@@ -1,7 +1,5 @@
 import type { DomainEvent } from '@learnova/events';
-import { JOB_NAMES } from '@learnova/types';
 import { logger } from '../../utils/logger/index.js';
-import { enqueueAudit } from '../../queues/producer.js';
 import { eventBus } from '../event-bus.js';
 
 /**
@@ -19,14 +17,13 @@ export function registerInfrastructureListeners(): void {
       'Domain event emitted',
     );
 
+    // Lazy import avoids circular init with queues
+    const { enqueueAudit } = await import('../../queues/producer.js');
     await enqueueAudit({
       actorId: event.actorId,
       action: event.name,
       resource: event.name.split('.')[0] ?? 'domain',
-      metadata: {
-        payload: event.payload,
-        jobName: JOB_NAMES.WRITE_AUDIT,
-      },
+      metadata: { payload: event.payload },
       correlationId: event.correlationId,
       occurredAt: event.occurredAt,
     });
