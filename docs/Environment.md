@@ -2,13 +2,11 @@
 
 All environments are validated with Zod (`@learnova/config`). Apps **fail fast** on missing/invalid values.
 
-Copy examples before running:
+Use local env files only (gitignored — never commit secrets):
 
-```bash
-cp apps/frontend/.env.example apps/frontend/.env.local
-cp apps/backend/.env.example apps/backend/.env
-cp apps/worker/.env.example apps/worker/.env
-```
+- `apps/frontend/.env.local`
+- `apps/backend/.env`
+- `apps/worker/.env`
 
 Generate strong JWT secrets (≥ 32 chars) for anything beyond local toy usage.
 

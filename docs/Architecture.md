@@ -57,7 +57,7 @@ BullMQ workers for `email`, `notifications`, `grading`, `analytics`, `audit`. Em
 - Helmet, CORS allowlist, rate limiting (Redis-backed).
 - Security response headers on Next.js.
 - Logger redacts auth headers and token fields.
-- No secrets committed (`.env.example` only).
+- No secrets committed (local `.env` / `.env.local` only; gitignored).
 
 ## Scalability
 

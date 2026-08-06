@@ -1,6 +1,8 @@
 /**
- * Validates that critical .env.example files exist and document required keys.
+ * Validates that local env files exist and contain required keys.
  * Run: pnpm env:check
+ *
+ * Note: .env / .env.local are gitignored — this checks your local machine only.
  */
 
 import { existsSync, readFileSync } from 'node:fs';
@@ -10,7 +12,7 @@ const root = resolve(import.meta.dirname, '..');
 
 const checks: { path: string; required: string[] }[] = [
   {
-    path: 'apps/frontend/.env.example',
+    path: 'apps/frontend/.env.local',
     required: [
       'NEXT_PUBLIC_APP_URL',
       'NEXT_PUBLIC_API_URL',
@@ -19,7 +21,7 @@ const checks: { path: string; required: string[] }[] = [
     ],
   },
   {
-    path: 'apps/backend/.env.example',
+    path: 'apps/backend/.env',
     required: [
       'PORT',
       'MONGODB_URI',
@@ -30,7 +32,7 @@ const checks: { path: string; required: string[] }[] = [
     ],
   },
   {
-    path: 'apps/worker/.env.example',
+    path: 'apps/worker/.env',
     required: ['MONGODB_URI', 'REDIS_URL', 'WORKER_CONCURRENCY'],
   },
 ];
@@ -46,7 +48,7 @@ for (const check of checks) {
   }
   const content = readFileSync(full, 'utf8');
   for (const key of check.required) {
-    if (!content.includes(key)) {
+    if (!new RegExp(`^${key}=`, 'm').test(content)) {
       console.error(`Missing key "${key}" in ${check.path}`);
       failed = true;
     }
@@ -58,4 +60,4 @@ if (failed) {
   process.exit(1);
 }
 
-console.log('Environment examples look good.');
+console.log('Local environment files look good.');

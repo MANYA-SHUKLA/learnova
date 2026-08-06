@@ -24,7 +24,7 @@ See [README](../README.md) Quick start and [Environment](./Environment.md).
 ## Code review expectations
 
 - Types are complete; no `any`.
-- New env vars added to `.env.example` and `docs/Environment.md`.
+- New env vars added to local `.env` / `.env.local` and `docs/Environment.md`.
 - Shared contracts updated in `@learnova/types` / `@learnova/shared` when APIs change.
 - UI uses design tokens — no one-off hex colors.
 - Auth/permission checks use the shared matrix.

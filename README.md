@@ -67,10 +67,10 @@ scripts/
 # 1. Install
 pnpm install
 
-# 2. Copy environment files
-cp apps/frontend/.env.example apps/frontend/.env.local
-cp apps/backend/.env.example apps/backend/.env
-cp apps/worker/.env.example apps/worker/.env
+# 2. Configure local env files (gitignored)
+#    apps/frontend/.env.local
+#    apps/backend/.env
+#    apps/worker/.env
 
 # 3. Start infrastructure
 pnpm docker:dev
@@ -108,7 +108,7 @@ pnpm dev
 | `pnpm typecheck` | TypeScript check |
 | `pnpm format` | Prettier write |
 | `pnpm docker:dev` | Local Mongo + Redis |
-| `pnpm env:check` | Validate .env.example files |
+| `pnpm env:check` | Validate local .env / .env.local files |
 
 ## Documentation
 
