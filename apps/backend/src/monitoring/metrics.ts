@@ -60,7 +60,7 @@ export function collectMetrics(): SystemMetrics {
     cpu: {
       loadAverage: load,
       cores,
-      usagePercentEstimate: cores > 0 ? Math.min(100, (load[0] / cores) * 100) : null,
+      usagePercentEstimate: cores > 0 ? Math.min(100, ((load[0] ?? 0) / cores) * 100) : null,
     },
     process: {
       pid: process.pid,

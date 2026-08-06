@@ -1,4 +1,3 @@
-import { storageConfig } from '../config/slices.js';
 import { logger } from '../utils/logger/index.js';
 import { StorageError } from '../utils/errors/index.js';
 import type { IStorage, PutObjectInput, StorageDriver, StorageObject } from './types.js';

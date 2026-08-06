@@ -30,7 +30,7 @@ export async function acquireLock(
   ttlSeconds = 30,
 ): Promise<{ token: string; unlock: () => Promise<void> } | null> {
   const token = createId();
-  const key = `${REDIS_KEYS.CACHE}lock:${resource}`;
+  const key = `${REDIS_KEYS.LOCK}${resource}`;
   const result = await getRedis().set(key, token, 'EX', ttlSeconds, 'NX');
   if (result !== 'OK') return null;
 
