@@ -221,13 +221,15 @@ export default function InstitutionProfilePage() {
         <CardHeader>
           <CardTitle className="text-base">Branding</CardTitle>
           <CardDescription>
-            Provide hosted image URLs (storage abstraction — no file upload).
+            Hosted image URLs with a live workspace preview. File upload lands with storage later.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <BrandingUpload
             logo={branding.logo}
             favicon={branding.favicon}
+            institutionName={form.name || data.name}
+            shortName={form.shortName || data.shortName}
             disabled={brandingMutation.isPending}
             onChange={setBranding}
           />

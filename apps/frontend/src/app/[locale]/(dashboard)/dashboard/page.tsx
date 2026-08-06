@@ -23,12 +23,15 @@ import {
   BookOpen,
   School,
   CalendarRange,
-  Activity,
+  Sparkles,
+  CheckCircle2,
+  Circle,
 } from 'lucide-react';
 import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -50,6 +53,7 @@ import {
 } from '@/features/institution';
 import { Link } from '@/lib/i18n/routing';
 import { isInstitutionNotFound } from '@/lib/onboarding';
+import { cn } from '@/lib/utils';
 
 const LIST_PARAMS = { limit: 50, page: 1 } as const;
 
@@ -92,6 +96,15 @@ const QUICK_ACTIONS = [
   },
 ] as const;
 
+const CHART_COLORS = [
+  'hsl(217 91% 53%)',
+  'hsl(224 76% 48%)',
+  'hsl(262 70% 52%)',
+  'hsl(199 89% 42%)',
+  'hsl(173 58% 39%)',
+  'hsl(215 20% 45%)',
+];
+
 function countFromQuery(data?: { meta?: { total?: number }; items?: unknown[] }) {
   if (typeof data?.meta?.total === 'number') return data.meta.total;
   return data?.items?.length ?? 0;
@@ -103,6 +116,26 @@ function locationLabel(institution: {
   country?: string | null;
 }) {
   return [institution.city, institution.state, institution.country].filter(Boolean).join(', ');
+}
+
+function CapacityMeter({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-background/75 p-4 backdrop-blur-sm">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-tight">
+        {value.toLocaleString()}
+      </p>
+      <p className="mt-0.5 text-xs text-muted-foreground">Plan capacity</p>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+        <motion.div
+          className="h-full rounded-full bg-brand-gradient"
+          initial={{ width: 0 }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </div>
+    </div>
+  );
 }
 
 const cardMotion = {
@@ -183,6 +216,8 @@ export default function DashboardPage() {
 
   const batchCount = countFromQuery(batchesQuery.data);
   const institution = institutionQuery.data;
+  const structureReady = stats.filter((s) => !s.loading && s.value > 0).length;
+  const structurePct = Math.round((structureReady / stats.length) * 100);
   const hasNoStructure =
     !institutionQuery.isLoading &&
     stats.every((s) => !s.loading && s.value === 0) &&
@@ -198,6 +233,7 @@ export default function DashboardPage() {
         </div>
         {missing ? (
           <EmptyState
+            illustration="building"
             title="Finish institution setup"
             description="Complete your profile, branding, and contact details to unlock the workspace."
             action={
@@ -221,103 +257,138 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          <p className="text-sm font-medium text-primary">Overview</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             Institution dashboard
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Institution structure, capacity, and academic pulse at a glance.
+            Structure, capacity, and academic pulse at a glance.
           </p>
         </div>
-        <Button asChild variant="outline" className="w-full rounded-xl sm:w-auto">
-          <Link href={APP_ROUTES.INSTITUTION}>
-            Open institution
-            <ArrowRight className="size-4" />
-          </Link>
-        </Button>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button asChild variant="outline" className="w-full rounded-xl sm:w-auto">
+            <Link href={APP_ROUTES.INSTITUTION_PROFILE}>Edit branding</Link>
+          </Button>
+          <Button asChild className="w-full rounded-xl sm:w-auto">
+            <Link href={APP_ROUTES.INSTITUTION}>
+              Open institution
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      {/* Institution hero */}
       <motion.div {...cardMotion} transition={{ duration: 0.35 }}>
         {institutionQuery.isLoading ? (
-          <Card className="rounded-2xl border-border/80 shadow-soft-md">
-            <CardContent className="space-y-4 p-6">
-              <Skeleton className="h-7 w-64" />
-              <Skeleton className="h-4 w-40" />
-              <div className="flex gap-3">
-                <Skeleton className="h-6 w-20" />
-                <Skeleton className="h-6 w-24" />
+          <Card className="overflow-hidden rounded-2xl border-border/80 shadow-soft-md">
+            <CardContent className="space-y-4 bg-hero p-6 sm:p-8">
+              <div className="flex gap-4">
+                <Skeleton className="size-14 rounded-2xl" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-7 w-64 max-w-full" />
+                  <Skeleton className="h-4 w-40" />
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Skeleton className="h-24 rounded-2xl" />
+                <Skeleton className="h-24 rounded-2xl" />
               </div>
             </CardContent>
           </Card>
         ) : institution ? (
-          <Card className="overflow-hidden rounded-2xl border-border/80 bg-gradient-to-br from-card via-card to-primary/[0.04] shadow-soft-md">
-            <CardContent className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-              <div className="min-w-0 space-y-4">
-                <div className="flex flex-wrap items-start gap-3">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <Building2 className="size-6" />
+          <Card className="overflow-hidden rounded-2xl border-border/80 shadow-soft-lg">
+            <div className="bg-hero relative">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-40"
+                style={{
+                  backgroundImage:
+                    'radial-gradient(circle at 12% 20%, hsl(var(--primary) / 0.18), transparent 42%), radial-gradient(circle at 88% 10%, hsl(var(--accent) / 0.14), transparent 38%)',
+                }}
+              />
+              <CardContent className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+                <div className="min-w-0 space-y-4">
+                  <div className="flex flex-wrap items-start gap-4">
+                    {institution.logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={institution.logo}
+                        alt=""
+                        className="size-14 shrink-0 rounded-2xl border border-border/70 bg-background object-contain p-1.5 shadow-soft-sm"
+                      />
+                    ) : (
+                      <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient text-lg font-bold text-white shadow-glow">
+                        {institution.shortName.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h2 className="truncate font-display text-xl font-semibold tracking-tight sm:text-2xl">
+                        {institution.name}
+                      </h2>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {institution.shortName} · {institution.code}
+                      </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <StatusBadge status={institution.status} />
+                        <Badge variant="secondary" className="rounded-lg capitalize">
+                          {institution.subscriptionPlan} plan
+                        </Badge>
+                        {locationLabel(institution) ? (
+                          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <MapPin className="size-3.5" />
+                            {locationLabel(institution)}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="truncate font-display text-lg font-semibold tracking-tight sm:text-xl">
-                      {institution.name}
-                    </h2>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                      {institution.shortName} · {institution.code}
+
+                  <div className="rounded-2xl border border-border/60 bg-background/60 p-4 backdrop-blur-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="size-4 text-primary" />
+                        <p className="text-sm font-medium">Structure readiness</p>
+                      </div>
+                      <p className="font-display text-lg font-semibold tabular-nums">{structurePct}%</p>
+                    </div>
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                      <motion.div
+                        className="h-full rounded-full bg-brand-gradient"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${structurePct}%` }}
+                        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {structureReady} of {stats.length} modules have records
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge status={institution.status} />
-                  <Badge variant="secondary" className="rounded-lg capitalize">
-                    {institution.subscriptionPlan} plan
-                  </Badge>
-                  {locationLabel(institution) ? (
-                    <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="size-3.5" />
-                      {locationLabel(institution)}
-                    </span>
-                  ) : null}
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                  <CapacityMeter label="Students" value={institution.maxStudents} />
+                  <CapacityMeter label="Faculty" value={institution.maxFaculty} />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="card-interactive rounded-2xl border border-border/70 bg-background/70 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Student capacity
-                  </p>
-                  <p className="mt-2 font-display text-2xl font-semibold tabular-nums">
-                    {institution.maxStudents.toLocaleString()}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">Plan limit</p>
-                </div>
-                <div className="card-interactive rounded-2xl border border-border/70 bg-background/70 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Faculty capacity
-                  </p>
-                  <p className="mt-2 font-display text-2xl font-semibold tabular-nums">
-                    {institution.maxFaculty.toLocaleString()}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">Plan limit</p>
-                </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            </div>
           </Card>
         ) : (
           <EmptyState
+            illustration="building"
             title="No institution linked"
             description="Connect or create an institution profile to unlock the academic workspace."
             action={
               <Button asChild>
-                <Link href={APP_ROUTES.INSTITUTION}>Go to institution</Link>
+                <Link href={APP_ROUTES.INSTITUTION_SETUP}>Continue setup</Link>
               </Button>
             }
           />
         )}
       </motion.div>
 
-      {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
@@ -328,7 +399,7 @@ export default function DashboardPage() {
               transition={{ duration: 0.3, delay: index * 0.04 }}
             >
               <Link href={stat.href} className="block h-full">
-                <Card className="h-full rounded-2xl border-border/80">
+                <Card className="card-interactive h-full rounded-2xl border-border/80">
                   <CardContent className="flex items-start justify-between gap-4 p-5">
                     <div>
                       <p className="text-sm text-muted-foreground">{stat.label}</p>
@@ -340,7 +411,7 @@ export default function DashboardPage() {
                         </p>
                       )}
                     </div>
-                    <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                       <Icon className="size-5" />
                     </div>
                   </CardContent>
@@ -353,6 +424,7 @@ export default function DashboardPage() {
 
       {hasNoStructure ? (
         <EmptyState
+          illustration="campus"
           title="Your academic structure is empty"
           description="Start by adding campuses, schools, and programs to bring this dashboard to life."
           action={
@@ -364,12 +436,11 @@ export default function DashboardPage() {
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-        {/* Chart */}
         <motion.div {...cardMotion} transition={{ duration: 0.35, delay: 0.1 }} className="min-w-0">
           <Card className="h-full min-w-0 rounded-2xl border-border/80 shadow-soft-md">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Module counts</CardTitle>
-              <CardDescription>Distribution across institution resources</CardDescription>
+              <CardTitle className="text-base">Module distribution</CardTitle>
+              <CardDescription>Counts across your institution workspace</CardDescription>
             </CardHeader>
             <CardContent className="h-64 min-w-0 pt-2 sm:h-72">
               {stats.some((s) => s.loading) ? (
@@ -403,7 +474,11 @@ export default function DashboardPage() {
                         boxShadow: 'var(--shadow-md)',
                       }}
                     />
-                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                      {chartData.map((_, i) => (
+                        <Cell key={chartData[i]!.name} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -411,7 +486,6 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
 
-        {/* Calendar + activity */}
         <div className="space-y-6">
           <motion.div {...cardMotion} transition={{ duration: 0.35, delay: 0.14 }}>
             <Card className="rounded-2xl border-border/80 shadow-soft-md">
@@ -440,7 +514,7 @@ export default function DashboardPage() {
                   upcomingEvents.map((event) => (
                     <div
                       key={event.id}
-                      className="rounded-xl border border-border/70 bg-muted/30 px-3 py-2.5"
+                      className="rounded-xl border border-border/70 bg-muted/30 px-3 py-2.5 transition-colors hover:bg-muted/50"
                     >
                       <p className="text-sm font-medium">{event.title}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
@@ -466,23 +540,44 @@ export default function DashboardPage() {
             <Card className="rounded-2xl border-border/80 shadow-soft-md">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Activity className="size-4 text-primary" />
-                  Recent activity
+                  <Building2 className="size-4 text-primary" />
+                  Structure pulse
                 </CardTitle>
+                <CardDescription>What’s ready in your workspace</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-10 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Activity feed will appear as your team works
-                  </p>
-                </div>
+              <CardContent className="space-y-2.5">
+                {stats.map((stat) => {
+                  const ready = !stat.loading && stat.value > 0;
+                  return (
+                    <div
+                      key={stat.label}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-border/60 px-3 py-2"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {ready ? (
+                          <CheckCircle2 className="size-4 text-success" />
+                        ) : (
+                          <Circle className="size-4 text-muted-foreground/50" />
+                        )}
+                        <span className="text-sm">{stat.label}</span>
+                      </div>
+                      <span
+                        className={cn(
+                          'text-xs font-medium tabular-nums',
+                          ready ? 'text-foreground' : 'text-muted-foreground',
+                        )}
+                      >
+                        {stat.loading ? '…' : stat.value}
+                      </span>
+                    </div>
+                  );
+                })}
               </CardContent>
             </Card>
           </motion.div>
         </div>
       </div>
 
-      {/* Quick actions */}
       <motion.div {...cardMotion} transition={{ duration: 0.35, delay: 0.2 }}>
         <div className="mb-4">
           <h2 className="font-display text-lg font-semibold tracking-tight">Quick actions</h2>
@@ -495,16 +590,16 @@ export default function DashboardPage() {
             const Icon = action.icon;
             return (
               <Link key={action.href} href={action.href} className="group">
-                <Card className="h-full rounded-2xl border-border/80">
+                <Card className="card-interactive h-full rounded-2xl border-border/80">
                   <CardContent className="flex items-start gap-4 p-5">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
                       <Icon className="size-5" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium">{action.title}</p>
                       <p className="mt-0.5 text-sm text-muted-foreground">{action.description}</p>
                     </div>
-                    <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                    <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
                   </CardContent>
                 </Card>
               </Link>

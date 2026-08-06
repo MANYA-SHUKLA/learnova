@@ -361,6 +361,8 @@ export default function InstitutionSetupPage() {
               <BrandingUpload
                 logo={branding.logo}
                 favicon={branding.favicon}
+                institutionName={form.name || 'Your institution'}
+                shortName={form.shortName || 'LN'}
                 onChange={setBranding}
                 disabled={saving}
               />

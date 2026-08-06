@@ -157,14 +157,31 @@ export default function InstitutionDashboardPage() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft-md"
+          className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft-lg"
         >
-          <div className="bg-hero border-b border-border px-4 py-5 sm:px-8 sm:py-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="bg-hero relative border-b border-border px-4 py-5 sm:px-8 sm:py-7">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-50"
+              style={{
+                backgroundImage:
+                  'radial-gradient(circle at 10% 0%, hsl(var(--primary) / 0.16), transparent 45%), radial-gradient(circle at 90% 20%, hsl(var(--accent) / 0.12), transparent 40%)',
+              }}
+            />
+            <div className="relative flex flex-wrap items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient text-lg font-bold text-white shadow-glow sm:size-14">
-                  {institution.shortName.slice(0, 2).toUpperCase()}
-                </div>
+                {institution.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={institution.logo}
+                    alt=""
+                    className="size-12 shrink-0 rounded-2xl border border-border/70 bg-background object-contain p-1.5 shadow-soft-sm sm:size-14"
+                  />
+                ) : (
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient text-lg font-bold text-white shadow-glow sm:size-14">
+                    {institution.shortName.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
                 <div className="min-w-0">
                   <h2 className="break-words font-display text-xl font-semibold tracking-tight sm:text-2xl">
                     {institution.name}
