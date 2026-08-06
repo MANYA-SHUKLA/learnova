@@ -87,7 +87,7 @@ function HeroVisual() {
       className="relative mx-auto w-full max-w-5xl"
       aria-hidden
     >
-      <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/20 via-[#7C3AED]/10 to-transparent blur-2xl" />
+      <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/20 via-accent/10 to-transparent blur-2xl" />
       <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/90 shadow-soft-lg backdrop-blur-sm">
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <span className="size-2.5 rounded-full bg-danger/70" />
@@ -124,7 +124,7 @@ function HeroVisual() {
                 {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
                   <div
                     key={i}
-                    className="flex-1 rounded-t bg-gradient-to-t from-primary/80 to-[#7C3AED]/50"
+                    className="flex-1 rounded-t bg-gradient-to-t from-primary/80 to-accent/50"
                     style={{ height: `${String(h * 0.7)}px` }}
                   />
                 ))}
@@ -143,7 +143,7 @@ function Hero() {
     <section className="relative overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,_hsl(var(--primary)/0.18),_transparent_55%),radial-gradient(ellipse_50%_40%_at_90%_20%,_#7C3AED22,_transparent_50%),radial-gradient(ellipse_40%_30%_at_10%_40%,_hsl(var(--primary)/0.1),_transparent_45%)]"
+        className="pointer-events-none absolute inset-0 bg-hero"
       />
       <div
         aria-hidden
@@ -525,7 +525,7 @@ function PracticeLabs() {
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-primary to-[#7C3AED]"
+                    className="h-full rounded-full bg-brand-gradient"
                     style={{ width: `${String(track.pct)}%` }}
                   />
                 </div>
