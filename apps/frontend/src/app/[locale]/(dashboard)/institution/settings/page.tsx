@@ -22,11 +22,38 @@ import {
   useUpdateInstitutionSettingsMutation,
 } from '@/features/institution';
 
+const POLICY_KEYS = [
+  ['attendance', 'Attendance'],
+  ['gradingScale', 'Grading scale'],
+  ['examRules', 'Exam rules'],
+  ['certificateSettings', 'Certificate settings'],
+  ['storageSettings', 'Storage settings'],
+  ['aiSettings', 'AI settings'],
+  ['notificationSettings', 'Notification settings'],
+  ['securitySettings', 'Security settings'],
+] as const;
+
+type PolicyKey = (typeof POLICY_KEYS)[number][0];
+
+function stringifyPolicy(value: Record<string, unknown>): string {
+  return JSON.stringify(value ?? {}, null, 2);
+}
+
 export default function InstitutionSettingsPage() {
   const { data, isLoading, isError, error, refetch } = useInstitutionSettings();
   const updateMutation = useUpdateInstitutionSettingsMutation();
   const [language, setLanguage] = useState('en');
   const [theme, setTheme] = useState('system');
+  const [policies, setPolicies] = useState<Record<PolicyKey, string>>({
+    attendance: '{}',
+    gradingScale: '{}',
+    examRules: '{}',
+    certificateSettings: '{}',
+    storageSettings: '{}',
+    aiSettings: '{}',
+    notificationSettings: '{}',
+    securitySettings: '{}',
+  });
   const [message, setMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -34,6 +61,16 @@ export default function InstitutionSettingsPage() {
     if (!data) return;
     setLanguage(data.language);
     setTheme(data.theme);
+    setPolicies({
+      attendance: stringifyPolicy(data.attendance),
+      gradingScale: stringifyPolicy(data.gradingScale),
+      examRules: stringifyPolicy(data.examRules),
+      certificateSettings: stringifyPolicy(data.certificateSettings),
+      storageSettings: stringifyPolicy(data.storageSettings),
+      aiSettings: stringifyPolicy(data.aiSettings),
+      notificationSettings: stringifyPolicy(data.notificationSettings),
+      securitySettings: stringifyPolicy(data.securitySettings),
+    });
   }, [data]);
 
   if (isLoading) {
@@ -67,8 +104,28 @@ export default function InstitutionSettingsPage() {
   const save = async () => {
     setFormError(null);
     setMessage(null);
+    const parsed: Record<string, Record<string, unknown>> = {};
     try {
-      await updateMutation.mutateAsync({ language, theme });
+      for (const [key] of POLICY_KEYS) {
+        parsed[key] = JSON.parse(policies[key] || '{}') as Record<string, unknown>;
+      }
+    } catch {
+      setFormError('One or more policy blocks contain invalid JSON.');
+      return;
+    }
+    try {
+      await updateMutation.mutateAsync({
+        language,
+        theme,
+        attendance: parsed.attendance,
+        gradingScale: parsed.gradingScale,
+        examRules: parsed.examRules,
+        certificateSettings: parsed.certificateSettings,
+        storageSettings: parsed.storageSettings,
+        aiSettings: parsed.aiSettings,
+        notificationSettings: parsed.notificationSettings,
+        securitySettings: parsed.securitySettings,
+      });
       setMessage('Settings saved.');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Failed to save settings.');
@@ -79,7 +136,7 @@ export default function InstitutionSettingsPage() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <PageHeader
         title="Institution settings"
-        description="Tenant defaults for language, theme, and policy JSON blocks."
+        description="Language, theme, attendance, grading, exams, certificates, storage, AI, notifications, and security."
       />
 
       <Card className="mb-6">
@@ -114,52 +171,48 @@ export default function InstitutionSettingsPage() {
               <option value="dark">Dark</option>
             </select>
           </div>
-          <PermissionGate permission={PERMISSIONS.INSTITUTION_MANAGE} enforce>
-            <div className="sm:col-span-2">
-              <Button type="button" disabled={updateMutation.isPending} onClick={() => void save()}>
-                {updateMutation.isPending ? (
-                  <>
-                    <Spinner size="sm" />
-                    Saving…
-                  </>
-                ) : (
-                  'Save settings'
-                )}
-              </Button>
-            </div>
-          </PermissionGate>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-base">Policy blocks</CardTitle>
           <CardDescription>
-            Advanced JSON configuration is managed via API. Summary of current keys:
+            JSON configuration for operational policies. Invalid JSON blocks save attempts.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-2">
-          {(
-            [
-              ['Attendance', data.attendance],
-              ['Grading scale', data.gradingScale],
-              ['Exam rules', data.examRules],
-              ['Certificates', data.certificateSettings],
-              ['Storage', data.storageSettings],
-              ['AI', data.aiSettings],
-              ['Notifications', data.notificationSettings],
-              ['Security', data.securitySettings],
-            ] as const
-          ).map(([label, value]) => (
-            <div key={label} className="rounded-lg border border-border p-3">
-              <p className="text-sm font-medium">{label}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {Object.keys(value).length} key(s)
-              </p>
+        <CardContent className="grid gap-4">
+          {POLICY_KEYS.map(([key, label]) => (
+            <div key={key} className="space-y-1.5">
+              <label className="text-sm font-medium" htmlFor={key}>
+                {label}
+              </label>
+              <textarea
+                id={key}
+                className="min-h-24 w-full rounded-lg border border-input bg-background px-3 py-2 font-mono text-xs"
+                value={policies[key]}
+                onChange={(e) => {
+                  setPolicies((prev) => ({ ...prev, [key]: e.target.value }));
+                }}
+                spellCheck={false}
+              />
             </div>
           ))}
         </CardContent>
       </Card>
+
+      <PermissionGate permission={PERMISSIONS.INSTITUTION_MANAGE} enforce>
+        <Button type="button" disabled={updateMutation.isPending} onClick={() => void save()}>
+          {updateMutation.isPending ? (
+            <>
+              <Spinner size="sm" />
+              Saving…
+            </>
+          ) : (
+            'Save settings'
+          )}
+        </Button>
+      </PermissionGate>
 
       {message ? <p className="mt-4 text-sm text-success">{message}</p> : null}
       {formError ? <p className="mt-4 text-sm text-danger">{formError}</p> : null}

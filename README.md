@@ -13,8 +13,11 @@ LMS · University ERP · Online Examination · Coding Platform · Cloud IDE · A
 | 1 | Foundation (monorepo, packages, API shell, theme, docs) | ✅ Complete |
 | 2 | Infrastructure (Mongo, Redis, BullMQ, cache, mail, storage, events, health) | ✅ Complete |
 | 3 | Authentication & Authorization | ✅ Complete |
+| 4 | Institution & Organization Management | ✅ Complete |
 
-Auth covers register (institution bootstrap), login/logout, JWT access + rotating refresh cookies, sessions, password reset/change, email verification, RBAC middleware, seeds, and auth UI. Academic modules (courses, departments, students/faculty CRUD, etc.) are **not** implemented yet.
+Auth covers register (institution bootstrap), login/logout, JWT access + rotating refresh cookies, sessions, password reset/change, email verification, RBAC middleware, seeds, and auth UI.
+
+Step 4 covers the academic hierarchy (institution → campus/school/department/program → academic year/semester/section/batch/calendar + settings) with REST APIs, admin UI, Zod validation, audit logs, and RBAC. Courses, faculty/student CRUD, exams, labs, and analytics are **not** implemented yet.
 
 ## Stack
 
