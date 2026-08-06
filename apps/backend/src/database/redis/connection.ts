@@ -11,50 +11,71 @@ let client: Redis | null = null;
 let lastReadyAt: string | null = null;
 let lastError: string | null = null;
 
+function isClientDead(redis: Redis): boolean {
+  return redis.status === 'end';
+}
+
+function createRedisClient(): Redis {
+  const redis = new Redis(redisConfig.url, {
+    password: redisConfig.password,
+    maxRetriesPerRequest: null,
+    enableReadyCheck: true,
+    lazyConnect: true,
+    connectTimeout: redisConfig.connectTimeout,
+    keepAlive: redisConfig.keepAlive,
+    retryStrategy(times) {
+      // Cap delay but keep retrying — Upstash idle timeouts are expected.
+      // Returning null permanently kills the client and breaks rate-limits.
+      if (times > redisConfig.maxRetries) {
+        logger.domain('redis', 'error', 'Redis max retries exceeded; backing off', {
+          times,
+        });
+        return Math.min(times * 500, 15_000);
+      }
+      const delay = Math.min(times * 200, 2000);
+      logger.domain('redis', 'warn', 'Redis reconnecting', { times, delay });
+      return delay;
+    },
+  });
+
+  redis.on('connect', () => {
+    logger.domain('redis', 'info', 'Redis connecting…');
+  });
+
+  redis.on('ready', () => {
+    lastReadyAt = new Date().toISOString();
+    lastError = null;
+    logger.domain('redis', 'info', 'Redis ready');
+  });
+
+  redis.on('error', (err: Error) => {
+    lastError = err.message;
+    logger.domain('redis', 'error', 'Redis error', { err });
+  });
+
+  redis.on('close', () => {
+    logger.domain('redis', 'warn', 'Redis connection closed');
+  });
+
+  redis.on('reconnecting', () => {
+    logger.domain('redis', 'info', 'Redis reconnecting…');
+  });
+
+  return redis;
+}
+
 export function getRedis(): Redis {
-  if (!client) {
-    client = new Redis(redisConfig.url, {
-      password: redisConfig.password,
-      maxRetriesPerRequest: null,
-      enableReadyCheck: true,
-      lazyConnect: true,
-      connectTimeout: redisConfig.connectTimeout,
-      keepAlive: redisConfig.keepAlive,
-      retryStrategy(times) {
-        if (times > redisConfig.maxRetries) {
-          logger.domain('redis', 'error', 'Redis max retries exceeded', { times });
-          return null;
-        }
-        const delay = Math.min(times * 200, 2000);
-        logger.domain('redis', 'warn', 'Redis reconnecting', { times, delay });
-        return delay;
-      },
-    });
-
-    client.on('connect', () => {
-      logger.domain('redis', 'info', 'Redis connecting…');
-    });
-
-    client.on('ready', () => {
-      lastReadyAt = new Date().toISOString();
-      lastError = null;
-      logger.domain('redis', 'info', 'Redis ready');
-    });
-
-    client.on('error', (err: Error) => {
-      lastError = err.message;
-      logger.domain('redis', 'error', 'Redis error', { err });
-    });
-
-    client.on('close', () => {
-      logger.domain('redis', 'warn', 'Redis connection closed');
-    });
-
-    client.on('reconnecting', () => {
-      logger.domain('redis', 'info', 'Redis reconnecting…');
-    });
+  if (client && isClientDead(client)) {
+    client.removeAllListeners();
+    try {
+      client.disconnect();
+    } catch {
+      // ignore — already ended
+    }
+    client = null;
   }
 
+  client ??= createRedisClient();
   return client;
 }
 

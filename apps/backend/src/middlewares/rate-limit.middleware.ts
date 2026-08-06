@@ -7,40 +7,44 @@ import type { RequestHandler } from 'express';
 
 /**
  * Rate limiter — Redis-backed when available, memory fallback for boot.
+ * `passOnStoreError` keeps auth/API available if Redis blips.
  */
-function buildLimiter(max: number): RequestHandler {
+function buildLimiter(max: number, prefix: string): RequestHandler {
   const windowMs = rateLimitConfig.windowMs;
 
+  const baseOptions = {
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    passOnStoreError: true,
+    // Express 5 + RedisStore script reload can trip this falsely.
+    validate: { singleCount: false },
+    handler: () => {
+      throw new RateLimitError();
+    },
+  } as const;
+
   try {
-    const redis = getRedis();
+    // Ensure client exists; sendCommand resolves a fresh client each call
+    // so we survive Upstash idle closes / reconnect cycles.
+    getRedis();
     return rateLimit({
-      windowMs,
-      max,
-      standardHeaders: true,
-      legacyHeaders: false,
+      ...baseOptions,
       store: new RedisStore({
+        prefix: `rl:${prefix}:`,
         sendCommand: (...args: string[]) => {
           const [command, ...commandArgs] = args;
           if (!command) {
             return Promise.reject(new Error('Redis rate-limit command is required'));
           }
+          const redis = getRedis();
           return redis.call(command, ...commandArgs) as Promise<number>;
         },
       }),
-      handler: () => {
-        throw new RateLimitError();
-      },
     });
   } catch {
-    return rateLimit({
-      windowMs,
-      max,
-      standardHeaders: true,
-      legacyHeaders: false,
-      handler: () => {
-        throw new RateLimitError();
-      },
-    });
+    return rateLimit(baseOptions);
   }
 }
 
@@ -50,7 +54,7 @@ export function createRateLimiter(): RequestHandler {
       next();
     };
   }
-  return buildLimiter(rateLimitConfig.max);
+  return buildLimiter(rateLimitConfig.max, 'global');
 }
 
 /** Stricter limiter for auth endpoints (login, refresh, password reset). */
@@ -60,5 +64,5 @@ export function createAuthRateLimiter(): RequestHandler {
       next();
     };
   }
-  return buildLimiter(rateLimitConfig.authMax);
+  return buildLimiter(rateLimitConfig.authMax, 'auth');
 }
