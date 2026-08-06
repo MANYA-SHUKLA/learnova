@@ -21,8 +21,7 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { siteContainer } from '@/lib/layout';
-import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
-import { isSaasModeEnabled } from '@/lib/saas';
+import { ctaButtonClass } from '@/lib/cta';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
@@ -159,8 +158,6 @@ function HeroVisual() {
 }
 
 function Hero() {
-  const saasMode = isSaasModeEnabled();
-
   return (
     <section className="relative overflow-hidden">
       <div
@@ -194,15 +191,6 @@ function Hero() {
             <Button asChild size="lg" className={ctaButtonClass}>
               <Link href="/login">Institution Login</Link>
             </Button>
-            {saasMode ? (
-              <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                <Link href="/register-institution">Register Institution</Link>
-              </Button>
-            ) : (
-              <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                <Link href="/contact">Request Demo</Link>
-              </Button>
-            )}
             <Button asChild variant="ghost" size="lg">
               <Link href="/features">Explore Platform</Link>
             </Button>
@@ -809,8 +797,8 @@ const TIERS = [
     price: 'Custom',
     description: 'Full academic stack for campuses and departments.',
     features: ['Unlimited programs', 'Exams + Analytics', 'SSO-ready roles', 'Priority support'],
-    cta: 'Register Institution',
-    href: '/register-institution',
+    cta: 'Institution Login',
+    href: '/login',
     highlighted: true,
   },
   {
@@ -873,8 +861,6 @@ function Pricing() {
 /* ─── Final CTA ─── */
 
 function FinalCta() {
-  const saasMode = isSaasModeEnabled();
-
   return (
     <MotionSection className="w-full pb-0 pt-8 sm:pb-28 sm:pt-10">
       <div className="w-full sm:px-[clamp(1rem,2.5vw,2.5rem)] xl:px-[clamp(1.5rem,3vw,3.5rem)]">
@@ -888,22 +874,13 @@ function FinalCta() {
               Ready to modernize learning?
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl">
-              Register your institution, invite faculty and students, and run academics from one
-              premium workspace.
+              Sign in to your institution workspace, invite faculty and students, and run academics
+              from one premium platform.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Button asChild size="lg" className={ctaButtonClass}>
                 <Link href="/login">Institution Login</Link>
               </Button>
-              {saasMode ? (
-                <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                  <Link href="/register-institution">Register Institution</Link>
-                </Button>
-              ) : (
-                <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                  <Link href="/contact">Request Demo</Link>
-                </Button>
-              )}
             </div>
           </div>
         </div>

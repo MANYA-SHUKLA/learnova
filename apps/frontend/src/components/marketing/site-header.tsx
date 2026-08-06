@@ -5,7 +5,6 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { siteContainer } from '@/lib/layout';
-import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
 import { LogoMark } from './logo-mark';
 
@@ -18,7 +17,6 @@ const NAV_LINKS = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const saasMode = isSaasModeEnabled();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-[var(--glass-bg)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--glass-bg)]">
@@ -45,18 +43,9 @@ export function SiteHeader() {
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <ThemeToggle />
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <Button asChild size="sm" className="hidden sm:inline-flex">
             <Link href="/login">Institution Login</Link>
           </Button>
-          {saasMode ? (
-            <Button asChild size="sm" className="hidden sm:inline-flex">
-              <Link href="/register-institution">Register Institution</Link>
-            </Button>
-          ) : (
-            <Button asChild size="sm" className="hidden sm:inline-flex">
-              <Link href="/contact">Request Demo</Link>
-            </Button>
-          )}
           <Button
             variant="ghost"
             size="icon"
@@ -89,8 +78,8 @@ export function SiteHeader() {
                 </Link>
               ))}
             </nav>
-            <div className="mt-4 flex flex-col gap-2">
-              <Button asChild variant="outline" className="w-full">
+            <div className="mt-4">
+              <Button asChild className="w-full">
                 <Link
                   href="/login"
                   onClick={() => {
@@ -98,16 +87,6 @@ export function SiteHeader() {
                   }}
                 >
                   Institution Login
-                </Link>
-              </Button>
-              <Button asChild className="w-full">
-                <Link
-                  href={saasMode ? '/register-institution' : '/contact'}
-                  onClick={() => {
-                    setOpen(false);
-                  }}
-                >
-                  {saasMode ? 'Register Institution' : 'Request Demo'}
                 </Link>
               </Button>
             </div>

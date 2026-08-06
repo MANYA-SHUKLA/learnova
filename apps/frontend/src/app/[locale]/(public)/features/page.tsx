@@ -11,9 +11,8 @@ import {
 } from 'lucide-react';
 import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
-import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
+import { ctaButtonClass } from '@/lib/cta';
 import { siteContainer } from '@/lib/layout';
-import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
 
 interface PageProps {
@@ -56,7 +55,6 @@ const FEATURES = [
 export default async function FeaturesPage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const saasMode = isSaasModeEnabled();
 
   return (
     <>
@@ -82,15 +80,6 @@ export default async function FeaturesPage({ params }: PageProps) {
               <Button asChild size="lg" className={ctaButtonClass}>
                 <Link href={APP_ROUTES.LOGIN}>Institution Login</Link>
               </Button>
-              {saasMode ? (
-                <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                  <Link href={APP_ROUTES.REGISTER_INSTITUTION}>Register Institution</Link>
-                </Button>
-              ) : (
-                <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                  <Link href={APP_ROUTES.CONTACT}>Request Demo</Link>
-                </Button>
-              )}
             </div>
           </div>
         </section>

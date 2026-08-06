@@ -12,7 +12,6 @@ import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
-import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
 
 interface AboutPageProps {
