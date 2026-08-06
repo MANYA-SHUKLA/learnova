@@ -36,7 +36,7 @@ const POLICY_KEYS = [
 type PolicyKey = (typeof POLICY_KEYS)[number][0];
 
 function stringifyPolicy(value: Record<string, unknown>): string {
-  return JSON.stringify(value ?? {}, null, 2);
+  return JSON.stringify(value, null, 2);
 }
 
 export default function InstitutionSettingsPage() {

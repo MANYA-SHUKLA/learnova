@@ -9,7 +9,7 @@ export interface ListResult<T> {
   limit: number;
 }
 
-type DocWithId = { _id: Types.ObjectId };
+interface DocWithId { _id: Types.ObjectId }
 
 export class TenantSoftDeleteRepository<T extends DocWithId> {
   constructor(
@@ -25,7 +25,7 @@ export class TenantSoftDeleteRepository<T extends DocWithId> {
     const filter: FilterQuery<T> = {
       ...extra,
       institutionId,
-    } as FilterQuery<T>;
+    };
 
     if (!query.includeDeleted) {
       (filter as Record<string, unknown>).deletedAt = null;
@@ -78,12 +78,12 @@ export class TenantSoftDeleteRepository<T extends DocWithId> {
 
   async findById(institutionId: string, id: string): Promise<T | null> {
     return this.model
-      .findOne({ _id: id, institutionId, deletedAt: null } as FilterQuery<T>)
+      .findOne({ _id: id, institutionId, deletedAt: null })
       .exec();
   }
 
   async findByIdIncludingDeleted(institutionId: string, id: string): Promise<T | null> {
-    return this.model.findOne({ _id: id, institutionId } as FilterQuery<T>).exec();
+    return this.model.findOne({ _id: id, institutionId }).exec();
   }
 
   async create(data: Partial<T>): Promise<T> {
@@ -97,7 +97,7 @@ export class TenantSoftDeleteRepository<T extends DocWithId> {
   ): Promise<T | null> {
     return this.model
       .findOneAndUpdate(
-        { _id: id, institutionId, deletedAt: null } as FilterQuery<T>,
+        { _id: id, institutionId, deletedAt: null },
         { $set: data },
         { new: true },
       )
@@ -107,7 +107,7 @@ export class TenantSoftDeleteRepository<T extends DocWithId> {
   async softDelete(institutionId: string, id: string): Promise<T | null> {
     return this.model
       .findOneAndUpdate(
-        { _id: id, institutionId, deletedAt: null } as FilterQuery<T>,
+        { _id: id, institutionId, deletedAt: null },
         { $set: { deletedAt: new Date(), status: 'archived' } },
         { new: true },
       )
@@ -117,7 +117,7 @@ export class TenantSoftDeleteRepository<T extends DocWithId> {
   async restore(institutionId: string, id: string): Promise<T | null> {
     return this.model
       .findOneAndUpdate(
-        { _id: id, institutionId, deletedAt: { $ne: null } } as FilterQuery<T>,
+        { _id: id, institutionId, deletedAt: { $ne: null } },
         { $set: { deletedAt: null, status: 'active' } },
         { new: true },
       )
@@ -126,7 +126,7 @@ export class TenantSoftDeleteRepository<T extends DocWithId> {
 
   async hardDelete(institutionId: string, id: string): Promise<boolean> {
     const res = await this.model
-      .deleteOne({ _id: id, institutionId } as FilterQuery<T>)
+      .deleteOne({ _id: id, institutionId })
       .exec();
     return res.deletedCount > 0;
   }

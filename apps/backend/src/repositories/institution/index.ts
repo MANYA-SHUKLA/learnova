@@ -120,20 +120,21 @@ export class InstitutionRepository {
 export class InstitutionSettingsRepository {
   async getOrCreate(institutionId: string) {
     let doc = await InstitutionSettingsModel.findOne({ institutionId }).exec();
-    if (!doc) {
-      doc = await InstitutionSettingsModel.create({
-        institutionId: new Types.ObjectId(institutionId),
-      });
-    }
+    doc ??= await InstitutionSettingsModel.create({
+      institutionId: new Types.ObjectId(institutionId),
+    });
     return doc;
   }
 
   async update(institutionId: string, data: Record<string, unknown>) {
-    return InstitutionSettingsModel.findOneAndUpdate(
+    const doc = await InstitutionSettingsModel.findOneAndUpdate(
       { institutionId },
       { $set: data },
       { new: true, upsert: true },
-    ).exec();
+    )
+      .orFail()
+      .exec();
+    return doc;
   }
 }
 

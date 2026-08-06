@@ -89,11 +89,10 @@ export default function AcademicCalendarPage() {
   const archiveMutation = useArchiveAcademicCalendarMutation();
   const restoreMutation = useRestoreAcademicCalendarMutation();
 
-  const yearOptions =
-    yearsData?.items.map((y) => ({ value: y.id, label: y.name })) ?? [];
-
-  const fields: FormField[] = useMemo(
-    () => [
+  const fields: FormField[] = useMemo(() => {
+    const yearOptions =
+      yearsData?.items.map((y) => ({ value: y.id, label: y.name })) ?? [];
+    return [
       {
         name: 'academicYearId',
         label: 'Academic year',
@@ -113,9 +112,8 @@ export default function AcademicCalendarPage() {
           { value: 'inactive', label: 'Inactive' },
         ],
       },
-    ],
-    [yearOptions],
-  );
+    ];
+  }, [yearsData?.items]);
 
   const openCreate = () => {
     setEditing(null);

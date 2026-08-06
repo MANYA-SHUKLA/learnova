@@ -1,5 +1,5 @@
 import { Router, type RequestHandler } from 'express';
-import type { ZodTypeAny } from 'zod';
+import type { ZodSchema } from 'zod';
 import { PERMISSIONS } from '@learnova/constants';
 import {
   createAcademicCalendarSchema,
@@ -30,15 +30,14 @@ import {
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/institution/institution.controller.js';
-
-type ResourceControllers = ReturnType<typeof ctrl.makeResourceControllers>;
+import type { ResourceControllers } from '../../controllers/institution/institution.controller.js';
 
 function mountResource(
   router: Router,
   basePath: string,
   controllers: ResourceControllers,
-  createSchema: ZodTypeAny,
-  updateSchema: ZodTypeAny,
+  createSchema: ZodSchema<unknown>,
+  updateSchema: ZodSchema<unknown>,
 ) {
   const read = [
     authenticate({ required: true }),
@@ -49,39 +48,48 @@ function mountResource(
     requirePermission(PERMISSIONS.INSTITUTION_MANAGE),
   ] as RequestHandler[];
 
-  router.get(basePath, ...read, validate(orgListQuerySchema, 'query'), controllers.list);
-  router.post(basePath, ...manage, validate(createSchema), controllers.create);
-  router.get(
-    `${basePath}/:id`,
-    ...read,
-    validate(idParamsSchema, 'params'),
-    controllers.get,
-  );
+  router.get(basePath, ...read, validate(orgListQuerySchema, 'query'), (req, res, next) => {
+    void controllers.list(req, res, next);
+  });
+  router.post(basePath, ...manage, validate(createSchema), (req, res, next) => {
+    void controllers.create(req, res, next);
+  });
+  router.get(`${basePath}/:id`, ...read, validate(idParamsSchema, 'params'), (req, res, next) => {
+    void controllers.get(req, res, next);
+  });
   router.put(
     `${basePath}/:id`,
     ...manage,
     validate(idParamsSchema, 'params'),
     validate(updateSchema),
-    controllers.update,
+    (req, res, next) => {
+      void controllers.update(req, res, next);
+    },
   );
   router.patch(
     `${basePath}/:id`,
     ...manage,
     validate(idParamsSchema, 'params'),
     validate(updateSchema),
-    controllers.update,
+    (req, res, next) => {
+      void controllers.update(req, res, next);
+    },
   );
   router.delete(
     `${basePath}/:id`,
     ...manage,
     validate(idParamsSchema, 'params'),
-    controllers.archive,
+    (req, res, next) => {
+      void controllers.archive(req, res, next);
+    },
   );
   router.post(
     `${basePath}/:id/restore`,
     ...manage,
     validate(idParamsSchema, 'params'),
-    controllers.restore,
+    (req, res, next) => {
+      void controllers.restore(req, res, next);
+    },
   );
 }
 

@@ -1,5 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { OrgListQuery } from '@learnova/validation';
+import type {
+  CreateInstitutionInput,
+  OrgListQuery,
+  UpdateInstitutionInput,
+  UpdateInstitutionSettingsInput,
+} from '@learnova/validation';
 import { UnauthorizedError } from '../../utils/errors/index.js';
 import { sendCreated, sendSuccess } from '../../utils/response/index.js';
 import {
@@ -19,7 +24,10 @@ function actorFrom(req: Request): ActorContext {
 
 export async function createInstitution(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await institutionService.createInstitution(req.body, actorFrom(req));
+    const data = await institutionService.createInstitution(
+      req.body as CreateInstitutionInput,
+      actorFrom(req),
+    );
     sendCreated(res, data, { requestId: req.requestId });
   } catch (err) {
     next(err);
@@ -60,7 +68,7 @@ export async function updateInstitution(req: Request, res: Response, next: NextF
   try {
     const data = await institutionService.updateInstitution(
       req.params.id as string,
-      req.body,
+      req.body as UpdateInstitutionInput,
       actorFrom(req),
     );
     sendSuccess(res, data, { requestId: req.requestId });
@@ -97,7 +105,7 @@ export async function updateBranding(req: Request, res: Response, next: NextFunc
   try {
     const data = await institutionService.updateBranding(
       req.params.id as string,
-      req.body,
+      req.body as { logo?: string | null; favicon?: string | null },
       actorFrom(req),
     );
     sendSuccess(res, data, { requestId: req.requestId });
@@ -115,6 +123,15 @@ type CreateFn = (body: unknown, actor: ActorContext) => Promise<unknown>;
 type UpdateFn = (id: string, body: unknown, actor: ActorContext) => Promise<unknown>;
 type IdFn = (id: string, actor: ActorContext) => Promise<unknown>;
 
+export interface ResourceControllers {
+  list: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  get: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  create: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  update: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  archive: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  restore: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+}
+
 export function makeResourceControllers(handlers: {
   list: ListFn;
   get: GetFn;
@@ -122,9 +139,9 @@ export function makeResourceControllers(handlers: {
   update: UpdateFn;
   archive: IdFn;
   restore: IdFn;
-}) {
+}): ResourceControllers {
   return {
-    async list(req: Request, res: Response, next: NextFunction) {
+    list: async (req, res, next) => {
       try {
         const result = await handlers.list(
           req.query as unknown as OrgListQuery,
@@ -138,7 +155,7 @@ export function makeResourceControllers(handlers: {
         next(err);
       }
     },
-    async get(req: Request, res: Response, next: NextFunction) {
+    get: async (req, res, next) => {
       try {
         const data = await handlers.get(req.params.id as string, actorFrom(req));
         sendSuccess(res, data, { requestId: req.requestId });
@@ -146,7 +163,7 @@ export function makeResourceControllers(handlers: {
         next(err);
       }
     },
-    async create(req: Request, res: Response, next: NextFunction) {
+    create: async (req, res, next) => {
       try {
         const data = await handlers.create(req.body, actorFrom(req));
         sendCreated(res, data, { requestId: req.requestId });
@@ -154,7 +171,7 @@ export function makeResourceControllers(handlers: {
         next(err);
       }
     },
-    async update(req: Request, res: Response, next: NextFunction) {
+    update: async (req, res, next) => {
       try {
         const data = await handlers.update(req.params.id as string, req.body, actorFrom(req));
         sendSuccess(res, data, { requestId: req.requestId });
@@ -162,7 +179,7 @@ export function makeResourceControllers(handlers: {
         next(err);
       }
     },
-    async archive(req: Request, res: Response, next: NextFunction) {
+    archive: async (req, res, next) => {
       try {
         const data = await handlers.archive(req.params.id as string, actorFrom(req));
         sendSuccess(res, data, { requestId: req.requestId });
@@ -170,7 +187,7 @@ export function makeResourceControllers(handlers: {
         next(err);
       }
     },
-    async restore(req: Request, res: Response, next: NextFunction) {
+    restore: async (req, res, next) => {
       try {
         const data = await handlers.restore(req.params.id as string, actorFrom(req));
         sendSuccess(res, data, { requestId: req.requestId });
@@ -273,7 +290,10 @@ export async function getSettings(req: Request, res: Response, next: NextFunctio
 
 export async function updateSettings(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await institutionService.updateSettings(req.body, actorFrom(req));
+    const data = await institutionService.updateSettings(
+      req.body as UpdateInstitutionSettingsInput,
+      actorFrom(req),
+    );
     sendSuccess(res, data, { requestId: req.requestId });
   } catch (err) {
     next(err);

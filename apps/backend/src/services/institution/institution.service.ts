@@ -67,9 +67,10 @@ function assertSameInstitution(actor: ActorContext, institutionId: string): void
   }
 }
 
-function toDto<T extends { _id: Types.ObjectId; toObject?: () => Record<string, unknown> }>(
-  doc: T,
-): Record<string, unknown> {
+function toDto(doc: {
+  _id: Types.ObjectId;
+  toObject?: () => Record<string, unknown>;
+}): Record<string, unknown> {
   const raw =
     typeof doc.toObject === 'function'
       ? doc.toObject()
@@ -86,7 +87,7 @@ function toDto<T extends { _id: Types.ObjectId; toObject?: () => Record<string, 
     } else if (value instanceof Date) {
       normalized[key] = value.toISOString();
     } else if (Array.isArray(value)) {
-      normalized[key] = value.map((item) => {
+      normalized[key] = value.map((item: unknown) => {
         if (item instanceof Types.ObjectId) return String(item);
         if (item instanceof Date) return item.toISOString();
         if (item && typeof item === 'object') {
@@ -110,7 +111,7 @@ function toDto<T extends { _id: Types.ObjectId; toObject?: () => Record<string, 
     deletedAt:
       rest.deletedAt instanceof Date
         ? rest.deletedAt.toISOString()
-        : ((rest.deletedAt as string | null | undefined) ?? null),
+        : (rest.deletedAt ?? null),
   };
 }
 
@@ -198,7 +199,7 @@ export class InstitutionService {
 
   async updateInstitution(id: string, input: UpdateInstitutionInput, actor: ActorContext) {
     assertSameInstitution(actor, id);
-    const doc = await institutionRepository.updateById(id, input as Record<string, unknown>);
+    const doc = await institutionRepository.updateById(id, input);
     if (!doc) throw new NotFoundError('Institution not found');
     await audit('institution.updated', actor, id, { fields: Object.keys(input) });
     return toDto(doc);
@@ -250,7 +251,7 @@ export class InstitutionService {
         deletedAt: null,
       });
       await audit(event, actor, institutionId, { id: String(doc._id) });
-      return toDto(doc as never);
+      return toDto(doc);
     } catch (err) {
       if ((err as { code?: number }).code === 11000) {
         throw new ConflictError('Duplicate code or unique constraint failed');
@@ -264,7 +265,7 @@ export class InstitutionService {
       list: (
         institutionId: string,
         query: OrgListQuery,
-      ) => Promise<{ items: Array<{ _id: Types.ObjectId }>; total: number; page: number; limit: number }>;
+      ) => Promise<{ items: { _id: Types.ObjectId }[]; total: number; page: number; limit: number }>;
     },
     actor: ActorContext,
     query: OrgListQuery,
@@ -272,7 +273,7 @@ export class InstitutionService {
     const institutionId = requireTenant(actor);
     const result = await repo.list(institutionId, query);
     return {
-      items: result.items.map((d) => toDto(d as never)),
+      items: result.items.map((d) => toDto(d)),
       meta: pageMeta(result.total, result.page, result.limit),
     };
   }
@@ -287,7 +288,7 @@ export class InstitutionService {
     const institutionId = requireTenant(actor);
     const doc = await repo.findById(institutionId, id);
     if (!doc) throw new NotFoundError('Resource not found');
-    return toDto(doc as never);
+    return toDto(doc);
   }
 
   private async updateTenantResource(
@@ -307,7 +308,7 @@ export class InstitutionService {
     const doc = await repo.updateById(institutionId, id, data);
     if (!doc) throw new NotFoundError('Resource not found');
     await audit(event, actor, institutionId, { id });
-    return toDto(doc as never);
+    return toDto(doc);
   }
 
   private async archiveTenantResource(
@@ -325,7 +326,7 @@ export class InstitutionService {
     const doc = await repo.softDelete(institutionId, id);
     if (!doc) throw new NotFoundError('Resource not found');
     await audit('entity.archived', actor, institutionId, { entity, id });
-    return toDto(doc as never);
+    return toDto(doc);
   }
 
   private async restoreTenantResource(
@@ -343,12 +344,12 @@ export class InstitutionService {
     const doc = await repo.restore(institutionId, id);
     if (!doc) throw new NotFoundError('Resource not found');
     await audit('entity.restored', actor, institutionId, { entity, id });
-    return toDto(doc as never);
+    return toDto(doc);
   }
 
   // Campuses
   createCampus = (input: CreateCampusInput, actor: ActorContext) =>
-    this.createTenantResource(campusRepository, actor, input as never, 'campus.created');
+    this.createTenantResource(campusRepository, actor, input, 'campus.created');
   listCampuses = (query: OrgListQuery, actor: ActorContext) =>
     this.listTenantResource(campusRepository, actor, query);
   getCampus = (id: string, actor: ActorContext) =>
@@ -358,7 +359,7 @@ export class InstitutionService {
       campusRepository,
       actor,
       id,
-      input as never,
+      input,
       'campus.updated',
     );
   archiveCampus = (id: string, actor: ActorContext) =>
@@ -368,7 +369,7 @@ export class InstitutionService {
 
   // Schools
   createSchool = (input: CreateSchoolInput, actor: ActorContext) =>
-    this.createTenantResource(schoolRepository, actor, input as never, 'school.created');
+    this.createTenantResource(schoolRepository, actor, input, 'school.created');
   listSchools = (query: OrgListQuery, actor: ActorContext) =>
     this.listTenantResource(schoolRepository, actor, query);
   getSchool = (id: string, actor: ActorContext) =>
@@ -378,7 +379,7 @@ export class InstitutionService {
       schoolRepository,
       actor,
       id,
-      input as never,
+      input,
       'school.updated',
     );
   archiveSchool = (id: string, actor: ActorContext) =>
@@ -394,7 +395,7 @@ export class InstitutionService {
     return this.createTenantResource(
       departmentRepository,
       actor,
-      input as never,
+      input,
       'department.created',
     );
   }
@@ -407,7 +408,7 @@ export class InstitutionService {
       departmentRepository,
       actor,
       id,
-      input as never,
+      input,
       'department.updated',
     );
   archiveDepartment = (id: string, actor: ActorContext) =>
@@ -423,7 +424,7 @@ export class InstitutionService {
     return this.createTenantResource(
       programRepository,
       actor,
-      input as never,
+      input,
       'program.created',
     );
   }
@@ -436,7 +437,7 @@ export class InstitutionService {
       programRepository,
       actor,
       id,
-      input as never,
+      input,
       'program.updated',
     );
   archiveProgram = (id: string, actor: ActorContext) =>
@@ -459,7 +460,7 @@ export class InstitutionService {
     return this.createTenantResource(
       academicYearRepository,
       actor,
-      input as never,
+      input,
       'academic_year.created',
     );
   }
@@ -472,7 +473,7 @@ export class InstitutionService {
       academicYearRepository,
       actor,
       id,
-      input as never,
+      input,
       'academic_year.updated',
     );
   archiveAcademicYear = (id: string, actor: ActorContext) =>
@@ -488,7 +489,7 @@ export class InstitutionService {
     return this.createTenantResource(
       semesterRepository,
       actor,
-      input as never,
+      input,
       'semester.created',
     );
   }
@@ -501,7 +502,7 @@ export class InstitutionService {
       semesterRepository,
       actor,
       id,
-      input as never,
+      input,
       'semester.updated',
     );
   archiveSemester = (id: string, actor: ActorContext) =>
@@ -522,7 +523,7 @@ export class InstitutionService {
     return this.createTenantResource(
       sectionRepository,
       actor,
-      input as never,
+      input,
       'section.created',
     );
   }
@@ -535,7 +536,7 @@ export class InstitutionService {
       sectionRepository,
       actor,
       id,
-      input as never,
+      input,
       'section.updated',
     );
   archiveSection = (id: string, actor: ActorContext) =>
@@ -551,7 +552,7 @@ export class InstitutionService {
     return this.createTenantResource(
       batchRepository,
       actor,
-      input as never,
+      input,
       'batch.created',
     );
   }
@@ -560,7 +561,7 @@ export class InstitutionService {
   getBatch = (id: string, actor: ActorContext) =>
     this.getTenantResource(batchRepository, actor, id);
   updateBatch = (id: string, input: UpdateBatchInput, actor: ActorContext) =>
-    this.updateTenantResource(batchRepository, actor, id, input as never, 'batch.updated');
+    this.updateTenantResource(batchRepository, actor, id, input, 'batch.updated');
   archiveBatch = (id: string, actor: ActorContext) =>
     this.archiveTenantResource(batchRepository, actor, id, 'batch');
   restoreBatch = (id: string, actor: ActorContext) =>
@@ -571,7 +572,7 @@ export class InstitutionService {
     const institutionId = requireTenant(actor);
     const year = await academicYearRepository.findById(institutionId, input.academicYearId);
     if (!year) throw new ValidationError('Invalid academicYearId');
-    const events = (input.events ?? []).map((e) => ({
+    const events = input.events.map((e) => ({
       ...e,
       id: e.id ?? createId(),
     }));
@@ -622,10 +623,10 @@ export class InstitutionService {
     const institutionId = requireTenant(actor);
     const doc = await institutionSettingsRepository.update(
       institutionId,
-      input as Record<string, unknown>,
+      input,
     );
     await audit('settings.updated', actor, institutionId, { fields: Object.keys(input) });
-    return toDto(doc!);
+    return toDto(doc);
   }
 }
 
