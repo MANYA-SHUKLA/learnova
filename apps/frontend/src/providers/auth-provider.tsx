@@ -33,6 +33,23 @@ interface AuthProviderState extends AuthContextValue {
 
 const AuthContext = createContext<AuthProviderState | null>(null);
 
+function sessionFromPayload(payload: NonNullable<ReturnType<typeof decodeJwtPayload>>): Session {
+  return {
+    id: payload.sessionId,
+    userId: payload.sub,
+    deviceType: 'unknown',
+    expiresAt: new Date(payload.exp * 1000).toISOString(),
+    createdAt: new Date(payload.iat * 1000).toISOString(),
+    lastActivityAt: new Date().toISOString(),
+    userAgent: null,
+    ipAddress: null,
+    browser: null,
+    os: null,
+    country: null,
+    isCurrent: true,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const session = useAuthStore((s) => s.session);
@@ -57,9 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const token = getAccessToken();
         const payload = token ? decodeJwtPayload(token) : null;
-        const tokenUsable = Boolean(payload && !isTokenExpired(payload));
+        const tokenUsable = Boolean(token && payload && !isTokenExpired(payload));
 
-        if (tokenUsable) {
+        if (token && payload && tokenUsable) {
           try {
             const [meUser, currentSession] = await Promise.all([
               authApi.me(),
@@ -68,23 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (cancelled) return;
             setAuth({
               user: meUser,
-              accessToken: token!,
-              session:
-                currentSession ??
-                ({
-                  id: payload!.sessionId,
-                  userId: payload!.sub,
-                  deviceType: 'unknown',
-                  expiresAt: new Date(payload!.exp * 1000).toISOString(),
-                  createdAt: new Date(payload!.iat * 1000).toISOString(),
-                  lastActivityAt: new Date().toISOString(),
-                  userAgent: null,
-                  ipAddress: null,
-                  browser: null,
-                  os: null,
-                  country: null,
-                  isCurrent: true,
-                } satisfies Session),
+              accessToken: token,
+              session: currentSession ?? sessionFromPayload(payload),
             });
             return;
           } catch {

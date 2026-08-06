@@ -12,7 +12,7 @@ import {
   Input,
   Spinner,
 } from '@learnova/ui';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { ApiClientError } from '@/lib/api/client';
 import { Link } from '@/lib/i18n/routing';
@@ -36,19 +36,21 @@ export default function ForgotPasswordPage() {
     defaultValues: { email: '' },
   });
 
-  const onSubmit = handleSubmit(async (values) => {
-    setSuccessMessage(null);
-    try {
-      const result = await mutation.mutateAsync(values);
-      setSuccessMessage(result.message);
-    } catch (err) {
-      const message =
-        err instanceof ApiClientError
-          ? err.message
-          : 'Unable to send reset link. Try again.';
-      setError('root', { message });
-    }
-  });
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    void handleSubmit(async (values) => {
+      setSuccessMessage(null);
+      try {
+        const result = await mutation.mutateAsync(values);
+        setSuccessMessage(result.message);
+      } catch (err) {
+        const message =
+          err instanceof ApiClientError
+            ? err.message
+            : 'Unable to send reset link. Try again.';
+        setError('root', { message });
+      }
+    })(event);
+  };
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-12">

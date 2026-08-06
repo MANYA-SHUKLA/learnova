@@ -34,7 +34,7 @@ export function useLoginMutation() {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
-    mutationFn: authApi.login,
+    mutationFn: (body: { email: string; password: string }) => authApi.login(body),
     onSuccess: (data) => {
       storeAccessToken(data.accessToken);
       setAuth({
@@ -77,19 +77,19 @@ export function useLogoutAllMutation() {
 
 export function useForgotPasswordMutation() {
   return useMutation({
-    mutationFn: authApi.forgotPassword,
+    mutationFn: (body: { email: string }) => authApi.forgotPassword(body),
   });
 }
 
 export function useResetPasswordMutation() {
   return useMutation({
-    mutationFn: authApi.resetPassword,
+    mutationFn: (body: { token: string; password: string }) => authApi.resetPassword(body),
   });
 }
 
 export function useVerifyEmailMutation() {
   return useMutation({
-    mutationFn: authApi.verifyEmail,
+    mutationFn: (body: { token: string }) => authApi.verifyEmail(body),
   });
 }
 

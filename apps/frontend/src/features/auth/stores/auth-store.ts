@@ -36,32 +36,39 @@ export const useAuthStore = create<AuthState>((set) => ({
   ...empty,
   isLoading: true,
 
-  setAuth: ({ user, accessToken, session }) =>
+  setAuth: ({ user, accessToken, session }) => {
     set({
       user,
       accessToken,
       session,
-      permissions: user.permissions ?? [],
+      permissions: user.permissions,
       isAuthenticated: true,
       isLoading: false,
-    }),
+    });
+  },
 
-  setUser: (user) =>
+  setUser: (user) => {
     set((state) => ({
       user,
       permissions: user?.permissions ?? [],
       isAuthenticated: Boolean(user && state.session),
-    })),
+    }));
+  },
 
-  setSession: (session) =>
+  setSession: (session) => {
     set((state) => ({
       session,
       isAuthenticated: Boolean(state.user && session),
-    })),
+    }));
+  },
 
-  setLoading: (isLoading) => set({ isLoading }),
+  setLoading: (isLoading) => {
+    set({ isLoading });
+  },
 
-  clear: () => set({ ...empty, isLoading: false }),
+  clear: () => {
+    set({ ...empty, isLoading: false });
+  },
 
   logout: () => {
     clearTokens();

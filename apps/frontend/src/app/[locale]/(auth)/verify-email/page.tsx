@@ -11,12 +11,12 @@ import {
   Spinner,
 } from '@learnova/ui';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { ApiClientError } from '@/lib/api/client';
 import { Link } from '@/lib/i18n/routing';
 import { useVerifyEmailMutation } from '@/features/auth';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const mutation = useVerifyEmailMutation();
@@ -28,13 +28,15 @@ export default function VerifyEmailPage() {
     token ? 'Verifying your email…' : 'Verification token is missing.',
   );
 
+  const mutateAsync = mutation.mutateAsync;
+
   useEffect(() => {
     if (!token || started.current) return;
     started.current = true;
 
     void (async () => {
       try {
-        const result = await mutation.mutateAsync({ token });
+        const result = await mutateAsync({ token });
         setStatus('success');
         setMessage(result.message || 'Email verified successfully.');
       } catch (err) {
@@ -46,47 +48,64 @@ export default function VerifyEmailPage() {
         );
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount with token
-  }, [token]);
+  }, [token, mutateAsync]);
 
   return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Verify email</CardTitle>
+        <CardDescription>
+          {status === 'loading'
+            ? 'Confirming your email address.'
+            : status === 'success'
+              ? 'Your account is ready.'
+              : 'We could not verify this link.'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {status === 'loading' ? (
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Spinner size="sm" />
+            {message}
+          </div>
+        ) : (
+          <p
+            role={status === 'error' ? 'alert' : 'status'}
+            className={
+              status === 'success'
+                ? 'rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success'
+                : 'rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger'
+            }
+          >
+            {message}
+          </p>
+        )}
+      </CardContent>
+      <CardFooter>
+        <Button asChild className="w-full" disabled={status === 'loading'}>
+          <Link href="/login">Go to sign in</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+function VerifyFallback() {
+  return (
+    <Card className="w-full max-w-md">
+      <CardContent className="flex min-h-[200px] items-center justify-center pt-6">
+        <Spinner size="lg" />
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
     <main className="flex min-h-screen items-center justify-center px-6 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Verify email</CardTitle>
-          <CardDescription>
-            {status === 'loading'
-              ? 'Confirming your email address.'
-              : status === 'success'
-                ? 'Your account is ready.'
-                : 'We could not verify this link.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {status === 'loading' ? (
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <Spinner size="sm" />
-              {message}
-            </div>
-          ) : (
-            <p
-              role={status === 'error' ? 'alert' : 'status'}
-              className={
-                status === 'success'
-                  ? 'rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success'
-                  : 'rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger'
-              }
-            >
-              {message}
-            </p>
-          )}
-        </CardContent>
-        <CardFooter>
-          <Button asChild className="w-full" disabled={status === 'loading'}>
-            <Link href="/login">Go to sign in</Link>
-          </Button>
-        </CardFooter>
-      </Card>
+      <Suspense fallback={<VerifyFallback />}>
+        <VerifyEmailContent />
+      </Suspense>
     </main>
   );
 }
