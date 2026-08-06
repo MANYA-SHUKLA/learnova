@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: APP_ROUTES.INSTITUTION_SECTIONS, label: 'Sections' },
   { href: APP_ROUTES.INSTITUTION_BATCHES, label: 'Batches' },
   { href: APP_ROUTES.INSTITUTION_CALENDAR, label: 'Calendar' },
+  { href: APP_ROUTES.INSTITUTION_FACULTY, label: 'Faculty' },
   { href: APP_ROUTES.INSTITUTION_SETTINGS, label: 'Settings' },
 ] as const;
 
