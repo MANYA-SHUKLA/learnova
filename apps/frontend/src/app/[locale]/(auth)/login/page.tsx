@@ -53,10 +53,10 @@ function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>Enter your credentials to access Learnova.</CardDescription>
+    <Card className="w-full border-border/80 shadow-glow">
+      <CardHeader className="space-y-1 pb-4">
+        <CardTitle className="text-lg">Sign in</CardTitle>
+        <CardDescription>Use your institution admin or faculty credentials.</CardDescription>
       </CardHeader>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className="space-y-4">
@@ -139,10 +139,16 @@ function LoginFallback() {
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-12">
+    <div className="w-full max-w-md">
+      <div className="mb-6 text-center">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Welcome back</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Sign in to your institution workspace.
+        </p>
+      </div>
       <Suspense fallback={<LoginFallback />}>
         <LoginForm />
       </Suspense>
-    </main>
+    </div>
   );
 }
