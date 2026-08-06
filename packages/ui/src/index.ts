@@ -1,4 +1,4 @@
-export { Button, buttonVariants, type ButtonProps } from './components/button/index.js';
+export { Button, buttonVariants, type ButtonProps } from './components/button/index.tsx';
 export {
   Card,
   CardContent,
@@ -6,10 +6,10 @@ export {
   CardFooter,
   CardHeader,
   CardTitle,
-} from './components/card/index.js';
-export { Input, type InputProps } from './components/input/index.js';
-export { Badge, badgeVariants, type BadgeProps } from './components/badge/index.js';
-export { Separator } from './components/separator/index.js';
-export { Skeleton } from './components/skeleton/index.js';
-export { Spinner } from './components/spinner/index.js';
-export { cn } from './lib/utils.js';
+} from './components/card/index.tsx';
+export { Input, type InputProps } from './components/input/index.tsx';
+export { Badge, badgeVariants, type BadgeProps } from './components/badge/index.tsx';
+export { Separator } from './components/separator/index.tsx';
+export { Skeleton } from './components/skeleton/index.tsx';
+export { Spinner } from './components/spinner/index.tsx';
+export { cn } from './lib/utils.ts';

@@ -4,7 +4,7 @@
  */
 
 import type { ApiErrorResponse, ApiResponse } from '@learnova/types';
-import { HTTP_HEADERS } from '@learnova/shared';
+import { HTTP_HEADERS } from '@learnova/constants';
 import { env } from '@/config/env';
 import { getAccessToken } from '@/lib/auth/jwt';
 

@@ -4,9 +4,10 @@ export * from './pagination/index.js';
 export * from './search/index.js';
 export * from './uuid/index.js';
 export * from './file/index.js';
-export * from './encryption/index.js';
+/** Node-only: import from `@learnova/utils/encryption` */
 export * from './slug/index.js';
 export * from './csv/index.js';
+/** Node-oriented PDF helpers: prefer `@learnova/utils/pdf` for explicit imports */
 export * from './pdf/index.js';
 export * from './retry/index.js';
 export * from './async/index.js';

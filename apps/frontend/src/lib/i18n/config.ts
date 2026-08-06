@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@learnova/shared';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@learnova/constants';
 
 export const locales = SUPPORTED_LOCALES;
 export const defaultLocale = DEFAULT_LOCALE;
