@@ -18,9 +18,9 @@ const COMPANY_LINKS = [
 ] as const;
 
 const LEGAL_LINKS = [
-  { href: '/about', label: 'Privacy' },
-  { href: '/about', label: 'Terms' },
-  { href: '/about', label: 'Security' },
+  { href: '/privacy', label: 'Privacy' },
+  { href: '/terms', label: 'Terms' },
+  { href: '/security', label: 'Security' },
 ] as const;
 
 function FooterColumn({
