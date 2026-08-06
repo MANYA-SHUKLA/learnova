@@ -80,11 +80,20 @@ export type BackendEnv = z.infer<typeof backendEnvSchema>;
 export type FrontendEnv = z.infer<typeof frontendEnvSchema>;
 export type WorkerEnv = z.infer<typeof workerEnvSchema>;
 
+/** Treat blank .env values as unset so optional fields don't fail validation. */
+function normalizeEnv(env: NodeJS.ProcessEnv): Record<string, string | undefined> {
+  const normalized: Record<string, string | undefined> = {};
+  for (const [key, value] of Object.entries(env)) {
+    normalized[key] = value === '' ? undefined : value;
+  }
+  return normalized;
+}
+
 export function parseEnv<T extends z.ZodTypeAny>(
   schema: T,
   env: NodeJS.ProcessEnv = process.env,
 ): z.output<T> {
-  const result = schema.safeParse(env);
+  const result = schema.safeParse(normalizeEnv(env));
   if (!result.success) {
     const formatted = result.error.flatten().fieldErrors;
     const message = Object.entries(formatted)

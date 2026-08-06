@@ -12,7 +12,7 @@
     "lint:fix": "eslint . --fix --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "clean": "rimraf dist",
-    "seed:auth": "tsx src/seeds/run-auth-seed.ts",
+    "seed:auth": "tsx --env-file=.env src/seeds/run-auth-seed.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
