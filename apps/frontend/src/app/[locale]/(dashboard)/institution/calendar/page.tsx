@@ -221,7 +221,7 @@ export default function AcademicCalendarPage() {
 
       <div className="mb-4 flex flex-wrap gap-3">
         <Input
-          className="max-w-xs"
+          className="w-full min-w-0 sm:max-w-xs"
           placeholder="Search calendars…"
           value={q}
           onChange={(e) => {

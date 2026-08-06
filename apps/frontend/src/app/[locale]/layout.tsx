@@ -28,8 +28,8 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <NextIntlClientProvider messages={messages}>
       <AppProviders>
-        <div className="flex min-h-svh flex-col">
-          <div className="flex-1">{children}</div>
+        <div className="flex min-h-svh w-full min-w-0 max-w-[100vw] flex-col overflow-x-clip">
+          <div className="min-w-0 flex-1">{children}</div>
           <MadeWithLoveFooter />
         </div>
       </AppProviders>

@@ -854,7 +854,7 @@ function FinalCta() {
   return (
     <MotionSection className="pb-24 pt-8 sm:pb-28">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-background to-accent/10 px-6 py-14 text-center shadow-soft-lg sm:px-12 sm:py-16">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-background to-accent/10 px-4 py-12 text-center shadow-soft-lg sm:px-12 sm:py-16">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(var(--primary)/0.12),_transparent_65%)]"

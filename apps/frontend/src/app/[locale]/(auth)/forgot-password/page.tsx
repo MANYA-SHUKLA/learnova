@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-12">
+    <div className="w-full min-w-0">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Forgot password</CardTitle>
@@ -117,6 +117,6 @@ export default function ForgotPasswordPage() {
           </CardFooter>
         </form>
       </Card>
-    </main>
+    </div>
   );
 }

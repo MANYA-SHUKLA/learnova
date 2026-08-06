@@ -46,7 +46,7 @@ export default function SessionsPage() {
 
   if (authLoading || (isAuthenticated && isLoading)) {
     return (
-      <main className="flex min-h-[50vh] items-center justify-center px-6">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -79,8 +79,8 @@ export default function SessionsPage() {
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-3xl">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <h1 className="font-display text-2xl font-semibold tracking-tight">Sessions</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Devices where you are currently signed in.
@@ -88,6 +88,7 @@ export default function SessionsPage() {
         </div>
         <Button
           variant="danger"
+          className="w-full sm:w-auto"
           disabled={logoutAllMutation.isPending}
           onClick={() => void handleLogoutAll()}
         >
@@ -118,10 +119,10 @@ export default function SessionsPage() {
       <div className="space-y-3">
         {(sessions ?? []).map((session) => (
           <Card key={session.id}>
-            <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-              <div className="space-y-1.5">
+            <CardHeader className="flex flex-col items-start justify-between gap-3 space-y-0 sm:flex-row sm:items-start sm:gap-4">
+              <div className="min-w-0 space-y-1.5">
                 <CardTitle className="text-base">{sessionLabel(session)}</CardTitle>
-                <CardDescription>
+                <CardDescription className="break-words">
                   Last active {formatDate(session.lastActivityAt)}
                   {session.ipAddress ? ` · ${session.ipAddress}` : ''}
                   {session.country ? ` · ${session.country}` : ''}

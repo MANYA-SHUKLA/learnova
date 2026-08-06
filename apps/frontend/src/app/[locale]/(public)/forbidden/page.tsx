@@ -11,7 +11,7 @@ export default async function ForbiddenPage({ params }: ForbiddenPageProps) {
   setRequestLocale(locale);
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-12">
+    <main className="flex min-h-svh w-full min-w-0 items-center justify-center px-4 py-12 sm:px-6">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Forbidden</CardTitle>
