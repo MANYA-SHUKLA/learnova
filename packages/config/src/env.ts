@@ -80,22 +80,17 @@ export type BackendEnv = z.infer<typeof backendEnvSchema>;
 export type FrontendEnv = z.infer<typeof frontendEnvSchema>;
 export type WorkerEnv = z.infer<typeof workerEnvSchema>;
 
-export function parseEnv<Output>(
-  schema: z.ZodType<Output>,
+export function parseEnv<T extends z.ZodTypeAny>(
+  schema: T,
   env: NodeJS.ProcessEnv = process.env,
-): Output {
+): z.output<T> {
   const result = schema.safeParse(env);
   if (!result.success) {
     const formatted = result.error.flatten().fieldErrors;
     const message = Object.entries(formatted)
-      .map(([key, errors]) => {
-        const detail = Array.isArray(errors)
-          ? errors.map((e) => String(e)).join(', ')
-          : 'invalid';
-        return `  ${key}: ${detail}`;
-      })
+      .map(([key, errors]) => `  ${key}: ${errors?.join(', ') ?? 'invalid'}`)
       .join('\n');
     throw new Error(`Invalid environment configuration:\n${message}`);
   }
-  return result.data;
+  return result.data as z.output<T>;
 }

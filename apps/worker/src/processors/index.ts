@@ -1,5 +1,12 @@
 import { type Job, Worker } from 'bullmq';
 import { QUEUE_LIST, QUEUE_NAMES, type QueueName } from '@learnova/constants';
+import type {
+  AnalyticsJobPayload,
+  AuditJobPayload,
+  EmailJobPayload,
+  GradingJobPayload,
+  NotificationJobPayload,
+} from '@learnova/types';
 import { env } from '../config/env.js';
 import { getRedisConnection } from '../connection/redis.js';
 import { logger } from '../utils/logger.js';
@@ -18,18 +25,19 @@ import {
 type Processor = (job: Job) => Promise<void>;
 
 const processors: Record<QueueName, Processor> = {
-  [QUEUE_NAMES.EMAIL]: (job) => processEmailJob(job),
-  [QUEUE_NAMES.NOTIFICATIONS]: (job) => processNotificationJob(job),
-  [QUEUE_NAMES.GRADING]: (job) => processGradingJob(job),
-  [QUEUE_NAMES.ANALYTICS]: (job) => processAnalyticsJob(job),
-  [QUEUE_NAMES.AUDIT]: (job) => processAuditJob(job),
+  [QUEUE_NAMES.EMAIL]: (job) => processEmailJob(job as Job<EmailJobPayload>),
+  [QUEUE_NAMES.NOTIFICATIONS]: (job) =>
+    processNotificationJob(job as Job<NotificationJobPayload>),
+  [QUEUE_NAMES.GRADING]: (job) => processGradingJob(job as Job<GradingJobPayload>),
+  [QUEUE_NAMES.ANALYTICS]: (job) => processAnalyticsJob(job as Job<AnalyticsJobPayload>),
+  [QUEUE_NAMES.AUDIT]: (job) => processAuditJob(job as Job<AuditJobPayload>),
   [QUEUE_NAMES.CERTIFICATE]: (job) => processCertificateJob(job),
   [QUEUE_NAMES.AI]: (job) => processAiJob(job),
   [QUEUE_NAMES.COMPILE]: (job) => processCompileJob(job),
   [QUEUE_NAMES.CLEANUP]: (job) => processCleanupJob(job),
 };
 
-export async function startWorkers(): Promise<Worker[]> {
+export function startWorkers(): Promise<Worker[]> {
   const connection = getRedisConnection();
   const concurrency = env.WORKER_CONCURRENCY;
 
@@ -61,7 +69,7 @@ export async function startWorkers(): Promise<Worker[]> {
   }
 
   logger.info({ queues: [...QUEUE_LIST], concurrency }, 'Workers started');
-  return workers;
+  return Promise.resolve(workers);
 }
 
 export function getWorkerMetrics(workers: Worker[]) {

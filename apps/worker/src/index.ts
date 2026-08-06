@@ -11,13 +11,21 @@ async function bootstrap(): Promise<void> {
   const shutdown = async (signal: string) => {
     logger.info({ signal }, 'Worker shutting down…');
     await Promise.all(workers.map((w) => w.close()));
-    await new Promise<void>((resolve) => healthServer.close(() => resolve()));
+    await new Promise<void>((resolve) => {
+      healthServer.close(() => {
+        resolve();
+      });
+    });
     await closeRedisConnection();
     process.exit(0);
   };
 
-  process.on('SIGTERM', () => void shutdown('SIGTERM'));
-  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => {
+    void shutdown('SIGTERM');
+  });
+  process.on('SIGINT', () => {
+    void shutdown('SIGINT');
+  });
 }
 
 bootstrap().catch((err: unknown) => {

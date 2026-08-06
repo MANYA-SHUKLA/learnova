@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
+import type { Worker } from 'bullmq';
 import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
-import type { Worker } from 'bullmq';
 import { getWorkerMetrics } from '../processors/index.js';
 
 /**
@@ -24,7 +24,7 @@ export function startWorkerHealthServer(workers: Worker[]): ReturnType<typeof cr
     res.writeHead(404).end();
   });
 
-  const port = env.WORKER_HEALTH_PORT ?? 4100;
+  const port = env.WORKER_HEALTH_PORT;
   server.listen(port, () => {
     logger.info({ port }, 'Worker health server listening');
   });

@@ -2,7 +2,7 @@ import type { Job } from 'bullmq';
 import type { AnalyticsJobPayload } from '../jobs/index.js';
 import { logger } from '../utils/logger.js';
 
-export async function processAnalyticsJob(
+export function processAnalyticsJob(
   job: Job<AnalyticsJobPayload>,
 ): Promise<void> {
   logger.info(
@@ -14,4 +14,5 @@ export async function processAnalyticsJob(
     },
     'Analytics job processed (scaffold)',
   );
+  return Promise.resolve();
 }

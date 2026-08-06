@@ -3,9 +3,7 @@ import { workerEnvSchema, parseEnv, type WorkerEnv } from '@learnova/config';
 let cached: WorkerEnv | null = null;
 
 export function getEnv(): WorkerEnv {
-  if (!cached) {
-    cached = parseEnv(workerEnvSchema);
-  }
+  cached ??= parseEnv(workerEnvSchema);
   return cached;
 }
 
