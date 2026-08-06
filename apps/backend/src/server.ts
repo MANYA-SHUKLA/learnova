@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { createApp } from './app.js';
 import { env } from './config/env.js';
+import { appConfig } from './config/app.js';
 import {
   connectMongo,
   connectRedis,
@@ -14,12 +15,28 @@ import { getMailer } from './mail/index.js';
 import { createSocketServer } from './socket/index.js';
 import { logger } from './utils/logger/index.js';
 
+/**
+ * Startup sequence:
+ * 1. Validate env (lazy via config)
+ * 2. Connect Mongo (retry)
+ * 3. Connect Redis (retry)
+ * 4. Init BullMQ queues + DLQ + QueueEvents
+ * 5. Init storage + mail adapters
+ * 6. Register event listeners
+ * 7. Create HTTP app + Socket.io
+ * 8. Listen
+ *
+ * Shutdown sequence:
+ * 1. Stop accepting connections
+ * 2. Close queues
+ * 3. Disconnect Mongo + Redis
+ * 4. Exit
+ */
 async function bootstrap(): Promise<void> {
   await connectMongo();
   await connectRedis();
   await initQueues();
 
-  // Eager-init infra adapters so misconfig fails at boot, not first request
   const storage = getStorage();
   const mailer = getMailer();
   registerInfrastructureListeners();
@@ -30,6 +47,8 @@ async function bootstrap(): Promise<void> {
     {
       storage: { driver: storage.driver, healthy: storageOk },
       mail: { driver: mailer.driver, healthy: mailOk },
+      version: appConfig.version,
+      commit: appConfig.commitSha,
     },
     'Infrastructure adapters ready',
   );

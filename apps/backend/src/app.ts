@@ -3,13 +3,16 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
-import { env } from './config/env.js';
+import { corsConfig } from './config/slices.js';
 import {
   createRateLimiter,
   errorHandler,
   httpLogger,
+  metricsMiddleware,
   notFoundMiddleware,
   requestIdMiddleware,
+  securityHeadersMiddleware,
+  timeoutMiddleware,
 } from './middlewares/index.js';
 import routes from './routes/index.js';
 
@@ -20,10 +23,13 @@ export function createApp(): Express {
   app.disable('x-powered-by');
 
   app.use(helmet());
+  app.use(securityHeadersMiddleware);
   app.use(
     cors({
-      origin: env.CORS_ORIGINS.split(',').map((o) => o.trim()),
-      credentials: true,
+      origin: corsConfig.origins,
+      credentials: corsConfig.credentials,
+      methods: corsConfig.methods,
+      allowedHeaders: corsConfig.allowedHeaders,
     }),
   );
   app.use(compression());
@@ -31,6 +37,8 @@ export function createApp(): Express {
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
   app.use(cookieParser());
   app.use(requestIdMiddleware);
+  app.use(timeoutMiddleware());
+  app.use(metricsMiddleware);
   app.use(httpLogger);
   app.use(createRateLimiter());
 

@@ -1,24 +1,25 @@
 import { Router } from 'express';
 import healthRoutes from './health.routes.js';
+import {
+  healthCheck,
+  livenessCheck,
+  readinessCheck,
+  versionCheck,
+} from '../../controllers/health/health.controller.js';
 
 /**
  * API v1 router.
- * Module routes (auth, lms, erp, …) mount here when implemented.
- * Auth routes are intentionally omitted — prepare only.
+ * Also exposes top-level aliases: /api/v1/live, /ready, /version
  */
 const v1Router = Router();
 
 v1Router.use('/health', healthRoutes);
+v1Router.get('/live', livenessCheck);
+v1Router.get('/ready', readinessCheck);
+v1Router.get('/version', versionCheck);
+v1Router.get('/healthz', healthCheck);
 
 // Future mounts (do not implement yet):
 // v1Router.use('/auth', authRoutes);
-// v1Router.use('/lms', lmsRoutes);
-// v1Router.use('/erp', erpRoutes);
-// v1Router.use('/examination', examinationRoutes);
-// v1Router.use('/coding', codingRoutes);
-// v1Router.use('/ide', ideRoutes);
-// v1Router.use('/ideation', ideationRoutes);
-// v1Router.use('/analytics', analyticsRoutes);
-// v1Router.use('/audit', auditRoutes);
 
 export default v1Router;

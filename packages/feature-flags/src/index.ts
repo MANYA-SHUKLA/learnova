@@ -1,6 +1,5 @@
 /**
  * Feature flags — env-driven defaults for foundation.
- * Replace with remote config (Redis/LaunchDarkly) later without changing call sites.
  */
 
 export const FEATURE_FLAGS = {
@@ -13,11 +12,12 @@ export const FEATURE_FLAGS = {
   ENABLE_ANALYTICS: 'ENABLE_ANALYTICS',
   ENABLE_AUDIT_LOGS: 'ENABLE_AUDIT_LOGS',
   ENABLE_WEBHOOKS: 'ENABLE_WEBHOOKS',
+  ENABLE_NOTIFICATIONS: 'ENABLE_NOTIFICATIONS',
+  ENABLE_PROJECTS: 'ENABLE_PROJECTS',
 } as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
 
-/** Safe defaults for local/dev — all optional capabilities off until wired */
 export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   ENABLE_AI: false,
   ENABLE_CHAT: false,
@@ -28,6 +28,8 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   ENABLE_ANALYTICS: true,
   ENABLE_AUDIT_LOGS: true,
   ENABLE_WEBHOOKS: false,
+  ENABLE_NOTIFICATIONS: false,
+  ENABLE_PROJECTS: false,
 };
 
 function parseBool(value: string | undefined, fallback: boolean): boolean {

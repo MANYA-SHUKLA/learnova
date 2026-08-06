@@ -1,15 +1,20 @@
 import rateLimit from 'express-rate-limit';
 import { RedisStore } from 'rate-limit-redis';
-import { env } from '../config/env.js';
+import { rateLimitConfig } from '../config/slices.js';
 import { getRedis } from '../database/redis/connection.js';
 import { RateLimitError } from '../utils/errors/index.js';
+import type { RequestHandler } from 'express';
 
 /**
  * Rate limiter — Redis-backed when available, memory fallback for boot.
  */
-export function createRateLimiter() {
-  const windowMs = env.RATE_LIMIT_WINDOW_MS;
-  const max = env.RATE_LIMIT_MAX;
+export function createRateLimiter(): RequestHandler {
+  if (!rateLimitConfig.enabled) {
+    return (_req, _res, next) => next();
+  }
+
+  const windowMs = rateLimitConfig.windowMs;
+  const max = rateLimitConfig.max;
 
   try {
     const redis = getRedis();

@@ -18,7 +18,7 @@ export function errorHandler(
 
   if (err instanceof AppError) {
     logger.warn(
-      { err, requestId, code: err.code },
+      { err, requestId, code: err.code, metadata: err.metadata },
       err.message,
     );
     sendError(res, {
@@ -26,6 +26,7 @@ export function errorHandler(
       code: err.code,
       message: err.message,
       details: err.details,
+      metadata: err.metadata,
       requestId,
     });
     return;

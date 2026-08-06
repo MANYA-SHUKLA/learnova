@@ -1,5 +1,3 @@
-/** Re-export app constants from @learnova/constants for backward compatibility */
-
 export {
   APP_NAME,
   APP_DESCRIPTION,
@@ -13,7 +11,13 @@ export {
   REDIS_KEYS,
   HTTP_HEADERS,
   QUEUE_NAMES,
+  QUEUE_LIST,
   CACHE_TTL,
+  HTTP_STATUS,
+  LIMITS,
+  COURSE_STATUS,
+  EXAM_STATUS,
+  PROJECT_STATUS,
 } from '@learnova/constants';
 
 export type { QueueName } from '@learnova/constants';

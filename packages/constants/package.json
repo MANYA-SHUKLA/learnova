@@ -34,6 +34,14 @@
     "./regex": {
       "types": "./dist/regex/index.d.ts",
       "import": "./dist/regex/index.js"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "import": "./dist/http/index.js"
+    },
+    "./limits": {
+      "types": "./dist/limits/index.d.ts",
+      "import": "./dist/limits/index.js"
     }
   },
   "scripts": {

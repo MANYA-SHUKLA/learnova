@@ -104,11 +104,13 @@ pnpm dev
 ## Documentation
 
 - [Architecture](docs/Architecture.md)
+- [Infrastructure](docs/Infrastructure.md)
 - [ADRs](docs/adr/README.md)
 - [Folder Structure](docs/FolderStructure.md)
 - [Coding Standards](docs/CodingStandards.md)
 - [Contribution Guide](docs/Contribution.md)
 - [Environment Variables](docs/Environment.md)
+- [Logger](docs/Logger.md) · [Queue](docs/Queue.md) · [Redis](docs/Redis.md) · [Monitoring](docs/Monitoring.md) · [Storage](docs/Storage.md) · [Mail](docs/Mail.md) · [Events](docs/Events.md)
 
 ## Roles (v1)
 

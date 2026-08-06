@@ -38,6 +38,30 @@
     "./encryption": {
       "types": "./dist/encryption/index.d.ts",
       "import": "./dist/encryption/index.js"
+    },
+    "./slug": {
+      "types": "./dist/slug/index.d.ts",
+      "import": "./dist/slug/index.js"
+    },
+    "./csv": {
+      "types": "./dist/csv/index.d.ts",
+      "import": "./dist/csv/index.js"
+    },
+    "./pdf": {
+      "types": "./dist/pdf/index.d.ts",
+      "import": "./dist/pdf/index.js"
+    },
+    "./retry": {
+      "types": "./dist/retry/index.d.ts",
+      "import": "./dist/retry/index.js"
+    },
+    "./async": {
+      "types": "./dist/async/index.d.ts",
+      "import": "./dist/async/index.js"
+    },
+    "./cursor": {
+      "types": "./dist/cursor/index.d.ts",
+      "import": "./dist/cursor/index.js"
     }
   },
   "scripts": {
