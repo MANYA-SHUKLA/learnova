@@ -1,22 +1,36 @@
 'use client';
 
 import { Button, Card, CardContent } from '@learnova/ui';
-import { Inbox } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
+import {
+  EmptyIllustration,
+  type IllustrationVariant,
+} from './illustrations';
 
 interface EmptyStateProps {
   title: string;
   description?: string;
   action?: ReactNode;
+  illustration?: IllustrationVariant;
 }
 
-export function EmptyState({ title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  title,
+  description,
+  action,
+  illustration = 'inbox',
+}: EmptyStateProps) {
   return (
-    <Card className="border-dashed">
-      <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-primary">
-          <Inbox className="size-6" />
-        </div>
+    <Card className="overflow-hidden border-dashed border-border/80">
+      <CardContent className="flex flex-col items-center justify-center gap-5 py-14 text-center sm:py-16">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35 }}
+        >
+          <EmptyIllustration variant={illustration} />
+        </motion.div>
         <div className="space-y-2">
           <p className="font-display text-lg font-semibold tracking-tight">{title}</p>
           {description ? (

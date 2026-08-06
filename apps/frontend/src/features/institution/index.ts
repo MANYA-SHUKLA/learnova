@@ -8,6 +8,7 @@ export {
   useMyInstitution,
   useInstitution,
   useInstitutions,
+  useCreateInstitutionMutation,
   useUpdateInstitutionMutation,
   useUpdateBrandingMutation,
   useInstitutionSettings,

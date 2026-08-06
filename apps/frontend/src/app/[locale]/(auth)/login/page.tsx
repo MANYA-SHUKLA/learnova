@@ -21,7 +21,7 @@ import {
   useLoginMutation,
 } from '@/features/auth';
 import { ApiClientError } from '@/lib/api/client';
-import { dashboardPathForRole } from '@/lib/auth/redirects';
+import { resolvePostLoginPath } from '@/lib/auth/redirects';
 import { isSaasModeEnabled } from '@/lib/saas';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
@@ -50,7 +50,7 @@ function LoginForm() {
           email: values.email,
           password: values.password,
         });
-        const destination = nextPath || dashboardPathForRole(session.user.role);
+        const destination = await resolvePostLoginPath(session.user.role, nextPath);
         router.replace(destination);
       } catch (err) {
         const message =
@@ -75,7 +75,7 @@ function LoginForm() {
               role="status"
               className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success"
             >
-              Institution registered. Verify your email, then sign in as Institution Admin.
+              Institution registered. Verify your email, then sign in to finish institution setup.
             </p>
           ) : null}
           {errors.root?.message ? (

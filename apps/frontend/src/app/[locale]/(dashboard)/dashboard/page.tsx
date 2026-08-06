@@ -49,6 +49,7 @@ import {
   useSemesters,
 } from '@/features/institution';
 import { Link } from '@/lib/i18n/routing';
+import { isInstitutionNotFound } from '@/lib/onboarding';
 
 const LIST_PARAMS = { limit: 50, page: 1 } as const;
 
@@ -188,20 +189,33 @@ export default function DashboardPage() {
     !institutionQuery.isError;
 
   if (institutionQuery.isError) {
+    const missing = isInstitutionNotFound(institutionQuery.error);
     return (
       <div className="space-y-6">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">Institution overview</p>
         </div>
-        <ErrorState
-          message={
-            institutionQuery.error instanceof Error
-              ? institutionQuery.error.message
-              : 'Unable to load institution dashboard.'
-          }
-          onRetry={() => void institutionQuery.refetch()}
-        />
+        {missing ? (
+          <EmptyState
+            title="Finish institution setup"
+            description="Complete your profile, branding, and contact details to unlock the workspace."
+            action={
+              <Button asChild>
+                <Link href={APP_ROUTES.INSTITUTION_SETUP}>Continue setup</Link>
+              </Button>
+            }
+          />
+        ) : (
+          <ErrorState
+            message={
+              institutionQuery.error instanceof Error
+                ? institutionQuery.error.message
+                : 'Unable to load institution dashboard.'
+            }
+            onRetry={() => void institutionQuery.refetch()}
+          />
+        )}
       </div>
     );
   }

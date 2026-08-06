@@ -37,6 +37,7 @@ import {
   useSchools,
 } from '@/features/institution';
 import { Link } from '@/lib/i18n/routing';
+import { isInstitutionNotFound } from '@/lib/onboarding';
 
 const MODULES = [
   {
@@ -127,6 +128,16 @@ export default function InstitutionDashboardPage() {
           <Skeleton className="h-40 rounded-2xl lg:col-span-2" />
           <Skeleton className="h-40 rounded-2xl" />
         </div>
+      ) : isError && isInstitutionNotFound(error) ? (
+        <EmptyState
+          title="Finish institution setup"
+          description="Add logo, contact details, and branding to unlock campuses, schools, and programs."
+          action={
+            <Button asChild>
+              <Link href={APP_ROUTES.INSTITUTION_SETUP}>Continue setup</Link>
+            </Button>
+          }
+        />
       ) : isError ? (
         <ErrorState
           message={error instanceof Error ? error.message : 'Failed to load institution.'}
@@ -134,11 +145,11 @@ export default function InstitutionDashboardPage() {
         />
       ) : !institution ? (
         <EmptyState
-          title="No institution linked"
-          description="Create your institution profile to unlock campuses, schools, and programs."
+          title="Finish institution setup"
+          description="Add logo, contact details, and branding to unlock campuses, schools, and programs."
           action={
             <Button asChild>
-              <Link href={APP_ROUTES.INSTITUTION_PROFILE}>Set up institution</Link>
+              <Link href={APP_ROUTES.INSTITUTION_SETUP}>Continue setup</Link>
             </Button>
           }
         />

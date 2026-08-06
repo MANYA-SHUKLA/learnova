@@ -54,6 +54,7 @@ export const APP_ROUTES = {
   CONTACT: '/contact',
   FEATURES: '/features',
   INSTITUTION: '/institution',
+  INSTITUTION_SETUP: '/institution/setup',
   INSTITUTION_PROFILE: '/institution/profile',
   INSTITUTION_CAMPUSES: '/institution/campuses',
   INSTITUTION_SCHOOLS: '/institution/schools',

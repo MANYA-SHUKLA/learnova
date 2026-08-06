@@ -13,6 +13,7 @@ import type {
   Section,
   Semester,
 } from '@learnova/types';
+import { ApiClientError } from '@/lib/api/client';
 import { institutionApi } from '../services/institution-api';
 import type {
   AcademicCalendarInput,
@@ -61,6 +62,31 @@ export function useMyInstitution(enabled = true) {
     queryFn: () => institutionApi.getMe(),
     enabled,
     staleTime: 60_000,
+    retry: (count, error) => {
+      if (error instanceof ApiClientError && error.status === 404) return false;
+      return count < 2;
+    },
+  });
+}
+
+export function useCreateInstitutionMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (
+      body: InstitutionUpdateInput & {
+        name: string;
+        shortName: string;
+        slug: string;
+        code: string;
+        email: string;
+        country: string;
+      },
+    ) => institutionApi.create(body),
+    onSuccess: (data) => {
+      queryClient.setQueryData(institutionKeys.me, data);
+      queryClient.setQueryData(institutionKeys.detail(data.id), data);
+      void queryClient.invalidateQueries({ queryKey: institutionKeys.all });
+    },
   });
 }
 

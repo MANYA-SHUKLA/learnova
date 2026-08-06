@@ -24,18 +24,6 @@ import { ApiClientError } from '@/lib/api/client';
 import { isSaasModeEnabled } from '@/lib/saas';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
-const TIMEZONES = [
-  'Asia/Kolkata',
-  'UTC',
-  'America/New_York',
-  'America/Los_Angeles',
-  'Europe/London',
-  'Europe/Berlin',
-  'Asia/Dubai',
-  'Asia/Singapore',
-  'Australia/Sydney',
-] as const;
-
 export default function RegisterInstitutionPage() {
   const router = useRouter();
   const saasMode = isSaasModeEnabled();
@@ -50,14 +38,9 @@ export default function RegisterInstitutionPage() {
     resolver: zodResolver(registerInstitutionFormSchema),
     defaultValues: {
       institutionName: '',
-      institutionCode: '',
-      institutionEmail: '',
       adminFirstName: '',
       adminLastName: '',
       adminEmail: '',
-      phone: '',
-      country: 'India',
-      timezone: 'Asia/Kolkata',
       password: '',
       confirmPassword: '',
       acceptTerms: false,
@@ -95,21 +78,6 @@ export default function RegisterInstitutionPage() {
           firstName: values.adminFirstName,
           lastName: values.adminLastName,
         });
-
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem(
-            'learnova_onboarding_profile',
-            JSON.stringify({
-              code: values.institutionCode,
-              email: values.institutionEmail,
-              phone: values.phone,
-              country: values.country,
-              timezone: values.timezone,
-              name: values.institutionName,
-            }),
-          );
-        }
-
         router.replace('/login?registered=1');
       } catch (err) {
         const message =
@@ -145,7 +113,7 @@ export default function RegisterInstitutionPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div className="mx-auto w-full max-w-lg">
       <div className="mb-6 text-center">
         <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <Building2 className="size-6" />
@@ -154,20 +122,20 @@ export default function RegisterInstitutionPage() {
           Register your institution
         </h1>
         <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-          Create the Institution Admin account. Students and faculty are invited later by your
-          administrators — there is no public signup.
+          Create the Institution Admin account. After email verification, sign in to finish setup —
+          logo, contact details, and branding.
         </p>
       </div>
 
       <Card className="border-border/80 shadow-soft-lg">
         <CardHeader>
-          <CardTitle className="text-lg">Institution onboarding</CardTitle>
+          <CardTitle className="text-lg">Create admin account</CardTitle>
           <CardDescription>
-            After registration, verify email and sign in to finish your institution profile.
+            Students and faculty are invited by your administrators — there is no public signup.
           </CardDescription>
         </CardHeader>
         <form onSubmit={onSubmit} noValidate>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             {errors.root?.message ? (
               <p
                 role="alert"
@@ -177,71 +145,29 @@ export default function RegisterInstitutionPage() {
               </p>
             ) : null}
 
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-primary">
-                Institution
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {field('institutionName', 'Institution name', {
-                  placeholder: 'Northbridge University',
-                })}
-                {field('institutionCode', 'Institution code', { placeholder: 'NBU' })}
-                {field('institutionEmail', 'Institution email', {
-                  type: 'email',
-                  placeholder: 'admin@campus.edu',
-                })}
-                {field('phone', 'Phone', { type: 'tel', placeholder: '+91…' })}
-                {field('country', 'Country')}
-                <div className="space-y-1.5">
-                  <label htmlFor="timezone" className="text-sm font-medium">
-                    Timezone
-                  </label>
-                  <select
-                    id="timezone"
-                    className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
-                    disabled={registerMutation.isPending}
-                    {...register('timezone')}
-                  >
-                    {TIMEZONES.map((tz) => (
-                      <option key={tz} value={tz}>
-                        {tz}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.timezone ? (
-                    <p className="text-xs text-danger">{errors.timezone.message}</p>
-                  ) : null}
-                </div>
-              </div>
+            {field('institutionName', 'Institution name', {
+              placeholder: 'Northbridge University',
+            })}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {field('adminFirstName', 'Admin first name', { autoComplete: 'given-name' })}
+              {field('adminLastName', 'Admin last name', { autoComplete: 'family-name' })}
             </div>
-
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-primary">
-                Institution admin
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {field('adminFirstName', 'Admin first name', { autoComplete: 'given-name' })}
-                {field('adminLastName', 'Admin last name', { autoComplete: 'family-name' })}
-                <div className="sm:col-span-2">
-                  {field('adminEmail', 'Admin email', {
-                    type: 'email',
-                    autoComplete: 'email',
-                    placeholder: 'shuklamanya99@gmail.com',
-                  })}
-                </div>
-                {field('password', 'Password', {
-                  type: 'password',
-                  autoComplete: 'new-password',
-                })}
-                {field('confirmPassword', 'Confirm password', {
-                  type: 'password',
-                  autoComplete: 'new-password',
-                })}
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Password must be 12+ characters with upper, lower, number, and special character.
-              </p>
-            </div>
+            {field('adminEmail', 'Admin email', {
+              type: 'email',
+              autoComplete: 'email',
+              placeholder: 'shuklamanya99@gmail.com',
+            })}
+            {field('password', 'Password', {
+              type: 'password',
+              autoComplete: 'new-password',
+            })}
+            {field('confirmPassword', 'Confirm password', {
+              type: 'password',
+              autoComplete: 'new-password',
+            })}
+            <p className="text-xs text-muted-foreground">
+              Password must be 12+ characters with upper, lower, number, and special character.
+            </p>
 
             <label className="flex items-start gap-2 text-sm text-muted-foreground">
               <input
@@ -271,10 +197,10 @@ export default function RegisterInstitutionPage() {
               {registerMutation.isPending ? (
                 <>
                   <Spinner size="sm" />
-                  Creating institution…
+                  Creating account…
                 </>
               ) : (
-                'Create institution'
+                'Continue'
               )}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
