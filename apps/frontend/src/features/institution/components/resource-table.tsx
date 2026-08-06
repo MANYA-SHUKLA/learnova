@@ -42,7 +42,7 @@ export function ResourceTable<T extends { id: string }>({
 }: ResourceTableProps<T>) {
   if (isLoading) {
     return (
-      <div className="space-y-2 rounded-lg border border-border">
+      <div className="space-y-2 rounded-2xl border border-border">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex gap-3 border-b border-border px-4 py-3 last:border-b-0">
             <Skeleton className="h-4 w-1/4" />
@@ -64,9 +64,9 @@ export function ResourceTable<T extends { id: string }>({
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
+    <div className="overflow-x-auto rounded-2xl border border-border shadow-soft-sm">
       <table className="w-full min-w-[640px] text-left text-sm">
-        <thead className="border-b border-border bg-muted/40">
+        <thead className="sticky top-0 z-10 border-b border-border bg-muted/60 backdrop-blur-sm">
           <tr>
             {columns.map((col) => (
               <th

@@ -1,30 +1,25 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
 
 interface PageHeaderProps {
   title: string;
   description?: string;
   actions?: ReactNode;
-  className?: string;
 }
 
-export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
+export function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
-    <div
-      className={cn(
-        'mb-8 flex flex-wrap items-end justify-between gap-4 print:mb-4',
-        className,
-      )}
-    >
-      <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div className="min-w-0 space-y-2">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">{title}</h1>
         {description ? (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            {description}
+          </p>
         ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2 print:hidden">{actions}</div> : null}
+      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
   );
 }
