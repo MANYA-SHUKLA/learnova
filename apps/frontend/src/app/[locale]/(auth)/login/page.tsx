@@ -23,7 +23,6 @@ import {
 } from '@/features/auth';
 import { ApiClientError } from '@/lib/api/client';
 import { resolvePostLoginPath } from '@/lib/auth/redirects';
-import { isSaasModeEnabled } from '@/lib/saas';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
 function LoginForm() {
@@ -32,7 +31,6 @@ function LoginForm() {
   const nextPath = searchParams.get('next');
   const registered = searchParams.get('registered') === '1';
   const loginMutation = useLoginMutation();
-  const saasMode = isSaasModeEnabled();
 
   const {
     register,
