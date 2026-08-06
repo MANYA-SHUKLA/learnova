@@ -47,6 +47,18 @@ export function useLoginMutation() {
   });
 }
 
+export function useRegisterInstitutionMutation() {
+  return useMutation({
+    mutationFn: (body: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+      institutionName: string;
+    }) => authApi.registerInstitution(body),
+  });
+}
+
 export function useLogoutMutation() {
   const queryClient = useQueryClient();
   const logoutLocal = useAuthStore((s) => s.logout);

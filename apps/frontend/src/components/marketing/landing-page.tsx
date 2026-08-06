@@ -22,6 +22,7 @@ import {
 import type { ReactNode } from 'react';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
+import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
@@ -158,6 +159,8 @@ function HeroVisual() {
 }
 
 function Hero() {
+  const saasMode = isSaasModeEnabled();
+
   return (
     <section className="relative overflow-hidden">
       <div
@@ -183,15 +186,25 @@ function Hero() {
             Learn. Build. Excel.
           </h1>
           <p className="mx-auto mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
-            The enterprise AI learning platform that unifies LMS, exams, coding labs, and analytics
-            for modern institutions.
+            The enterprise AI learning platform for institutions — LMS, exams, coding labs, and
+            analytics under one admin-controlled identity. Students and faculty are invited by your
+            campus, not by public signup.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Button asChild size="lg" className={ctaButtonClass}>
-              <Link href="/login">Get started</Link>
+              <Link href="/login">Institution Login</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-              <Link href="/about">Learn more</Link>
+            {saasMode ? (
+              <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
+                <Link href="/register-institution">Register Institution</Link>
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
+                <Link href="/contact">Request Demo</Link>
+              </Button>
+            )}
+            <Button asChild variant="ghost" size="lg">
+              <Link href="/features">Explore Platform</Link>
             </Button>
           </div>
         </motion.div>
@@ -787,7 +800,8 @@ const TIERS = [
     price: 'Free to explore',
     description: 'Evaluate core LMS and lab flows with a small cohort.',
     features: ['Up to 50 learners', 'LMS + Coding Labs', 'Community support'],
-    cta: 'Start free',
+    cta: 'Institution Login',
+    href: '/login',
     highlighted: false,
   },
   {
@@ -795,7 +809,8 @@ const TIERS = [
     price: 'Custom',
     description: 'Full academic stack for campuses and departments.',
     features: ['Unlimited programs', 'Exams + Analytics', 'SSO-ready roles', 'Priority support'],
-    cta: 'Talk to us',
+    cta: 'Register Institution',
+    href: '/register-institution',
     highlighted: true,
   },
   {
@@ -803,7 +818,8 @@ const TIERS = [
     price: 'Custom',
     description: 'Multi-campus governance, audit, and dedicated success.',
     features: ['Multi-tenant control', 'Advanced audit', 'SLA & onboarding', 'Custom integrations'],
-    cta: 'Contact sales',
+    cta: 'Request Demo',
+    href: '/contact',
     highlighted: false,
   },
 ] as const;
@@ -844,7 +860,7 @@ function Pricing() {
                 className="mt-8 w-full"
                 variant={tier.highlighted ? 'default' : 'outline'}
               >
-                <Link href="/login">{tier.cta}</Link>
+                <Link href={tier.href}>{tier.cta}</Link>
               </Button>
             </div>
           ))}
@@ -857,6 +873,8 @@ function Pricing() {
 /* ─── Final CTA ─── */
 
 function FinalCta() {
+  const saasMode = isSaasModeEnabled();
+
   return (
     <MotionSection className="w-full pb-0 pt-8 sm:pb-28 sm:pt-10">
       <div className="w-full sm:px-[clamp(1rem,2.5vw,2.5rem)] xl:px-[clamp(1.5rem,3vw,3.5rem)]">
@@ -870,15 +888,22 @@ function FinalCta() {
               Ready to modernize learning?
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl">
-              Bring LMS, exams, coding labs, and AI into one premium experience for your institution.
+              Register your institution, invite faculty and students, and run academics from one
+              premium workspace.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href="/login">Get started</Link>
+                <Link href="/login">Institution Login</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                <Link href="/about">About Learnova</Link>
-              </Button>
+              {saasMode ? (
+                <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
+                  <Link href="/register-institution">Register Institution</Link>
+                </Button>
+              ) : (
+                <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
+                  <Link href="/contact">Request Demo</Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>

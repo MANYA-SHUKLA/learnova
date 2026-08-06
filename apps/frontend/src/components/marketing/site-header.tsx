@@ -5,18 +5,20 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { siteContainer } from '@/lib/layout';
+import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
 import { LogoMark } from './logo-mark';
 
 const NAV_LINKS = [
-  { href: '/#product', label: 'Product' },
-  { href: '/#features', label: 'Features' },
+  { href: '/features', label: 'Features' },
   { href: '/#pricing', label: 'Pricing' },
   { href: '/#faq', label: 'FAQ' },
+  { href: '/contact', label: 'Contact' },
 ] as const;
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const saasMode = isSaasModeEnabled();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-[var(--glass-bg)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--glass-bg)]">
@@ -44,11 +46,17 @@ export function SiteHeader() {
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <ThemeToggle />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-            <Link href="/login">Login</Link>
+            <Link href="/login">Institution Login</Link>
           </Button>
-          <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link href="/login">Get started</Link>
-          </Button>
+          {saasMode ? (
+            <Button asChild size="sm" className="hidden sm:inline-flex">
+              <Link href="/register-institution">Register Institution</Link>
+            </Button>
+          ) : (
+            <Button asChild size="sm" className="hidden sm:inline-flex">
+              <Link href="/contact">Request Demo</Link>
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -89,17 +97,17 @@ export function SiteHeader() {
                     setOpen(false);
                   }}
                 >
-                  Login
+                  Institution Login
                 </Link>
               </Button>
               <Button asChild className="w-full">
                 <Link
-                  href="/login"
+                  href={saasMode ? '/register-institution' : '/contact'}
                   onClick={() => {
                     setOpen(false);
                   }}
                 >
-                  Get started
+                  {saasMode ? 'Register Institution' : 'Request Demo'}
                 </Link>
               </Button>
             </div>

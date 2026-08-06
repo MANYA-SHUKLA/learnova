@@ -31,6 +31,7 @@ const PROTECTED_PATH_PREFIXES = [
 const AUTH_PATH_PREFIXES = [
   '/login',
   '/register',
+  '/register-institution',
   '/forgot-password',
   '/reset-password',
   '/verify-email',
@@ -69,7 +70,7 @@ export default function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    return NextResponse.redirect(new URL(`/${locale}/institution/dashboard`, request.url));
   }
 
   const response = intlMiddleware(request);

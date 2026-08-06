@@ -23,11 +23,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       </header>
       <main
         className={cn(
-          'relative z-10 flex w-full min-w-0 flex-1 items-center justify-center pb-16 pt-4',
+          'relative z-10 flex w-full min-w-0 flex-1 items-start justify-center pb-16 pt-4 sm:items-center',
           siteGutter,
         )}
       >
-        <div className="w-full min-w-0 max-w-md">{children}</div>
+        <div className="w-full min-w-0">{children}</div>
       </main>
     </div>
   );

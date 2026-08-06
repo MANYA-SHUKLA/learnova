@@ -15,19 +15,23 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { Suspense, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
-import { ApiClientError } from '@/lib/api/client';
-import { Link, useRouter } from '@/lib/i18n/routing';
 import {
   loginSchema,
   type LoginFormValues,
   useLoginMutation,
 } from '@/features/auth';
+import { ApiClientError } from '@/lib/api/client';
+import { dashboardPathForRole } from '@/lib/auth/redirects';
+import { isSaasModeEnabled } from '@/lib/saas';
+import { Link, useRouter } from '@/lib/i18n/routing';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get('next') ?? '/dashboard';
+  const nextPath = searchParams.get('next');
+  const registered = searchParams.get('registered') === '1';
   const loginMutation = useLoginMutation();
+  const saasMode = isSaasModeEnabled();
 
   const {
     register,
@@ -36,14 +40,18 @@ function LoginForm() {
     setError,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', password: '', rememberMe: true },
   });
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     void handleSubmit(async (values) => {
       try {
-        await loginMutation.mutateAsync(values);
-        router.replace(nextPath);
+        const session = await loginMutation.mutateAsync({
+          email: values.email,
+          password: values.password,
+        });
+        const destination = nextPath || dashboardPathForRole(session.user.role);
+        router.replace(destination);
       } catch (err) {
         const message =
           err instanceof ApiClientError ? err.message : 'Unable to sign in. Try again.';
@@ -53,13 +61,23 @@ function LoginForm() {
   };
 
   return (
-    <Card className="w-full border-border/80 shadow-glow">
+    <Card className="w-full border-border/80 shadow-soft-lg">
       <CardHeader className="space-y-1 pb-4">
-        <CardTitle className="text-lg">Sign in</CardTitle>
-        <CardDescription>Use your institution admin or faculty credentials.</CardDescription>
+        <CardTitle className="text-lg">Institution login</CardTitle>
+        <CardDescription>
+          Sign in with the credentials issued by your institution.
+        </CardDescription>
       </CardHeader>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className="space-y-4">
+          {registered ? (
+            <p
+              role="status"
+              className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success"
+            >
+              Institution registered. Verify your email, then sign in as Institution Admin.
+            </p>
+          ) : null}
           {errors.root?.message ? (
             <p
               role="alert"
@@ -93,7 +111,7 @@ function LoginForm() {
               </label>
               <Link
                 href="/forgot-password"
-                className="text-xs text-muted-foreground hover:text-foreground"
+                className="text-xs font-medium text-primary hover:underline"
               >
                 Forgot password?
               </Link>
@@ -109,8 +127,18 @@ function LoginForm() {
               <p className="text-xs text-danger">{errors.password.message}</p>
             ) : null}
           </div>
+
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="size-4 rounded border-input"
+              disabled={loginMutation.isPending}
+              {...register('rememberMe')}
+            />
+            Remember me
+          </label>
         </CardContent>
-        <CardFooter className="flex flex-col gap-3">
+        <CardFooter className="flex flex-col gap-4">
           <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
             {loginMutation.isPending ? (
               <>
@@ -118,9 +146,29 @@ function LoginForm() {
                 Signing in…
               </>
             ) : (
-              'Sign in'
+              'Login'
             )}
           </Button>
+
+          <div className="w-full space-y-3 border-t border-border pt-4 text-center text-sm text-muted-foreground">
+            <p>
+              Need an account?{' '}
+              <span className="font-medium text-foreground">
+                Contact your Institution Administrator
+              </span>
+            </p>
+            {saasMode ? (
+              <p>
+                Setting up a campus?{' '}
+                <Link
+                  href="/register-institution"
+                  className="font-semibold text-primary underline-offset-2 hover:underline"
+                >
+                  Register Institution
+                </Link>
+              </p>
+            ) : null}
+          </div>
         </CardFooter>
       </form>
     </Card>
@@ -139,11 +187,16 @@ function LoginFallback() {
 
 export default function LoginPage() {
   return (
-    <div className="w-full max-w-md">
+    <div className="mx-auto w-full max-w-md">
       <div className="mb-6 text-center">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Welcome back</h1>
+        <p className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-primary">
+          Learnova
+        </p>
+        <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+          Welcome back
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign in to your institution workspace.
+          Learn. Build. Excel. — Institution workspace access.
         </p>
       </div>
       <Suspense fallback={<LoginFallback />}>

@@ -14,6 +14,20 @@ export const authApi = {
     return apiClient.post<AuthSessionResponse>(`${BASE}/login`, body, { auth: false });
   },
 
+  registerInstitution(body: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    institutionName: string;
+  }) {
+    return apiClient.post<{ user: AuthSessionResponse['user']; message: string }>(
+      `${BASE}/register`,
+      body,
+      { auth: false },
+    );
+  },
+
   logout() {
     return apiClient.post<MessageResponse>(`${BASE}/logout`);
   },

@@ -19,6 +19,8 @@ import {
   Network,
   CalendarRange,
   Grid3X3,
+  Users,
+  UserRound,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useEffect } from 'react';
@@ -35,6 +37,7 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   exact?: boolean;
+  comingSoon?: boolean;
 }
 
 interface NavGroup {
@@ -44,10 +47,15 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Overview',
+    label: 'Institution',
     items: [
-      { href: APP_ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard, exact: true },
+      { href: APP_ROUTES.INSTITUTION_DASHBOARD, label: 'Dashboard', icon: LayoutDashboard, exact: true },
       { href: APP_ROUTES.INSTITUTION, label: 'Institution', icon: Building2, exact: true },
+      { href: APP_ROUTES.INSTITUTION_DEPARTMENTS, label: 'Departments', icon: Network },
+      { href: APP_ROUTES.INSTITUTION_PROGRAMS, label: 'Programs', icon: BookOpen },
+      { href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, label: 'Academic Years', icon: CalendarRange },
+      { href: APP_ROUTES.INSTITUTION_SEMESTERS, label: 'Semesters', icon: Layers3 },
+      { href: APP_ROUTES.INSTITUTION_SETTINGS, label: 'Settings', icon: Settings },
     ],
   },
   {
@@ -55,21 +63,22 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: APP_ROUTES.INSTITUTION_CAMPUSES, label: 'Campuses', icon: School },
       { href: APP_ROUTES.INSTITUTION_SCHOOLS, label: 'Schools', icon: GraduationCap },
-      { href: APP_ROUTES.INSTITUTION_DEPARTMENTS, label: 'Departments', icon: Network },
-      { href: APP_ROUTES.INSTITUTION_PROGRAMS, label: 'Programs', icon: BookOpen },
-      { href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, label: 'Academic Years', icon: CalendarRange },
-      { href: APP_ROUTES.INSTITUTION_SEMESTERS, label: 'Semesters', icon: Layers3 },
       { href: APP_ROUTES.INSTITUTION_SECTIONS, label: 'Sections', icon: Grid3X3 },
       { href: APP_ROUTES.INSTITUTION_BATCHES, label: 'Batches', icon: UsersRound },
       { href: APP_ROUTES.INSTITUTION_CALENDAR, label: 'Calendar', icon: CalendarDays },
     ],
   },
   {
-    label: 'System',
+    label: 'People & learning',
     items: [
-      { href: APP_ROUTES.INSTITUTION_SETTINGS, label: 'Settings', icon: Settings },
-      { href: SESSIONS_ROUTE, label: 'Sessions', icon: Shield },
+      { href: '#', label: 'Faculty', icon: UserRound, comingSoon: true },
+      { href: '#', label: 'Students', icon: Users, comingSoon: true },
+      { href: '#', label: 'Courses', icon: BookOpen, comingSoon: true },
     ],
+  },
+  {
+    label: 'System',
+    items: [{ href: SESSIONS_ROUTE, label: 'Sessions', icon: Shield }],
   },
 ];
 
@@ -110,8 +119,31 @@ function SidebarNav({
           )}
           <ul className="space-y-1">
             {group.items.map((item) => {
-              const active = isNavActive(pathname, item.href, item.exact);
+              const active = !item.comingSoon && isNavActive(pathname, item.href, item.exact);
               const Icon = item.icon;
+              if (item.comingSoon) {
+                return (
+                  <li key={item.label}>
+                    <span
+                      title={collapsed ? `${item.label} (coming soon)` : undefined}
+                      className={cn(
+                        'flex cursor-not-allowed items-center gap-3 rounded-xl px-2.5 py-2 text-sm text-muted-foreground/70',
+                        collapsed && 'justify-center px-2',
+                      )}
+                    >
+                      <Icon className="size-4 shrink-0 opacity-60" />
+                      {!collapsed ? (
+                        <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                          <span className="truncate">{item.label}</span>
+                          <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                            Soon
+                          </span>
+                        </span>
+                      ) : null}
+                    </span>
+                  </li>
+                );
+              }
               return (
                 <li key={item.href}>
                   <Link

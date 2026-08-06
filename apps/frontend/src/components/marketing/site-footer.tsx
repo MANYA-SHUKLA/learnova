@@ -12,9 +12,9 @@ const PRODUCT_LINKS = [
 
 const COMPANY_LINKS = [
   { href: '/about', label: 'About' },
-  { href: '/#pricing', label: 'Pricing' },
-  { href: '/#faq', label: 'FAQ' },
-  { href: '/login', label: 'Sign in' },
+  { href: '/features', label: 'Features' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/login', label: 'Institution Login' },
 ] as const;
 
 const LEGAL_LINKS = [
