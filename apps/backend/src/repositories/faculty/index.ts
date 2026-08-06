@@ -270,6 +270,66 @@ export class FacultyRepository {
     return res.modifiedCount;
   }
 
+  async bulkAssignAcademic(
+    institutionId: string,
+    ids: string[],
+    input: {
+      academicYearId?: string | null;
+      semesterId?: string | null;
+      courseIds?: string[];
+      mode?: 'replace' | 'append';
+    },
+  ): Promise<number> {
+    const $set: Record<string, unknown> = {};
+    if (input.academicYearId !== undefined) {
+      $set.academicYearId = input.academicYearId
+        ? toObjectId(input.academicYearId)
+        : null;
+    }
+    if (input.semesterId !== undefined) {
+      $set.semesterId = input.semesterId ? toObjectId(input.semesterId) : null;
+    }
+
+    if (input.courseIds) {
+      const courseOids = input.courseIds.map(toObjectId);
+      if ((input.mode ?? 'append') === 'replace') {
+        $set.courseIds = courseOids;
+        const res = await FacultyModel.updateMany(
+          {
+            _id: { $in: ids },
+            institutionId: toObjectId(institutionId),
+            deletedAt: null,
+          },
+          { $set },
+        ).exec();
+        return res.modifiedCount;
+      }
+      const res = await FacultyModel.updateMany(
+        {
+          _id: { $in: ids },
+          institutionId: toObjectId(institutionId),
+          deletedAt: null,
+        },
+        {
+          ...(Object.keys($set).length > 0 ? { $set } : {}),
+          $addToSet: { courseIds: { $each: courseOids } },
+        },
+      ).exec();
+      return res.modifiedCount;
+    }
+
+    if (Object.keys($set).length === 0) return 0;
+    const res = await FacultyModel.updateMany(
+      {
+        _id: { $in: ids },
+        institutionId: toObjectId(institutionId),
+        deletedAt: null,
+      },
+      { $set },
+    ).exec();
+    return res.modifiedCount;
+  }
+
   async stats(institutionId: string) {
     const oid = toObjectId(institutionId);
     const startOfMonth = new Date();
@@ -288,6 +348,7 @@ export class FacultyRepository {
       byDepartment,
       byEmploymentType,
       byExperience,
+      recentJoinees,
     ] = await Promise.all([
       FacultyModel.countDocuments({ institutionId: oid, deletedAt: null }),
       FacultyModel.countDocuments({ institutionId: oid, deletedAt: null, status: 'active' }),
@@ -324,6 +385,11 @@ export class FacultyRepository {
           },
         },
       ]),
+      FacultyModel.find({ institutionId: oid, deletedAt: null })
+        .sort({ joiningDate: -1, createdAt: -1 })
+        .limit(6)
+        .select('fullName employeeId joiningDate designation customDesignation')
+        .exec(),
     ]);
 
     return {
@@ -339,6 +405,7 @@ export class FacultyRepository {
       byDepartment,
       byEmploymentType,
       byExperience,
+      recentJoinees,
     };
   }
 

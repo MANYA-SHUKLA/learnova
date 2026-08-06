@@ -90,6 +90,9 @@ const facultyBaseFields = {
   schoolId: objectIdField.optional().nullable(),
   departmentId: objectIdField.optional().nullable(),
   programIds: z.array(objectIdField).max(50).optional().default([]),
+  courseIds: z.array(objectIdField).max(50).optional().default([]),
+  academicYearId: objectIdField.optional().nullable(),
+  semesterId: objectIdField.optional().nullable(),
   firstName: z.string().trim().min(1).max(80),
   middleName: optionalString(80),
   lastName: z.string().trim().min(1).max(80),
@@ -195,6 +198,15 @@ export const facultyBulkAssignProgramSchema = z.object({
   mode: z.enum(['replace', 'append']).optional().default('append'),
 });
 
+export const facultyBulkAssignAcademicSchema = z.object({
+  ids: z.array(objectIdField).min(1).max(500),
+  academicYearId: objectIdField.optional().nullable(),
+  semesterId: objectIdField.optional().nullable(),
+  /** Course IDs are accepted as placeholders until the Course module exists */
+  courseIds: z.array(objectIdField).max(50).optional(),
+  mode: z.enum(['replace', 'append']).optional().default('append'),
+});
+
 export const facultyImportConfirmSchema = z.object({
   rows: z.array(z.record(z.string(), z.string())).min(1).max(2000),
   dryRun: z.boolean().optional().default(false),
@@ -227,6 +239,7 @@ export type FacultyBulkIdsInput = z.infer<typeof facultyBulkIdsSchema>;
 export type FacultyBulkStatusInput = z.infer<typeof facultyBulkStatusSchema>;
 export type FacultyBulkAssignDepartmentInput = z.infer<typeof facultyBulkAssignDepartmentSchema>;
 export type FacultyBulkAssignProgramInput = z.infer<typeof facultyBulkAssignProgramSchema>;
+export type FacultyBulkAssignAcademicInput = z.infer<typeof facultyBulkAssignAcademicSchema>;
 export type FacultyImportConfirmInput = z.infer<typeof facultyImportConfirmSchema>;
 export type FacultyExportQuery = z.infer<typeof facultyExportQuerySchema>;
 export type FacultyPhotoUploadInput = z.infer<typeof facultyPhotoUploadSchema>;

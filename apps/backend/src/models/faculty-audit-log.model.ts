@@ -8,7 +8,9 @@ const facultyAuditEvents = [
   'faculty.deleted',
   'faculty.import.started',
   'faculty.import.completed',
+  'faculty.imported',
   'faculty.export',
+  'faculty.exported',
   'faculty.profile.updated',
   'faculty.status.changed',
 ] as const;

@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import type {
   CreateFacultyInput,
+  FacultyBulkAssignAcademicInput,
   FacultyBulkAssignDepartmentInput,
   FacultyBulkAssignProgramInput,
   FacultyBulkIdsInput,
@@ -131,6 +132,24 @@ export async function restoreFaculty(req: Request, res: Response, next: NextFunc
   }
 }
 
+export async function activateFaculty(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await facultyService.activate(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deactivateFaculty(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await facultyService.deactivate(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function listFacultyAudit(req: Request, res: Response, next: NextFunction) {
   try {
     const facultyId = typeof req.query.facultyId === 'string' ? req.query.facultyId : undefined;
@@ -196,6 +215,18 @@ export async function bulkAssignProgram(req: Request, res: Response, next: NextF
   try {
     const data = await facultyService.bulkAssignProgram(
       req.body as FacultyBulkAssignProgramInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function bulkAssignAcademic(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await facultyService.bulkAssignAcademic(
+      req.body as FacultyBulkAssignAcademicInput,
       actorFrom(req),
     );
     sendSuccess(res, data, { requestId: req.requestId });

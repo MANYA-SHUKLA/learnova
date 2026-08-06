@@ -60,6 +60,10 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
     experienceYears: String(initial?.experienceYears ?? 0),
     specialization: initial?.specialization ?? '',
     researchAreas: (initial?.researchAreas ?? []).join(', '),
+    programIds: (initial?.programIds ?? []).join(', '),
+    courseIds: (initial?.courseIds ?? []).join(', '),
+    academicYearId: initial?.academicYearId ?? '',
+    semesterId: initial?.semesterId ?? '',
     officeRoom: initial?.officeRoom ?? '',
     officeHours: initial?.officeHours ?? '',
     bio: initial?.bio ?? '',
@@ -68,6 +72,10 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
     country: initial?.country ?? '',
     city: initial?.city ?? '',
     address: initial?.address ?? '',
+    alternatePhone: initial?.alternatePhone ?? '',
+    gender: initial?.gender ?? '',
+    dateOfBirth: initial?.dateOfBirth?.slice(0, 10) ?? '',
+    joiningDate: initial?.joiningDate?.slice(0, 10) ?? '',
     emergencyContactName: initial?.emergencyContactName ?? '',
     emergencyContactPhone: initial?.emergencyContactPhone ?? '',
   });
@@ -99,6 +107,16 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
+      programIds: form.programIds
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      courseIds: form.courseIds
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      academicYearId: form.academicYearId.trim() || null,
+      semesterId: form.semesterId.trim() || null,
       officeRoom: form.officeRoom.trim() || null,
       officeHours: form.officeHours.trim() || null,
       bio: form.bio.trim() || null,
@@ -107,6 +125,10 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
       country: form.country.trim() || null,
       city: form.city.trim() || null,
       address: form.address.trim() || null,
+      alternatePhone: form.alternatePhone.trim() || null,
+      gender: (form.gender || null) as FacultyCreateBody['gender'],
+      dateOfBirth: form.dateOfBirth || null,
+      joiningDate: form.joiningDate || null,
       emergencyContactName: form.emergencyContactName.trim() || null,
       emergencyContactPhone: form.emergencyContactPhone.trim() || null,
     };
@@ -163,10 +185,15 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
             {field('lastName', 'Last name')}
             {field('email', 'Email', { type: 'email' })}
             {field('phone', 'Phone')}
+            {field('alternatePhone', 'Alternate phone')}
+            {field('dateOfBirth', 'Date of birth', { type: 'date' })}
+            {field('joiningDate', 'Joining date', { type: 'date' })}
             {field('experienceYears', 'Experience (years)', { type: 'number' })}
             {field('departmentId', 'Department ID')}
             {field('schoolId', 'School ID')}
             {field('campusId', 'Campus ID')}
+            {field('academicYearId', 'Academic year ID')}
+            {field('semesterId', 'Semester ID')}
             {field('specialization', 'Specialization')}
             {field('highestQualification', 'Highest qualification')}
             {field('officeRoom', 'Office room')}
@@ -178,6 +205,20 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
+            <SelectField
+              id="gender"
+              label="Gender"
+              value={form.gender || ''}
+              disabled={pending}
+              onChange={(v) => set('gender', v)}
+              options={[
+                { value: '', label: 'Not set' },
+                { value: 'male', label: 'Male' },
+                { value: 'female', label: 'Female' },
+                { value: 'other', label: 'Other' },
+                { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+              ]}
+            />
             <SelectField
               id="designation"
               label="Designation"
@@ -211,6 +252,8 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
           </div>
 
           {form.designation === 'custom' ? field('customDesignation', 'Custom designation') : null}
+          {field('programIds', 'Program IDs (comma separated)')}
+          {field('courseIds', 'Course IDs — placeholder until Courses module')}
           {field('researchAreas', 'Research areas (comma separated)')}
           <div className="space-y-1.5">
             <label className="text-sm font-medium" htmlFor="bio">

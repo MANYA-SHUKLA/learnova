@@ -9,6 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Input,
   Skeleton,
   Spinner,
 } from '@learnova/ui';
@@ -16,25 +17,47 @@ import { ArrowLeft, Pencil } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { authApi, useSessions } from '@/features/auth';
 import { ErrorState } from '@/features/institution';
 import {
   formatDesignation,
   formatEmploymentType,
   formatFacultyStatus,
+  useActivateFacultyMutation,
+  useDeactivateFacultyMutation,
   useFaculty,
   useFacultyAudit,
   useFacultyPhotoUploadMutation,
 } from '@/features/faculty';
+import { ApiClientError } from '@/lib/api/client';
 import { Link } from '@/lib/i18n/routing';
+import { useAuth } from '@/providers/auth-provider';
 
 export default function FacultyDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+  const { user } = useAuth();
   const query = useFaculty(id);
   const auditQuery = useFacultyAudit(id);
   const photoMutation = useFacultyPhotoUploadMutation();
+  const activateMutation = useActivateFacultyMutation();
+  const deactivateMutation = useDeactivateFacultyMutation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+  });
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordPending, setPasswordPending] = useState(false);
+
+  const isOwnProfile =
+    Boolean(query.data?.email) &&
+    Boolean(user?.email) &&
+    query.data!.email.toLowerCase() === user!.email.toLowerCase();
+
+  const sessionsQuery = useSessions(isOwnProfile);
 
   if (query.isLoading) {
     return (
@@ -126,14 +149,35 @@ export default function FacultyDetailPage() {
               </div>
             </div>
           </div>
-          <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
-            <Button asChild>
-              <Link href={`${APP_ROUTES.INSTITUTION_FACULTY}/${faculty.id}/edit`}>
-                <Pencil className="size-4" />
-                Edit
-              </Link>
-            </Button>
-          </PermissionGate>
+          <div className="flex flex-wrap gap-2">
+            <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
+              <Button asChild>
+                <Link href={`${APP_ROUTES.INSTITUTION_FACULTY}/${faculty.id}/edit`}>
+                  <Pencil className="size-4" />
+                  Edit
+                </Link>
+              </Button>
+              {faculty.status === 'active' ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={deactivateMutation.isPending}
+                  onClick={() => void deactivateMutation.mutateAsync(faculty.id)}
+                >
+                  Deactivate
+                </Button>
+              ) : faculty.deletedAt ? null : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={activateMutation.isPending}
+                  onClick={() => void activateMutation.mutateAsync(faculty.id)}
+                >
+                  Activate
+                </Button>
+              )}
+            </PermissionGate>
+          </div>
         </div>
 
         <Card className="overflow-hidden rounded-2xl border-border/80 bg-hero">
@@ -188,10 +232,14 @@ export default function FacultyDetailPage() {
 
         {section('Basic information', [
           ['Full name', faculty.fullName],
+          ['Employee ID', faculty.employeeId],
+          ['Faculty code', faculty.facultyCode],
           ['Email', faculty.email],
           ['Alternate email', faculty.alternateEmail],
           ['Phone', faculty.phone],
+          ['Alternate phone', faculty.alternatePhone],
           ['Gender', faculty.gender],
+          ['Date of birth', faculty.dateOfBirth?.slice(0, 10)],
           ['Nationality', faculty.nationality],
         ])}
 
@@ -208,9 +256,25 @@ export default function FacultyDetailPage() {
           ['Highest qualification', faculty.highestQualification],
           ['Specialization', faculty.specialization],
           ['Research areas', faculty.researchAreas.join(', ')],
-          ['Department ID', faculty.departmentId],
-          ['School ID', faculty.schoolId],
+          ['Institution ID', faculty.institutionId],
           ['Campus ID', faculty.campusId],
+          ['School ID', faculty.schoolId],
+          ['Department ID', faculty.departmentId],
+          ['Academic year ID', faculty.academicYearId],
+          ['Semester ID', faculty.semesterId],
+        ])}
+
+        {section('Assignments', [
+          ['Assigned department', faculty.departmentId],
+          ['Assigned programs', faculty.programIds.join(', ') || 'None'],
+          [
+            'Assigned courses',
+            faculty.courseIds.length > 0
+              ? faculty.courseIds.join(', ')
+              : 'Placeholder — available when Courses module ships',
+          ],
+          ['Academic year', faculty.academicYearId],
+          ['Semester', faculty.semesterId],
         ])}
 
         {section('Office & contact', [
@@ -220,6 +284,7 @@ export default function FacultyDetailPage() {
           ['City', faculty.city],
           ['State', faculty.state],
           ['Country', faculty.country],
+          ['Postal code', faculty.postalCode],
           ['LinkedIn', faculty.linkedin],
           ['Website', faculty.website],
           ['ORCID', faculty.orcid],
@@ -232,9 +297,100 @@ export default function FacultyDetailPage() {
           ['Relation', faculty.emergencyContactRelation],
         ])}
 
+        {isOwnProfile ? (
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-base">Change password</CardTitle>
+              <CardDescription>Update the password for your linked account.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid max-w-md gap-3">
+              <Input
+                type="password"
+                placeholder="Current password"
+                value={passwordForm.currentPassword}
+                onChange={(e) =>
+                  setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))
+                }
+              />
+              <Input
+                type="password"
+                placeholder="New password"
+                value={passwordForm.newPassword}
+                onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
+              />
+              {passwordError ? <p className="text-sm text-danger">{passwordError}</p> : null}
+              {passwordMessage ? <p className="text-sm text-success">{passwordMessage}</p> : null}
+              <Button
+                type="button"
+                disabled={passwordPending}
+                onClick={() => {
+                  void (async () => {
+                    setPasswordPending(true);
+                    setPasswordError(null);
+                    setPasswordMessage(null);
+                    try {
+                      await authApi.changePassword(passwordForm);
+                      setPasswordMessage('Password updated.');
+                      setPasswordForm({ currentPassword: '', newPassword: '' });
+                    } catch (err) {
+                      setPasswordError(
+                        err instanceof ApiClientError ? err.message : 'Unable to change password.',
+                      );
+                    } finally {
+                      setPasswordPending(false);
+                    }
+                  })();
+                }}
+              >
+                {passwordPending ? (
+                  <>
+                    <Spinner size="sm" />
+                    Updating…
+                  </>
+                ) : (
+                  'Update password'
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {isOwnProfile ? (
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-base">Login history</CardTitle>
+              <CardDescription>Active sessions for your account.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {sessionsQuery.isLoading ? (
+                <Skeleton className="h-16 w-full" />
+              ) : (sessionsQuery.data?.length ?? 0) === 0 ? (
+                <p className="text-sm text-muted-foreground">No sessions found.</p>
+              ) : (
+                sessionsQuery.data?.map((session) => (
+                  <div
+                    key={session.id}
+                    className="rounded-xl border border-border/70 px-3 py-2 text-sm"
+                  >
+                    <p className="font-medium">
+                      {session.deviceType ?? 'Device'} · {session.ipAddress ?? 'IP unknown'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Last active {session.lastActivityAt ?? session.createdAt}
+                    </p>
+                  </div>
+                ))
+              )}
+              <Button asChild variant="outline" size="sm">
+                <Link href="/sessions">Manage all sessions</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
+
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle className="text-base">Audit timeline</CardTitle>
+            <CardTitle className="text-base">Activity / audit timeline</CardTitle>
             <CardDescription>Recent faculty audit events for this record.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">

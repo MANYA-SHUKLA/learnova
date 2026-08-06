@@ -2,18 +2,16 @@
 
 Base path: `/api/v1/faculty`
 
-All endpoints require authentication.
-
 ## Read (`faculty:read`)
 
-| Method | Path | Notes |
-| --- | --- | --- |
-| GET | `/faculty` | List + filters + pagination |
-| GET | `/faculty/search?q=` | Search |
-| GET | `/faculty/stats` | Dashboard stats |
-| GET | `/faculty/export?format=csv\|excel\|pdf` | File download |
-| GET | `/faculty/audit` | Audit log (`facultyId` optional) |
-| GET | `/faculty/:id` | Detail |
+| Method | Path |
+| --- | --- |
+| GET | `/faculty` |
+| GET | `/faculty/search` |
+| GET | `/faculty/stats` |
+| GET | `/faculty/export` |
+| GET | `/faculty/audit` |
+| GET | `/faculty/:id` |
 
 ## Write own profile (`faculty:write`)
 
@@ -30,8 +28,10 @@ All endpoints require authentication.
 | --- | --- |
 | POST | `/faculty` |
 | PUT/PATCH | `/faculty/:id` |
-| DELETE | `/faculty/:id` (archive) |
+| DELETE | `/faculty/:id` (archive / soft delete) |
 | POST | `/faculty/:id/restore` |
+| POST | `/faculty/:id/activate` |
+| POST | `/faculty/:id/deactivate` |
 | POST | `/faculty/import/preview` |
 | POST | `/faculty/import` |
 | POST | `/faculty/bulk/archive` |
@@ -40,11 +40,18 @@ All endpoints require authentication.
 | POST | `/faculty/bulk/status` |
 | POST | `/faculty/bulk/assign-department` |
 | POST | `/faculty/bulk/assign-program` |
+| POST | `/faculty/bulk/assign-academic` |
 
-## List query filters
+## Assignment fields
 
-`q`, `status`, `campusId`, `schoolId`, `departmentId`, `programId`, `designation`, `employmentType`, `joiningDateFrom`, `joiningDateTo`, `experienceMin`, `experienceMax`, `includeDeleted`, `page`, `limit`, `sortBy`, `sortOrder`
+- `departmentId`, `programIds[]`
+- `academicYearId`, `semesterId`
+- `courseIds[]` — accepted as placeholders until the Course module
 
 ## Status values
 
-`active`, `on_leave`, `suspended`, `retired`, `archived`
+`active` · `on_leave` · `suspended` · `retired` · `archived`
+
+## Audit events
+
+`faculty.created` · `faculty.updated` · `faculty.archived` · `faculty.restored` · `faculty.imported` · `faculty.exported` · `faculty.profile.updated` · `faculty.status.changed`

@@ -19,6 +19,20 @@ const facultySchema = new Schema(
       index: true,
     },
     programIds: [{ type: Schema.Types.ObjectId, ref: 'Program' }],
+    /** Placeholder until Course module — stores future course ObjectIds */
+    courseIds: [{ type: Schema.Types.ObjectId }],
+    academicYearId: {
+      type: Schema.Types.ObjectId,
+      ref: 'AcademicYear',
+      default: null,
+      index: true,
+    },
+    semesterId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Semester',
+      default: null,
+      index: true,
+    },
     firstName: { type: String, required: true, trim: true },
     middleName: { type: String, default: null, trim: true },
     lastName: { type: String, required: true, trim: true },

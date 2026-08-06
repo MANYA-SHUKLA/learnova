@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { EVENTS } from '@learnova/events';
 import type {
   CreateFacultyInput,
+  FacultyBulkAssignAcademicInput,
   FacultyBulkAssignDepartmentInput,
   FacultyBulkAssignProgramInput,
   FacultyBulkIdsInput,
@@ -174,9 +175,12 @@ export class FacultyService {
       email: input.email.toLowerCase(),
       fullName,
       programIds: (input.programIds ?? []).map((id) => new Types.ObjectId(id)),
+      courseIds: (input.courseIds ?? []).map((id) => new Types.ObjectId(id)),
       campusId: input.campusId ? new Types.ObjectId(input.campusId) : null,
       schoolId: input.schoolId ? new Types.ObjectId(input.schoolId) : null,
       departmentId: input.departmentId ? new Types.ObjectId(input.departmentId) : null,
+      academicYearId: input.academicYearId ? new Types.ObjectId(input.academicYearId) : null,
+      semesterId: input.semesterId ? new Types.ObjectId(input.semesterId) : null,
       institutionId: new Types.ObjectId(institutionId),
       createdBy: new Types.ObjectId(actor.userId),
       updatedBy: new Types.ObjectId(actor.userId),
@@ -236,6 +240,9 @@ export class FacultyService {
     if (input.programIds) {
       patch.programIds = input.programIds.map((pid) => new Types.ObjectId(pid));
     }
+    if (input.courseIds) {
+      patch.courseIds = input.courseIds.map((cid) => new Types.ObjectId(cid));
+    }
     if (input.campusId !== undefined) {
       patch.campusId = input.campusId ? new Types.ObjectId(input.campusId) : null;
     }
@@ -244,6 +251,14 @@ export class FacultyService {
     }
     if (input.departmentId !== undefined) {
       patch.departmentId = input.departmentId ? new Types.ObjectId(input.departmentId) : null;
+    }
+    if (input.academicYearId !== undefined) {
+      patch.academicYearId = input.academicYearId
+        ? new Types.ObjectId(input.academicYearId)
+        : null;
+    }
+    if (input.semesterId !== undefined) {
+      patch.semesterId = input.semesterId ? new Types.ObjectId(input.semesterId) : null;
     }
 
     const firstName = input.firstName ?? existing.firstName;
@@ -337,6 +352,14 @@ export class FacultyService {
     return toDto(doc);
   }
 
+  async activate(id: string, actor: ActorContext) {
+    return this.update(id, { status: 'active', isActive: true }, actor);
+  }
+
+  async deactivate(id: string, actor: ActorContext) {
+    return this.update(id, { status: 'suspended', isActive: false }, actor);
+  }
+
   async getStats(actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const raw = await facultyRepository.stats(institutionId);
@@ -374,6 +397,18 @@ export class FacultyService {
       byExperience: raw.byExperience.map((d) => ({
         bucket: experienceBucketLabel(d._id as number | string),
         count: d.count as number,
+      })),
+      recentJoinees: raw.recentJoinees.map((doc) => ({
+        id: String(doc._id),
+        fullName: doc.fullName,
+        employeeId: doc.employeeId,
+        joiningDate:
+          doc.joiningDate instanceof Date
+            ? doc.joiningDate.toISOString()
+            : doc.joiningDate
+              ? String(doc.joiningDate)
+              : null,
+        designation: doc.customDesignation || doc.designation,
       })),
     };
   }
@@ -484,6 +519,25 @@ export class FacultyService {
       bulk: true,
       action: 'assign_program',
       programIds: input.programIds,
+      modified,
+    });
+    return { modified };
+  }
+
+  async bulkAssignAcademic(input: FacultyBulkAssignAcademicInput, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const modified = await facultyRepository.bulkAssignAcademic(institutionId, input.ids, {
+      academicYearId: input.academicYearId,
+      semesterId: input.semesterId,
+      courseIds: input.courseIds,
+      mode: input.mode,
+    });
+    await this.audit('faculty.updated', actor, institutionId, null, {
+      bulk: true,
+      action: 'assign_academic',
+      academicYearId: input.academicYearId,
+      semesterId: input.semesterId,
+      courseIds: input.courseIds,
       modified,
     });
     return { modified };
@@ -624,6 +678,9 @@ export class FacultyService {
     await this.audit('faculty.import.completed', actor, institutionId, null, {
       imported: createdIds.length,
     });
+    await this.audit('faculty.imported', actor, institutionId, null, {
+      imported: createdIds.length,
+    });
     await eventBus.publish(
       EVENTS.FACULTY_IMPORTED,
       { institutionId, count: createdIds.length },
@@ -669,6 +726,10 @@ export class FacultyService {
     });
 
     await this.audit('faculty.export', actor, institutionId, null, {
+      format: query.format,
+      count: rows.length,
+    });
+    await this.audit('faculty.exported', actor, institutionId, null, {
       format: query.format,
       count: rows.length,
     });

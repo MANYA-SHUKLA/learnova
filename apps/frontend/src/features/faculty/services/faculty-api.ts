@@ -88,6 +88,10 @@ export const facultyApi = {
 
   restore: (id: string) => apiClient.post<Faculty>(`${API_ROUTES.FACULTY}/${id}/restore`),
 
+  activate: (id: string) => apiClient.post<Faculty>(`${API_ROUTES.FACULTY}/${id}/activate`),
+
+  deactivate: (id: string) => apiClient.post<Faculty>(`${API_ROUTES.FACULTY}/${id}/deactivate`),
+
   audit: (facultyId?: string) =>
     apiClient.get<{ items: Array<Record<string, unknown>> }>(
       `${API_ROUTES.FACULTY}/audit${facultyId ? `?facultyId=${facultyId}` : ''}`,

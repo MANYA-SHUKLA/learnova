@@ -37,6 +37,10 @@ export interface Faculty {
   schoolId: ID | null;
   departmentId: ID | null;
   programIds: ID[];
+  /** Placeholder until Course module ships */
+  courseIds: ID[];
+  academicYearId: ID | null;
+  semesterId: ID | null;
   firstName: string;
   middleName: string | null;
   lastName: string;
@@ -95,6 +99,13 @@ export interface FacultyStats {
   byDepartment: Array<{ departmentId: string | null; label: string; count: number }>;
   byEmploymentType: Array<{ employmentType: string; count: number }>;
   byExperience: Array<{ bucket: string; count: number }>;
+  recentJoinees: Array<{
+    id: string;
+    fullName: string;
+    employeeId: string;
+    joiningDate: string | null;
+    designation: string;
+  }>;
 }
 
 export interface FacultyImportRowError {

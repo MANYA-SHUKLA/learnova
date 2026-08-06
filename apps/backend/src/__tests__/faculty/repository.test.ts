@@ -34,10 +34,12 @@ describe('faculty audit event catalog', () => {
       'faculty.deleted',
       'faculty.import.started',
       'faculty.import.completed',
+      'faculty.imported',
       'faculty.export',
+      'faculty.exported',
       'faculty.profile.updated',
       'faculty.status.changed',
     ];
-    expect(events).toHaveLength(10);
+    expect(events).toHaveLength(12);
   });
 });

@@ -113,6 +113,22 @@ export function useRestoreFacultyMutation() {
   });
 }
 
+export function useActivateFacultyMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => facultyApi.activate(id),
+    onSuccess: () => invalidateFaculty(queryClient),
+  });
+}
+
+export function useDeactivateFacultyMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => facultyApi.deactivate(id),
+    onSuccess: () => invalidateFaculty(queryClient),
+  });
+}
+
 export function useBulkArchiveFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({

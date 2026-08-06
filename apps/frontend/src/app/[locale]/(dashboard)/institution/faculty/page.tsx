@@ -509,6 +509,32 @@ export default function FacultyListPage() {
             </Card>
           </div>
         ) : null}
+
+        {stats?.recentJoinees && stats.recentJoinees.length > 0 ? (
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-base">Recent joinees</CardTitle>
+              <CardDescription>Newest faculty by joining date.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {stats.recentJoinees.map((row) => (
+                <Link
+                  key={row.id}
+                  href={`${APP_ROUTES.INSTITUTION_FACULTY}/${row.id}`}
+                  className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2 text-sm transition-colors hover:bg-muted/40"
+                >
+                  <span>
+                    <span className="font-medium">{row.fullName}</span>
+                    <span className="ml-2 text-muted-foreground">{row.employeeId}</span>
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {row.joiningDate?.slice(0, 10) ?? '—'} · {row.designation}
+                  </span>
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </PermissionGate>
   );

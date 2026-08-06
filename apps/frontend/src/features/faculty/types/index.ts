@@ -54,11 +54,15 @@ export type FacultyCreateBody = {
   schoolId?: string | null;
   departmentId?: string | null;
   programIds?: string[];
+  courseIds?: string[];
+  academicYearId?: string | null;
+  semesterId?: string | null;
   phone?: string | null;
   alternateEmail?: string | null;
   alternatePhone?: string | null;
   profilePhoto?: string | null;
   gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say' | null;
+  dateOfBirth?: string | null;
   customDesignation?: string | null;
   joiningDate?: string | null;
   experienceYears?: number;

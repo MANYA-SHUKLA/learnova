@@ -1,15 +1,18 @@
 # Faculty Management
 
-Enterprise ERP module for managing institution faculty records.
+Enterprise ERP module for institution faculty records (Step 5).
 
-## Scope
+## Capabilities
 
-- Faculty CRUD with soft delete (archive / restore)
+- CRUD with soft delete (archive / restore)
+- Activate / deactivate
 - Search, filters, pagination, sorting
-- Bulk activate / suspend / archive / assign department / assign programs
-- CSV import with preview, validation, duplicate detection, rollback
+- Bulk archive / activate / suspend / department / program / academic assign
+- CSV import with preview + rollback
 - CSV / Excel / PDF export + print
-- Profile photo upload via storage abstraction
+- Profile photo via storage abstraction
+- Own-profile change password + login history (sessions)
+- Assignments: department, programs, academic year, semester, courses (placeholder)
 - Audit trail + domain events
 - Role-based permissions
 
@@ -17,25 +20,16 @@ Enterprise ERP module for managing institution faculty records.
 
 | Route | Purpose |
 | --- | --- |
-| `/institution/faculty` | Directory + stats dashboard |
-| `/institution/faculty/create` | Create faculty |
-| `/institution/faculty/:id` | Profile |
+| `/institution/faculty` | Dashboard widgets + directory |
+| `/institution/faculty/create` | Create |
+| `/institution/faculty/:id` | Profile / details |
 | `/institution/faculty/:id/edit` | Edit |
 | `/institution/faculty/import` | CSV import |
 | `/institution/faculty/export` | Export center |
 
-## Backend layout
+## Dashboard widgets
 
-- Model: `apps/backend/src/models/faculty.model.ts`
-- Audit: `apps/backend/src/models/faculty-audit-log.model.ts`
-- Repository: `apps/backend/src/repositories/faculty/`
-- Service: `apps/backend/src/services/faculty/faculty.service.ts`
-- Controller / routes: `controllers/faculty`, `routes/v1/faculty.routes.ts`
-
-## Frontend layout
-
-- Feature: `apps/frontend/src/features/faculty/`
-- Pages under `app/[locale]/(dashboard)/institution/faculty/`
+Total · Active · Inactive · On Leave · Departments · New this month · Department distribution · Employment types · Recent joinees
 
 ## Related docs
 

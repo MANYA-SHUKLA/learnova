@@ -4,6 +4,7 @@ import {
   createFacultySchema,
   facultyBulkAssignDepartmentSchema,
   facultyBulkAssignProgramSchema,
+  facultyBulkAssignAcademicSchema,
   facultyBulkIdsSchema,
   facultyBulkStatusSchema,
   facultyExportQuerySchema,
@@ -133,6 +134,13 @@ facultyRoutes.post(
   ctrl.bulkAssignProgram,
 );
 
+facultyRoutes.post(
+  '/faculty/bulk/assign-academic',
+  ...manageAuth,
+  validate(facultyBulkAssignAcademicSchema),
+  ctrl.bulkAssignAcademic,
+);
+
 facultyRoutes.get(
   '/faculty/:id',
   ...readAuth,
@@ -168,6 +176,20 @@ facultyRoutes.post(
   ...manageAuth,
   validate(facultyIdParamsSchema, 'params'),
   ctrl.restoreFaculty,
+);
+
+facultyRoutes.post(
+  '/faculty/:id/activate',
+  ...manageAuth,
+  validate(facultyIdParamsSchema, 'params'),
+  ctrl.activateFaculty,
+);
+
+facultyRoutes.post(
+  '/faculty/:id/deactivate',
+  ...manageAuth,
+  validate(facultyIdParamsSchema, 'params'),
+  ctrl.deactivateFaculty,
 );
 
 facultyRoutes.post(
