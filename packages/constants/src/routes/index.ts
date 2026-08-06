@@ -17,6 +17,7 @@ export const API_ROUTES = {
   BATCHES: '/batches',
   ACADEMIC_CALENDARS: '/academic-calendars',
   INSTITUTION_SETTINGS: '/institution-settings',
+  FACULTY: '/faculty',
   LMS: '/lms',
   ERP: '/erp',
   EXAMINATION: '/examination',
@@ -66,6 +67,10 @@ export const APP_ROUTES = {
   INSTITUTION_BATCHES: '/institution/batches',
   INSTITUTION_CALENDAR: '/institution/calendar',
   INSTITUTION_SETTINGS: '/institution/settings',
+  INSTITUTION_FACULTY: '/institution/faculty',
+  INSTITUTION_FACULTY_CREATE: '/institution/faculty/create',
+  INSTITUTION_FACULTY_IMPORT: '/institution/faculty/import',
+  INSTITUTION_FACULTY_EXPORT: '/institution/faculty/export',
 } as const;
 
 export const SOCKET_NAMESPACES = {

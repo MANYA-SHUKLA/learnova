@@ -25,6 +25,9 @@ export const PERMISSIONS = {
   ROLES_MANAGE: 'roles:manage',
   INSTITUTION_READ: 'institution:read',
   INSTITUTION_MANAGE: 'institution:manage',
+  FACULTY_READ: 'faculty:read',
+  FACULTY_WRITE: 'faculty:write',
+  FACULTY_MANAGE: 'faculty:manage',
 } as const;
 
 export type PermissionConstant = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

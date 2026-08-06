@@ -31,6 +31,12 @@ export const EVENTS = {
   LAB_SUBMITTED: 'lab.submitted',
   IDE_SESSION_STARTED: 'ide.session_started',
   IDE_SESSION_STOPPED: 'ide.session_stopped',
+
+  FACULTY_CREATED: 'faculty.created',
+  FACULTY_UPDATED: 'faculty.updated',
+  FACULTY_DELETED: 'faculty.deleted',
+  FACULTY_STATUS_CHANGED: 'faculty.status.changed',
+  FACULTY_IMPORTED: 'faculty.imported',
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
@@ -66,6 +72,15 @@ export interface EventPayloadMap {
   'lab.submitted': { labId: string; userId?: string };
   'ide.session_started': { sessionId: string; userId?: string };
   'ide.session_stopped': { sessionId: string };
+  'faculty.created': { facultyId: string; institutionId: string };
+  'faculty.updated': { facultyId: string; institutionId: string };
+  'faculty.deleted': { facultyId: string; institutionId: string };
+  'faculty.status.changed': {
+    facultyId: string;
+    institutionId: string;
+    status: string;
+  };
+  'faculty.imported': { institutionId: string; count: number };
 }
 
 export type TypedEventName = keyof EventPayloadMap;
@@ -99,6 +114,11 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.LAB_SUBMITTED, description: 'Lab submitted', version: 1 },
   { name: EVENTS.IDE_SESSION_STARTED, description: 'IDE session started', version: 1 },
   { name: EVENTS.IDE_SESSION_STOPPED, description: 'IDE session stopped', version: 1 },
+  { name: EVENTS.FACULTY_CREATED, description: 'Faculty member created', version: 1 },
+  { name: EVENTS.FACULTY_UPDATED, description: 'Faculty member updated', version: 1 },
+  { name: EVENTS.FACULTY_DELETED, description: 'Faculty member deleted', version: 1 },
+  { name: EVENTS.FACULTY_STATUS_CHANGED, description: 'Faculty status changed', version: 1 },
+  { name: EVENTS.FACULTY_IMPORTED, description: 'Faculty CSV import completed', version: 1 },
 ] as const;
 
 export function isRegisteredEvent(name: string): name is EventName {

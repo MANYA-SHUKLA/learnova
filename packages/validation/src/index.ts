@@ -68,3 +68,4 @@ export {
 } from './auth.js';
 
 export * from './institution.js';
+export * from './faculty.js';
