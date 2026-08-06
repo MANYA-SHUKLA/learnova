@@ -42,7 +42,6 @@
   "dependencies": {
     "@learnova/constants": "workspace:*",
     "@learnova/types": "workspace:*",
-    "@learnova/utils": "workspace:*",
     "@learnova/validation": "workspace:*",
     "zod": "^3.25.56"
   },

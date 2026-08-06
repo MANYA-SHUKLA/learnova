@@ -15,6 +15,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@learnova/config": "workspace:*",
+    "@learnova/constants": "workspace:*",
     "@learnova/shared": "workspace:*",
     "@learnova/types": "workspace:*",
     "@learnova/ui": "workspace:*",

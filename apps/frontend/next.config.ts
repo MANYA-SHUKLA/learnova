@@ -7,7 +7,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   output: 'standalone',
-  transpilePackages: ['@learnova/ui', '@learnova/shared', '@learnova/types'],
+  transpilePackages: [
+    '@learnova/ui',
+    '@learnova/shared',
+    '@learnova/types',
+    '@learnova/constants',
+  ],
   experimental: {
     optimizePackageImports: ['lucide-react', '@learnova/ui', 'recharts'],
   },
