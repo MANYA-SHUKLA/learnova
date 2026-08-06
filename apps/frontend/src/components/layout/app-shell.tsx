@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { siteGutter } from '@/lib/layout';
 import { AppSidebar } from './app-sidebar';
 import { AppTopbar } from './app-topbar';
 
@@ -18,11 +19,12 @@ export function AppShell({ children, className }: AppShellProps) {
         <AppTopbar />
         <main
           className={cn(
-            'min-w-0 flex-1 px-3 py-4 sm:px-5 sm:py-6 lg:px-8',
+            'min-w-0 flex-1 py-4 sm:py-6 lg:py-8',
+            siteGutter,
             className,
           )}
         >
-          <div className="mx-auto w-full min-w-0 max-w-7xl">{children}</div>
+          <div className="w-full min-w-0">{children}</div>
         </main>
       </div>
     </div>

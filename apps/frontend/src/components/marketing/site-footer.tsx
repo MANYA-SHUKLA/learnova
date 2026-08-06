@@ -1,3 +1,4 @@
+import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
 import { LogoMark } from './logo-mark';
 
@@ -52,18 +53,18 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-muted/40">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="w-full border-t border-border bg-muted/40">
+      <div className={siteContainer('py-14 sm:py-16')}>
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-16">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link
               href="/"
-              className="inline-flex items-center gap-2.5 font-display text-lg font-semibold tracking-tight text-foreground"
+              className="inline-flex items-center gap-2.5 font-display text-xl font-bold tracking-tight text-foreground"
             >
               <LogoMark />
               Learnova
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground sm:text-base">
               The enterprise AI learning platform for institutions that teach, assess, and innovate at
               scale.
             </p>

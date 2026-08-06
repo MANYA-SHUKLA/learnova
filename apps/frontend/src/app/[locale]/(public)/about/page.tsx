@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
+import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
 
 interface AboutPageProps {
@@ -56,24 +57,24 @@ export default async function AboutPage({ params }: AboutPageProps) {
   return (
     <>
       <SiteHeader />
-      <main className="font-body">
-        <section className="relative overflow-hidden">
+      <main className="w-full font-body">
+        <section className="relative w-full overflow-hidden">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,_hsl(var(--primary)/0.16),_transparent_55%),radial-gradient(ellipse_40%_30%_at_85%_15%,_#7C3AED18,_transparent_50%)]"
           />
-          <div className="relative mx-auto max-w-3xl px-4 pb-16 pt-20 text-center sm:px-6 sm:pt-24 lg:px-8">
-            <p className="font-display text-4xl font-bold tracking-tight text-primary sm:text-5xl">
+          <div className={siteContainer('relative pb-20 pt-20 text-center sm:pb-24 sm:pt-28')}>
+            <p className="font-display text-5xl font-bold tracking-tight text-primary sm:text-6xl lg:text-7xl">
               Learnova
             </p>
-            <h1 className="mt-5 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h1 className="mt-6 font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               About the platform
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="mx-auto mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
               Learnova is an enterprise AI learning platform for modern institutions — LMS, ERP,
               examinations, coding, cloud IDE, ideation, analytics, and audit in one coherent product.
             </p>
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Button asChild size="lg">
                 <Link href="/login">Get started</Link>
               </Button>
@@ -84,39 +85,39 @@ export default async function AboutPage({ params }: AboutPageProps) {
           </div>
         </section>
 
-        <section className="border-t border-border bg-muted/30 py-20 sm:py-24">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="font-display text-3xl font-bold tracking-tight text-foreground">
+        <section className="w-full border-t border-border bg-muted/30 py-20 sm:py-24">
+          <div className={siteContainer()}>
+            <div className="mx-auto w-full max-w-3xl text-center">
+              <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                 What we believe
               </h2>
-              <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+              <p className="mt-4 text-base text-muted-foreground sm:text-lg lg:text-xl">
                 Learning infrastructure should feel as refined as the products students aspire to build.
               </p>
             </div>
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:gap-5">
               {PILLARS.map(({ icon: Icon, title, body }) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-border bg-card p-6 shadow-soft-sm"
+                  className="rounded-2xl border border-border bg-card p-6 shadow-soft-sm sm:p-7"
                 >
-                  <span className="inline-flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <span className="inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="size-5" />
                   </span>
-                  <h3 className="mt-4 font-display text-base font-semibold text-foreground">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                  <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">{body}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-20 sm:py-24">
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground">
+        <section className="w-full py-20 sm:py-24">
+          <div className={siteContainer('text-center')}>
+            <h2 className="mx-auto max-w-4xl font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
               Built for institutions that teach at scale
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
               From program structure to exam integrity and coding mastery, Learnova gives campuses a
               single operating system for academic delivery — without sacrificing polish or control.
             </p>

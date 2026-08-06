@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
@@ -67,14 +68,18 @@ function SectionHeading({
   className?: string;
 }) {
   return (
-    <div className={cn('mx-auto max-w-2xl text-center', className)}>
+    <div className={cn('mx-auto w-full max-w-4xl text-center', className)}>
       {eyebrow ? (
-        <p className="font-display text-sm font-semibold tracking-wide text-primary">{eyebrow}</p>
+        <p className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-primary sm:text-base">
+          {eyebrow}
+        </p>
       ) : null}
-      <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl xl:text-[3.25rem] xl:leading-[1.1]">
         {title}
       </h2>
-      <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">{description}</p>
+      <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
+        {description}
+      </p>
     </div>
   );
 }
@@ -84,7 +89,7 @@ function SectionHeading({
 function HeroVisual() {
   return (
     <div
-      className="relative mx-auto w-full max-w-5xl"
+      className="relative mx-auto w-full"
       aria-hidden
     >
       <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/20 via-accent/10 to-transparent blur-2xl" />
@@ -163,24 +168,24 @@ function Hero() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent"
       />
 
-      <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-20 lg:px-8 lg:pt-24">
+      <div className={siteContainer('relative pb-20 pt-20 sm:pb-28 sm:pt-28 lg:pb-32 lg:pt-32')}>
         <motion.div
-          className="mx-auto max-w-3xl text-center"
+          className="mx-auto w-full max-w-5xl text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="font-display text-4xl font-bold tracking-tight text-primary sm:text-5xl lg:text-6xl">
+          <p className="font-display text-5xl font-bold tracking-tight text-primary sm:text-6xl md:text-7xl lg:text-8xl">
             Learnova
           </p>
-          <h1 className="mt-5 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+          <h1 className="mt-6 font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl xl:text-7xl">
             Learn. Build. Excel.
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <p className="mx-auto mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
             The enterprise AI learning platform that unifies LMS, exams, coding labs, and analytics
             for modern institutions.
           </p>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Button asChild size="lg">
               <Link href="/login">Get started</Link>
             </Button>
@@ -191,7 +196,7 @@ function Hero() {
         </motion.div>
 
         <motion.div
-          className="mt-14 sm:mt-16"
+          className="mt-16 w-full sm:mt-20"
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
@@ -251,23 +256,23 @@ const FEATURES: { icon: LucideIcon; title: string; description: string }[] = [
 function FeatureGrid() {
   return (
     <MotionSection id="features" className="scroll-mt-24 py-20 sm:py-24">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className={siteContainer()}>
         <SectionHeading
           eyebrow="Platform"
           title="Everything your institution needs"
           description="Eight modules that work together — from curriculum delivery to secure exams and AI-assisted learning."
         />
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-5">
           {FEATURES.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="rounded-2xl border border-border bg-card p-5 shadow-soft-sm transition-shadow hover:shadow-soft-md"
+              className="rounded-2xl border border-border bg-card p-6 shadow-soft-sm transition-shadow hover:shadow-soft-md sm:p-7"
             >
-              <span className="inline-flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span className="inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="size-5" />
               </span>
-              <h3 className="mt-4 font-display text-base font-semibold text-foreground">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
+              <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p>
             </div>
           ))}
         </div>
@@ -281,7 +286,7 @@ function FeatureGrid() {
 function DashboardPreview() {
   return (
     <MotionSection id="product" className="scroll-mt-24 py-20 sm:py-24">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className={siteContainer()}>
         <SectionHeading
           eyebrow="Dashboard"
           title="A command center for learning ops"
@@ -385,7 +390,7 @@ function ProductSection({
 }) {
   return (
     <MotionSection id={id} className="scroll-mt-24 py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className={siteContainer()}>
         <div
           className={cn(
             'grid items-center gap-10 lg:grid-cols-2 lg:gap-16',
@@ -691,7 +696,7 @@ const TESTIMONIALS = [
 function Testimonials() {
   return (
     <MotionSection className="py-20 sm:py-24">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className={siteContainer()}>
         <SectionHeading
           eyebrow="Testimonials"
           title="Trusted by academic leaders"
@@ -748,13 +753,13 @@ const FAQS = [
 function Faq() {
   return (
     <MotionSection id="faq" className="scroll-mt-24 py-20 sm:py-24">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div className={siteContainer()}>
         <SectionHeading
           eyebrow="FAQ"
           title="Answers before you dive in"
           description="A short list of the questions institutions ask most often."
         />
-        <div className="mt-10 space-y-3">
+        <div className="mx-auto mt-10 w-full max-w-5xl space-y-3">
           {FAQS.map((item) => (
             <details
               key={item.q}
@@ -805,7 +810,7 @@ const TIERS = [
 function Pricing() {
   return (
     <MotionSection id="pricing" className="scroll-mt-24 py-20 sm:py-24">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className={siteContainer()}>
         <SectionHeading
           eyebrow="Pricing"
           title="Plans that scale with you"
@@ -853,20 +858,20 @@ function Pricing() {
 function FinalCta() {
   return (
     <MotionSection className="pb-24 pt-8 sm:pb-28">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-background to-accent/10 px-4 py-12 text-center shadow-soft-lg sm:px-12 sm:py-16">
+      <div className={siteContainer()}>
+        <div className="relative overflow-hidden rounded-none border-y border-border bg-gradient-to-br from-primary/15 via-background to-accent/10 px-[clamp(1rem,3vw,3.5rem)] py-16 text-center shadow-none sm:rounded-2xl sm:border sm:py-20 sm:shadow-soft-lg lg:py-24">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(var(--primary)/0.12),_transparent_65%)]"
           />
-          <div className="relative">
-            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <div className="relative mx-auto w-full max-w-4xl">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Ready to modernize learning?
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
+            <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl">
               Bring LMS, exams, coding labs, and AI into one premium experience for your institution.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Button asChild size="lg">
                 <Link href="/login">Get started</Link>
               </Button>

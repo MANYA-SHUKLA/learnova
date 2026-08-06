@@ -75,7 +75,7 @@ export default function InstitutionSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-3xl">
+      <div className="w-full min-w-0">
         <Skeleton className="mb-6 h-8 w-40" />
         <Skeleton className="h-48 w-full" />
       </div>
@@ -84,7 +84,7 @@ export default function InstitutionSettingsPage() {
 
   if (isError) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-3xl">
+      <div className="w-full min-w-0">
         <ErrorState
           message={error instanceof Error ? error.message : 'Failed to load settings.'}
           onRetry={() => void refetch()}
@@ -95,7 +95,7 @@ export default function InstitutionSettingsPage() {
 
   if (!data) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-3xl">
+      <div className="w-full min-w-0">
         <EmptyState title="No settings" description="Settings record was not found." />
       </div>
     );
@@ -133,7 +133,7 @@ export default function InstitutionSettingsPage() {
   };
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-3xl">
+    <div className="w-full min-w-0">
       <PageHeader
         title="Institution settings"
         description="Language, theme, attendance, grading, exams, certificates, storage, AI, notifications, and security."

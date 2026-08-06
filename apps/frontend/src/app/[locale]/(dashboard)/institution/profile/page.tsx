@@ -72,7 +72,7 @@ export default function InstitutionProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-3xl">
+      <div className="w-full min-w-0">
         <Skeleton className="mb-6 h-8 w-48" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -81,7 +81,7 @@ export default function InstitutionProfilePage() {
 
   if (isError) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-3xl">
+      <div className="w-full min-w-0">
         <ErrorState
           message={error instanceof Error ? error.message : 'Failed to load profile.'}
           onRetry={() => void refetch()}
@@ -92,7 +92,7 @@ export default function InstitutionProfilePage() {
 
   if (!data) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-3xl">
+      <div className="w-full min-w-0">
         <EmptyState title="No institution" description="Nothing to display." />
       </div>
     );
@@ -159,7 +159,7 @@ export default function InstitutionProfilePage() {
   );
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-3xl">
+    <div className="w-full min-w-0">
       <PageHeader
         title="Institution profile"
         description="Update identity, contact details, and branding URLs."

@@ -54,7 +54,7 @@ export default function SessionsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-3xl">
+      <div className="w-full min-w-0">
         <Card>
           <CardHeader>
             <CardTitle>Sessions</CardTitle>
@@ -78,7 +78,7 @@ export default function SessionsPage() {
   };
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-3xl">
+    <div className="w-full min-w-0">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-display text-2xl font-semibold tracking-tight">Sessions</h1>
