@@ -23,15 +23,11 @@ export class RoleRepository {
     permissionIds: Types.ObjectId[];
     isActive: boolean;
   }): Promise<RoleDocument> {
-    const doc = await RoleModel.findOneAndUpdate(
+    return RoleModel.findOneAndUpdate(
       { name: data.name },
       { $set: data },
-      { upsert: true, new: true },
-    ).exec();
-    if (!doc) {
-      throw new Error('Failed to upsert role');
-    }
-    return doc;
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    ).exec() as Promise<RoleDocument>;
   }
 }
 
@@ -54,15 +50,11 @@ export class PermissionRepository {
     action: string;
     description: string;
   }): Promise<PermissionDocument> {
-    const doc = await PermissionModel.findOneAndUpdate(
+    return PermissionModel.findOneAndUpdate(
       { name: data.name },
       { $set: data },
-      { upsert: true, new: true },
-    ).exec();
-    if (!doc) {
-      throw new Error('Failed to upsert permission');
-    }
-    return doc;
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    ).exec() as Promise<PermissionDocument>;
   }
 }
 
