@@ -75,10 +75,10 @@ export default async function AboutPage({ params }: AboutPageProps) {
               examinations, coding, cloud IDE, ideation, analytics, and audit in one coherent product.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="min-w-[10rem] px-9">
                 <Link href="/login">Get started</Link>
               </Button>
-              <Button asChild variant="outline" size="lg">
+              <Button asChild variant="outline" size="lg" className="min-w-[10rem] px-9">
                 <Link href="/#features">Explore features</Link>
               </Button>
             </div>
