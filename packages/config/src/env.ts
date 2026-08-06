@@ -54,6 +54,11 @@ export const backendEnvSchema = baseEnvSchema
   .extend({
     PORT: z.coerce.number().int().positive().default(4000),
     HOST: z.string().default('0.0.0.0'),
+    /** When true, POST /auth/register (institution bootstrap) is public. Default off. */
+    SAAS_MODE: z
+      .enum(['true', 'false', '1', '0'])
+      .default('false')
+      .transform((v) => v === 'true' || v === '1'),
   });
 
 export const frontendEnvSchema = baseEnvSchema.extend({
@@ -61,6 +66,7 @@ export const frontendEnvSchema = baseEnvSchema.extend({
   NEXT_PUBLIC_API_URL: z.string().url().default('http://localhost:4000/api/v1'),
   NEXT_PUBLIC_WS_URL: z.string().url().default('http://localhost:4000'),
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(['en', 'hi', 'te']).default('en'),
+  NEXT_PUBLIC_SAAS_MODE: z.enum(['true', 'false', '1', '0']).optional(),
 });
 
 export const workerEnvSchema = baseEnvSchema

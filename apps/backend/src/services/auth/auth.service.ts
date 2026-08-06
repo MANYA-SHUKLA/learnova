@@ -233,6 +233,12 @@ async function sendVerificationEmail(
 
 export class AuthService {
   async registerInstitution(input: RegisterInstitutionInput, ctx: ClientContext) {
+    if (!env.SAAS_MODE) {
+      throw new ForbiddenError(
+        'Institution self-registration is disabled. Contact your Learnova operator.',
+      );
+    }
+
     const existing = await userRepository.findByEmail(input.email);
     if (existing) {
       throw new ConflictError('An account with this email already exists');
