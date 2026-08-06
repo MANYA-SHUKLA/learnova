@@ -187,10 +187,10 @@ function Hero() {
             for modern institutions.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            <Button asChild size="lg" className="min-w-[10rem] px-9">
+            <Button asChild size="lg" className={ctaButtonClass}>
               <Link href="/login">Get started</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="min-w-[10rem] px-9">
+            <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
               <Link href="/about">Learn more</Link>
             </Button>
           </div>
@@ -873,10 +873,10 @@ function FinalCta() {
               Bring LMS, exams, coding labs, and AI into one premium experience for your institution.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-              <Button asChild size="lg" className="min-w-[10rem] px-9">
+              <Button asChild size="lg" className={ctaButtonClass}>
                 <Link href="/login">Get started</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="min-w-[11rem] px-9">
+              <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
                 <Link href="/about">About Learnova</Link>
               </Button>
             </div>
