@@ -11,6 +11,7 @@ import {
 import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { siteContainer } from '@/lib/layout';
+import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
 import { Link } from '@/lib/i18n/routing';
 
 interface AboutPageProps {
@@ -75,10 +76,10 @@ export default async function AboutPage({ params }: AboutPageProps) {
               examinations, coding, cloud IDE, ideation, analytics, and audit in one coherent product.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-              <Button asChild size="lg" className="min-w-[10rem] px-9">
+              <Button asChild size="lg" className={ctaButtonClass}>
                 <Link href="/login">Get started</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="min-w-[10rem] px-9">
+              <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
                 <Link href="/#features">Explore features</Link>
               </Button>
             </div>
@@ -122,7 +123,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
               single operating system for academic delivery — without sacrificing polish or control.
             </p>
             <div className="mt-10">
-              <Button asChild size="lg">
+              <Button asChild size="lg" className={ctaButtonClass}>
                 <Link href="/login">Join Learnova</Link>
               </Button>
             </div>

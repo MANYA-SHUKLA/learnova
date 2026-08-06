@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { siteContainer } from '@/lib/layout';
+import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
@@ -131,13 +132,13 @@ function HeroVisual() {
             <div className="h-3 w-24 max-w-full rounded bg-muted sm:w-32" />
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[68, 42, 91].map((n) => (
-                <div key={n} className="min-w-0 rounded-xl border border-border bg-background p-2.5 shadow-soft-sm sm:p-3">
+                <div key={n} className="card-interactive min-w-0 rounded-xl border border-border bg-background p-2.5 shadow-soft-sm sm:p-3">
                   <div className="h-2 w-8 max-w-full rounded bg-muted sm:w-10" />
                   <p className="mt-2 font-display text-base font-semibold text-foreground sm:text-xl">{n}%</p>
                 </div>
               ))}
             </div>
-            <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
+            <div className="card-interactive rounded-xl border border-border bg-background p-3 sm:p-4">
               <div className="mb-3 flex items-end gap-1.5 sm:gap-2">
                 {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
                   <div
@@ -326,14 +327,14 @@ function DashboardPreview() {
                   { label: 'Open labs', value: '46' },
                   { label: 'Upcoming exams', value: '12' },
                 ].map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
+                  <div key={stat.label} className="card-interactive rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
                     <p className="text-xs text-muted-foreground">{stat.label}</p>
                     <p className="mt-1 font-display text-2xl font-semibold text-foreground">{stat.value}</p>
                   </div>
                 ))}
               </div>
               <div className="grid gap-3 md:grid-cols-2">
-                <div className="rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
+                <div className="card-interactive rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
                   <p className="text-sm font-medium text-foreground">Engagement trend</p>
                   <div className="mt-4 flex h-28 items-end gap-2">
                     {[35, 48, 42, 70, 58, 82, 76].map((h, i) => (
@@ -345,7 +346,7 @@ function DashboardPreview() {
                     ))}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
+                <div className="card-interactive rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
                   <p className="text-sm font-medium text-foreground">Recent activity</p>
                   <ul className="mt-4 space-y-3">
                     {['Batch A submitted Lab 04', 'Exam window opened', 'New course published'].map(
@@ -501,7 +502,7 @@ function AiFeatures() {
                 Model Raft under network partitions with live visuals.
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-background p-3 text-sm text-foreground">
+            <div className="card-interactive rounded-xl border border-border bg-background p-3 text-sm text-foreground">
               <p className="font-medium">2. Edge cache playground</p>
               <p className="mt-1 text-muted-foreground">Compare TTL strategies across regions.</p>
             </div>
@@ -536,7 +537,7 @@ function PracticeLabs() {
                 { name: 'System design basics', pct: 18 },
               ] as const
             ).map((track) => (
-              <div key={track.name} className="rounded-xl border border-border bg-background p-3">
+              <div key={track.name} className="card-interactive rounded-xl border border-border bg-background p-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-foreground">{track.name}</span>
                   <span className="text-xs text-muted-foreground">{track.pct}%</span>
@@ -585,7 +586,7 @@ function ExamsSection() {
               { label: 'Candidates', value: '312' },
               { label: 'Integrity', value: 'On' },
             ].map((item) => (
-              <div key={item.label} className="rounded-xl border border-border bg-background p-3">
+              <div key={item.label} className="card-interactive rounded-xl border border-border bg-background p-3">
                 <p className="text-xs text-muted-foreground">{item.label}</p>
                 <p className="mt-1 font-display text-lg font-semibold text-foreground">{item.value}</p>
               </div>
@@ -821,7 +822,7 @@ function Pricing() {
             <div
               key={tier.name}
               className={cn(
-                'flex flex-col rounded-2xl border bg-card p-6 shadow-soft-sm sm:p-8',
+                'card-interactive flex flex-col rounded-2xl border bg-card p-6 shadow-soft-sm sm:p-8',
                 tier.highlighted
                   ? 'border-primary shadow-soft-lg ring-1 ring-primary/30'
                   : 'border-border',

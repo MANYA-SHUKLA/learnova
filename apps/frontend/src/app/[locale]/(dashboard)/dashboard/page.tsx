@@ -49,7 +49,6 @@ import {
   useSemesters,
 } from '@/features/institution';
 import { Link } from '@/lib/i18n/routing';
-import { cn } from '@/lib/utils';
 
 const LIST_PARAMS = { limit: 50, page: 1 } as const;
 
@@ -270,7 +269,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+                <div className="card-interactive rounded-2xl border border-border/70 bg-background/70 p-4">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Student capacity
                   </p>
@@ -279,7 +278,7 @@ export default function DashboardPage() {
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">Plan limit</p>
                 </div>
-                <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+                <div className="card-interactive rounded-2xl border border-border/70 bg-background/70 p-4">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Faculty capacity
                   </p>
@@ -315,7 +314,7 @@ export default function DashboardPage() {
               transition={{ duration: 0.3, delay: index * 0.04 }}
             >
               <Link href={stat.href} className="block h-full">
-                <Card className="h-full rounded-2xl border-border/80 shadow-soft-md transition-colors hover:border-primary/30 hover:bg-primary/[0.02]">
+                <Card className="h-full rounded-2xl border-border/80">
                   <CardContent className="flex items-start justify-between gap-4 p-5">
                     <div>
                       <p className="text-sm text-muted-foreground">{stat.label}</p>
@@ -482,12 +481,7 @@ export default function DashboardPage() {
             const Icon = action.icon;
             return (
               <Link key={action.href} href={action.href} className="group">
-                <Card
-                  className={cn(
-                    'h-full rounded-2xl border-border/80 shadow-soft-md transition-all',
-                    'group-hover:border-primary/35 group-hover:shadow-soft-md',
-                  )}
-                >
+                <Card className="h-full rounded-2xl border-border/80">
                   <CardContent className="flex items-start gap-4 p-5">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                       <Icon className="size-5" />

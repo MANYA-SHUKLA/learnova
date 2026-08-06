@@ -212,7 +212,7 @@ export default function InstitutionDashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
           >
-            <Card className="hover:shadow-glow">
+            <Card>
               <CardContent className="flex items-center gap-4 p-5">
                 <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <stat.icon className="size-5" />
@@ -238,7 +238,7 @@ export default function InstitutionDashboardPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {MODULES.map((mod) => (
             <Link key={mod.href} href={mod.href} className="group block">
-              <Card className="h-full transition-all group-hover:-translate-y-0.5 group-hover:border-primary/25 group-hover:shadow-glow">
+              <Card className="h-full">
                 <CardHeader className="flex flex-row items-start gap-4 space-y-0">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-primary transition-colors group-hover:bg-primary/10">
                     <mod.icon className="size-5" />
