@@ -49,7 +49,7 @@ export const storageConfig = {
 
 export const mailConfig = {
   driver: env.MAIL_DRIVER ?? 'console',
-  from: env.MAIL_FROM ?? 'noreply@learnova.local',
+  from: env.MAIL_FROM ?? 'shuklamanya99@gmail.com',
   smtp: {
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,

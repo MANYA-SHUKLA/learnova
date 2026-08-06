@@ -68,6 +68,15 @@ export function SiteFooter() {
               The enterprise AI learning platform for institutions that teach, assess, and innovate at
               scale.
             </p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Contact:{' '}
+              <a
+                href="mailto:shuklamanya99@gmail.com"
+                className="font-medium text-foreground underline-offset-2 hover:underline"
+              >
+                shuklamanya99@gmail.com
+              </a>
+            </p>
           </div>
           <FooterColumn title="Product" links={PRODUCT_LINKS} />
           <FooterColumn title="Company" links={COMPANY_LINKS} />

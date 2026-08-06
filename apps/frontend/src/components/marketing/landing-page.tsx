@@ -186,15 +186,10 @@ function Hero() {
             for modern institutions.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            <Button asChild size="lg" className="min-w-[10.5rem] px-9 shadow-soft-lg">
+            <Button asChild size="lg">
               <Link href="/login">Get started</Link>
             </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="min-w-[10.5rem] border-border/70 bg-card/80 px-9 backdrop-blur-sm"
-            >
+            <Button asChild variant="outline" size="lg">
               <Link href="/about">Learn more</Link>
             </Button>
           </div>
@@ -681,19 +676,19 @@ const TESTIMONIALS = [
   {
     quote:
       'Learnova replaced three tools for us. Faculty actually use the dashboard — that alone was worth it.',
-    name: 'Dr. Ananya Rao',
+    name: 'Manya Shukla',
     role: 'Dean of Engineering, Northbridge University',
   },
   {
     quote:
       'Coding labs and exams in one place cut our ops overhead dramatically. Students feel the polish.',
-    name: 'Marcus Chen',
+    name: 'Rajkumar Yogi',
     role: 'Director of Digital Learning, Helix Institute',
   },
   {
     quote:
       'The analytics finally show us where cohorts stall — interventions are faster and more targeted.',
-    name: 'Priya Nair',
+    name: 'Mahi Raj',
     role: 'VP Academic Affairs, Summit College',
   },
 ] as const;
@@ -747,7 +742,7 @@ const FAQS = [
   },
   {
     q: 'Is there a sandbox for evaluation?',
-    a: 'Contact us for a guided demo environment. Starter accounts can explore core flows without a payment commitment.',
+    a: 'Contact us at shuklamanya99@gmail.com for a guided demo environment. Starter accounts can explore core flows without a payment commitment.',
   },
   {
     q: 'How is AI usage governed?',
@@ -877,15 +872,10 @@ function FinalCta() {
               Bring LMS, exams, coding labs, and AI into one premium experience for your institution.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-              <Button asChild size="lg" className="min-w-[10.5rem] px-9 shadow-soft-lg">
+              <Button asChild size="lg">
                 <Link href="/login">Get started</Link>
               </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="min-w-[10.5rem] border-border/70 bg-card/80 px-9 backdrop-blur-sm"
-              >
+              <Button asChild variant="outline" size="lg">
                 <Link href="/about">About Learnova</Link>
               </Button>
             </div>

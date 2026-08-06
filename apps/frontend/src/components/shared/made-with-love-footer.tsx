@@ -32,7 +32,14 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
             Manya Shukla
           </a>
           {' · '}
-          8005586588 · 2026 · SOE JNU Minor Project
+          <a
+            href="mailto:shuklamanya99@gmail.com"
+            className="font-medium text-foreground underline-offset-2 hover:underline"
+          >
+            shuklamanya99@gmail.com
+          </a>
+          {' · '}
+          2026 · SOE JNU Minor Project
         </span>
       </p>
     </footer>

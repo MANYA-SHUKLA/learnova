@@ -28,7 +28,7 @@ export async function sendWorkerEmail(payload: EmailJobPayload): Promise<WorkerM
     });
 
     const info = await transporter.sendMail({
-      from: env.MAIL_FROM ?? 'noreply@learnova.local',
+      from: env.MAIL_FROM ?? 'shuklamanya99@gmail.com',
       to: payload.to,
       subject: payload.subject,
       html: payload.html,

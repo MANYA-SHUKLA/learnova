@@ -52,7 +52,7 @@ Generate strong JWT secrets (≥ 32 chars) for anything beyond local toy usage.
 | `STORAGE_DRIVER` | no | `local` | `local` \| `s3` |
 | `STORAGE_LOCAL_PATH` | no | `./uploads` | Local upload root |
 | `MAIL_DRIVER` | no | `console` | `console` \| `smtp` \| `ses` |
-| `MAIL_FROM` | no | `noreply@learnova.local` | From address |
+| `MAIL_FROM` | no | `shuklamanya99@gmail.com` | From address |
 | `SMTP_HOST` | no | — | SMTP host when driver=smtp |
 
 ### Feature flags (optional)

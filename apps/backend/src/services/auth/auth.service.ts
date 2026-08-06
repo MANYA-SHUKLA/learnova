@@ -32,6 +32,7 @@ import {
   verifyRefreshToken,
 } from '../../utils/jwt/index.js';
 import { sendMail } from '../../mail/index.js';
+import { mailHtml, mailText } from '../../mail/mail-copy.js';
 import { env } from '../../config/env.js';
 import {
   auditAuthLogRepository,
@@ -214,8 +215,10 @@ async function sendVerificationEmail(
   await sendMail({
     to: user.email,
     subject: 'Verify your Learnova email',
-    html: `<p>Hello ${user.firstName},</p><p>Verify your email: <a href="${link}">${link}</a></p>`,
-    text: `Verify your email: ${link}`,
+    html: mailHtml(
+      `<p>Hello ${user.firstName},</p><p>Verify your email: <a href="${link}">${link}</a></p>`,
+    ),
+    text: mailText(`Hello ${user.firstName},\n\nVerify your email: ${link}`),
   });
 
   await auditAuthLogRepository.create({
@@ -270,8 +273,12 @@ export class AuthService {
     await sendMail({
       to: user.email,
       subject: 'Welcome to Learnova',
-      html: `<p>Welcome ${user.firstName}!</p><p>Your institution <strong>${input.institutionName}</strong> is ready. Please verify your email to sign in.</p>`,
-      text: `Welcome ${user.firstName}! Verify your email to sign in.`,
+      html: mailHtml(
+        `<p>Welcome ${user.firstName}!</p><p>Your institution <strong>${input.institutionName}</strong> is ready. Please verify your email to sign in.</p>`,
+      ),
+      text: mailText(
+        `Welcome ${user.firstName}! Your institution ${input.institutionName} is ready. Verify your email to sign in.`,
+      ),
     });
 
     const permissions = [...getPermissionsForRole('institution_admin')] as Permission[];
@@ -518,8 +525,10 @@ export class AuthService {
     await sendMail({
       to: user.email,
       subject: 'Reset your Learnova password',
-      html: `<p>Reset your password: <a href="${link}">${link}</a></p><p>This link expires in 1 hour.</p>`,
-      text: `Reset your password: ${link}`,
+      html: mailHtml(
+        `<p>Reset your password: <a href="${link}">${link}</a></p><p>This link expires in 1 hour.</p>`,
+      ),
+      text: mailText(`Reset your password: ${link}\nThis link expires in 1 hour.`),
     });
 
     await auditAuthLogRepository.create({
