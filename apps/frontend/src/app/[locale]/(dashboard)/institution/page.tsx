@@ -106,15 +106,15 @@ export default function InstitutionDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <p className="text-sm font-medium text-primary">Organization</p>
-          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight">Institution</h1>
-          <p className="mt-2 max-w-xl text-muted-foreground">
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">Institution</h1>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
             Structure, academic calendar, and tenant settings for your campus.
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="w-full sm:w-auto">
           <Link href={APP_ROUTES.INSTITUTION_PROFILE}>
             Edit profile
             <ArrowRight className="size-4" />
@@ -148,17 +148,17 @@ export default function InstitutionDashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft-md"
         >
-          <div className="bg-hero border-b border-border px-6 py-6 sm:px-8">
+          <div className="bg-hero border-b border-border px-4 py-5 sm:px-8 sm:py-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-gradient text-lg font-bold text-white shadow-glow">
+              <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient text-lg font-bold text-white shadow-glow sm:size-14">
                   {institution.shortName.slice(0, 2).toUpperCase()}
                 </div>
-                <div>
-                  <h2 className="font-display text-2xl font-semibold tracking-tight">
+                <div className="min-w-0">
+                  <h2 className="break-words font-display text-xl font-semibold tracking-tight sm:text-2xl">
                     {institution.name}
                   </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-1 break-all text-sm text-muted-foreground">
                     {institution.shortName} · {institution.code} · {institution.slug}
                   </p>
                   <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
