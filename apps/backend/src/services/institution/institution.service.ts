@@ -433,11 +433,10 @@ export class InstitutionService {
     }
     const institutionId = requireTenant(actor);
     if (input.isActive) {
-      // deactivate other active years
-      await academicYearRepository['model'].updateMany(
+      await AcademicYearModel.updateMany(
         { institutionId, deletedAt: null },
         { $set: { isActive: false } },
-      );
+      ).exec();
     }
     return this.createTenantResource(
       academicYearRepository,
@@ -456,7 +455,7 @@ export class InstitutionService {
       actor,
       id,
       input as never,
-      'academic_year.created',
+      'academic_year.updated',
     );
   archiveAcademicYear = (id: string, actor: ActorContext) =>
     this.archiveTenantResource(academicYearRepository, actor, id, 'academic_year');
@@ -485,7 +484,7 @@ export class InstitutionService {
       actor,
       id,
       input as never,
-      'semester.created',
+      'semester.updated',
     );
   archiveSemester = (id: string, actor: ActorContext) =>
     this.archiveTenantResource(semesterRepository, actor, id, 'semester');
@@ -506,7 +505,7 @@ export class InstitutionService {
       sectionRepository,
       actor,
       input as never,
-      'department.created',
+      'section.created',
     );
   }
   listSections = (query: OrgListQuery, actor: ActorContext) =>
@@ -519,7 +518,7 @@ export class InstitutionService {
       actor,
       id,
       input as never,
-      'department.updated',
+      'section.updated',
     );
   archiveSection = (id: string, actor: ActorContext) =>
     this.archiveTenantResource(sectionRepository, actor, id, 'section');
@@ -535,7 +534,7 @@ export class InstitutionService {
       batchRepository,
       actor,
       input as never,
-      'department.created',
+      'batch.created',
     );
   }
   listBatches = (query: OrgListQuery, actor: ActorContext) =>
@@ -543,7 +542,7 @@ export class InstitutionService {
   getBatch = (id: string, actor: ActorContext) =>
     this.getTenantResource(batchRepository, actor, id);
   updateBatch = (id: string, input: UpdateBatchInput, actor: ActorContext) =>
-    this.updateTenantResource(batchRepository, actor, id, input as never, 'department.updated');
+    this.updateTenantResource(batchRepository, actor, id, input as never, 'batch.updated');
   archiveBatch = (id: string, actor: ActorContext) =>
     this.archiveTenantResource(batchRepository, actor, id, 'batch');
   restoreBatch = (id: string, actor: ActorContext) =>

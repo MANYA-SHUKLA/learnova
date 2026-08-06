@@ -80,6 +80,11 @@ export const createInstitutionSchema = z.object({
 
 export const updateInstitutionSchema = createInstitutionSchema.partial();
 
+export const updateInstitutionBrandingSchema = z.object({
+  logo: z.string().url().optional().nullable(),
+  favicon: z.string().url().optional().nullable(),
+});
+
 export const createCampusSchema = z.object({
   name: z.string().trim().min(2).max(200),
   code: z.string().trim().min(1).max(32),
