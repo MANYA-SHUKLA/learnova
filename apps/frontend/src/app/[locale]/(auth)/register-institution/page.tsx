@@ -22,12 +22,10 @@ import {
   useRegisterInstitutionMutation,
 } from '@/features/auth';
 import { ApiClientError } from '@/lib/api/client';
-import { isSaasModeEnabled } from '@/lib/saas';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
 export default function RegisterInstitutionPage() {
   const router = useRouter();
-  const saasMode = isSaasModeEnabled();
   const registerMutation = useRegisterInstitutionMutation();
 
   const {
@@ -47,27 +45,6 @@ export default function RegisterInstitutionPage() {
       acceptTerms: false,
     },
   });
-
-  if (!saasMode) {
-    return (
-      <div className="w-full max-w-lg">
-        <Card>
-          <CardHeader>
-            <CardTitle>Registration unavailable</CardTitle>
-            <CardDescription>
-              Institution self-registration is disabled for this deployment. Contact your Learnova
-              operator.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button asChild className="w-full">
-              <Link href="/login">Institution Login</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     void handleSubmit(async (values) => {

@@ -155,17 +155,6 @@ function LoginForm() {
                 Contact your Institution Administrator
               </span>
             </p>
-            {saasMode ? (
-              <p>
-                Setting up a campus?{' '}
-                <Link
-                  href="/register-institution"
-                  className="font-semibold text-primary underline-offset-2 hover:underline"
-                >
-                  Register Institution
-                </Link>
-              </p>
-            ) : null}
           </div>
         </CardFooter>
       </form>
