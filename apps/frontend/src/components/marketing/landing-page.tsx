@@ -100,7 +100,7 @@ function HeroVisual() {
           <span className="size-2.5 rounded-full bg-success/70" />
           <span className="ml-3 text-xs text-muted-foreground">learnova.app / dashboard</span>
         </div>
-        <div className="grid min-h-[200px] grid-cols-1 sm:min-h-[280px] sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]">
+        <div className="grid min-h-[220px] grid-cols-1 sm:min-h-[320px] sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] lg:min-h-[380px]">
           <aside className="hidden space-y-2 border-b border-border bg-muted/40 p-3 sm:block sm:border-b-0 sm:border-r sm:p-4">
             {['Overview', 'Courses', 'Labs', 'Exams', 'Analytics'].map((item, i) => (
               <div
@@ -816,12 +816,12 @@ function Pricing() {
           title="Plans that scale with you"
           description="Placeholder tiers for planning — no payment required. Choose the shape that fits your institution."
         />
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
+        <div className="mt-12 grid gap-4 lg:grid-cols-3 xl:gap-6">
           {TIERS.map((tier) => (
             <div
               key={tier.name}
               className={cn(
-                'flex flex-col rounded-2xl border bg-card p-6 shadow-soft-sm',
+                'flex flex-col rounded-2xl border bg-card p-6 shadow-soft-sm sm:p-8',
                 tier.highlighted
                   ? 'border-primary shadow-soft-lg ring-1 ring-primary/30'
                   : 'border-border',
@@ -857,9 +857,9 @@ function Pricing() {
 
 function FinalCta() {
   return (
-    <MotionSection className="pb-24 pt-8 sm:pb-28">
-      <div className={siteContainer()}>
-        <div className="relative overflow-hidden rounded-none border-y border-border bg-gradient-to-br from-primary/15 via-background to-accent/10 px-[clamp(1rem,3vw,3.5rem)] py-16 text-center shadow-none sm:rounded-2xl sm:border sm:py-20 sm:shadow-soft-lg lg:py-24">
+    <MotionSection className="w-full pb-0 pt-8 sm:pb-28 sm:pt-10">
+      <div className="w-full sm:px-[clamp(1rem,2.5vw,2.5rem)] xl:px-[clamp(1.5rem,3vw,3.5rem)]">
+        <div className="relative overflow-hidden border-y border-border bg-gradient-to-br from-primary/15 via-background to-accent/10 px-[clamp(1rem,3vw,3.5rem)] py-16 text-center sm:rounded-2xl sm:border sm:py-20 sm:shadow-soft-lg lg:py-24">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(var(--primary)/0.12),_transparent_65%)]"
@@ -888,7 +888,7 @@ function FinalCta() {
 
 export function LandingPage() {
   return (
-    <main className="font-body">
+    <main className="w-full max-w-[100vw] overflow-x-clip font-body">
       <Hero />
       <FeatureGrid />
       <DashboardPreview />

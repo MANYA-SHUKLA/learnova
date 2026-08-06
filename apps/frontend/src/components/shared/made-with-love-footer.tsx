@@ -1,4 +1,5 @@
 import { Heart } from 'lucide-react';
+import { siteGutter } from '@/lib/layout';
 import { cn } from '@/lib/utils';
 
 interface MadeWithLoveFooterProps {
@@ -9,7 +10,8 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
   return (
     <footer
       className={cn(
-        'border-t border-border bg-muted/30 px-4 py-4 text-center print:hidden',
+        'w-full border-t border-border bg-muted/30 py-4 text-center print:hidden',
+        siteGutter,
         className,
       )}
     >
