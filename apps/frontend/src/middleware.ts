@@ -69,7 +69,7 @@ export default function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL(`/${locale}/sessions`, request.url));
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
   }
 
   const response = intlMiddleware(request);
