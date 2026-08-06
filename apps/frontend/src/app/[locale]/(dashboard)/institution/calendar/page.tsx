@@ -171,16 +171,16 @@ export default function AcademicCalendarPage() {
 
   if (listQuery.isLoading) {
     return (
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mx-auto w-full min-w-0 max-w-6xl">
         <Skeleton className="mb-6 h-8 w-48" />
         <Skeleton className="h-64 w-full" />
-      </main>
+      </div>
     );
   }
 
   if (listQuery.isError) {
     return (
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mx-auto w-full min-w-0 max-w-6xl">
         <ErrorState
           message={
             listQuery.error instanceof Error
@@ -189,7 +189,7 @@ export default function AcademicCalendarPage() {
           }
           onRetry={() => void listQuery.refetch()}
         />
-      </main>
+      </div>
     );
   }
 
@@ -197,7 +197,7 @@ export default function AcademicCalendarPage() {
   const meta = listQuery.data?.meta;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto w-full min-w-0 max-w-6xl">
       <PageHeader
         title="Academic calendars"
         description="Semester starts/ends, exam windows, holidays, and institutional events."
@@ -389,6 +389,6 @@ export default function AcademicCalendarPage() {
           </CardContent>
         </Card>
       </ResourceFormDialog>
-    </main>
+    </div>
   );
 }

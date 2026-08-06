@@ -125,7 +125,7 @@ export function ResourceFormDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 max-h-[90vh] w-full overflow-y-auto rounded-t-2xl border border-border bg-background p-6 shadow-lg sm:max-w-2xl sm:rounded-2xl"
+        className="relative z-10 max-h-[min(90vh,100dvh)] w-full max-w-full overflow-y-auto rounded-t-2xl border border-border bg-background p-4 shadow-lg sm:max-w-2xl sm:rounded-2xl sm:p-6"
       >
         <div className="mb-5">
           <h2 id={titleId} className="font-display text-xl font-semibold tracking-tight">

@@ -241,14 +241,14 @@ export default function DashboardPage() {
           </Card>
         ) : institution ? (
           <Card className="overflow-hidden rounded-2xl border-border/80 bg-gradient-to-br from-card via-card to-primary/[0.04] shadow-soft-md">
-            <CardContent className="grid gap-6 p-6 lg:grid-cols-[1.4fr_1fr]">
-              <div className="space-y-4">
+            <CardContent className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+              <div className="min-w-0 space-y-4">
                 <div className="flex flex-wrap items-start gap-3">
-                  <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                     <Building2 className="size-6" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-display text-xl font-semibold tracking-tight">
+                    <h2 className="truncate font-display text-lg font-semibold tracking-tight sm:text-xl">
                       {institution.name}
                     </h2>
                     <p className="mt-0.5 text-sm text-muted-foreground">
@@ -350,30 +350,30 @@ export default function DashboardPage() {
         />
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         {/* Chart */}
-        <motion.div {...cardMotion} transition={{ duration: 0.35, delay: 0.1 }}>
-          <Card className="h-full rounded-2xl border-border/80 shadow-soft-md">
+        <motion.div {...cardMotion} transition={{ duration: 0.35, delay: 0.1 }} className="min-w-0">
+          <Card className="h-full min-w-0 rounded-2xl border-border/80 shadow-soft-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Module counts</CardTitle>
               <CardDescription>Distribution across institution resources</CardDescription>
             </CardHeader>
-            <CardContent className="h-72 pt-2">
+            <CardContent className="h-64 min-w-0 pt-2 sm:h-72">
               {stats.some((s) => s.loading) ? (
                 <Skeleton className="h-full w-full rounded-xl" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                  <BarChart data={chartData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
                     <XAxis
                       dataKey="name"
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
                       interval={0}
-                      angle={-20}
+                      angle={-35}
                       textAnchor="end"
-                      height={56}
+                      height={64}
                     />
                     <YAxis
                       allowDecimals={false}

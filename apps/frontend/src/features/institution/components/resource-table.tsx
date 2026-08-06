@@ -64,45 +64,77 @@ export function ResourceTable<T extends { id: string }>({
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border shadow-soft-sm">
-      <table className="w-full min-w-[640px] text-left text-sm">
-        <thead className="sticky top-0 z-10 border-b border-border bg-muted/60 backdrop-blur-sm">
-          <tr>
-            {columns.map((col) => (
-              <th
-                key={col.id}
-                className={cn(
-                  'px-4 py-3 font-medium text-muted-foreground',
-                  col.className,
-                )}
-              >
-                {col.header}
-              </th>
-            ))}
-            {rowActions ? (
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground print:hidden">
-                Actions
-              </th>
-            ) : null}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/30">
+    <div className="min-w-0">
+      {/* Mobile: stacked cards */}
+      <ul className="space-y-3 md:hidden">
+        {rows.map((row) => (
+          <li
+            key={row.id}
+            className="rounded-2xl border border-border bg-card p-4 shadow-soft-sm"
+          >
+            <dl className="space-y-3">
               {columns.map((col) => (
-                <td key={col.id} className={cn('px-4 py-3 align-middle', col.className)}>
-                  {col.cell(row)}
-                </td>
+                <div key={col.id} className="min-w-0">
+                  <dt className="text-xs font-medium text-muted-foreground">{col.header}</dt>
+                  <dd className={cn('mt-0.5 break-words text-sm text-foreground', col.className)}>
+                    {col.cell(row)}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {rowActions ? (
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-3 print:hidden">
+                {rowActions(row)}
+              </div>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+
+      {/* Desktop / tablet: scrollable table */}
+      <div className="hidden min-w-0 overflow-x-auto rounded-2xl border border-border shadow-soft-sm md:block">
+        <table className="w-full min-w-[36rem] text-left text-sm">
+          <thead className="sticky top-0 z-10 border-b border-border bg-muted/60 backdrop-blur-sm">
+            <tr>
+              {columns.map((col) => (
+                <th
+                  key={col.id}
+                  className={cn(
+                    'whitespace-nowrap px-3 py-3 font-medium text-muted-foreground sm:px-4',
+                    col.className,
+                  )}
+                >
+                  {col.header}
+                </th>
               ))}
               {rowActions ? (
-                <td className="px-4 py-3 text-right align-middle print:hidden">
-                  <div className="flex flex-wrap justify-end gap-1">{rowActions(row)}</div>
-                </td>
+                <th className="px-3 py-3 text-right font-medium text-muted-foreground print:hidden sm:px-4">
+                  Actions
+                </th>
               ) : null}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/30">
+                {columns.map((col) => (
+                  <td
+                    key={col.id}
+                    className={cn('max-w-[16rem] truncate px-3 py-3 align-middle sm:px-4', col.className)}
+                  >
+                    {col.cell(row)}
+                  </td>
+                ))}
+                {rowActions ? (
+                  <td className="px-3 py-3 text-right align-middle print:hidden sm:px-4">
+                    <div className="flex flex-wrap justify-end gap-1">{rowActions(row)}</div>
+                  </td>
+                ) : null}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -129,11 +161,12 @@ export function PaginationControls({
       <p className="text-xs text-muted-foreground">
         Page {page} of {Math.max(totalPages, 1)} · {total} total
       </p>
-      <div className="flex gap-2">
+      <div className="flex w-full gap-2 sm:w-auto">
         <Button
           type="button"
           variant="outline"
           size="sm"
+          className="flex-1 sm:flex-none"
           disabled={!hasPrevPage}
           onClick={() => { onPageChange(page - 1); }}
         >
@@ -143,6 +176,7 @@ export function PaginationControls({
           type="button"
           variant="outline"
           size="sm"
+          className="flex-1 sm:flex-none"
           disabled={!hasNextPage}
           onClick={() => { onPageChange(page + 1); }}
         >

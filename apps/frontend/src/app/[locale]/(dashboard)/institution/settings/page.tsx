@@ -75,29 +75,29 @@ export default function InstitutionSettingsPage() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <div className="mx-auto w-full min-w-0 max-w-3xl">
         <Skeleton className="mb-6 h-8 w-40" />
         <Skeleton className="h-48 w-full" />
-      </main>
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <div className="mx-auto w-full min-w-0 max-w-3xl">
         <ErrorState
           message={error instanceof Error ? error.message : 'Failed to load settings.'}
           onRetry={() => void refetch()}
         />
-      </main>
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <div className="mx-auto w-full min-w-0 max-w-3xl">
         <EmptyState title="No settings" description="Settings record was not found." />
-      </main>
+      </div>
     );
   }
 
@@ -133,7 +133,7 @@ export default function InstitutionSettingsPage() {
   };
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
+    <div className="mx-auto w-full min-w-0 max-w-3xl">
       <PageHeader
         title="Institution settings"
         description="Language, theme, attendance, grading, exams, certificates, storage, AI, notifications, and security."
@@ -216,6 +216,6 @@ export default function InstitutionSettingsPage() {
 
       {message ? <p className="mt-4 text-sm text-success">{message}</p> : null}
       {formError ? <p className="mt-4 text-sm text-danger">{formError}</p> : null}
-    </main>
+    </div>
   );
 }

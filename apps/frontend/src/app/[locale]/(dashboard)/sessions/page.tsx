@@ -48,20 +48,20 @@ export default function SessionsPage() {
     return (
       <main className="flex min-h-[50vh] items-center justify-center px-6">
         <Spinner size="lg" />
-      </main>
+      </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-12">
+      <div className="mx-auto w-full min-w-0 max-w-3xl">
         <Card>
           <CardHeader>
             <CardTitle>Sessions</CardTitle>
             <CardDescription>Sign in to manage your active sessions.</CardDescription>
           </CardHeader>
         </Card>
-      </main>
+      </div>
     );
   }
 
@@ -78,7 +78,7 @@ export default function SessionsPage() {
   };
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <div className="mx-auto w-full min-w-0 max-w-3xl">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight">Sessions</h1>
@@ -154,6 +154,6 @@ export default function SessionsPage() {
           </Card>
         ) : null}
       </div>
-    </main>
+    </div>
   );
 }

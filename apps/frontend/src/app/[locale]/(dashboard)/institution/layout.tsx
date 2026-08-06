@@ -43,10 +43,10 @@ export default function InstitutionLayout({ children }: { children: ReactNode })
         </Card>
       }
     >
-      <div className="mb-6 print:hidden">
+      <div className="mb-6 w-full min-w-0 print:hidden">
         <nav
           aria-label="Institution sections"
-          className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-border/80 bg-muted/40 p-1 shadow-soft-sm"
+          className="flex w-full max-w-full gap-1 overflow-x-auto overscroll-x-contain rounded-full border border-border/80 bg-muted/40 p-1 shadow-soft-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {NAV_ITEMS.map((item) => {
             const active = isActive(pathname, item.href, 'exact' in item && item.exact);
