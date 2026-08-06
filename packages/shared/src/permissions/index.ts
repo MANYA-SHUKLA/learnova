@@ -30,6 +30,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'analytics:read',
     'analytics:export',
     'users:read',
+    'institution:read',
   ],
   institution_admin: [
     'lms:read',
@@ -52,6 +53,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'users:read',
     'users:manage',
     'roles:manage',
+    'institution:read',
     'institution:manage',
   ],
   // Future roles — empty until activated

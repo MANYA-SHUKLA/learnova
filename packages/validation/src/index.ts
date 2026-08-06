@@ -66,3 +66,5 @@ export {
   type VerifyEmailInput,
   type ResendVerificationInput,
 } from './auth.js';
+
+export * from './institution.js';

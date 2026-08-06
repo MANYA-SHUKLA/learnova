@@ -23,6 +23,7 @@ export const PERMISSIONS = {
   USERS_READ: 'users:read',
   USERS_MANAGE: 'users:manage',
   ROLES_MANAGE: 'roles:manage',
+  INSTITUTION_READ: 'institution:read',
   INSTITUTION_MANAGE: 'institution:manage',
 } as const;
 

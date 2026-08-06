@@ -28,6 +28,7 @@ export type Permission =
   | 'users:read'
   | 'users:manage'
   | 'roles:manage'
+  | 'institution:read'
   | 'institution:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
