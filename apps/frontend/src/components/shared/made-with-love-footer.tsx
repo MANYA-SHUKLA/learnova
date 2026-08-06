@@ -20,8 +20,19 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
           aria-hidden
         />
         <span>
-          by <span className="font-medium text-foreground">Manya Shukla</span> · 2026 · SOE JNU
-          Minor Project
+          by{' '}
+          <span className="font-medium text-foreground">Manya Shukla</span>
+          {' · '}
+          <a
+            href="https://wa.me/918005586588"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-foreground underline-offset-2 hover:underline"
+          >
+            8005586588
+          </a>
+          {' · '}
+          2026 · SOE JNU Minor Project
         </span>
       </p>
     </footer>
