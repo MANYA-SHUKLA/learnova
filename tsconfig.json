@@ -1,8 +1,37 @@
 {
   "compilerOptions": {
-    "types": ["node"]
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@learnova/config": ["packages/config/src/index.ts"],
+      "@learnova/config/*": ["packages/config/src/*"],
+      "@learnova/constants": ["packages/constants/src/index.ts"],
+      "@learnova/constants/*": ["packages/constants/src/*"],
+      "@learnova/events": ["packages/events/src/index.ts"],
+      "@learnova/events/*": ["packages/events/src/*"],
+      "@learnova/feature-flags": ["packages/feature-flags/src/index.ts"],
+      "@learnova/feature-flags/*": ["packages/feature-flags/src/*"],
+      "@learnova/logger": ["packages/logger/src/index.ts"],
+      "@learnova/logger/*": ["packages/logger/src/*"],
+      "@learnova/shared": ["packages/shared/src/index.ts"],
+      "@learnova/shared/*": ["packages/shared/src/*"],
+      "@learnova/types": ["packages/types/src/index.ts"],
+      "@learnova/types/*": ["packages/types/src/*"],
+      "@learnova/ui": ["packages/ui/src/index.ts"],
+      "@learnova/ui/*": ["packages/ui/src/*"],
+      "@learnova/utils": ["packages/utils/src/index.ts"],
+      "@learnova/utils/*": ["packages/utils/src/*"],
+      "@learnova/validation": ["packages/validation/src/index.ts"],
+      "@learnova/validation/*": ["packages/validation/src/*"]
+    }
   },
-  "files": [],
-  "include": [],
-  "exclude": ["node_modules", "**/dist", "**/.next"]
+  "include": ["scripts/**/*.ts"],
+  "exclude": ["node_modules", "**/dist", "**/.next", "**/node_modules"]
 }
