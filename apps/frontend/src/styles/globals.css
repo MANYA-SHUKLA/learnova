@@ -1,7 +1,1 @@
-@import 'tailwindcss';
-
-/* Scan app + shared UI package for utility classes (Tailwind v4) */
-@source '../**/*.{ts,tsx}';
-@source '../../../../packages/ui/src/**/*.{ts,tsx}';
-
 @import '@learnova/ui/globals.css';
