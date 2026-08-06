@@ -52,6 +52,8 @@ export async function sendWorkerEmail(payload: EmailJobPayload): Promise<WorkerM
       messageId,
       correlationId: payload.correlationId,
       templateId: payload.templateId,
+      text: payload.text,
+      html: payload.html,
     },
     'Worker email sent (console)',
   );
