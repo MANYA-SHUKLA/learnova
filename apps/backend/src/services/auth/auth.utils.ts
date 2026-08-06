@@ -26,10 +26,10 @@ export function parseUserAgent(ua: string | null): {
   else if (lower.includes('opera') || lower.includes('opr/')) browser = 'Opera';
 
   let os: string | null = null;
-  if (lower.includes('windows')) os = 'Windows';
+  if (lower.includes('android')) os = 'Android';
+  else if (lower.includes('iphone') || lower.includes('ipad') || lower.includes('ipod')) os = 'iOS';
+  else if (lower.includes('windows')) os = 'Windows';
   else if (lower.includes('mac os') || lower.includes('macintosh')) os = 'macOS';
-  else if (lower.includes('android')) os = 'Android';
-  else if (lower.includes('iphone') || lower.includes('ipad')) os = 'iOS';
   else if (lower.includes('linux')) os = 'Linux';
 
   let deviceType: DeviceType = 'desktop';

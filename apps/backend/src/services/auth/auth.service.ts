@@ -57,11 +57,11 @@ function toAuthUser(user: UserEntity, role: Role, permissions: Permission[]): Au
     firstName: user.firstName,
     lastName: user.lastName,
     role: role as AuthUser['role'],
-    institutionId: user.institutionId ? String(user.institutionId) : null,
+    institutionId: String(user.institutionId),
     permissions,
-    locale: (user.locale as AuthUser['locale']) || 'en',
-    avatarUrl: user.avatarUrl ?? null,
-    isEmailVerified: Boolean(user.isEmailVerified),
+    locale: user.locale as AuthUser['locale'],
+    avatarUrl: user.avatarUrl,
+    isEmailVerified: user.isEmailVerified,
   };
 }
 
@@ -106,7 +106,7 @@ async function resolveRolePermissions(roleId: Types.ObjectId): Promise<{
     throw new AuthenticationError('Role not found for user');
   }
   const role = roleDoc.name as Role;
-  const permissions = [...getPermissionsForRole(role)] as Permission[];
+  const permissions = [...getPermissionsForRole(role)];
   return { role, permissions };
 }
 
@@ -158,10 +158,10 @@ async function issueSessionTokens(
     sub: String(user._id),
     email: user.email,
     role,
-    institutionId: user.institutionId ? String(user.institutionId) : null,
+    institutionId: String(user.institutionId),
     permissions,
     sessionId: String(session._id),
-    tv: user.tokenVersion ?? 0,
+    tv: user.tokenVersion,
   });
 
   await auditAuthLogRepository.create({
@@ -284,7 +284,10 @@ export class AuthService {
   async login(input: LoginInput, ctx: ClientContext) {
     const user = await userRepository.findByEmail(input.email);
 
-    const fail = async (reason: string, status: 'auth' | 'forbidden' = 'auth') => {
+    const fail = async (
+      reason: string,
+      status: 'auth' | 'forbidden' = 'auth',
+    ): Promise<never> => {
       await loginAttemptRepository.create({
         email: input.email,
         ipAddress: ctx.ipAddress,
@@ -312,7 +315,7 @@ export class AuthService {
       await fail('user_not_found');
     }
 
-    const activeUser = user!;
+    const activeUser = user;
 
     if (activeUser.lockedUntil && activeUser.lockedUntil > new Date()) {
       await fail('Account is temporarily locked. Try again later.', 'forbidden');
@@ -410,7 +413,7 @@ export class AuthService {
     }
 
     const user = await userRepository.findById(payload.sub);
-    if (!user || !user.isActive) {
+    if (!user?.isActive) {
       throw new AuthenticationError('User inactive');
     }
 
@@ -443,10 +446,10 @@ export class AuthService {
       sub: String(user._id),
       email: user.email,
       role,
-      institutionId: user.institutionId ? String(user.institutionId) : null,
+      institutionId: String(user.institutionId),
       permissions,
       sessionId: String(session._id),
-      tv: user.tokenVersion ?? 0,
+      tv: user.tokenVersion,
     });
 
     return {
@@ -542,10 +545,10 @@ export class AuthService {
       throw new NotFoundError('User not found');
     }
 
-    await assertPasswordNotReused(input.password, user.passwordHistory ?? [], user.passwordHash);
+    await assertPasswordNotReused(input.password, [...user.passwordHistory], user.passwordHash);
 
     const passwordHash = await hashPassword(input.password);
-    const history = [user.passwordHash, ...(user.passwordHistory ?? [])].slice(
+    const history = [user.passwordHash, ...user.passwordHistory].slice(
       0,
       AUTH.PASSWORD_HISTORY_SIZE,
     );
@@ -587,10 +590,10 @@ export class AuthService {
       throw new AuthenticationError('Current password is incorrect');
     }
 
-    await assertPasswordNotReused(input.newPassword, user.passwordHistory ?? [], user.passwordHash);
+    await assertPasswordNotReused(input.newPassword, [...user.passwordHistory], user.passwordHash);
 
     const passwordHash = await hashPassword(input.newPassword);
-    const history = [user.passwordHash, ...(user.passwordHistory ?? [])].slice(
+    const history = [user.passwordHash, ...user.passwordHistory].slice(
       0,
       AUTH.PASSWORD_HISTORY_SIZE,
     );

@@ -9,7 +9,7 @@ import { env } from '../../config/env.js';
 
 export function signAccessToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_TTL ?? JWT.ACCESS_TOKEN_TTL,
+    expiresIn: env.JWT_ACCESS_TTL,
     issuer: JWT.ISSUER,
     audience: JWT.AUDIENCE,
   } as jwt.SignOptions);
@@ -19,7 +19,7 @@ export function signRefreshToken(
   payload: Omit<RefreshTokenPayload, 'iat' | 'exp'>,
 ): string {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
-    expiresIn: env.JWT_REFRESH_TTL ?? JWT.REFRESH_TOKEN_TTL,
+    expiresIn: env.JWT_REFRESH_TTL,
     issuer: JWT.ISSUER,
     audience: JWT.AUDIENCE,
   } as jwt.SignOptions);
@@ -41,7 +41,7 @@ export function verifyRefreshToken(token: string): RefreshTokenPayload {
 
 /** Approximate access-token TTL in seconds for client `expiresIn`. */
 export function accessTokenExpiresInSeconds(): number {
-  const ttl = env.JWT_ACCESS_TTL ?? JWT.ACCESS_TOKEN_TTL;
+  const ttl = env.JWT_ACCESS_TTL;
   if (ttl.endsWith('m')) return Number.parseInt(ttl, 10) * 60;
   if (ttl.endsWith('h')) return Number.parseInt(ttl, 10) * 3600;
   if (ttl.endsWith('d')) return Number.parseInt(ttl, 10) * 86_400;

@@ -4,7 +4,7 @@ import { nodeConfig } from '@learnova/eslint-config/node';
 export default [
   ...nodeConfig,
   {
-    ignores: ['**/.gitkeep.ts'],
+    ignores: ['**/.gitkeep.ts', 'vitest.config.ts'],
   },
   {
     languageOptions: {

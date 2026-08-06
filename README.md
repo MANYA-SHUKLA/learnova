@@ -105,6 +105,7 @@ pnpm dev
 
 - [Architecture](docs/Architecture.md)
 - [Infrastructure](docs/Infrastructure.md)
+- [Authentication](docs/Auth.md)
 - [ADRs](docs/adr/README.md)
 - [Folder Structure](docs/FolderStructure.md)
 - [Coding Standards](docs/CodingStandards.md)

@@ -14,7 +14,7 @@ async function main(): Promise<void> {
   await disconnectMongo();
 }
 
-main().catch(async (err) => {
+main().catch(async (err: unknown) => {
   logger.error({ err }, 'Auth seed failed');
   try {
     await disconnectMongo();
