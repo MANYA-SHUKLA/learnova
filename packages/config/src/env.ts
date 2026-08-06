@@ -7,6 +7,14 @@ import { storageConfigSchema } from './storage/index.js';
 import { mailConfigSchema } from './mail/index.js';
 import { geminiConfigSchema } from './gemini/index.js';
 import { judge0ConfigSchema } from './judge0/index.js';
+import { bullmqConfigSchema } from './bullmq/index.js';
+import { loggingConfigSchema } from './logging/index.js';
+import { securityConfigSchema } from './security/index.js';
+import { corsConfigSchema } from './cors/index.js';
+import { rateLimitConfigSchema } from './rate-limit/index.js';
+import { cookiesConfigSchema } from './cookies/index.js';
+import { sessionConfigSchema } from './session/index.js';
+import { appConfigSchema } from './app/index.js';
 
 /**
  * Environment validation schemas.
@@ -18,6 +26,8 @@ export const nodeEnvSchema = z.enum(['development', 'staging', 'production', 'te
 export const baseEnvSchema = z.object({
   NODE_ENV: nodeEnvSchema.default('development'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  APP_VERSION: z.string().default('0.1.0'),
+  GIT_COMMIT_SHA: z.string().optional(),
 });
 
 export const mongoEnvSchema = databaseConfigSchema;
@@ -25,6 +35,7 @@ export const redisEnvSchema = redisConfigSchema;
 export const jwtEnvSchema = jwtConfigSchema;
 
 export const backendEnvSchema = baseEnvSchema
+  .merge(appConfigSchema.partial())
   .merge(databaseConfigSchema)
   .merge(redisConfigSchema)
   .merge(jwtConfigSchema)
@@ -33,12 +44,16 @@ export const backendEnvSchema = baseEnvSchema
   .merge(mailConfigSchema.partial())
   .merge(geminiConfigSchema.partial())
   .merge(judge0ConfigSchema.partial())
+  .merge(bullmqConfigSchema.partial())
+  .merge(loggingConfigSchema.partial())
+  .merge(securityConfigSchema.partial())
+  .merge(corsConfigSchema.partial())
+  .merge(rateLimitConfigSchema.partial())
+  .merge(cookiesConfigSchema.partial())
+  .merge(sessionConfigSchema.partial())
   .extend({
     PORT: z.coerce.number().int().positive().default(4000),
     HOST: z.string().default('0.0.0.0'),
-    CORS_ORIGINS: z.string().default('http://localhost:3000'),
-    RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
-    RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
   });
 
 export const frontendEnvSchema = baseEnvSchema.extend({
@@ -54,8 +69,11 @@ export const workerEnvSchema = baseEnvSchema
   .merge(mailConfigSchema.partial())
   .merge(geminiConfigSchema.partial())
   .merge(judge0ConfigSchema.partial())
+  .merge(bullmqConfigSchema.partial())
+  .merge(loggingConfigSchema.partial())
   .extend({
     WORKER_CONCURRENCY: z.coerce.number().int().positive().default(5),
+    WORKER_HEALTH_PORT: z.coerce.number().int().positive().default(4100),
   });
 
 export type BackendEnv = z.infer<typeof backendEnvSchema>;

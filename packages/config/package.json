@@ -54,6 +54,34 @@
     "./docker": {
       "types": "./dist/docker/index.d.ts",
       "import": "./dist/docker/index.js"
+    },
+    "./bullmq": {
+      "types": "./dist/bullmq/index.d.ts",
+      "import": "./dist/bullmq/index.js"
+    },
+    "./logging": {
+      "types": "./dist/logging/index.d.ts",
+      "import": "./dist/logging/index.js"
+    },
+    "./security": {
+      "types": "./dist/security/index.d.ts",
+      "import": "./dist/security/index.js"
+    },
+    "./cors": {
+      "types": "./dist/cors/index.d.ts",
+      "import": "./dist/cors/index.js"
+    },
+    "./rate-limit": {
+      "types": "./dist/rate-limit/index.d.ts",
+      "import": "./dist/rate-limit/index.js"
+    },
+    "./cookies": {
+      "types": "./dist/cookies/index.d.ts",
+      "import": "./dist/cookies/index.js"
+    },
+    "./session": {
+      "types": "./dist/session/index.d.ts",
+      "import": "./dist/session/index.js"
     }
   },
   "scripts": {
