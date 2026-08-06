@@ -34,6 +34,7 @@ import {
 import { sendMail } from '../../mail/index.js';
 import { mailHtml, mailText } from '../../mail/mail-copy.js';
 import { env } from '../../config/env.js';
+import { logger } from '../../utils/logger/index.js';
 import {
   auditAuthLogRepository,
   emailVerificationTokenRepository,
@@ -212,6 +213,9 @@ async function sendVerificationEmail(
   });
 
   const link = `${frontendBaseUrl()}/en/verify-email?token=${raw}`;
+  if (env.NODE_ENV !== 'production') {
+    logger.info({ email: user.email, link }, 'Email verification link (dev)');
+  }
   await sendMail({
     to: user.email,
     subject: 'Verify your Learnova email',
