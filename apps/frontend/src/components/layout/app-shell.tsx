@@ -12,7 +12,7 @@ interface AppShellProps {
 
 export function AppShell({ children, className }: AppShellProps) {
   return (
-    <div className="flex min-h-0 min-h-svh w-full max-w-[100vw] overflow-x-clip bg-background">
+    <div className="flex min-h-svh w-full max-w-[100vw] overflow-x-clip bg-background">
       <AppSidebar />
       <div className="flex min-w-0 flex-1 flex-col overflow-x-clip">
         <AppTopbar />

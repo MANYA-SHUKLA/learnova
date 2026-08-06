@@ -95,8 +95,8 @@ function HeroVisual() {
           <span className="size-2.5 rounded-full bg-success/70" />
           <span className="ml-3 text-xs text-muted-foreground">learnova.app / dashboard</span>
         </div>
-        <div className="grid min-h-[220px] grid-cols-[140px_1fr] sm:min-h-[280px] sm:grid-cols-[180px_1fr]">
-          <aside className="space-y-2 border-r border-border bg-muted/40 p-3 sm:p-4">
+        <div className="grid min-h-[200px] grid-cols-1 sm:min-h-[280px] sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]">
+          <aside className="hidden space-y-2 border-b border-border bg-muted/40 p-3 sm:block sm:border-b-0 sm:border-r sm:p-4">
             {['Overview', 'Courses', 'Labs', 'Exams', 'Analytics'].map((item, i) => (
               <div
                 key={item}
@@ -109,13 +109,26 @@ function HeroVisual() {
               </div>
             ))}
           </aside>
-          <div className="space-y-3 p-3 sm:space-y-4 sm:p-5">
-            <div className="h-3 w-32 rounded bg-muted" />
+          <div className="min-w-0 space-y-3 p-3 sm:space-y-4 sm:p-5">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 sm:hidden">
+              {['Overview', 'Courses', 'Labs', 'Exams'].map((item, i) => (
+                <div
+                  key={item}
+                  className={cn(
+                    'shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-medium',
+                    i === 0 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
+                  )}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+            <div className="h-3 w-24 max-w-full rounded bg-muted sm:w-32" />
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[68, 42, 91].map((n) => (
-                <div key={n} className="rounded-xl border border-border bg-background p-3 shadow-soft-sm">
-                  <div className="h-2 w-10 rounded bg-muted" />
-                  <p className="mt-2 font-display text-lg font-semibold text-foreground sm:text-xl">{n}%</p>
+                <div key={n} className="min-w-0 rounded-xl border border-border bg-background p-2.5 shadow-soft-sm sm:p-3">
+                  <div className="h-2 w-8 max-w-full rounded bg-muted sm:w-10" />
+                  <p className="mt-2 font-display text-base font-semibold text-foreground sm:text-xl">{n}%</p>
                 </div>
               ))}
             </div>
@@ -275,8 +288,8 @@ function DashboardPreview() {
           description="Faculty, admins, and learners share one coherent workspace — without the clutter."
         />
         <div className="mt-12 overflow-hidden rounded-2xl border border-border bg-card shadow-soft-lg">
-          <div className="grid lg:grid-cols-[220px_1fr]">
-            <aside className="hidden border-r border-border bg-muted/30 p-5 lg:block">
+          <div className="grid lg:grid-cols-[minmax(0,13.75rem)_minmax(0,1fr)]">
+            <aside className="hidden min-w-0 border-r border-border bg-muted/30 p-5 lg:block">
               <p className="font-display text-sm font-semibold text-foreground">Learnova</p>
               <nav className="mt-6 space-y-1">
                 {['Home', 'Courses', 'Calendar', 'People', 'Reports', 'Settings'].map((item, i) => (

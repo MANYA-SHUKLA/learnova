@@ -150,8 +150,8 @@ export function AppTopbar() {
           })}
         </nav>
 
-        <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-1.5">
-          <div className="relative hidden min-w-0 flex-1 md:block lg:max-w-[14rem] xl:max-w-[18rem]">
+        <div className="ml-auto flex min-w-0 items-center gap-1 sm:gap-1.5">
+          <div className="relative hidden w-[min(100%,12rem)] shrink lg:block xl:w-[min(100%,16rem)]">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               readOnly
