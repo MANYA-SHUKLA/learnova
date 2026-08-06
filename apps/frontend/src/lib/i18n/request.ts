@@ -5,11 +5,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const locale = requested && isValidLocale(requested) ? requested : defaultLocale;
 
+  const messagesModule = (await import(
+    `../../../messages/${locale}.json`
+  )) as { default: Record<string, unknown> };
+
   return {
     locale,
-    messages: (await import(`../../../messages/${locale}.json`)).default as Record<
-      string,
-      unknown
-    >,
+    messages: messagesModule.default,
   };
 });

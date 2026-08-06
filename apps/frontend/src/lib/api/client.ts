@@ -3,7 +3,7 @@
  * No endpoints implemented — transport + error mapping only.
  */
 
-import type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from '@learnova/types';
+import type { ApiErrorResponse, ApiResponse } from '@learnova/types';
 import { HTTP_HEADERS } from '@learnova/shared';
 import { env } from '@/config/env';
 import { getAccessToken } from '@/lib/auth/jwt';
@@ -25,7 +25,7 @@ function createRequestId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID();
   }
-  return `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  return `req_${String(Date.now())}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export interface RequestOptions extends Omit<RequestInit, 'body'> {
@@ -61,17 +61,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const json = (await response.json()) as ApiResponse<T>;
 
   if (!json.success) {
-    const err = json as ApiErrorResponse;
     throw new ApiClientError(
-      err.error.message,
-      err.error.code,
+      json.error.message,
+      json.error.code,
       response.status,
-      err.requestId,
-      err.error.details,
+      json.requestId,
+      json.error.details,
     );
   }
 
-  return (json as ApiSuccessResponse<T>).data;
+  return json.data;
 }
 
 export const apiClient = {

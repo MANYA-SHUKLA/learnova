@@ -6,7 +6,7 @@
  * Consumers can already wire to useAuth().
  */
 
-import type { AuthContextValue, AuthUser, Permission, Session } from '@learnova/types';
+import type { AuthContextValue, AuthUser, Session } from '@learnova/types';
 import {
   createContext,
   useCallback,
@@ -45,20 +45,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(empty.session);
   }, []);
 
-  const permissions: Permission[] = user?.permissions ?? [];
-
   const value = useMemo<AuthProviderState>(
     () => ({
       user,
       session,
       isAuthenticated: Boolean(user && session),
       isLoading,
-      permissions,
+      permissions: user?.permissions ?? [],
       setUser,
       setSession,
       signOut,
     }),
-    [user, session, isLoading, permissions, signOut],
+    [user, session, isLoading, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
