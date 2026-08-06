@@ -305,7 +305,7 @@ function DashboardPreview() {
                 ))}
               </nav>
             </aside>
-            <div className="space-y-4 p-5 sm:p-8">
+            <div className="min-w-0 space-y-4 p-4 sm:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="font-display text-xl font-semibold text-foreground">Welcome back</h3>

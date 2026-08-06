@@ -180,7 +180,7 @@ export function ResourceCrudPage<T extends SoftRow>({
   };
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <div className="w-full min-w-0 space-y-6">
       <PageHeader
         title={title}
         description={description}
@@ -202,23 +202,24 @@ export function ResourceCrudPage<T extends SoftRow>({
         }
       />
 
-      <Card className="mb-6 print:hidden">
-        <CardContent className="flex flex-wrap items-end gap-3 pt-6">
-          <div className="min-w-[200px] flex-1 space-y-1.5">
+      <Card className="print:hidden">
+        <CardContent className="grid gap-3 pt-6 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto] lg:items-end">
+          <div className="min-w-0 space-y-1.5 sm:col-span-2 lg:col-span-1">
             <label className="text-xs font-medium text-muted-foreground">Search</label>
             <Input
               value={q}
               placeholder="Search by name or code…"
+              className="w-full min-w-0"
               onChange={(e) => { setQ(e.target.value); }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') applySearch();
               }}
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">Status</label>
             <select
-              className="flex h-10 rounded-lg border border-input bg-background px-3 text-sm"
+              className="flex h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm"
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value as '' | OrgEntityStatus);
@@ -232,7 +233,7 @@ export function ResourceCrudPage<T extends SoftRow>({
               ))}
             </select>
           </div>
-          <label className="flex items-center gap-2 pb-2 text-sm text-muted-foreground">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground lg:pb-2">
             <input
               type="checkbox"
               checked={includeDeleted}
@@ -240,12 +241,14 @@ export function ResourceCrudPage<T extends SoftRow>({
                 setIncludeDeleted(e.target.checked);
                 setPage(1);
               }}
-              className="size-4 rounded border-input"
+              className="size-4 shrink-0 rounded border-input"
             />
             Include archived
           </label>
-          {extraFilters}
-          <Button type="button" variant="secondary" onClick={applySearch}>
+          {extraFilters ? (
+            <div className="min-w-0 sm:col-span-2 lg:col-span-full">{extraFilters}</div>
+          ) : null}
+          <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={applySearch}>
             Apply
           </Button>
         </CardContent>
@@ -341,6 +344,6 @@ export function ResourceCrudPage<T extends SoftRow>({
         onSubmit={handleSubmit}
         submitLabel={editing ? 'Update' : 'Create'}
       />
-    </main>
+    </div>
   );
 }
