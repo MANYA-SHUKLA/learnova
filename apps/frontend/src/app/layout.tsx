@@ -18,7 +18,12 @@ export const metadata: Metadata = {
     'Enterprise AI learning platform — LMS, ERP, exams, coding labs, and analytics for modern institutions.',
   applicationName: 'Learnova',
   icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    icon: [
+      { url: '/icon', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: [{ url: '/icon', type: 'image/png' }],
   },
 };
 
