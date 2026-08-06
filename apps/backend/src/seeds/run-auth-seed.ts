@@ -3,6 +3,7 @@
  * Usage: pnpm --filter @learnova/backend seed:auth
  */
 
+import '../config/load-env.js';
 import { connectMongo, disconnectMongo } from '../database/index.js';
 import { logger } from '../utils/logger/index.js';
 import { seedAuth } from './auth.seed.js';

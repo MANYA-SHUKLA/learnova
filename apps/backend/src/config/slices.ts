@@ -68,7 +68,7 @@ export const bullmqConfig = {
   backoffMs: env.BULLMQ_BACKOFF_MS ?? 2000,
   removeOnComplete: env.BULLMQ_REMOVE_ON_COMPLETE ?? 1000,
   removeOnFail: env.BULLMQ_REMOVE_ON_FAIL ?? 5000,
-  dlqSuffix: env.BULLMQ_DLQ_SUFFIX ?? ':dlq',
+  dlqSuffix: env.BULLMQ_DLQ_SUFFIX ?? '-dlq',
 } as const;
 
 export const loggingConfig = {
