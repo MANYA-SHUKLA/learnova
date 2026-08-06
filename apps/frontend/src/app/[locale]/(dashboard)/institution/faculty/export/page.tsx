@@ -1,0 +1,70 @@
+'use client';
+
+import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@learnova/ui';
+import { Download, Printer } from 'lucide-react';
+import { PermissionGate } from '@/components/shared/protected-route';
+import { env } from '@/config/env';
+import { getAccessToken } from '@/lib/auth/jwt';
+import { Link } from '@/lib/i18n/routing';
+
+async function download(format: 'csv' | 'excel' | 'pdf') {
+  const token = getAccessToken();
+  const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/faculty/export?format=${format}`, {
+    credentials: 'include',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) return;
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `faculty-export.${format === 'excel' ? 'xls' : format}`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export default function FacultyExportPage() {
+  return (
+    <PermissionGate permission={PERMISSIONS.FACULTY_READ} enforce>
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div>
+          <p className="text-sm font-medium text-primary">Faculty</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">Export</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Download the faculty directory as CSV, Excel-compatible, or PDF. Use print for a hard
+            copy.
+          </p>
+        </div>
+
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle className="text-base">Export formats</CardTitle>
+            <CardDescription>Exports are audited as faculty.export.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-3">
+            <Button type="button" onClick={() => void download('csv')}>
+              <Download className="size-4" />
+              CSV
+            </Button>
+            <Button type="button" variant="outline" onClick={() => void download('excel')}>
+              <Download className="size-4" />
+              Excel
+            </Button>
+            <Button type="button" variant="outline" onClick={() => void download('pdf')}>
+              <Download className="size-4" />
+              PDF
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => window.print()}>
+              <Printer className="size-4" />
+              Print
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href={APP_ROUTES.INSTITUTION_FACULTY}>Back to directory</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </PermissionGate>
+  );
+}
