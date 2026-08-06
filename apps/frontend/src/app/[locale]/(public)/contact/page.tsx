@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { Mail, MessageSquare, Phone } from 'lucide-react';
 import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
-import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
+import { ctaButtonClass } from '@/lib/cta';
 import { siteContainer } from '@/lib/layout';
 import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
@@ -35,15 +35,10 @@ export default async function ContactPage({ params }: PageProps) {
               Talk to Learnova
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-              Request a demo, ask about institutional rollout, or reach the team behind this project.
+              Ask about institutional rollout, or reach the team behind this project.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <a href="mailto:shuklamanya99@gmail.com?subject=Learnova%20demo%20request">
-                  Request Demo
-                </a>
-              </Button>
-              <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
                 <Link href={APP_ROUTES.LOGIN}>Institution Login</Link>
               </Button>
             </div>

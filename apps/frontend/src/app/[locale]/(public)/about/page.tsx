@@ -12,6 +12,7 @@ import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
+import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
 
 interface AboutPageProps {
@@ -54,6 +55,7 @@ const PILLARS = [
 export default async function AboutPage({ params }: AboutPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const saasMode = isSaasModeEnabled();
 
   return (
     <>
@@ -124,7 +126,9 @@ export default async function AboutPage({ params }: AboutPageProps) {
             </p>
             <div className="mt-10">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href="/register-institution">Register Institution</Link>
+                <Link href={saasMode ? '/register-institution' : '/login'}>
+                  {saasMode ? 'Register Institution' : 'Institution Login'}
+                </Link>
               </Button>
             </div>
           </div>
