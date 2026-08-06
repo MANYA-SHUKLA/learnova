@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "files": [],
+  "include": [],
+  "exclude": ["node_modules", "**/dist", "**/.next"]
+}
