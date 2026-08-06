@@ -42,3 +42,21 @@ export const HTTP_HEADERS = {
   CORRELATION_ID: 'x-correlation-id',
   IDEMPOTENCY_KEY: 'x-idempotency-key',
 } as const;
+
+/** BullMQ queue names — shared by API producers and workers */
+export const QUEUE_NAMES = {
+  EMAIL: 'email',
+  NOTIFICATIONS: 'notifications',
+  GRADING: 'grading',
+  ANALYTICS: 'analytics',
+  AUDIT: 'audit',
+} as const;
+
+export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
+
+export const CACHE_TTL = {
+  SHORT: 60,
+  MEDIUM: 300,
+  LONG: 3_600,
+  DAY: 86_400,
+} as const;

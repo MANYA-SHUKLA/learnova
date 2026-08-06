@@ -1,14 +1,5 @@
 /**
- * BullMQ queue definitions — scaffolding.
- * Processors live in apps/worker.
+ * @deprecated Import QUEUE_NAMES from @learnova/constants or ../queues
+ * Kept for backward-compatible re-export.
  */
-
-export const QUEUE_NAMES = {
-  EMAIL: 'email',
-  NOTIFICATIONS: 'notifications',
-  GRADING: 'grading',
-  ANALYTICS: 'analytics',
-  AUDIT: 'audit',
-} as const;
-
-export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
+export { QUEUE_NAMES, type QueueName } from '@learnova/constants';
