@@ -40,12 +40,15 @@ const processors: Record<QueueName, Processor> = {
 export function startWorkers(): Promise<Worker[]> {
   const connection = getRedisConnection();
   const concurrency = env.WORKER_CONCURRENCY;
+  // Must match backend Queue `prefix` or jobs sit forever on the wrong Redis keyspace.
+  const prefix = env.BULLMQ_PREFIX ?? 'learnova';
 
   const workers = QUEUE_LIST.map(
     (name) =>
       new Worker(name, processors[name], {
         connection,
         concurrency,
+        prefix,
       }),
   );
 
@@ -68,7 +71,7 @@ export function startWorkers(): Promise<Worker[]> {
     });
   }
 
-  logger.info({ queues: [...QUEUE_LIST], concurrency }, 'Workers started');
+  logger.info({ queues: [...QUEUE_LIST], concurrency, prefix }, 'Workers started');
   return Promise.resolve(workers);
 }
 
