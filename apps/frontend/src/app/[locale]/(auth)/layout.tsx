@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-svh w-full flex-col bg-background">
+    <div className="relative flex min-h-0 w-full flex-1 flex-col bg-background">
       <div className="pointer-events-none absolute inset-0 bg-hero" aria-hidden />
       <header
         className={cn(

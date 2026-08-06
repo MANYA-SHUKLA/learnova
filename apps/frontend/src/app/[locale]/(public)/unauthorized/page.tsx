@@ -11,7 +11,7 @@ export default async function UnauthorizedPage({ params }: UnauthorizedPageProps
   setRequestLocale(locale);
 
   return (
-    <main className="flex min-h-svh w-full min-w-0 items-center justify-center px-4 py-12 sm:px-6">
+    <main className="flex w-full min-w-0 flex-1 items-center justify-center px-4 py-12 sm:px-6">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Unauthorized</CardTitle>

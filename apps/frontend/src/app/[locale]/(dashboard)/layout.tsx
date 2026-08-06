@@ -10,7 +10,7 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
 
   if (isLoading) {
     return (
-      <div className="flex min-h-svh items-center justify-center bg-background">
+      <div className="flex flex-1 items-center justify-center bg-background">
         <Spinner size="lg" />
       </div>
     );

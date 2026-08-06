@@ -10,7 +10,7 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
   return (
     <footer
       className={cn(
-        'w-full border-t border-border bg-muted/30 py-4 text-center print:hidden',
+        'mt-auto w-full shrink-0 border-t border-border bg-muted/30 py-4 text-center',
         siteGutter,
         className,
       )}
@@ -30,13 +30,6 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
             className="font-medium text-foreground underline-offset-2 hover:underline"
           >
             Manya Shukla
-          </a>
-          {' · '}
-          <a
-            href="mailto:shuklamanya99@gmail.com"
-            className="font-medium text-foreground underline-offset-2 hover:underline"
-          >
-            shuklamanya99@gmail.com
           </a>
           {' · '}
           2026 · SOE JNU Minor Project
