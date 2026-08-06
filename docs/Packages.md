@@ -50,9 +50,11 @@ Managed via **pnpm workspaces**. Run `pnpm install` at the repo root.
 | zod | Validation |
 | helmet / cors / compression / cookie-parser | Hardening & parsing |
 | express-rate-limit + rate-limit-redis | Rate limiting |
-| pino + pino-http | Structured logging |
+| pino + pino-http + @learnova/logger | Structured logging |
+| bullmq | Job queue producers |
+| nodemailer | SMTP mail transport |
 | uuid | Request IDs |
-| @learnova/types, shared, config | Workspace packages |
+| @learnova/types, shared, config, constants, events, utils, validation, feature-flags, logger | Workspace packages |
 
 ## Worker (`@learnova/worker`)
 
