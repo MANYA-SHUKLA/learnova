@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@learnova/config": "workspace:*",
+    "@learnova/constants": "workspace:*",
     "@learnova/events": "workspace:*",
     "@learnova/feature-flags": "workspace:*",
     "@learnova/logger": "workspace:*",
@@ -22,6 +23,7 @@
     "@learnova/utils": "workspace:*",
     "bullmq": "^5.34.8",
     "ioredis": "^5.6.1",
+    "nodemailer": "^7.0.3",
     "pino": "^9.7.0",
     "zod": "^3.25.56"
   },
@@ -29,6 +31,7 @@
     "@learnova/eslint-config": "workspace:*",
     "@learnova/tsconfig": "workspace:*",
     "@types/node": "^22.15.29",
+    "@types/nodemailer": "^6.4.17",
     "eslint": "^9.28.0",
     "pino-pretty": "^13.0.0",
     "rimraf": "^6.0.1",
