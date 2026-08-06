@@ -17,6 +17,7 @@ import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { useLogoutMutation } from '@/features/auth';
 import { locales, type AppLocale } from '@/lib/i18n/config';
 import { Link, usePathname, useRouter } from '@/lib/i18n/routing';
+import { siteGutter } from '@/lib/layout';
 import { useAuth } from '@/providers/auth-provider';
 import { useUIStore } from '@/stores/ui-store';
 import { cn } from '@/lib/utils';
@@ -110,7 +111,7 @@ export function AppTopbar() {
 
   return (
     <header className="sticky top-0 z-20 w-full min-w-0 border-b border-border/80 bg-background/85 backdrop-blur-md">
-      <div className="flex h-14 min-w-0 items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-5 lg:px-6">
+      <div className={cn('flex h-14 min-w-0 items-center gap-2 sm:h-16 sm:gap-3', siteGutter)}>
         <Button
           type="button"
           variant="ghost"
@@ -265,7 +266,7 @@ export function AppTopbar() {
         </div>
       </div>
 
-      <div className="flex min-w-0 items-center gap-2 border-t border-border/60 px-3 py-2 sm:px-4 md:hidden">
+      <div className={cn('flex min-w-0 items-center gap-2 border-t border-border/60 py-2 md:hidden', siteGutter)}>
         <UserRound className="size-3.5 shrink-0 text-muted-foreground" />
         <p className="min-w-0 truncate text-xs text-muted-foreground">
           {breadcrumbs.map((c) => c.label).join(' / ') || 'Dashboard'}
