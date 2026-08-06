@@ -1,10 +1,18 @@
-import { createLogger } from '@learnova/logger';
-import { env } from '../../config/env.js';
+import { createLogger, installProcessErrorHandlers } from '@learnova/logger';
+import { loggingConfig } from '../../config/slices.js';
 
 export const logger = createLogger({
-  name: 'learnova-api',
-  level: env.LOG_LEVEL,
-  pretty: env.NODE_ENV === 'development',
+  name: loggingConfig.serviceName,
+  level: loggingConfig.level,
+  pretty: loggingConfig.pretty,
+  rotation: {
+    enabled: true,
+    dir: loggingConfig.dir,
+    maxFiles: loggingConfig.maxFiles,
+    maxSize: loggingConfig.maxSize,
+  },
 });
+
+installProcessErrorHandlers(logger);
 
 export type Logger = typeof logger;
