@@ -8,7 +8,7 @@ LMS · University ERP · Online Examination · Coding Platform · Cloud IDE · A
 
 ## Status
 
-**Foundation phase.** This repository ships a production-grade monorepo scaffold — architecture, design system, tooling, auth/permission contracts, database layers, and API wrappers. Authentication, CRUD, domain models, and business APIs are intentionally not implemented yet.
+**Foundation phase — Step 2 complete.** Stable backend infrastructure is in place: Mongo/Redis, queues, cache, events, storage & mail abstractions, logging, config, errors, and health. Authentication, CRUD, domain models, and business APIs are intentionally not implemented yet.
 
 ## Stack
 

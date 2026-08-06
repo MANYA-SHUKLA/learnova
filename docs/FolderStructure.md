@@ -52,6 +52,12 @@
 | Folder | Why it exists |
 | --- | --- |
 | `config/` | App + validated environment |
+| `cache/` | Redis cache layer (`CacheService`) |
+| `storage/` | File storage port (`IStorage` — local / s3) |
+| `mail/` | Email port (`IMailer` — console / smtp / ses) |
+| `events/` | Domain event bus + infrastructure listeners |
+| `queues/` | BullMQ queue init + job producers |
+| `jobs/` | Job payload re-exports |
 | `controllers/` | HTTP adapters (thin) |
 | `routes/` | Express routers; `v1/`, `internal/`, `webhooks/` |
 | `middlewares/` | Auth, validate, rate limit, logging, errors, request ID |
@@ -61,9 +67,6 @@
 | `validators/` | Zod request schemas |
 | `dtos/` | Transport shapes |
 | `interfaces/` | Ports for DI (repositories, services) |
-| `jobs/` | Job payloads / schedulers |
-| `queues/` | Queue definitions for BullMQ |
-| `events/` | Domain event emitters/listeners |
 | `socket/` | Socket.io setup + handlers |
 | `utils/` | Logger, errors, response, JWT |
 | `helpers/` | Small pure helpers |
@@ -78,9 +81,11 @@
 | Folder | Why |
 | --- | --- |
 | `config/` | Worker env |
-| `queues/` | Queue name constants |
-| `processors/` | BullMQ processors per domain |
-| `jobs/` | Job type definitions |
+| `connection/` | Redis connection for BullMQ |
+| `queues/` | Queue name re-exports |
+| `jobs/` | Shared job payload types |
+| `mail/` | Email send helper for email queue |
+| `processors/` | Typed BullMQ processors per domain |
 | `utils/` | Logger / helpers |
 | `types/` | Worker-local types |
 

@@ -49,6 +49,11 @@ Generate strong JWT secrets (≥ 32 chars) for anything beyond local toy usage.
 | `GEMINI_API_KEY` | no | — | Reserved for AI ideation |
 | `JUDGE0_API_URL` | no | — | Reserved for coding judge |
 | `JUDGE0_API_KEY` | no | — | Judge0 auth |
+| `STORAGE_DRIVER` | no | `local` | `local` \| `s3` |
+| `STORAGE_LOCAL_PATH` | no | `./uploads` | Local upload root |
+| `MAIL_DRIVER` | no | `console` | `console` \| `smtp` \| `ses` |
+| `MAIL_FROM` | no | `noreply@learnova.local` | From address |
+| `SMTP_HOST` | no | — | SMTP host when driver=smtp |
 
 ### Feature flags (optional)
 

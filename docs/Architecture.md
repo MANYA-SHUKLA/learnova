@@ -38,13 +38,18 @@ Learnova is a modular enterprise SaaS platform delivered as a **pnpm + Turborepo
 - Versioned API under `/api/v1`, plus `/api/internal` and `/api/webhooks` mounts for future ops and provider callbacks.
 - Middleware chain: Helmet → CORS → compression → JSON → cookies → request ID → HTTP logger → rate limit → routes → 404 → error handler.
 - Database layers ready (Mongo + Redis). **No models.**
+- **Cache** — Redis-backed `CacheService` (`get` / `set` / `del` / `wrap`).
+- **Queues** — BullMQ producers on API (`enqueueEmail`, `enqueueAudit`, …); workers consume typed jobs.
+- **Events** — in-process `eventBus` with infrastructure listeners → audit queue.
+- **Storage** — `IStorage` with `local` driver (S3 port reserved).
+- **Mail** — `IMailer` with `console` / `smtp` / `ses` (SES reserved).
 - Auth middleware prepared (`authenticate`, `requireRoles`, `requirePermissions`) — soft by default.
 - Socket.io namespaces prepared: `/ide`, `/exam`, `/notifications`.
-- Queue names defined for worker handoff.
+- Health checks include mongo, redis, storage, mail, and queue depths.
 
 ## Worker
 
-BullMQ workers for `email`, `notifications`, `grading`, `analytics`, `audit`. Processors are scaffolds that log job receipt until feature work lands.
+BullMQ workers for `email`, `notifications`, `grading`, `analytics`, `audit`. Email processor sends via console/SMTP; others log job receipt until feature work lands. Shared job payload types live in `@learnova/types`.
 
 ## Security posture (foundation)
 

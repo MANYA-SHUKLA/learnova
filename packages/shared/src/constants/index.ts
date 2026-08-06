@@ -12,4 +12,8 @@ export {
   JWT,
   REDIS_KEYS,
   HTTP_HEADERS,
+  QUEUE_NAMES,
+  CACHE_TTL,
 } from '@learnova/constants';
+
+export type { QueueName } from '@learnova/constants';
