@@ -54,7 +54,6 @@ const PILLARS = [
 export default async function AboutPage({ params }: AboutPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const saasMode = isSaasModeEnabled();
 
   return (
     <>
@@ -125,9 +124,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
             </p>
             <div className="mt-10">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href={saasMode ? '/register-institution' : '/login'}>
-                  {saasMode ? 'Register Institution' : 'Institution Login'}
-                </Link>
+                <Link href="/login">Institution Login</Link>
               </Button>
             </div>
           </div>
