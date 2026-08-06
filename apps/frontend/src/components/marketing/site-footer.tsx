@@ -73,11 +73,10 @@ export function SiteFooter() {
           <FooterColumn title="Legal" links={LEGAL_LINKS} />
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-12 border-t border-border pt-8">
           <p className="text-sm text-muted-foreground">
             © {year} Learnova. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground">Built for modern institutions.</p>
         </div>
       </div>
     </footer>

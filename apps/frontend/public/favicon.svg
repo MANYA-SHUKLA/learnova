@@ -1,4 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <rect width="32" height="32" rx="8" fill="#2563EB"/>
-  <path d="M9 8h6.2c3.9 0 6.3 2.2 6.3 5.6 0 3.5-2.5 5.7-6.5 5.7H12.5V24H9V8zm3.5 8.2h2.4c1.9 0 3-1 3-2.6s-1.1-2.5-3-2.5h-2.4v5.1z" fill="white"/>
+  <text
+    x="16"
+    y="21"
+    text-anchor="middle"
+    font-family="ui-sans-serif, system-ui, -apple-system, sans-serif"
+    font-size="12"
+    font-weight="700"
+    letter-spacing="-0.04em"
+    fill="#FFFFFF"
+  >MS</text>
 </svg>

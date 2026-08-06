@@ -20,18 +20,8 @@ export function Logo({ collapsed = false, href = APP_ROUTES.DASHBOARD, className
       )}
       aria-label="Learnova"
     >
-      <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary shadow-soft-sm">
-        <svg
-          viewBox="0 0 24 24"
-          className="size-5 text-primary-foreground"
-          aria-hidden
-          fill="none"
-        >
-          <path
-            d="M7 5.5h4.2c3.35 0 5.55 1.85 5.55 4.7 0 2.95-2.2 4.8-5.55 4.8H9.4V18.5H7V5.5Zm2.4 2.15v5.2h1.7c1.95 0 3.15-1.05 3.15-2.6s-1.2-2.6-3.15-2.6H9.4Z"
-            fill="currentColor"
-          />
-        </svg>
+      <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary font-display text-xs font-bold tracking-tight text-primary-foreground shadow-soft-sm">
+        MS
       </span>
       <span
         className={cn(

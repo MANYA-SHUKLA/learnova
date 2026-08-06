@@ -1,6 +1,8 @@
 /**
  * Learnova Design System — premium SaaS tokens (Stripe / Linear grade).
  * Light + Dark via `.dark` (next-themes). Spacing: 8px scale. Radius: 12 / 16 / 24.
+ *
+ * Tailwind is imported by the app entry (`apps/frontend/src/styles/globals.css`).
  */
 
 @custom-variant dark (&:is(.dark *));
@@ -196,11 +198,15 @@
   }
 
   h1 {
-    @apply font-display text-4xl font-semibold tracking-tight sm:text-5xl;
+    @apply font-display font-semibold tracking-tight;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.1;
   }
 
   h2 {
-    @apply font-display text-2xl font-semibold tracking-tight sm:text-3xl;
+    @apply font-display font-semibold tracking-tight;
+    font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+    line-height: 1.2;
   }
 
   ::selection {
