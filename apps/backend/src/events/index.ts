@@ -1,8 +1,13 @@
 export {
   eventBus,
   EVENTS,
+  EVENT_REGISTRY,
+  isRegisteredEvent,
+  getEventDefinition,
   type DomainEvent,
   type EventName,
   type EventHandler,
+  type EventPayloadMap,
+  type TypedEventName,
 } from './event-bus.js';
 export { registerInfrastructureListeners } from './listeners/infrastructure.listeners.js';
