@@ -6,7 +6,6 @@ import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { ctaButtonClass } from '@/lib/cta';
 import { siteContainer } from '@/lib/layout';
-import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
 
 interface PageProps {
@@ -16,7 +15,6 @@ interface PageProps {
 export default async function ContactPage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const saasMode = isSaasModeEnabled();
 
   return (
     <>
@@ -66,8 +64,8 @@ export default async function ContactPage({ params }: PageProps) {
                 {
                   icon: MessageSquare,
                   title: 'Onboarding',
-                  body: saasMode ? 'Register your institution' : 'Contact your operator',
-                  href: saasMode ? APP_ROUTES.REGISTER_INSTITUTION : APP_ROUTES.LOGIN,
+                  body: 'Sign in to your institution workspace',
+                  href: APP_ROUTES.LOGIN,
                   external: false,
                 },
               ].map(({ icon: Icon, title, body, href, external }) =>
