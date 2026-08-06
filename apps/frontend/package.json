@@ -26,6 +26,7 @@
     "@xterm/xterm": "^5.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^13.0.0",
     "lucide-react": "^0.511.0",
     "next": "^15.3.3",
     "next-intl": "^4.1.0",
