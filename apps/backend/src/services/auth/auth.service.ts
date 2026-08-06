@@ -60,7 +60,7 @@ function toAuthUser(user: UserEntity, role: Role, permissions: Permission[]): Au
     institutionId: String(user.institutionId),
     permissions,
     locale: user.locale as AuthUser['locale'],
-    avatarUrl: user.avatarUrl,
+    avatarUrl: user.avatarUrl ?? null,
     isEmailVerified: user.isEmailVerified,
   };
 }
@@ -105,7 +105,7 @@ async function resolveRolePermissions(roleId: Types.ObjectId): Promise<{
   if (!roleDoc) {
     throw new AuthenticationError('Role not found for user');
   }
-  const role = roleDoc.name as Role;
+  const role = roleDoc.name;
   const permissions = [...getPermissionsForRole(role)];
   return { role, permissions };
 }
@@ -312,21 +312,21 @@ export class AuthService {
     };
 
     if (!user) {
-      await fail('user_not_found');
+      return fail('user_not_found');
     }
 
     const activeUser = user;
 
     if (activeUser.lockedUntil && activeUser.lockedUntil > new Date()) {
-      await fail('Account is temporarily locked. Try again later.', 'forbidden');
+      return fail('Account is temporarily locked. Try again later.', 'forbidden');
     }
 
     if (!activeUser.isActive) {
-      await fail('Account is deactivated.', 'forbidden');
+      return fail('Account is deactivated.', 'forbidden');
     }
 
     if (!activeUser.isEmailVerified) {
-      await fail('Email is not verified. Please verify your email.', 'forbidden');
+      return fail('Email is not verified. Please verify your email.', 'forbidden');
     }
 
     const valid = await verifyPassword(input.password, activeUser.passwordHash);
@@ -337,7 +337,7 @@ export class AuthService {
       if (lockedUntil) {
         await userRepository.updateById(String(activeUser._id), { lockedUntil });
       }
-      await fail('invalid_password');
+      return fail('invalid_password');
     }
 
     await userRepository.resetFailedAttempts(String(activeUser._id));

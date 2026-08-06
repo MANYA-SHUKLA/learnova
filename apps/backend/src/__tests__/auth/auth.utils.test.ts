@@ -46,8 +46,11 @@ describe('computeLockUntil', () => {
     const second = computeLockUntil(6);
     expect(first).toBeInstanceOf(Date);
     expect(second).toBeInstanceOf(Date);
-    expect(second!.getTime() - Date.now()).toBeGreaterThan(
-      (first!.getTime() - Date.now()) * 1.5,
+    if (!(first instanceof Date) || !(second instanceof Date)) {
+      throw new Error('expected lock dates');
+    }
+    expect(second.getTime() - Date.now()).toBeGreaterThan(
+      (first.getTime() - Date.now()) * 1.5,
     );
   });
 });

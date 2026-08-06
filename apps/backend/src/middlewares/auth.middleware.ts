@@ -41,11 +41,11 @@ export function authenticate(options: AuthMiddlewareOptions = {}) {
       try {
         const payload = verifyAccessToken(token);
         const user = await userRepository.findById(payload.sub);
-        if (!user || !user.isActive) {
+        if (!user?.isActive) {
           next(new UnauthorizedError('User inactive'));
           return;
         }
-        if ((user.tokenVersion ?? 0) !== (payload.tv ?? 0)) {
+        if (user.tokenVersion !== payload.tv) {
           next(new UnauthorizedError('Token revoked'));
           return;
         }

@@ -1,4 +1,13 @@
 import type { NextFunction, Request, Response } from 'express';
+import type {
+  ChangePasswordInput,
+  ForgotPasswordInput,
+  LoginInput,
+  RegisterInstitutionInput,
+  ResendVerificationInput,
+  ResetPasswordInput,
+  VerifyEmailInput,
+} from '@learnova/validation';
 import { authService } from '../../services/auth/auth.service.js';
 import { sendCreated, sendSuccess } from '../../utils/response/index.js';
 import {
@@ -15,7 +24,8 @@ export async function register(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await authService.registerInstitution(req.body, getClientContext(req));
+    const body = req.body as RegisterInstitutionInput;
+    const result = await authService.registerInstitution(body, getClientContext(req));
     sendCreated(res, result, { requestId: req.requestId });
   } catch (err) {
     next(err);
@@ -28,7 +38,8 @@ export async function login(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await authService.login(req.body, getClientContext(req));
+    const body = req.body as LoginInput;
+    const result = await authService.login(body, getClientContext(req));
     setRefreshCookie(res, result.tokens.refreshToken);
     sendSuccess(
       res,
@@ -106,7 +117,8 @@ export async function forgotPassword(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await authService.forgotPassword(req.body, getClientContext(req));
+    const body = req.body as ForgotPasswordInput;
+    const result = await authService.forgotPassword(body, getClientContext(req));
     sendSuccess(res, result, { requestId: req.requestId });
   } catch (err) {
     next(err);
@@ -119,7 +131,8 @@ export async function resetPassword(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await authService.resetPassword(req.body, getClientContext(req));
+    const body = req.body as ResetPasswordInput;
+    const result = await authService.resetPassword(body, getClientContext(req));
     clearRefreshCookie(res);
     sendSuccess(res, result, { requestId: req.requestId });
   } catch (err) {
@@ -134,9 +147,10 @@ export async function changePassword(
 ): Promise<void> {
   try {
     if (!req.user) throw new UnauthorizedError();
+    const body = req.body as ChangePasswordInput;
     const result = await authService.changePassword(
       req.user.sub,
-      req.body,
+      body,
       getClientContext(req),
     );
     clearRefreshCookie(res);
@@ -152,7 +166,8 @@ export async function verifyEmail(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await authService.verifyEmail(req.body, getClientContext(req));
+    const body = req.body as VerifyEmailInput;
+    const result = await authService.verifyEmail(body, getClientContext(req));
     sendSuccess(res, result, { requestId: req.requestId });
   } catch (err) {
     next(err);
@@ -165,7 +180,8 @@ export async function resendVerification(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await authService.resendVerification(req.body, getClientContext(req));
+    const body = req.body as ResendVerificationInput;
+    const result = await authService.resendVerification(body, getClientContext(req));
     sendSuccess(res, result, { requestId: req.requestId });
   } catch (err) {
     next(err);

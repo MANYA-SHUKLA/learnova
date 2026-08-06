@@ -1,6 +1,6 @@
 import { PERMISSIONS } from '@learnova/constants';
 import { ROLE_DEFINITIONS } from '@learnova/shared';
-import type { Permission, Role } from '@learnova/types';
+import type { Permission } from '@learnova/types';
 import { Types } from 'mongoose';
 import {
   permissionRepository,
@@ -97,14 +97,13 @@ export async function seedPermissions(): Promise<Map<string, string>> {
 
 export async function seedRoles(permissionIds: Map<string, string>): Promise<void> {
   for (const def of Object.values(ROLE_DEFINITIONS)) {
-    const role = def.role as Role;
     const objectIds = def.permissions
       .map((p) => permissionIds.get(p))
       .filter((id): id is string => Boolean(id))
       .map((id) => new Types.ObjectId(id));
 
     await roleRepository.upsert({
-      name: role,
+      name: def.role,
       label: def.label,
       description: def.description,
       permissionIds: objectIds,
