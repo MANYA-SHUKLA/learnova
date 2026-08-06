@@ -9,12 +9,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Input,
   Spinner,
 } from '@learnova/ui';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
+import { PasswordInput } from '@/components/shared/password-input';
 import { ApiClientError } from '@/lib/api/client';
 import { Link, useRouter } from '@/lib/i18n/routing';
 import {
@@ -115,9 +115,8 @@ function ResetPasswordForm() {
             <label htmlFor="password" className="text-sm font-medium">
               New password
             </label>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="new-password"
               disabled={mutation.isPending}
               {...register('password')}
@@ -131,9 +130,8 @@ function ResetPasswordForm() {
             <label htmlFor="confirmPassword" className="text-sm font-medium">
               Confirm password
             </label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               autoComplete="new-password"
               disabled={mutation.isPending}
               {...register('confirmPassword')}

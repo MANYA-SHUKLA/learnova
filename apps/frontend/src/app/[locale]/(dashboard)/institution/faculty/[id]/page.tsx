@@ -9,7 +9,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
   Skeleton,
   Spinner,
 } from '@learnova/ui';
@@ -17,6 +16,7 @@ import { ArrowLeft, Pencil } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { PasswordInput } from '@/components/shared/password-input';
 import { authApi, useSessions } from '@/features/auth';
 import { ErrorState } from '@/features/institution';
 import {
@@ -304,16 +304,14 @@ export default function FacultyDetailPage() {
               <CardDescription>Update the password for your linked account.</CardDescription>
             </CardHeader>
             <CardContent className="grid max-w-md gap-3">
-              <Input
-                type="password"
+              <PasswordInput
                 placeholder="Current password"
                 value={passwordForm.currentPassword}
                 onChange={(e) =>
                   setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))
                 }
               />
-              <Input
-                type="password"
+              <PasswordInput
                 placeholder="New password"
                 value={passwordForm.newPassword}
                 onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}

@@ -15,6 +15,7 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { Suspense, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
+import { PasswordInput } from '@/components/shared/password-input';
 import {
   loginSchema,
   type LoginFormValues,
@@ -116,9 +117,8 @@ function LoginForm() {
                 Forgot password?
               </Link>
             </div>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="current-password"
               disabled={loginMutation.isPending}
               {...register('password')}

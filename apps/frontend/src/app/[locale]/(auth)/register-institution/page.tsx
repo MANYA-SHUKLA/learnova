@@ -15,6 +15,7 @@ import {
 import { Building2 } from 'lucide-react';
 import { type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
+import { PasswordInput } from '@/components/shared/password-input';
 import {
   registerInstitutionFormSchema,
   type RegisterInstitutionFormValues,
@@ -146,7 +147,7 @@ export default function RegisterInstitutionPage() {
             ) : null}
 
             {field('institutionName', 'Institution name', {
-              placeholder: 'Northbridge University',
+              placeholder: 'SOE JNU',
             })}
             <div className="grid gap-4 sm:grid-cols-2">
               {field('adminFirstName', 'Admin first name', { autoComplete: 'given-name' })}
@@ -157,14 +158,34 @@ export default function RegisterInstitutionPage() {
               autoComplete: 'email',
               placeholder: 'shuklamanya99@gmail.com',
             })}
-            {field('password', 'Password', {
-              type: 'password',
-              autoComplete: 'new-password',
-            })}
-            {field('confirmPassword', 'Confirm password', {
-              type: 'password',
-              autoComplete: 'new-password',
-            })}
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="text-sm font-medium">
+                Password
+              </label>
+              <PasswordInput
+                id="password"
+                autoComplete="new-password"
+                disabled={registerMutation.isPending}
+                {...register('password')}
+              />
+              {errors.password ? (
+                <p className="text-xs text-danger">{errors.password.message}</p>
+              ) : null}
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="confirmPassword" className="text-sm font-medium">
+                Confirm password
+              </label>
+              <PasswordInput
+                id="confirmPassword"
+                autoComplete="new-password"
+                disabled={registerMutation.isPending}
+                {...register('confirmPassword')}
+              />
+              {errors.confirmPassword ? (
+                <p className="text-xs text-danger">{errors.confirmPassword.message}</p>
+              ) : null}
+            </div>
             <p className="text-xs text-muted-foreground">
               Password must be 12+ characters with upper, lower, number, and special character.
             </p>
