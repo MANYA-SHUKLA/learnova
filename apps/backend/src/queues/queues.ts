@@ -1,51 +1,118 @@
-import { Queue } from 'bullmq';
+import { Queue, QueueEvents } from 'bullmq';
 import type { Redis } from 'ioredis';
-import { QUEUE_NAMES, type QueueName } from '@learnova/constants';
+import { QUEUE_LIST, QUEUE_NAMES, type QueueName } from '@learnova/constants';
+import { bullmqConfig } from '../config/slices.js';
 import { getRedis } from '../database/redis/connection.js';
 import { logger } from '../utils/logger/index.js';
+import { QueueError } from '../utils/errors/index.js';
 
-export { QUEUE_NAMES, type QueueName };
+export { QUEUE_NAMES, QUEUE_LIST, type QueueName };
 
 const queues = new Map<QueueName, Queue>();
+const queueEvents = new Map<QueueName, QueueEvents>();
+const dlqQueues = new Map<string, Queue>();
+
+function defaultJobOptions() {
+  return {
+    removeOnComplete: bullmqConfig.removeOnComplete,
+    removeOnFail: bullmqConfig.removeOnFail,
+    attempts: bullmqConfig.attempts,
+    backoff: { type: 'exponential' as const, delay: bullmqConfig.backoffMs },
+  };
+}
 
 export function getQueue(name: QueueName): Queue {
   const existing = queues.get(name);
   if (existing) return existing;
-  throw new Error(`Queue "${name}" is not initialized. Call initQueues() during bootstrap.`);
+  throw new QueueError(`Queue "${name}" is not initialized. Call initQueues() during bootstrap.`);
+}
+
+export function getQueueEvents(name: QueueName): QueueEvents {
+  const existing = queueEvents.get(name);
+  if (existing) return existing;
+  throw new QueueError(`QueueEvents for "${name}" not initialized`);
+}
+
+/** Dead-letter queue preparation — separate queue per source */
+export function getDlq(name: QueueName): Queue {
+  const dlqName = `${name}${bullmqConfig.dlqSuffix}`;
+  const existing = dlqQueues.get(dlqName);
+  if (existing) return existing;
+  throw new QueueError(`DLQ "${dlqName}" is not initialized`);
 }
 
 export async function initQueues(connection?: Redis): Promise<Map<QueueName, Queue>> {
   if (queues.size > 0) return queues;
 
   const redis = connection ?? getRedis();
-  for (const name of Object.values(QUEUE_NAMES)) {
+
+  for (const name of QUEUE_LIST) {
     const queue = new Queue(name, {
       connection: redis,
-      defaultJobOptions: {
-        removeOnComplete: 1000,
-        removeOnFail: 5000,
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 2000 },
-      },
+      prefix: bullmqConfig.prefix,
+      defaultJobOptions: defaultJobOptions(),
     });
     queues.set(name, queue);
+
+    const events = new QueueEvents(name, {
+      connection: redis.duplicate(),
+      prefix: bullmqConfig.prefix,
+    });
+    events.on('failed', ({ jobId, failedReason }) => {
+      logger.domain('bullmq', 'warn', 'Job failed', { queue: name, jobId, failedReason });
+    });
+    events.on('completed', ({ jobId }) => {
+      logger.domain('bullmq', 'debug', 'Job completed', { queue: name, jobId });
+    });
+    queueEvents.set(name, events);
+
+    const dlqName = `${name}${bullmqConfig.dlqSuffix}`;
+    const dlq = new Queue(dlqName, {
+      connection: redis,
+      prefix: bullmqConfig.prefix,
+      defaultJobOptions: {
+        removeOnComplete: 100,
+        removeOnFail: 1000,
+        attempts: 1,
+      },
+    });
+    dlqQueues.set(dlqName, dlq);
   }
 
-  logger.info({ queues: [...queues.keys()] }, 'BullMQ queues initialized');
+  logger.domain('bullmq', 'info', 'BullMQ queues initialized', {
+    queues: [...queues.keys()],
+    dlq: [...dlqQueues.keys()],
+  });
   return queues;
 }
 
 export async function closeQueues(): Promise<void> {
-  await Promise.all([...queues.values()].map((q) => q.close()));
+  await Promise.all([
+    ...[...queues.values()].map((q) => q.close()),
+    ...[...queueEvents.values()].map((e) => e.close()),
+    ...[...dlqQueues.values()].map((q) => q.close()),
+  ]);
   queues.clear();
-  logger.info('BullMQ queues closed');
+  queueEvents.clear();
+  dlqQueues.clear();
+  logger.domain('bullmq', 'info', 'BullMQ queues closed');
 }
 
-export async function getQueueHealth(): Promise<Record<QueueName, { waiting: number; active: number }>> {
-  const result = {} as Record<QueueName, { waiting: number; active: number }>;
+export async function getQueueHealth(): Promise<
+  Record<string, { waiting: number; active: number; failed: number; delayed: number }>
+> {
+  const result: Record<
+    string,
+    { waiting: number; active: number; failed: number; delayed: number }
+  > = {};
   for (const [name, queue] of queues) {
-    const [waiting, active] = await Promise.all([queue.getWaitingCount(), queue.getActiveCount()]);
-    result[name] = { waiting, active };
+    const [waiting, active, failed, delayed] = await Promise.all([
+      queue.getWaitingCount(),
+      queue.getActiveCount(),
+      queue.getFailedCount(),
+      queue.getDelayedCount(),
+    ]);
+    result[name] = { waiting, active, failed, delayed };
   }
   return result;
 }

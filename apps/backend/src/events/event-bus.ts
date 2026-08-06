@@ -2,7 +2,12 @@ import { EventEmitter } from 'node:events';
 import {
   type DomainEvent,
   type EventName,
+  type EventPayloadMap,
+  type TypedEventName,
   EVENTS,
+  EVENT_REGISTRY,
+  isRegisteredEvent,
+  getEventDefinition,
 } from '@learnova/events';
 import { createId, toIso } from '@learnova/utils';
 import { logger } from '../utils/logger/index.js';
@@ -12,14 +17,21 @@ export type EventHandler<T = unknown> = (
 ) => void | Promise<void>;
 
 /**
- * In-process domain event bus.
- * Later: fan-out to Redis Streams / BullMQ without changing emit call sites.
+ * In-process domain event bus with typed publish/subscribe.
  */
 class EventBus {
   private readonly emitter = new EventEmitter();
 
   constructor() {
-    this.emitter.setMaxListeners(50);
+    this.emitter.setMaxListeners(100);
+  }
+
+  async publish<K extends TypedEventName>(
+    name: K,
+    payload: EventPayloadMap[K],
+    meta?: { correlationId?: string; actorId?: string },
+  ): Promise<DomainEvent<EventPayloadMap[K]>> {
+    return this.emit(name, payload, meta);
   }
 
   async emit<T>(
@@ -27,6 +39,10 @@ class EventBus {
     payload: T,
     meta?: { correlationId?: string; actorId?: string },
   ): Promise<DomainEvent<T>> {
+    if (!isRegisteredEvent(name)) {
+      logger.warn({ event: name }, 'Emitting unregistered event name');
+    }
+
     const event: DomainEvent<T> = {
       name,
       payload,
@@ -46,7 +62,6 @@ class EventBus {
       }),
     );
 
-    // Wildcard observers
     const anyHandlers = this.emitter.listeners('*') as EventHandler[];
     await Promise.all(
       anyHandlers.map(async (handler) => {
@@ -59,6 +74,10 @@ class EventBus {
     );
 
     return event;
+  }
+
+  subscribe<T = unknown>(name: EventName | '*', handler: EventHandler<T>): () => void {
+    return this.on(name, handler);
   }
 
   on<T = unknown>(name: EventName | '*', handler: EventHandler<T>): () => void {
@@ -79,8 +98,12 @@ class EventBus {
   listenerCount(name: EventName | '*'): number {
     return this.emitter.listenerCount(name);
   }
+
+  listRegistry() {
+    return EVENT_REGISTRY;
+  }
 }
 
 export const eventBus = new EventBus();
-export { EVENTS };
-export type { DomainEvent, EventName };
+export { EVENTS, EVENT_REGISTRY, isRegisteredEvent, getEventDefinition };
+export type { DomainEvent, EventName, EventPayloadMap, TypedEventName };

@@ -17,16 +17,18 @@ export interface SignedUrlOptions {
   expiresInSeconds?: number;
 }
 
+export type StorageDriver = 'local' | 's3' | 'minio' | 'r2';
+
 /**
- * File storage port — swap local ↔ S3 without changing callers.
+ * File storage port — Local / MinIO / S3 / R2.
+ * Abstraction only — no upload HTTP API.
  */
 export interface IStorage {
-  readonly driver: 'local' | 's3';
+  readonly driver: StorageDriver;
   put(input: PutObjectInput): Promise<StorageObject>;
   get(key: string): Promise<Buffer>;
   delete(key: string): Promise<void>;
   exists(key: string): Promise<boolean>;
   getPublicUrl(key: string): Promise<string>;
-  /** Ready check for health probes */
   isHealthy(): Promise<boolean>;
 }

@@ -35,6 +35,7 @@ export const REDIS_KEYS = {
   IDE_SESSION: 'ide:session:',
   QUEUE: 'bull:',
   FEATURE_FLAGS: 'ff:',
+  LOCK: 'lock:',
 } as const;
 
 export const HTTP_HEADERS = {
@@ -46,13 +47,40 @@ export const HTTP_HEADERS = {
 /** BullMQ queue names — shared by API producers and workers */
 export const QUEUE_NAMES = {
   EMAIL: 'email',
+  MAIL: 'email',
   NOTIFICATIONS: 'notifications',
-  GRADING: 'grading',
+  NOTIFICATION: 'notifications',
+  CERTIFICATE: 'certificate',
+  AI: 'ai',
+  COMPILE: 'compile',
   ANALYTICS: 'analytics',
   AUDIT: 'audit',
+  CLEANUP: 'cleanup',
+  GRADING: 'grading',
 } as const;
 
-export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
+export type QueueName =
+  | 'email'
+  | 'notifications'
+  | 'certificate'
+  | 'ai'
+  | 'compile'
+  | 'analytics'
+  | 'audit'
+  | 'cleanup'
+  | 'grading';
+
+export const QUEUE_LIST: readonly QueueName[] = [
+  'email',
+  'notifications',
+  'certificate',
+  'ai',
+  'compile',
+  'analytics',
+  'audit',
+  'cleanup',
+  'grading',
+] as const;
 
 export const CACHE_TTL = {
   SHORT: 60,

@@ -11,14 +11,16 @@ export interface SendMailResult {
   messageId: string;
   accepted: string[];
   rejected: string[];
-  driver: 'console' | 'smtp' | 'ses';
+  driver: MailDriver;
 }
 
+export type MailDriver = 'console' | 'smtp' | 'ses' | 'resend' | 'brevo' | 'nodemailer';
+
 /**
- * Email port — console for local, SMTP/SES when configured.
+ * Email port — console / smtp / nodemailer / resend / brevo / ses.
  */
 export interface IMailer {
-  readonly driver: 'console' | 'smtp' | 'ses';
+  readonly driver: MailDriver;
   send(input: SendMailInput): Promise<SendMailResult>;
   isHealthy(): Promise<boolean>;
 }

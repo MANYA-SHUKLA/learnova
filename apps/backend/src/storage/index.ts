@@ -3,7 +3,8 @@ export type {
   StorageObject,
   PutObjectInput,
   SignedUrlOptions,
+  StorageDriver,
 } from './types.js';
 export { LocalStorage } from './local.storage.js';
-export { S3Storage } from './s3.storage.js';
+export { S3Storage, S3CompatibleStorage } from './s3.storage.js';
 export { createStorage, getStorage, resetStorageForTests } from './storage.factory.js';
