@@ -42,6 +42,6 @@ export function getClientContext(req: Request) {
   return {
     ipAddress: ipFromForwarded ?? req.ip ?? null,
     userAgent: req.headers['user-agent'] ?? null,
-    correlationId: req.requestId ?? null,
+    correlationId: req.requestId as string | null,
   };
 }
