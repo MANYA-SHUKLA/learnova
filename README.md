@@ -8,7 +8,13 @@ LMS · University ERP · Online Examination · Coding Platform · Cloud IDE · A
 
 ## Status
 
-**Foundation phase — Step 2 complete.** Stable backend infrastructure is in place: Mongo/Redis, queues, cache, events, storage & mail abstractions, logging, config, errors, and health. Authentication, CRUD, domain models, and business APIs are intentionally not implemented yet.
+| Step | Scope | State |
+| --- | --- | --- |
+| 1 | Foundation (monorepo, packages, API shell, theme, docs) | ✅ Complete |
+| 2 | Infrastructure (Mongo, Redis, BullMQ, cache, mail, storage, events, health) | ✅ Complete |
+| 3 | Authentication & Authorization | ✅ Complete |
+
+Auth covers register (institution bootstrap), login/logout, JWT access + rotating refresh cookies, sessions, password reset/change, email verification, RBAC middleware, seeds, and auth UI. Academic modules (courses, departments, students/faculty CRUD, etc.) are **not** implemented yet.
 
 ## Stack
 

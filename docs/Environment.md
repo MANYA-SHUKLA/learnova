@@ -42,7 +42,7 @@ Generate strong JWT secrets (≥ 32 chars) for anything beyond local toy usage.
 | `JWT_ACCESS_SECRET` | **yes** | — | ≥ 32 chars |
 | `JWT_REFRESH_SECRET` | **yes** | — | ≥ 32 chars |
 | `JWT_ACCESS_TTL` | no | `15m` | Access token TTL |
-| `JWT_REFRESH_TTL` | no | `7d` | Refresh token TTL |
+| `JWT_REFRESH_TTL` | no | `30d` | Refresh token TTL |
 | `CORS_ORIGINS` | no | `http://localhost:3000` | Comma-separated origins |
 | `RATE_LIMIT_WINDOW_MS` | no | `60000` | Rate limit window |
 | `RATE_LIMIT_MAX` | no | `100` | Max requests per window |
