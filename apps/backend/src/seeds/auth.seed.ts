@@ -83,6 +83,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage institution settings',
   },
+  'faculty:read': {
+    resource: 'faculty',
+    action: 'read',
+    description: 'View faculty directory and profiles',
+  },
+  'faculty:write': {
+    resource: 'faculty',
+    action: 'write',
+    description: 'Update own faculty profile',
+  },
+  'faculty:manage': {
+    resource: 'faculty',
+    action: 'manage',
+    description: 'Manage faculty records',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {

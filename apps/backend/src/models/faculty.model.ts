@@ -30,7 +30,7 @@ const facultySchema = new Schema(
     profilePhoto: { type: String, default: null },
     gender: {
       type: String,
-      enum: ['male', 'female', 'other', 'prefer_not_to_say', null],
+      enum: ['male', 'female', 'other', 'prefer_not_to_say'],
       default: null,
     },
     dateOfBirth: { type: Date, default: null },

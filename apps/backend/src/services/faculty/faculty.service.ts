@@ -284,6 +284,13 @@ export class FacultyService {
     return toDto(doc);
   }
 
+  async getOwnProfile(actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const existing = await facultyRepository.findByEmail(institutionId, actor.email);
+    if (!existing) throw new NotFoundError('Faculty profile not found for this account');
+    return toDto(existing);
+  }
+
   async updateOwnProfile(input: UpdateFacultyProfileInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const existing = await facultyRepository.findByEmail(institutionId, actor.email);
@@ -557,14 +564,17 @@ export class FacultyService {
     }
 
     if (preview.invalidRows > 0) {
-      throw new ValidationError('Import validation failed', preview.errors.map((e) => ({
-        path: `row.${e.row}${e.field ? `.${e.field}` : ''}`,
-        message: e.message,
-      })));
+      throw new ValidationError(
+        'Import validation failed',
+        preview.errors.map((e) => ({
+          field: `row.${e.row}${e.field ? `.${e.field}` : ''}`,
+          code: 'IMPORT_ROW_INVALID',
+          message: e.message,
+        })),
+      );
     }
 
     const createdIds: string[] = [];
-    const errors: Array<{ row: number; message: string }> = [];
 
     try {
       for (let i = 0; i < input.rows.length; i += 1) {
@@ -622,10 +632,14 @@ export class FacultyService {
 
     return {
       imported: createdIds.length,
-      failed: errors.length,
-      errors,
+      failed: 0,
+      errors: [] as Array<{ row: number; message: string }>,
       facultyIds: createdIds,
-      ...preview,
+      totalRows: preview.totalRows,
+      validRows: preview.validRows,
+      invalidRows: preview.invalidRows,
+      duplicates: preview.duplicates,
+      sample: preview.sample,
     };
   }
 
@@ -644,7 +658,7 @@ export class FacultyService {
       limit: 5000,
     });
 
-    const rows = list.items.map((doc) => {
+    const rows: Array<Record<string, unknown>> = list.items.map((doc) => {
       const dto = toDto(doc);
       return {
         ...dto,

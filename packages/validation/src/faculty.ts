@@ -129,19 +129,27 @@ const facultyBaseFields = {
   status: facultyStatusSchema.optional().default('active'),
 };
 
-export const createFacultySchema = z
-  .object(facultyBaseFields)
-  .superRefine((data, ctx) => {
-    if (data.designation === 'custom' && !data.customDesignation?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Custom designation is required',
-        path: ['customDesignation'],
-      });
-    }
-  });
+const facultyObjectSchema = z.object(facultyBaseFields);
 
-export const updateFacultySchema = createFacultySchema.partial();
+export const createFacultySchema = facultyObjectSchema.superRefine((data, ctx) => {
+  if (data.designation === 'custom' && !data.customDesignation?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Custom designation is required',
+      path: ['customDesignation'],
+    });
+  }
+});
+
+export const updateFacultySchema = facultyObjectSchema.partial().superRefine((data, ctx) => {
+  if (data.designation === 'custom' && data.customDesignation !== undefined && !data.customDesignation?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Custom designation is required',
+      path: ['customDesignation'],
+    });
+  }
+});
 
 export const updateFacultyProfileSchema = z.object({
   phone: optionalString(30),
