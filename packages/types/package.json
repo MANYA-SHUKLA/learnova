@@ -22,6 +22,10 @@
     "./common": {
       "types": "./dist/common/index.d.ts",
       "import": "./dist/common/index.js"
+    },
+    "./jobs": {
+      "types": "./dist/jobs/index.d.ts",
+      "import": "./dist/jobs/index.js"
     }
   },
   "scripts": {

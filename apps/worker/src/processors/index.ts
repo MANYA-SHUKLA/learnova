@@ -1,45 +1,35 @@
 import { type Job, Worker } from 'bullmq';
-import { Redis } from 'ioredis';
+import { QUEUE_NAMES, type QueueName } from '@learnova/constants';
 import { env } from '../config/env.js';
+import { getRedisConnection } from '../connection/redis.js';
 import { logger } from '../utils/logger.js';
-import { QUEUE_NAMES, type QueueName } from '../queues/names.js';
+import { processEmailJob } from './email.processor.js';
+import { processNotificationJob } from './notifications.processor.js';
+import { processGradingJob } from './grading.processor.js';
+import { processAnalyticsJob } from './analytics.processor.js';
+import { processAuditJob } from './audit.processor.js';
+
+type Processor = (job: Job) => Promise<void>;
+
+const processors: Record<QueueName, Processor> = {
+  [QUEUE_NAMES.EMAIL]: (job) => processEmailJob(job),
+  [QUEUE_NAMES.NOTIFICATIONS]: (job) => processNotificationJob(job),
+  [QUEUE_NAMES.GRADING]: (job) => processGradingJob(job),
+  [QUEUE_NAMES.ANALYTICS]: (job) => processAnalyticsJob(job),
+  [QUEUE_NAMES.AUDIT]: (job) => processAuditJob(job),
+};
 
 /**
- * Worker processors — scaffolding only.
- * Each queue gets a no-op-safe processor that logs job receipt.
- * Real business logic lands when features are implemented.
+ * Background worker framework — one Worker per queue, typed processors.
+ * Business logic expands inside each processor; framework stays stable.
  */
-
-async function createConnection(): Promise<Redis> {
-  const redis = new Redis(env.REDIS_URL, {
-    maxRetriesPerRequest: null,
-    enableReadyCheck: true,
-  });
-  return redis;
-}
-
-async function defaultProcessor(job: Job): Promise<void> {
-  logger.info(
-    { queue: job.queueName, jobId: job.id, name: job.name },
-    'Job received (processor scaffold)',
-  );
-}
-
 export async function startWorkers(): Promise<Worker[]> {
-  const connection = await createConnection();
+  const connection = getRedisConnection();
   const concurrency = env.WORKER_CONCURRENCY;
 
-  const queueList: QueueName[] = [
-    QUEUE_NAMES.EMAIL,
-    QUEUE_NAMES.NOTIFICATIONS,
-    QUEUE_NAMES.GRADING,
-    QUEUE_NAMES.ANALYTICS,
-    QUEUE_NAMES.AUDIT,
-  ];
-
-  const workers = queueList.map(
+  const workers = (Object.values(QUEUE_NAMES) as QueueName[]).map(
     (name) =>
-      new Worker(name, defaultProcessor, {
+      new Worker(name, processors[name], {
         connection,
         concurrency,
       }),
@@ -52,8 +42,11 @@ export async function startWorkers(): Promise<Worker[]> {
     worker.on('completed', (job) => {
       logger.debug({ jobId: job.id, queue: worker.name }, 'Job completed');
     });
+    worker.on('error', (err) => {
+      logger.error({ err, queue: worker.name }, 'Worker error');
+    });
   }
 
-  logger.info({ queues: queueList, concurrency }, 'Workers started');
+  logger.info({ queues: Object.values(QUEUE_NAMES), concurrency }, 'Workers started');
   return workers;
 }

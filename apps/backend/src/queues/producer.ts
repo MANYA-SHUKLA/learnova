@@ -10,7 +10,7 @@ import { QUEUE_NAMES } from '@learnova/constants';
 import { getQueue } from './queues.js';
 import { logger } from '../utils/logger/index.js';
 
-async function addJob<T extends Record<string, unknown>>(
+async function addJob<T extends { correlationId?: string }>(
   queueName: (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES],
   jobName: string,
   payload: T,
