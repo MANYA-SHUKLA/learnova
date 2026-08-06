@@ -23,9 +23,21 @@ export const RATE_LIMIT = {
 
 export const JWT = {
   ACCESS_TOKEN_TTL: '15m',
-  REFRESH_TOKEN_TTL: '7d',
+  REFRESH_TOKEN_TTL: '30d',
   ISSUER: 'learnova',
   AUDIENCE: 'learnova-platform',
+} as const;
+
+/** Auth cookie & lockout policy */
+export const AUTH = {
+  REFRESH_COOKIE_NAME: 'learnova_session',
+  ACCESS_COOKIE_NAME: 'learnova_access',
+  MAX_FAILED_ATTEMPTS: 5,
+  LOCK_BASE_MS: 60_000,
+  PASSWORD_HISTORY_SIZE: 5,
+  VERIFICATION_TOKEN_TTL_MS: 24 * 60 * 60 * 1000,
+  RESET_TOKEN_TTL_MS: 60 * 60 * 1000,
+  REFRESH_TTL_MS: 30 * 24 * 60 * 60 * 1000,
 } as const;
 
 export const REDIS_KEYS = {

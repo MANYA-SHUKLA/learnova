@@ -1,0 +1,119 @@
+import { PERMISSIONS } from '@learnova/constants';
+import { ROLE_DEFINITIONS } from '@learnova/shared';
+import type { Permission, Role } from '@learnova/types';
+import { Types } from 'mongoose';
+import {
+  permissionRepository,
+  roleRepository,
+} from '../repositories/auth/index.js';
+
+const PERMISSION_META: Record<
+  Permission,
+  { resource: string; action: string; description: string }
+> = {
+  'lms:read': { resource: 'lms', action: 'read', description: 'View LMS content' },
+  'lms:write': { resource: 'lms', action: 'write', description: 'Create/update LMS content' },
+  'lms:manage': { resource: 'lms', action: 'manage', description: 'Manage LMS settings' },
+  'erp:read': { resource: 'erp', action: 'read', description: 'View ERP records' },
+  'erp:write': { resource: 'erp', action: 'write', description: 'Create/update ERP records' },
+  'erp:manage': { resource: 'erp', action: 'manage', description: 'Manage ERP settings' },
+  'examination:read': {
+    resource: 'examination',
+    action: 'read',
+    description: 'View examinations',
+  },
+  'examination:write': {
+    resource: 'examination',
+    action: 'write',
+    description: 'Create/update examinations',
+  },
+  'examination:manage': {
+    resource: 'examination',
+    action: 'manage',
+    description: 'Manage examination settings',
+  },
+  'examination:proctor': {
+    resource: 'examination',
+    action: 'proctor',
+    description: 'Proctor examinations',
+  },
+  'coding:read': { resource: 'coding', action: 'read', description: 'View coding labs' },
+  'coding:write': {
+    resource: 'coding',
+    action: 'write',
+    description: 'Create/update coding labs',
+  },
+  'coding:submit': {
+    resource: 'coding',
+    action: 'submit',
+    description: 'Submit coding solutions',
+  },
+  'ide:access': { resource: 'ide', action: 'access', description: 'Access the IDE' },
+  'ideation:read': {
+    resource: 'ideation',
+    action: 'read',
+    description: 'View ideation boards',
+  },
+  'ideation:write': {
+    resource: 'ideation',
+    action: 'write',
+    description: 'Contribute to ideation',
+  },
+  'analytics:read': {
+    resource: 'analytics',
+    action: 'read',
+    description: 'View analytics',
+  },
+  'analytics:export': {
+    resource: 'analytics',
+    action: 'export',
+    description: 'Export analytics',
+  },
+  'audit:read': { resource: 'audit', action: 'read', description: 'View audit logs' },
+  'users:read': { resource: 'users', action: 'read', description: 'View users' },
+  'users:manage': { resource: 'users', action: 'manage', description: 'Manage users' },
+  'roles:manage': { resource: 'roles', action: 'manage', description: 'Manage roles' },
+  'institution:manage': {
+    resource: 'institution',
+    action: 'manage',
+    description: 'Manage institution settings',
+  },
+};
+
+export async function seedPermissions(): Promise<Map<string, string>> {
+  const idByName = new Map<string, string>();
+  for (const name of Object.values(PERMISSIONS) as Permission[]) {
+    const meta = PERMISSION_META[name];
+    const doc = await permissionRepository.upsert({
+      name,
+      resource: meta.resource,
+      action: meta.action,
+      description: meta.description,
+    });
+    idByName.set(name, String(doc._id));
+  }
+  return idByName;
+}
+
+export async function seedRoles(permissionIds: Map<string, string>): Promise<void> {
+  for (const def of Object.values(ROLE_DEFINITIONS)) {
+    const role = def.role as Role;
+    const objectIds = def.permissions
+      .map((p) => permissionIds.get(p))
+      .filter((id): id is string => Boolean(id))
+      .map((id) => new Types.ObjectId(id));
+
+    await roleRepository.upsert({
+      name: role,
+      label: def.label,
+      description: def.description,
+      permissionIds: objectIds,
+      isActive: def.isActive,
+    });
+  }
+}
+
+export async function seedAuth(): Promise<void> {
+  const permissionIds = await seedPermissions();
+  await seedRoles(permissionIds);
+}

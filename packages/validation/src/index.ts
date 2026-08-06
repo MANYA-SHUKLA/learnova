@@ -47,3 +47,22 @@ export const slugSchema = z.string().regex(REGEX.SLUG, 'Invalid slug');
 
 export type PaginationInput = z.infer<typeof paginationSchema>;
 export type SearchQueryInput = z.infer<typeof searchQuerySchema>;
+
+export {
+  passwordSchema,
+  registerInstitutionSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
+  sessionIdParamsSchema,
+  type RegisterInstitutionInput,
+  type LoginInput,
+  type ForgotPasswordInput,
+  type ResetPasswordInput,
+  type ChangePasswordInput,
+  type VerifyEmailInput,
+  type ResendVerificationInput,
+} from './auth.js';

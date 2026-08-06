@@ -1,13 +1,13 @@
 /**
- * Auth middleware — PREPARED only.
- * Verifies Bearer JWT when present; does not implement login.
- * Soft-fail mode until auth feature ships (attach user if valid, else continue).
+ * Auth middleware — JWT authentication + RBAC guards.
  */
 
 import type { JwtPayload, Permission, Role } from '@learnova/types';
 import type { NextFunction, Request, Response } from 'express';
 import { ForbiddenError, UnauthorizedError } from '../utils/errors/index.js';
 import { verifyAccessToken } from '../utils/jwt/index.js';
+import { userRepository } from '../repositories/auth/user.repository.js';
+import { sessionRepository } from '../repositories/auth/session.repository.js';
 
 declare global {
   namespace Express {
@@ -23,37 +23,64 @@ export interface AuthMiddlewareOptions {
 }
 
 export function authenticate(options: AuthMiddlewareOptions = {}) {
-  const { required = false } = options;
+  const { required = true } = options;
 
   return (req: Request, _res: Response, next: NextFunction): void => {
-    const header = req.headers.authorization;
-    if (!header?.startsWith('Bearer ')) {
-      if (required) {
-        next(new UnauthorizedError('Missing bearer token'));
+    void (async () => {
+      const header = req.headers.authorization;
+      if (!header?.startsWith('Bearer ')) {
+        if (required) {
+          next(new UnauthorizedError('Missing bearer token'));
+          return;
+        }
+        next();
         return;
       }
-      next();
-      return;
-    }
 
-    const token = header.slice(7);
-    try {
-      req.user = verifyAccessToken(token);
-      next();
-    } catch {
-      if (required) {
-        next(new UnauthorizedError('Invalid or expired token'));
-        return;
+      const token = header.slice(7);
+      try {
+        const payload = verifyAccessToken(token);
+        const user = await userRepository.findById(payload.sub);
+        if (!user || !user.isActive) {
+          next(new UnauthorizedError('User inactive'));
+          return;
+        }
+        if ((user.tokenVersion ?? 0) !== (payload.tv ?? 0)) {
+          next(new UnauthorizedError('Token revoked'));
+          return;
+        }
+        const session = await sessionRepository.findById(payload.sessionId);
+        if (!session || session.revokedAt || session.expiresAt < new Date()) {
+          next(new UnauthorizedError('Session revoked'));
+          return;
+        }
+        void sessionRepository.touch(payload.sessionId);
+        req.user = payload;
+        next();
+      } catch {
+        if (required) {
+          next(new UnauthorizedError('Invalid or expired token'));
+          return;
+        }
+        next();
       }
-      next();
-    }
+    })();
   };
+}
+
+/** Soft auth — attach user when token present, never reject for missing token. */
+export function optionalAuthenticate() {
+  return authenticate({ required: false });
+}
+
+export function requireRole(...roles: Role[]) {
+  return requireRoles(...roles);
 }
 
 export function requireRoles(...roles: Role[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
-      next(new UnauthorizedError());
+      next(new UnauthorizedError('Unauthorized'));
       return;
     }
     if (!roles.includes(req.user.role)) {
@@ -64,10 +91,14 @@ export function requireRoles(...roles: Role[]) {
   };
 }
 
+export function requirePermission(...permissions: Permission[]) {
+  return requirePermissions(...permissions);
+}
+
 export function requirePermissions(...permissions: Permission[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
-      next(new UnauthorizedError());
+      next(new UnauthorizedError('Unauthorized'));
       return;
     }
     const ok = permissions.every((p) => req.user?.permissions.includes(p));
@@ -76,5 +107,28 @@ export function requirePermissions(...permissions: Permission[]) {
       return;
     }
     next();
+  };
+}
+
+/**
+ * Ensures the authenticated user owns the resource identified by a route param,
+ * or is an institution/super admin.
+ */
+export function requireOwnership(paramKey = 'userId') {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      next(new UnauthorizedError('Unauthorized'));
+      return;
+    }
+    const resourceUserId = req.params[paramKey];
+    if (!resourceUserId || resourceUserId === req.user.sub) {
+      next();
+      return;
+    }
+    if (req.user.role === 'institution_admin' || req.user.role === 'super_admin') {
+      next();
+      return;
+    }
+    next(new ForbiddenError('Resource ownership required'));
   };
 }

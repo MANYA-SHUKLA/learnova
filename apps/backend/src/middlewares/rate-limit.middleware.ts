@@ -8,13 +8,8 @@ import type { RequestHandler } from 'express';
 /**
  * Rate limiter — Redis-backed when available, memory fallback for boot.
  */
-export function createRateLimiter(): RequestHandler {
-  if (!rateLimitConfig.enabled) {
-    return (_req, _res, next) => { next(); };
-  }
-
+function buildLimiter(max: number): RequestHandler {
   const windowMs = rateLimitConfig.windowMs;
-  const max = rateLimitConfig.max;
 
   try {
     const redis = getRedis();
@@ -47,4 +42,23 @@ export function createRateLimiter(): RequestHandler {
       },
     });
   }
+}
+
+export function createRateLimiter(): RequestHandler {
+  if (!rateLimitConfig.enabled) {
+    return (_req, _res, next) => {
+      next();
+    };
+  }
+  return buildLimiter(rateLimitConfig.max);
+}
+
+/** Stricter limiter for auth endpoints (login, refresh, password reset). */
+export function createAuthRateLimiter(): RequestHandler {
+  if (!rateLimitConfig.enabled) {
+    return (_req, _res, next) => {
+      next();
+    };
+  }
+  return buildLimiter(rateLimitConfig.authMax);
 }

@@ -1,6 +1,5 @@
 /**
- * Auth & permission foundation types.
- * Login/session flows are NOT implemented — types prepare the contract only.
+ * Auth & permission types — consumed by JWT, middleware, and frontend auth store.
  */
 
 import type { ActiveRole, ID, Locale, ModuleName, Role } from '../common/index.js';
@@ -31,6 +30,8 @@ export type Permission =
   | 'roles:manage'
   | 'institution:manage';
 
+export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
+
 export interface JwtPayload {
   sub: ID;
   email: string;
@@ -38,8 +39,19 @@ export interface JwtPayload {
   institutionId: ID | null;
   permissions: Permission[];
   sessionId: string;
+  /** Token version — bumped on logout-all / password change */
+  tv: number;
   iat: number;
   exp: number;
+}
+
+export interface RefreshTokenPayload {
+  sub: ID;
+  sessionId: string;
+  familyId: string;
+  version: number;
+  iat?: number;
+  exp?: number;
 }
 
 export interface AuthUser {
@@ -52,15 +64,22 @@ export interface AuthUser {
   permissions: Permission[];
   locale: Locale;
   avatarUrl: string | null;
+  isEmailVerified: boolean;
 }
 
 export interface Session {
   id: ID;
   userId: ID;
+  deviceType: DeviceType;
   expiresAt: string;
   createdAt: string;
+  lastActivityAt: string;
   userAgent: string | null;
   ipAddress: string | null;
+  browser: string | null;
+  os: string | null;
+  country: string | null;
+  isCurrent?: boolean;
 }
 
 export interface AuthTokens {
@@ -78,7 +97,6 @@ export interface RoleDefinition {
   isActive: boolean;
 }
 
-/** Placeholder auth context — providers will hydrate this later */
 export interface AuthContextValue {
   user: AuthUser | null;
   session: Session | null;
