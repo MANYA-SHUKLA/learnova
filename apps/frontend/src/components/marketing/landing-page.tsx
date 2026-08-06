@@ -266,7 +266,7 @@ function FeatureGrid() {
           {FEATURES.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="rounded-2xl border border-border bg-card p-6 shadow-soft-sm transition-shadow hover:shadow-soft-md sm:p-7"
+              className="card-interactive rounded-2xl border border-border bg-card p-6 shadow-soft-sm sm:p-7"
             >
               <span className="inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="size-5" />
@@ -428,7 +428,7 @@ function MockPanel({ children, className }: { children: ReactNode; className?: s
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border bg-card p-5 shadow-soft-lg sm:p-6',
+        'card-interactive rounded-2xl border border-border bg-card p-5 shadow-soft-md sm:p-6',
         className,
       )}
     >
@@ -706,7 +706,7 @@ function Testimonials() {
           {TESTIMONIALS.map((t) => (
             <blockquote
               key={t.name}
-              className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft-sm"
+              className="card-interactive flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft-sm"
             >
               <p className="flex-1 text-sm leading-relaxed text-foreground">&ldquo;{t.quote}&rdquo;</p>
               <footer className="mt-6 border-t border-border pt-4">
@@ -763,7 +763,7 @@ function Faq() {
           {FAQS.map((item) => (
             <details
               key={item.q}
-              className="group rounded-2xl border border-border bg-card px-5 py-1 shadow-soft-sm open:shadow-soft-md"
+              className="card-interactive group rounded-2xl border border-border bg-card px-5 py-1 shadow-soft-sm open:shadow-soft-md"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-display text-sm font-semibold text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
                 {item.q}

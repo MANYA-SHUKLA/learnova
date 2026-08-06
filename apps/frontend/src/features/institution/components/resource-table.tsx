@@ -70,7 +70,7 @@ export function ResourceTable<T extends { id: string }>({
         {rows.map((row) => (
           <li
             key={row.id}
-            className="rounded-2xl border border-border bg-card p-4 shadow-soft-sm"
+            className="card-interactive rounded-2xl border border-border bg-card p-4 shadow-soft-sm"
           >
             <dl className="space-y-3">
               {columns.map((col) => (

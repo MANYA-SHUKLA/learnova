@@ -99,7 +99,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
               {PILLARS.map(({ icon: Icon, title, body }) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-border bg-card p-6 shadow-soft-sm sm:p-7"
+                  className="card-interactive rounded-2xl border border-border bg-card p-6 shadow-soft-sm sm:p-7"
                 >
                   <span className="inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="size-5" />

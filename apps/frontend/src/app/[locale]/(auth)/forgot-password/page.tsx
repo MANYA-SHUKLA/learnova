@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="you@institution.edu"
+                placeholder="shuklamanya99@gmail.com"
                 disabled={mutation.isPending}
                 {...register('email')}
               />

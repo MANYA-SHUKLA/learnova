@@ -77,7 +77,7 @@ function LoginForm() {
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="you@institution.edu"
+              placeholder="shuklamanya99@gmail.com"
               disabled={loginMutation.isPending}
               {...register('email')}
             />
