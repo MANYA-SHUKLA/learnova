@@ -73,6 +73,11 @@ const PERMISSION_META: Record<
   'users:read': { resource: 'users', action: 'read', description: 'View users' },
   'users:manage': { resource: 'users', action: 'manage', description: 'Manage users' },
   'roles:manage': { resource: 'roles', action: 'manage', description: 'Manage roles' },
+  'institution:read': {
+    resource: 'institution',
+    action: 'read',
+    description: 'View institution hierarchy',
+  },
   'institution:manage': {
     resource: 'institution',
     action: 'manage',
