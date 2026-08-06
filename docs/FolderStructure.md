@@ -53,7 +53,7 @@
 | --- | --- |
 | `config/` | App + validated environment |
 | `controllers/` | HTTP adapters (thin) |
-| `routes/` | Express routers; `v1/` for versioning |
+| `routes/` | Express routers; `v1/`, `internal/`, `webhooks/` |
 | `middlewares/` | Auth, validate, rate limit, logging, errors, request ID |
 | `services/` | Business logic (empty until features) |
 | `repositories/` | Data access; `base/` holds abstract repository |

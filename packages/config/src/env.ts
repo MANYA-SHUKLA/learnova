@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { appConfigSchema } from './app/index.js';
 import { databaseConfigSchema } from './database/index.js';
 import { redisConfigSchema } from './redis/index.js';
 import { jwtConfigSchema } from './jwt/index.js';
@@ -8,7 +7,6 @@ import { storageConfigSchema } from './storage/index.js';
 import { mailConfigSchema } from './mail/index.js';
 import { geminiConfigSchema } from './gemini/index.js';
 import { judge0ConfigSchema } from './judge0/index.js';
-import { dockerConfigSchema } from './docker/index.js';
 
 /**
  * Environment validation schemas.

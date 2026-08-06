@@ -53,5 +53,10 @@
     "*.{json,md,yml,yaml,css}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "thread-stream": "3.1.0"
+    }
   }
 }
