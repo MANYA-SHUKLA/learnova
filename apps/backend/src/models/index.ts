@@ -34,3 +34,9 @@ export {
   InstitutionAuditLogModel,
   type InstitutionAuditLogDocument,
 } from './institution-audit-log.model.js';
+export { FacultyModel, type FacultyDocument } from './faculty.model.js';
+export {
+  FacultyAuditLogModel,
+  type FacultyAuditLogDocument,
+  type FacultyAuditEvent,
+} from './faculty-audit-log.model.js';
