@@ -18,6 +18,7 @@ export const API_ROUTES = {
   ACADEMIC_CALENDARS: '/academic-calendars',
   INSTITUTION_SETTINGS: '/institution-settings',
   FACULTY: '/faculty',
+  STUDENTS: '/students',
   LMS: '/lms',
   ERP: '/erp',
   EXAMINATION: '/examination',
@@ -71,6 +72,11 @@ export const APP_ROUTES = {
   INSTITUTION_FACULTY_CREATE: '/institution/faculty/create',
   INSTITUTION_FACULTY_IMPORT: '/institution/faculty/import',
   INSTITUTION_FACULTY_EXPORT: '/institution/faculty/export',
+  INSTITUTION_STUDENTS: '/institution/students',
+  INSTITUTION_STUDENTS_CREATE: '/institution/students/create',
+  INSTITUTION_STUDENTS_IMPORT: '/institution/students/import',
+  INSTITUTION_STUDENTS_EXPORT: '/institution/students/export',
+  STUDENT_PROFILE: '/student/profile',
 } as const;
 
 export const SOCKET_NAMESPACES = {

@@ -98,6 +98,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage faculty records',
   },
+  'student:read': {
+    resource: 'student',
+    action: 'read',
+    description: 'View student directory and profiles',
+  },
+  'student:write': {
+    resource: 'student',
+    action: 'write',
+    description: 'Update own student profile',
+  },
+  'student:manage': {
+    resource: 'student',
+    action: 'manage',
+    description: 'Manage student records',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {

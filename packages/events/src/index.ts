@@ -37,6 +37,12 @@ export const EVENTS = {
   FACULTY_DELETED: 'faculty.deleted',
   FACULTY_STATUS_CHANGED: 'faculty.status.changed',
   FACULTY_IMPORTED: 'faculty.imported',
+
+  STUDENT_CREATED: 'student.created',
+  STUDENT_UPDATED: 'student.updated',
+  STUDENT_DELETED: 'student.deleted',
+  STUDENT_STATUS_CHANGED: 'student.status.changed',
+  STUDENT_IMPORTED: 'student.imported',
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
@@ -81,6 +87,15 @@ export interface EventPayloadMap {
     status: string;
   };
   'faculty.imported': { institutionId: string; count: number };
+  'student.created': { studentId: string; institutionId: string };
+  'student.updated': { studentId: string; institutionId: string };
+  'student.deleted': { studentId: string; institutionId: string };
+  'student.status.changed': {
+    studentId: string;
+    institutionId: string;
+    status: string;
+  };
+  'student.imported': { institutionId: string; count: number };
 }
 
 export type TypedEventName = keyof EventPayloadMap;
@@ -119,6 +134,11 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.FACULTY_DELETED, description: 'Faculty member deleted', version: 1 },
   { name: EVENTS.FACULTY_STATUS_CHANGED, description: 'Faculty status changed', version: 1 },
   { name: EVENTS.FACULTY_IMPORTED, description: 'Faculty CSV import completed', version: 1 },
+  { name: EVENTS.STUDENT_CREATED, description: 'Student created', version: 1 },
+  { name: EVENTS.STUDENT_UPDATED, description: 'Student updated', version: 1 },
+  { name: EVENTS.STUDENT_DELETED, description: 'Student deleted', version: 1 },
+  { name: EVENTS.STUDENT_STATUS_CHANGED, description: 'Student status changed', version: 1 },
+  { name: EVENTS.STUDENT_IMPORTED, description: 'Student CSV import completed', version: 1 },
 ] as const;
 
 export function isRegisteredEvent(name: string): name is EventName {

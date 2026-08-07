@@ -32,7 +32,10 @@ export type Permission =
   | 'institution:manage'
   | 'faculty:read'
   | 'faculty:write'
-  | 'faculty:manage';
+  | 'faculty:manage'
+  | 'student:read'
+  | 'student:write'
+  | 'student:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
 

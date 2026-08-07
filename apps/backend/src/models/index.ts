@@ -40,3 +40,9 @@ export {
   type FacultyAuditLogDocument,
   type FacultyAuditEvent,
 } from './faculty-audit-log.model.js';
+export { StudentModel, type StudentDocument } from './student.model.js';
+export {
+  StudentAuditLogModel,
+  type StudentAuditLogDocument,
+  type StudentAuditEvent,
+} from './student-audit-log.model.js';

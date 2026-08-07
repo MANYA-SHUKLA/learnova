@@ -69,3 +69,4 @@ export {
 
 export * from './institution.js';
 export * from './faculty.js';
+export * from './student.js';
