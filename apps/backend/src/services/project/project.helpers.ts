@@ -48,10 +48,8 @@ export const PROJECT_STATUS_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> 
 };
 
 export function canTransitionStatus(from: ProjectStatus, to: ProjectStatus): boolean {
-  return canTransitionLifecycle(
-    from as AssessmentLifecycleStatus,
-    to as AssessmentLifecycleStatus,
-  );
+  if (from === to) return true;
+  return PROJECT_STATUS_TRANSITIONS[from]?.includes(to) ?? false;
 }
 
 export {

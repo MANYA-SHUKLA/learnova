@@ -1658,12 +1658,7 @@ export class ProjectService {
       throw new ForbiddenError('Students cannot submit faculty reviews');
     }
 
-    const reviewInput = input as CreateReviewInput & {
-      score?: number | null;
-      suggestions?: string | null;
-      approval?: boolean | null;
-      revisionRequired?: boolean;
-    };
+    const reviewInput = input;
 
     const doc = await projectRepository.createReview({
       institutionId: oid(institutionId),
@@ -1672,7 +1667,7 @@ export class ProjectService {
       reviewerId: oid(actor.userId),
       reviewType: input.reviewType,
       status: 'draft',
-      score: reviewInput.score ?? reviewInput.rating ?? null,
+      score: reviewInput.score ?? null,
       feedback: reviewInput.feedback ?? null,
       suggestions: reviewInput.suggestions ?? null,
       approval: reviewInput.approval ?? null,
@@ -1691,21 +1686,14 @@ export class ProjectService {
       throw new ForbiddenError('Not allowed to submit this review');
     }
 
-    const submitInput = input as SubmitReviewInput & {
-      score?: number | null;
-      suggestions?: string | null;
-      approval?: boolean | null;
-      revisionRequired?: boolean;
-    };
-
     const doc = await projectRepository.updateReviewById(institutionId, id, {
       status: 'submitted',
-      score: submitInput.score ?? submitInput.rating ?? existing.score,
-      feedback: submitInput.feedback ?? existing.feedback,
-      suggestions: submitInput.suggestions ?? existing.suggestions,
-      approval: submitInput.approval ?? existing.approval,
-      revisionRequired: submitInput.revisionRequired ?? existing.revisionRequired,
-      rubricScores: submitInput.rubricScores ?? existing.rubricScores,
+      score: input.score ?? existing.score,
+      feedback: input.feedback ?? existing.feedback,
+      suggestions: input.suggestions ?? existing.suggestions,
+      approval: input.approval ?? existing.approval,
+      revisionRequired: input.revisionRequired ?? existing.revisionRequired,
+      rubricScores: input.rubricScores ?? existing.rubricScores,
       submittedAt: new Date(),
     });
     if (!doc) throw new NotFoundError('Review not found');

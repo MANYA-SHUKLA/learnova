@@ -1,16 +1,21 @@
 import type {
   PaginatedMeta,
   Project,
+  ProjectCategory,
+  ProjectComment,
+  ProjectDifficulty,
   ProjectFacultyDashboard,
-  ProjectFileRef,
   ProjectInstitutionDashboard,
+  ProjectMember,
   ProjectMilestone,
   ProjectMilestoneStatus,
+  ProjectMilestoneType,
   ProjectReview,
   ProjectStatus,
   ProjectStudentDashboard,
   ProjectSubmission,
   ProjectSubmissionStatus,
+  ProjectTag,
   ProjectTeam,
   ProjectTeamMemberRole,
   ProjectTeamStatus,
@@ -18,38 +23,32 @@ import type {
   ProjectVisibility,
 } from '@learnova/types';
 
-/** Full academic spec project types */
-export type ProjectTypeSpec =
-  | 'mini_project'
-  | 'major_project'
-  | 'capstone'
-  | 'research'
-  | 'case_study'
-  | 'industry_project'
-  | 'innovation_challenge'
-  | 'open_project'
-  | ProjectType;
+export type {
+  Project,
+  ProjectCategory,
+  ProjectComment,
+  ProjectDifficulty,
+  ProjectFacultyDashboard,
+  ProjectInstitutionDashboard,
+  ProjectMember,
+  ProjectMilestone,
+  ProjectMilestoneStatus,
+  ProjectMilestoneType,
+  ProjectReview,
+  ProjectStatus,
+  ProjectStudentDashboard,
+  ProjectSubmission,
+  ProjectSubmissionStatus,
+  ProjectTag,
+  ProjectTeam,
+  ProjectTeamStatus,
+  ProjectType,
+  ProjectVisibility,
+};
 
-export type ProjectDifficulty = 'beginner' | 'intermediate' | 'advanced' | 'expert';
-
-export type ProjectTeamStatusSpec =
-  | 'pending'
-  | 'approved'
-  | 'rejected'
-  | 'completed'
-  | ProjectTeamStatus;
-
-export type ProjectMilestoneType =
-  | 'proposal'
-  | 'design'
-  | 'implementation'
-  | 'testing'
-  | 'documentation'
-  | 'presentation'
-  | 'final_submission'
-  | 'custom';
-
-export type ProjectInvitationStatus = 'pending' | 'accepted' | 'rejected' | 'expired';
+/** Alias for academic project types */
+export type ProjectTypeSpec = ProjectType;
+export type ProjectTeamStatusSpec = ProjectTeamStatus;
 
 export type ProjectSortOption =
   | 'newest'
@@ -58,36 +57,7 @@ export type ProjectSortOption =
   | 'title'
   | 'difficulty';
 
-export interface ProjectCategory {
-  id: string;
-  institutionId?: string;
-  name: string;
-  slug: string;
-  description?: string | null;
-}
-
-export interface ProjectTag {
-  id: string;
-  institutionId?: string;
-  name: string;
-  slug: string;
-}
-
-export interface ProjectComment {
-  id: string;
-  institutionId?: string;
-  projectId: string;
-  submissionId?: string | null;
-  milestoneId?: string | null;
-  parentCommentId?: string | null;
-  authorId: string;
-  body: string;
-  resolved: boolean;
-  attachments: ProjectFileRef[];
-  createdAt: string;
-  updatedAt: string;
-  replies?: ProjectComment[];
-}
+export type ProjectInvitationStatus = 'pending' | 'accepted' | 'rejected' | 'expired';
 
 export interface ProjectTeamInvitation {
   id: string;
@@ -99,67 +69,16 @@ export interface ProjectTeamInvitation {
   createdAt: string;
 }
 
-export interface ProjectTeamMember {
-  id: string;
-  teamId: string;
-  projectId: string;
-  studentId: string;
-  role: ProjectTeamMemberRole;
-  approvedBy?: string | null;
-  joinedAt: string;
-}
-
 export interface MyTeamEntry {
   teamId: string;
   teamName: string;
   projectId: string;
   projectTitle: string;
-  status: ProjectTeamStatusSpec;
+  status: ProjectTeamStatus;
   memberCount: number;
-  members: ProjectTeamMember[];
+  members: ProjectMember[];
   pendingInvitations: ProjectTeamInvitation[];
 }
-
-export type ProjectExtended = Project & {
-  slug?: string | null;
-  objective?: string | null;
-  problemStatement?: string | null;
-  learningOutcomes?: string[];
-  difficulty?: ProjectDifficulty | null;
-  categoryId?: string | null;
-  category?: ProjectCategory | null;
-  tagIds?: string[];
-  tags?: ProjectTag[];
-  startDate?: string | null;
-  submissionDeadline?: string | null;
-  resources?: ProjectFileRef[];
-  allowIndividual?: boolean;
-  allowTeams?: boolean;
-  facultyId?: string | null;
-  archived?: boolean;
-};
-
-export type ProjectInstitutionDashboardExtended = ProjectInstitutionDashboard & {
-  active?: number;
-  completed?: number;
-  departments?: number;
-  facultyParticipation?: number;
-};
-
-export type ProjectFacultyDashboardExtended = ProjectFacultyDashboard & {
-  upcomingDeadlines?: number;
-  studentTeams?: number;
-  lateSubmissions?: number;
-};
-
-export type ProjectStudentDashboardExtended = ProjectStudentDashboard & {
-  myProjects?: number;
-  currentTeam?: string | null;
-  milestones?: number;
-  upcomingDeadlines?: number;
-  submissionHistory?: number;
-  reviewFeedback?: number;
-};
 
 export type ProjectListParams = {
   q?: string;
@@ -168,7 +87,7 @@ export type ProjectListParams = {
   moduleId?: string;
   lessonId?: string;
   status?: ProjectStatus;
-  projectType?: ProjectTypeSpec;
+  projectType?: ProjectType;
   difficulty?: ProjectDifficulty;
   categoryId?: string;
   tagId?: string;
@@ -187,7 +106,7 @@ export type ProjectListParams = {
 };
 
 export type ProjectListResult = {
-  items: ProjectExtended[];
+  items: Project[];
   meta: PaginatedMeta;
 };
 
@@ -199,7 +118,7 @@ export type MilestoneListResult = {
 export type TeamListParams = {
   projectId?: string;
   courseId?: string;
-  status?: ProjectTeamStatusSpec;
+  status?: ProjectTeamStatus;
   pendingApproval?: boolean;
   page?: number;
   limit?: number;
@@ -253,28 +172,26 @@ export type MyTeamListResult = {
 };
 
 export type BulkIdsBody = { ids: string[] };
-
 export type BulkAssignFacultyBody = { ids: string[]; facultyId: string };
-
 export type BulkResult = { modified: number; ids?: string[] };
 
 export type ProjectCreateBody = {
   courseId: string;
   moduleId?: string | null;
   lessonId?: string | null;
-  slug?: string | null;
+  slug?: string;
   title: string;
   description?: string | null;
   objective?: string | null;
   problemStatement?: string | null;
   learningOutcomes?: string[];
   instructions?: string | null;
-  projectType?: ProjectTypeSpec;
-  difficulty?: ProjectDifficulty | null;
+  projectType?: ProjectType;
+  difficulty?: ProjectDifficulty;
   categoryId?: string | null;
-  tagIds?: string[];
-  teamSizeMin?: number;
-  teamSizeMax?: number;
+  tags?: string[];
+  minimumTeamSize?: number;
+  maximumTeamSize?: number;
   allowIndividual?: boolean;
   allowTeams?: boolean;
   allowSelfTeamFormation?: boolean;
@@ -286,8 +203,8 @@ export type ProjectCreateBody = {
   totalMarks?: number;
   passingMarks?: number;
   weightage?: number;
-  allowLateSubmission?: boolean;
-  latePenaltyPercent?: number;
+  lateSubmissionAllowed?: boolean;
+  latePenalty?: number;
   allowResubmission?: boolean;
   maxAttempts?: number;
   publishDate?: string | null;
@@ -295,10 +212,9 @@ export type ProjectCreateBody = {
   dueDate?: string | null;
   submissionDeadline?: string | null;
   closeDate?: string | null;
-  estimatedMinutes?: number | null;
+  estimatedHours?: number | null;
   rubricId?: string | null;
-  facultyId?: string | null;
-  resources?: string[];
+  assignedFacultyIds?: string[];
 };
 
 export type ProjectUpdateBody = Partial<Omit<ProjectCreateBody, 'courseId'>>;
@@ -310,21 +226,21 @@ export type MilestoneCreateBody = {
   milestoneType?: ProjectMilestoneType;
   dueDate?: string | null;
   order?: number;
-  weight?: number;
+  weightage?: number;
 };
 
 export type MilestoneUpdateBody = Partial<Omit<MilestoneCreateBody, 'projectId'>>;
 
 export type TeamCreateBody = {
   projectId: string;
-  name: string;
+  teamName: string;
   repoLink?: string | null;
 };
 
 export type TeamUpdateBody = {
-  name?: string;
+  teamName?: string;
   repoLink?: string | null;
-  status?: ProjectTeamStatusSpec;
+  status?: ProjectTeamStatus;
 };
 
 export type JoinTeamBody = {
@@ -332,26 +248,19 @@ export type JoinTeamBody = {
   role?: ProjectTeamMemberRole;
 };
 
-export type TeamInviteBody = {
-  studentId: string;
-};
-
-export type TeamTransferLeadershipBody = {
-  studentId: string;
-};
-
-export type TeamRejectBody = {
-  reason?: string | null;
-};
+export type TeamInviteBody = { studentId: string };
+export type TeamTransferLeadershipBody = { studentId: string };
+export type TeamRejectBody = { reason?: string | null };
 
 export type SubmitBody = {
   projectId: string;
   milestoneId?: string | null;
   deliveryType?: 'text' | 'file' | 'link' | 'mixed';
+  submissionText?: string | null;
   textSubmission?: string | null;
   links?: string[];
-  repoLink?: string | null;
   githubRepository?: string | null;
+  repoLink?: string | null;
   demoVideo?: string | null;
   liveDemoURL?: string | null;
   timeSpentMinutes?: number | null;
@@ -376,8 +285,8 @@ export type ReviewCreateBody = {
   projectId: string;
   submissionId: string;
   reviewType?: 'peer' | 'faculty';
-  rating?: number | null;
   score?: number | null;
+  rating?: number | null;
   feedback?: string | null;
   suggestions?: string | null;
   approval?: boolean | null;
@@ -386,8 +295,8 @@ export type ReviewCreateBody = {
 };
 
 export type ReviewSubmitBody = {
-  rating?: number | null;
   score?: number | null;
+  rating?: number | null;
   feedback?: string | null;
   suggestions?: string | null;
   approval?: boolean | null;
@@ -406,22 +315,4 @@ export type CommentCreateBody = {
 export type CommentUpdateBody = {
   body?: string;
   resolved?: boolean;
-};
-
-export type {
-  Project,
-  ProjectExtended as ProjectDetail,
-  ProjectFacultyDashboard,
-  ProjectInstitutionDashboard,
-  ProjectMilestone,
-  ProjectMilestoneStatus,
-  ProjectReview,
-  ProjectStatus,
-  ProjectStudentDashboard,
-  ProjectSubmission,
-  ProjectSubmissionStatus,
-  ProjectTeam,
-  ProjectTeamStatus,
-  ProjectType,
-  ProjectTypeSpec as ProjectAcademicType,
 };

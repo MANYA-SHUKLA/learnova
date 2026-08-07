@@ -94,11 +94,8 @@ export interface ProjectStats {
 }
 
 export interface ExtendedProjectListQuery extends Partial<ProjectListQuery> {
-  tags?: string[];
-  categoryId?: string;
-  difficulty?: string;
   facultyId?: string;
-  sortBy?: ProjectListQuery['sortBy'] | 'difficulty' | 'newest' | 'oldest' | 'deadline';
+  sortBy?: ProjectListQuery['sortBy'] | 'newest' | 'oldest';
 }
 
 function escapeRegex(value: string) {

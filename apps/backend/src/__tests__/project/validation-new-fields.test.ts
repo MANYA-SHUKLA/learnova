@@ -49,8 +49,8 @@ describe('project slug helpers', () => {
   });
 });
 
-describe('project open status transitions', () => {
-  it('allows published to open', () => {
+describe('project status transitions', () => {
+  it('supports open status after published', () => {
     expect(canTransitionStatus('published', 'open')).toBe(true);
   });
 

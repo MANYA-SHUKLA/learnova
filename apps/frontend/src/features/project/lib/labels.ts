@@ -1,33 +1,23 @@
 import type {
   ProjectMilestoneStatus,
+  ProjectMilestoneType,
   ProjectStatus,
   ProjectSubmissionStatus,
+  ProjectTeamStatus,
   ProjectType,
   ProjectVisibility,
-} from '@learnova/types';
-import type {
   ProjectDifficulty,
-  ProjectMilestoneType,
-  ProjectTeamStatusSpec,
-  ProjectTypeSpec,
-} from '../types';
+} from '@learnova/types';
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
   draft: 'Draft',
   published: 'Published',
+  open: 'Open',
   archived: 'Archived',
   closed: 'Closed',
 };
 
-const OPEN_STATUS_LABEL = 'Open';
-
 const TYPE_LABELS: Record<ProjectType, string> = {
-  individual: 'Individual',
-  team: 'Team',
-  hybrid: 'Hybrid',
-};
-
-const ACADEMIC_TYPE_LABELS: Record<string, string> = {
   mini_project: 'Mini Project',
   major_project: 'Major Project',
   capstone: 'Capstone',
@@ -36,9 +26,6 @@ const ACADEMIC_TYPE_LABELS: Record<string, string> = {
   industry_project: 'Industry Project',
   innovation_challenge: 'Innovation Challenge',
   open_project: 'Open Project',
-  individual: 'Individual',
-  team: 'Team',
-  hybrid: 'Hybrid',
 };
 
 const DIFFICULTY_LABELS: Record<ProjectDifficulty, string> = {
@@ -81,23 +68,19 @@ const SUBMISSION_LABELS: Record<ProjectSubmissionStatus, string> = {
   missing: 'Missing',
 };
 
-const TEAM_LABELS: Record<string, string> = {
+const TEAM_LABELS: Record<ProjectTeamStatus, string> = {
   pending: 'Pending approval',
   approved: 'Approved',
   rejected: 'Rejected',
   completed: 'Completed',
-  forming: 'Forming',
-  active: 'Active',
-  dissolved: 'Dissolved',
 };
 
-export function formatProjectStatus(status: ProjectStatus | 'open') {
-  if (status === 'open') return OPEN_STATUS_LABEL;
-  return STATUS_LABELS[status as ProjectStatus] ?? status;
+export function formatProjectStatus(status: ProjectStatus) {
+  return STATUS_LABELS[status] ?? status;
 }
 
-export function formatProjectType(type: ProjectTypeSpec | ProjectType) {
-  return ACADEMIC_TYPE_LABELS[type] ?? TYPE_LABELS[type as ProjectType] ?? type;
+export function formatProjectType(type: ProjectType) {
+  return TYPE_LABELS[type] ?? type;
 }
 
 export function formatProjectDifficulty(difficulty: ProjectDifficulty | null | undefined) {
@@ -122,7 +105,7 @@ export function formatSubmissionStatus(status: ProjectSubmissionStatus) {
   return SUBMISSION_LABELS[status] ?? status;
 }
 
-export function formatTeamStatus(status: ProjectTeamStatusSpec) {
+export function formatTeamStatus(status: ProjectTeamStatus) {
   return TEAM_LABELS[status] ?? status;
 }
 

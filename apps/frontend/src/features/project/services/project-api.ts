@@ -1,51 +1,13 @@
 import { API_ROUTES, PAGINATION } from '@learnova/constants';
 import type {
   PaginatedMeta,
+  Project,
   ProjectGrade,
   ProjectMilestone,
   ProjectReview,
   ProjectSubmission,
   ProjectTeam,
 } from '@learnova/types';
-import { apiClient } from '@/lib/api/client';
-import type {
-  BulkAssignFacultyBody,
-  BulkIdsBody,
-  BulkResult,
-  CommentCreateBody,
-  CommentListParams,
-  CommentListResult,
-  CommentUpdateBody,
-  GradeBody,
-  JoinTeamBody,
-  MilestoneCreateBody,
-  MilestoneListResult,
-  MilestoneUpdateBody,
-  MyTeamListResult,
-  ProjectCategory,
-  ProjectComment,
-  ProjectCreateBody,
-  ProjectExtended,
-  ProjectFacultyDashboardExtended,
-  ProjectInstitutionDashboardExtended,
-  ProjectListParams,
-  ProjectListResult,
-  ProjectStudentDashboardExtended,
-  ProjectTag,
-  ProjectUpdateBody,
-  ReviewCreateBody,
-  ReviewSubmitBody,
-  SubmissionListParams,
-  SubmissionListResult,
-  SubmitBody,
-  TeamCreateBody,
-  TeamInviteBody,
-  TeamListParams,
-  TeamListResult,
-  TeamRejectBody,
-  TeamTransferLeadershipBody,
-  TeamUpdateBody,
-} from '../types';
 
 const base = API_ROUTES.PROJECTS;
 

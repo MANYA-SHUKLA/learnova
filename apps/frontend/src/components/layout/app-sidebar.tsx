@@ -64,6 +64,7 @@ type SidebarItemId =
   | 'assignments'
   | 'practiceLabs'
   | 'projects'
+  | 'myTeam'
   | 'bookmarks'
   | 'notes'
   | 'activity'
