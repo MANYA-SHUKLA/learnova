@@ -200,7 +200,7 @@ export default function CourseListPage() {
                     setPage(1);
                   }}
                 >
-                  {tCommon('clear')}
+                  Clear
                 </Button>
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function CourseListPage() {
                     setPage(1);
                   }}
                 >
-                  {st === 'all' ? tCommon('all') : formatCourseStatus(st as CourseStatus)}
+                  {st === 'all' ? 'All' : formatCourseStatus(st as CourseStatus)}
                 </Button>
               ))}
             </div>
