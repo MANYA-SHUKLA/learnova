@@ -2064,7 +2064,7 @@ export class ProjectService {
   // ----------------------------------------------------------- bulk operations
 
   async bulkPublish(ids: string[], actor: ActorContext) {
-    requireTenant(actor);
+    const institutionId = requireTenant(actor);
     if (actor.role === 'student') throw new ForbiddenError('Students cannot bulk publish');
     const modified = await projectRepository.bulkUpdateProjectStatus(institutionId, ids, 'published');
     for (const id of ids) {
