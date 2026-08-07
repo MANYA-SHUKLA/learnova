@@ -61,7 +61,7 @@
   },
   "nav": {
     "dashboard": "డాష్‌బోర్డ్",
-    "institution": "Institution",
+    "institution": "సంస్థ",
     "departments": "విభాగాలు",
     "programs": "కార్యక్రమాలు",
     "academicYears": "విద్యా సంవత్సరాలు",
@@ -75,6 +75,8 @@
     "students": "విద్యార్థులు",
     "courses": "కోర్సులు",
     "overview": "అవలోకనం",
+    "profile": "ప్రొఫైల్",
+    "settings": "సెట్టింగ్‌లు",
     "labs": "ప్రయోగశాలలు",
     "exams": "పరీక్షలు",
     "analytics": "విశ్లేషణలు",

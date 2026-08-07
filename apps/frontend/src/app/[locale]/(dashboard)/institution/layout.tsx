@@ -2,25 +2,26 @@
 
 import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import { Card, CardContent } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { Link, usePathname } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
-  { href: APP_ROUTES.INSTITUTION, label: 'Overview', exact: true },
-  { href: APP_ROUTES.INSTITUTION_PROFILE, label: 'Profile' },
-  { href: APP_ROUTES.INSTITUTION_CAMPUSES, label: 'Campuses' },
-  { href: APP_ROUTES.INSTITUTION_SCHOOLS, label: 'Schools' },
-  { href: APP_ROUTES.INSTITUTION_DEPARTMENTS, label: 'Departments' },
-  { href: APP_ROUTES.INSTITUTION_PROGRAMS, label: 'Programs' },
-  { href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, label: 'Academic years' },
-  { href: APP_ROUTES.INSTITUTION_SEMESTERS, label: 'Semesters' },
-  { href: APP_ROUTES.INSTITUTION_SECTIONS, label: 'Sections' },
-  { href: APP_ROUTES.INSTITUTION_BATCHES, label: 'Batches' },
-  { href: APP_ROUTES.INSTITUTION_CALENDAR, label: 'Calendar' },
-  { href: APP_ROUTES.INSTITUTION_FACULTY, label: 'Faculty' },
-  { href: APP_ROUTES.INSTITUTION_SETTINGS, label: 'Settings' },
+  { href: APP_ROUTES.INSTITUTION, labelKey: 'overview', exact: true },
+  { href: APP_ROUTES.INSTITUTION_PROFILE, labelKey: 'profile' },
+  { href: APP_ROUTES.INSTITUTION_CAMPUSES, labelKey: 'campuses' },
+  { href: APP_ROUTES.INSTITUTION_SCHOOLS, labelKey: 'schools' },
+  { href: APP_ROUTES.INSTITUTION_DEPARTMENTS, labelKey: 'departments' },
+  { href: APP_ROUTES.INSTITUTION_PROGRAMS, labelKey: 'programs' },
+  { href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, labelKey: 'academicYears' },
+  { href: APP_ROUTES.INSTITUTION_SEMESTERS, labelKey: 'semesters' },
+  { href: APP_ROUTES.INSTITUTION_SECTIONS, labelKey: 'sections' },
+  { href: APP_ROUTES.INSTITUTION_BATCHES, labelKey: 'batches' },
+  { href: APP_ROUTES.INSTITUTION_CALENDAR, labelKey: 'calendar' },
+  { href: APP_ROUTES.INSTITUTION_FACULTY, labelKey: 'faculty' },
+  { href: APP_ROUTES.INSTITUTION_SETTINGS, labelKey: 'settings' },
 ] as const;
 
 function isActive(pathname: string, href: string, exact?: boolean) {
@@ -30,6 +31,8 @@ function isActive(pathname: string, href: string, exact?: boolean) {
 
 export default function InstitutionLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const tNav = useTranslations('nav');
+  const t = useTranslations('dashboard.institution');
 
   return (
     <PermissionGate
@@ -38,15 +41,14 @@ export default function InstitutionLayout({ children }: { children: ReactNode })
       fallback={
         <Card className="rounded-2xl shadow-soft-md">
           <CardContent className="pt-6 text-sm text-muted-foreground">
-            You need <code className="text-foreground">institution:read</code> permission to access
-            institution management.
+            {t('accessDenied')}
           </CardContent>
         </Card>
       }
     >
       <div className="mb-6 w-full min-w-0 print:hidden">
         <nav
-          aria-label="Institution sections"
+          aria-label={t('navAriaLabel')}
           className="flex w-full max-w-full gap-1 overflow-x-auto overscroll-x-contain rounded-full border border-border/80 bg-muted/40 p-1 shadow-soft-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {NAV_ITEMS.map((item) => {
@@ -62,7 +64,7 @@ export default function InstitutionLayout({ children }: { children: ReactNode })
                     : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
                 )}
               >
-                {item.label}
+                {tNav(item.labelKey)}
               </Link>
             );
           })}

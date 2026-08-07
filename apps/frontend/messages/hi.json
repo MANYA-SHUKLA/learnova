@@ -75,6 +75,8 @@
     "students": "छात्र",
     "courses": "पाठ्यक्रम",
     "overview": "अवलोकन",
+    "profile": "प्रोफ़ाइल",
+    "settings": "सेटिंग्स",
     "labs": "लैब",
     "exams": "परीक्षाएं",
     "analytics": "विश्लेषण",
@@ -601,6 +603,8 @@
       "unableToFinish": "सेटअप पूरा नहीं हो सका।"
     },
     "institution": {
+      "navAriaLabel": "संस्थान अनुभाग",
+      "accessDenied": "संस्थान प्रबंधन तक पहुँचने के लिए आपको institution:read अनुमति चाहिए।",
       "overview": {
         "eyebrow": "संगठन",
         "title": "संस्थान",

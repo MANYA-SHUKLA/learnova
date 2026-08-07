@@ -75,6 +75,8 @@
     "students": "Students",
     "courses": "Courses",
     "overview": "Overview",
+    "profile": "Profile",
+    "settings": "Settings",
     "labs": "Labs",
     "exams": "Exams",
     "analytics": "Analytics",
@@ -601,6 +603,8 @@
       "unableToFinish": "Unable to finish setup."
     },
     "institution": {
+      "navAriaLabel": "Institution sections",
+      "accessDenied": "You need institution:read permission to access institution management.",
       "overview": {
         "eyebrow": "Organization",
         "title": "Institution",
