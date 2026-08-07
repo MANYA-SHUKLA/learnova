@@ -21,6 +21,7 @@
     "seed:progress": "tsx --env-file=.env src/seeds/run-progress-seed.ts",
     "seed:assignments": "tsx --env-file=.env src/seeds/run-assignment-seed.ts",
     "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",
+    "mail:test": "tsx --env-file=.env src/scripts/test-smtp.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
