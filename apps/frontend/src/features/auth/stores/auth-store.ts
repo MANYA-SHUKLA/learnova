@@ -1,6 +1,7 @@
 'use client';
 
 import type { AuthUser, Permission, Session } from '@learnova/types';
+import { getPermissionsForRole } from '@learnova/shared';
 import { create } from 'zustand';
 import { clearTokens } from '@/lib/auth/jwt';
 
@@ -24,6 +25,13 @@ interface AuthState {
   logout: () => void;
 }
 
+function permissionsFor(user: AuthUser | null): Permission[] {
+  if (!user) return [];
+  if (user.permissions?.length) return user.permissions;
+  const fromRole = getPermissionsForRole(user.role);
+  return fromRole ? [...fromRole] : [];
+}
+
 const empty = {
   user: null as AuthUser | null,
   accessToken: null as string | null,
@@ -37,20 +45,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
 
   setAuth: ({ user, accessToken, session }) => {
+    const permissions = permissionsFor(user);
     set({
-      user,
+      user: { ...user, permissions },
       accessToken,
       session,
-      permissions: user.permissions,
+      permissions,
       isAuthenticated: true,
       isLoading: false,
     });
   },
 
   setUser: (user) => {
+    const permissions = permissionsFor(user);
     set((state) => ({
-      user,
-      permissions: user?.permissions ?? [],
+      user: user ? { ...user, permissions } : null,
+      permissions,
       isAuthenticated: Boolean(user && state.session),
     }));
   },

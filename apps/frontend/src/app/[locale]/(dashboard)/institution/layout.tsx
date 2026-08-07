@@ -1,12 +1,15 @@
 'use client';
 
 import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
-import { Card, CardContent } from '@learnova/ui';
+import { Card, CardContent, Spinner } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { Link, usePathname } from '@/lib/i18n/routing';
+import { dashboardPathForRole } from '@/lib/auth/redirects';
+import { Link, usePathname, useRouter } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/providers/auth-provider';
+import { can } from '@/lib/auth/permissions';
 
 const NAV_ITEMS = [
   { href: APP_ROUTES.INSTITUTION, labelKey: 'overview', exact: true },
@@ -34,8 +37,26 @@ function isActive(pathname: string, href: string, exact?: boolean) {
 
 export default function InstitutionLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, permissions, isLoading, isAuthenticated } = useAuth();
   const tNav = useTranslations('nav');
   const t = useTranslations('dashboard.institution');
+  const allowed = can(permissions, PERMISSIONS.INSTITUTION_READ);
+
+  useEffect(() => {
+    if (isLoading || !isAuthenticated || !user) return;
+    if (!allowed) {
+      router.replace(dashboardPathForRole(user.role));
+    }
+  }, [isLoading, isAuthenticated, user, allowed, router]);
+
+  if (isLoading || (isAuthenticated && user && !allowed)) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <PermissionGate

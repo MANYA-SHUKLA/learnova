@@ -6,13 +6,13 @@
  */
 
 import type { AuthContextValue, AuthUser, Session } from '@learnova/types';
+import { getPermissionsForRole } from '@learnova/shared';
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
-  useRef,
   type ReactNode,
 } from 'react';
 import { authApi } from '@/features/auth/services/auth-api';
@@ -50,6 +50,16 @@ function sessionFromPayload(payload: NonNullable<ReturnType<typeof decodeJwtPayl
   };
 }
 
+/** Prefer API permissions; fall back to role matrix if the payload omitted them. */
+export function resolveUserPermissions(user: AuthUser): AuthUser {
+  if (user.permissions?.length) return user;
+  const fromRole = getPermissionsForRole(user.role);
+  return {
+    ...user,
+    permissions: fromRole ? [...fromRole] : [],
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const session = useAuthStore((s) => s.session);
@@ -61,12 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setSession = useAuthStore((s) => s.setSession);
   const setLoading = useAuthStore((s) => s.setLoading);
   const clear = useAuthStore((s) => s.clear);
-  const hydrated = useRef(false);
 
   useEffect(() => {
-    if (hydrated.current) return;
-    hydrated.current = true;
-
     let cancelled = false;
 
     async function hydrate() {
@@ -84,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             ]);
             if (cancelled) return;
             setAuth({
-              user: meUser,
+              user: resolveUserPermissions(meUser),
               accessToken: token,
               session: currentSession ?? sessionFromPayload(payload),
             });
@@ -98,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         storeAccessToken(refreshed.accessToken);
         setAuth({
-          user: refreshed.user,
+          user: resolveUserPermissions(refreshed.user),
           accessToken: refreshed.accessToken,
           session: refreshed.session,
         });
