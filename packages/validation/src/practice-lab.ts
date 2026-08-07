@@ -104,7 +104,7 @@ export const testCaseIdParamsSchema = z.object({
   id: objectIdField,
 });
 
-export const submissionIdParamsSchema = z.object({
+export const practiceSubmissionIdParamsSchema = z.object({
   id: objectIdField,
 });
 
@@ -209,7 +209,7 @@ export const problemListQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 });
 
-export const submissionListQuerySchema = z.object({
+export const practiceSubmissionListQuerySchema = z.object({
   practiceLabId: objectIdField.optional(),
   problemId: objectIdField.optional(),
   studentId: objectIdField.optional(),
@@ -281,7 +281,7 @@ export type RunCodeInput = z.infer<typeof runCodeSchema>;
 export type SubmitSolutionInput = z.infer<typeof submitSolutionSchema>;
 export type PracticeLabListQuery = z.infer<typeof practiceLabListQuerySchema>;
 export type ProblemListQuery = z.infer<typeof problemListQuerySchema>;
-export type SubmissionListQuery = z.infer<typeof submissionListQuerySchema>;
+export type PracticeSubmissionListQuery = z.infer<typeof practiceSubmissionListQuerySchema>;
 export type ExecutionHistoryQuery = z.infer<typeof executionHistoryQuerySchema>;
 export type LeaderboardQuery = z.infer<typeof leaderboardQuerySchema>;
 export type ImportProblemsInput = z.infer<typeof importProblemsSchema>;

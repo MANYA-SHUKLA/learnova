@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   canTransitionStatus,
   computeSubmissionScore,
+  mapJudge0StatusToExecutionStatus,
   normalizeOutput,
   outputsMatch,
   slugifyProblemTitle,
 } from '../../services/practice-lab/practice-lab.helpers.js';
-import { mapJudge0StatusToExecutionStatus } from '../../services/practice-lab/judge0.client.js';
 
 describe('practice lab helpers', () => {
   it('normalizes trailing whitespace for output compare', () => {

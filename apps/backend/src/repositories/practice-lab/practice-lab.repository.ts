@@ -3,7 +3,7 @@ import type {
   ExecutionHistoryQuery,
   PracticeLabListQuery,
   ProblemListQuery,
-  SubmissionListQuery,
+  PracticeSubmissionListQuery,
 } from '@learnova/validation';
 import type { PracticeLabAuditEvent } from '@learnova/constants';
 import { PracticeLabModel, type PracticeLabDocument } from '../../models/practice-lab.model.js';
@@ -262,7 +262,7 @@ export class PracticeLabRepository {
 
   async listSubmissions(
     filter: Record<string, unknown>,
-    query: Pick<SubmissionListQuery, 'page' | 'limit' | 'sortBy' | 'sortOrder'>,
+    query: Pick<PracticeSubmissionListQuery, 'page' | 'limit' | 'sortBy' | 'sortOrder'>,
   ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
@@ -281,7 +281,7 @@ export class PracticeLabRepository {
 
   buildSubmissionFilter(
     institutionId: string,
-    query: Partial<SubmissionListQuery>,
+    query: Partial<PracticeSubmissionListQuery>,
   ): Record<string, unknown> {
     const filter: Record<string, unknown> = {
       institutionId: toObjectId(institutionId),

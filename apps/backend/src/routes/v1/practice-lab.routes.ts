@@ -15,8 +15,8 @@ import {
   problemIdParamsSchema,
   problemListQuerySchema,
   runCodeSchema,
-  submissionIdParamsSchema,
-  submissionListQuerySchema,
+  practiceSubmissionIdParamsSchema,
+  practiceSubmissionListQuerySchema,
   submitSolutionSchema,
   testCaseIdParamsSchema,
   updateLabProblemSchema,
@@ -180,14 +180,14 @@ practiceLabRoutes.post(
 practiceLabRoutes.get(
   '/practice-labs/submissions',
   ...readAuth,
-  validate(submissionListQuerySchema, 'query'),
+  validate(practiceSubmissionListQuerySchema, 'query'),
   ctrl.listSubmissions,
 );
 
 practiceLabRoutes.get(
   '/practice-labs/submissions/:id',
   ...readAuth,
-  validate(submissionIdParamsSchema, 'params'),
+  validate(practiceSubmissionIdParamsSchema, 'params'),
   ctrl.getSubmission,
 );
 

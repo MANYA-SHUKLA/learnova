@@ -8,8 +8,8 @@ import type {
   LeaderboardQuery,
   PracticeLabListQuery,
   ProblemListQuery,
+  PracticeSubmissionListQuery,
   RunCodeInput,
-  SubmissionListQuery,
   SubmitSolutionInput,
   UpdateLabProblemInput,
   UpdatePracticeLabInput,
@@ -297,7 +297,7 @@ export async function submitSolution(req: Request, res: Response, next: NextFunc
 export async function listSubmissions(req: Request, res: Response, next: NextFunction) {
   try {
     const result = await practiceLabService.listSubmissions(
-      req.query as unknown as SubmissionListQuery,
+      req.query as unknown as PracticeSubmissionListQuery,
       actorFrom(req),
     );
     sendPaginated(res, result.items, result.meta, { requestId: req.requestId });

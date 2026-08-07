@@ -1,10 +1,5 @@
 import { Types } from 'mongoose';
 import { EVENTS } from '@learnova/events';
-import {
-  JUDGE0_LANGUAGE_IDS,
-  PRACTICE_LANGUAGE_META,
-  PRACTICE_LANGUAGES,
-} from '@learnova/constants';
 import type {
   CreateLabProblemInput,
   CreatePracticeLabInput,
@@ -14,8 +9,8 @@ import type {
   LeaderboardQuery,
   PracticeLabListQuery,
   ProblemListQuery,
+  PracticeSubmissionListQuery,
   RunCodeInput,
-  SubmissionListQuery,
   SubmitSolutionInput,
   UpdateLabProblemInput,
   UpdatePracticeLabInput,
@@ -53,23 +48,22 @@ import {
 import { practiceLabRepository } from '../../repositories/practice-lab/index.js';
 import { getSocketServer } from '../../socket/server-ref.js';
 import {
+  createCodingEngine,
+  codingLanguageService,
+  createPracticeLabCodingStorage,
+  labActivityRef,
+} from '../coding-engine/index.js';
+import {
   ACTIVE_ENROLLMENT_STATUSES,
   canTransitionStatus,
-  computeSubmissionScore,
   defaultBoilerplates,
   evaluateAttempt,
-  outputsMatch,
   pageMeta,
   PRACTICE_LAB_CSV_HEADERS,
   rowsToCsv,
   slugifyProblemTitle,
   toIso,
 } from './practice-lab.helpers.js';
-import {
-  judge0Client,
-  judge0IdForLanguage,
-  mapJudge0StatusToExecutionStatus,
-} from './judge0.client.js';
 
 export interface ActorContext {
   userId: string;
@@ -1386,7 +1380,7 @@ class PracticeLabService {
     }
   }
 
-  async listSubmissions(query: SubmissionListQuery, actor: ActorContext) {
+  async listSubmissions(query: PracticeSubmissionListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const filter = practiceLabRepository.buildSubmissionFilter(institutionId, query);
     if (actor.role === 'student') {

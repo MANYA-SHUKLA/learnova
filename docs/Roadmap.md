@@ -435,7 +435,7 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 
 ✓ Assignment Model · ✓ Submission Model · ✓ Rubrics · ✓ CRUD · ✓ Submission Flow · ✓ Manual Grading · ✓ Comments · ✓ Attachments · ✓ Search · ✓ Filters · ✓ Faculty / Student / Institution Dashboards · ✓ Validation · ✓ Audit · ✓ Events · ✓ Tests · ✓ Documentation  
 
-**Hard rule:** Assignment DoD is met. Assessment Core (9.5) is next before Labs — **now met**. Do **not** start Practice Labs (Step **10**) without consuming Assessment Core.
+**Hard rule:** Assignment DoD is met. Assessment Core (9.5) is met. Practice Labs (10) is met — do not start Projects (11) from Assignment work.
 
 ---
 
@@ -456,7 +456,34 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 
 ### Hard rule
 
-Practice Labs (10), Quizzes, and Exams **must** import Assessment Core helpers — do not duplicate deadline or grading logic.
+Practice Labs (10) ✅, Quizzes, and Exams **must** import Assessment Core helpers — do not duplicate deadline or grading logic.
+
+---
+
+## Step 10 — Practice Labs / Coding Platform
+
+**Status:** ✅ Complete  
+**Goal:** Enterprise browser-based coding practice labs with Monaco, Judge0, hidden tests, submissions, progress, leaderboards, and real-time execution status.
+
+### Shipped
+
+- Models: PracticeLab · LabProblem · ProblemTestCase · StudentCodeSubmission · ExecutionHistory · Language · LabProgress · audit
+- API: CRUD, run, submit, history, leaderboard, dashboards, import/export/duplicate/archive
+- Judge0 client + offline mock · Socket.IO `/practice` · BullMQ `execute-code`
+- Frontend: institution / faculty / student routes + Monaco editor
+- Seed: `seed:practice-labs` (30 / 300 / 5k / 10k targets)
+- Tests: validation · permissions · helpers
+- Docs: `PracticeLab.md` · `Problem.md` · `Judge0.md` · `Execution.md` · `PracticeSubmission.md` · `Leaderboard.md`
+
+### Explicitly out of scope
+
+Projects · Quizzes · MCQ/coding exams · Certificates · Gradebook · Attendance · AI codegen
+
+### Exit criteria (DoD — met)
+
+✓ Practice Lab Module · ✓ Problem Bank · ✓ Monaco · ✓ Judge0 · ✓ Run/Submit · ✓ Hidden tests · ✓ Execution history · ✓ Leaderboard · ✓ Progress · ✓ Queue/Socket · ✓ Search/Filters · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed · ✓ Tests · ✓ Docs
+
+**Hard rule:** Stop after Practice Labs. Do **not** start Projects, Quizzes, or Exams.
 
 ---
 
@@ -495,4 +522,6 @@ Practice Labs (10), Quizzes, and Exams **must** import Assessment Core helpers �
 - [Assignment](./Assignment.md) · [AssignmentAPI](./AssignmentAPI.md) · [Submission](./Submission.md)
 - [Rubrics](./Rubrics.md) · [AssignmentPermissions](./AssignmentPermissions.md)
 - [AssessmentCore](./AssessmentCore.md) · [ADR 0006](./adr/0006-assessment-core.md)
+- [PracticeLab](./PracticeLab.md) · [Problem](./Problem.md) · [Judge0](./Judge0.md) · [Execution](./Execution.md)
+- [PracticeSubmission](./PracticeSubmission.md) · [Leaderboard](./Leaderboard.md)
 - [AccessModel](./AccessModel.md) · [Auth](./Auth.md) · [Architecture](./Architecture.md)
