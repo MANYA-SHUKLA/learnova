@@ -64,7 +64,6 @@ export default function InstitutionProjectsPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<ProjectStatus | 'open' | 'all'>('all');
   const [projectType, setProjectType] = useState<ProjectTypeSpec | 'all'>('all');
-  const [difficulty, setDifficulty] = useState<ProjectDifficulty | 'all'>('all');
   const [courseId, setCourseId] = useState('');
   const [facultyId, setFacultyId] = useState('');
   const [publishedFilter, setPublishedFilter] = useState<'all' | 'yes' | 'no'>('all');
@@ -140,9 +139,9 @@ export default function InstitutionProjectsPage() {
           {[
             { label: t('stats.total'), value: dash?.totalProjects },
             { label: t('stats.published'), value: dash?.published },
-            { label: t('stats.active'), value: dash?.active ?? dash?.totalTeams },
-            { label: t('stats.completed'), value: dash?.completed ?? dash?.closed },
-            { label: t('stats.departments'), value: dash?.departments ?? dash?.byDepartment?.length },
+            { label: t('stats.active'), value: dash?.active },
+            { label: t('stats.completed'), value: dash?.completed },
+            { label: t('stats.departments'), value: dash?.departments?.length },
             {
               label: t('stats.submissionRate'),
               value: dash ? `${Math.round((dash.submissionRate ?? 0) * 100)}%` : undefined,
@@ -475,7 +474,7 @@ export default function InstitutionProjectsPage() {
           </CardContent>
         </Card>
 
-        {dash?.byDepartment?.length ? (
+        {dash?.departments?.length ? (
           <Card className="rounded-2xl border-border/80">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -484,7 +483,7 @@ export default function InstitutionProjectsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {dash.byDepartment.slice(0, 8).map((d) => (
+              {dash.departments.slice(0, 8).map((d: { departmentId: string | null; label: string; count: number }) => (
                 <div key={d.departmentId ?? d.label} className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{d.label}</span>
                   <span className="font-medium">{d.count}</span>
