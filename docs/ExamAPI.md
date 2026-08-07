@@ -47,4 +47,11 @@ Permissions: `examination:read` · `examination:write` · `examination:manage` �
 | GET | `/examinations/dashboard/student` | read |
 | GET | `/examinations/dashboard/institution` | manage |
 
-See [ExamProctoring.md](./ExamProctoring.md) for proctor endpoints.
+| GET | `/examinations/:id/live` | proctor | Live monitoring snapshot |
+| GET | `/examinations/:id/violations` | read | Violation list |
+| GET | `/examinations/:id/attendance` | read | Attendance list |
+| GET | `/examinations/policies` | read | Policy templates |
+| POST | `/examinations/policies` | write | Create policy template |
+| POST | `/examinations/attempts/:id/violations` | write | Student reports violation (secure browser) |
+
+See [ExamProctoring.md](./ExamProctoring.md) for proctor endpoints. See [LiveMonitoring.md](./LiveMonitoring.md) for Socket.IO events.
