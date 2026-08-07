@@ -65,6 +65,16 @@ export const EVENTS = {
 
   LAB_STARTED: 'lab.started',
   LAB_SUBMITTED: 'lab.submitted',
+  LAB_COMPLETED: 'lab.completed',
+  PRACTICE_CREATED: 'practice.created',
+  PROBLEM_CREATED: 'problem.created',
+  PROBLEM_SOLVED: 'problem.solved',
+  LAB_SUBMISSION_CREATED: 'lab.submission.created',
+  LAB_SUBMISSION_ACCEPTED: 'lab.submission.accepted',
+  LAB_SUBMISSION_FAILED: 'lab.submission.failed',
+  EXECUTION_STARTED: 'execution.started',
+  EXECUTION_FINISHED: 'execution.finished',
+  EXECUTION_COMPLETED: 'execution.completed',
   IDE_SESSION_STARTED: 'ide.session_started',
   IDE_SESSION_STOPPED: 'ide.session_stopped',
 
