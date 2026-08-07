@@ -53,6 +53,34 @@ export default function StudentExamDetailPage() {
 
   const exam = examQuery.data;
 
+  const handleViolation = (violationType: string) => {
+    if (!attemptId) return;
+    void reportViolationMutation.mutateAsync({ attemptId, violationType });
+  };
+
+  useSecureExamMode(
+    Boolean(attemptId && exam && exam.proctoring.secureBrowser !== 'off'),
+    {
+      blockCopyPaste: exam?.proctoring.blockCopyPaste,
+      blockRightClick: exam?.proctoring.blockRightClick,
+      requireFullscreen: exam?.proctoring.requireFullscreen,
+    },
+    handleViolation,
+  );
+
+  useProctorMedia({
+    enabled: Boolean(attemptId && exam),
+    requireWebcam: exam?.proctoring.requireWebcam,
+    requireMicrophone: exam?.proctoring.requireMicrophone,
+    onViolation: handleViolation,
+  });
+
+  useExamSocket({
+    examId,
+    attemptId,
+    enabled: Boolean(attemptId),
+  });
+
   const handleCheckIn = async () => {
     await checkInMutation.mutateAsync({ examId });
     setCheckedIn(true);
@@ -65,6 +93,7 @@ export default function StudentExamDetailPage() {
     });
     setAttemptId(data.attempt.id);
     setQuestions((data.questions as typeof questions) ?? []);
+    setActiveAttempt(examId, data.attempt.id);
   };
 
   const handleSubmit = async () => {
@@ -80,6 +109,7 @@ export default function StudentExamDetailPage() {
       })),
     });
     setSubmitted(true);
+    clearActiveAttempt();
   };
 
   if (examQuery.isError) {
@@ -145,6 +175,19 @@ export default function StudentExamDetailPage() {
 
         {attemptId && !submitted ? (
           <div className="space-y-6">
+            {remainingSeconds != null ? (
+              <p className="text-sm text-muted-foreground">
+                {t('minutes')}: {Math.ceil(remainingSeconds / 60)}
+              </p>
+            ) : null}
+            {warnings.length > 0 ? (
+              <Card className="rounded-2xl border-amber-500/30 bg-amber-500/5">
+                <CardHeader>
+                  <CardTitle className="text-base">Warnings</CardTitle>
+                  <CardDescription>{warnings.join(' · ')}</CardDescription>
+                </CardHeader>
+              </Card>
+            ) : null}
             {questions.map((q, index) => (
               <Card key={q.id} className="rounded-2xl border-border/80">
                 <CardHeader>
