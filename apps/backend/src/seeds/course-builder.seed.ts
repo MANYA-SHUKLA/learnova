@@ -57,8 +57,12 @@ function generateSlug(title: string, suffix?: string): string {
   return suffix ? `${base}-${suffix}` : base;
 }
 
-function getRandomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+function getRandomElement<T>(arr: readonly T[]): T {
+  const result = arr[Math.floor(Math.random() * arr.length)];
+  if (result === undefined) {
+    throw new Error('Array is empty');
+  }
+  return result;
 }
 
 function generateLessonContent(lessonTitle: string, lessonType: string): string {
@@ -139,12 +143,12 @@ export async function seedCourseBuilder(institutionId: string): Promise<void> {
     const numModules = Math.floor(Math.random() * 3) + 2;
 
     for (let m = 0; m < numModules; m++) {
-      const moduleTitle = MODULE_TITLES[m % MODULE_TITLES.length];
+      const moduleTitle = MODULE_TITLES[m % MODULE_TITLES.length] ?? 'Module';
       const module = await CourseModuleModel.create({
         courseId: course._id,
         institutionId: institutionOid,
         title: `${moduleTitle} - ${course.title}`,
-        slug: generateSlug(moduleTitle, String(course._id).slice(-6)),
+        slug: generateSlug(moduleTitle ?? 'module', String(course._id).slice(-6)),
         description: `This module covers ${moduleTitle.toLowerCase()} for ${course.title}.`,
         moduleNumber: m + 1,
         orderIndex: m,
@@ -159,7 +163,7 @@ export async function seedCourseBuilder(institutionId: string): Promise<void> {
       const numLessons = Math.floor(Math.random() * 6) + 4;
 
       for (let l = 0; l < numLessons; l++) {
-        const lessonTitle = LESSON_TITLES[l % LESSON_TITLES.length];
+        const lessonTitle = LESSON_TITLES[l % LESSON_TITLES.length] ?? 'Lesson';
         const lessonType = getRandomElement([...LESSON_TYPES]);
 
         const lesson = await CourseLessonModel.create({
@@ -168,7 +172,7 @@ export async function seedCourseBuilder(institutionId: string): Promise<void> {
           institutionId: institutionOid,
           title: `${lessonTitle}`,
           slug: generateSlug(
-            `${moduleTitle}-${lessonTitle}`,
+            `${moduleTitle ?? 'module'}-${lessonTitle ?? 'lesson'}`,
             String(module._id).slice(-6),
           ),
           lessonNumber: l + 1,
@@ -199,7 +203,7 @@ export async function seedCourseBuilder(institutionId: string): Promise<void> {
           const numResources = Math.floor(Math.random() * 2) + 1;
 
           for (let r = 0; r < numResources; r++) {
-            const resourceTitle = RESOURCE_TITLES[r % RESOURCE_TITLES.length];
+            const resourceTitle = RESOURCE_TITLES[r % RESOURCE_TITLES.length] ?? 'Resource';
             const resourceType = getRandomElement([...RESOURCE_TYPES]);
 
             await CourseResourceModel.create({

@@ -4,8 +4,8 @@
 
 'use client';
 
-import { Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Input, Switch } from '@learnova/ui';
-import { useEffect, useState } from 'react';
+import { Input } from '@learnova/ui';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import type { CourseBuilderLessonNode } from '@learnova/types';
 import { useUpdateLessonMutation } from '../hooks/use-builder-queries';
 import { useBuilderStore } from '../store/builder-store';
@@ -19,6 +19,9 @@ interface LessonPropertiesProps {
   courseId: string;
   lesson: CourseBuilderLessonNode;
 }
+
+const selectClass =
+  'mt-1.5 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
 
 export function LessonProperties({ courseId, lesson }: LessonPropertiesProps) {
   const updateMutation = useUpdateLessonMutation(courseId);
@@ -61,81 +64,84 @@ export function LessonProperties({ courseId, lesson }: LessonPropertiesProps) {
         <h3 className="mb-3 font-medium">Lesson Settings</h3>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="prop-type">Type</Label>
-            <Select
+            <label className="text-sm font-medium" htmlFor="prop-type">
+              Type
+            </label>
+            <select
+              id="prop-type"
+              className={selectClass}
               value={localType}
-              onValueChange={(v) => {
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                const v = e.target.value as typeof localType;
                 setLocalType(v);
                 void update({ lessonType: v });
               }}
             >
-              <SelectTrigger id="prop-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LESSON_TYPE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {LESSON_TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
-            <Label htmlFor="prop-status">Status</Label>
-            <Select
+            <label className="text-sm font-medium" htmlFor="prop-status">
+              Status
+            </label>
+            <select
+              id="prop-status"
+              className={selectClass}
               value={localStatus}
-              onValueChange={(v) => {
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                const v = e.target.value as typeof localStatus;
                 setLocalStatus(v);
                 void update({ status: v });
               }}
             >
-              <SelectTrigger id="prop-status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LESSON_STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {LESSON_STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
-            <Label htmlFor="prop-visibility">Visibility</Label>
-            <Select
+            <label className="text-sm font-medium" htmlFor="prop-visibility">
+              Visibility
+            </label>
+            <select
+              id="prop-visibility"
+              className={selectClass}
               value={localVisibility}
-              onValueChange={(v) => {
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                const v = e.target.value as typeof localVisibility;
                 setLocalVisibility(v);
                 void update({ visibility: v });
               }}
             >
-              <SelectTrigger id="prop-visibility">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LESSON_VISIBILITY_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {LESSON_VISIBILITY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
-            <Label htmlFor="prop-minutes">Estimated minutes</Label>
+            <label className="text-sm font-medium" htmlFor="prop-minutes">
+              Estimated minutes
+            </label>
             <Input
               id="prop-minutes"
+              className="mt-1.5"
               type="number"
               value={localEstimated}
-              onChange={(e) => setLocalEstimated(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setLocalEstimated(e.target.value)}
               onBlur={() => {
                 const num = parseInt(localEstimated, 10);
-                void update({ estimatedMinutes: isNaN(num) ? null : num });
+                void update({ estimatedMinutes: Number.isNaN(num) ? null : num });
               }}
               placeholder="0"
             />
@@ -146,50 +152,29 @@ export function LessonProperties({ courseId, lesson }: LessonPropertiesProps) {
       <div>
         <h4 className="mb-3 text-sm font-medium">Options</h4>
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="prop-comments">Allow comments</Label>
-            <Switch
-              id="prop-comments"
-              checked={localComments}
-              onCheckedChange={(checked) => {
-                setLocalComments(checked);
-                void update({ allowComments: checked });
-              }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="prop-downloads">Allow downloads</Label>
-            <Switch
-              id="prop-downloads"
-              checked={localDownloads}
-              onCheckedChange={(checked) => {
-                setLocalDownloads(checked);
-                void update({ allowDownloads: checked });
-              }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="prop-preview">Preview access</Label>
-            <Switch
-              id="prop-preview"
-              checked={localPreview}
-              onCheckedChange={(checked) => {
-                setLocalPreview(checked);
-                void update({ isPreview: checked });
-              }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="prop-locked">Locked</Label>
-            <Switch
-              id="prop-locked"
-              checked={localLocked}
-              onCheckedChange={(checked) => {
-                setLocalLocked(checked);
-                void update({ isLocked: checked });
-              }}
-            />
-          </div>
+          {(
+            [
+              ['prop-comments', 'Allow comments', localComments, setLocalComments, 'allowComments'],
+              ['prop-downloads', 'Allow downloads', localDownloads, setLocalDownloads, 'allowDownloads'],
+              ['prop-preview', 'Preview access', localPreview, setLocalPreview, 'isPreview'],
+              ['prop-locked', 'Locked', localLocked, setLocalLocked, 'isLocked'],
+            ] as const
+          ).map(([id, label, value, setValue, field]) => (
+            <label key={id} className="flex items-center justify-between gap-3 text-sm" htmlFor={id}>
+              <span>{label}</span>
+              <input
+                id={id}
+                type="checkbox"
+                className="size-4 rounded border-input"
+                checked={value}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const checked = e.target.checked;
+                  setValue(checked);
+                  void update({ [field]: checked });
+                }}
+              />
+            </label>
+          ))}
         </div>
       </div>
     </div>

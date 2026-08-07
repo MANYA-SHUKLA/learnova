@@ -12,8 +12,8 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
@@ -48,7 +48,7 @@ import {
   useReorderLessonsMutation,
   useUpdateModuleMutation,
 } from '../hooks/use-builder-queries';
-import { formatLessonStatus, formatModuleStatus } from '../lib/labels';
+import { formatLessonStatus } from '../lib/labels';
 
 interface ModuleSidebarProps {
   courseId: string;
@@ -170,7 +170,7 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
       const oldIndex = modules.indexOf(activeModule);
       const newIndex = modules.indexOf(overModule);
       const reordered = arrayMove(modules, oldIndex, newIndex);
-      void reorderModulesMutation.mutateAsync({ moduleIds: reordered.map((m) => m.id) });
+      void reorderModulesMutation.mutateAsync(reordered.map((m) => m.id));
     } else {
       for (const mod of modules) {
         const activeLesson = mod.lessons.find((l) => l.id === activeId);
@@ -181,7 +181,7 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
           const reordered = arrayMove(mod.lessons, oldIndex, newIndex);
           void reorderLessonsMutation.mutateAsync({
             moduleId: mod.id,
-            body: { lessonIds: reordered.map((l) => l.id) },
+            lessonIds: reordered.map((l) => l.id),
           });
           break;
         }

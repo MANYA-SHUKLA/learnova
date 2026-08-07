@@ -1,5 +1,6 @@
 /**
  * Course Builder API client — endpoints under /courses/:courseId/...
+ * Aligned with apps/backend/src/routes/v1/course-builder.routes.ts
  */
 
 import { API_ROUTES } from '@learnova/constants';
@@ -15,18 +16,38 @@ import type {
   LessonUpdatePayload,
   ModuleCreatePayload,
   ModuleUpdatePayload,
-  ReorderLessonsPayload,
-  ReorderModulesPayload,
   ResourceCreatePayload,
   ResourceUpdatePayload,
 } from '../types';
 
-export const builderApi = {
-  // Tree
-  getTree: (courseId: string) =>
-    apiClient.get<CourseBuilderTree>(`${API_ROUTES.COURSES}/${courseId}/builder/tree`),
+export interface BuilderReorderBody {
+  modules?: Array<{ id: string; orderIndex: number }>;
+  lessons?: Array<{ id: string; moduleId: string; orderIndex: number }>;
+  resources?: Array<{ id: string; lessonId: string; orderIndex: number }>;
+}
 
-  // Modules
+export const builderApi = {
+  getTree: (courseId: string) =>
+    apiClient.get<CourseBuilderTree>(`${API_ROUTES.COURSES}/${courseId}/builder`),
+
+  search: (courseId: string, params?: Record<string, string | boolean | undefined>) => {
+    const search = new URLSearchParams();
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== '') search.set(key, String(value));
+      }
+    }
+    const qs = search.toString();
+    return apiClient.get<{
+      modules: CourseModule[];
+      lessons: CourseLesson[];
+      resources: CourseResource[];
+    }>(`${API_ROUTES.COURSES}/${courseId}/builder/search${qs ? `?${qs}` : ''}`);
+  },
+
+  reorder: (courseId: string, body: BuilderReorderBody) =>
+    apiClient.post<{ ok: boolean }>(`${API_ROUTES.COURSES}/${courseId}/builder/reorder`, body),
+
   createModule: (courseId: string, body: ModuleCreatePayload) =>
     apiClient.post<CourseModule>(`${API_ROUTES.COURSES}/${courseId}/modules`, body),
 
@@ -41,13 +62,6 @@ export const builderApi = {
       `${API_ROUTES.COURSES}/${courseId}/modules/${moduleId}/duplicate`,
     ),
 
-  reorderModules: (courseId: string, body: ReorderModulesPayload) =>
-    apiClient.post<{ modified: number }>(
-      `${API_ROUTES.COURSES}/${courseId}/modules/reorder`,
-      body,
-    ),
-
-  // Lessons
   createLesson: (courseId: string, body: LessonCreatePayload) =>
     apiClient.post<CourseLesson>(`${API_ROUTES.COURSES}/${courseId}/lessons`, body),
 
@@ -62,22 +76,31 @@ export const builderApi = {
       `${API_ROUTES.COURSES}/${courseId}/lessons/${lessonId}/duplicate`,
     ),
 
-  reorderLessons: (courseId: string, moduleId: string, body: ReorderLessonsPayload) =>
-    apiClient.post<{ modified: number }>(
-      `${API_ROUTES.COURSES}/${courseId}/modules/${moduleId}/lessons/reorder`,
+  moveLesson: (courseId: string, lessonId: string, body: { moduleId: string; orderIndex?: number }) =>
+    apiClient.post<CourseLesson>(
+      `${API_ROUTES.COURSES}/${courseId}/lessons/${lessonId}/move`,
       body,
     ),
 
-  // Resources
-  createResource: (courseId: string, body: ResourceCreatePayload) =>
-    apiClient.post<CourseResource>(`${API_ROUTES.COURSES}/${courseId}/resources`, body),
+  createResource: (courseId: string, lessonId: string, body: Omit<ResourceCreatePayload, 'lessonId'>) =>
+    apiClient.post<CourseResource>(
+      `${API_ROUTES.COURSES}/${courseId}/lessons/${lessonId}/resources`,
+      body,
+    ),
 
-  updateResource: (courseId: string, resourceId: string, body: ResourceUpdatePayload) =>
+  updateResource: (
+    courseId: string,
+    lessonId: string,
+    resourceId: string,
+    body: ResourceUpdatePayload,
+  ) =>
     apiClient.patch<CourseResource>(
-      `${API_ROUTES.COURSES}/${courseId}/resources/${resourceId}`,
+      `${API_ROUTES.COURSES}/${courseId}/lessons/${lessonId}/resources/${resourceId}`,
       body,
     ),
 
-  deleteResource: (courseId: string, resourceId: string) =>
-    apiClient.delete<CourseResource>(`${API_ROUTES.COURSES}/${courseId}/resources/${resourceId}`),
+  deleteResource: (courseId: string, lessonId: string, resourceId: string) =>
+    apiClient.delete<CourseResource>(
+      `${API_ROUTES.COURSES}/${courseId}/lessons/${lessonId}/resources/${resourceId}`,
+    ),
 };

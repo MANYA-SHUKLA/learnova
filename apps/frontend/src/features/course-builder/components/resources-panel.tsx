@@ -4,10 +4,10 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Spinner } from '@learnova/ui';
+import { useState, type ChangeEvent } from 'react';
+import { Button, Input, Spinner } from '@learnova/ui';
 import { ExternalLink, FileUp, Plus, Trash2 } from 'lucide-react';
-import type { CourseResource } from '@learnova/types';
+import type { CourseResource, CourseResourceType } from '@learnova/types';
 import { useCreateResourceMutation, useDeleteResourceMutation } from '../hooks/use-builder-queries';
 import { formatResourceType, RESOURCE_TYPE_OPTIONS, RESOURCE_VISIBILITY_OPTIONS } from '../lib/labels';
 
@@ -17,12 +17,15 @@ interface ResourcesPanelProps {
   resources: CourseResource[];
 }
 
+const selectClass =
+  'mt-1.5 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
+
 export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanelProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
-  const [newType, setNewType] = useState<string>('pdf');
+  const [newType, setNewType] = useState<CourseResourceType>('pdf');
   const [newUrl, setNewUrl] = useState('');
-  const [newVisibility, setNewVisibility] = useState<string>('enrolled');
+  const [newVisibility, setNewVisibility] = useState('enrolled');
 
   const createMutation = useCreateResourceMutation(courseId);
   const deleteMutation = useDeleteResourceMutation(courseId);
@@ -47,7 +50,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
 
   const handleDelete = (resourceId: string) => {
     if (confirm('Delete this resource?')) {
-      void deleteMutation.mutateAsync(resourceId);
+      void deleteMutation.mutateAsync({ lessonId, resourceId });
     }
   };
 
@@ -66,55 +69,67 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
       {isAdding ? (
         <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
           <div>
-            <Label htmlFor="res-title">Title</Label>
+            <label className="text-sm font-medium" htmlFor="res-title">
+              Title
+            </label>
             <Input
               id="res-title"
+              className="mt-1.5"
               value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
               placeholder="Resource title"
             />
           </div>
           <div>
-            <Label htmlFor="res-type">Type</Label>
-            <Select value={newType} onValueChange={setNewType}>
-              <SelectTrigger id="res-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {RESOURCE_TYPE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <label className="text-sm font-medium" htmlFor="res-type">
+              Type
+            </label>
+            <select
+              id="res-type"
+              className={selectClass}
+              value={newType}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                setNewType(e.target.value as CourseResourceType)
+              }
+            >
+              {RESOURCE_TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
-            <Label htmlFor="res-url">URL</Label>
+            <label className="text-sm font-medium" htmlFor="res-url">
+              URL
+            </label>
             <Input
               id="res-url"
+              className="mt-1.5"
               value={newUrl}
-              onChange={(e) => setNewUrl(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNewUrl(e.target.value)}
               placeholder="https://..."
             />
           </div>
           <div>
-            <Label htmlFor="res-visibility">Visibility</Label>
-            <Select value={newVisibility} onValueChange={setNewVisibility}>
-              <SelectTrigger id="res-visibility">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {RESOURCE_VISIBILITY_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <label className="text-sm font-medium" htmlFor="res-visibility">
+              Visibility
+            </label>
+            <select
+              id="res-visibility"
+              className={selectClass}
+              value={newVisibility}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setNewVisibility(e.target.value)}
+            >
+              {RESOURCE_VISIBILITY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex gap-2">
-            <Button type="button" size="sm" onClick={handleAdd} disabled={createMutation.isPending}>
+            <Button type="button" size="sm" onClick={() => void handleAdd()} disabled={createMutation.isPending}>
               {createMutation.isPending ? <Spinner size="sm" /> : <FileUp className="size-4" />}
               Add
             </Button>
@@ -138,7 +153,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{res.title}</p>
               <p className="text-xs text-muted-foreground">
-                {formatResourceType(res.type as never)} · {res.url ? 'External' : 'Uploaded'}
+                {formatResourceType(res.type)} · {res.url ? 'External' : 'Uploaded'}
               </p>
               {res.url ? (
                 <a

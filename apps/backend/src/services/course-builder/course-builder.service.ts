@@ -16,12 +16,7 @@ import { eventBus } from '../../events/index.js';
 import { CourseModel } from '../../models/course.model.js';
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
-import {
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-} from '../../utils/errors/index.js';
+import { ForbiddenError, NotFoundError } from '../../utils/errors/index.js';
 import { builderRepository } from '../../repositories/course-builder/builder.repository.js';
 
 export interface ActorContext {
@@ -171,7 +166,7 @@ class CourseBuilderService {
       },
     });
 
-    eventBus.emit(EVENTS.BUILDER_REORDERED, {
+    eventBus.emit(EVENTS.COURSE_BUILDER_REORDERED, {
       courseId,
       institutionId,
       userId: actor.userId,
@@ -233,7 +228,7 @@ class CourseBuilderService {
       metadata: { title: module.title },
     });
 
-    eventBus.emit(EVENTS.MODULE_CREATED, {
+    eventBus.emit(EVENTS.COURSE_MODULE_CREATED, {
       moduleId: String(module._id),
       courseId,
       institutionId,
@@ -306,7 +301,7 @@ class CourseBuilderService {
       metadata: { changes: Object.keys(updates) },
     });
 
-    eventBus.emit(EVENTS.MODULE_UPDATED, {
+    eventBus.emit(EVENTS.COURSE_MODULE_UPDATED, {
       moduleId,
       courseId,
       institutionId,
@@ -343,7 +338,7 @@ class CourseBuilderService {
       metadata: { title: module.title },
     });
 
-    eventBus.emit(EVENTS.MODULE_DELETED, {
+    eventBus.emit(EVENTS.COURSE_MODULE_DELETED, {
       moduleId,
       courseId,
       institutionId,
@@ -494,7 +489,7 @@ class CourseBuilderService {
       lessonId: lesson._id,
       institutionId: new Types.ObjectId(institutionId),
       version: 1,
-      snapshot: lesson.toObject(),
+      snapshot: lesson as unknown as Record<string, unknown>,
       createdBy: new Types.ObjectId(actor.userId),
     });
 
@@ -509,7 +504,7 @@ class CourseBuilderService {
       metadata: { title: lesson.title },
     });
 
-    eventBus.emit(EVENTS.LESSON_CREATED, {
+    eventBus.emit(EVENTS.COURSE_LESSON_CREATED, {
       lessonId: String(lesson._id),
       moduleId: data.moduleId,
       courseId,
@@ -586,7 +581,7 @@ class CourseBuilderService {
         lessonId: new Types.ObjectId(lessonId),
         institutionId: new Types.ObjectId(institutionId),
         version: nextVersion,
-        snapshot: updated.toObject(),
+        snapshot: updated as unknown as Record<string, unknown>,
         createdBy: new Types.ObjectId(actor.userId),
       });
     }
@@ -602,7 +597,7 @@ class CourseBuilderService {
       metadata: { changes: Object.keys(updates) },
     });
 
-    eventBus.emit(EVENTS.LESSON_UPDATED, {
+    eventBus.emit(EVENTS.COURSE_LESSON_UPDATED, {
       lessonId,
       moduleId: String(lesson.moduleId),
       courseId,
@@ -641,7 +636,7 @@ class CourseBuilderService {
       metadata: { title: lesson.title },
     });
 
-    eventBus.emit(EVENTS.LESSON_DELETED, {
+    eventBus.emit(EVENTS.COURSE_LESSON_DELETED, {
       lessonId,
       moduleId: String(lesson.moduleId),
       courseId,
@@ -712,7 +707,7 @@ class CourseBuilderService {
       lessonId: copy._id,
       institutionId: new Types.ObjectId(institutionId),
       version: 1,
-      snapshot: copy.toObject(),
+      snapshot: copy as unknown as Record<string, unknown>,
       createdBy: new Types.ObjectId(actor.userId),
     });
 
@@ -834,7 +829,7 @@ class CourseBuilderService {
 
       await getStorage().put({
         key: storageKey,
-        data: buffer,
+        body: buffer,
         contentType: data.contentType,
       });
 
@@ -873,7 +868,7 @@ class CourseBuilderService {
       metadata: { title: resource.title, type: resource.type },
     });
 
-    eventBus.emit(EVENTS.RESOURCE_UPLOADED, {
+    eventBus.emit(EVENTS.COURSE_RESOURCE_UPLOADED, {
       resourceId: String(resource._id),
       lessonId,
       moduleId: String(lesson.moduleId),
@@ -942,7 +937,7 @@ class CourseBuilderService {
       try {
         await getStorage().delete(resource.storageKey);
       } catch (err) {
-        logger.warn('Failed to delete resource from storage', { storageKey: resource.storageKey });
+        logger.warn({ storageKey: resource.storageKey }, 'Failed to delete resource from storage');
       }
     }
 
@@ -957,7 +952,7 @@ class CourseBuilderService {
       metadata: { title: resource.title, type: resource.type },
     });
 
-    eventBus.emit(EVENTS.RESOURCE_DELETED, {
+    eventBus.emit(EVENTS.COURSE_RESOURCE_DELETED, {
       resourceId,
       lessonId,
       courseId,
@@ -1002,7 +997,7 @@ class CourseBuilderService {
       lessonId: new Types.ObjectId(lessonId),
       institutionId: new Types.ObjectId(institutionId),
       version: nextVersion,
-      snapshot: updated.toObject(),
+      snapshot: updated as unknown as Record<string, unknown>,
       createdBy: new Types.ObjectId(actor.userId),
     });
 
@@ -1017,7 +1012,7 @@ class CourseBuilderService {
       metadata: { autosave: true, version: nextVersion },
     });
 
-    eventBus.emit(EVENTS.BUILDER_SAVED, {
+    eventBus.emit(EVENTS.COURSE_BUILDER_SAVED, {
       lessonId,
       moduleId: String(lesson.moduleId),
       courseId,

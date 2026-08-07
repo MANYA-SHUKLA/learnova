@@ -1,11 +1,11 @@
 /**
- * Lesson editor with tabs: General | Content | Resources | Settings
+ * Lesson editor with tabs: General | Content | Resources
  */
 
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { Input, Label, Textarea, Button, Badge } from '@learnova/ui';
+import { useState, useCallback, useEffect, type ChangeEvent } from 'react';
+import { Input, Button, Badge } from '@learnova/ui';
 import { Save } from 'lucide-react';
 import type { CourseBuilderLessonNode } from '@learnova/types';
 import { useUpdateLessonMutation } from '../hooks/use-builder-queries';
@@ -20,7 +20,10 @@ interface LessonEditorProps {
   lesson: CourseBuilderLessonNode;
 }
 
-type TabId = 'general' | 'content' | 'resources' | 'settings';
+type TabId = 'general' | 'content' | 'resources';
+
+const fieldClass =
+  'mt-1.5 min-h-24 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm';
 
 export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
   const [activeTab, setActiveTab] = useState<TabId>('general');
@@ -42,13 +45,11 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
   }, [lesson]);
 
   const debouncedUpdate = useDebouncedCallback(
-    async (body: Record<string, unknown>) => {
-      try {
-        await updateMutation.mutateAsync({ lessonId: lesson.id, body });
-        markSaved();
-      } catch {
-        // handled
-      }
+    (body: Record<string, unknown>) => {
+      void updateMutation
+        .mutateAsync({ lessonId: lesson.id, body })
+        .then(() => markSaved())
+        .catch(() => undefined);
     },
     800,
   );
@@ -56,7 +57,7 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
   const handleFieldChange = useCallback(
     (field: string, value: string) => {
       setDirty(true);
-      void debouncedUpdate({ [field]: value });
+      debouncedUpdate({ [field]: value });
     },
     [setDirty, debouncedUpdate],
   );
@@ -73,9 +74,7 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
         <div className="flex items-center gap-3">
           <h2 className="font-display text-lg font-semibold">{lesson.title}</h2>
           <Badge variant="outline">{formatLessonType(lesson.lessonType)}</Badge>
-          <Badge
-            variant={lesson.status === 'published' ? 'default' : 'secondary'}
-          >
+          <Badge variant={lesson.status === 'published' ? 'default' : 'secondary'}>
             {formatLessonStatus(lesson.status)}
           </Badge>
         </div>
@@ -109,14 +108,17 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
-        {activeTab === 'general' && (
+        {activeTab === 'general' ? (
           <div className="mx-auto max-w-3xl space-y-4">
             <div>
-              <Label htmlFor="lesson-title">Title</Label>
+              <label className="text-sm font-medium" htmlFor="lesson-title">
+                Title
+              </label>
               <Input
                 id="lesson-title"
+                className="mt-1.5"
                 value={localTitle}
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setLocalTitle(e.target.value);
                   handleFieldChange('title', e.target.value);
                 }}
@@ -124,11 +126,14 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
               />
             </div>
             <div>
-              <Label htmlFor="lesson-description">Description</Label>
-              <Textarea
+              <label className="text-sm font-medium" htmlFor="lesson-description">
+                Description
+              </label>
+              <textarea
                 id="lesson-description"
+                className={fieldClass}
                 value={localDescription}
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
                   setLocalDescription(e.target.value);
                   handleFieldChange('description', e.target.value);
                 }}
@@ -137,11 +142,14 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
               />
             </div>
             <div>
-              <Label htmlFor="lesson-summary">Summary</Label>
-              <Textarea
+              <label className="text-sm font-medium" htmlFor="lesson-summary">
+                Summary
+              </label>
+              <textarea
                 id="lesson-summary"
+                className={fieldClass}
                 value={localSummary}
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
                   setLocalSummary(e.target.value);
                   handleFieldChange('summary', e.target.value);
                 }}
@@ -150,9 +158,9 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
               />
             </div>
           </div>
-        )}
+        ) : null}
 
-        {activeTab === 'content' && (
+        {activeTab === 'content' ? (
           <div className="mx-auto max-w-4xl">
             <RichTextEditor
               content={localContent}
@@ -162,13 +170,13 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
               }}
             />
           </div>
-        )}
+        ) : null}
 
-        {activeTab === 'resources' && (
+        {activeTab === 'resources' ? (
           <div className="mx-auto max-w-3xl">
             <ResourcesPanel courseId={courseId} lessonId={lesson.id} resources={lesson.resources} />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

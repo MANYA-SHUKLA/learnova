@@ -92,8 +92,9 @@ export class BuilderRepository {
     original: CourseModuleDocument,
     newData: Partial<CourseModuleDocument>,
   ): Promise<CourseModuleDocument> {
+    const originalObj = original as unknown as Record<string, unknown>;
     const copy = new CourseModuleModel({
-      ...original.toObject(),
+      ...originalObj,
       _id: new Types.ObjectId(),
       ...newData,
       createdAt: undefined,
@@ -174,8 +175,9 @@ export class BuilderRepository {
     original: CourseLessonDocument,
     newData: Partial<CourseLessonDocument>,
   ): Promise<CourseLessonDocument> {
+    const originalObj = original as unknown as Record<string, unknown>;
     const copy = new CourseLessonModel({
-      ...original.toObject(),
+      ...originalObj,
       _id: new Types.ObjectId(),
       ...newData,
       createdAt: undefined,

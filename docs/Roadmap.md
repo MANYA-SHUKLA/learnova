@@ -16,7 +16,7 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | 6 | Student Management | ✅ Complete |
 | **6.5** | **System Integration & Demo** | ✅ Complete |
 | **7** | **Course Management (catalog)** | ✅ Complete |
-| 7.5 | Course Content Builder (modules / lessons) | Planned |
+| **7.5** | **Course Builder & Content Management** | ✅ Complete |
 | 8 | Enrollments | Planned |
 | 8.5 | Progress Tracking | Planned |
 
@@ -275,7 +275,7 @@ CRUD · Permissions · Publishing · Archive · Duplicate · Search · Filters �
 
 | Step | Scope | State |
 | --- | --- | --- |
-| **7.5** | Course Content Builder (modules / lessons / resources) | Planned |
+| **7.5** | Course Content Builder (modules / lessons / resources) | ✅ Complete |
 | **8** | Enrollments | Planned |
 | **8.5** | Progress tracking | Planned |
 | 9 | Practice Labs / Coding | Planned |

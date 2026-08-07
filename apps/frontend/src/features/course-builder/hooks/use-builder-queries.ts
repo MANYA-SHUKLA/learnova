@@ -6,19 +6,16 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
+  CourseBuilderLessonNode,
+  CourseBuilderModuleNode,
   CourseBuilderTree,
-  CourseLesson,
-  CourseModule,
-  CourseResource,
 } from '@learnova/types';
-import { builderApi } from '../services/builder-api';
+import { builderApi, type BuilderReorderBody } from '../services/builder-api';
 import type {
   LessonCreatePayload,
   LessonUpdatePayload,
   ModuleCreatePayload,
   ModuleUpdatePayload,
-  ReorderLessonsPayload,
-  ReorderModulesPayload,
   ResourceCreatePayload,
   ResourceUpdatePayload,
 } from '../types';
@@ -28,7 +25,6 @@ export const builderKeys = {
   tree: (courseId: string) => [...builderKeys.all, 'tree', courseId] as const,
 };
 
-// Tree query
 export function useBuilderTree(courseId: string, enabled = true) {
   return useQuery({
     queryKey: builderKeys.tree(courseId),
@@ -42,7 +38,6 @@ function invalidateTree(queryClient: ReturnType<typeof useQueryClient>, courseId
   void queryClient.invalidateQueries({ queryKey: builderKeys.tree(courseId) });
 }
 
-// Module mutations
 export function useCreateModuleMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -79,14 +74,20 @@ export function useDuplicateModuleMutation(courseId: string) {
 export function useReorderModulesMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: ReorderModulesPayload) => builderApi.reorderModules(courseId, body),
-    onMutate: async (body) => {
+    mutationFn: (moduleIds: string[]) => {
+      const body: BuilderReorderBody = {
+        modules: moduleIds.map((id, orderIndex) => ({ id, orderIndex })),
+      };
+      return builderApi.reorder(courseId, body);
+    },
+    onMutate: async (moduleIds) => {
       await queryClient.cancelQueries({ queryKey: builderKeys.tree(courseId) });
       const prev = queryClient.getQueryData<CourseBuilderTree>(builderKeys.tree(courseId));
       if (prev) {
-        const reordered = body.moduleIds
+        const reordered = moduleIds
           .map((id) => prev.modules.find((m) => m.id === id))
-          .filter((m): m is CourseModule & { lessons: CourseLesson[] } => m !== undefined);
+          .filter((m): m is CourseBuilderModuleNode => m !== undefined)
+          .map((m, orderIndex) => ({ ...m, orderIndex }));
         queryClient.setQueryData<CourseBuilderTree>(builderKeys.tree(courseId), {
           ...prev,
           modules: reordered,
@@ -103,7 +104,6 @@ export function useReorderModulesMutation(courseId: string) {
   });
 }
 
-// Lesson mutations
 export function useCreateLessonMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -140,17 +140,22 @@ export function useDuplicateLessonMutation(courseId: string) {
 export function useReorderLessonsMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ moduleId, body }: { moduleId: string; body: ReorderLessonsPayload }) =>
-      builderApi.reorderLessons(courseId, moduleId, body),
-    onMutate: async ({ moduleId, body }) => {
+    mutationFn: ({ moduleId, lessonIds }: { moduleId: string; lessonIds: string[] }) => {
+      const body: BuilderReorderBody = {
+        lessons: lessonIds.map((id, orderIndex) => ({ id, moduleId, orderIndex })),
+      };
+      return builderApi.reorder(courseId, body);
+    },
+    onMutate: async ({ moduleId, lessonIds }) => {
       await queryClient.cancelQueries({ queryKey: builderKeys.tree(courseId) });
       const prev = queryClient.getQueryData<CourseBuilderTree>(builderKeys.tree(courseId));
       if (prev) {
         const modules = prev.modules.map((mod) => {
           if (mod.id !== moduleId) return mod;
-          const reordered = body.lessonIds
+          const reordered = lessonIds
             .map((id) => mod.lessons.find((l) => l.id === id))
-            .filter((l): l is CourseLesson & { resources: CourseResource[] } => l !== undefined);
+            .filter((l): l is CourseBuilderLessonNode => l !== undefined)
+            .map((l, orderIndex) => ({ ...l, orderIndex }));
           return { ...mod, lessons: reordered };
         });
         queryClient.setQueryData<CourseBuilderTree>(builderKeys.tree(courseId), {
@@ -169,11 +174,13 @@ export function useReorderLessonsMutation(courseId: string) {
   });
 }
 
-// Resource mutations
 export function useCreateResourceMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: ResourceCreatePayload) => builderApi.createResource(courseId, body),
+    mutationFn: (body: ResourceCreatePayload) => {
+      const { lessonId, ...rest } = body;
+      return builderApi.createResource(courseId, lessonId, rest);
+    },
     onSuccess: () => invalidateTree(queryClient, courseId),
   });
 }
@@ -181,8 +188,15 @@ export function useCreateResourceMutation(courseId: string) {
 export function useUpdateResourceMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ resourceId, body }: { resourceId: string; body: ResourceUpdatePayload }) =>
-      builderApi.updateResource(courseId, resourceId, body),
+    mutationFn: ({
+      lessonId,
+      resourceId,
+      body,
+    }: {
+      lessonId: string;
+      resourceId: string;
+      body: ResourceUpdatePayload;
+    }) => builderApi.updateResource(courseId, lessonId, resourceId, body),
     onSuccess: () => invalidateTree(queryClient, courseId),
   });
 }
@@ -190,7 +204,8 @@ export function useUpdateResourceMutation(courseId: string) {
 export function useDeleteResourceMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (resourceId: string) => builderApi.deleteResource(courseId, resourceId),
+    mutationFn: ({ lessonId, resourceId }: { lessonId: string; resourceId: string }) =>
+      builderApi.deleteResource(courseId, lessonId, resourceId),
     onSuccess: () => invalidateTree(queryClient, courseId),
   });
 }

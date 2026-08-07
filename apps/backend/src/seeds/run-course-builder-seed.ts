@@ -26,7 +26,7 @@ async function run() {
     await disconnect();
     process.exit(0);
   } catch (err) {
-    logger.error('Course builder seed failed', { error: err });
+    logger.error({ error: err }, 'Course builder seed failed');
     await disconnect();
     process.exit(1);
   }

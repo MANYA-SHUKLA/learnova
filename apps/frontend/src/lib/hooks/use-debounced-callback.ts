@@ -2,23 +2,32 @@
  * Debounced callback hook
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-export function useDebouncedCallback<T extends (...args: never[]) => void>(
-  callback: T,
+export function useDebouncedCallback<TArgs extends unknown[]>(
+  callback: (...args: TArgs) => void,
   delay: number,
-): T {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+): (...args: TArgs) => void {
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const callbackRef = useRef(callback);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   return useCallback(
-    ((...args: never[]) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+    (...args: TArgs) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
-        callback(...args);
+        callbackRef.current(...args);
       }, delay);
-    }) as T,
-    [callback, delay],
+    },
+    [delay],
   );
 }
