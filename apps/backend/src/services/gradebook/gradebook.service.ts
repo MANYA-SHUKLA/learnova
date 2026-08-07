@@ -1,8 +1,11 @@
 import { Types } from 'mongoose';
+import { EVENTS } from '@learnova/events';
 import { GRADEBOOK_DEFAULTS } from '@learnova/constants';
 import {
   aggregateWeightedPercentage,
+  gradePointsFromPercentage,
   letterGradeFromPercentage,
+  resultFromPercentage,
   sumMarks,
 } from '@learnova/shared';
 import type {
@@ -28,11 +31,13 @@ import { StudentModel } from '../../models/student.model.js';
 import { GradebookEntryModel } from '../../models/gradebook-entry.model.js';
 import { CourseGradeSummaryModel } from '../../models/course-grade-summary.model.js';
 import {
+  ConflictError,
   ForbiddenError,
   NotFoundError,
   ValidationError,
 } from '../../utils/errors/index.js';
 import { gradebookRepository } from '../../repositories/gradebook/gradebook.repository.js';
+import { eventBus } from '../../events/index.js';
 import {
   countPendingProjectSubmissions,
   ingestBySource,
@@ -40,7 +45,7 @@ import {
 } from './gradebook-ingestion.js';
 import {
   ACTIVE_ENROLLMENT_STATUSES,
-  kindWeightKey,
+  distributeWeightage,
   oid,
   pageMeta,
   toDto,
@@ -152,55 +157,40 @@ async function resolveStudentScope(
   return explicitStudentId;
 }
 
-function distributeWeightage(
-  entries: Array<{ activityKind: string; _id: Types.ObjectId }>,
-  scheme: {
-    assignmentWeight: number;
-    labWeight: number;
-    quizWeight: number;
-    examWeight: number;
-    projectWeight: number;
-  },
-): Map<string, number> {
-  const byKind = new Map<string, Types.ObjectId[]>();
-  for (const entry of entries) {
-    const list = byKind.get(entry.activityKind) ?? [];
-    list.push(entry._id);
-    byKind.set(entry.activityKind, list);
-  }
-
-  const weights = new Map<string, number>();
-  for (const [kind, ids] of byKind.entries()) {
-    const bucket = scheme[kindWeightKey(kind)] ?? 0;
-    const each = ids.length > 0 ? bucket / ids.length : 0;
-    for (const id of ids) {
-      weights.set(String(id), Math.round(each * 100) / 100);
-    }
-  }
-  return weights;
-}
-
 async function recomputeStudentSummary(
   institutionId: string,
   courseId: string,
   studentId: string,
 ) {
+  const existing = await gradebookRepository.getSummary(institutionId, courseId, studentId);
+  if (existing?.locked) return existing;
+
   const entries = await gradebookRepository.listEntriesForStudentCourse(
     institutionId,
     courseId,
     studentId,
   );
-  const scheme =
-    (await gradebookRepository.getWeightScheme(institutionId, courseId)) ??
-    ({
-      assignmentWeight: GRADEBOOK_DEFAULTS.ASSIGNMENT_WEIGHT,
-      labWeight: GRADEBOOK_DEFAULTS.LAB_WEIGHT,
-      quizWeight: GRADEBOOK_DEFAULTS.QUIZ_WEIGHT,
-      examWeight: GRADEBOOK_DEFAULTS.EXAM_WEIGHT,
-      projectWeight: GRADEBOOK_DEFAULTS.PROJECT_WEIGHT,
-    } as const);
+  const schemeDoc = await gradebookRepository.getWeightScheme(institutionId, courseId);
+  const scheme = schemeDoc ?? {
+    assignmentWeight: GRADEBOOK_DEFAULTS.ASSIGNMENT_WEIGHT,
+    labWeight: GRADEBOOK_DEFAULTS.LAB_WEIGHT,
+    quizWeight: GRADEBOOK_DEFAULTS.QUIZ_WEIGHT,
+    examWeight: GRADEBOOK_DEFAULTS.MIDTERM_WEIGHT + GRADEBOOK_DEFAULTS.FINAL_EXAM_WEIGHT,
+    midtermWeight: GRADEBOOK_DEFAULTS.MIDTERM_WEIGHT,
+    finalExamWeight: GRADEBOOK_DEFAULTS.FINAL_EXAM_WEIGHT,
+    projectWeight: GRADEBOOK_DEFAULTS.PROJECT_WEIGHT,
+    attendanceWeight: GRADEBOOK_DEFAULTS.ATTENDANCE_WEIGHT,
+    extraCreditWeight: GRADEBOOK_DEFAULTS.EXTRA_CREDIT_WEIGHT,
+  };
 
-  const weightMap = distributeWeightage(entries, scheme);
+  const weightMap = distributeWeightage(
+    entries.map((entry) => ({
+      _id: entry._id,
+      activityKind: entry.activityKind,
+      metadata: entry.metadata as Record<string, unknown>,
+    })),
+    scheme as Record<string, number>,
+  );
   for (const entry of entries) {
     const weightage = weightMap.get(String(entry._id)) ?? 0;
     if (entry.weightage !== weightage) {
@@ -221,19 +211,44 @@ async function recomputeStudentSummary(
 
   const weightedPercentage = aggregateWeightedPercentage(rows);
   const marks = sumMarks(rows);
-  const enrollmentId = entries[0]?.enrollmentId ?? null;
-
-  return gradebookRepository.upsertSummary({
+  const enrollment = await EnrollmentModel.findOne({
     institutionId: oid(institutionId),
     courseId: oid(courseId),
     studentId: oid(studentId),
-    enrollmentId: enrollmentId as Types.ObjectId | null,
+    deletedAt: null,
+  })
+    .select('_id semesterId facultyId programId')
+    .lean()
+    .exec();
+
+  const letterGrade = letterGradeFromPercentage(weightedPercentage);
+  const gradePoints = gradePointsFromPercentage(weightedPercentage);
+  const result = resultFromPercentage(weightedPercentage, GRADEBOOK_DEFAULTS.PASSING_PERCENTAGE);
+
+  const summary = await gradebookRepository.upsertSummary({
+    institutionId: oid(institutionId),
+    courseId: oid(courseId),
+    studentId: oid(studentId),
+    enrollmentId: (enrollment?._id as Types.ObjectId | undefined) ?? null,
+    semesterId: (enrollment?.semesterId as Types.ObjectId | undefined) ?? null,
+    facultyId: (enrollment?.facultyId as Types.ObjectId | undefined) ?? null,
     weightedPercentage,
-    letterGrade: letterGradeFromPercentage(weightedPercentage),
+    finalMarks: marks.earned,
+    percentage: weightedPercentage,
+    letterGrade,
+    gradePoints,
+    result,
     totalMarksEarned: marks.earned,
     totalMarksPossible: marks.possible,
     entryCount: entries.length,
   });
+
+  await eventBus.emit(
+    EVENTS.GRADE_CALCULATED,
+    { courseId, studentId, institutionId },
+  );
+
+  return summary;
 }
 
 export class GradebookService {
@@ -279,7 +294,11 @@ export class GradebookService {
       courseId,
       scopedStudent,
     );
-    return summaries.map(toDto);
+    const filtered =
+      actor.role === 'student'
+        ? summaries.filter((row) => row.published)
+        : summaries;
+    return filtered.map(toDto);
   }
 
   async getWeightScheme(courseId: string, actor: ActorContext): Promise<GradebookWeightScheme> {
@@ -295,9 +314,14 @@ export class GradebookService {
         assignmentWeight: GRADEBOOK_DEFAULTS.ASSIGNMENT_WEIGHT,
         labWeight: GRADEBOOK_DEFAULTS.LAB_WEIGHT,
         quizWeight: GRADEBOOK_DEFAULTS.QUIZ_WEIGHT,
-        examWeight: GRADEBOOK_DEFAULTS.EXAM_WEIGHT,
+        examWeight: GRADEBOOK_DEFAULTS.MIDTERM_WEIGHT + GRADEBOOK_DEFAULTS.FINAL_EXAM_WEIGHT,
+        midtermWeight: GRADEBOOK_DEFAULTS.MIDTERM_WEIGHT,
+        finalExamWeight: GRADEBOOK_DEFAULTS.FINAL_EXAM_WEIGHT,
         projectWeight: GRADEBOOK_DEFAULTS.PROJECT_WEIGHT,
+        attendanceWeight: GRADEBOOK_DEFAULTS.ATTENDANCE_WEIGHT,
+        extraCreditWeight: GRADEBOOK_DEFAULTS.EXTRA_CREDIT_WEIGHT,
         attemptPolicy: GRADEBOOK_DEFAULTS.ATTEMPT_POLICY,
+        scaleId: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -310,12 +334,17 @@ export class GradebookService {
     const institutionId = requireTenant(actor);
     await assertCourseAccess(actor, institutionId, input.courseId);
 
+    const examWeight =
+      input.examWeight ??
+      input.midtermWeight + input.finalExamWeight;
     const total =
       input.assignmentWeight +
       input.labWeight +
       input.quizWeight +
-      input.examWeight +
-      input.projectWeight;
+      examWeight +
+      input.projectWeight +
+      input.attendanceWeight +
+      input.extraCreditWeight;
     if (Math.abs(total - 100) > 0.01) {
       throw new ValidationError('Category weights must sum to 100');
     }
@@ -327,9 +356,14 @@ export class GradebookService {
         assignmentWeight: input.assignmentWeight,
         labWeight: input.labWeight,
         quizWeight: input.quizWeight,
-        examWeight: input.examWeight,
+        examWeight,
+        midtermWeight: input.midtermWeight,
+        finalExamWeight: input.finalExamWeight,
         projectWeight: input.projectWeight,
+        attendanceWeight: input.attendanceWeight,
+        extraCreditWeight: input.extraCreditWeight,
         attemptPolicy: input.attemptPolicy,
+        scaleId: input.scaleId ?? null,
       },
       actor.userId,
     );
@@ -369,6 +403,16 @@ export class GradebookService {
         : draft;
     if (!refinedDraft) throw new NotFoundError('Grade source not found or not releasable');
 
+    if (
+      await gradebookRepository.isStudentLocked(
+        institutionId,
+        String(refinedDraft.courseId),
+        String(refinedDraft.studentId),
+      )
+    ) {
+      throw new ConflictError('Grades are locked for this student');
+    }
+
     const entry = await gradebookRepository.upsertEntry(refinedDraft, 0);
     await recomputeStudentSummary(
       institutionId,
@@ -401,6 +445,15 @@ export class GradebookService {
     const studentIds = new Set<string>();
 
     for (const draft of drafts) {
+      if (
+        await gradebookRepository.isStudentLocked(
+          institutionId,
+          input.courseId,
+          String(draft.studentId),
+        )
+      ) {
+        continue;
+      }
       await gradebookRepository.upsertEntry(draft, 0);
       studentIds.add(String(draft.studentId));
     }
@@ -544,13 +597,17 @@ export class GradebookService {
         deletedAt: null,
       }).exec();
       const pendingProjectGrades = await countPendingProjectSubmissions(institutionId, courseId);
+      const pendingAppeals = await gradebookRepository.countPendingAppeals(institutionId, courseId);
 
       const dashboard: GradebookCourseDashboard = {
         courseId,
         enrollmentCount,
         entryCount: stats.entryCount,
         finalizedSummaries: stats.finalizedSummaries,
+        publishedSummaries: stats.publishedSummaries ?? 0,
+        lockedSummaries: stats.lockedSummaries ?? 0,
         pendingProjectGrades,
+        pendingAppeals,
         averageWeightedPercentage: Math.round((stats.averageWeightedPercentage ?? 0) * 100) / 100,
       };
       return dashboard;
@@ -598,6 +655,7 @@ export class GradebookService {
     await assertCourseAccess(actor, institutionId, courseId);
     const stats = await gradebookRepository.aggregateCourseStats(institutionId, courseId);
     const pendingProjectGrades = await countPendingProjectSubmissions(institutionId, courseId);
+    const pendingAppeals = await gradebookRepository.countPendingAppeals(institutionId, courseId);
     const enrollmentCount = await EnrollmentModel.countDocuments({
       institutionId: oid(institutionId),
       courseId: oid(courseId),
@@ -610,7 +668,10 @@ export class GradebookService {
       enrollmentCount,
       entryCount: stats.entryCount,
       finalizedSummaries: stats.finalizedSummaries,
+      publishedSummaries: stats.publishedSummaries ?? 0,
+      lockedSummaries: stats.lockedSummaries ?? 0,
       pendingProjectGrades,
+      pendingAppeals,
       averageWeightedPercentage: Math.round((stats.averageWeightedPercentage ?? 0) * 100) / 100,
     } satisfies GradebookCourseDashboard;
   }
@@ -630,15 +691,22 @@ export class GradebookService {
       .lean()
       .exec();
 
-    const summaries = await CourseGradeSummaryModel.find({
+    const publishedSummaries = await CourseGradeSummaryModel.find({
       institutionId: oid(institutionId),
       studentId: oid(studentId),
+      published: true,
     })
       .lean()
       .exec();
 
-    const finalizedCourses = summaries.filter((row) => row.status === 'finalized').length;
-    const percentages = summaries
+    const semesterRows = await gradebookRepository.listSemesterGrades(institutionId, studentId);
+    const cgpaRecord = await gradebookRepository.getCgpaRecord(institutionId, studentId);
+    const pendingAppeals = await gradebookRepository.countPendingAppeals(institutionId);
+
+    const finalizedCourses = publishedSummaries.filter(
+      (row) => row.status === 'published' || row.status === 'finalized',
+    ).length;
+    const percentages = publishedSummaries
       .map((row) => row.weightedPercentage)
       .filter((value): value is number => value != null);
     const averagePercentage =
@@ -658,7 +726,11 @@ export class GradebookService {
     return {
       courseCount: enrollments.length,
       finalizedCourses,
+      publishedCourses: publishedSummaries.length,
       averagePercentage,
+      semesterGpa: semesterRows[0]?.semesterGpa ?? null,
+      cgpa: cgpaRecord?.cgpa ?? null,
+      pendingAppeals,
       recentEntries: recentEntries.map(toDto) as GradebookStudentDashboard['recentEntries'],
     };
   }

@@ -29,6 +29,7 @@
     "seed:examinations": "tsx --env-file=.env src/seeds/run-examination-seed.ts",
     "seed:projects": "tsx --env-file=.env src/seeds/run-project-seed.ts",
     "seed:practice-labs": "tsx --env-file=.env src/seeds/run-practice-lab-seed.ts",
+    "seed:gradebook": "tsx --env-file=.env src/seeds/run-gradebook-seed.ts",
     "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",
     "mail:test": "tsx --env-file=.env src/scripts/test-smtp.ts",
     "db:reset-keep-jnu": "tsx --env-file=.env src/scripts/reset-keep-jnu.ts",

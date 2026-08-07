@@ -72,6 +72,7 @@ type SidebarItemId =
   | 'quizResults'
   | 'examinations'
   | 'gradebook'
+  | 'semesterGrades'
   | 'proctoring'
   | 'myTeam'
   | 'bookmarks'
@@ -178,6 +179,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'quizResults', href: APP_ROUTES.STUDENT_QUIZ_RESULTS, icon: ClipboardCheck },
       { id: 'examinations', href: APP_ROUTES.STUDENT_EXAMS, icon: ShieldCheck },
       { id: 'gradebook', href: APP_ROUTES.STUDENT_GRADEBOOK, icon: GraduationCap },
+      { id: 'semesterGrades', href: APP_ROUTES.STUDENT_SEMESTER, icon: BarChart3 },
       { id: 'myTeam', href: STUDENT_MY_TEAM, icon: UsersRound },
       { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },
       { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },

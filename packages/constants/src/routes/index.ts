@@ -149,6 +149,8 @@ export const APP_ROUTES = {
   INSTITUTION_GRADEBOOK: '/institution/gradebook',
   FACULTY_GRADEBOOK: '/faculty/gradebook',
   STUDENT_GRADEBOOK: '/student/gradebook',
+  STUDENT_GRADES: '/student/grades',
+  STUDENT_SEMESTER: '/student/semester',
   CHANGE_PASSWORD: '/account/change-password',
 } as const;
 

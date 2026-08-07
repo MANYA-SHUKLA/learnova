@@ -635,6 +635,6 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 - [ProjectManagement](./ProjectManagement.md) · [ProjectAPI](./ProjectAPI.md) · [ProjectPermissions](./ProjectPermissions.md) · [ProjectTeams](./ProjectTeams.md) · [ProjectMilestones](./ProjectMilestones.md) · [ProjectReviews](./ProjectReviews.md)
 - [QuizManagement](./QuizManagement.md) · [QuizBuilder](./QuizBuilder.md) · [QuestionBank](./QuestionBank.md) · [QuizAPI](./QuizAPI.md) · [QuizPermissions](./QuizPermissions.md) · [QuizAnalytics](./QuizAnalytics.md)
 - [ExamManagement](./ExamManagement.md) · [ExamProctoring](./ExamProctoring.md) · [ExamAPI](./ExamAPI.md) · [ExamPermissions](./ExamPermissions.md)
-- [Gradebook](./Gradebook.md) · [GradebookAPI](./GradebookAPI.md) · [GradebookPermissions](./GradebookPermissions.md)
+- [Gradebook](./Gradebook.md) · [GradebookAPI](./GradebookAPI.md) · [GradeCalculation](./GradeCalculation.md) · [GradeScales](./GradeScales.md) · [GradeAppeals](./GradeAppeals.md) · [Reports](./Reports.md) · [GradebookPermissions](./GradebookPermissions.md)
 - [AccessModel](./AccessModel.md) · [Auth](./Auth.md) · [Architecture](./Architecture.md)
 - [Deploy](./Deploy.md) — Vercel (frontend) + Render (backend)

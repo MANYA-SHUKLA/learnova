@@ -93,4 +93,15 @@ export const gradebookApi = {
 
   studentDashboard: () =>
     apiClient.get<GradebookStudentDashboard>(`${base}/dashboard/student`),
+
+  semesterGrades: (params?: { studentId?: string; semesterId?: string }) =>
+    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+      `${base}/semester${toQuery(params ?? {})}`,
+    ),
+
+  courseMatrix: (courseId: string) =>
+    apiClient.get<Record<string, unknown>>(`${base}/courses/${courseId}/matrix`),
+
+  exportReport: (params: Record<string, string | undefined>) =>
+    apiClient.get<string>(`${base}/reports${toQuery({ ...params, format: 'csv' })}`),
 };

@@ -36,7 +36,7 @@ describe('gradebook helpers', () => {
   });
 
   it('maps letter grades from percentage bands', () => {
-    expect(letterGradeFromPercentage(91)).toBe('A');
+    expect(letterGradeFromPercentage(97)).toBe('A+');
     expect(letterGradeFromPercentage(55)).toBe('F');
   });
 

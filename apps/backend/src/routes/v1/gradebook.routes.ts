@@ -2,13 +2,23 @@ import { Router, type RequestHandler } from 'express';
 import { PERMISSIONS } from '@learnova/constants';
 import {
   assignProjectGradeSchema,
+  createGradeAppealSchema,
+  createGradeCommentSchema,
   finalizeCourseGradesSchema,
+  gradeReportQuerySchema,
+  gradebookBulkActionSchema,
   gradebookCourseIdParamsSchema,
   gradebookListQuerySchema,
   ingestGradebookSourceSchema,
+  lockCourseGradesSchema,
+  publishCourseGradesSchema,
+  resolveGradeAppealSchema,
+  semesterGradeQuerySchema,
   syncCourseGradebookSchema,
+  unlockCourseGradesSchema,
   upsertWeightSchemeSchema,
 } from '@learnova/validation';
+import { z } from 'zod';
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/gradebook/gradebook.controller.js';
@@ -105,5 +115,58 @@ gradebookRoutes.get('/gradebook/dashboard/institution', ...manageAuth, ctrl.inst
 gradebookRoutes.get('/gradebook/dashboard/faculty', ...readAuth, ctrl.facultyDashboard);
 
 gradebookRoutes.get('/gradebook/dashboard/student', ...readAuth, ctrl.studentDashboard);
+
+gradebookRoutes.post('/gradebook/publish', ...writeAuth, validate(publishCourseGradesSchema), ctrl.publishGrades);
+gradebookRoutes.post('/gradebook/lock', ...writeAuth, validate(lockCourseGradesSchema), ctrl.lockGrades);
+gradebookRoutes.post('/gradebook/unlock', ...manageAuth, validate(unlockCourseGradesSchema), ctrl.unlockGrades);
+gradebookRoutes.post('/gradebook/bulk', ...writeAuth, validate(gradebookBulkActionSchema), ctrl.bulkAction);
+
+gradebookRoutes.post('/gradebook/appeals', ...readAuth, validate(createGradeAppealSchema), ctrl.createAppeal);
+gradebookRoutes.post('/gradebook/appeals/resolve', ...writeAuth, validate(resolveGradeAppealSchema), ctrl.resolveAppeal);
+gradebookRoutes.get('/gradebook/appeals', ...readAuth, ctrl.listAppeals);
+
+gradebookRoutes.post('/gradebook/comments', ...writeAuth, validate(createGradeCommentSchema), ctrl.addComment);
+gradebookRoutes.get('/gradebook/comments', ...readAuth, ctrl.listComments);
+
+gradebookRoutes.get(
+  '/gradebook/history/:courseGradeId',
+  ...readAuth,
+  validate(z.object({ courseGradeId: gradebookCourseIdParamsSchema.shape.courseId }), 'params'),
+  ctrl.listHistory,
+);
+
+gradebookRoutes.get(
+  '/gradebook/courses/:courseId/matrix',
+  ...readAuth,
+  validate(gradebookCourseIdParamsSchema, 'params'),
+  ctrl.getCourseMatrix,
+);
+
+gradebookRoutes.get(
+  '/gradebook/semester',
+  ...readAuth,
+  validate(semesterGradeQuerySchema, 'query'),
+  ctrl.getSemesterGrades,
+);
+gradebookRoutes.post(
+  '/gradebook/semester/recompute',
+  ...writeAuth,
+  validate(semesterGradeQuerySchema),
+  ctrl.recomputeSemesterGrades,
+);
+
+gradebookRoutes.get(
+  '/gradebook/cgpa/:studentId',
+  ...readAuth,
+  validate(z.object({ studentId: gradebookCourseIdParamsSchema.shape.courseId }), 'params'),
+  ctrl.getCgpa,
+);
+
+gradebookRoutes.get(
+  '/gradebook/reports',
+  ...readAuth,
+  validate(gradeReportQuerySchema, 'query'),
+  ctrl.generateReport,
+);
 
 export default gradebookRoutes;

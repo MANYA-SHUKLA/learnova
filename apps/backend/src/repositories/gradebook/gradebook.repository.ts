@@ -385,14 +385,26 @@ export const gradebookRepository = {
       {
         institutionId: oid(institutionId),
         courseId: oid(courseId),
-        status: 'draft',
+        locked: { $ne: true },
       },
-      { $set: { status: 'finalized', finalizedAt: now, finalizedBy: oid(actorId) } },
+      {
+        $set: {
+          status: 'published',
+          locked: true,
+          published: true,
+          publishedAt: now,
+          finalizedAt: now,
+          finalizedBy: oid(actorId),
+          lockedAt: now,
+          lockedBy: oid(actorId),
+        },
+      },
     ).exec();
     return CourseGradeSummaryModel.find({
       institutionId: oid(institutionId),
       courseId: oid(courseId),
-      status: 'finalized',
+      status: 'published',
+      locked: true,
     }).exec();
   },
 

@@ -1,14 +1,24 @@
 import type { NextFunction, Request, Response } from 'express';
 import type {
   AssignProjectGradeInput,
+  CreateGradeAppealInput,
+  CreateGradeCommentInput,
   FinalizeCourseGradesInput,
+  GradeReportQuery,
+  GradebookBulkActionInput,
   GradebookListQuery,
   IngestGradebookSourceInput,
+  LockCourseGradesInput,
+  PublishCourseGradesInput,
+  ResolveGradeAppealInput,
+  SemesterGradeQuery,
   SyncCourseGradebookInput,
+  UnlockCourseGradesInput,
   UpsertWeightSchemeInput,
 } from '@learnova/validation';
 import { UnauthorizedError } from '../../utils/errors/index.js';
 import { sendCreated, sendSuccess } from '../../utils/response/index.js';
+import { gradebookEnterpriseService } from '../../services/gradebook/gradebook-enterprise.service.js';
 import { gradebookService, type ActorContext } from '../../services/gradebook/gradebook.service.js';
 
 function actorFrom(req: Request): ActorContext {
@@ -133,7 +143,10 @@ export async function finalizeCourse(req: Request, res: Response, next: NextFunc
 export async function institutionDashboard(req: Request, res: Response, next: NextFunction) {
   try {
     const courseId = req.query.courseId as string | undefined;
-    const data = await gradebookService.institutionDashboard(courseId, actorFrom(req));
+    const data = await gradebookEnterpriseService.enhancedInstitutionDashboard(
+      courseId,
+      actorFrom(req),
+    );
     sendSuccess(res, data, { requestId: req.requestId });
   } catch (err) {
     next(err);
@@ -166,6 +179,194 @@ export async function listPendingProjects(req: Request, res: Response, next: Nex
       actorFrom(req),
     );
     sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function publishGrades(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.publishGrades(
+      req.body as PublishCourseGradesInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function lockGrades(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.lockGrades(
+      req.body as LockCourseGradesInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function unlockGrades(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.unlockGrades(
+      req.body as UnlockCourseGradesInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function bulkAction(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.bulkAction(
+      req.body as GradebookBulkActionInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createAppeal(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.createAppeal(
+      req.body as CreateGradeAppealInput,
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resolveAppeal(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.resolveAppeal(
+      req.body as ResolveGradeAppealInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listAppeals(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await gradebookEnterpriseService.listAppeals(actorFrom(req), {
+      courseId: req.query.courseId as string | undefined,
+      studentId: req.query.studentId as string | undefined,
+      status: req.query.status as string | undefined,
+    });
+    sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function addComment(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.addComment(
+      req.body as CreateGradeCommentInput,
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listComments(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await gradebookEnterpriseService.listComments(actorFrom(req), {
+      courseId: req.query.courseId as string | undefined,
+      studentId: req.query.studentId as string | undefined,
+      courseGradeId: req.query.courseGradeId as string | undefined,
+    });
+    sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listHistory(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await gradebookEnterpriseService.listHistory(
+      req.params.courseGradeId as string,
+      actorFrom(req),
+    );
+    sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getCourseMatrix(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.getCourseMatrix(
+      req.params.courseId as string,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getSemesterGrades(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await gradebookEnterpriseService.getSemesterGrades(
+      req.query as unknown as SemesterGradeQuery,
+      actorFrom(req),
+    );
+    sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function recomputeSemesterGrades(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.recomputeSemesterGrades(
+      req.body as SemesterGradeQuery,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getCgpa(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.recomputeCgpa(
+      req.params.studentId as string,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function generateReport(req: Request, res: Response, next: NextFunction) {
+  try {
+    const result = await gradebookEnterpriseService.generateReport(
+      req.query as unknown as GradeReportQuery,
+      actorFrom(req),
+    );
+    if ('csv' in result) {
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="gradebook-export.csv"');
+      res.send(result.csv);
+      return;
+    }
+    sendSuccess(res, result, { requestId: req.requestId });
   } catch (err) {
     next(err);
   }

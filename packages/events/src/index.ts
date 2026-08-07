@@ -125,6 +125,13 @@ export const EVENTS = {
   ATTEMPT_STARTED: 'attempt.started',
   ATTEMPT_SUBMITTED: 'attempt.submitted',
   QUESTION_ANSWERED: 'question.answered',
+
+  GRADE_READY: 'grade.ready',
+  GRADE_PUBLISHED: 'grade.published',
+  GRADE_LOCKED: 'grade.locked',
+  GRADE_CALCULATED: 'grade.calculated',
+  GRADE_APPEAL_CREATED: 'grade.appeal.created',
+  GRADE_APPEAL_RESOLVED: 'grade.appeal.resolved',
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
@@ -499,6 +506,12 @@ export interface EventPayloadMap {
     questionId: string;
     isCorrect: boolean | null;
   };
+  'grade.ready': { courseId: string; studentId: string; institutionId: string };
+  'grade.published': { courseId: string; institutionId: string; count: number };
+  'grade.locked': { courseId: string; institutionId: string; count: number };
+  'grade.calculated': { courseId: string; studentId: string; institutionId: string };
+  'grade.appeal.created': { appealId: string; courseGradeId: string; studentId: string };
+  'grade.appeal.resolved': { appealId: string; status: string; studentId: string };
 }
 
 export type TypedEventName = keyof EventPayloadMap;
@@ -621,6 +634,12 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.ATTEMPT_STARTED, description: 'Quiz attempt started', version: 1 },
   { name: EVENTS.ATTEMPT_SUBMITTED, description: 'Quiz attempt submitted', version: 1 },
   { name: EVENTS.QUESTION_ANSWERED, description: 'Quiz question answered during attempt', version: 1 },
+  { name: EVENTS.GRADE_READY, description: 'Course grade computed and ready for review', version: 1 },
+  { name: EVENTS.GRADE_PUBLISHED, description: 'Course grades published to students', version: 1 },
+  { name: EVENTS.GRADE_LOCKED, description: 'Course grades locked', version: 1 },
+  { name: EVENTS.GRADE_CALCULATED, description: 'Course grade recalculated from sources', version: 1 },
+  { name: EVENTS.GRADE_APPEAL_CREATED, description: 'Student grade appeal submitted', version: 1 },
+  { name: EVENTS.GRADE_APPEAL_RESOLVED, description: 'Grade appeal resolved by faculty', version: 1 },
 ] as const;
 
 export function isRegisteredEvent(name: string): name is EventName {

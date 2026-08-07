@@ -76,3 +76,7 @@ Institution admins may `POST /gradebook/finalize` to lock summaries after sync.
 
 - [GradebookAPI](./GradebookAPI.md)
 - [GradebookPermissions](./GradebookPermissions.md)
+- [GradeCalculation](./GradeCalculation.md)
+- [GradeScales](./GradeScales.md)
+- [GradeAppeals](./GradeAppeals.md)
+- [Reports](./Reports.md)
