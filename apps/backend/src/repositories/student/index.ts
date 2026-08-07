@@ -58,10 +58,18 @@ export class StudentRepository {
 
   async list(institutionId: string, query: StudentListQuery): Promise<StudentListResult> {
     const filter = this.buildFilter(institutionId, query);
-    const page = query.page;
-    const limit = query.limit;
-    const sortField = query.sortBy ?? 'createdAt';
-    const sortDir = query.sortOrder === 'asc' ? 1 : -1;
+    return this.listByFilter(filter, query.page, query.limit, query.sortBy, query.sortOrder);
+  }
+
+  async listByFilter(
+    filter: Record<string, unknown>,
+    page: number,
+    limit: number,
+    sortBy?: string,
+    sortOrder?: 'asc' | 'desc',
+  ): Promise<StudentListResult> {
+    const sortField = sortBy ?? 'createdAt';
+    const sortDir = sortOrder === 'asc' ? 1 : -1;
 
     const [items, total] = await Promise.all([
       StudentModel.find(filter)

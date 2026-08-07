@@ -111,7 +111,7 @@ const STATES = [
   'Kerala',
 ];
 
-function randomItem<T>(arr: T[]): T {
+function randomItem<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]!;
 }
 

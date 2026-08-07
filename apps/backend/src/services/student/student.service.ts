@@ -238,37 +238,17 @@ export class StudentService {
     let filter = studentRepository.buildFilter(institutionId, query);
     filter = await scopeByFacultyAccess(filter, actor, institutionId);
 
-    const page = query.page;
-    const limit = query.limit;
-    const sortField = query.sortBy ?? 'createdAt';
-    const sortDir = query.sortOrder === 'asc' ? 1 : -1;
-
-    const [items, total] = await Promise.all([
-      (async () => {
-        const cursor = studentRepository['StudentModel']
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (studentRepository as any).StudentModel.find(filter)
-          : // @ts-expect-error accessing private StudentModel through import
-            (await import('../../models/student.model.js')).StudentModel.find(filter);
-        return cursor
-          .sort({ [sortField]: sortDir })
-          .skip((page - 1) * limit)
-          .limit(limit)
-          .exec();
-      })(),
-      (async () => {
-        const cursor = studentRepository['StudentModel']
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (studentRepository as any).StudentModel.countDocuments(filter)
-          : // @ts-expect-error accessing private StudentModel through import
-            (await import('../../models/student.model.js')).StudentModel.countDocuments(filter);
-        return cursor.exec();
-      })(),
-    ]);
+    const result = await studentRepository.listByFilter(
+      filter,
+      query.page,
+      query.limit,
+      query.sortBy,
+      query.sortOrder,
+    );
 
     return {
-      items: items.map((d) => toDto(d)),
-      meta: pageMeta(total, page, limit),
+      items: result.items.map((d) => toDto(d)),
+      meta: pageMeta(result.total, result.page, result.limit),
     };
   }
 
