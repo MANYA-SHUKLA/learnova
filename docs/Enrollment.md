@@ -53,6 +53,17 @@ pnpm --filter @learnova/backend seed:enrollments
 
 Uses `SEED_INSTITUTION_ID`. Generates 1000+ enrollments across students/courses.
 
+## Integration checkpoint (Step 8.25)
+
+Before Progress Tracking (8.5), verify:
+
+1. Course enrollment rules (open · approval · invite-only · closed · waitlist · deadline)
+2. Role flows (Institution Admin · Faculty · Student)
+3. Dashboard / enrollment counts stay consistent after enroll · approve · withdraw · complete
+4. Audit logs and domain events for every lifecycle action
+
+See [Roadmap.md](./Roadmap.md#step-825--enrollment-integration-checkpoint) and [EnrollmentWorkflow.md](./EnrollmentWorkflow.md).
+
 ## Related docs
 
 - [EnrollmentAPI.md](./EnrollmentAPI.md)

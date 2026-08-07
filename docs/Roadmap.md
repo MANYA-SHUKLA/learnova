@@ -368,4 +368,5 @@ Then proceed to **Step 8.5 — Progress Tracking**.
 
 - [Institution](./Institution.md) · [Academic Structure](./AcademicStructure.md)
 - [Faculty](./Faculty.md) · [Student](./Student.md) · [Course](./Course.md)
+- [Enrollment](./Enrollment.md) · [EnrollmentWorkflow](./EnrollmentWorkflow.md)
 - [Auth](./Auth.md) · [Architecture](./Architecture.md)

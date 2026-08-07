@@ -42,3 +42,7 @@ Staff marks enrollment `completed` with `completionStatus: completed` and `compl
 ## Waitlist
 
 Join → position assigned · Leave → remove · Promote → create enrollment when seat available.
+
+## Integration checkpoint
+
+Do not start Progress Tracking until Step **8.25** passes: enrollment rules, role flows, dashboard consistency, and audit/events. See [Roadmap.md](./Roadmap.md#step-825--enrollment-integration-checkpoint).
