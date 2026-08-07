@@ -37,6 +37,9 @@ export const PERMISSIONS = {
   ENROLLMENT_READ: 'enrollment:read',
   ENROLLMENT_WRITE: 'enrollment:write',
   ENROLLMENT_MANAGE: 'enrollment:manage',
+  PROGRESS_READ: 'progress:read',
+  PROGRESS_WRITE: 'progress:write',
+  PROGRESS_MANAGE: 'progress:manage',
 } as const;
 
 export type PermissionConstant = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

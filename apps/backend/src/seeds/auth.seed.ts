@@ -143,6 +143,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Full enrollment management including import/export and bulk ops',
   },
+  'progress:read': {
+    resource: 'progress',
+    action: 'read',
+    description: 'View learning progress',
+  },
+  'progress:write': {
+    resource: 'progress',
+    action: 'write',
+    description: 'Update own or assigned learning progress',
+  },
+  'progress:manage': {
+    resource: 'progress',
+    action: 'manage',
+    description: 'Manage institution-wide learning progress analytics',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {

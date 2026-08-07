@@ -7,6 +7,7 @@ export * from './student/index.js';
 export * from './course/index.js';
 export * from './course-builder/index.js';
 export * from './enrollment/index.js';
+export * from './progress/index.js';
 export * from './modules/index.js';
 export * from './jobs/index.js';
 

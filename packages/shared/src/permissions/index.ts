@@ -21,6 +21,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'course:read',
     'enrollment:read',
     'enrollment:write',
+    'progress:read',
+    'progress:write',
   ],
   faculty: [
     'lms:read',
@@ -44,6 +46,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'course:write',
     'enrollment:read',
     'enrollment:write',
+    'progress:read',
+    'progress:write',
   ],
   institution_admin: [
     'lms:read',
@@ -80,6 +84,9 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'enrollment:read',
     'enrollment:write',
     'enrollment:manage',
+    'progress:read',
+    'progress:write',
+    'progress:manage',
   ],
   // Future roles — empty until activated
   super_admin: [],

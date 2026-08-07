@@ -31,6 +31,12 @@ export const EVENTS = {
   COURSE_BUILDER_REORDERED: 'builder.reordered',
   COURSE_BUILDER_SAVED: 'builder.saved',
   COURSE_PROGRESS_UPDATED: 'course.progress.updated',
+  PROGRESS_UPDATED: 'progress.updated',
+  LESSON_COMPLETED: 'lesson.completed',
+  MODULE_COMPLETED: 'module.completed',
+  COURSE_COMPLETED: 'course.completed',
+  BOOKMARK_CREATED: 'bookmark.created',
+  NOTE_CREATED: 'note.created',
 
   USER_CREATED: 'user.created',
   USER_REGISTERED: 'user.registered',
@@ -150,6 +156,44 @@ export interface EventPayloadMap {
   'builder.reordered': { courseId: string; institutionId: string };
   'builder.saved': { courseId: string; lessonId?: string; institutionId: string };
   'course.progress.updated': { courseId: string; studentId: string; progressPercent: number };
+  'progress.updated': {
+    courseId: string;
+    studentId: string;
+    institutionId: string;
+    progressPercentage: number;
+  };
+  'lesson.completed': {
+    courseId: string;
+    moduleId: string;
+    lessonId: string;
+    studentId: string;
+    institutionId: string;
+  };
+  'module.completed': {
+    courseId: string;
+    moduleId: string;
+    studentId: string;
+    institutionId: string;
+  };
+  'course.completed': {
+    courseId: string;
+    studentId: string;
+    institutionId: string;
+    enrollmentId: string;
+  };
+  'bookmark.created': {
+    bookmarkId: string;
+    studentId: string;
+    courseId: string;
+    institutionId: string;
+  };
+  'note.created': {
+    noteId: string;
+    studentId: string;
+    courseId: string;
+    lessonId: string;
+    institutionId: string;
+  };
   'user.created': { userId: string; email?: string };
   'user.registered': { userId: string };
   'user.logged_in': { userId: string };
