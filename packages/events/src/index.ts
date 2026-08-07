@@ -120,6 +120,7 @@ export interface EventDefinition {
 export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.COURSE_CREATED, description: 'Course created', version: 1 },
   { name: EVENTS.COURSE_UPDATED, description: 'Course updated', version: 1 },
+  { name: EVENTS.COURSE_DELETED, description: 'Course soft-deleted', version: 1 },
   { name: EVENTS.COURSE_ARCHIVED, description: 'Course archived', version: 1 },
   { name: EVENTS.COURSE_PUBLISHED, description: 'Course published', version: 1 },
   { name: EVENTS.COURSE_ENROLLED, description: 'Course enrolled', version: 1 },
