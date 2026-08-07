@@ -191,15 +191,27 @@
 
   html {
     @apply antialiased;
+    color-scheme: light;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
     overflow-x: clip;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
     @apply bg-background text-foreground font-body;
     overflow-x: clip;
     min-width: 0;
+  }
+
+  /* Native controls inherit theme surfaces */
+  select,
+  option,
+  textarea {
+    color-scheme: inherit;
   }
 
   h1 {

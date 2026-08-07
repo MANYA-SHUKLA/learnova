@@ -28,7 +28,9 @@ export function ThemeProvider({
       attribute={attribute}
       defaultTheme={defaultTheme}
       enableSystem={enableSystem}
+      enableColorScheme
       disableTransitionOnChange={disableTransitionOnChange}
+      storageKey="learnova-theme"
     >
       {children}
     </NextThemesProvider>
