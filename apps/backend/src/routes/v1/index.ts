@@ -4,6 +4,7 @@ import authRoutes from './auth.routes.js';
 import institutionRoutes from './institution.routes.js';
 import facultyRoutes from './faculty.routes.js';
 import studentRoutes from './student.routes.js';
+import courseRoutes from './course.routes.js';
 import {
   healthCheck,
   livenessCheck,
@@ -22,6 +23,7 @@ v1Router.use('/auth', authRoutes);
 v1Router.use(institutionRoutes);
 v1Router.use(facultyRoutes);
 v1Router.use(studentRoutes);
+v1Router.use(courseRoutes);
 v1Router.get('/live', livenessCheck);
 v1Router.get('/ready', readinessCheck);
 v1Router.get('/version', versionCheck);
