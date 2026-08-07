@@ -84,7 +84,7 @@ export function evaluateAttempt(input: {
     return {
       allowed: false,
       nextAttempt,
-      reason: `Maximum attempts (${input.maxAttempts}) reached`,
+      reason: `Maximum attempts (${String(input.maxAttempts)}) reached`,
     };
   }
 
@@ -214,7 +214,14 @@ export const ASSIGNMENT_CSV_HEADERS = [
 ] as const;
 
 export function escapeCsv(value: unknown): string {
-  const str = value == null ? '' : String(value);
+  let str: string;
+  if (value == null) {
+    str = '';
+  } else if (typeof value === 'object') {
+    str = JSON.stringify(value);
+  } else {
+    str = String(value);
+  }
   if (/[",\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
   return str;
 }

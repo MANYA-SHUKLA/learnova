@@ -1,14 +1,6 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
 
-export const ASSIGNMENT_GRADING_METHODS = [
-  'manual',
-  'rubric',
-  'pass_fail',
-  'marks',
-  'percentage',
-] as const;
-
-const assignmentRubricScoreSchema = new Schema(
+const rubricScoreSchema = new Schema(
   {
     criterionId: { type: String, required: true },
     points: { type: Number, required: true, min: 0 },
@@ -35,34 +27,29 @@ const assignmentGradeSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'AssignmentSubmission',
       required: true,
+      unique: true,
       index: true,
     },
     studentId: { type: Schema.Types.ObjectId, ref: 'Student', required: true, index: true },
     gradingMethod: {
       type: String,
-      enum: ASSIGNMENT_GRADING_METHODS,
+      enum: ['manual', 'rubric', 'pass_fail', 'marks', 'percentage'],
       default: 'marks',
     },
     marksObtained: { type: Number, default: null },
-    percentage: { type: Number, default: null },
-    passed: { type: Boolean, default: null, index: true },
+    percentage: { type: Number, default: null, min: 0, max: 100 },
+    passed: { type: Boolean, default: null },
     feedback: { type: String, default: null },
-    rubricScores: { type: [assignmentRubricScoreSchema], default: [] },
-    gradedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
-    gradedAt: { type: Date, default: null, index: true },
+    rubricScores: { type: [rubricScoreSchema], default: [] },
+    gradedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    gradedAt: { type: Date, default: null },
     deletedAt: { type: Date, default: null, index: true },
   },
   { timestamps: true, collection: 'assignment_grades' },
 );
 
-assignmentGradeSchema.index({ institutionId: 1, assignmentId: 1, studentId: 1 });
-assignmentGradeSchema.index({ institutionId: 1, studentId: 1, gradedAt: -1 });
-assignmentGradeSchema.index({ submissionId: 1 }, { partialFilterExpression: { deletedAt: null } });
-
 export type AssignmentGradeDocument = InferSchemaType<typeof assignmentGradeSchema> & {
   _id: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export const AssignmentGradeModel = model('AssignmentGrade', assignmentGradeSchema);

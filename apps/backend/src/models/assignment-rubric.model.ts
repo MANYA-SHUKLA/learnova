@@ -1,6 +1,6 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
 
-const assignmentRubricCriterionSchema = new Schema(
+const criterionSchema = new Schema(
   {
     id: { type: String, required: true },
     title: { type: String, required: true, trim: true },
@@ -19,25 +19,20 @@ const assignmentRubricSchema = new Schema(
       required: true,
       index: true,
     },
-    title: { type: String, required: true, trim: true, index: true },
+    title: { type: String, required: true, trim: true, maxlength: 200, index: true },
     description: { type: String, default: null },
-    criteria: { type: [assignmentRubricCriterionSchema], default: [] },
+    criteria: { type: [criterionSchema], default: [] },
     totalPoints: { type: Number, default: 0, min: 0 },
     reusable: { type: Boolean, default: true, index: true },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     deletedAt: { type: Date, default: null, index: true },
   },
   { timestamps: true, collection: 'assignment_rubrics' },
 );
 
-assignmentRubricSchema.index({ institutionId: 1, createdAt: -1 });
-assignmentRubricSchema.index({ institutionId: 1, reusable: 1 });
-
 export type AssignmentRubricDocument = InferSchemaType<typeof assignmentRubricSchema> & {
   _id: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export const AssignmentRubricModel = model('AssignmentRubric', assignmentRubricSchema);

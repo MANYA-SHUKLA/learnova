@@ -609,9 +609,8 @@ export class AssignmentService {
       throw new ValidationError('Uploaded file is empty');
     }
     if (buffer.length > ASSIGNMENT_MAX_FILE_BYTES) {
-      throw new ValidationError(
-        `File exceeds maximum size of ${Math.floor(ASSIGNMENT_MAX_FILE_BYTES / (1024 * 1024))}MB`,
-      );
+      const maxMb = Math.floor(ASSIGNMENT_MAX_FILE_BYTES / (1024 * 1024));
+      throw new ValidationError(`File exceeds maximum size of ${String(maxMb)}MB`);
     }
 
     const id = newFileId();
@@ -1525,7 +1524,7 @@ export class AssignmentService {
       studentId: log.studentId ? String(log.studentId) : null,
       userId: log.userId ? String(log.userId) : null,
       email: log.email,
-      metadata: log.metadata,
+      metadata: (log.metadata ?? {}) as Record<string, unknown>,
       createdAt: log.createdAt.toISOString(),
     }));
   }

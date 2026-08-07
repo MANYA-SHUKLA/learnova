@@ -1,5 +1,18 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
-import { assignmentFileRefSchema } from './assignment.model.js';
+
+const fileRefSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    fileName: { type: String, required: true, trim: true },
+    contentType: { type: String, required: true },
+    sizeBytes: { type: Number, required: true, min: 0 },
+    storageKey: { type: String, required: true },
+    url: { type: String, default: null },
+    uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
+);
 
 const assignmentCommentSchema = new Schema(
   {
@@ -29,21 +42,15 @@ const assignmentCommentSchema = new Schema(
     },
     authorId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     authorRole: { type: String, required: true },
-    body: { type: String, required: true },
-    attachments: { type: [assignmentFileRefSchema], default: [] },
+    body: { type: String, required: true, maxlength: 10000 },
+    attachments: { type: [fileRefSchema], default: [] },
     deletedAt: { type: Date, default: null, index: true },
   },
   { timestamps: true, collection: 'assignment_comments' },
 );
 
-assignmentCommentSchema.index({ institutionId: 1, assignmentId: 1, createdAt: 1 });
-assignmentCommentSchema.index({ institutionId: 1, submissionId: 1, createdAt: 1 });
-assignmentCommentSchema.index({ parentCommentId: 1, createdAt: 1 });
-
 export type AssignmentCommentDocument = InferSchemaType<typeof assignmentCommentSchema> & {
   _id: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export const AssignmentCommentModel = model('AssignmentComment', assignmentCommentSchema);
