@@ -61,6 +61,8 @@ export interface Course {
   allowPreview: boolean;
   maxStudents: number | null;
   enrollmentMode: CourseEnrollmentMode;
+  enrollmentDeadline: string | null;
+  waitlistEnabled: boolean;
   publishDate: string | null;
   archiveDate: string | null;
   seoTitle: string | null;

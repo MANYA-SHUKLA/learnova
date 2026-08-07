@@ -137,6 +137,8 @@ const courseBaseFields = {
   allowPreview: z.boolean().optional().default(false),
   maxStudents: z.coerce.number().int().min(1).max(100000).optional().nullable(),
   enrollmentMode: courseEnrollmentModeSchema.optional().default('open'),
+  enrollmentDeadline: z.coerce.date().optional().nullable(),
+  waitlistEnabled: z.boolean().optional().default(false),
   publishDate: z.coerce.date().optional().nullable(),
   archiveDate: z.coerce.date().optional().nullable(),
   seoTitle: optionalString(120),
