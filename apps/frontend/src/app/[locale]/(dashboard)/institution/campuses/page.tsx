@@ -42,8 +42,13 @@ export default function CampusesPage() {
     { name: 'city', label: tf('city'), type: 'text' },
     { name: 'state', label: tf('state'), type: 'text' },
     { name: 'country', label: tf('country'), type: 'text' },
-    { name: 'phone', label: tf('phone'), type: 'text' },
-    { name: 'email', label: tf('email'), type: 'email' },
+    { name: 'phone', label: tf('phone'), type: 'text', placeholder: '8005586588' },
+    {
+      name: 'email',
+      label: tf('email'),
+      type: 'email',
+      placeholder: 'shuklamanya99@gmail.com',
+    },
     {
       name: 'status',
       label: tf('status'),

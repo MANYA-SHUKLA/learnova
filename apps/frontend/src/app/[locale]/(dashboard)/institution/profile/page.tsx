@@ -146,7 +146,7 @@ export default function InstitutionProfilePage() {
   const field = (
     key: keyof typeof form,
     label: string,
-    opts?: { type?: string; disabled?: boolean },
+    opts?: { type?: string; disabled?: boolean; placeholder?: string },
   ) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
@@ -157,6 +157,7 @@ export default function InstitutionProfilePage() {
         type={opts?.type ?? 'text'}
         value={form[key]}
         disabled={opts?.disabled}
+        placeholder={opts?.placeholder}
         onChange={(e) => { setForm((prev) => ({ ...prev, [key]: e.target.value })); }}
       />
     </div>
@@ -180,8 +181,11 @@ export default function InstitutionProfilePage() {
         <CardContent className="grid gap-4 sm:grid-cols-2">
           {field('name', tf('name'))}
           {field('shortName', t('shortName'))}
-          {field('email', tf('email'), { type: 'email' })}
-          {field('phone', tf('phone'))}
+          {field('email', tf('email'), {
+            type: 'email',
+            placeholder: 'shuklamanya99@gmail.com',
+          })}
+          {field('phone', tf('phone'), { placeholder: '8005586588' })}
           {field('website', t('website'), { type: 'url' })}
           {field('timezone', t('timezone'))}
           {field('currency', t('currency'))}
