@@ -257,7 +257,8 @@ export class AuthService {
       lastName: input.lastName,
       roleId: role._id,
       institutionId,
-      isEmailVerified: false,
+      // Local/dev: skip inbox dependency when SMTP is misconfigured.
+      isEmailVerified: env.NODE_ENV !== 'production',
       passwordHistory: [],
       lastPasswordChangedAt: new Date(),
     });
