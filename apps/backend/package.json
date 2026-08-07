@@ -15,6 +15,7 @@
     "seed:auth": "tsx --env-file=.env src/seeds/run-auth-seed.ts",
     "seed:students": "tsx --env-file=.env src/seeds/run-student-seed.ts",
     "seed:courses": "tsx --env-file=.env src/seeds/run-course-seed.ts",
+    "seed:course-builder": "tsx --env-file=.env src/seeds/run-course-builder-seed.ts",
     "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -45,6 +46,7 @@
     "pino": "^9.7.0",
     "pino-http": "^10.4.0",
     "rate-limit-redis": "^4.2.0",
+    "slugify": "^1.6.6",
     "socket.io": "^4.8.1",
     "uuid": "^11.1.0",
     "zod": "^3.25.56"
