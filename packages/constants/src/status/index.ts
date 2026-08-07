@@ -9,9 +9,17 @@ export const ENTITY_STATUS = {
 
 export const COURSE_STATUS = {
   DRAFT: 'draft',
+  REVIEW: 'review',
   PUBLISHED: 'published',
   ARCHIVED: 'archived',
-  DELETED: 'deleted',
+  SCHEDULED: 'scheduled',
+} as const;
+
+export const COURSE_VISIBILITY = {
+  PRIVATE: 'private',
+  INSTITUTION: 'institution',
+  PUBLIC: 'public',
+  INVITE_ONLY: 'invite_only',
 } as const;
 
 export const EXAM_STATUS = {
