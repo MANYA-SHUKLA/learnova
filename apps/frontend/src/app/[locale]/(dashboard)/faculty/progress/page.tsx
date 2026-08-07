@@ -9,14 +9,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
   Skeleton,
 } from '@learnova/ui';
 import { BarChart3, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
+import { useCourseList } from '@/features/course';
 import {
   ProgressStatCards,
   formatPercent,
@@ -25,8 +25,16 @@ import {
 
 export default function FacultyProgressPage() {
   const t = useTranslations('dashboard.faculty.progress');
-  const [courseIdInput, setCourseIdInput] = useState('');
   const [courseId, setCourseId] = useState('');
+
+  const coursesQuery = useCourseList({ page: 1, limit: 50, sortBy: 'title', sortOrder: 'asc' });
+  const courses = coursesQuery.data?.items ?? [];
+
+  useEffect(() => {
+    if (!courseId && courses.length > 0) {
+      setCourseId(courses[0]!.id);
+    }
+  }, [courseId, courses]);
 
   const dashboardQuery = useFacultyProgressDashboard(courseId, Boolean(courseId));
   const data = dashboardQuery.data;
@@ -74,18 +82,27 @@ export default function FacultyProgressPage() {
             <CardTitle className="text-base">{t('selectTitle')}</CardTitle>
             <CardDescription>{t('selectDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2 sm:flex-row">
-            <Input
-              placeholder={t('courseIdPlaceholder')}
-              value={courseIdInput}
-              onChange={(e) => setCourseIdInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') setCourseId(courseIdInput.trim());
-              }}
-            />
+          <CardContent className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <select
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm sm:max-w-md"
+              value={courseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              disabled={coursesQuery.isLoading || courses.length === 0}
+            >
+              {courses.length === 0 ? (
+                <option value="">{t('emptyTitle')}</option>
+              ) : (
+                courses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.courseCode} — {c.title}
+                  </option>
+                ))
+              )}
+            </select>
             <Button
-              onClick={() => setCourseId(courseIdInput.trim())}
-              disabled={!courseIdInput.trim()}
+              variant="outline"
+              disabled={!courseId || dashboardQuery.isFetching}
+              onClick={() => void dashboardQuery.refetch()}
             >
               {t('load')}
             </Button>
