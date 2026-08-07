@@ -246,7 +246,7 @@ export default function StudentProjectDetailPage({
                           onClick={async () => {
                             await createTeam.mutateAsync({
                               projectId: id,
-                              name: teamName.trim(),
+                              teamName: teamName.trim(),
                               repoLink: github || null,
                             });
                             setTeamName('');

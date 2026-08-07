@@ -1896,9 +1896,6 @@ export class ProjectService {
       activeTeams,
       pendingReviews,
       pendingGrades,
-      totalMilestones,
-      completedMilestones,
-      totalSubmissions,
     ] = await Promise.all([
       ProjectModel.countDocuments({
         institutionId: institutionOid,
@@ -1920,25 +1917,7 @@ export class ProjectService {
         status: { $in: ['submitted', 'late'] },
         gradeId: null,
       }),
-      ProjectMilestoneModel.countDocuments({
-        institutionId: institutionOid,
-        projectId: { $in: projectIds },
-        deletedAt: null,
-      }).exec(),
-      ProjectMilestoneModel.countDocuments({
-        institutionId: institutionOid,
-        projectId: { $in: projectIds },
-        status: 'completed',
-        deletedAt: null,
-      }).exec(),
-      projectRepository.countSubmissions({
-        ...submissionBase,
-        status: { $ne: 'draft' },
-      }),
     ]);
-
-    const milestoneCompletionRate =
-      totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
 
     return {
       projectsCreated,
@@ -1954,10 +1933,8 @@ export class ProjectService {
     const institutionOid = oid(institutionId);
     const student = await this.resolveStudent(actor, institutionId);
     const courseIds = await this.enrolledCourseIds(student._id, institutionId);
-    const now = new Date();
 
-    const [publishedProjects, submissions, overdueMilestones, pendingPeerReviews] =
-      await Promise.all([
+    const [publishedProjects, submissions] = await Promise.all([
         ProjectModel.find({
           institutionId: institutionOid,
           deletedAt: null,
@@ -1972,25 +1949,9 @@ export class ProjectService {
           studentId: student._id,
           status: { $ne: 'draft' },
         })
-          .select('status projectId')
+          .select('status projectId _id')
           .exec(),
-        projectRepository.countProjects({
-          institutionId: institutionOid,
-          deletedAt: null,
-          courseId: { $in: courseIds },
-          dueDate: { $lt: now },
-        }),
-        projectRepository.countReviews({
-          institutionId: institutionOid,
-          deletedAt: null,
-          reviewerId: oid(actor.userId),
-          status: 'draft',
-          reviewType: 'peer',
-        }),
       ]);
-
-    const submittedProjectIds = new Set(submissions.map((s) => String(s.projectId)));
-    const graded = submissions.filter((s) => s.status === 'graded').length;
 
     return {
       myProjects: publishedProjects.length,

@@ -63,7 +63,7 @@ export default function InstitutionProjectsPage() {
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<ProjectStatus | 'open' | 'all'>('all');
-  const [projectType, setProjectType] = useState<ProjectTypeSpec | 'all'>('all');
+  const [projectType, _setProjectType] = useState<ProjectTypeSpec | 'all'>('all');
   const [difficulty, setDifficulty] = useState<ProjectDifficulty | 'all'>('all');
   const [courseId, setCourseId] = useState('');
   const [facultyId, setFacultyId] = useState('');

@@ -157,20 +157,11 @@ export class ProjectRepository {
     query: Pick<ExtendedProjectListQuery, 'sortBy' | 'sortOrder'>,
   ): { field: string; dir: 1 | -1 } {
     const sortOrder = query.sortOrder === 'asc' ? 1 : -1;
-    switch (query.sortBy) {
-      case 'newest':
-        return { field: 'createdAt', dir: -1 };
-      case 'oldest':
-        return { field: 'createdAt', dir: 1 };
-      case 'deadline':
-        return { field: 'dueDate', dir: sortOrder };
-      case 'difficulty':
-        return { field: 'difficulty', dir: sortOrder };
-      case 'title':
-        return { field: 'title', dir: sortOrder };
-      default:
-        return { field: query.sortBy ?? 'createdAt', dir: sortOrder };
-    }
+    const sortBy = query.sortBy ?? 'createdAt';
+    if (sortBy === 'newest') return { field: 'createdAt', dir: -1 };
+    if (sortBy === 'oldest') return { field: 'createdAt', dir: 1 };
+    if (sortBy === 'deadline') return { field: 'dueDate', dir: sortOrder };
+    return { field: sortBy, dir: sortOrder };
   }
 
   async slugExists(institutionId: string, slug: string, excludeId?: string): Promise<boolean> {

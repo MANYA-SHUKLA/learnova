@@ -362,16 +362,24 @@ export default function InstitutionProjectDetailPage({
                   <CardTitle className="text-base">{t('tabs.resources')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {project.attachments?.length || project.resources?.length ? (
+                  {project.resources?.length ? (
                     <ul className="divide-y divide-border rounded-xl border">
-                      {[...(project.attachments ?? []), ...(project.resources ?? [])].map((file) => (
-                        <li key={file.id} className="px-4 py-3 text-sm">
-                          <p className="font-medium">{file.fileName}</p>
-                          {file.url ? (
-                            <a href={file.url} className="text-xs text-primary hover:underline" target="_blank" rel="noreferrer">
-                              {file.url}
+                      {project.resources.map((resource) => (
+                        <li key={resource.id} className="px-4 py-3 text-sm">
+                          <p className="font-medium">{resource.title}</p>
+                          {resource.url ? (
+                            <a href={resource.url} className="text-xs text-primary hover:underline" target="_blank" rel="noreferrer">
+                              {resource.url}
                             </a>
                           ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : project.attachments?.length ? (
+                    <ul className="divide-y divide-border rounded-xl border">
+                      {project.attachments.map((file) => (
+                        <li key={file.id} className="px-4 py-3 text-sm">
+                          <p className="font-medium">{file.fileName}</p>
                         </li>
                       ))}
                     </ul>
