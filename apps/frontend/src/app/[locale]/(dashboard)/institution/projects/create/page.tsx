@@ -32,9 +32,6 @@ const PROJECT_TYPES: ProjectTypeSpec[] = [
   'industry_project',
   'innovation_challenge',
   'open_project',
-  'team',
-  'individual',
-  'hybrid',
 ];
 
 const DIFFICULTIES: ProjectDifficulty[] = ['beginner', 'intermediate', 'advanced', 'expert'];
@@ -60,8 +57,8 @@ export default function CreateProjectPage() {
   const [difficulty, setDifficulty] = useState<ProjectDifficulty>('intermediate');
   const [categoryId, setCategoryId] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [teamSizeMin, setTeamSizeMin] = useState('2');
-  const [teamSizeMax, setTeamSizeMax] = useState('5');
+  const [minimumTeamSize, setMinimumTeamSize] = useState('2');
+  const [maximumTeamSize, setMaximumTeamSize] = useState('5');
   const [totalMarks, setTotalMarks] = useState('100');
   const [passingMarks, setPassingMarks] = useState('40');
   const [startDate, setStartDate] = useState('');
@@ -228,11 +225,11 @@ export default function CreateProjectPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('teamSizeMin')}</label>
-                <Input type="number" value={teamSizeMin} onChange={(e) => setTeamSizeMin(e.target.value)} />
+                <Input type="number" value={minimumTeamSize} onChange={(e) => setMinimumTeamSize(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('teamSizeMax')}</label>
-                <Input type="number" value={teamSizeMax} onChange={(e) => setTeamSizeMax(e.target.value)} />
+                <Input type="number" value={maximumTeamSize} onChange={(e) => setMaximumTeamSize(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('totalMarks')}</label>
@@ -295,8 +292,8 @@ export default function CreateProjectPage() {
                       difficulty,
                       categoryId: categoryId || null,
                       tagIds: selectedTags,
-                      teamSizeMin: Number(teamSizeMin) || 2,
-                      teamSizeMax: Number(teamSizeMax) || 5,
+                      minimumTeamSize: Number(minimumTeamSize) || 2,
+                      maximumTeamSize: Number(maximumTeamSize) || 5,
                       totalMarks: Number(totalMarks) || 100,
                       passingMarks: Number(passingMarks) || 40,
                       startDate: startDate || null,
