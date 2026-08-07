@@ -13,7 +13,7 @@ export default function CoursesPlaceholderPage() {
       preparingLine={t('preparingLine')}
       modulesIntro={t('modulesIntro')}
       welcome={t('welcome')}
-      welcomeNamed={t('welcomeNamed')}
+      welcomeNamed={(name) => t('welcomeNamed', { name })}
       contactAdmin={t('contactAdmin')}
       modules={[
         t('modules.catalog'),

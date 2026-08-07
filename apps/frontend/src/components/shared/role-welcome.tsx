@@ -12,7 +12,7 @@ interface RoleWelcomeProps {
   preparingLine: string;
   modulesIntro: string;
   welcome: string;
-  welcomeNamed: string;
+  welcomeNamed: (name: string) => string;
   contactAdmin: string;
 }
 
@@ -55,7 +55,7 @@ export function RoleWelcome({
         <Card className="overflow-hidden border-border/80 shadow-soft-md">
           <div className="border-b border-border bg-hero px-6 py-6 sm:px-8">
             <p className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
-              {name ? welcomeNamed.replace('{name}', name) : welcome}
+              {name ? welcomeNamed(name) : welcome}
             </p>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">{preparingLine}</p>
           </div>

@@ -27,6 +27,7 @@ import {
   CheckCircle2,
   Circle,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   Bar,
   BarChart,
@@ -57,45 +58,6 @@ import { cn } from '@/lib/utils';
 
 const LIST_PARAMS = { limit: 50, page: 1 } as const;
 
-const QUICK_ACTIONS = [
-  {
-    href: APP_ROUTES.INSTITUTION_CAMPUSES,
-    title: 'Campuses',
-    description: 'Manage locations',
-    icon: School,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_SCHOOLS,
-    title: 'Schools',
-    description: 'Faculties & schools',
-    icon: GraduationCap,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_DEPARTMENTS,
-    title: 'Departments',
-    description: 'Org structure',
-    icon: Network,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_PROGRAMS,
-    title: 'Programs',
-    description: 'Degree offerings',
-    icon: BookOpen,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS,
-    title: 'Academic years',
-    description: 'Year ranges',
-    icon: CalendarRange,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_CALENDAR,
-    title: 'Calendar',
-    description: 'Key dates',
-    icon: CalendarDays,
-  },
-] as const;
-
 const CHART_COLORS = [
   'hsl(217 91% 53%)',
   'hsl(224 76% 48%)',
@@ -118,14 +80,14 @@ function locationLabel(institution: {
   return [institution.city, institution.state, institution.country].filter(Boolean).join(', ');
 }
 
-function CapacityMeter({ label, value }: { label: string; value: number }) {
+function CapacityMeter({ label, value, planCapacity }: { label: string; value: number; planCapacity: string }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-background/75 p-4 backdrop-blur-sm">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-tight">
         {value.toLocaleString()}
       </p>
-      <p className="mt-0.5 text-xs text-muted-foreground">Plan capacity</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">{planCapacity}</p>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
         <motion.div
           className="h-full rounded-full bg-brand-gradient"
@@ -144,6 +106,9 @@ const cardMotion = {
 };
 
 export default function DashboardPage() {
+  const t = useTranslations('dashboard.home');
+  const tCommon = useTranslations('common');
+
   const institutionQuery = useMyInstitution();
   const campusesQuery = useCampuses(LIST_PARAMS);
   const schoolsQuery = useSchools(LIST_PARAMS);
@@ -156,42 +121,54 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      label: 'Campuses',
+      key: 'campuses' as const,
+      label: t('stats.campuses'),
+      chartLabel: t('chart.campuses'),
       value: countFromQuery(campusesQuery.data),
       icon: School,
       href: APP_ROUTES.INSTITUTION_CAMPUSES,
       loading: campusesQuery.isLoading,
     },
     {
-      label: 'Schools',
+      key: 'schools' as const,
+      label: t('stats.schools'),
+      chartLabel: t('chart.schools'),
       value: countFromQuery(schoolsQuery.data),
       icon: GraduationCap,
       href: APP_ROUTES.INSTITUTION_SCHOOLS,
       loading: schoolsQuery.isLoading,
     },
     {
-      label: 'Departments',
+      key: 'departments' as const,
+      label: t('stats.departments'),
+      chartLabel: t('chart.departments'),
       value: countFromQuery(departmentsQuery.data),
       icon: Network,
       href: APP_ROUTES.INSTITUTION_DEPARTMENTS,
       loading: departmentsQuery.isLoading,
     },
     {
-      label: 'Programs',
+      key: 'programs' as const,
+      label: t('stats.programs'),
+      chartLabel: t('chart.programs'),
       value: countFromQuery(programsQuery.data),
       icon: BookOpen,
       href: APP_ROUTES.INSTITUTION_PROGRAMS,
       loading: programsQuery.isLoading,
     },
     {
-      label: 'Academic Years',
+      key: 'academicYears' as const,
+      label: t('stats.academicYears'),
+      chartLabel: t('chart.years'),
       value: countFromQuery(yearsQuery.data),
       icon: CalendarRange,
       href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS,
       loading: yearsQuery.isLoading,
     },
     {
-      label: 'Semesters',
+      key: 'semesters' as const,
+      label: t('stats.semesters'),
+      chartLabel: t('chart.semesters'),
       value: countFromQuery(semestersQuery.data),
       icon: Layers3,
       href: APP_ROUTES.INSTITUTION_SEMESTERS,
@@ -199,7 +176,46 @@ export default function DashboardPage() {
     },
   ];
 
-  const chartData = stats.map((s) => ({ name: s.label.replace('Academic ', ''), count: s.value }));
+  const quickActions = [
+    {
+      href: APP_ROUTES.INSTITUTION_CAMPUSES,
+      title: t('actions.campuses.title'),
+      description: t('actions.campuses.description'),
+      icon: School,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_SCHOOLS,
+      title: t('actions.schools.title'),
+      description: t('actions.schools.description'),
+      icon: GraduationCap,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_DEPARTMENTS,
+      title: t('actions.departments.title'),
+      description: t('actions.departments.description'),
+      icon: Network,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_PROGRAMS,
+      title: t('actions.programs.title'),
+      description: t('actions.programs.description'),
+      icon: BookOpen,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS,
+      title: t('actions.academicYears.title'),
+      description: t('actions.academicYears.description'),
+      icon: CalendarRange,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_CALENDAR,
+      title: t('actions.calendar.title'),
+      description: t('actions.calendar.description'),
+      icon: CalendarDays,
+    },
+  ] as const;
+
+  const chartData = stats.map((s) => ({ name: s.chartLabel, count: s.value }));
 
   const calendarCount = countFromQuery(calendarsQuery.data);
   const upcomingEvents =
@@ -223,22 +239,31 @@ export default function DashboardPage() {
     stats.every((s) => !s.loading && s.value === 0) &&
     !institutionQuery.isError;
 
+  const calendarsLabel =
+    calendarCount === 1
+      ? t('calendarCountOne', { count: calendarCount })
+      : t('calendarCount', { count: calendarCount });
+  const batchesLabel =
+    batchCount === 1
+      ? t('batchCountOne', { count: batchCount })
+      : t('batchCount', { count: batchCount });
+
   if (institutionQuery.isError) {
     const missing = isInstitutionNotFound(institutionQuery.error);
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Institution overview</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{t('errorTitle')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('errorDescription')}</p>
         </div>
         {missing ? (
           <EmptyState
             illustration="building"
-            title="Finish institution setup"
-            description="Complete your profile, branding, and contact details to unlock the workspace."
+            title={t('finishSetupTitle')}
+            description={t('finishSetupDescription')}
             action={
               <Button asChild>
-                <Link href={APP_ROUTES.INSTITUTION_SETUP}>Continue setup</Link>
+                <Link href={APP_ROUTES.INSTITUTION_SETUP}>{t('continueSetup')}</Link>
               </Button>
             }
           />
@@ -247,7 +272,7 @@ export default function DashboardPage() {
             message={
               institutionQuery.error instanceof Error
                 ? institutionQuery.error.message
-                : 'Unable to load institution dashboard.'
+                : t('loadFailed')
             }
             onRetry={() => void institutionQuery.refetch()}
           />
@@ -260,21 +285,19 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-primary">Overview</p>
+          <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
           <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Institution dashboard
+            {t('title')}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Structure, capacity, and academic pulse at a glance.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('description')}</p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <Button asChild variant="outline" className="w-full rounded-xl sm:w-auto">
-            <Link href={APP_ROUTES.INSTITUTION_PROFILE}>Edit branding</Link>
+            <Link href={APP_ROUTES.INSTITUTION_PROFILE}>{t('editBranding')}</Link>
           </Button>
           <Button asChild className="w-full rounded-xl sm:w-auto">
             <Link href={APP_ROUTES.INSTITUTION}>
-              Open institution
+              {t('openInstitution')}
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -334,7 +357,7 @@ export default function DashboardPage() {
                       <div className="mt-3 flex flex-wrap items-center gap-2">
                         <StatusBadge status={institution.status} />
                         <Badge variant="secondary" className="rounded-lg capitalize">
-                          {institution.subscriptionPlan} plan
+                          {t('planBadge', { plan: institution.subscriptionPlan })}
                         </Badge>
                         {locationLabel(institution) ? (
                           <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -350,7 +373,7 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <Sparkles className="size-4 text-primary" />
-                        <p className="text-sm font-medium">Structure readiness</p>
+                        <p className="text-sm font-medium">{t('structureReadiness')}</p>
                       </div>
                       <p className="font-display text-lg font-semibold tabular-nums">{structurePct}%</p>
                     </div>
@@ -363,14 +386,22 @@ export default function DashboardPage() {
                       />
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
-                      {structureReady} of {stats.length} modules have records
+                      {t('modulesHaveRecords', { ready: structureReady, total: stats.length })}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                  <CapacityMeter label="Students" value={institution.maxStudents} />
-                  <CapacityMeter label="Faculty" value={institution.maxFaculty} />
+                  <CapacityMeter
+                    label={t('students')}
+                    value={institution.maxStudents}
+                    planCapacity={t('planCapacity')}
+                  />
+                  <CapacityMeter
+                    label={t('faculty')}
+                    value={institution.maxFaculty}
+                    planCapacity={t('planCapacity')}
+                  />
                 </div>
               </CardContent>
             </div>
@@ -378,11 +409,11 @@ export default function DashboardPage() {
         ) : (
           <EmptyState
             illustration="building"
-            title="No institution linked"
-            description="Connect or create an institution profile to unlock the academic workspace."
+            title={t('noInstitutionTitle')}
+            description={t('noInstitutionDescription')}
             action={
               <Button asChild>
-                <Link href={APP_ROUTES.INSTITUTION_SETUP}>Continue setup</Link>
+                <Link href={APP_ROUTES.INSTITUTION_SETUP}>{t('continueSetup')}</Link>
               </Button>
             }
           />
@@ -394,7 +425,7 @@ export default function DashboardPage() {
           const Icon = stat.icon;
           return (
             <motion.div
-              key={stat.label}
+              key={stat.key}
               {...cardMotion}
               transition={{ duration: 0.3, delay: index * 0.04 }}
             >
@@ -425,11 +456,11 @@ export default function DashboardPage() {
       {hasNoStructure ? (
         <EmptyState
           illustration="campus"
-          title="Your academic structure is empty"
-          description="Start by adding campuses, schools, and programs to bring this dashboard to life."
+          title={t('emptyStructureTitle')}
+          description={t('emptyStructureDescription')}
           action={
             <Button asChild>
-              <Link href={APP_ROUTES.INSTITUTION_CAMPUSES}>Add a campus</Link>
+              <Link href={APP_ROUTES.INSTITUTION_CAMPUSES}>{t('addCampus')}</Link>
             </Button>
           }
         />
@@ -439,8 +470,8 @@ export default function DashboardPage() {
         <motion.div {...cardMotion} transition={{ duration: 0.35, delay: 0.1 }} className="min-w-0">
           <Card className="h-full min-w-0 rounded-2xl border-border/80 shadow-soft-md">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Module distribution</CardTitle>
-              <CardDescription>Counts across your institution workspace</CardDescription>
+              <CardTitle className="text-base">{t('moduleDistribution')}</CardTitle>
+              <CardDescription>{t('moduleDistributionDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="h-64 min-w-0 pt-2 sm:h-72">
               {stats.some((s) => s.loading) ? (
@@ -492,15 +523,18 @@ export default function DashboardPage() {
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <CardTitle className="text-base">Calendar summary</CardTitle>
+                    <CardTitle className="text-base">{t('calendarSummary')}</CardTitle>
                     <CardDescription>
                       {calendarsQuery.isLoading
-                        ? 'Loading calendars…'
-                        : `${String(calendarCount)} calendar${calendarCount === 1 ? '' : 's'} · ${String(batchCount)} batches`}
+                        ? t('loadingCalendars')
+                        : t('calendarSummaryMeta', {
+                            calendars: calendarsLabel,
+                            batches: batchesLabel,
+                          })}
                     </CardDescription>
                   </div>
                   <Button asChild variant="ghost" size="sm" className="rounded-lg">
-                    <Link href={APP_ROUTES.INSTITUTION_CALENDAR}>View</Link>
+                    <Link href={APP_ROUTES.INSTITUTION_CALENDAR}>{tCommon('view')}</Link>
                   </Button>
                 </div>
               </CardHeader>
@@ -529,7 +563,7 @@ export default function DashboardPage() {
                   ))
                 ) : (
                   <p className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
-                    No upcoming events yet. Add dates on the academic calendar.
+                    {t('noUpcomingEvents')}
                   </p>
                 )}
               </CardContent>
@@ -541,16 +575,16 @@ export default function DashboardPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Building2 className="size-4 text-primary" />
-                  Structure pulse
+                  {t('structurePulse')}
                 </CardTitle>
-                <CardDescription>What’s ready in your workspace</CardDescription>
+                <CardDescription>{t('structurePulseDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2.5">
                 {stats.map((stat) => {
                   const ready = !stat.loading && stat.value > 0;
                   return (
                     <div
-                      key={stat.label}
+                      key={stat.key}
                       className="flex items-center justify-between gap-3 rounded-xl border border-border/60 px-3 py-2"
                     >
                       <div className="flex items-center gap-2.5">
@@ -580,13 +614,11 @@ export default function DashboardPage() {
 
       <motion.div {...cardMotion} transition={{ duration: 0.35, delay: 0.2 }}>
         <div className="mb-4">
-          <h2 className="font-display text-lg font-semibold tracking-tight">Quick actions</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Jump into the modules you manage most often.
-          </p>
+          <h2 className="font-display text-lg font-semibold tracking-tight">{t('quickActionsTitle')}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t('quickActionsDescription')}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {QUICK_ACTIONS.map((action) => {
+          {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <Link key={action.href} href={action.href} className="group">
