@@ -20,6 +20,7 @@ export const API_ROUTES = {
   FACULTY: '/faculty',
   STUDENTS: '/students',
   COURSES: '/courses',
+  ENROLLMENTS: '/enrollments',
   LMS: '/lms',
   ERP: '/erp',
   EXAMINATION: '/examination',
@@ -84,6 +85,12 @@ export const APP_ROUTES = {
   INSTITUTION_COURSES_IMPORT: '/institution/courses/import',
   INSTITUTION_COURSES_EXPORT: '/institution/courses/export',
   INSTITUTION_COURSE_BUILDER: '/institution/courses/:courseId/builder',
+  INSTITUTION_ENROLLMENTS: '/institution/enrollments',
+  INSTITUTION_ENROLLMENTS_CREATE: '/institution/enrollments/create',
+  INSTITUTION_ENROLLMENTS_IMPORT: '/institution/enrollments/import',
+  INSTITUTION_ENROLLMENTS_EXPORT: '/institution/enrollments/export',
+  FACULTY_ENROLLMENTS: '/faculty/enrollments',
+  STUDENT_ENROLLMENTS: '/student/enrollments',
 } as const;
 
 export const SOCKET_NAMESPACES = {

@@ -38,7 +38,10 @@ export type Permission =
   | 'student:manage'
   | 'course:read'
   | 'course:write'
-  | 'course:manage';
+  | 'course:manage'
+  | 'enrollment:read'
+  | 'enrollment:write'
+  | 'enrollment:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
 

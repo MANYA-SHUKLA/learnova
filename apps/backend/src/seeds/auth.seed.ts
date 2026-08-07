@@ -128,6 +128,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage all institution courses',
   },
+  'enrollment:read': {
+    resource: 'enrollment',
+    action: 'read',
+    description: 'View enrollments',
+  },
+  'enrollment:write': {
+    resource: 'enrollment',
+    action: 'write',
+    description: 'Request enrollment, withdraw own, or manage assigned-course enrollments',
+  },
+  'enrollment:manage': {
+    resource: 'enrollment',
+    action: 'manage',
+    description: 'Full enrollment management including import/export and bulk ops',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {

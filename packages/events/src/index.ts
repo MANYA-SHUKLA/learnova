@@ -11,6 +11,15 @@ export const EVENTS = {
   COURSE_ARCHIVED: 'course.archived',
   COURSE_PUBLISHED: 'course.published',
   COURSE_ENROLLED: 'course.enrolled',
+  ENROLLMENT_CREATED: 'enrollment.created',
+  ENROLLMENT_UPDATED: 'enrollment.updated',
+  ENROLLMENT_DELETED: 'enrollment.deleted',
+  ENROLLMENT_APPROVED: 'enrollment.approved',
+  ENROLLMENT_REJECTED: 'enrollment.rejected',
+  ENROLLMENT_COMPLETED: 'enrollment.completed',
+  ENROLLMENT_WITHDRAWN: 'enrollment.withdrawn',
+  ENROLLMENT_IMPORTED: 'enrollment.imported',
+  ENROLLMENT_EXPORTED: 'enrollment.exported',
   COURSE_MODULE_CREATED: 'module.created',
   COURSE_MODULE_UPDATED: 'module.updated',
   COURSE_MODULE_DELETED: 'module.deleted',
@@ -76,6 +85,35 @@ export interface EventPayloadMap {
   'course.archived': { courseId: string; institutionId: string };
   'course.published': { courseId: string; institutionId: string };
   'course.enrolled': { courseId: string; userId: string };
+  'enrollment.created': {
+    enrollmentId: string;
+    institutionId: string;
+    studentId: string;
+    courseId: string;
+  };
+  'enrollment.updated': { enrollmentId: string; institutionId: string };
+  'enrollment.deleted': { enrollmentId: string; institutionId: string };
+  'enrollment.approved': {
+    enrollmentId: string;
+    institutionId: string;
+    studentId: string;
+    courseId: string;
+  };
+  'enrollment.rejected': { enrollmentId: string; institutionId: string };
+  'enrollment.completed': {
+    enrollmentId: string;
+    institutionId: string;
+    studentId: string;
+    courseId: string;
+  };
+  'enrollment.withdrawn': {
+    enrollmentId: string;
+    institutionId: string;
+    studentId: string;
+    courseId: string;
+  };
+  'enrollment.imported': { institutionId: string; count: number };
+  'enrollment.exported': { institutionId: string; format: string; count: number };
   'module.created': { courseId: string; moduleId: string; institutionId: string };
   'module.updated': { courseId: string; moduleId: string; institutionId: string };
   'module.deleted': { courseId: string; moduleId: string; institutionId: string };
@@ -165,6 +203,15 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.COURSE_ARCHIVED, description: 'Course archived', version: 1 },
   { name: EVENTS.COURSE_PUBLISHED, description: 'Course published', version: 1 },
   { name: EVENTS.COURSE_ENROLLED, description: 'Course enrolled', version: 1 },
+  { name: EVENTS.ENROLLMENT_CREATED, description: 'Enrollment created', version: 1 },
+  { name: EVENTS.ENROLLMENT_UPDATED, description: 'Enrollment updated', version: 1 },
+  { name: EVENTS.ENROLLMENT_DELETED, description: 'Enrollment deleted', version: 1 },
+  { name: EVENTS.ENROLLMENT_APPROVED, description: 'Enrollment approved', version: 1 },
+  { name: EVENTS.ENROLLMENT_REJECTED, description: 'Enrollment rejected', version: 1 },
+  { name: EVENTS.ENROLLMENT_COMPLETED, description: 'Enrollment completed', version: 1 },
+  { name: EVENTS.ENROLLMENT_WITHDRAWN, description: 'Enrollment withdrawn', version: 1 },
+  { name: EVENTS.ENROLLMENT_IMPORTED, description: 'Enrollment CSV import completed', version: 1 },
+  { name: EVENTS.ENROLLMENT_EXPORTED, description: 'Enrollment export completed', version: 1 },
   { name: EVENTS.COURSE_MODULE_CREATED, description: 'Course module created', version: 1 },
   { name: EVENTS.COURSE_MODULE_UPDATED, description: 'Course module updated', version: 1 },
   { name: EVENTS.COURSE_MODULE_DELETED, description: 'Course module deleted', version: 1 },
