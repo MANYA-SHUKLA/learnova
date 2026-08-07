@@ -1,13 +1,12 @@
 import type {
   AssessmentGradingMethod,
   AssessmentLifecycleStatus,
-  AssessmentAttemptStatus,
   AssignmentGradingMethod,
   AssignmentStatus,
   AssignmentSubmissionStatus,
 } from '@learnova/types';
+import { ASSESSMENT_ENROLLMENT_STATUSES } from '@learnova/constants';
 import {
-  ASSESSMENT_ENROLLMENT_STATUSES,
   applyLatePenalty,
   canTransitionLifecycle,
   computePercentage,
@@ -28,7 +27,7 @@ import {
 
 /**
  * Assignment helpers — thin adapters over Assessment Core.
- * Prefer importing primitives from `@learnova/shared/assessment` in new modules.
+ * Prefer importing primitives from `@learnova/shared` in new modules.
  */
 
 /** @deprecated Prefer ASSESSMENT_ENROLLMENT_STATUSES from @learnova/constants */

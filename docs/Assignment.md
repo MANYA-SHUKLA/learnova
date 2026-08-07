@@ -2,6 +2,8 @@
 
 Enterprise coursework assessment layer (Step **9**). Assignments are course activities attached to a **course**, optionally a **module** or **lesson**. They are **not** exams, coding labs, quizzes, projects, gradebook, or certificates.
 
+Shared deadline, attempt, grading, and feedback primitives live in **[Assessment Core](./AssessmentCore.md)** (Step **9.5**).
+
 ```
 Enrollment → Published Assignment → Submission → Grade / Feedback
 ```

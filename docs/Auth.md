@@ -2,6 +2,8 @@
 
 Learnova auth is production-ready for institution bootstrap, session lifecycle, and RBAC.
 
+**Access model (canonical):** See [AccessModel.md](./AccessModel.md) — Institution Admin is created via institution registration; Faculty and Student accounts are created only by the Institution Admin; one shared login page; no public faculty/student signup.
+
 ## Overview
 
 | Layer | Location |
