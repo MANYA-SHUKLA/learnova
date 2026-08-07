@@ -166,7 +166,7 @@ export async function ingestExamResult(sourceRefId: string): Promise<IngestDraft
   if (!result) return null;
 
   const exam = await ExamModel.findOne({ _id: result.examId, deletedAt: null })
-    .select('courseId title rules')
+    .select('courseId title rules examType')
     .lean()
     .exec();
   if (!exam) return null;
@@ -197,7 +197,11 @@ export async function ingestExamResult(sourceRefId: string): Promise<IngestDraft
     status: 'final',
     gradedAt: result.releasedAt ?? null,
     gradedBy: null,
-    metadata: { attemptId: String(result.attemptId), releasedAt: result.releasedAt?.toISOString() },
+    metadata: {
+      attemptId: String(result.attemptId),
+      releasedAt: result.releasedAt?.toISOString(),
+      examType: (exam as { examType?: string }).examType ?? 'internal',
+    },
   };
 }
 
