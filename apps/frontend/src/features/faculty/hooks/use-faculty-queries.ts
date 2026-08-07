@@ -25,6 +25,7 @@ export function useFacultyList(params?: FacultyListParams, enabled = true) {
     queryFn: () => facultyApi.list(params),
     enabled,
     staleTime: 30_000,
+    refetchOnMount: 'always',
   });
 }
 

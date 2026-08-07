@@ -23,6 +23,7 @@ export function useCourseList(params?: CourseListParams, enabled = true) {
     queryFn: () => courseApi.list(params),
     enabled,
     staleTime: 30_000,
+    refetchOnMount: 'always',
   });
 }
 

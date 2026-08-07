@@ -25,6 +25,7 @@ export function useStudentList(params?: StudentListParams, enabled = true) {
     queryFn: () => studentApi.list(params),
     enabled,
     staleTime: 30_000,
+    refetchOnMount: 'always',
   });
 }
 
