@@ -3,12 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
-  Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
   Input,
   Spinner,
 } from '@learnova/ui';
@@ -16,6 +12,15 @@ import { Building2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
+import {
+  AuthAlert,
+  AuthButtonMotion,
+  AuthCardShell,
+  authContentClassName,
+  authFooterClassName,
+  authInputClassName,
+  authPrimaryButtonClassName,
+} from '@/components/shared/auth-card-shell';
 import { PasswordInput } from '@/components/shared/password-input';
 import {
   registerInstitutionFormSchema,
@@ -84,6 +89,7 @@ export default function RegisterInstitutionPage() {
         autoComplete={opts?.autoComplete}
         placeholder={opts?.placeholder}
         disabled={registerMutation.isPending}
+        className={authInputClassName}
         {...register(name)}
       />
       {errors[name] ? (
@@ -93,106 +99,108 @@ export default function RegisterInstitutionPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-lg">
-      <div className="mb-6 text-center">
-        <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <Building2 className="size-6" />
-        </span>
-        <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t('title')}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">{t('subtitle')}</p>
-      </div>
+    <AuthCardShell
+      icon={Building2}
+      title={t('title')}
+      description={t('subtitle')}
+      maxWidthClass="max-w-lg"
+    >
+      <form onSubmit={onSubmit} noValidate>
+        <CardContent className={authContentClassName}>
+          {errors.root?.message ? (
+            <AuthAlert variant="error">{errors.root.message}</AuthAlert>
+          ) : null}
 
-      <Card className="border-border/80 shadow-soft-lg">
-        <CardHeader>
-          <CardTitle className="text-lg">{t('cardTitle')}</CardTitle>
-          <CardDescription>{t('cardDescription')}</CardDescription>
-        </CardHeader>
-        <form onSubmit={onSubmit} noValidate>
-          <CardContent className="space-y-4">
-            {errors.root?.message ? (
-              <p
-                role="alert"
-                className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
-              >
-                {errors.root.message}
-              </p>
-            ) : null}
+          <p className="text-sm font-medium text-foreground">{t('cardTitle')}</p>
+          <p className="-mt-2 text-xs text-muted-foreground">{t('cardDescription')}</p>
 
-            {field('institutionName', t('institutionName'), {
-              placeholder: t('institutionNamePlaceholder'),
+          {field('institutionName', t('institutionName'), {
+            placeholder: t('institutionNamePlaceholder'),
+          })}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {field('adminFirstName', t('adminFirstName'), {
+              autoComplete: 'given-name',
+              placeholder: t('adminFirstNamePlaceholder'),
             })}
-            <div className="grid gap-4 sm:grid-cols-2">
-              {field('adminFirstName', t('adminFirstName'), {
-                autoComplete: 'given-name',
-                placeholder: t('adminFirstNamePlaceholder'),
-              })}
-              {field('adminLastName', t('adminLastName'), {
-                autoComplete: 'family-name',
-                placeholder: t('adminLastNamePlaceholder'),
-              })}
-            </div>
-            {field('adminEmail', t('adminEmail'), {
-              type: 'email',
-              autoComplete: 'email',
-              placeholder: t('adminEmailPlaceholder'),
+            {field('adminLastName', t('adminLastName'), {
+              autoComplete: 'family-name',
+              placeholder: t('adminLastNamePlaceholder'),
             })}
-            <div className="space-y-1.5">
-              <label htmlFor="password" className="text-sm font-medium">
-                {t('password')}
-              </label>
-              <PasswordInput
-                id="password"
-                autoComplete="new-password"
-                disabled={registerMutation.isPending}
-                {...register('password')}
-              />
-              {errors.password ? (
-                <p className="text-xs text-danger">{errors.password.message}</p>
-              ) : null}
-            </div>
-            <div className="space-y-1.5">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">
-                {t('confirmPassword')}
-              </label>
-              <PasswordInput
-                id="confirmPassword"
-                autoComplete="new-password"
-                disabled={registerMutation.isPending}
-                {...register('confirmPassword')}
-              />
-              {errors.confirmPassword ? (
-                <p className="text-xs text-danger">{errors.confirmPassword.message}</p>
-              ) : null}
-            </div>
-            <p className="text-xs text-muted-foreground">{t('passwordRequirement')}</p>
-
-            <label className="flex items-start gap-2 text-sm text-muted-foreground">
-              <input
-                type="checkbox"
-                className="mt-0.5 size-4 rounded border-input"
-                disabled={registerMutation.isPending}
-                {...register('acceptTerms')}
-              />
-              <span>
-                {t('acceptTermsLabel')}{' '}
-                <Link href="/terms" className="font-medium text-foreground underline-offset-2 hover:underline">
-                  {t('terms')}
-                </Link>{' '}
-                {t('and')}{' '}
-                <Link href="/privacy" className="font-medium text-foreground underline-offset-2 hover:underline">
-                  {t('privacyPolicy')}
-                </Link>
-                .
-              </span>
+          </div>
+          {field('adminEmail', t('adminEmail'), {
+            type: 'email',
+            autoComplete: 'email',
+            placeholder: t('adminEmailPlaceholder'),
+          })}
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="text-sm font-medium">
+              {t('password')}
             </label>
-            {errors.acceptTerms ? (
-              <p className="text-xs text-danger">{errors.acceptTerms.message}</p>
+            <PasswordInput
+              id="password"
+              autoComplete="new-password"
+              disabled={registerMutation.isPending}
+              className={authInputClassName}
+              {...register('password')}
+            />
+            {errors.password ? (
+              <p className="text-xs text-danger">{errors.password.message}</p>
             ) : null}
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" size="lg" disabled={registerMutation.isPending}>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="confirmPassword" className="text-sm font-medium">
+              {t('confirmPassword')}
+            </label>
+            <PasswordInput
+              id="confirmPassword"
+              autoComplete="new-password"
+              disabled={registerMutation.isPending}
+              className={authInputClassName}
+              {...register('confirmPassword')}
+            />
+            {errors.confirmPassword ? (
+              <p className="text-xs text-danger">{errors.confirmPassword.message}</p>
+            ) : null}
+          </div>
+          <p className="text-xs text-muted-foreground">{t('passwordRequirement')}</p>
+
+          <label className="flex items-start gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-4 rounded border-input"
+              disabled={registerMutation.isPending}
+              {...register('acceptTerms')}
+            />
+            <span>
+              {t('acceptTermsLabel')}{' '}
+              <Link
+                href="/terms"
+                className="font-medium text-foreground underline-offset-2 hover:underline"
+              >
+                {t('terms')}
+              </Link>{' '}
+              {t('and')}{' '}
+              <Link
+                href="/privacy"
+                className="font-medium text-foreground underline-offset-2 hover:underline"
+              >
+                {t('privacyPolicy')}
+              </Link>
+              .
+            </span>
+          </label>
+          {errors.acceptTerms ? (
+            <p className="text-xs text-danger">{errors.acceptTerms.message}</p>
+          ) : null}
+        </CardContent>
+
+        <CardFooter className={authFooterClassName}>
+          <AuthButtonMotion pending={registerMutation.isPending}>
+            <Button
+              type="submit"
+              className={authPrimaryButtonClassName}
+              disabled={registerMutation.isPending}
+            >
               {registerMutation.isPending ? (
                 <>
                   <Spinner size="sm" />
@@ -202,15 +210,15 @@ export default function RegisterInstitutionPage() {
                 t('continueButton')
               )}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              {t('alreadyRegistered')}{' '}
-              <Link href="/login" className="font-semibold text-primary hover:underline">
-                {t('institutionLogin')}
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+          </AuthButtonMotion>
+          <p className="text-center text-sm text-muted-foreground">
+            {t('alreadyRegistered')}{' '}
+            <Link href="/login" className="font-semibold text-primary hover:underline">
+              {t('institutionLogin')}
+            </Link>
+          </p>
+        </CardFooter>
+      </form>
+    </AuthCardShell>
   );
 }

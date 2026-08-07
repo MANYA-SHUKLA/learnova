@@ -2,17 +2,22 @@
 
 import {
   Button,
-  Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
   Spinner,
 } from '@learnova/ui';
+import { MailCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
+import {
+  AuthAlert,
+  AuthButtonMotion,
+  AuthCardShell,
+  authContentClassName,
+  authFooterClassName,
+  authPrimaryButtonClassName,
+} from '@/components/shared/auth-card-shell';
 import { ApiClientError } from '@/lib/api/client';
 import { Link } from '@/lib/i18n/routing';
 import { useVerifyEmailMutation } from '@/features/auth';
@@ -52,57 +57,52 @@ function VerifyEmailContent() {
   }, [token, mutateAsync, t, tCommon]);
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
-        <CardDescription>
-          {status === 'loading' ? tCommon('loading') : t('description')}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <AuthCardShell
+      icon={MailCheck}
+      title={t('title')}
+      description={status === 'loading' ? tCommon('loading') : t('description')}
+    >
+      <CardContent className={authContentClassName}>
         {status === 'loading' ? (
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <Spinner size="sm" />
             {message}
           </div>
         ) : (
-          <p
-            role={status === 'error' ? 'alert' : 'status'}
-            className={
-              status === 'success'
-                ? 'rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success'
-                : 'rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger'
-            }
-          >
+          <AuthAlert variant={status === 'success' ? 'success' : 'error'}>
             {message}
-          </p>
+          </AuthAlert>
         )}
       </CardContent>
-      <CardFooter>
-        <Button asChild className="w-full" disabled={status === 'loading'}>
-          <Link href="/login">{t('backToLogin')}</Link>
-        </Button>
+      <CardFooter className={authFooterClassName}>
+        <AuthButtonMotion pending={status === 'loading'}>
+          <Button
+            asChild
+            className={authPrimaryButtonClassName}
+            disabled={status === 'loading'}
+          >
+            <Link href="/login">{t('backToLogin')}</Link>
+          </Button>
+        </AuthButtonMotion>
       </CardFooter>
-    </Card>
+    </AuthCardShell>
   );
 }
 
 function VerifyFallback() {
   return (
-    <Card className="w-full max-w-md">
-      <CardContent className="flex min-h-[200px] items-center justify-center pt-6">
+    <AuthCardShell icon={MailCheck} title="…" description="">
+      <CardContent className="flex min-h-[200px] items-center justify-center py-10">
         <Spinner size="lg" />
       </CardContent>
-    </Card>
+    </AuthCardShell>
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <div className="w-full min-w-0">
-      <Suspense fallback={<VerifyFallback />}>
-        <VerifyEmailContent />
-      </Suspense>
-    </div>
+    <Suspense fallback={<VerifyFallback />}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

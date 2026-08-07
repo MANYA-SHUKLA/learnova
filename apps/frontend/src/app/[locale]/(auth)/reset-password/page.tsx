@@ -3,18 +3,24 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
-  Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
   Spinner,
 } from '@learnova/ui';
+import { ArrowLeft, LockKeyhole } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
+import {
+  AuthAlert,
+  AuthButtonMotion,
+  AuthCardShell,
+  authContentClassName,
+  authFooterClassName,
+  authInputClassName,
+  authPrimaryButtonClassName,
+} from '@/components/shared/auth-card-shell';
 import { PasswordInput } from '@/components/shared/password-input';
 import { ApiClientError } from '@/lib/api/client';
 import { Link, useRouter } from '@/lib/i18n/routing';
@@ -70,45 +76,36 @@ function ResetPasswordForm() {
 
   if (!tokenFromUrl) {
     return (
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{tCommon('error')}</CardTitle>
-          <CardDescription>{t('description')}</CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button asChild className="w-full">
-            <Link href="/forgot-password">{tForgot('sendButton')}</Link>
-          </Button>
+      <AuthCardShell icon={LockKeyhole} title={tCommon('error')} description={t('description')}>
+        <CardFooter className={authFooterClassName}>
+          <AuthButtonMotion>
+            <Button asChild className={authPrimaryButtonClassName}>
+              <Link href="/forgot-password">{tForgot('sendButton')}</Link>
+            </Button>
+          </AuthButtonMotion>
+          <Link
+            href="/login"
+            className="group/back inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          >
+            <ArrowLeft className="size-3.5 transition-transform duration-200 group-hover/back:-translate-x-1" />
+            {tForgot('backToSignIn')}
+          </Link>
         </CardFooter>
-      </Card>
+      </AuthCardShell>
     );
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
-        <CardDescription>{t('description')}</CardDescription>
-      </CardHeader>
+    <AuthCardShell icon={LockKeyhole} title={t('title')} description={t('description')}>
       <form onSubmit={onSubmit} noValidate>
-        <CardContent className="space-y-4">
+        <CardContent className={authContentClassName}>
           <input type="hidden" {...register('token')} />
 
           {errors.root?.message ? (
-            <p
-              role="alert"
-              className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
-            >
-              {errors.root.message}
-            </p>
+            <AuthAlert variant="error">{errors.root.message}</AuthAlert>
           ) : null}
           {successMessage ? (
-            <p
-              role="status"
-              className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success"
-            >
-              {successMessage}
-            </p>
+            <AuthAlert variant="success">{successMessage}</AuthAlert>
           ) : null}
 
           <div className="space-y-2">
@@ -119,6 +116,7 @@ function ResetPasswordForm() {
               id="password"
               autoComplete="new-password"
               disabled={mutation.isPending}
+              className={authInputClassName}
               {...register('password')}
             />
             {errors.password ? (
@@ -134,6 +132,7 @@ function ResetPasswordForm() {
               id="confirmPassword"
               autoComplete="new-password"
               disabled={mutation.isPending}
+              className={authInputClassName}
               {...register('confirmPassword')}
             />
             {errors.confirmPassword ? (
@@ -141,45 +140,51 @@ function ResetPasswordForm() {
             ) : null}
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={mutation.isPending}>
-            {mutation.isPending ? (
-              <>
-                <Spinner size="sm" />
-                {t('resetting')}
-              </>
-            ) : (
-              t('resetButton')
-            )}
-          </Button>
+
+        <CardFooter className={authFooterClassName}>
+          <AuthButtonMotion pending={mutation.isPending}>
+            <Button
+              type="submit"
+              className={authPrimaryButtonClassName}
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? (
+                <>
+                  <Spinner size="sm" />
+                  {t('resetting')}
+                </>
+              ) : (
+                t('resetButton')
+              )}
+            </Button>
+          </AuthButtonMotion>
           <Link
             href="/login"
-            className="text-center text-sm text-muted-foreground hover:text-foreground"
+            className="group/back inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
           >
+            <ArrowLeft className="size-3.5 transition-transform duration-200 group-hover/back:-translate-x-1" />
             {tForgot('backToSignIn')}
           </Link>
         </CardFooter>
       </form>
-    </Card>
+    </AuthCardShell>
   );
 }
 
 function ResetFallback() {
   return (
-    <Card className="w-full max-w-md">
-      <CardContent className="flex min-h-[240px] items-center justify-center pt-6">
+    <AuthCardShell icon={LockKeyhole} title="…" description="">
+      <CardContent className="flex min-h-[200px] items-center justify-center py-10">
         <Spinner size="lg" />
       </CardContent>
-    </Card>
+    </AuthCardShell>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <div className="w-full min-w-0">
-      <Suspense fallback={<ResetFallback />}>
-        <ResetPasswordForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={<ResetFallback />}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

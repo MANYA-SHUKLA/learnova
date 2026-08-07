@@ -5,7 +5,7 @@
  * centered, spring entrance, hover lift, ambient orb, accent line.
  */
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@learnova/ui';
+import { Card, CardDescription, CardHeader, CardTitle } from '@learnova/ui';
 import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -16,15 +16,14 @@ export function AuthCardShell({
   title,
   description,
   children,
-  footer,
   maxWidthClass = 'max-w-md',
   className,
 }: {
   icon: LucideIcon;
   title: string;
   description?: string;
+  /** Typically a <form> with CardContent + CardFooter */
   children: ReactNode;
-  footer?: ReactNode;
   maxWidthClass?: string;
   className?: string;
 }) {
@@ -85,40 +84,11 @@ export function AuthCardShell({
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4 px-6 pb-2 pt-4 text-left sm:px-8">
-              {children}
-            </CardContent>
-
-            {footer ? (
-              <CardFooter className="flex flex-col gap-4 px-6 pb-8 pt-2 sm:px-8">
-                {footer}
-              </CardFooter>
-            ) : null}
+            {children}
           </Card>
         </motion.div>
       </motion.div>
     </div>
-  );
-}
-
-export function AuthSubmitButton({
-  pending,
-  pendingLabel,
-  label,
-}: {
-  pending: boolean;
-  pendingLabel: string;
-  label: string;
-}) {
-  return (
-    <motion.div
-      className="w-full"
-      whileHover={{ scale: pending ? 1 : 1.015 }}
-      whileTap={{ scale: pending ? 1 : 0.985 }}
-    >
-      {/* Button is passed via children pattern from pages — see AuthPrimaryButton */}
-      <span className="sr-only">{pending ? pendingLabel : label}</span>
-    </motion.div>
   );
 }
 
@@ -146,8 +116,27 @@ export function AuthAlert({
   );
 }
 
+export function AuthButtonMotion({
+  pending,
+  children,
+}: {
+  pending?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <motion.div
+      className="w-full"
+      whileHover={{ scale: pending ? 1 : 1.015 }}
+      whileTap={{ scale: pending ? 1 : 0.985 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export const authContentClassName = 'space-y-4 px-6 pb-2 pt-4 text-left sm:px-8';
+export const authFooterClassName = 'flex flex-col gap-4 px-6 pb-8 pt-2 sm:px-8';
 export const authInputClassName =
   'h-11 rounded-xl border-border/80 transition-[border-color,background-color] duration-200 hover:border-primary/40 focus-visible:border-primary';
-
 export const authPrimaryButtonClassName =
   'h-11 w-full rounded-xl text-sm font-semibold transition-shadow duration-300 hover:shadow-soft-md';

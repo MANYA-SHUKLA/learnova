@@ -2,18 +2,24 @@
 
 import {
   Button,
-  Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
   Spinner,
 } from '@learnova/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
+import {
+  AuthAlert,
+  AuthButtonMotion,
+  AuthCardShell,
+  authContentClassName,
+  authFooterClassName,
+  authInputClassName,
+  authPrimaryButtonClassName,
+} from '@/components/shared/auth-card-shell';
 import { PasswordInput } from '@/components/shared/password-input';
 import {
   changePasswordSchema,
@@ -59,78 +65,72 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
-      <div className="mb-6 text-center">
-        <p className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-          {t('brand')}
-        </p>
-        <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight">{t('title')}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
-      </div>
+    <AuthCardShell icon={ShieldCheck} title={t('title')} description={t('description')}>
+      <form onSubmit={onSubmit} noValidate>
+        <CardContent className={authContentClassName}>
+          {errors.root?.message ? (
+            <AuthAlert variant="error">{errors.root.message}</AuthAlert>
+          ) : null}
 
-      <Card className="w-full border-border/80 shadow-soft-lg">
-        <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-lg">{t('cardTitle')}</CardTitle>
-          <CardDescription>{t('cardDescription')}</CardDescription>
-        </CardHeader>
-        <form onSubmit={onSubmit} noValidate>
-          <CardContent className="space-y-4">
-            {errors.root?.message ? (
-              <p
-                role="alert"
-                className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
-              >
-                {errors.root.message}
-              </p>
+          <p className="text-sm font-medium text-foreground">{t('cardTitle')}</p>
+          <p className="-mt-2 text-xs text-muted-foreground">{t('cardDescription')}</p>
+
+          <div className="space-y-2">
+            <label htmlFor="currentPassword" className="text-sm font-medium">
+              {t('currentPassword')}
+            </label>
+            <PasswordInput
+              id="currentPassword"
+              autoComplete="current-password"
+              disabled={changeMutation.isPending}
+              className={authInputClassName}
+              {...register('currentPassword')}
+            />
+            {errors.currentPassword ? (
+              <p className="text-xs text-danger">{errors.currentPassword.message}</p>
             ) : null}
+          </div>
 
-            <div className="space-y-2">
-              <label htmlFor="currentPassword" className="text-sm font-medium">
-                {t('currentPassword')}
-              </label>
-              <PasswordInput
-                id="currentPassword"
-                autoComplete="current-password"
-                disabled={changeMutation.isPending}
-                {...register('currentPassword')}
-              />
-              {errors.currentPassword ? (
-                <p className="text-xs text-danger">{errors.currentPassword.message}</p>
-              ) : null}
-            </div>
+          <div className="space-y-2">
+            <label htmlFor="newPassword" className="text-sm font-medium">
+              {t('newPassword')}
+            </label>
+            <PasswordInput
+              id="newPassword"
+              autoComplete="new-password"
+              disabled={changeMutation.isPending}
+              className={authInputClassName}
+              {...register('newPassword')}
+            />
+            {errors.newPassword ? (
+              <p className="text-xs text-danger">{errors.newPassword.message}</p>
+            ) : null}
+          </div>
 
-            <div className="space-y-2">
-              <label htmlFor="newPassword" className="text-sm font-medium">
-                {t('newPassword')}
-              </label>
-              <PasswordInput
-                id="newPassword"
-                autoComplete="new-password"
-                disabled={changeMutation.isPending}
-                {...register('newPassword')}
-              />
-              {errors.newPassword ? (
-                <p className="text-xs text-danger">{errors.newPassword.message}</p>
-              ) : null}
-            </div>
+          <div className="space-y-2">
+            <label htmlFor="confirmPassword" className="text-sm font-medium">
+              {t('confirmPassword')}
+            </label>
+            <PasswordInput
+              id="confirmPassword"
+              autoComplete="new-password"
+              disabled={changeMutation.isPending}
+              className={authInputClassName}
+              {...register('confirmPassword')}
+            />
+            {errors.confirmPassword ? (
+              <p className="text-xs text-danger">{errors.confirmPassword.message}</p>
+            ) : null}
+          </div>
+        </CardContent>
 
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">
-                {t('confirmPassword')}
-              </label>
-              <PasswordInput
-                id="confirmPassword"
-                autoComplete="new-password"
-                disabled={changeMutation.isPending}
-                {...register('confirmPassword')}
-              />
-              {errors.confirmPassword ? (
-                <p className="text-xs text-danger">{errors.confirmPassword.message}</p>
-              ) : null}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full" disabled={changeMutation.isPending}>
+        <CardFooter className={authFooterClassName}>
+          <AuthButtonMotion pending={changeMutation.isPending}>
+            <Button
+              type="submit"
+              className={authPrimaryButtonClassName}
+              disabled={changeMutation.isPending}
+            >
               {changeMutation.isPending ? (
                 <>
                   <Spinner size="sm" />
@@ -140,11 +140,10 @@ export default function ChangePasswordPage() {
                 t('submit')
               )}
             </Button>
-          </CardFooter>
-        </form>
-      </Card>
-
-      <p className="mt-4 text-center text-xs text-muted-foreground">{t('cannotSkip')}</p>
-    </div>
+          </AuthButtonMotion>
+          <p className="text-center text-xs text-muted-foreground">{t('cannotSkip')}</p>
+        </CardFooter>
+      </form>
+    </AuthCardShell>
   );
 }
