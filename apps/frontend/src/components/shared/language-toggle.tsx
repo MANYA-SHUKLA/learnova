@@ -20,67 +20,66 @@ const LOCALE_NAMES: Record<AppLocale, string> = {
   te: 'తెలుగు',
 };
 
-type LocaleSwitcherProps = {
+interface LanguageToggleProps {
   className?: string;
   size?: 'sm' | 'icon';
-};
+}
 
-export function LocaleSwitcher({ className, size = 'sm' }: LocaleSwitcherProps) {
+export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) {
   const pathname = usePathname();
   const router = useRouter();
   const locale = useLocale() as AppLocale;
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onPointerDown = (event: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
+    function onPointerDown(event: MouseEvent) {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false);
+    }
     document.addEventListener('mousedown', onPointerDown);
-    return () => {
-      document.removeEventListener('mousedown', onPointerDown);
-    };
+    return () => document.removeEventListener('mousedown', onPointerDown);
   }, []);
 
-  function switchLocale(next: AppLocale) {
+  const switchLocale = (next: AppLocale) => {
     setOpen(false);
     if (next === locale) return;
     router.replace(pathname, { locale: next });
-  }
+  };
 
   return (
-    <div className={cn('relative', className)} ref={rootRef}>
+    <div ref={ref} className={cn('relative', className)}>
       <Button
         type="button"
         variant="ghost"
         size={size === 'icon' ? 'icon' : 'sm'}
-        className={cn(size === 'sm' && 'gap-1.5 rounded-xl px-2.5')}
         aria-label="Switch language"
         aria-expanded={open}
-        onClick={() => {
-          setOpen((v) => !v);
-        }}
+        aria-haspopup="listbox"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(size === 'sm' && 'gap-1.5 px-2.5')}
       >
         <Languages className="size-4" />
-        {size === 'sm' ? (
-          <span className="text-xs font-semibold">{LOCALE_LABELS[locale]}</span>
-        ) : null}
+        {size === 'sm' ? <span className="text-xs font-semibold">{LOCALE_LABELS[locale]}</span> : null}
       </Button>
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[148px] overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-soft-md">
+        <div
+          role="listbox"
+          aria-label="Language"
+          className="absolute right-0 z-50 mt-1.5 min-w-[9.5rem] overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-soft-md"
+        >
           {locales.map((code) => (
             <button
               key={code}
               type="button"
-              onClick={() => {
-                switchLocale(code);
-              }}
+              role="option"
+              aria-selected={code === locale}
               className={cn(
-                'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted',
-                code === locale && 'bg-muted font-medium text-primary',
+                'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                code === locale
+                  ? 'bg-primary/10 font-semibold text-primary'
+                  : 'text-foreground hover:bg-muted',
               )}
+              onClick={() => switchLocale(code)}
             >
               <span>{LOCALE_NAMES[code]}</span>
               <span className="text-xs text-muted-foreground">{LOCALE_LABELS[code]}</span>

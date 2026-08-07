@@ -1,7 +1,7 @@
 {
   "common": {
     "appName": "Learnova",
-    "tagline": "Enterprise AI Learning Platform",
+    "tagline": "Learn. Build. Excel.",
     "loading": "Loading…",
     "error": "Something went wrong",
     "retry": "Retry",
@@ -12,28 +12,493 @@
     "search": "Search",
     "settings": "Settings",
     "logout": "Log out",
-    "language": "Language"
+    "language": "Language",
+    "openNav": "Open menu",
+    "closeNav": "Close menu",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "account": "Account",
+    "signedIn": "Signed in",
+    "sessions": "Sessions",
+    "signingOut": "Signing out…",
+    "comingSoon": "Coming soon",
+    "explorePlatform": "Explore Platform",
+    "contact": "Contact",
+    "features": "Features",
+    "about": "About",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "security": "Security",
+    "home": "Home",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "requestDemo": "Request Demo",
+    "institutionLogin": "Institution Login",
+    "learnMore": "Learn More",
+    "submit": "Submit",
+    "email": "Email",
+    "password": "Password",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "onboarding": "Onboarding",
+    "yes": "Yes",
+    "no": "No",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "export": "Export",
+    "import": "Import",
+    "view": "View",
+    "actions": "Actions",
+    "empty": "No items found",
+    "refresh": "Refresh",
+    "liveSync": "Live sync"
   },
   "nav": {
     "dashboard": "Dashboard",
-    "lms": "Learning",
-    "erp": "ERP",
-    "examination": "Examinations",
-    "coding": "Coding",
-    "ide": "Cloud IDE",
-    "ideation": "AI Ideation",
+    "institution": "Institution",
+    "departments": "Departments",
+    "programs": "Programs",
+    "academicYears": "Academic Years",
+    "semesters": "Semesters",
+    "campuses": "Campuses",
+    "schools": "Schools",
+    "sections": "Sections",
+    "batches": "Batches",
+    "calendar": "Calendar",
+    "faculty": "Faculty",
+    "students": "Students",
+    "courses": "Courses",
+    "overview": "Overview",
+    "labs": "Labs",
+    "exams": "Exams",
     "analytics": "Analytics",
-    "audit": "Audit Logs"
+    "people": "People",
+    "reports": "Reports"
   },
-  "home": {
-    "headline": "Learn. Build. Excel.",
-    "subtitle": "The enterprise learning platform for modern institutions.",
-    "cta": "Get started"
+  "marketing": {
+    "header": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "contact": "Contact",
+      "institutionLogin": "Institution Login"
+    },
+    "footer": {
+      "tagline": "The enterprise AI learning platform for institutions that teach, assess, and innovate at scale.",
+      "copyright": "All rights reserved.",
+      "contactLabel": "Contact:",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "productLinks": {
+        "features": "Features",
+        "codingLabs": "Coding Labs",
+        "aiIdeation": "AI Ideation",
+        "exams": "Exams",
+        "analytics": "Analytics"
+      },
+      "companyLinks": {
+        "about": "About",
+        "features": "Features",
+        "contact": "Contact",
+        "institutionLogin": "Institution Login"
+      },
+      "legalLinks": {
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "security": "Security"
+      }
+    },
+    "landing": {
+      "hero": {
+        "brand": "Learnova",
+        "title": "Learn. Build. Excel.",
+        "subtitle": "The enterprise AI learning platform for institutions — LMS, exams, coding labs, and analytics under one admin-controlled identity. Students and faculty are invited by your campus, not by public signup.",
+        "loginCta": "Institution Login",
+        "exploreCta": "Explore Platform"
+      },
+      "features": {
+        "eyebrow": "Platform",
+        "title": "Everything your institution needs",
+        "description": "Eight modules that work together — from curriculum delivery to secure exams and AI-assisted learning.",
+        "lms": {
+          "title": "LMS",
+          "description": "Courses, cohorts, and content delivery built for institutional scale."
+        },
+        "erp": {
+          "title": "ERP",
+          "description": "Programs, campuses, batches, and academic structure in one place."
+        },
+        "exams": {
+          "title": "Exams",
+          "description": "Secure assessment workflows with scheduling, proctoring hooks, and results."
+        },
+        "codingLabs": {
+          "title": "Coding Labs",
+          "description": "Hands-on practice environments with real-time feedback for every learner."
+        },
+        "cloudIDE": {
+          "title": "Cloud IDE",
+          "description": "Browser-native development workspaces ready for assignments and projects."
+        },
+        "aiIdeation": {
+          "title": "AI Ideation",
+          "description": "Guided brainstorming and concept exploration powered by institutional AI."
+        },
+        "analytics": {
+          "title": "Analytics",
+          "description": "Live insights across engagement, mastery, and institutional outcomes."
+        },
+        "audit": {
+          "title": "Audit",
+          "description": "Complete activity trails for compliance, governance, and peace of mind."
+        }
+      },
+      "dashboard": {
+        "eyebrow": "Dashboard",
+        "title": "A command center for learning ops",
+        "description": "Faculty, admins, and learners share one coherent workspace — without the clutter.",
+        "welcomeBack": "Welcome back",
+        "institutionOverview": "Institution overview · this week",
+        "activeCourses": "Active courses",
+        "openLabs": "Open labs",
+        "upcomingExams": "Upcoming exams",
+        "engagementTrend": "Engagement trend",
+        "recentActivity": "Recent activity",
+        "activity1": "Batch A submitted Lab 04",
+        "activity2": "Exam window opened",
+        "activity3": "New course published"
+      },
+      "codingLabs": {
+        "eyebrow": "Coding Labs",
+        "title": "Practice that feels like production",
+        "description": "Scaffolded challenges, auto-graded submissions, and a cloud IDE your students can open in one click.",
+        "bullet1": "Language packs for popular stacks",
+        "bullet2": "Instant feedback on test suites",
+        "bullet3": "Faculty templates and rubrics",
+        "passingStatus": "Passing"
+      },
+      "aiFeatures": {
+        "eyebrow": "AI Features",
+        "title": "Ideation that accelerates learning",
+        "description": "Help students explore concepts, outline projects, and get structured guidance — with faculty-controlled guardrails.",
+        "bullet1": "Prompted brainstorming sessions",
+        "bullet2": "Institution-scoped knowledge",
+        "bullet3": "Transparent, auditable AI usage",
+        "ideationTitle": "AI Ideation",
+        "prompt": "Suggest three project ideas for distributed systems…",
+        "response1Title": "1. Consensus simulator",
+        "response1Body": "Model Raft under network partitions with live visuals.",
+        "response2Title": "2. Edge cache playground",
+        "response2Body": "Compare TTL strategies across regions."
+      },
+      "practiceLabs": {
+        "eyebrow": "Practice Labs",
+        "title": "Repetition that builds mastery",
+        "description": "Guided drills and progressive difficulty keep learners in flow — from first concept to interview-ready skill.",
+        "bullet1": "Skill tracks mapped to curricula",
+        "bullet2": "Streaks and progress milestones",
+        "bullet3": "Peer comparison without pressure",
+        "trackTitle": "Practice track",
+        "track1": "Arrays & hashing",
+        "track2": "Graphs",
+        "track3": "System design basics"
+      },
+      "exams": {
+        "eyebrow": "Exams",
+        "title": "Assessment you can trust",
+        "description": "Schedule windows, question banks, and result pipelines designed for high-stakes institutional exams.",
+        "bullet1": "Timed sections and question pools",
+        "bullet2": "Role-based exam administration",
+        "bullet3": "Exportable results and audit trails",
+        "windowOpen": "Window open",
+        "duration": "Duration",
+        "durationValue": "90 min",
+        "questions": "Questions",
+        "questionsValue": "40",
+        "candidates": "Candidates",
+        "candidatesValue": "312",
+        "integrity": "Integrity",
+        "integrityValue": "On"
+      },
+      "projects": {
+        "eyebrow": "Projects",
+        "title": "From assignment to portfolio",
+        "description": "Team projects with milestones, reviews, and submission workflows that mirror real product work.",
+        "bullet1": "Milestones and peer reviews",
+        "bullet2": "Repo-linked submissions",
+        "bullet3": "Faculty feedback loops",
+        "boardTitle": "Capstone board",
+        "backlog": "Backlog",
+        "inProgress": "In progress",
+        "done": "Done"
+      },
+      "analytics": {
+        "eyebrow": "Analytics",
+        "title": "Outcomes you can act on",
+        "description": "See where cohorts struggle, which labs drive mastery, and how interventions move the needle.",
+        "bullet1": "Cohort and course heatmaps",
+        "bullet2": "At-risk learner signals",
+        "bullet3": "Export-ready institutional reports",
+        "masteryTitle": "Mastery by module",
+        "module1": "Algorithms",
+        "module2": "Databases",
+        "module3": "Networks"
+      },
+      "testimonials": {
+        "eyebrow": "Testimonials",
+        "title": "Trusted by academic leaders",
+        "description": "Placeholder voices from institutions evaluating Learnova for their next learning stack.",
+        "quote1": "Learnova replaced three tools for us. Faculty actually use the dashboard — that alone was worth it.",
+        "name1": "Manya Shukla",
+        "role1": "Dean of Engineering, Northbridge University",
+        "quote2": "Coding labs and exams in one place cut our ops overhead dramatically. Students feel the polish.",
+        "name2": "Rajkumar Yogi",
+        "role2": "Director of Digital Learning, Helix Institute",
+        "quote3": "The analytics finally show us where cohorts stall — interventions are faster and more targeted.",
+        "name3": "Mahi Raj",
+        "role3": "VP Academic Affairs, Summit College"
+      },
+      "faq": {
+        "eyebrow": "FAQ",
+        "title": "Answers before you dive in",
+        "description": "A short list of the questions institutions ask most often.",
+        "q1": "Who is Learnova for?",
+        "a1": "Universities, colleges, and training institutes that need LMS, exams, coding practice, and analytics in a single enterprise platform.",
+        "q2": "Can we roll out module by module?",
+        "a2": "Yes. Start with LMS or Coding Labs and expand into exams, IDE, and analytics as your teams are ready.",
+        "q3": "Does Learnova support institutional SSO?",
+        "a3": "Enterprise plans are designed for SSO and role-based access across campuses, departments, and programs.",
+        "q4": "Is there a sandbox for evaluation?",
+        "a4": "Contact us at shuklamanya99@gmail.com for a guided demo environment. Starter accounts can explore core flows without a payment commitment.",
+        "q5": "How is AI usage governed?",
+        "a5": "AI features respect institution policies, with audit trails and faculty-configurable guardrails for student-facing tools."
+      },
+      "pricing": {
+        "eyebrow": "Pricing",
+        "title": "Plans that scale with you",
+        "description": "Placeholder tiers for planning — no payment required. Choose the shape that fits your institution.",
+        "starter": {
+          "name": "Starter",
+          "price": "Free to explore",
+          "description": "Evaluate core LMS and lab flows with a small cohort.",
+          "feature1": "Up to 50 learners",
+          "feature2": "LMS + Coding Labs",
+          "feature3": "Community support",
+          "cta": "Institution Login"
+        },
+        "institution": {
+          "name": "Institution",
+          "price": "Custom",
+          "description": "Full academic stack for campuses and departments.",
+          "feature1": "Unlimited programs",
+          "feature2": "Exams + Analytics",
+          "feature3": "SSO-ready roles",
+          "feature4": "Priority support",
+          "cta": "Institution Login"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "price": "Custom",
+          "description": "Multi-campus governance, audit, and dedicated success.",
+          "feature1": "Multi-tenant control",
+          "feature2": "Advanced audit",
+          "feature3": "SLA & onboarding",
+          "feature4": "Custom integrations",
+          "cta": "Request Demo"
+        }
+      },
+      "finalCta": {
+        "title": "Ready to modernize learning?",
+        "description": "Sign in to your institution workspace, invite faculty and students, and run academics from one premium platform.",
+        "cta": "Institution Login"
+      }
+    },
+    "about": {
+      "brand": "Learnova",
+      "title": "About the platform",
+      "subtitle": "Learnova is an enterprise AI learning platform for modern institutions — LMS, ERP, examinations, coding, cloud IDE, ideation, analytics, and audit in one coherent product.",
+      "loginCta": "Institution Login",
+      "exploreCta": "Explore Platform",
+      "believeTitle": "What we believe",
+      "believeSubtitle": "Learning infrastructure should feel as refined as the products students aspire to build.",
+      "pillar1Title": "Unified learning stack",
+      "pillar1Body": "LMS, ERP, exams, and coding labs share one identity, one academic structure, and one source of truth.",
+      "pillar2Title": "Build by doing",
+      "pillar2Body": "Cloud IDE and practice labs turn coursework into production-shaped skills with measurable mastery.",
+      "pillar3Title": "AI with guardrails",
+      "pillar3Body": "Ideation and assistance stay institution-scoped, auditable, and aligned to faculty policy.",
+      "pillar4Title": "Outcomes over activity",
+      "pillar4Body": "Analytics surface where cohorts stall so leaders can intervene with clarity, not guesswork.",
+      "pillar5Title": "Enterprise trust",
+      "pillar5Body": "Roles, audit trails, and campus-aware governance come standard — not bolted on later.",
+      "pillar6Title": "Designed for polish",
+      "pillar6Body": "A premium experience for students and operators alike, across light and dark themes.",
+      "finalTitle": "Built for institutions that teach at scale",
+      "finalDescription": "From program structure to exam integrity and coding mastery, Learnova gives campuses a single operating system for academic delivery — without sacrificing polish or control.",
+      "finalCta": "Institution Login"
+    },
+    "features": {
+      "brand": "Learnova",
+      "title": "Explore the platform",
+      "subtitle": "An enterprise AI learning stack — LMS, exams, coding, and analytics — under one institutional identity.",
+      "cta": "Institution Login",
+      "lmsTitle": "LMS & curriculum",
+      "lmsBody": "Courses, cohorts, and content delivery aligned to your academic structure.",
+      "examsTitle": "Exams",
+      "examsBody": "Secure assessment workflows with scheduling hooks and results integrity.",
+      "codingLabsTitle": "Coding labs",
+      "codingLabsBody": "Hands-on practice with feedback loops designed for institutional scale.",
+      "cloudIDETitle": "Cloud IDE",
+      "cloudIDEBody": "Browser workspaces ready for assignments and projects.",
+      "analyticsTitle": "Analytics",
+      "analyticsBody": "See where cohorts stall and intervene with clarity.",
+      "governanceTitle": "Governance",
+      "governanceBody": "Roles, sessions, and audit trails for enterprise trust."
+    },
+    "contact": {
+      "eyebrow": "Contact",
+      "title": "Talk to Learnova",
+      "subtitle": "Ask about institutional rollout, or reach the team behind this project.",
+      "cta": "Institution Login",
+      "emailTitle": "Email",
+      "emailBody": "shuklamanya99@gmail.com",
+      "whatsappTitle": "WhatsApp",
+      "whatsappBody": "Chat with Manya Shukla",
+      "onboardingTitle": "Onboarding",
+      "onboardingBody": "Sign in to your institution workspace"
+    },
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "security": "Security"
+    }
   },
   "auth": {
-    "login": "Sign in",
-    "register": "Create account",
-    "forgotPassword": "Forgot password?"
+    "login": {
+      "brand": "Learnova",
+      "welcomeBack": "Welcome back",
+      "tagline": "Learn. Build. Excel. — Institution workspace access.",
+      "title": "Institution login",
+      "description": "Sign in with the credentials issued by your institution.",
+      "email": "Email",
+      "emailPlaceholder": "shuklamanya99@gmail.com",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "rememberMe": "Remember me",
+      "loginButton": "Login",
+      "signingIn": "Signing in…",
+      "needAccountLabel": "Need an account?",
+      "needAccountText": "Contact your Institution Administrator",
+      "registeredMessage": "Institution registered. Verify your email, then sign in to finish institution setup.",
+      "errorMessage": "Unable to sign in. Try again."
+    },
+    "registerInstitution": {
+      "title": "Register your institution",
+      "subtitle": "Create the Institution Admin account. After email verification, sign in to finish setup — logo, contact details, and branding.",
+      "cardTitle": "Create admin account",
+      "cardDescription": "Students and faculty are invited by your administrators — there is no public signup.",
+      "institutionName": "Institution name",
+      "institutionNamePlaceholder": "SOE JNU",
+      "adminFirstName": "Admin first name",
+      "adminLastName": "Admin last name",
+      "adminEmail": "Admin email",
+      "adminEmailPlaceholder": "shuklamanya99@gmail.com",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "passwordRequirement": "Password must be 12+ characters with upper, lower, number, and special character.",
+      "acceptTermsLabel": "I accept the",
+      "terms": "Terms",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "continueButton": "Continue",
+      "creatingAccount": "Creating account…",
+      "alreadyRegistered": "Already registered?",
+      "institutionLogin": "Institution Login",
+      "errorMessage": "Unable to register institution. Try again."
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "description": "Enter your email and we'll send a reset link if an account exists.",
+      "email": "Email",
+      "emailPlaceholder": "shuklamanya99@gmail.com",
+      "sendButton": "Send reset link",
+      "sending": "Sending…",
+      "backToSignIn": "Back to sign in",
+      "errorMessage": "Unable to send reset link. Try again."
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "description": "Enter your new password.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "resetButton": "Reset password",
+      "resetting": "Resetting…"
+    },
+    "verifyEmail": {
+      "title": "Verify your email",
+      "description": "Check your inbox for the verification link.",
+      "resendButton": "Resend verification email",
+      "backToLogin": "Back to login"
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "groups": {
+        "institution": "Institution",
+        "academics": "Academics",
+        "peopleAndLearning": "People & learning",
+        "system": "System"
+      },
+      "items": {
+        "dashboard": "Dashboard",
+        "institution": "Institution",
+        "departments": "Departments",
+        "programs": "Programs",
+        "academicYears": "Academic Years",
+        "semesters": "Semesters",
+        "settings": "Settings",
+        "campuses": "Campuses",
+        "schools": "Schools",
+        "sections": "Sections",
+        "batches": "Batches",
+        "calendar": "Calendar",
+        "faculty": "Faculty",
+        "students": "Students",
+        "courses": "Courses",
+        "sessions": "Sessions"
+      },
+      "comingSoon": "Soon"
+    },
+    "topbar": {
+      "menu": "Menu",
+      "notifications": "Notifications",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Log out"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "dashboard": "Dashboard"
+    }
+  },
+  "errors": {
+    "unauthorized": {
+      "title": "Unauthorized",
+      "body": "You don't have permission to access this page.",
+      "cta": "Go to dashboard"
+    },
+    "forbidden": {
+      "title": "Forbidden",
+      "body": "Access to this resource is forbidden.",
+      "cta": "Go back"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "body": "The page you're looking for doesn't exist.",
+      "cta": "Go home"
+    }
   },
   "roles": {
     "student": "Student",
