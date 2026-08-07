@@ -910,6 +910,57 @@
         },
         "emptyTitle": "No faculty yet",
         "emptyDescription": "Add your first faculty member or import a CSV to populate the directory."
+      },
+      "students": {
+        "eyebrow": "People",
+        "title": "Students",
+        "description": "Manage student records, academic status, and enrollment details.",
+        "addStudent": "Add student",
+        "directory": "Directory",
+        "directoryDescription": "Search, filter, and run bulk actions.",
+        "searchPlaceholder": "Search name, student ID, roll number, email…",
+        "stats": {
+          "total": "Total",
+          "active": "Active",
+          "graduated": "Graduated",
+          "dropped": "Dropped",
+          "departments": "Departments",
+          "newThisMonth": "New this month"
+        },
+        "create": {
+          "eyebrow": "Students",
+          "title": "Add student"
+        },
+        "edit": {
+          "eyebrow": "Students",
+          "title": "Edit {name}",
+          "notFound": "Student not found."
+        },
+        "import": {
+          "eyebrow": "Students",
+          "title": "Import CSV",
+          "description": "Upload, preview, validate, and import. Failed imports are rolled back.",
+          "uploadTitle": "CSV upload",
+          "uploadDescription": "Required columns: studentId, admissionNumber, firstName, lastName, email.",
+          "confirmImport": "Confirm import",
+          "importing": "Importing…",
+          "previewFailed": "Preview failed",
+          "importFailed": "Import failed and was rolled back",
+          "totalRows": "Total rows: {count}",
+          "valid": "Valid: {count}",
+          "invalid": "Invalid: {count}",
+          "duplicates": "Duplicates in file: {count}",
+          "rowError": "Row {row}{field}: {message}"
+        },
+        "export": {
+          "eyebrow": "Students",
+          "title": "Export",
+          "description": "Download the student directory as CSV, Excel-compatible, or PDF. Use print for a hard copy.",
+          "formatsTitle": "Export formats",
+          "formatsDescription": "Exports are audited as student.export."
+        },
+        "emptyTitle": "No students yet",
+        "emptyDescription": "Add your first student or import a CSV to populate the directory."
       }
     },
     "sessions": {

@@ -910,6 +910,57 @@
         },
         "emptyTitle": "अभी कोई संकाय नहीं",
         "emptyDescription": "अपना पहला संकाय सदस्य जोड़ें या निर्देशिका भरने के लिए CSV आयात करें।"
+      },
+      "students": {
+        "eyebrow": "लोग",
+        "title": "छात्र",
+        "description": "छात्र रिकॉर्ड, शैक्षणिक स्थिति और नामांकन विवरण प्रबंधित करें।",
+        "addStudent": "छात्र जोड़ें",
+        "directory": "निर्देशिका",
+        "directoryDescription": "खोजें, फ़िल्टर करें और बल्क क्रियाएँ चलाएँ।",
+        "searchPlaceholder": "नाम, छात्र ID, रोल नंबर, ईमेल खोजें…",
+        "stats": {
+          "total": "कुल",
+          "active": "सक्रिय",
+          "graduated": "स्नातक",
+          "dropped": "छोड़ दिया",
+          "departments": "विभाग",
+          "newThisMonth": "इस माह नए"
+        },
+        "create": {
+          "eyebrow": "छात्र",
+          "title": "छात्र जोड़ें"
+        },
+        "edit": {
+          "eyebrow": "छात्र",
+          "title": "{name} संपादित करें",
+          "notFound": "छात्र नहीं मिला।"
+        },
+        "import": {
+          "eyebrow": "छात्र",
+          "title": "CSV आयात",
+          "description": "अपलोड, पूर्वावलोकन, सत्यापन और आयात। विफल आयात वापस लिए जाते हैं।",
+          "uploadTitle": "CSV अपलोड",
+          "uploadDescription": "आवश्यक कॉलम: studentId, admissionNumber, firstName, lastName, email.",
+          "confirmImport": "आयात की पुष्टि करें",
+          "importing": "आयात हो रहा है…",
+          "previewFailed": "पूर्वावलोकन विफल",
+          "importFailed": "आयात विफल और वापस ले लिया गया",
+          "totalRows": "कुल पंक्तियाँ: {count}",
+          "valid": "मान्य: {count}",
+          "invalid": "अमान्य: {count}",
+          "duplicates": "फ़ाइल में डुप्लिकेट: {count}",
+          "rowError": "पंक्ति {row}{field}: {message}"
+        },
+        "export": {
+          "eyebrow": "छात्र",
+          "title": "निर्यात",
+          "description": "छात्र निर्देशिका CSV, Excel-संगत या PDF के रूप में डाउनलोड करें। हार्ड कॉपी के लिए प्रिंट उपयोग करें।",
+          "formatsTitle": "निर्यात प्रारूप",
+          "formatsDescription": "निर्यात student.export के रूप में ऑडिट होते हैं।"
+        },
+        "emptyTitle": "अभी कोई छात्र नहीं",
+        "emptyDescription": "अपना पहला छात्र जोड़ें या निर्देशिका भरने के लिए CSV आयात करें।"
       }
     },
     "sessions": {

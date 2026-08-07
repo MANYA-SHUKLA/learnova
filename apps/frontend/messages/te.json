@@ -910,6 +910,57 @@
         },
         "emptyTitle": "ఇంకా అధ్యాపకులు లేరు",
         "emptyDescription": "మీ మొదటి అధ్యాపకుడిని జోడించండి లేదా డైరెక్టరీని నింపడానికి CSV దిగుమతి చేయండి."
+      },
+      "students": {
+        "eyebrow": "ప్రజలు",
+        "title": "విద్యార్థులు",
+        "description": "విద్యార్థి రికార్డులు, అకడమిక్ స్థితి మరియు నమోదు వివరాలను నిర్వహించండి.",
+        "addStudent": "విద్యార్థిని జోడించండి",
+        "directory": "డైరెక్టరీ",
+        "directoryDescription": "బల్క్ చర్యలను శోధించండి, ఫిల్టర్ చేయండి మరియు అమలు చేయండి.",
+        "searchPlaceholder": "శోధన పేరు, విద్యార్థి ID, రోల్ నంబర్, ఇమెయిల్...",
+        "stats": {
+          "total": "మొత్తం",
+          "active": "చురుకుగా",
+          "graduated": "పట్టభద్రులైన",
+          "dropped": "విడిచిపెట్టినవారు",
+          "departments": "విభాగాలు",
+          "newThisMonth": "ఈ నెల కొత్తది"
+        },
+        "create": {
+          "eyebrow": "విద్యార్థులు",
+          "title": "విద్యార్థిని జోడించండి"
+        },
+        "edit": {
+          "eyebrow": "విద్యార్థులు",
+          "title": "{name}ని సవరించు",
+          "notFound": "విద్యార్థి దొరకలేదు."
+        },
+        "import": {
+          "eyebrow": "విద్యార్థులు",
+          "title": "CSVని దిగుమతి చేయండి",
+          "description": "అప్‌లోడ్ చేయండి, ప్రివ్యూ చేయండి, ధృవీకరించండి మరియు దిగుమతి చేయండి. విఫలమైన దిగుమతులు వెనక్కి తీసుకోబడ్డాయి.",
+          "uploadTitle": "CSV అప్‌లోడ్",
+          "uploadDescription": "Required columns: studentId, admissionNumber, firstName, lastName, email.",
+          "confirmImport": "దిగుమతిని నిర్ధారించండి",
+          "importing": "దిగుమతి చేస్తోంది...",
+          "previewFailed": "ప్రివ్యూ విఫలమైంది",
+          "importFailed": "దిగుమతి విఫలమైంది మరియు వెనక్కి తీసుకోబడింది",
+          "totalRows": "మొత్తం అడ్డు వరుసలు: {count}",
+          "valid": "చెల్లుబాటు: {count}",
+          "invalid": "చెల్లదు: {count}",
+          "duplicates": "ఫైల్‌లో నకిలీలు: {count}",
+          "rowError": "అడ్డు వరుస {row}{field}: {message}"
+        },
+        "export": {
+          "eyebrow": "విద్యార్థులు",
+          "title": "ఎగుమతి చేయండి",
+          "description": "విద్యార్థి డైరెక్టరీని CSV, Excel-compatible లేదా PDFగా డౌన్‌లోడ్ చేయండి. హార్డ్ కాపీ కోసం ప్రింట్ ఉపయోగించండి.",
+          "formatsTitle": "ఎగుమతి ఫార్మాట్‌లు",
+          "formatsDescription": "ఎగుమతులు student.exportగా ఆడిట్ చేయబడతాయి."
+        },
+        "emptyTitle": "ఇంకా విద్యార్థులు లేరు",
+        "emptyDescription": "మీ మొదటి విద్యార్థిని జోడించండి లేదా డైరెక్టరీని నింపడానికి CSV దిగుమతి చేయండి."
       }
     },
     "sessions": {
