@@ -3,26 +3,23 @@
  * Served at /docs (Swagger UI) and /openapi.json.
  */
 
-import type { OpenAPIV3 } from 'openapi-types';
+type Json = Record<string, unknown>;
 
-const bearer: OpenAPIV3.SecurityRequirementObject = { bearerAuth: [] };
+const bearer = [{ bearerAuth: [] }];
 
-function jsonBody(schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): OpenAPIV3.RequestBodyObject {
+function jsonBody(schema: Json): Json {
   return {
     required: true,
     content: { 'application/json': { schema } },
   };
 }
 
-function ok(
-  description: string,
-  schema?: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
-): OpenAPIV3.ResponseObject {
+function ok(description: string): Json {
   return {
     description,
     content: {
       'application/json': {
-        schema: schema ?? {
+        schema: {
           type: 'object',
           properties: {
             success: { type: 'boolean', example: true },
@@ -36,7 +33,7 @@ function ok(
   };
 }
 
-const errorResponses: Record<string, OpenAPIV3.ResponseObject> = {
+const errorResponses: Json = {
   '400': { description: 'Validation error' },
   '401': { description: 'Unauthorized — missing or invalid bearer token' },
   '403': { description: 'Forbidden — insufficient permission' },
@@ -50,16 +47,16 @@ function op(
   opts: {
     tags: string[];
     security?: boolean;
-    parameters?: OpenAPIV3.ParameterObject[];
-    requestBody?: OpenAPIV3.RequestBodyObject;
+    parameters?: Json[];
+    requestBody?: Json;
     description?: string;
   },
-): OpenAPIV3.OperationObject {
+): Json {
   return {
     summary,
     description: opts.description,
     tags: opts.tags,
-    security: opts.security === false ? [] : [bearer],
+    security: opts.security === false ? [] : bearer,
     parameters: opts.parameters,
     requestBody: opts.requestBody,
     responses: {
@@ -69,7 +66,7 @@ function op(
   };
 }
 
-const objectIdParam = (name: string, description?: string): OpenAPIV3.ParameterObject => ({
+const objectIdParam = (name: string, description?: string): Json => ({
   name,
   in: 'path',
   required: true,
@@ -77,51 +74,40 @@ const objectIdParam = (name: string, description?: string): OpenAPIV3.ParameterO
   description: description ?? 'MongoDB ObjectId',
 });
 
-const pageParams: OpenAPIV3.ParameterObject[] = [
+const pageParams: Json[] = [
   { name: 'page', in: 'query', schema: { type: 'integer', minimum: 1, default: 1 } },
   { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
   { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Search query' },
-  {
-    name: 'sortBy',
-    in: 'query',
-    schema: { type: 'string' },
-  },
-  {
-    name: 'sortOrder',
-    in: 'query',
-    schema: { type: 'string', enum: ['asc', 'desc'] },
-  },
+  { name: 'sortBy', in: 'query', schema: { type: 'string' } },
+  { name: 'sortOrder', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] } },
 ];
 
-function crudCollection(
-  tag: string,
-  base: string,
-  idName = 'id',
-): OpenAPIV3.PathsObject {
+function crudCollection(tag: string, base: string, idName = 'id'): Json {
+  const singular = tag.endsWith('s') ? tag.slice(0, -1) : tag;
   return {
     [base]: {
       get: op(`List ${tag}`, { tags: [tag], parameters: pageParams }),
-      post: op(`Create ${tag.slice(0, -1) || tag}`, {
+      post: op(`Create ${singular}`, {
         tags: [tag],
         requestBody: jsonBody({ type: 'object', additionalProperties: true }),
       }),
     },
     [`${base}/{${idName}}`]: {
-      get: op(`Get ${tag} by id`, {
+      get: op(`Get ${singular} by id`, {
         tags: [tag],
         parameters: [objectIdParam(idName)],
       }),
-      put: op(`Replace ${tag.slice(0, -1) || tag}`, {
-        tags: [tag],
-        parameters: [objectIdParam(idName)],
-        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
-      }),
-      patch: op(`Update ${tag.slice(0, -1) || tag}`, {
+      put: op(`Replace ${singular}`, {
         tags: [tag],
         parameters: [objectIdParam(idName)],
         requestBody: jsonBody({ type: 'object', additionalProperties: true }),
       }),
-      delete: op(`Archive/delete ${tag.slice(0, -1) || tag}`, {
+      patch: op(`Update ${singular}`, {
+        tags: [tag],
+        parameters: [objectIdParam(idName)],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      delete: op(`Archive/delete ${singular}`, {
         tags: [tag],
         parameters: [objectIdParam(idName)],
       }),
@@ -129,11 +115,7 @@ function crudCollection(
   };
 }
 
-function orgResource(name: string, path: string): OpenAPIV3.PathsObject {
-  return crudCollection(name, path);
-}
-
-export const openApiDocument: OpenAPIV3.Document = {
+export const openApiDocument: Json = {
   openapi: '3.0.3',
   info: {
     title: 'Learnova API',
@@ -153,7 +135,7 @@ export const openApiDocument: OpenAPIV3.Document = {
   },
   servers: [
     { url: 'http://localhost:4000', description: 'Local development' },
-    { url: '/ ', description: 'Current host' },
+    { url: '/', description: 'Current host' },
   ],
   tags: [
     { name: 'Health', description: 'Liveness / readiness' },
@@ -182,16 +164,6 @@ export const openApiDocument: OpenAPIV3.Document = {
         properties: {
           email: { type: 'string', format: 'email', example: 'faculty.demo@learnova.test' },
           password: { type: 'string', format: 'password', example: 'Demo@12345' },
-        },
-      },
-      ApiSuccess: {
-        type: 'object',
-        properties: {
-          success: { type: 'boolean', example: true },
-          data: {},
-          meta: { type: 'object' },
-          requestId: { type: 'string' },
-          timestamp: { type: 'string', format: 'date-time' },
         },
       },
     },
@@ -224,17 +196,11 @@ export const openApiDocument: OpenAPIV3.Document = {
       }),
     },
     '/api/v1/auth/login': {
-      post: {
-        ...op('Login', {
-          tags: ['Auth'],
-          security: false,
-          requestBody: jsonBody({ $ref: '#/components/schemas/LoginRequest' }),
-        }),
-        responses: {
-          '200': ok('Login success — returns accessToken + user'),
-          ...errorResponses,
-        },
-      },
+      post: op('Login', {
+        tags: ['Auth'],
+        security: false,
+        requestBody: jsonBody({ $ref: '#/components/schemas/LoginRequest' }),
+      }),
     },
     '/api/v1/auth/logout': {
       post: op('Logout current session', { tags: ['Auth'] }),
@@ -298,23 +264,25 @@ export const openApiDocument: OpenAPIV3.Document = {
     '/api/v1/auth/sessions/{sessionId}': {
       delete: op('Revoke session', {
         tags: ['Auth'],
-        parameters: [{ name: 'sessionId', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          { name: 'sessionId', in: 'path', required: true, schema: { type: 'string' } },
+        ],
       }),
     },
 
     '/api/v1/institutions/me': {
       get: op('My institution', { tags: ['Institution'] }),
     },
-    ...orgResource('Institution', '/api/v1/institutions'),
-    ...orgResource('Campuses', '/api/v1/campuses'),
-    ...orgResource('Schools', '/api/v1/schools'),
-    ...orgResource('Departments', '/api/v1/departments'),
-    ...orgResource('Programs', '/api/v1/programs'),
-    ...orgResource('Academic Years', '/api/v1/academic-years'),
-    ...orgResource('Semesters', '/api/v1/semesters'),
-    ...orgResource('Sections', '/api/v1/sections'),
-    ...orgResource('Batches', '/api/v1/batches'),
-    ...orgResource('Academic Calendars', '/api/v1/academic-calendars'),
+    ...crudCollection('Institution', '/api/v1/institutions'),
+    ...crudCollection('Campuses', '/api/v1/campuses'),
+    ...crudCollection('Schools', '/api/v1/schools'),
+    ...crudCollection('Departments', '/api/v1/departments'),
+    ...crudCollection('Programs', '/api/v1/programs'),
+    ...crudCollection('Academic Years', '/api/v1/academic-years'),
+    ...crudCollection('Semesters', '/api/v1/semesters'),
+    ...crudCollection('Sections', '/api/v1/sections'),
+    ...crudCollection('Batches', '/api/v1/batches'),
+    ...crudCollection('Academic Calendars', '/api/v1/academic-calendars'),
     '/api/v1/institution-settings': {
       get: op('Get institution settings', { tags: ['Institution'] }),
       put: op('Replace institution settings', {
@@ -328,9 +296,7 @@ export const openApiDocument: OpenAPIV3.Document = {
     },
 
     ...crudCollection('Faculty', '/api/v1/faculty'),
-    '/api/v1/faculty/stats': {
-      get: op('Faculty stats', { tags: ['Faculty'] }),
-    },
+    '/api/v1/faculty/stats': { get: op('Faculty stats', { tags: ['Faculty'] }) },
     '/api/v1/faculty/search': {
       get: op('Search faculty', { tags: ['Faculty'], parameters: pageParams }),
     },
@@ -358,9 +324,7 @@ export const openApiDocument: OpenAPIV3.Document = {
     },
 
     ...crudCollection('Students', '/api/v1/students'),
-    '/api/v1/students/stats': {
-      get: op('Student stats', { tags: ['Students'] }),
-    },
+    '/api/v1/students/stats': { get: op('Student stats', { tags: ['Students'] }) },
     '/api/v1/students/search': {
       get: op('Search students', { tags: ['Students'], parameters: pageParams }),
     },
@@ -382,9 +346,7 @@ export const openApiDocument: OpenAPIV3.Document = {
     },
 
     ...crudCollection('Courses', '/api/v1/courses'),
-    '/api/v1/courses/stats': {
-      get: op('Course catalog stats', { tags: ['Courses'] }),
-    },
+    '/api/v1/courses/stats': { get: op('Course catalog stats', { tags: ['Courses'] }) },
     '/api/v1/courses/search': {
       get: op('Search courses', { tags: ['Courses'], parameters: pageParams }),
     },
@@ -392,22 +354,13 @@ export const openApiDocument: OpenAPIV3.Document = {
       get: op('Export courses', { tags: ['Courses'], parameters: pageParams }),
     },
     '/api/v1/courses/{id}/publish': {
-      post: op('Publish course', {
-        tags: ['Courses'],
-        parameters: [objectIdParam('id')],
-      }),
+      post: op('Publish course', { tags: ['Courses'], parameters: [objectIdParam('id')] }),
     },
     '/api/v1/courses/{id}/unpublish': {
-      post: op('Unpublish course', {
-        tags: ['Courses'],
-        parameters: [objectIdParam('id')],
-      }),
+      post: op('Unpublish course', { tags: ['Courses'], parameters: [objectIdParam('id')] }),
     },
     '/api/v1/courses/{id}/duplicate': {
-      post: op('Duplicate course', {
-        tags: ['Courses'],
-        parameters: [objectIdParam('id')],
-      }),
+      post: op('Duplicate course', { tags: ['Courses'], parameters: [objectIdParam('id')] }),
     },
     '/api/v1/courses/{id}/restore': {
       post: op('Restore archived course', {
@@ -498,9 +451,7 @@ export const openApiDocument: OpenAPIV3.Document = {
     },
 
     ...crudCollection('Enrollments', '/api/v1/enrollments'),
-    '/api/v1/enrollments/stats': {
-      get: op('Enrollment stats', { tags: ['Enrollments'] }),
-    },
+    '/api/v1/enrollments/stats': { get: op('Enrollment stats', { tags: ['Enrollments'] }) },
     '/api/v1/enrollments/search': {
       get: op('Search enrollments', { tags: ['Enrollments'], parameters: pageParams }),
     },
