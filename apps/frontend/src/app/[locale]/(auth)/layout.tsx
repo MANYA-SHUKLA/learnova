@@ -12,7 +12,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className="pointer-events-none absolute inset-0 bg-hero" aria-hidden />
       <header
         className={cn(
-          'relative z-10 flex items-center justify-between py-5',
+          'relative z-50 flex items-center justify-between py-5',
           siteGutter,
         )}
       >

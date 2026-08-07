@@ -27,7 +27,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <HtmlLang />
       <AppProviders>
         <div className="flex min-h-svh w-full min-w-0 max-w-[100vw] flex-col overflow-x-clip">
