@@ -1,18 +1,16 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
+import { assignmentFileRefSchema } from './assignment.model.js';
 
-const fileRefSchema = new Schema(
-  {
-    id: { type: String, required: true },
-    fileName: { type: String, required: true, trim: true },
-    contentType: { type: String, required: true },
-    sizeBytes: { type: Number, required: true, min: 0 },
-    storageKey: { type: String, required: true },
-    url: { type: String, default: null },
-    uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    createdAt: { type: Date, default: Date.now },
-  },
-  { _id: false },
-);
+export const ASSIGNMENT_SUBMISSION_STATUSES = [
+  'draft',
+  'submitted',
+  'late',
+  'returned',
+  'graded',
+  'missing',
+] as const;
+
+export const ASSIGNMENT_SUBMISSION_TYPES = ['text', 'file', 'link', 'mixed'] as const;
 
 const assignmentSubmissionSchema = new Schema(
   {
@@ -34,16 +32,16 @@ const assignmentSubmissionSchema = new Schema(
     submittedAt: { type: Date, default: null, index: true },
     status: {
       type: String,
-      enum: ['draft', 'submitted', 'late', 'returned', 'graded', 'missing'],
+      enum: ASSIGNMENT_SUBMISSION_STATUSES,
       default: 'draft',
       index: true,
     },
     submissionType: {
       type: String,
-      enum: ['text', 'file', 'link', 'mixed'],
+      enum: ASSIGNMENT_SUBMISSION_TYPES,
       default: 'mixed',
     },
-    files: { type: [fileRefSchema], default: [] },
+    files: { type: [assignmentFileRefSchema], default: [] },
     textSubmission: { type: String, default: null },
     links: { type: [String], default: [] },
     timeSpentMinutes: { type: Number, default: null },

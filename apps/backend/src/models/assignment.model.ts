@@ -1,6 +1,23 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
 
-const fileRefSchema = new Schema(
+export const ASSIGNMENT_TYPES = [
+  'homework',
+  'essay',
+  'research',
+  'presentation',
+  'case_study',
+  'document_upload',
+  'pdf_upload',
+  'image_upload',
+  'video_upload',
+  'mixed',
+] as const;
+
+export const ASSIGNMENT_STATUSES = ['draft', 'published', 'archived', 'closed'] as const;
+
+export const ASSIGNMENT_VISIBILITIES = ['institution', 'enrolled', 'faculty'] as const;
+
+export const assignmentFileRefSchema = new Schema(
   {
     id: { type: String, required: true },
     fileName: { type: String, required: true, trim: true },
@@ -30,30 +47,19 @@ const assignmentSchema = new Schema(
     instructions: { type: String, default: null },
     assignmentType: {
       type: String,
-      enum: [
-        'homework',
-        'essay',
-        'research',
-        'presentation',
-        'case_study',
-        'document_upload',
-        'pdf_upload',
-        'image_upload',
-        'video_upload',
-        'mixed',
-      ],
+      enum: ASSIGNMENT_TYPES,
       default: 'homework',
       index: true,
     },
     visibility: {
       type: String,
-      enum: ['institution', 'enrolled', 'faculty'],
+      enum: ASSIGNMENT_VISIBILITIES,
       default: 'enrolled',
       index: true,
     },
     status: {
       type: String,
-      enum: ['draft', 'published', 'archived', 'closed'],
+      enum: ASSIGNMENT_STATUSES,
       default: 'draft',
       index: true,
     },
@@ -68,7 +74,7 @@ const assignmentSchema = new Schema(
     dueDate: { type: Date, default: null, index: true },
     closeDate: { type: Date, default: null, index: true },
     estimatedMinutes: { type: Number, default: null },
-    attachments: { type: [fileRefSchema], default: [] },
+    attachments: { type: [assignmentFileRefSchema], default: [] },
     rubricId: { type: Schema.Types.ObjectId, ref: 'AssignmentRubric', default: null },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },

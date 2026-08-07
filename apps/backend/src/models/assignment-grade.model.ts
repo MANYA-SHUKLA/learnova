@@ -1,5 +1,13 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
 
+export const ASSIGNMENT_GRADING_METHODS = [
+  'manual',
+  'rubric',
+  'pass_fail',
+  'marks',
+  'percentage',
+] as const;
+
 const rubricScoreSchema = new Schema(
   {
     criterionId: { type: String, required: true },
@@ -33,7 +41,7 @@ const assignmentGradeSchema = new Schema(
     studentId: { type: Schema.Types.ObjectId, ref: 'Student', required: true, index: true },
     gradingMethod: {
       type: String,
-      enum: ['manual', 'rubric', 'pass_fail', 'marks', 'percentage'],
+      enum: ASSIGNMENT_GRADING_METHODS,
       default: 'marks',
     },
     marksObtained: { type: Number, default: null },
