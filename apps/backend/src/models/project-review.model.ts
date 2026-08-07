@@ -36,7 +36,7 @@ const projectReviewSchema = new Schema(
     reviewType: {
       type: String,
       enum: PROJECT_REVIEW_TYPES,
-      default: 'peer',
+      default: 'faculty',
       index: true,
     },
     status: {
@@ -45,8 +45,11 @@ const projectReviewSchema = new Schema(
       default: 'draft',
       index: true,
     },
-    rating: { type: Number, default: null, min: 0, max: 10 },
+    score: { type: Number, default: null, min: 0, max: 100 },
     feedback: { type: String, default: null },
+    suggestions: { type: String, default: null },
+    approval: { type: Boolean, default: null },
+    revisionRequired: { type: Boolean, default: false },
     rubricScores: { type: [rubricScoreSchema], default: [] },
     submittedAt: { type: Date, default: null },
     deletedAt: { type: Date, default: null, index: true },
@@ -56,7 +59,7 @@ const projectReviewSchema = new Schema(
 
 projectReviewSchema.index(
   { submissionId: 1, reviewerId: 1, reviewType: 1, deletedAt: 1 },
-  { unique: true },
+  { unique: true, partialFilterExpression: { deletedAt: null } },
 );
 
 export type ProjectReviewDocument = InferSchemaType<typeof projectReviewSchema> & {

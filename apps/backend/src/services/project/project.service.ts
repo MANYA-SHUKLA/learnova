@@ -50,9 +50,12 @@ import {
   PROJECT_CSV_HEADERS,
   canTransitionStatus,
   computeSubmissionRate,
+  DEFAULT_PROJECT_MILESTONES,
+  ensureUniqueProjectSlug,
   evaluateAttempt,
   evaluateSubmissionWindow,
   extensionFor,
+  generateSlug,
   pageMeta,
   parseDate,
   resolveGradeOutcome,
@@ -271,11 +274,11 @@ export class ProjectService {
         return filter;
       }
       const courseIds = await this.enrolledCourseIds(student._id, institutionId);
-      mergeAnd(filter, { courseId: { $in: courseIds }, status: 'published' });
+      mergeAnd(filter, { courseId: { $in: courseIds }, status: { $in: ['published', 'open'] } });
       return filter;
     }
 
-    mergeAnd(filter, { status: 'published' });
+    mergeAnd(filter, { status: { $in: ['published', 'open'] } });
     return filter;
   }
 
@@ -295,7 +298,7 @@ export class ProjectService {
     }
 
     if (actor.role === 'student') {
-      if (project.status !== 'published') {
+      if (project.status !== 'published' && project.status !== 'open') {
         throw new ForbiddenError('Project is not available');
       }
       const student = await this.resolveStudent(actor, institutionId);
@@ -303,7 +306,7 @@ export class ProjectService {
       return;
     }
 
-    if (project.status !== 'published') {
+    if (project.status !== 'published' && project.status !== 'open') {
       throw new ForbiddenError('Access denied');
     }
   }
@@ -371,17 +374,32 @@ export class ProjectService {
     };
   }
 
+  private submissionPayload(input: SaveProjectSubmissionDraftInput | SubmitProjectInput) {
+    return {
+      deliveryType: input.deliveryType,
+      submissionText: input.submissionText ?? null,
+      githubRepository: input.githubRepository ?? null,
+      demoVideo: input.demoVideo ?? null,
+      liveDemoURL: input.liveDemoURL ?? null,
+      links: input.links,
+      timeSpentMinutes: input.timeSpentMinutes ?? null,
+    };
+  }
+
   private async resolveSubmissionContext(
     project: {
       _id: Types.ObjectId;
       courseId: Types.ObjectId;
       projectType: string;
+      allowTeams?: boolean;
+      allowIndividual?: boolean;
       maxAttempts: number;
       allowResubmission: boolean;
       status: string;
       dueDate?: Date | null;
       closeDate?: Date | null;
-      allowLateSubmission: boolean;
+      allowLateSubmission?: boolean;
+      lateSubmissionAllowed?: boolean;
     },
     actor: ActorContext,
     institutionId: string,
@@ -394,13 +412,13 @@ export class ProjectService {
     await this.assertEnrollment(institutionId, student._id, project.courseId);
 
     let teamId: Types.ObjectId | null = null;
-    if (project.projectType === 'team' || project.projectType === 'hybrid') {
+    if (project.allowTeams !== false && project.projectType !== 'individual') {
       const team = await projectRepository.findTeamByMember(
         institutionId,
         String(project._id),
         String(student._id),
       );
-      if (project.projectType === 'team' && !team) {
+      if (!project.allowIndividual && !team) {
         throw new ForbiddenError('You must join a team before submitting');
       }
       teamId = team?._id ?? null;
@@ -422,24 +440,43 @@ export class ProjectService {
     }).exec();
     if (!course) throw new NotFoundError('Course not found');
 
-    if (input.passingMarks > input.totalMarks) {
+    const totalMarks = input.totalMarks;
+    const passingMarks = input.passingMarks;
+    if (passingMarks > totalMarks) {
       throw new ValidationError('passingMarks cannot exceed totalMarks');
     }
-    if (input.teamSizeMin > input.teamSizeMax) {
-      throw new ValidationError('teamSizeMin cannot exceed teamSizeMax');
+
+    const teamSizeMin = input.minimumTeamSize;
+    const teamSizeMax = input.maximumTeamSize;
+    if (teamSizeMin > teamSizeMax) {
+      throw new ValidationError('minimumTeamSize cannot exceed maximumTeamSize');
     }
+
+    const baseSlug = input.slug ?? generateSlug(input.title);
+    const slug = await ensureUniqueProjectSlug(institutionId, baseSlug, (candidate) =>
+      projectRepository.slugExists(institutionId, candidate),
+    );
 
     const doc = await projectRepository.createProject({
       institutionId: oid(institutionId),
       courseId: oid(input.courseId),
       moduleId: input.moduleId ? oid(input.moduleId) : null,
       lessonId: input.lessonId ? oid(input.lessonId) : null,
+      slug,
       title: input.title,
       description: input.description ?? null,
       instructions: input.instructions ?? null,
+      objective: input.objective ?? null,
+      problemStatement: input.problemStatement ?? null,
+      learningOutcomes: input.learningOutcomes,
+      difficulty: input.difficulty,
+      categoryId: input.categoryId ? oid(input.categoryId) : null,
+      tags: input.tags.map((id) => oid(id)),
       projectType: input.projectType,
-      teamSizeMin: input.teamSizeMin,
-      teamSizeMax: input.teamSizeMax,
+      allowIndividual: input.allowIndividual,
+      allowTeams: input.allowTeams,
+      minimumTeamSize: teamSizeMin,
+      maximumTeamSize: teamSizeMax,
       allowSelfTeamFormation: input.allowSelfTeamFormation,
       allowPeerReview: input.allowPeerReview,
       peerReviewsRequired: input.peerReviewsRequired,
@@ -447,22 +484,43 @@ export class ProjectService {
       allowMilestones: input.allowMilestones,
       visibility: input.visibility,
       status: 'draft',
-      totalMarks: input.totalMarks,
-      passingMarks: input.passingMarks,
+      totalMarks,
+      passingMarks,
       weightage: input.weightage,
-      allowLateSubmission: input.allowLateSubmission,
-      latePenaltyPercent: input.latePenaltyPercent,
+      startDate: parseDate(input.startDate),
+      dueDate: parseDate(input.dueDate),
+      submissionDeadline: parseDate(input.submissionDeadline),
+      lateSubmissionAllowed: input.lateSubmissionAllowed,
+      latePenalty: input.latePenalty,
       allowResubmission: input.allowResubmission,
       maxAttempts: input.maxAttempts,
       publishDate: parseDate(input.publishDate),
-      dueDate: parseDate(input.dueDate),
       closeDate: parseDate(input.closeDate),
-      estimatedMinutes: input.estimatedMinutes ?? null,
+      estimatedHours: input.estimatedHours ?? null,
+      resources: input.resources,
+      assignedFacultyIds: input.assignedFacultyIds.map((id) => oid(id)),
       attachments: [],
       rubricId: input.rubricId ? oid(input.rubricId) : null,
       createdBy: oid(actor.userId),
       updatedBy: oid(actor.userId),
     });
+
+    if (input.allowMilestones) {
+      await projectRepository.createMilestonesBulk(
+        DEFAULT_PROJECT_MILESTONES.map((m) => ({
+          institutionId: oid(institutionId),
+          projectId: doc._id,
+          title: m.title,
+          description: m.description,
+          milestoneType: m.milestoneType,
+          order: m.order,
+          weightage: m.weightage,
+          status: 'pending',
+          createdBy: oid(actor.userId),
+          updatedBy: oid(actor.userId),
+        })),
+      );
+    }
 
     await this.audit('project_created', actor, institutionId, {
       projectId: String(doc._id),
@@ -659,6 +717,10 @@ export class ProjectService {
     return this.transition(id, 'published', actor);
   }
 
+  async open(id: string, actor: ActorContext) {
+    return this.transition(id, 'open', actor);
+  }
+
   async archive(id: string, actor: ActorContext) {
     return this.transition(id, 'archived', actor);
   }
@@ -673,17 +735,25 @@ export class ProjectService {
     if (!existing) throw new NotFoundError('Project not found');
     await this.assertProjectWriteAccess(existing, actor, institutionId);
 
+    const baseSlug = await ensureUniqueProjectSlug(
+      institutionId,
+      generateSlug(`${existing.title}-copy`),
+      (candidate) => projectRepository.slugExists(institutionId, candidate),
+    );
+
     const doc = await projectRepository.createProject({
       institutionId: existing.institutionId,
       courseId: existing.courseId,
       moduleId: existing.moduleId,
       lessonId: existing.lessonId,
+      slug: baseSlug,
       title: `${existing.title} (Copy)`,
       description: existing.description,
       instructions: existing.instructions,
+      objective: existing.objective,
       projectType: existing.projectType,
-      teamSizeMin: existing.teamSizeMin,
-      teamSizeMax: existing.teamSizeMax,
+      minimumTeamSize: existing.minimumTeamSize,
+      maximumTeamSize: existing.maximumTeamSize,
       allowSelfTeamFormation: existing.allowSelfTeamFormation,
       allowPeerReview: existing.allowPeerReview,
       peerReviewsRequired: existing.peerReviewsRequired,
@@ -694,15 +764,18 @@ export class ProjectService {
       totalMarks: existing.totalMarks,
       passingMarks: existing.passingMarks,
       weightage: existing.weightage,
-      allowLateSubmission: existing.allowLateSubmission,
-      latePenaltyPercent: existing.latePenaltyPercent,
+      lateSubmissionAllowed: existing.lateSubmissionAllowed,
+      latePenalty: existing.latePenalty,
       allowResubmission: existing.allowResubmission,
       maxAttempts: existing.maxAttempts,
       publishDate: null,
       dueDate: existing.dueDate,
       closeDate: existing.closeDate,
-      estimatedMinutes: existing.estimatedMinutes,
+      estimatedHours: existing.estimatedHours,
       attachments: [],
+      tags: existing.tags ?? [],
+      assignedFacultyIds: existing.assignedFacultyIds ?? [],
+      resources: [],
       rubricId: existing.rubricId,
       createdBy: oid(actor.userId),
       updatedBy: oid(actor.userId),
@@ -781,7 +854,8 @@ export class ProjectService {
       description: input.description ?? null,
       dueDate: parseDate(input.dueDate),
       order,
-      weight: input.weight,
+      weightage: input.weightage,
+      milestoneType: input.milestoneType,
       status: 'pending',
       createdBy: oid(actor.userId),
       updatedBy: oid(actor.userId),
@@ -813,7 +887,8 @@ export class ProjectService {
     if (input.description !== undefined) updates.description = input.description ?? null;
     if (input.dueDate !== undefined) updates.dueDate = parseDate(input.dueDate);
     if (input.order !== undefined) updates.order = input.order;
-    if (input.weight !== undefined) updates.weight = input.weight;
+    if (input.weightage !== undefined) updates.weightage = input.weightage;
+    if (input.milestoneType !== undefined) updates.milestoneType = input.milestoneType;
 
     const doc = await projectRepository.updateMilestoneById(institutionId, id, updates);
     if (!doc) throw new NotFoundError('Milestone not found');
@@ -904,11 +979,14 @@ export class ProjectService {
 
     const project = await projectRepository.findProjectById(institutionId, input.projectId);
     if (!project) throw new NotFoundError('Project not found');
-    if (project.status !== 'published') {
+    if (project.status !== 'published' && project.status !== 'open') {
       throw new ForbiddenError('Project is not open for team formation');
     }
     if (!project.allowSelfTeamFormation) {
       throw new ForbiddenError('Self team formation is not allowed');
+    }
+    if (!project.allowTeams) {
+      throw new ForbiddenError('This project does not allow teams');
     }
 
     const student = await this.resolveStudent(actor, institutionId);
@@ -923,24 +1001,31 @@ export class ProjectService {
       throw new ConflictError('You are already on a team for this project');
     }
 
+    const teamName = input.teamName;
+    const teamStatus = project.allowSelfTeamFormation ? 'approved' : 'pending';
+
     const doc = await projectRepository.createTeam({
       institutionId: oid(institutionId),
       projectId: oid(input.projectId),
       courseId: project.courseId,
-      name: input.name,
-      status: 'forming',
+      teamName,
+      status: teamStatus,
       leaderId: student._id,
       memberCount: 1,
       repoLink: input.repoLink ?? null,
-      members: [
-        {
-          studentId: student._id,
-          role: 'leader',
-          joinedAt: new Date(),
-        },
-      ],
       createdBy: oid(actor.userId),
       updatedBy: oid(actor.userId),
+    });
+
+    await projectRepository.createMember({
+      institutionId: oid(institutionId),
+      teamId: doc._id,
+      projectId: oid(input.projectId),
+      studentId: student._id,
+      role: 'leader',
+      invitationStatus: 'accepted',
+      joinedAt: new Date(),
+      approvedBy: teamStatus === 'approved' ? oid(actor.userId) : null,
     });
 
     await this.audit('team_created', actor, institutionId, {
@@ -948,6 +1033,7 @@ export class ProjectService {
       teamId: String(doc._id),
       courseId: String(project.courseId),
       studentId: String(student._id),
+      metadata: { status: teamStatus },
     });
 
     eventBus.emit(EVENTS.PROJECT_TEAM_CREATED, {
@@ -967,8 +1053,11 @@ export class ProjectService {
 
     const team = await projectRepository.findTeamById(institutionId, input.teamId);
     if (!team) throw new NotFoundError('Team not found');
-    if (team.status === 'dissolved') {
-      throw new ConflictError('Team has been dissolved');
+    if (team.status === 'rejected') {
+      throw new ConflictError('Team has been rejected');
+    }
+    if (team.status === 'pending') {
+      throw new ConflictError('Team is pending faculty approval');
     }
 
     const project = await projectRepository.findProjectById(
@@ -976,15 +1065,17 @@ export class ProjectService {
       String(team.projectId),
     );
     if (!project) throw new NotFoundError('Project not found');
-    if (project.status !== 'published') {
+    if (project.status !== 'published' && project.status !== 'open') {
       throw new ForbiddenError('Project is not open for team formation');
     }
 
     const student = await this.resolveStudent(actor, institutionId);
     await this.assertEnrollment(institutionId, student._id, project.courseId);
 
-    const alreadyMember = team.members.some(
-      (m) => String(m.studentId) === String(student._id),
+    const alreadyMember = await projectRepository.findMemberByTeamAndStudent(
+      institutionId,
+      input.teamId,
+      String(student._id),
     );
     if (alreadyMember) {
       throw new ConflictError('You are already on this team');
@@ -999,23 +1090,28 @@ export class ProjectService {
       throw new ConflictError('You are already on a team for this project');
     }
 
-    if (team.memberCount >= project.teamSizeMax) {
+    if (team.memberCount >= project.maximumTeamSize) {
       throw new ConflictError('Team is full');
     }
 
-    const members = [
-      ...team.members,
-      {
-        studentId: student._id,
-        role: input.role,
-        joinedAt: new Date(),
-      },
-    ];
-    const memberCount = members.length;
-    const status = memberCount >= project.teamSizeMin ? 'active' : team.status;
+    await projectRepository.createMember({
+      institutionId: oid(institutionId),
+      teamId: team._id,
+      projectId: team.projectId,
+      studentId: student._id,
+      role: input.role,
+      invitationStatus: 'accepted',
+      joinedAt: new Date(),
+      approvedBy: oid(actor.userId),
+    });
+
+    const memberCount = team.memberCount + 1;
+    const status =
+      memberCount >= project.minimumTeamSize && team.status === 'approved'
+        ? 'approved'
+        : team.status;
 
     const doc = await projectRepository.updateTeamById(institutionId, input.teamId, {
-      members,
       memberCount,
       status,
       updatedBy: oid(actor.userId),
@@ -1049,25 +1145,33 @@ export class ProjectService {
     if (!team) throw new NotFoundError('Team not found');
 
     const student = await this.resolveStudent(actor, institutionId);
-    const memberIndex = team.members.findIndex(
-      (m) => String(m.studentId) === String(student._id),
+    const member = await projectRepository.findMemberByTeamAndStudent(
+      institutionId,
+      teamId,
+      String(student._id),
     );
-    if (memberIndex === -1) {
+    if (!member) {
       throw new NotFoundError('You are not a member of this team');
     }
 
-    const members = team.members.filter((m) => String(m.studentId) !== String(student._id));
-    const memberCount = members.length;
+    await projectRepository.softDeleteMember(institutionId, String(member._id));
+
+    const remaining = await projectRepository.listMembersByTeam(institutionId, teamId);
+    const memberCount = remaining.length;
     let leaderId = team.leaderId;
     if (String(leaderId) === String(student._id)) {
-      leaderId = members[0]?.studentId ?? null;
+      leaderId = remaining[0]?.studentId ?? null;
+      if (remaining[0]) {
+        await projectRepository.updateMemberById(institutionId, String(remaining[0]._id), {
+          role: 'leader',
+        });
+      }
     }
 
     const doc = await projectRepository.updateTeamById(institutionId, teamId, {
-      members,
       memberCount,
       leaderId,
-      status: memberCount === 0 ? 'dissolved' : 'forming',
+      status: memberCount === 0 ? 'rejected' : team.status,
       updatedBy: oid(actor.userId),
     });
     if (!doc) throw new NotFoundError('Team not found');
@@ -1091,16 +1195,33 @@ export class ProjectService {
       String(team.projectId),
     );
     if (!project) throw new NotFoundError('Project not found');
-    await this.assertProjectWriteAccess(project, actor, institutionId);
 
-    const members = team.members.filter((m) => String(m.studentId) !== studentId);
-    if (members.length === team.members.length) {
-      throw new NotFoundError('Team member not found');
+    if (actor.role === 'student') {
+      const student = await this.resolveStudent(actor, institutionId);
+      if (String(team.leaderId) !== String(student._id)) {
+        throw new ForbiddenError('Only the team leader can remove members');
+      }
+    } else {
+      await this.assertProjectWriteAccess(project, actor, institutionId);
+    }
+
+    const member = await projectRepository.findMemberByTeamAndStudent(
+      institutionId,
+      teamId,
+      studentId,
+    );
+    if (!member) throw new NotFoundError('Team member not found');
+
+    await projectRepository.softDeleteMember(institutionId, String(member._id));
+    const remaining = await projectRepository.listMembersByTeam(institutionId, teamId);
+    let leaderId = team.leaderId;
+    if (String(leaderId) === studentId) {
+      leaderId = remaining[0]?.studentId ?? null;
     }
 
     const doc = await projectRepository.updateTeamById(institutionId, teamId, {
-      members,
-      memberCount: members.length,
+      memberCount: remaining.length,
+      leaderId,
       updatedBy: oid(actor.userId),
     });
     if (!doc) throw new NotFoundError('Team not found');
@@ -1143,7 +1264,7 @@ export class ProjectService {
     }
 
     const updates: Record<string, unknown> = { updatedBy: oid(actor.userId) };
-    if (input.name !== undefined) updates.name = input.name;
+    if (input.teamName !== undefined) updates.teamName = input.teamName;
     if (input.repoLink !== undefined) updates.repoLink = input.repoLink ?? null;
     if (input.status !== undefined) updates.status = input.status;
 
@@ -1206,7 +1327,7 @@ export class ProjectService {
     const institutionId = requireTenant(actor);
     const project = await projectRepository.findProjectById(institutionId, input.projectId);
     if (!project) throw new NotFoundError('Project not found');
-    if (project.status !== 'published') {
+    if (project.status !== 'published' && project.status !== 'open') {
       throw new ForbiddenError('Project is not open for submissions');
     }
 
@@ -1216,21 +1337,17 @@ export class ProjectService {
       institutionId,
     );
 
+    const payload = {
+      ...this.submissionPayload(input),
+      updatedBy: oid(actor.userId),
+    };
+
     const existing = await projectRepository.findDraftSubmission(
       input.projectId,
-      project.projectType === 'individual' ? String(student._id) : null,
+      teamId ? null : String(student._id),
       teamId ? String(teamId) : null,
       input.milestoneId ?? null,
     );
-
-    const payload = {
-      deliveryType: input.deliveryType,
-      textSubmission: input.textSubmission ?? null,
-      links: input.links,
-      repoLink: input.repoLink ?? null,
-      timeSpentMinutes: input.timeSpentMinutes ?? null,
-      updatedBy: oid(actor.userId),
-    };
 
     if (existing) {
       const doc = await projectRepository.updateSubmissionById(
@@ -1244,7 +1361,7 @@ export class ProjectService {
 
     const attempts = await projectRepository.countAttempts(
       input.projectId,
-      project.projectType === 'individual' ? String(student._id) : null,
+      teamId ? null : String(student._id),
       teamId ? String(teamId) : null,
     );
 
@@ -1252,13 +1369,14 @@ export class ProjectService {
       institutionId: oid(institutionId),
       projectId: project._id,
       courseId: project.courseId,
-      studentId: project.projectType === 'individual' ? student._id : student._id,
+      submittedBy: oid(actor.userId),
+      studentId: teamId ? student._id : student._id,
       teamId,
       milestoneId: input.milestoneId ? oid(input.milestoneId) : null,
       attemptNumber: attempts + 1,
       submittedAt: null,
       status: 'draft',
-      files: [],
+      attachments: [],
       lateSubmission: false,
       createdBy: oid(actor.userId),
       ...payload,
@@ -1279,10 +1397,10 @@ export class ProjectService {
     );
 
     const window = evaluateSubmissionWindow({
-      status: project.status,
+      status: project.status as ProjectStatus,
       dueDate: project.dueDate ?? null,
       closeDate: project.closeDate ?? null,
-      allowLateSubmission: project.allowLateSubmission,
+      allowLateSubmission: project.lateSubmissionAllowed ?? project.allowLateSubmission ?? true,
     });
     if (!window.allowed) {
       throw new ForbiddenError(window.reason ?? 'Submission not allowed');
@@ -1290,7 +1408,7 @@ export class ProjectService {
 
     const previousAttempts = await projectRepository.countAttempts(
       input.projectId,
-      project.projectType === 'individual' ? String(student._id) : null,
+      teamId ? null : String(student._id),
       teamId ? String(teamId) : null,
     );
     const attempt = evaluateAttempt({
@@ -1303,21 +1421,18 @@ export class ProjectService {
     }
 
     const payload = {
-      deliveryType: input.deliveryType,
-      textSubmission: input.textSubmission ?? null,
-      links: input.links,
-      repoLink: input.repoLink ?? null,
-      timeSpentMinutes: input.timeSpentMinutes ?? null,
+      ...this.submissionPayload(input),
       lateSubmission: window.late,
       status: resolveSubmissionStatus(window.late),
       submittedAt: new Date(),
       attemptNumber: attempt.nextAttempt,
+      submittedBy: oid(actor.userId),
       updatedBy: oid(actor.userId),
     };
 
     const draft = await projectRepository.findDraftSubmission(
       input.projectId,
-      project.projectType === 'individual' ? String(student._id) : null,
+      teamId ? null : String(student._id),
       teamId ? String(teamId) : null,
       input.milestoneId ?? null,
     );
@@ -1328,10 +1443,11 @@ export class ProjectService {
           institutionId: oid(institutionId),
           projectId: project._id,
           courseId: project.courseId,
+          submittedBy: oid(actor.userId),
           studentId: student._id,
           teamId,
           milestoneId: input.milestoneId ? oid(input.milestoneId) : null,
-          files: [],
+          attachments: [],
           createdBy: oid(actor.userId),
           ...payload,
         });
@@ -1449,7 +1565,7 @@ export class ProjectService {
       totalMarks: project.totalMarks,
       passingMarks: project.passingMarks,
       late: submission.lateSubmission,
-      latePenaltyPercent: project.latePenaltyPercent,
+      latePenaltyPercent: project.latePenalty ?? (project as { latePenaltyPercent?: number }).latePenaltyPercent ?? 0,
     });
 
     await projectRepository.softDeleteGradesForSubmission(submissionId);
@@ -1542,6 +1658,13 @@ export class ProjectService {
       throw new ForbiddenError('Students cannot submit faculty reviews');
     }
 
+    const reviewInput = input as CreateReviewInput & {
+      score?: number | null;
+      suggestions?: string | null;
+      approval?: boolean | null;
+      revisionRequired?: boolean;
+    };
+
     const doc = await projectRepository.createReview({
       institutionId: oid(institutionId),
       projectId: oid(input.projectId),
@@ -1549,8 +1672,11 @@ export class ProjectService {
       reviewerId: oid(actor.userId),
       reviewType: input.reviewType,
       status: 'draft',
-      rating: input.rating ?? null,
-      feedback: input.feedback ?? null,
+      score: reviewInput.score ?? reviewInput.rating ?? null,
+      feedback: reviewInput.feedback ?? null,
+      suggestions: reviewInput.suggestions ?? null,
+      approval: reviewInput.approval ?? null,
+      revisionRequired: reviewInput.revisionRequired ?? false,
       rubricScores: input.rubricScores,
     });
 
@@ -1565,11 +1691,21 @@ export class ProjectService {
       throw new ForbiddenError('Not allowed to submit this review');
     }
 
+    const submitInput = input as SubmitReviewInput & {
+      score?: number | null;
+      suggestions?: string | null;
+      approval?: boolean | null;
+      revisionRequired?: boolean;
+    };
+
     const doc = await projectRepository.updateReviewById(institutionId, id, {
       status: 'submitted',
-      rating: input.rating ?? existing.rating,
-      feedback: input.feedback ?? existing.feedback,
-      rubricScores: input.rubricScores ?? existing.rubricScores,
+      score: submitInput.score ?? submitInput.rating ?? existing.score,
+      feedback: submitInput.feedback ?? existing.feedback,
+      suggestions: submitInput.suggestions ?? existing.suggestions,
+      approval: submitInput.approval ?? existing.approval,
+      revisionRequired: submitInput.revisionRequired ?? existing.revisionRequired,
+      rubricScores: submitInput.rubricScores ?? existing.rubricScores,
       submittedAt: new Date(),
     });
     if (!doc) throw new NotFoundError('Review not found');
@@ -1581,6 +1717,13 @@ export class ProjectService {
     });
 
     eventBus.emit(EVENTS.PROJECT_REVIEW_SUBMITTED, {
+      reviewId: id,
+      projectId: String(doc.projectId),
+      submissionId: String(doc.submissionId),
+      institutionId,
+    });
+
+    eventBus.emit('review.completed', {
       reviewId: id,
       projectId: String(doc.projectId),
       submissionId: String(doc.submissionId),
@@ -1755,7 +1898,7 @@ export class ProjectService {
       }),
       projectRepository.countTeams({
         ...submissionBase,
-        status: 'active',
+        status: { $in: ['approved', 'completed'] },
       }),
       projectRepository.countReviews({
         institutionId: institutionOid,
@@ -1810,7 +1953,7 @@ export class ProjectService {
         ProjectModel.find({
           institutionId: institutionOid,
           deletedAt: null,
-          status: 'published',
+          status: { $in: ['published', 'open'] },
           courseId: { $in: courseIds },
         })
           .select('_id allowPeerReview peerReviewsRequired')
@@ -1899,7 +2042,7 @@ export class ProjectService {
     let filter = projectRepository.buildProjectFilter(institutionId, query);
     mergeAnd(filter, {
       courseId: { $in: courseIds },
-      status: 'published',
+      status: { $in: ['published', 'open'] },
     });
 
     const result = await projectRepository.listProjects(filter, query);
@@ -1907,6 +2050,423 @@ export class ProjectService {
       items: result.items.map(toDto),
       meta: pageMeta(result.total, result.page, result.limit),
     };
+  }
+
+  // ----------------------------------------------------------- bulk operations
+
+  async bulkPublish(ids: string[], actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    if (actor.role === 'student') throw new ForbiddenError('Students cannot bulk publish');
+    const modified = await projectRepository.bulkUpdateProjectStatus(institutionId, ids, 'published');
+    for (const id of ids) {
+      eventBus.emit(EVENTS.PROJECT_PUBLISHED, { projectId: id, institutionId });
+    }
+    return { modified };
+  }
+
+  async bulkArchive(ids: string[], actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    if (actor.role === 'student') throw new ForbiddenError('Students cannot bulk archive');
+    const modified = await projectRepository.bulkUpdateProjectStatus(institutionId, ids, 'archived');
+    return { modified };
+  }
+
+  async bulkDelete(ids: string[], actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    if (actor.role === 'student') throw new ForbiddenError('Students cannot bulk delete');
+    const modified = await projectRepository.bulkSoftDeleteProjects(institutionId, ids);
+    return { modified };
+  }
+
+  async bulkDuplicate(ids: string[], actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    if (actor.role === 'student') throw new ForbiddenError('Students cannot bulk duplicate');
+    const duplicated: string[] = [];
+    for (const id of ids) {
+      const copy = await this.duplicate(id, actor);
+      duplicated.push(String(copy.id));
+    }
+    return { duplicated, count: duplicated.length };
+  }
+
+  async bulkAssignFaculty(ids: string[], facultyIds: string[], actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    if (actor.role === 'student') throw new ForbiddenError('Students cannot assign faculty');
+    const modified = await projectRepository.bulkAssignFaculty(institutionId, ids, facultyIds);
+    return { modified };
+  }
+
+  // -------------------------------------------------------------- team approval
+
+  async approveTeam(teamId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const team = await projectRepository.findTeamById(institutionId, teamId);
+    if (!team) throw new NotFoundError('Team not found');
+    const project = await projectRepository.findProjectById(institutionId, String(team.projectId));
+    if (!project) throw new NotFoundError('Project not found');
+    await this.assertProjectWriteAccess(project, actor, institutionId);
+
+    const doc = await projectRepository.updateTeamById(institutionId, teamId, {
+      status: 'approved',
+      updatedBy: oid(actor.userId),
+    });
+    if (!doc) throw new NotFoundError('Team not found');
+
+    await this.audit('team_approved', actor, institutionId, {
+      projectId: String(team.projectId),
+      teamId,
+      courseId: String(project.courseId),
+    });
+
+    return toDto(doc);
+  }
+
+  async rejectTeam(teamId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const team = await projectRepository.findTeamById(institutionId, teamId);
+    if (!team) throw new NotFoundError('Team not found');
+    const project = await projectRepository.findProjectById(institutionId, String(team.projectId));
+    if (!project) throw new NotFoundError('Project not found');
+    await this.assertProjectWriteAccess(project, actor, institutionId);
+
+    const doc = await projectRepository.updateTeamById(institutionId, teamId, {
+      status: 'rejected',
+      updatedBy: oid(actor.userId),
+    });
+    if (!doc) throw new NotFoundError('Team not found');
+
+    await this.audit('team_rejected', actor, institutionId, {
+      projectId: String(team.projectId),
+      teamId,
+      courseId: String(project.courseId),
+    });
+
+    return toDto(doc);
+  }
+
+  async inviteMember(
+    teamId: string,
+    studentId: string,
+    role: 'leader' | 'member',
+    actor: ActorContext,
+  ) {
+    const institutionId = requireTenant(actor);
+    const team = await projectRepository.findTeamById(institutionId, teamId);
+    if (!team) throw new NotFoundError('Team not found');
+
+    const project = await projectRepository.findProjectById(institutionId, String(team.projectId));
+    if (!project) throw new NotFoundError('Project not found');
+
+    if (actor.role === 'student') {
+      const student = await this.resolveStudent(actor, institutionId);
+      if (String(team.leaderId) !== String(student._id)) {
+        throw new ForbiddenError('Only the team leader can invite members');
+      }
+    } else {
+      await this.assertProjectWriteAccess(project, actor, institutionId);
+    }
+
+    const existing = await projectRepository.findMemberByTeamAndStudent(
+      institutionId,
+      teamId,
+      studentId,
+    );
+    if (existing) throw new ConflictError('Student is already associated with this team');
+
+    const doc = await projectRepository.createMember({
+      institutionId: oid(institutionId),
+      teamId: team._id,
+      projectId: team.projectId,
+      studentId: oid(studentId),
+      role,
+      invitationStatus: 'pending',
+      joinedAt: new Date(),
+    });
+
+    return toDto(doc);
+  }
+
+  async acceptInvitation(memberId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const member = await projectRepository.findMemberById(institutionId, memberId);
+    if (!member) throw new NotFoundError('Invitation not found');
+    if (member.invitationStatus !== 'pending') {
+      throw new ConflictError('Invitation is no longer pending');
+    }
+
+    const student = await this.resolveStudent(actor, institutionId);
+    if (String(member.studentId) !== String(student._id)) {
+      throw new ForbiddenError('You can only accept your own invitations');
+    }
+
+    const team = await projectRepository.findTeamById(institutionId, String(member.teamId));
+    if (!team) throw new NotFoundError('Team not found');
+
+    const doc = await projectRepository.updateMemberById(institutionId, memberId, {
+      invitationStatus: 'accepted',
+      approvedBy: oid(actor.userId),
+    });
+    if (!doc) throw new NotFoundError('Invitation not found');
+
+    await projectRepository.updateTeamById(institutionId, String(member.teamId), {
+      memberCount: team.memberCount + 1,
+      updatedBy: oid(actor.userId),
+    });
+
+    await this.audit('team_joined', actor, institutionId, {
+      projectId: String(member.projectId),
+      teamId: String(member.teamId),
+      studentId: String(student._id),
+      metadata: { viaInvitation: true },
+    });
+
+    return toDto(doc);
+  }
+
+  async rejectInvitation(memberId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const member = await projectRepository.findMemberById(institutionId, memberId);
+    if (!member) throw new NotFoundError('Invitation not found');
+    if (member.invitationStatus !== 'pending') {
+      throw new ConflictError('Invitation is no longer pending');
+    }
+
+    const student = await this.resolveStudent(actor, institutionId);
+    if (String(member.studentId) !== String(student._id)) {
+      throw new ForbiddenError('You can only reject your own invitations');
+    }
+
+    const doc = await projectRepository.updateMemberById(institutionId, memberId, {
+      invitationStatus: 'rejected',
+    });
+    if (!doc) throw new NotFoundError('Invitation not found');
+    return toDto(doc);
+  }
+
+  async transferLeadership(teamId: string, studentId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const team = await projectRepository.findTeamById(institutionId, teamId);
+    if (!team) throw new NotFoundError('Team not found');
+
+    if (actor.role === 'student') {
+      const student = await this.resolveStudent(actor, institutionId);
+      if (String(team.leaderId) !== String(student._id)) {
+        throw new ForbiddenError('Only the current leader can transfer leadership');
+      }
+    }
+
+    const target = await projectRepository.findMemberByTeamAndStudent(
+      institutionId,
+      teamId,
+      studentId,
+    );
+    if (!target || target.invitationStatus !== 'accepted') {
+      throw new NotFoundError('Target member not found on team');
+    }
+
+    const currentLeader = await projectRepository.findMemberByTeamAndStudent(
+      institutionId,
+      teamId,
+      String(team.leaderId),
+    );
+    if (currentLeader) {
+      await projectRepository.updateMemberById(institutionId, String(currentLeader._id), {
+        role: 'member',
+      });
+    }
+
+    await projectRepository.updateMemberById(institutionId, String(target._id), {
+      role: 'leader',
+    });
+
+    const doc = await projectRepository.updateTeamById(institutionId, teamId, {
+      leaderId: oid(studentId),
+      updatedBy: oid(actor.userId),
+    });
+    if (!doc) throw new NotFoundError('Team not found');
+    return toDto(doc);
+  }
+
+  async getMyTeams(actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    if (actor.role !== 'student') {
+      throw new ForbiddenError('Only students can list their teams');
+    }
+
+    const student = await this.resolveStudent(actor, institutionId);
+    const members = await projectRepository.listMembersByStudent(
+      institutionId,
+      String(student._id),
+    );
+
+    const teams = await Promise.all(
+      members.map(async (member) => {
+        const team = await projectRepository.findTeamById(institutionId, String(member.teamId));
+        if (!team) return null;
+        const project = await projectRepository.findProjectById(
+          institutionId,
+          String(member.projectId),
+        );
+        return {
+          ...toDto(team),
+          member: toDto(member),
+          project: project ? toDto(project) : null,
+        };
+      }),
+    );
+
+    return teams.filter(Boolean);
+  }
+
+  // ------------------------------------------------------------------- comments
+
+  async listComments(projectId: string, submissionId: string | undefined, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const project = await projectRepository.findProjectById(institutionId, projectId);
+    if (!project) throw new NotFoundError('Project not found');
+    await this.assertProjectReadAccess(project, actor, institutionId);
+
+    const comments = await projectRepository.listComments(
+      institutionId,
+      projectId,
+      submissionId ?? null,
+    );
+    return comments.map(toDto);
+  }
+
+  async createComment(
+    input: {
+      projectId: string;
+      submissionId?: string | null;
+      parentCommentId?: string | null;
+      body: string;
+      attachments?: string[];
+    },
+    actor: ActorContext,
+  ) {
+    const institutionId = requireTenant(actor);
+    const project = await projectRepository.findProjectById(institutionId, input.projectId);
+    if (!project) throw new NotFoundError('Project not found');
+    await this.assertProjectReadAccess(project, actor, institutionId);
+
+    if (input.parentCommentId) {
+      const parent = await projectRepository.findCommentById(
+        institutionId,
+        input.parentCommentId,
+      );
+      if (!parent) throw new NotFoundError('Parent comment not found');
+    }
+
+    const doc = await projectRepository.createComment({
+      institutionId: oid(institutionId),
+      projectId: oid(input.projectId),
+      submissionId: input.submissionId ? oid(input.submissionId) : null,
+      parentCommentId: input.parentCommentId ? oid(input.parentCommentId) : null,
+      authorId: oid(actor.userId),
+      authorRole: actor.role,
+      body: input.body,
+      attachments: input.attachments?.map((id) => oid(id)) ?? [],
+      resolved: false,
+    });
+
+    await this.audit('comment_created', actor, institutionId, {
+      projectId: input.projectId,
+      submissionId: input.submissionId ?? null,
+      courseId: String(project.courseId),
+    });
+
+    return toDto(doc);
+  }
+
+  async replyToComment(
+    commentId: string,
+    body: string,
+    actor: ActorContext,
+  ) {
+    const institutionId = requireTenant(actor);
+    const parent = await projectRepository.findCommentById(institutionId, commentId);
+    if (!parent) throw new NotFoundError('Comment not found');
+
+    return this.createComment(
+      {
+        projectId: String(parent.projectId),
+        submissionId: parent.submissionId ? String(parent.submissionId) : null,
+        parentCommentId: commentId,
+        body,
+      },
+      actor,
+    );
+  }
+
+  async resolveComment(commentId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    if (actor.role === 'student') {
+      throw new ForbiddenError('Only faculty can resolve comments');
+    }
+
+    const comment = await projectRepository.findCommentById(institutionId, commentId);
+    if (!comment) throw new NotFoundError('Comment not found');
+
+    const project = await projectRepository.findProjectById(
+      institutionId,
+      String(comment.projectId),
+    );
+    if (!project) throw new NotFoundError('Project not found');
+    await this.assertProjectWriteAccess(project, actor, institutionId);
+
+    const doc = await projectRepository.updateCommentById(institutionId, commentId, {
+      resolved: true,
+    });
+    if (!doc) throw new NotFoundError('Comment not found');
+    return toDto(doc);
+  }
+
+  // ---------------------------------------------------------------- tags/categories
+
+  async listTags(actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const tags = await projectRepository.listTags(institutionId);
+    return tags.map(toDto);
+  }
+
+  async createTag(input: { name: string; color?: string | null }, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const slug = generateSlug(input.name);
+    const existing = await projectRepository.findTagBySlug(institutionId, slug);
+    if (existing) throw new ConflictError('Tag already exists');
+
+    const doc = await projectRepository.createTag({
+      institutionId: oid(institutionId),
+      name: input.name,
+      slug,
+      color: input.color ?? null,
+    });
+    return toDto(doc);
+  }
+
+  async listCategories(actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const categories = await projectRepository.listCategories(institutionId);
+    return categories.map(toDto);
+  }
+
+  async createCategory(
+    input: { name: string; description?: string | null; color?: string | null },
+    actor: ActorContext,
+  ) {
+    const institutionId = requireTenant(actor);
+    const slug = generateSlug(input.name);
+    const existing = await projectRepository.findCategoryBySlug(institutionId, slug);
+    if (existing) throw new ConflictError('Category already exists');
+
+    const doc = await projectRepository.createCategory({
+      institutionId: oid(institutionId),
+      name: input.name,
+      slug,
+      description: input.description ?? null,
+      color: input.color ?? null,
+    });
+    return toDto(doc);
   }
 }
 

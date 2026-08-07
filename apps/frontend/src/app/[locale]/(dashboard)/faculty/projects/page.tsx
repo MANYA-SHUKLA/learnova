@@ -14,6 +14,7 @@ import {
 } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
+import { SuccessPopup } from '@/components/shared/success-popup';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
 import {
@@ -21,20 +22,30 @@ import {
   formatProjectStatus,
   formatProjectType,
   formatSubmissionStatus,
+  formatTeamStatus,
+  useApproveTeamMutation,
   useFacultyProjectDashboard,
   useGradeSubmissionMutation,
   useProjectList,
   usePublishProjectMutation,
+  useRejectTeamMutation,
   useSubmissionList,
+  useTeamList,
 } from '@/features/project';
+import { useSuccessPopup } from '@/hooks/use-success-popup';
 import { Link } from '@/lib/i18n/routing';
 
 export default function FacultyProjectsPage() {
   const t = useTranslations('dashboard.faculty.projects');
+  const tCommon = useTranslations('common');
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [gradeMarks, setGradeMarks] = useState<Record<string, string>>({});
+  const [gradeFeedback, setGradeFeedback] = useState<Record<string, string>>({});
+  const [gradeSuggestions, setGradeSuggestions] = useState<Record<string, string>>({});
+  const [revisionRequired, setRevisionRequired] = useState<Record<string, boolean>>({});
+  const { open, message, showSuccess, closeSuccess } = useSuccessPopup(tCommon('savedSuccessfully'));
 
   const params = useMemo(
     () => ({
@@ -49,6 +60,7 @@ export default function FacultyProjectsPage() {
 
   const listQuery = useProjectList(params);
   const dashQuery = useFacultyProjectDashboard();
+  const pendingTeamsQuery = useTeamList({ pendingApproval: true, limit: 10 });
   const submissionsQuery = useSubmissionList({
     status: 'submitted',
     page: 1,
@@ -56,23 +68,23 @@ export default function FacultyProjectsPage() {
     sortBy: 'submittedAt',
     sortOrder: 'desc',
   });
-  const pendingReviewsQuery = useSubmissionList({
-    graded: false,
-    status: 'submitted',
-    page: 1,
-    limit: 10,
-  });
+  const lateQuery = useSubmissionList({ late: true, page: 1, limit: 5 });
   const publishMutation = usePublishProjectMutation();
   const gradeMutation = useGradeSubmissionMutation();
+  const approveTeam = useApproveTeamMutation();
+  const rejectTeam = useRejectTeamMutation();
 
   const rows = listQuery.data?.items ?? [];
   const dash = dashQuery.data;
+  const pendingTeams = pendingTeamsQuery.data?.items ?? [];
   const pending = submissionsQuery.data?.items ?? [];
-  const pendingReviews = pendingReviewsQuery.data?.items ?? [];
+  const late = lateQuery.data?.items ?? [];
 
   return (
     <PermissionGate permission={PERMISSIONS.PROJECT_READ} enforce>
       <div className="space-y-8">
+        <SuccessPopup open={open} message={message} onClose={closeSuccess} />
+
         <div>
           <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
           <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -84,13 +96,10 @@ export default function FacultyProjectsPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           {[
             { label: t('stats.created'), value: dash?.projectsCreated },
-            { label: t('stats.teams'), value: dash?.activeTeams },
             { label: t('stats.pendingReviews'), value: dash?.pendingReviews },
-            { label: t('stats.pendingGrades'), value: dash?.pendingGrades },
-            {
-              label: t('stats.submissionRate'),
-              value: dash ? `${Math.round(dash.submissionRate * 100)}%` : '—',
-            },
+            { label: t('stats.upcomingDeadlines'), value: dash?.upcomingDeadlines ?? dash?.pendingGrades },
+            { label: t('stats.studentTeams'), value: dash?.studentTeams ?? dash?.activeTeams },
+            { label: t('stats.lateSubmissions'), value: dash?.lateSubmissions ?? late.length },
           ].map((stat) => (
             <Card key={stat.label} className="rounded-2xl border-border/80">
               <CardHeader className="pb-2">
@@ -102,6 +111,57 @@ export default function FacultyProjectsPage() {
             </Card>
           ))}
         </div>
+
+        <Card className="rounded-2xl border-border/80">
+          <CardHeader>
+            <CardTitle className="text-base">{t('teamApprovalTitle')}</CardTitle>
+            <CardDescription>{t('teamApprovalDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {pendingTeams.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t('noPendingTeams')}</p>
+            ) : (
+              pendingTeams.map((team) => (
+                <div
+                  key={team.id}
+                  className="flex flex-col gap-2 rounded-xl border border-border/80 p-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-medium">{team.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {team.memberCount} {t('members')} · {formatTeamStatus(team.status)}
+                    </p>
+                  </div>
+                  <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        disabled={approveTeam.isPending}
+                        onClick={async () => {
+                          await approveTeam.mutateAsync(team.id);
+                          showSuccess(t('teamApproved'));
+                        }}
+                      >
+                        {t('approveTeam')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={rejectTeam.isPending}
+                        onClick={async () => {
+                          await rejectTeam.mutateAsync({ id: team.id });
+                          showSuccess(t('teamRejected'));
+                        }}
+                      >
+                        {t('rejectTeam')}
+                      </Button>
+                    </div>
+                  </PermissionGate>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
 
         <Card className="rounded-2xl border-border/80">
           <CardHeader className="gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -168,13 +228,15 @@ export default function FacultyProjectsPage() {
                         </Link>
                       </Button>
                       {row.status === 'draft' ? (
-                        <Button
-                          size="sm"
-                          disabled={publishMutation.isPending}
-                          onClick={() => void publishMutation.mutateAsync(row.id)}
-                        >
-                          {t('publish')}
-                        </Button>
+                        <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
+                          <Button
+                            size="sm"
+                            disabled={publishMutation.isPending}
+                            onClick={() => void publishMutation.mutateAsync(row.id)}
+                          >
+                            {t('publish')}
+                          </Button>
+                        </PermissionGate>
                       ) : null}
                     </div>
                   </li>
@@ -184,77 +246,84 @@ export default function FacultyProjectsPage() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="rounded-2xl border-border/80">
-            <CardHeader>
-              <CardTitle className="text-base">{t('pendingTitle')}</CardTitle>
-              <CardDescription>{t('pendingDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {pending.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t('noPending')}</p>
-              ) : (
-                pending.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="flex flex-col gap-2 rounded-xl border border-border/80 p-3"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge variant="outline">{formatSubmissionStatus(sub.status)}</Badge>
-                      <span className="text-xs text-muted-foreground">#{sub.attemptNumber}</span>
-                    </div>
-                    <Input
-                      type="number"
-                      placeholder={t('marksPlaceholder')}
-                      value={gradeMarks[sub.id] ?? ''}
+        <Card className="rounded-2xl border-border/80">
+          <CardHeader>
+            <CardTitle className="text-base">{t('pendingTitle')}</CardTitle>
+            <CardDescription>{t('pendingDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {pending.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t('noPending')}</p>
+            ) : (
+              pending.map((sub) => (
+                <div
+                  key={sub.id}
+                  className="flex flex-col gap-2 rounded-xl border border-border/80 p-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="outline">{formatSubmissionStatus(sub.status)}</Badge>
+                    <span className="text-xs text-muted-foreground">#{sub.attemptNumber}</span>
+                  </div>
+                  <Input
+                    type="number"
+                    placeholder={t('marksPlaceholder')}
+                    value={gradeMarks[sub.id] ?? ''}
+                    onChange={(e) =>
+                      setGradeMarks((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                    }
+                  />
+                  <Input
+                    placeholder={t('feedbackPlaceholder')}
+                    value={gradeFeedback[sub.id] ?? ''}
+                    onChange={(e) =>
+                      setGradeFeedback((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                    }
+                  />
+                  <Input
+                    placeholder={t('suggestionsPlaceholder')}
+                    value={gradeSuggestions[sub.id] ?? ''}
+                    onChange={(e) =>
+                      setGradeSuggestions((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                    }
+                  />
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={revisionRequired[sub.id] ?? false}
                       onChange={(e) =>
-                        setGradeMarks((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                        setRevisionRequired((prev) => ({ ...prev, [sub.id]: e.target.checked }))
                       }
                     />
+                    {t('revisionRequired')}
+                  </label>
+                  <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
                     <Button
                       size="sm"
                       disabled={gradeMutation.isPending || !gradeMarks[sub.id]}
-                      onClick={() =>
-                        void gradeMutation.mutateAsync({
+                      onClick={async () => {
+                        await gradeMutation.mutateAsync({
                           id: sub.id,
                           body: {
                             gradingMethod: 'marks',
                             marksObtained: Number(gradeMarks[sub.id]),
-                            feedback: 'Graded',
+                            score: Number(gradeMarks[sub.id]),
+                            feedback: gradeFeedback[sub.id] || null,
+                            suggestions: gradeSuggestions[sub.id] || null,
+                            approval: !revisionRequired[sub.id],
+                            revisionRequired: revisionRequired[sub.id] ?? false,
                           },
-                        })
-                      }
+                        });
+                        showSuccess(t('gradedSuccess'));
+                      }}
                     >
                       {t('grade')}
                     </Button>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl border-border/80">
-            <CardHeader>
-              <CardTitle className="text-base">{t('reviewsTitle')}</CardTitle>
-              <CardDescription>{t('reviewsDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {pendingReviews.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t('noReviews')}</p>
-              ) : (
-                pendingReviews.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
-                  >
-                    <span className="truncate">{sub.projectId}</span>
-                    <Badge variant="outline">{formatSubmissionStatus(sub.status)}</Badge>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                  </PermissionGate>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
     </PermissionGate>
   );

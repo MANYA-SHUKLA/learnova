@@ -3,7 +3,6 @@ import {
   PROJECT_DELIVERY_TYPES,
   PROJECT_SUBMISSION_STATUSES,
 } from '@learnova/constants';
-import { projectFileRefSchema } from './project.model.js';
 
 export { PROJECT_SUBMISSION_STATUSES, PROJECT_DELIVERY_TYPES };
 
@@ -22,6 +21,12 @@ const projectSubmissionSchema = new Schema(
       index: true,
     },
     courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true, index: true },
+    submittedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
     studentId: { type: Schema.Types.ObjectId, ref: 'Student', default: null, index: true },
     teamId: { type: Schema.Types.ObjectId, ref: 'ProjectTeam', default: null, index: true },
     milestoneId: {
@@ -43,10 +48,12 @@ const projectSubmissionSchema = new Schema(
       enum: PROJECT_DELIVERY_TYPES,
       default: 'mixed',
     },
-    files: { type: [projectFileRefSchema], default: [] },
-    textSubmission: { type: String, default: null },
+    submissionText: { type: String, default: null },
+    githubRepository: { type: String, default: null },
+    demoVideo: { type: String, default: null },
+    liveDemoURL: { type: String, default: null },
+    attachments: [{ type: Schema.Types.ObjectId, ref: 'ProjectAttachment' }],
     links: { type: [String], default: [] },
-    repoLink: { type: String, default: null },
     timeSpentMinutes: { type: Number, default: null },
     lateSubmission: { type: Boolean, default: false, index: true },
     gradeId: { type: Schema.Types.ObjectId, ref: 'ProjectGrade', default: null },

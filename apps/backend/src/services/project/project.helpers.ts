@@ -5,7 +5,11 @@ import type {
   ProjectStatus,
   ProjectSubmissionStatus,
 } from '@learnova/types';
-import { ASSESSMENT_ENROLLMENT_STATUSES, PROJECT_CSV_HEADERS } from '@learnova/constants';
+import {
+  ASSESSMENT_ENROLLMENT_STATUSES,
+  PROJECT_CSV_HEADERS,
+  PROJECT_DEFAULT_MILESTONES,
+} from '@learnova/constants';
 import {
   applyLatePenalty,
   canTransitionLifecycle,
@@ -33,10 +37,13 @@ import {
 /** @deprecated Prefer ASSESSMENT_ENROLLMENT_STATUSES from @learnova/constants */
 export const ACTIVE_ENROLLMENT_STATUSES = ASSESSMENT_ENROLLMENT_STATUSES;
 
+export const DEFAULT_PROJECT_MILESTONES = PROJECT_DEFAULT_MILESTONES;
+
 export const PROJECT_STATUS_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
   draft: ['published', 'archived'],
-  published: ['closed', 'archived'],
-  closed: ['published', 'archived'],
+  published: ['open', 'closed', 'archived'],
+  open: ['closed', 'archived'],
+  closed: ['published', 'open', 'archived'],
   archived: ['draft'],
 };
 
@@ -165,4 +172,28 @@ export function rowsToCsv(
 
 export function extensionFor(contentType: string): string {
   return extensionForContentType(contentType);
+}
+
+export function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
+export async function ensureUniqueProjectSlug(
+  institutionId: string,
+  baseSlug: string,
+  exists: (slug: string) => Promise<boolean>,
+): Promise<string> {
+  let slug = baseSlug;
+  let suffix = 0;
+  while (await exists(slug)) {
+    suffix += 1;
+    slug = `${baseSlug}-${String(suffix)}`;
+  }
+  return slug;
 }

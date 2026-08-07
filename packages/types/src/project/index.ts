@@ -1,10 +1,20 @@
 import type { ID } from '../common/index.js';
 
-export type ProjectType = 'individual' | 'team' | 'hybrid';
+export type ProjectType =
+  | 'mini_project'
+  | 'major_project'
+  | 'capstone'
+  | 'research'
+  | 'case_study'
+  | 'industry_project'
+  | 'innovation_challenge'
+  | 'open_project';
 
-export type ProjectStatus = 'draft' | 'published' | 'archived' | 'closed';
+export type ProjectStatus = 'draft' | 'published' | 'open' | 'closed' | 'archived';
 
 export type ProjectVisibility = 'institution' | 'enrolled' | 'faculty';
+
+export type ProjectDifficulty = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 
 export type ProjectSubmissionStatus =
   | 'draft'
@@ -23,9 +33,21 @@ export type ProjectGradingMethod =
   | 'marks'
   | 'percentage';
 
-export type ProjectTeamStatus = 'forming' | 'active' | 'dissolved';
+export type ProjectTeamStatus = 'pending' | 'approved' | 'rejected' | 'completed';
 
 export type ProjectTeamMemberRole = 'leader' | 'member';
+
+export type ProjectMemberInvitationStatus = 'pending' | 'accepted' | 'rejected';
+
+export type ProjectMilestoneType =
+  | 'proposal'
+  | 'design'
+  | 'implementation'
+  | 'testing'
+  | 'documentation'
+  | 'presentation'
+  | 'final_submission'
+  | 'custom';
 
 export type ProjectMilestoneStatus = 'pending' | 'in_progress' | 'completed' | 'overdue';
 
@@ -50,18 +72,35 @@ export interface ProjectFileRef {
   createdAt: string;
 }
 
+export interface ProjectResource {
+  id: ID;
+  title: string;
+  url: string | null;
+  description: string | null;
+  type: 'link' | 'document' | 'video' | 'other';
+}
+
 export interface Project {
   id: ID;
   institutionId: ID;
   courseId: ID;
   moduleId: ID | null;
   lessonId: ID | null;
+  slug: string;
   title: string;
   description: string | null;
   instructions: string | null;
+  objective: string | null;
+  problemStatement: string | null;
+  learningOutcomes: string[];
+  difficulty: ProjectDifficulty;
+  categoryId: ID | null;
+  tags: ID[];
   projectType: ProjectType;
-  teamSizeMin: number;
-  teamSizeMax: number;
+  allowIndividual: boolean;
+  allowTeams: boolean;
+  minimumTeamSize: number;
+  maximumTeamSize: number;
   allowSelfTeamFormation: boolean;
   allowPeerReview: boolean;
   peerReviewsRequired: number;
@@ -72,18 +111,45 @@ export interface Project {
   totalMarks: number;
   passingMarks: number;
   weightage: number;
-  allowLateSubmission: boolean;
-  latePenaltyPercent: number;
+  startDate: string | null;
+  dueDate: string | null;
+  submissionDeadline: string | null;
+  lateSubmissionAllowed: boolean;
+  latePenalty: number;
   allowResubmission: boolean;
   maxAttempts: number;
   publishDate: string | null;
-  dueDate: string | null;
   closeDate: string | null;
-  estimatedMinutes: number | null;
+  estimatedHours: number | null;
+  resources: ProjectResource[];
+  assignedFacultyIds: ID[];
   attachments: ProjectFileRef[];
   rubricId: ID | null;
   createdBy: ID | null;
   updatedBy: ID | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface ProjectCategory {
+  id: ID;
+  institutionId: ID;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface ProjectTag {
+  id: ID;
+  institutionId: ID;
+  name: string;
+  slug: string;
+  color: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -95,9 +161,11 @@ export interface ProjectMilestone {
   projectId: ID;
   title: string;
   description: string | null;
+  milestoneType: ProjectMilestoneType;
   dueDate: string | null;
   order: number;
-  weight: number;
+  /** Percentage weight toward final grade (alias: weight) */
+  weightage: number;
   status: ProjectMilestoneStatus;
   createdBy: ID | null;
   updatedBy: ID | null;
@@ -111,7 +179,7 @@ export interface ProjectTeam {
   institutionId: ID;
   projectId: ID;
   courseId: ID;
-  name: string;
+  teamName: string;
   status: ProjectTeamStatus;
   leaderId: ID | null;
   memberCount: number;
@@ -123,7 +191,7 @@ export interface ProjectTeam {
   deletedAt: string | null;
 }
 
-export interface ProjectTeamMember {
+export interface ProjectMember {
   id: ID;
   institutionId: ID;
   teamId: ID;
@@ -131,6 +199,25 @@ export interface ProjectTeamMember {
   studentId: ID;
   role: ProjectTeamMemberRole;
   joinedAt: string;
+  approvedBy: ID | null;
+  invitationStatus: ProjectMemberInvitationStatus;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface ProjectAttachment {
+  id: ID;
+  institutionId: ID;
+  projectId: ID | null;
+  submissionId: ID | null;
+  commentId: ID | null;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  storageKey: string;
+  url: string | null;
+  uploadedBy: ID | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -141,22 +228,42 @@ export interface ProjectSubmission {
   institutionId: ID;
   projectId: ID;
   courseId: ID;
-  studentId: ID;
+  submittedBy: ID;
+  studentId: ID | null;
   teamId: ID | null;
   milestoneId: ID | null;
   attemptNumber: number;
   submittedAt: string | null;
   status: ProjectSubmissionStatus;
   deliveryType: ProjectDeliveryType;
-  files: ProjectFileRef[];
-  textSubmission: string | null;
+  submissionText: string | null;
+  githubRepository: string | null;
+  demoVideo: string | null;
+  liveDemoURL: string | null;
+  attachments: ProjectAttachment[];
   links: string[];
-  repoLink: string | null;
   timeSpentMinutes: number | null;
   lateSubmission: boolean;
   gradeId: ID | null;
   createdBy: ID | null;
   updatedBy: ID | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface ProjectComment {
+  id: ID;
+  institutionId: ID;
+  projectId: ID;
+  submissionId: ID | null;
+  milestoneId: ID | null;
+  parentCommentId: ID | null;
+  authorId: ID;
+  authorRole: string;
+  body: string;
+  resolved: boolean;
+  attachments: ProjectAttachment[];
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -176,8 +283,11 @@ export interface ProjectReview {
   reviewerId: ID;
   reviewType: ProjectReviewType;
   status: ProjectReviewStatus;
-  rating: number | null;
+  score: number | null;
   feedback: string | null;
+  suggestions: string | null;
+  approval: boolean | null;
+  revisionRequired: boolean;
   rubricScores: ProjectRubricScore[];
   submittedAt: string | null;
   createdAt: string;
@@ -240,36 +350,31 @@ export interface ProjectAuditLog {
   createdAt: string;
 }
 
-export interface ProjectFacultyDashboard {
-  projectsCreated: number;
-  activeTeams: number;
-  pendingReviews: number;
-  pendingGrades: number;
-  milestoneCompletionRate: number;
-  submissionRate: number;
-}
-
-export interface ProjectStudentDashboard {
-  active: number;
-  inProgress: number;
-  submitted: number;
-  graded: number;
-  overdueMilestones: number;
-  pendingPeerReviews: number;
-}
-
 export interface ProjectInstitutionDashboard {
   totalProjects: number;
   published: number;
-  closed: number;
-  totalTeams: number;
-  totalSubmissions: number;
-  gradedSubmissions: number;
-  lateSubmissions: number;
+  active: number;
+  completed: number;
+  departments: Array<{ departmentId: string | null; label: string; count: number }>;
   submissionRate: number;
-  averageGrade: number | null;
-  byDepartment: Array<{ departmentId: string | null; label: string; count: number }>;
-  byCourse: Array<{ courseId: string; courseCode: string; title: string; count: number }>;
+  facultyParticipation: number;
+}
+
+export interface ProjectFacultyDashboard {
+  projectsCreated: number;
+  pendingReviews: number;
+  upcomingDeadlines: Array<{ projectId: string; title: string; dueDate: string }>;
+  studentTeams: number;
+  lateSubmissions: number;
+}
+
+export interface ProjectStudentDashboard {
+  myProjects: number;
+  currentTeam: ProjectTeam | null;
+  milestones: Array<{ milestoneId: string; title: string; status: ProjectMilestoneStatus; dueDate: string | null }>;
+  upcomingDeadlines: Array<{ projectId: string; title: string; dueDate: string }>;
+  submissionHistory: Array<{ submissionId: string; projectId: string; status: ProjectSubmissionStatus; submittedAt: string | null }>;
+  reviewFeedback: Array<{ reviewId: string; score: number | null; feedback: string | null }>;
 }
 
 export interface ProjectImportRowError {

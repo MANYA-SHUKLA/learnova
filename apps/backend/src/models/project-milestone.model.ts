@@ -1,7 +1,7 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
-import { PROJECT_MILESTONE_STATUSES } from '@learnova/constants';
+import { PROJECT_MILESTONE_STATUSES, PROJECT_MILESTONE_TYPES } from '@learnova/constants';
 
-export { PROJECT_MILESTONE_STATUSES };
+export { PROJECT_MILESTONE_STATUSES, PROJECT_MILESTONE_TYPES };
 
 const projectMilestoneSchema = new Schema(
   {
@@ -19,9 +19,15 @@ const projectMilestoneSchema = new Schema(
     },
     title: { type: String, required: true, trim: true, maxlength: 200 },
     description: { type: String, default: null },
+    milestoneType: {
+      type: String,
+      enum: PROJECT_MILESTONE_TYPES,
+      default: 'custom',
+      index: true,
+    },
     dueDate: { type: Date, default: null, index: true },
     order: { type: Number, default: 0, min: 0 },
-    weight: { type: Number, default: 0, min: 0, max: 100 },
+    weightage: { type: Number, default: 0, min: 0, max: 100 },
     status: {
       type: String,
       enum: PROJECT_MILESTONE_STATUSES,

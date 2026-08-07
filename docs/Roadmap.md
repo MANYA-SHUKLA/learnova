@@ -490,6 +490,43 @@ Projects · Quizzes · MCQ/coding exams · Certificates · Gradebook · Attendan
 
 ---
 
+## Step 11 — Enterprise Project Management
+
+**Status:** ✅ Complete  
+**Goal:** Full academic project lifecycle — faculty create projects, students submit work, approved teams collaborate, milestones tracked, comments threaded, files uploaded, reviews given, and grades prepared. **Not** AI ideation, gradebook sync, exams, or certificates.
+
+### Shipped
+
+- Models: Project · ProjectMember · Milestone · Team · Submission · Comment · Tag · Category · Review · Grade · Progress · Audit
+- Assessment Core consumer (deadlines, attempts, grading via shared helpers)
+- Academic project types: mini_project · major_project · capstone · research · case_study · industry_project · innovation_challenge · open_project
+- Project fields: slug · objective · problemStatement · learningOutcomes · difficulty · category · tags · resources
+- Team workflow: pending/approved/rejected/completed · invite · accept/reject · transfer leadership · faculty approval
+- Milestone types: proposal · design · implementation · testing · documentation · presentation · final_submission · custom
+- Submission: GitHub repo · demo video · live demo URL · text · files
+- Comments: threaded CRUD · resolve
+- Reviews: score · feedback · suggestions · approval · revision required
+- Bulk ops: publish · archive · delete · duplicate · assign faculty
+- API: CRUD, bulk, teams, milestones, submissions, comments, reviews, tags, categories, my-team, dashboards, import/export
+- Permissions (`project:read|write|manage`), audit, domain events, seed (50/100/500/300), tests
+- UI: `/institution/projects/*` · `/faculty/projects/*` · `/student/projects/*` · `/student/my-team`
+
+### Explicitly out of scope
+
+AI ideation · Quizzes · Exams · Gradebook sync · Certificates · Attendance · Judge0 / coding engine
+
+### Documentation
+
+- `ProjectManagement.md` · `ProjectAPI.md` · `ProjectPermissions.md` · `ProjectTeams.md` · `ProjectMilestones.md` · `ProjectReviews.md`
+
+### Exit criteria (DoD — met)
+
+✓ Project model (slug, objective, outcomes, difficulty, category, tags) · ✓ ProjectMember · ✓ Team approval workflow · ✓ Invitations & transfer leadership · ✓ Milestone types · ✓ Submission (GitHub, demo, live URL) · ✓ Comments (threaded, resolve) · ✓ Reviews (score, suggestions, approval, revision) · ✓ Bulk ops & assign faculty · ✓ Tags & categories · ✓ `/student/my-team` route · ✓ Institution/Faculty/Student dashboards · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed scale · ✓ Tests · ✓ Docs
+
+**Hard rule:** Stop after Projects. Do **not** start Exams or Gradebook from this step. Gradebook (Step 13) will consume prepared project grades.
+
+---
+
 ## Later Academic Assessment & platform steps
 
 | Step | Scope | State |
@@ -501,7 +538,7 @@ Projects · Quizzes · MCQ/coding exams · Certificates · Gradebook · Attendan
 | **9** | **Assignment Management** | ✅ Complete |
 | **9.5** | **Assessment Core (shared)** | ✅ Complete |
 | **10** | Practice Labs / Coding | ✅ Complete |
-| **11** | Projects / Ideation | Planned |
+| **11** | **Enterprise Project Management** | ✅ Complete |
 | **12** | Examinations | Planned |
 | **13** | Gradebook | Planned |
 | **14** | Certificates (platform-wide) | Planned |
@@ -510,7 +547,7 @@ Projects · Quizzes · MCQ/coding exams · Certificates · Gradebook · Attendan
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
-**Boundary:** Practice Labs (10) DoD met — consume Assessment Core; next is Projects (11). **Do not start quizzes/exams from this step.**
+**Boundary:** Practice Labs (10) DoD met — consume Assessment Core. Projects (11) DoD met — consume Assessment Core. **Next is Examinations (12).** Do not start gradebook from this step.
 
 ---
 
@@ -527,5 +564,6 @@ Projects · Quizzes · MCQ/coding exams · Certificates · Gradebook · Attendan
 - [AssessmentCore](./AssessmentCore.md) · [ADR 0006](./adr/0006-assessment-core.md)
 - [PracticeLab](./PracticeLab.md) · [CodingEngine](./CodingEngine.md) · [Problem](./Problem.md) · [Judge0](./Judge0.md) · [Execution](./Execution.md)
 - [PracticeSubmission](./PracticeSubmission.md) · [Leaderboard](./Leaderboard.md)
+- [ProjectManagement](./ProjectManagement.md) · [ProjectAPI](./ProjectAPI.md) · [ProjectPermissions](./ProjectPermissions.md) · [ProjectTeams](./ProjectTeams.md) · [ProjectMilestones](./ProjectMilestones.md) · [ProjectReviews](./ProjectReviews.md)
 - [AccessModel](./AccessModel.md) · [Auth](./Auth.md) · [Architecture](./Architecture.md)
 - [Deploy](./Deploy.md) — Vercel (frontend) + Render (backend)

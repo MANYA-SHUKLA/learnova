@@ -22,6 +22,22 @@ import {
   type ProjectReviewDocument,
 } from '../../models/project-review.model.js';
 import {
+  ProjectMemberModel,
+  type ProjectMemberDocument,
+} from '../../models/project-member.model.js';
+import {
+  ProjectCommentModel,
+  type ProjectCommentDocument,
+} from '../../models/project-comment.model.js';
+import {
+  ProjectTagModel,
+  type ProjectTagDocument,
+} from '../../models/project-tag.model.js';
+import {
+  ProjectCategoryModel,
+  type ProjectCategoryDocument,
+} from '../../models/project-category.model.js';
+import {
   ProjectGradeModel,
   type ProjectGradeDocument,
 } from '../../models/project-grade.model.js';
@@ -77,6 +93,14 @@ export interface ProjectStats {
   byType: { projectType: string; count: number }[];
 }
 
+export interface ExtendedProjectListQuery extends Partial<ProjectListQuery> {
+  tags?: string[];
+  categoryId?: string;
+  difficulty?: string;
+  facultyId?: string;
+  sortBy?: ProjectListQuery['sortBy'] | 'difficulty' | 'newest' | 'oldest' | 'deadline';
+}
+
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -90,7 +114,7 @@ export class ProjectRepository {
 
   buildProjectFilter(
     institutionId: string,
-    query: Partial<ProjectListQuery>,
+    query: ExtendedProjectListQuery,
     now: Date = new Date(),
   ): Record<string, unknown> {
     const filter: Record<string, unknown> = {
@@ -104,8 +128,16 @@ export class ProjectRepository {
     if (query.status) filter.status = query.status;
     if (query.projectType) filter.projectType = query.projectType;
     if (query.createdBy) filter.createdBy = toObjectId(query.createdBy);
+    if (query.categoryId) filter.categoryId = toObjectId(query.categoryId);
+    if (query.difficulty) filter.difficulty = query.difficulty;
+    if (query.facultyId) {
+      filter.assignedFacultyIds = toObjectId(query.facultyId);
+    }
+    if (query.tagId) {
+      filter.tags = toObjectId(query.tagId);
+    }
     if (query.published !== undefined) {
-      filter.status = query.published ? 'published' : { $ne: 'published' };
+      filter.status = query.published ? { $in: ['published', 'open'] } : { $nin: ['published', 'open'] };
     }
 
     if (query.due === 'upcoming') {
@@ -118,20 +150,99 @@ export class ProjectRepository {
 
     if (query.q) {
       const regex = new RegExp(escapeRegex(query.q), 'i');
-      filter.$or = [{ title: regex }, { description: regex }, { instructions: regex }];
+      filter.$or = [{ title: regex }, { description: regex }, { instructions: regex }, { objective: regex }];
     }
 
     return filter;
   }
 
+  resolveProjectSort(
+    query: Pick<ExtendedProjectListQuery, 'sortBy' | 'sortOrder'>,
+  ): { field: string; dir: 1 | -1 } {
+    const sortOrder = query.sortOrder === 'asc' ? 1 : -1;
+    switch (query.sortBy) {
+      case 'newest':
+        return { field: 'createdAt', dir: -1 };
+      case 'oldest':
+        return { field: 'createdAt', dir: 1 };
+      case 'deadline':
+        return { field: 'dueDate', dir: sortOrder };
+      case 'difficulty':
+        return { field: 'difficulty', dir: sortOrder };
+      case 'title':
+        return { field: 'title', dir: sortOrder };
+      default:
+        return { field: query.sortBy ?? 'createdAt', dir: sortOrder };
+    }
+  }
+
+  async slugExists(institutionId: string, slug: string, excludeId?: string): Promise<boolean> {
+    const filter: Record<string, unknown> = {
+      institutionId: toObjectId(institutionId),
+      slug,
+      deletedAt: null,
+    };
+    if (excludeId) filter._id = { $ne: toObjectId(excludeId) };
+    const count = await ProjectModel.countDocuments(filter).exec();
+    return count > 0;
+  }
+
+  async createMilestonesBulk(data: Record<string, unknown>[]): Promise<void> {
+    if (data.length === 0) return;
+    await ProjectMilestoneModel.insertMany(data, { ordered: false });
+  }
+
+  async bulkUpdateProjectStatus(
+    institutionId: string,
+    ids: string[],
+    status: string,
+  ): Promise<number> {
+    const res = await ProjectModel.updateMany(
+      {
+        _id: { $in: ids.map(toObjectId) },
+        institutionId: toObjectId(institutionId),
+        deletedAt: null,
+      },
+      { $set: { status } },
+    ).exec();
+    return res.modifiedCount;
+  }
+
+  async bulkSoftDeleteProjects(institutionId: string, ids: string[]): Promise<number> {
+    const res = await ProjectModel.updateMany(
+      {
+        _id: { $in: ids.map(toObjectId) },
+        institutionId: toObjectId(institutionId),
+        deletedAt: null,
+      },
+      { $set: { deletedAt: new Date(), status: 'archived' } },
+    ).exec();
+    return res.modifiedCount;
+  }
+
+  async bulkAssignFaculty(
+    institutionId: string,
+    ids: string[],
+    facultyIds: string[],
+  ): Promise<number> {
+    const res = await ProjectModel.updateMany(
+      {
+        _id: { $in: ids.map(toObjectId) },
+        institutionId: toObjectId(institutionId),
+        deletedAt: null,
+      },
+      { $addToSet: { assignedFacultyIds: { $each: facultyIds.map(toObjectId) } } },
+    ).exec();
+    return res.modifiedCount;
+  }
+
   async listProjects(
     filter: Record<string, unknown>,
-    query: Pick<ProjectListQuery, 'page' | 'limit' | 'sortBy' | 'sortOrder'>,
+    query: Pick<ExtendedProjectListQuery, 'page' | 'limit' | 'sortBy' | 'sortOrder'>,
   ): Promise<ProjectListResult> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
-    const sortField = query.sortBy ?? 'createdAt';
-    const sortDir = query.sortOrder === 'asc' ? 1 : -1;
+    const { field: sortField, dir: sortDir } = this.resolveProjectSort(query);
 
     const [items, total] = await Promise.all([
       ProjectModel.find(filter)
@@ -320,11 +431,18 @@ export class ProjectRepository {
     projectId: string,
     studentId: string,
   ): Promise<ProjectTeamDocument | null> {
-    return ProjectTeamModel.findOne({
+    const member = await ProjectMemberModel.findOne({
       institutionId: toObjectId(institutionId),
       projectId: toObjectId(projectId),
+      studentId: toObjectId(studentId),
+      invitationStatus: 'accepted',
       deletedAt: null,
-      'members.studentId': toObjectId(studentId),
+    }).exec();
+    if (!member) return null;
+    return ProjectTeamModel.findOne({
+      _id: member.teamId,
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
     }).exec();
   }
 
@@ -350,7 +468,7 @@ export class ProjectRepository {
   ): Promise<ProjectTeamDocument | null> {
     return ProjectTeamModel.findOneAndUpdate(
       { _id: id, institutionId: toObjectId(institutionId), deletedAt: null },
-      { $set: { deletedAt: new Date(), status: 'dissolved' } },
+      { $set: { deletedAt: new Date(), status: 'rejected' } },
       { new: true },
     ).exec();
   }
@@ -382,7 +500,7 @@ export class ProjectRepository {
     }
     if (query.q) {
       const regex = new RegExp(escapeRegex(query.q), 'i');
-      filter.textSubmission = regex;
+      filter.submissionText = regex;
     }
 
     return filter;
@@ -475,7 +593,7 @@ export class ProjectRepository {
   ): Promise<ProjectSubmissionDocument | null> {
     return ProjectSubmissionModel.findOneAndUpdate(
       { _id: id, institutionId: toObjectId(institutionId), deletedAt: null },
-      { $push: { files: fileRef } },
+      { $push: { attachments: fileRef } },
       { new: true },
     ).exec();
   }
@@ -607,7 +725,7 @@ export class ProjectRepository {
       ProjectModel.countDocuments({ ...base, status: 'published' }),
       ProjectModel.countDocuments({ ...base, status: 'closed' }),
       ProjectModel.countDocuments({ ...base, status: 'archived' }),
-      ProjectTeamModel.countDocuments({ ...base, status: { $ne: 'dissolved' } }),
+      ProjectTeamModel.countDocuments({ ...base, status: { $in: ['approved', 'completed'] } }),
       ProjectSubmissionModel.countDocuments({ ...base, status: { $ne: 'draft' } }),
       ProjectSubmissionModel.countDocuments({ ...base, status: 'graded' }),
       ProjectSubmissionModel.countDocuments({ ...base, lateSubmission: true }),
@@ -740,6 +858,178 @@ export class ProjectRepository {
       email: input.email ?? null,
       metadata: input.metadata ?? {},
     });
+  }
+
+  // --------------------------------------------------------------------- members
+
+  async createMember(data: Record<string, unknown>): Promise<ProjectMemberDocument> {
+    return ProjectMemberModel.create(data);
+  }
+
+  async findMemberById(
+    institutionId: string,
+    id: string,
+  ): Promise<ProjectMemberDocument | null> {
+    return ProjectMemberModel.findOne({
+      _id: id,
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    }).exec();
+  }
+
+  async findMemberByTeamAndStudent(
+    institutionId: string,
+    teamId: string,
+    studentId: string,
+  ): Promise<ProjectMemberDocument | null> {
+    return ProjectMemberModel.findOne({
+      institutionId: toObjectId(institutionId),
+      teamId: toObjectId(teamId),
+      studentId: toObjectId(studentId),
+      deletedAt: null,
+    }).exec();
+  }
+
+  async listMembersByTeam(
+    institutionId: string,
+    teamId: string,
+  ): Promise<ProjectMemberDocument[]> {
+    return ProjectMemberModel.find({
+      institutionId: toObjectId(institutionId),
+      teamId: toObjectId(teamId),
+      deletedAt: null,
+    }).exec();
+  }
+
+  async listMembersByStudent(
+    institutionId: string,
+    studentId: string,
+  ): Promise<ProjectMemberDocument[]> {
+    return ProjectMemberModel.find({
+      institutionId: toObjectId(institutionId),
+      studentId: toObjectId(studentId),
+      invitationStatus: 'accepted',
+      deletedAt: null,
+    }).exec();
+  }
+
+  async updateMemberById(
+    institutionId: string,
+    id: string,
+    data: Record<string, unknown>,
+  ): Promise<ProjectMemberDocument | null> {
+    return ProjectMemberModel.findOneAndUpdate(
+      { _id: id, institutionId: toObjectId(institutionId), deletedAt: null },
+      { $set: data },
+      { new: true },
+    ).exec();
+  }
+
+  async softDeleteMember(
+    institutionId: string,
+    id: string,
+  ): Promise<ProjectMemberDocument | null> {
+    return ProjectMemberModel.findOneAndUpdate(
+      { _id: id, institutionId: toObjectId(institutionId), deletedAt: null },
+      { $set: { deletedAt: new Date() } },
+      { new: true },
+    ).exec();
+  }
+
+  async countMembers(filter: Record<string, unknown>): Promise<number> {
+    return ProjectMemberModel.countDocuments(filter).exec();
+  }
+
+  // -------------------------------------------------------------------- comments
+
+  async listComments(
+    institutionId: string,
+    projectId: string,
+    submissionId: string | null,
+  ): Promise<ProjectCommentDocument[]> {
+    const filter: Record<string, unknown> = {
+      institutionId: toObjectId(institutionId),
+      projectId: toObjectId(projectId),
+      deletedAt: null,
+    };
+    if (submissionId) filter.submissionId = toObjectId(submissionId);
+    return ProjectCommentModel.find(filter).sort({ createdAt: 1 }).exec();
+  }
+
+  async findCommentById(
+    institutionId: string,
+    id: string,
+  ): Promise<ProjectCommentDocument | null> {
+    return ProjectCommentModel.findOne({
+      _id: id,
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    }).exec();
+  }
+
+  async createComment(data: Record<string, unknown>): Promise<ProjectCommentDocument> {
+    return ProjectCommentModel.create(data);
+  }
+
+  async updateCommentById(
+    institutionId: string,
+    id: string,
+    data: Record<string, unknown>,
+  ): Promise<ProjectCommentDocument | null> {
+    return ProjectCommentModel.findOneAndUpdate(
+      { _id: id, institutionId: toObjectId(institutionId), deletedAt: null },
+      { $set: data },
+      { new: true },
+    ).exec();
+  }
+
+  // ------------------------------------------------------------------------ tags
+
+  async listTags(institutionId: string): Promise<ProjectTagDocument[]> {
+    return ProjectTagModel.find({
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    })
+      .sort({ name: 1 })
+      .exec();
+  }
+
+  async createTag(data: Record<string, unknown>): Promise<ProjectTagDocument> {
+    return ProjectTagModel.create(data);
+  }
+
+  async findTagBySlug(institutionId: string, slug: string): Promise<ProjectTagDocument | null> {
+    return ProjectTagModel.findOne({
+      institutionId: toObjectId(institutionId),
+      slug,
+      deletedAt: null,
+    }).exec();
+  }
+
+  // ------------------------------------------------------------------ categories
+
+  async listCategories(institutionId: string): Promise<ProjectCategoryDocument[]> {
+    return ProjectCategoryModel.find({
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    })
+      .sort({ name: 1 })
+      .exec();
+  }
+
+  async createCategory(data: Record<string, unknown>): Promise<ProjectCategoryDocument> {
+    return ProjectCategoryModel.create(data);
+  }
+
+  async findCategoryBySlug(
+    institutionId: string,
+    slug: string,
+  ): Promise<ProjectCategoryDocument | null> {
+    return ProjectCategoryModel.findOne({
+      institutionId: toObjectId(institutionId),
+      slug,
+      deletedAt: null,
+    }).exec();
   }
 }
 

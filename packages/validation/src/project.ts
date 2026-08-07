@@ -11,7 +11,6 @@ import {
   assessmentDeliveryTypeSchema,
   assessmentFileUploadSchema,
   assessmentGradingMethodSchema,
-  assessmentLifecycleStatusSchema,
   assessmentRubricScoreSchema,
   assessmentVisibilitySchema,
 } from './assessment.js';
@@ -19,10 +18,19 @@ import {
 const objectIdField = z.string().regex(REGEX.OBJECT_ID, 'Invalid ObjectId');
 const optionalString = (max: number) => z.string().trim().max(max).optional().nullable();
 
-export const projectTypeSchema = z.enum(['individual', 'team', 'hybrid']);
+export const projectTypeSchema = z.enum([
+  'mini_project',
+  'major_project',
+  'capstone',
+  'research',
+  'case_study',
+  'industry_project',
+  'innovation_challenge',
+  'open_project',
+]);
 
-/** Project lifecycle/status = Assessment Core lifecycle */
-export const projectStatusSchema = assessmentLifecycleStatusSchema;
+export const projectStatusSchema = z.enum(['draft', 'published', 'open', 'closed', 'archived']);
+export const projectDifficultySchema = z.enum(['beginner', 'intermediate', 'advanced', 'expert']);
 export const projectVisibilitySchema = assessmentVisibilitySchema;
 export const projectSubmissionStatusSchema = assessmentAttemptStatusSchema;
 export const projectDeliveryTypeSchema = assessmentDeliveryTypeSchema.extract([
@@ -39,8 +47,19 @@ export const projectGradingMethodSchema = assessmentGradingMethodSchema.extract(
   'percentage',
 ]);
 
-export const projectTeamStatusSchema = z.enum(['forming', 'active', 'dissolved']);
+export const projectTeamStatusSchema = z.enum(['pending', 'approved', 'rejected', 'completed']);
 export const projectTeamMemberRoleSchema = z.enum(['leader', 'member']);
+export const projectMemberInvitationStatusSchema = z.enum(['pending', 'accepted', 'rejected']);
+export const projectMilestoneTypeSchema = z.enum([
+  'proposal',
+  'design',
+  'implementation',
+  'testing',
+  'documentation',
+  'presentation',
+  'final_submission',
+  'custom',
+]);
 export const projectMilestoneStatusSchema = z.enum([
   'pending',
   'in_progress',
@@ -63,13 +82,23 @@ export const projectAllowedContentTypes = assessmentFileUploadSchema.shape.conte
 
 export const projectFileUploadSchema = assessmentFileUploadSchema;
 
+export const projectResourceSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  url: z.string().url().max(2000).optional().nullable(),
+  description: optionalString(2000),
+  type: z.enum(['link', 'document', 'video', 'other']).default('link'),
+});
+
 export const projectListQuerySchema = z.object({
   q: z.string().trim().max(200).optional(),
   courseId: objectIdField.optional(),
   moduleId: objectIdField.optional(),
   lessonId: objectIdField.optional(),
+  categoryId: objectIdField.optional(),
   status: projectStatusSchema.optional(),
   projectType: projectTypeSchema.optional(),
+  difficulty: projectDifficultySchema.optional(),
+  tagId: objectIdField.optional(),
   published: z
     .enum(['true', 'false'])
     .optional()
@@ -88,7 +117,7 @@ export const projectListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
   sortBy: z
-    .enum(['createdAt', 'dueDate', 'title', 'status', 'updatedAt', 'publishDate'])
+    .enum(['createdAt', 'dueDate', 'title', 'status', 'updatedAt', 'publishDate', 'difficulty', 'deadline'])
     .optional()
     .default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
@@ -124,16 +153,35 @@ export const projectReviewIdParamsSchema = z.object({
   id: objectIdField,
 });
 
+export const projectCommentIdParamsSchema = z.object({
+  id: objectIdField,
+});
+
 export const createProjectSchema = z.object({
   courseId: objectIdField,
   moduleId: objectIdField.optional().nullable(),
   lessonId: objectIdField.optional().nullable(),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(120)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase alphanumeric with hyphens')
+    .optional(),
   title: z.string().trim().min(1).max(200),
   description: optionalString(5000),
   instructions: optionalString(20000),
-  projectType: projectTypeSchema.default('team'),
-  teamSizeMin: z.number().int().min(1).max(PROJECT_MAX_TEAM_SIZE).default(1),
-  teamSizeMax: z.number().int().min(1).max(PROJECT_MAX_TEAM_SIZE).default(6),
+  objective: optionalString(5000),
+  problemStatement: optionalString(10000),
+  learningOutcomes: z.array(z.string().trim().min(1).max(500)).max(20).optional().default([]),
+  difficulty: projectDifficultySchema.default('intermediate'),
+  categoryId: objectIdField.optional().nullable(),
+  tags: z.array(objectIdField).max(20).optional().default([]),
+  projectType: projectTypeSchema.default('major_project'),
+  allowIndividual: z.boolean().default(true),
+  allowTeams: z.boolean().default(true),
+  minimumTeamSize: z.number().int().min(1).max(PROJECT_MAX_TEAM_SIZE).default(1),
+  maximumTeamSize: z.number().int().min(1).max(PROJECT_MAX_TEAM_SIZE).default(6),
   allowSelfTeamFormation: z.boolean().default(true),
   allowPeerReview: z.boolean().default(false),
   peerReviewsRequired: z.number().int().min(0).max(PROJECT_MAX_PEER_REVIEWS_REQUIRED).default(0),
@@ -143,14 +191,18 @@ export const createProjectSchema = z.object({
   totalMarks: z.number().min(0).max(10000).default(100),
   passingMarks: z.number().min(0).max(10000).default(40),
   weightage: z.number().min(0).max(100).default(0),
-  allowLateSubmission: z.boolean().default(true),
-  latePenaltyPercent: z.number().min(0).max(100).default(0),
+  startDate: z.string().datetime().optional().nullable(),
+  dueDate: z.string().datetime().optional().nullable(),
+  submissionDeadline: z.string().datetime().optional().nullable(),
+  lateSubmissionAllowed: z.boolean().default(true),
+  latePenalty: z.number().min(0).max(100).default(0),
   allowResubmission: z.boolean().default(false),
   maxAttempts: z.number().int().min(1).max(20).default(1),
   publishDate: z.string().datetime().optional().nullable(),
-  dueDate: z.string().datetime().optional().nullable(),
   closeDate: z.string().datetime().optional().nullable(),
-  estimatedMinutes: z.number().int().min(1).max(10080).optional().nullable(),
+  estimatedHours: z.number().int().min(1).max(1000).optional().nullable(),
+  resources: z.array(projectResourceSchema).max(50).optional().default([]),
+  assignedFacultyIds: z.array(objectIdField).max(50).optional().default([]),
   rubricId: objectIdField.optional().nullable(),
 });
 
@@ -160,21 +212,22 @@ export const createMilestoneSchema = z.object({
   projectId: objectIdField,
   title: z.string().trim().min(1).max(200),
   description: optionalString(5000),
+  milestoneType: projectMilestoneTypeSchema.default('custom'),
   dueDate: z.string().datetime().optional().nullable(),
   order: z.number().int().min(0).max(PROJECT_MAX_MILESTONES).optional(),
-  weight: z.number().min(0).max(100).default(0),
+  weightage: z.number().min(0).max(100).default(0),
 });
 
 export const updateMilestoneSchema = createMilestoneSchema.partial().omit({ projectId: true });
 
 export const createTeamSchema = z.object({
   projectId: objectIdField,
-  name: z.string().trim().min(1).max(100),
+  teamName: z.string().trim().min(1).max(100),
   repoLink: z.string().url().max(2000).optional().nullable(),
 });
 
 export const updateTeamSchema = z.object({
-  name: z.string().trim().min(1).max(100).optional(),
+  teamName: z.string().trim().min(1).max(100).optional(),
   repoLink: z.string().url().max(2000).optional().nullable(),
   status: projectTeamStatusSchema.optional(),
 });
@@ -184,13 +237,36 @@ export const joinTeamSchema = z.object({
   role: projectTeamMemberRoleSchema.optional().default('member'),
 });
 
+export const inviteMemberSchema = z.object({
+  teamId: objectIdField,
+  studentId: objectIdField,
+  role: projectTeamMemberRoleSchema.optional().default('member'),
+});
+
+export const approveTeamSchema = z.object({
+  teamId: objectIdField,
+  notes: optionalString(2000),
+});
+
+export const rejectTeamSchema = z.object({
+  teamId: objectIdField,
+  reason: z.string().trim().min(1).max(2000),
+});
+
+export const transferLeadershipSchema = z.object({
+  teamId: objectIdField,
+  newLeaderId: objectIdField,
+});
+
 export const saveProjectSubmissionDraftSchema = z.object({
   projectId: objectIdField,
   milestoneId: objectIdField.optional().nullable(),
   deliveryType: projectDeliveryTypeSchema.default('mixed'),
-  textSubmission: optionalString(100000),
+  submissionText: optionalString(100000),
+  githubRepository: z.string().url().max(2000).optional().nullable(),
+  demoVideo: z.string().url().max(2000).optional().nullable(),
+  liveDemoURL: z.string().url().max(2000).optional().nullable(),
   links: z.array(z.string().url().max(2000)).max(20).optional().default([]),
-  repoLink: z.string().url().max(2000).optional().nullable(),
   timeSpentMinutes: z.number().int().min(0).max(100000).optional().nullable(),
 });
 
@@ -211,9 +287,12 @@ export const gradeProjectSubmissionSchema = z.object({
 export const createReviewSchema = z.object({
   projectId: objectIdField,
   submissionId: objectIdField,
-  reviewType: projectReviewTypeSchema.default('peer'),
-  rating: z.number().min(0).max(10).optional().nullable(),
+  reviewType: projectReviewTypeSchema.default('faculty'),
+  score: z.number().min(0).max(100).optional().nullable(),
   feedback: optionalString(10000),
+  suggestions: optionalString(10000),
+  approval: z.boolean().optional().nullable(),
+  revisionRequired: z.boolean().optional().default(false),
   rubricScores: z.array(assessmentRubricScoreSchema).max(50).optional().default([]),
 });
 
@@ -223,9 +302,70 @@ export const updateReviewSchema = createReviewSchema.partial().omit({
 });
 
 export const submitReviewSchema = z.object({
-  rating: z.number().min(0).max(10).optional().nullable(),
+  score: z.number().min(0).max(100).optional().nullable(),
   feedback: optionalString(10000),
+  suggestions: optionalString(10000),
+  approval: z.boolean().optional().nullable(),
+  revisionRequired: z.boolean().optional().default(false),
   rubricScores: z.array(assessmentRubricScoreSchema).max(50).optional().default([]),
+});
+
+export const createProjectCommentSchema = z.object({
+  projectId: objectIdField,
+  submissionId: objectIdField.optional().nullable(),
+  milestoneId: objectIdField.optional().nullable(),
+  parentCommentId: objectIdField.optional().nullable(),
+  body: z.string().trim().min(1).max(10000),
+});
+
+export const updateProjectCommentSchema = z.object({
+  body: z.string().trim().min(1).max(10000).optional(),
+});
+
+export const resolveProjectCommentSchema = z.object({
+  resolved: z.boolean(),
+});
+
+export const createTagSchema = z.object({
+  name: z.string().trim().min(1).max(50),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(60)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/)
+    .optional()
+    .nullable(),
+});
+
+export const createCategorySchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(120)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .optional(),
+  description: optionalString(2000),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/)
+    .optional()
+    .nullable(),
+});
+
+export const bulkProjectIdsSchema = z.object({
+  projectIds: z.array(objectIdField).min(1).max(100),
+});
+
+export const bulkAssignFacultySchema = z.object({
+  projectIds: z.array(objectIdField).min(1).max(100),
+  facultyIds: z.array(objectIdField).min(1).max(50),
 });
 
 export const projectImportConfirmSchema = z.object({
@@ -235,12 +375,18 @@ export const projectImportConfirmSchema = z.object({
         courseId: objectIdField,
         moduleId: objectIdField.optional().nullable(),
         lessonId: objectIdField.optional().nullable(),
+        slug: z.string().trim().min(1).max(120).optional(),
         title: z.string().trim().min(1).max(200),
         projectType: projectTypeSchema.optional(),
+        difficulty: projectDifficultySchema.optional(),
+        categoryId: objectIdField.optional().nullable(),
         totalMarks: z.coerce.number().min(0).max(10000).optional(),
         passingMarks: z.coerce.number().min(0).max(10000).optional(),
+        startDate: z.string().optional().nullable(),
         dueDate: z.string().optional().nullable(),
+        submissionDeadline: z.string().optional().nullable(),
         description: optionalString(5000),
+        objective: optionalString(5000),
       }),
     )
     .min(1)
@@ -285,7 +431,7 @@ export const teamListQuerySchema = z.object({
   status: projectTeamStatusSchema.optional(),
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  sortBy: z.enum(['createdAt', 'name', 'memberCount', 'updatedAt']).optional().default('createdAt'),
+  sortBy: z.enum(['createdAt', 'teamName', 'memberCount', 'updatedAt']).optional().default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
@@ -296,12 +442,23 @@ export type UpdateMilestoneInput = z.infer<typeof updateMilestoneSchema>;
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
 export type JoinTeamInput = z.infer<typeof joinTeamSchema>;
+export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
+export type ApproveTeamInput = z.infer<typeof approveTeamSchema>;
+export type RejectTeamInput = z.infer<typeof rejectTeamSchema>;
+export type TransferLeadershipInput = z.infer<typeof transferLeadershipSchema>;
 export type SaveProjectSubmissionDraftInput = z.infer<typeof saveProjectSubmissionDraftSchema>;
 export type SubmitProjectInput = z.infer<typeof submitProjectSchema>;
 export type GradeProjectSubmissionInput = z.infer<typeof gradeProjectSubmissionSchema>;
 export type CreateReviewInput = z.infer<typeof createReviewSchema>;
 export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;
 export type SubmitReviewInput = z.infer<typeof submitReviewSchema>;
+export type CreateProjectCommentInput = z.infer<typeof createProjectCommentSchema>;
+export type UpdateProjectCommentInput = z.infer<typeof updateProjectCommentSchema>;
+export type ResolveProjectCommentInput = z.infer<typeof resolveProjectCommentSchema>;
+export type CreateTagInput = z.infer<typeof createTagSchema>;
+export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
+export type BulkProjectIdsInput = z.infer<typeof bulkProjectIdsSchema>;
+export type BulkAssignFacultyInput = z.infer<typeof bulkAssignFacultySchema>;
 export type ProjectListQuery = z.infer<typeof projectListQuerySchema>;
 export type ProjectSubmissionListQuery = z.infer<typeof projectSubmissionListQuerySchema>;
 export type ProjectTeamListQuery = z.infer<typeof teamListQuerySchema>;

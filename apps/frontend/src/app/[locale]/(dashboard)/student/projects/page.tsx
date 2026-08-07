@@ -19,6 +19,7 @@ import {
   formatDueDate,
   formatProjectStatus,
   formatProjectType,
+  STUDENT_MY_TEAM,
   useMyProjects,
   useStudentProjectDashboard,
 } from '@/features/project';
@@ -56,17 +57,18 @@ export default function StudentProjectsPage() {
             <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
           </div>
           <Button asChild variant="outline">
-            <Link href="/student/projects/team">{t('myTeams')}</Link>
+            <Link href={STUDENT_MY_TEAM}>{t('myTeams')}</Link>
           </Button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
           {[
-            { label: t('stats.active'), value: dash?.active },
-            { label: t('stats.inProgress'), value: dash?.inProgress },
-            { label: t('stats.submitted'), value: dash?.submitted },
-            { label: t('stats.graded'), value: dash?.graded },
-            { label: t('stats.pendingReviews'), value: dash?.pendingPeerReviews },
+            { label: t('stats.myProjects'), value: dash?.myProjects ?? dash?.active },
+            { label: t('stats.currentTeam'), value: dash?.currentTeam ?? '—' },
+            { label: t('stats.milestones'), value: dash?.milestones ?? dash?.overdueMilestones },
+            { label: t('stats.upcomingDeadlines'), value: dash?.upcomingDeadlines },
+            { label: t('stats.submissionHistory'), value: dash?.submissionHistory ?? dash?.submitted },
+            { label: t('stats.reviewFeedback'), value: dash?.reviewFeedback ?? dash?.pendingPeerReviews },
           ].map((stat) => (
             <Card key={stat.label} className="rounded-2xl border-border/80">
               <CardHeader className="pb-2">

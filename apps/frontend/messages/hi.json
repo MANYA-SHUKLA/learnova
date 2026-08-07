@@ -582,6 +582,7 @@
         "assignments": "असाइनमेंट",
         "practiceLabs": "प्रैक्टिस लैब्स",
         "projects": "परियोजनाएँ",
+        "myTeam": "मेरी टीम",
         "bookmarks": "बुकमार्क",
         "notes": "नोट्स",
         "activity": "गतिविधि",
@@ -1628,7 +1629,19 @@
         "teamsListTitle": "सभी टीमें",
         "teamsListDescription": "आपकी नामांकित परियोजनाओं में टीमें।",
         "noTeamsPageDescription": "परियोजना कार्यक्षेत्र से टीम में शामिल हों या बनाएं।",
-        "openProject": "परियोजना खोलें"
+        "openProject": "परियोजना खोलें",
+        "tabs": {
+          "overview": "अवलोकन",
+          "timeline": "समयरेखा",
+          "milestones": "माइलस्टोन",
+          "team": "टीम",
+          "submit": "कार्य जमा करें",
+          "comments": "टिप्पणियाँ",
+          "reviews": "समीक्षाएँ"
+        },
+        "pendingInvitations": "लंबित निमंत्रण",
+        "acceptInvitation": "स्वीकार करें",
+        "rejectInvitation": "अस्वीकार करें"
       }
     }
   },

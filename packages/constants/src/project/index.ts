@@ -1,15 +1,26 @@
-/** Enterprise Project Management constants — mirrors assignment/assessment patterns */
+/** Enterprise Project Management constants — academic project lifecycle */
 
 import {
   ASSESSMENT_ALLOWED_CONTENT_TYPES,
   ASSESSMENT_MAX_FILE_BYTES,
 } from '../assessment/index.js';
 
-export const PROJECT_TYPES = ['individual', 'team', 'hybrid'] as const;
+export const PROJECT_TYPES = [
+  'mini_project',
+  'major_project',
+  'capstone',
+  'research',
+  'case_study',
+  'industry_project',
+  'innovation_challenge',
+  'open_project',
+] as const;
 
-export const PROJECT_STATUSES = ['draft', 'published', 'archived', 'closed'] as const;
+export const PROJECT_STATUSES = ['draft', 'published', 'open', 'closed', 'archived'] as const;
 
 export const PROJECT_VISIBILITIES = ['institution', 'enrolled', 'faculty'] as const;
+
+export const PROJECT_DIFFICULTIES = ['beginner', 'intermediate', 'advanced', 'expert'] as const;
 
 export const PROJECT_SUBMISSION_STATUSES = [
   'draft',
@@ -30,9 +41,22 @@ export const PROJECT_GRADING_METHODS = [
   'percentage',
 ] as const;
 
-export const PROJECT_TEAM_STATUSES = ['forming', 'active', 'dissolved'] as const;
+export const PROJECT_TEAM_STATUSES = ['pending', 'approved', 'rejected', 'completed'] as const;
 
 export const PROJECT_TEAM_MEMBER_ROLES = ['leader', 'member'] as const;
+
+export const PROJECT_MEMBER_INVITATION_STATUSES = ['pending', 'accepted', 'rejected'] as const;
+
+export const PROJECT_MILESTONE_TYPES = [
+  'proposal',
+  'design',
+  'implementation',
+  'testing',
+  'documentation',
+  'presentation',
+  'final_submission',
+  'custom',
+] as const;
 
 export const PROJECT_MILESTONE_STATUSES = [
   'pending',
@@ -63,30 +87,94 @@ export const PROJECT_AUDIT_EVENTS = [
   'team_joined',
   'team_left',
   'team_dissolved',
+  'team_approved',
+  'team_rejected',
   'milestone_created',
   'milestone_updated',
   'milestone_completed',
   'submission_created',
   'submission_graded',
   'review_submitted',
+  'review_created',
+  'comment_created',
   'attachment_uploaded',
 ] as const;
 
 export type ProjectAuditEvent = (typeof PROJECT_AUDIT_EVENTS)[number];
 
+export const PROJECT_DEFAULT_MILESTONES = [
+  {
+    milestoneType: 'proposal' as const,
+    title: 'Project Proposal',
+    description: 'Submit project proposal including objectives, scope, and timeline',
+    weightage: 10,
+    order: 1,
+  },
+  {
+    milestoneType: 'design' as const,
+    title: 'Design & Architecture',
+    description: 'System design, wireframes, and technical architecture document',
+    weightage: 15,
+    order: 2,
+  },
+  {
+    milestoneType: 'implementation' as const,
+    title: 'Implementation',
+    description: 'Core development and feature implementation',
+    weightage: 30,
+    order: 3,
+  },
+  {
+    milestoneType: 'testing' as const,
+    title: 'Testing & QA',
+    description: 'Unit tests, integration tests, and quality assurance',
+    weightage: 15,
+    order: 4,
+  },
+  {
+    milestoneType: 'documentation' as const,
+    title: 'Documentation',
+    description: 'Technical documentation and user guides',
+    weightage: 10,
+    order: 5,
+  },
+  {
+    milestoneType: 'presentation' as const,
+    title: 'Presentation',
+    description: 'Project presentation and live demo',
+    weightage: 10,
+    order: 6,
+  },
+  {
+    milestoneType: 'final_submission' as const,
+    title: 'Final Submission',
+    description: 'Complete project deliverables and source code',
+    weightage: 10,
+    order: 7,
+  },
+] as const;
+
 export const PROJECT_CSV_HEADERS = [
   'id',
+  'slug',
   'courseId',
   'title',
   'projectType',
+  'difficulty',
+  'categoryId',
   'status',
+  'objective',
   'totalMarks',
   'passingMarks',
   'weightage',
+  'startDate',
   'dueDate',
-  'closeDate',
-  'teamSizeMin',
-  'teamSizeMax',
+  'submissionDeadline',
+  'minimumTeamSize',
+  'maximumTeamSize',
+  'allowIndividual',
+  'allowTeams',
+  'estimatedHours',
   'createdAt',
 ] as const;
 

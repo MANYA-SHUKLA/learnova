@@ -174,18 +174,25 @@ export {
   PROJECT_TYPES,
   PROJECT_STATUSES,
   PROJECT_VISIBILITIES,
+  PROJECT_DIFFICULTIES,
 } from './project.model.js';
 export {
   ProjectMilestoneModel,
   type ProjectMilestoneDocument,
   PROJECT_MILESTONE_STATUSES,
+  PROJECT_MILESTONE_TYPES,
 } from './project-milestone.model.js';
 export {
   ProjectTeamModel,
   type ProjectTeamDocument,
   PROJECT_TEAM_STATUSES,
-  PROJECT_TEAM_MEMBER_ROLES,
 } from './project-team.model.js';
+export {
+  ProjectMemberModel,
+  type ProjectMemberDocument,
+  PROJECT_TEAM_MEMBER_ROLES,
+  PROJECT_MEMBER_INVITATION_STATUSES,
+} from './project-member.model.js';
 export {
   ProjectSubmissionModel,
   type ProjectSubmissionDocument,
@@ -198,6 +205,22 @@ export {
   PROJECT_REVIEW_TYPES,
   PROJECT_REVIEW_STATUSES,
 } from './project-review.model.js';
+export {
+  ProjectCommentModel,
+  type ProjectCommentDocument,
+} from './project-comment.model.js';
+export {
+  ProjectAttachmentModel,
+  type ProjectAttachmentDocument,
+} from './project-attachment.model.js';
+export {
+  ProjectTagModel,
+  type ProjectTagDocument,
+} from './project-tag.model.js';
+export {
+  ProjectCategoryModel,
+  type ProjectCategoryDocument,
+} from './project-category.model.js';
 export {
   ProjectGradeModel,
   type ProjectGradeDocument,

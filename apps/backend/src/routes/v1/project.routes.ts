@@ -1,12 +1,19 @@
 import { Router, type RequestHandler } from 'express';
 import { PERMISSIONS } from '@learnova/constants';
 import {
+  bulkAssignFacultySchema,
+  bulkProjectIdsSchema,
+  createCategorySchema,
   createMilestoneSchema,
+  createProjectCommentSchema,
   createProjectSchema,
   createReviewSchema,
+  createTagSchema,
   createTeamSchema,
   gradeProjectSubmissionSchema,
+  inviteMemberSchema,
   joinTeamSchema,
+  projectCommentIdParamsSchema,
   projectExportQuerySchema,
   projectFileUploadSchema,
   projectIdParamsSchema,
@@ -22,6 +29,7 @@ import {
   submitProjectSchema,
   submitReviewSchema,
   teamListQuerySchema,
+  transferLeadershipSchema,
   updateMilestoneSchema,
   updateProjectSchema,
   updateTeamSchema,
@@ -29,6 +37,8 @@ import {
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/project/project.controller.js';
+
+const projectCommentBodySchema = createProjectCommentSchema.omit({ projectId: true });
 
 const projectRoutes = Router();
 
@@ -46,6 +56,61 @@ const manageAuth = [
   authenticate({ required: true }),
   requirePermission(PERMISSIONS.PROJECT_MANAGE),
 ] as RequestHandler[];
+
+projectRoutes.get('/projects/my-team', ...readAuth, ctrl.getMyTeams);
+
+projectRoutes.get('/projects/tags', ...readAuth, ctrl.listProjectTags);
+
+projectRoutes.post(
+  '/projects/tags',
+  ...writeAuth,
+  validate(createTagSchema),
+  ctrl.createProjectTag,
+);
+
+projectRoutes.get('/projects/categories', ...readAuth, ctrl.listProjectCategories);
+
+projectRoutes.post(
+  '/projects/categories',
+  ...writeAuth,
+  validate(createCategorySchema),
+  ctrl.createProjectCategory,
+);
+
+projectRoutes.post(
+  '/projects/bulk/publish',
+  ...writeAuth,
+  validate(bulkProjectIdsSchema),
+  ctrl.bulkPublishProjects,
+);
+
+projectRoutes.post(
+  '/projects/bulk/archive',
+  ...writeAuth,
+  validate(bulkProjectIdsSchema),
+  ctrl.bulkArchiveProjects,
+);
+
+projectRoutes.post(
+  '/projects/bulk/delete',
+  ...writeAuth,
+  validate(bulkProjectIdsSchema),
+  ctrl.bulkDeleteProjects,
+);
+
+projectRoutes.post(
+  '/projects/bulk/duplicate',
+  ...writeAuth,
+  validate(bulkProjectIdsSchema),
+  ctrl.bulkDuplicateProjects,
+);
+
+projectRoutes.post(
+  '/projects/bulk/assign-faculty',
+  ...manageAuth,
+  validate(bulkAssignFacultySchema),
+  ctrl.bulkAssignFacultyProjects,
+);
 
 // ------------------------------------------------------------------ collection
 
@@ -159,6 +224,50 @@ projectRoutes.post(
   ctrl.leaveTeam,
 );
 
+projectRoutes.post(
+  '/projects/teams/:id/approve',
+  ...writeAuth,
+  validate(projectTeamIdParamsSchema, 'params'),
+  ctrl.approveTeam,
+);
+
+projectRoutes.post(
+  '/projects/teams/:id/reject',
+  ...writeAuth,
+  validate(projectTeamIdParamsSchema, 'params'),
+  ctrl.rejectTeam,
+);
+
+projectRoutes.post(
+  '/projects/teams/:id/invite',
+  ...writeAuth,
+  validate(projectTeamIdParamsSchema, 'params'),
+  validate(inviteMemberSchema.omit({ teamId: true })),
+  ctrl.inviteTeamMember,
+);
+
+projectRoutes.post(
+  '/projects/teams/:id/transfer-leadership',
+  ...writeAuth,
+  validate(projectTeamIdParamsSchema, 'params'),
+  validate(transferLeadershipSchema.omit({ teamId: true })),
+  ctrl.transferTeamLeadership,
+);
+
+projectRoutes.post(
+  '/projects/members/:id/accept',
+  ...writeAuth,
+  validate(projectCommentIdParamsSchema, 'params'),
+  ctrl.acceptMemberInvitation,
+);
+
+projectRoutes.post(
+  '/projects/members/:id/reject',
+  ...writeAuth,
+  validate(projectCommentIdParamsSchema, 'params'),
+  ctrl.rejectMemberInvitation,
+);
+
 projectRoutes.delete(
   '/projects/teams/:id/members/:studentId',
   ...writeAuth,
@@ -243,6 +352,30 @@ projectRoutes.post(
   ...manageAuth,
   validate(projectImportConfirmSchema),
   ctrl.importProjects,
+);
+
+// --------------------------------------------------------------------- comments
+
+projectRoutes.get(
+  '/projects/:id/comments',
+  ...readAuth,
+  validate(projectIdParamsSchema, 'params'),
+  ctrl.listProjectComments,
+);
+
+projectRoutes.post(
+  '/projects/:id/comments',
+  ...writeAuth,
+  validate(projectIdParamsSchema, 'params'),
+  validate(projectCommentBodySchema),
+  ctrl.createProjectComment,
+);
+
+projectRoutes.patch(
+  '/projects/comments/:id/resolve',
+  ...writeAuth,
+  validate(projectCommentIdParamsSchema, 'params'),
+  ctrl.resolveProjectComment,
 );
 
 // ------------------------------------------------------------------------- item

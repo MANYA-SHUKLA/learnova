@@ -1,18 +1,32 @@
 import { Types } from 'mongoose';
+import {
+  PROJECT_DEFAULT_MILESTONES,
+  PROJECT_DIFFICULTIES,
+  PROJECT_STATUSES,
+  PROJECT_TYPES,
+} from '@learnova/constants';
 import { ProjectModel } from '../models/project.model.js';
 import { ProjectMilestoneModel } from '../models/project-milestone.model.js';
 import { ProjectTeamModel } from '../models/project-team.model.js';
+import { ProjectMemberModel } from '../models/project-member.model.js';
 import { ProjectSubmissionModel } from '../models/project-submission.model.js';
 import { ProjectReviewModel } from '../models/project-review.model.js';
+import { ProjectCommentModel } from '../models/project-comment.model.js';
+import { ProjectTagModel } from '../models/project-tag.model.js';
+import { ProjectCategoryModel } from '../models/project-category.model.js';
 import { ProjectGradeModel } from '../models/project-grade.model.js';
 import { ProjectProgressModel } from '../models/project-progress.model.js';
 import { ProjectAuditLogModel } from '../models/project-audit-log.model.js';
 import { logger } from '../utils/logger/index.js';
-import { computePercentage, isPassing } from '../services/project/project.helpers.js';
+import {
+  computePercentage,
+  generateSlug,
+  isPassing,
+} from '../services/project/project.helpers.js';
 
-const PROJECT_TYPES = ['individual', 'team', 'hybrid'] as const;
-const STATUSES = ['draft', 'published', 'archived', 'closed'] as const;
 const DELIVERY_TYPES = ['text', 'file', 'link', 'mixed'] as const;
+const TEAM_STATUSES = ['pending', 'approved', 'rejected', 'completed'] as const;
+const SUBMISSION_STATUSES = ['submitted', 'late', 'graded', 'draft'] as const;
 
 const TITLE_PREFIXES = [
   'Capstone Build',
@@ -25,6 +39,15 @@ const TITLE_PREFIXES = [
   'Cloud Migration',
   'AI Ethics Study',
   'Community Platform',
+];
+
+const TAG_NAMES = ['AI/ML', 'Web Dev', 'Mobile', 'IoT', 'Blockchain', 'Data Science', 'DevOps'];
+const CATEGORY_NAMES = [
+  'Software Engineering',
+  'Research',
+  'Design',
+  'Infrastructure',
+  'Business Analytics',
 ];
 
 function randomItem<T>(arr: readonly T[]): T {
@@ -58,8 +81,12 @@ export interface ProjectSeedResult {
   projects: number;
   milestones: number;
   teams: number;
+  members: number;
   submissions: number;
   reviews: number;
+  comments: number;
+  tags: number;
+  categories: number;
   grades: number;
   progress: number;
   auditLogs: number;
@@ -72,7 +99,7 @@ export async function seedProjects(
 ): Promise<ProjectSeedResult> {
   const oid = new Types.ObjectId(institutionId);
   const userOid = new Types.ObjectId(refs.userId);
-  const projectTarget = options.projectTarget ?? 10;
+  const projectTarget = options.projectTarget ?? 50;
 
   logger.info({ institutionId, projectTarget }, 'Starting project seed');
 
@@ -84,8 +111,12 @@ export async function seedProjects(
         projects: existing,
         milestones: 0,
         teams: 0,
+        members: 0,
         submissions: 0,
         reviews: 0,
+        comments: 0,
+        tags: 0,
+        categories: 0,
         grades: 0,
         progress: 0,
         auditLogs: 0,
@@ -99,8 +130,12 @@ export async function seedProjects(
       ProjectModel.deleteMany({ institutionId: oid }),
       ProjectMilestoneModel.deleteMany({ institutionId: oid }),
       ProjectTeamModel.deleteMany({ institutionId: oid }),
+      ProjectMemberModel.deleteMany({ institutionId: oid }),
       ProjectSubmissionModel.deleteMany({ institutionId: oid }),
       ProjectReviewModel.deleteMany({ institutionId: oid }),
+      ProjectCommentModel.deleteMany({ institutionId: oid }),
+      ProjectTagModel.deleteMany({ institutionId: oid }),
+      ProjectCategoryModel.deleteMany({ institutionId: oid }),
       ProjectGradeModel.deleteMany({ institutionId: oid }),
       ProjectProgressModel.deleteMany({ institutionId: oid }),
       ProjectAuditLogModel.deleteMany({ institutionId: oid }),
@@ -111,11 +146,33 @@ export async function seedProjects(
   const pastStart = new Date(now.getTime() - 120 * 24 * 60 * 60 * 1000);
   const futureEnd = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
 
+  const categories = CATEGORY_NAMES.map((name, i) => ({
+    _id: new Types.ObjectId(),
+    institutionId: oid,
+    name,
+    slug: generateSlug(name),
+    description: `Seeded category: ${name}`,
+    color: `#${((i + 1) * 111111).toString(16).slice(0, 6)}`,
+    deletedAt: null,
+  }));
+  await ProjectCategoryModel.insertMany(categories, { ordered: false });
+
+  const tags = TAG_NAMES.map((name, i) => ({
+    _id: new Types.ObjectId(),
+    institutionId: oid,
+    name,
+    slug: generateSlug(name),
+    color: `#${((i + 2) * 99999).toString(16).slice(0, 6)}`,
+    deletedAt: null,
+  }));
+  await ProjectTagModel.insertMany(tags, { ordered: false });
+
   const projects = Array.from({ length: projectTarget }, (_, i) => {
     const courseId = new Types.ObjectId(randomItem(refs.courseIds));
-    const status = randomItem(STATUSES);
+    const status = randomItem(PROJECT_STATUSES);
     const dueDate = randomDate(pastStart, futureEnd);
     const totalMarks = randomInt(50, 100);
+    const title = `${randomItem(TITLE_PREFIXES)} ${i + 1}`;
 
     return {
       _id: new Types.ObjectId(),
@@ -123,12 +180,19 @@ export async function seedProjects(
       courseId,
       moduleId: null,
       lessonId: null,
-      title: `${randomItem(TITLE_PREFIXES)} ${i + 1}`,
+      slug: `${generateSlug(title)}-${i + 1}`,
+      title,
       description: 'Seeded enterprise project for demo dashboards and workflows.',
       instructions: 'Deliver milestones on schedule; submit artifacts via the portal.',
+      objective: 'Demonstrate mastery of course concepts through a practical deliverable.',
       projectType: randomItem(PROJECT_TYPES),
-      teamSizeMin: 2,
-      teamSizeMax: 5,
+      difficulty: randomItem(PROJECT_DIFFICULTIES),
+      categoryId: randomItem(categories)._id,
+      tags: tags.slice(0, randomInt(1, 3)).map((t) => t._id),
+      allowIndividual: randomBool(0.4),
+      allowTeams: randomBool(0.8),
+      minimumTeamSize: 2,
+      maximumTeamSize: 5,
       allowSelfTeamFormation: true,
       allowPeerReview: randomBool(0.6),
       peerReviewsRequired: randomInt(0, 3),
@@ -139,15 +203,17 @@ export async function seedProjects(
       totalMarks,
       passingMarks: Math.floor(totalMarks * 0.4),
       weightage: randomInt(5, 25),
-      allowLateSubmission: randomBool(0.7),
-      latePenaltyPercent: randomInt(0, 15),
+      lateSubmissionAllowed: randomBool(0.7),
+      latePenalty: randomInt(0, 15),
       allowResubmission: randomBool(0.3),
       maxAttempts: randomInt(1, 3),
       publishDate: status !== 'draft' ? randomDate(pastStart, now) : null,
       dueDate,
       closeDate: randomBool(0.4) ? new Date(dueDate.getTime() + 7 * 86400000) : null,
-      estimatedMinutes: randomInt(600, 3000),
+      estimatedHours: randomInt(10, 50),
       attachments: [],
+      assignedFacultyIds: [],
+      resources: [],
       rubricId: null,
       createdBy: userOid,
       updatedBy: userOid,
@@ -158,91 +224,114 @@ export async function seedProjects(
   await ProjectModel.insertMany(projects, { ordered: false });
 
   const milestones = projects.flatMap((project) =>
-    Array.from({ length: randomInt(2, 4) }, (_, m) => ({
+    PROJECT_DEFAULT_MILESTONES.map((m, mIdx) => ({
       _id: new Types.ObjectId(),
       institutionId: oid,
       projectId: project._id,
-      title: `Milestone ${m + 1}`,
-      description: `Deliverable ${m + 1} for ${project.title}`,
+      title: m.title,
+      description: m.description,
+      milestoneType: m.milestoneType,
       dueDate: randomDate(pastStart, futureEnd),
-      order: m,
-      weight: randomInt(10, 40),
+      order: m.order ?? mIdx + 1,
+      weightage: m.weightage,
       status: randomItem(['pending', 'in_progress', 'completed', 'overdue'] as const),
       createdBy: userOid,
       updatedBy: userOid,
       deletedAt: null,
     })),
   );
-
   await ProjectMilestoneModel.insertMany(milestones, { ordered: false });
 
-  const teams = projects
-    .filter((p) => p.projectType !== 'individual')
-    .slice(0, 6)
-    .map((project, i) => {
-      const memberIds = refs.studentIds.slice(i * 2, i * 2 + randomInt(2, 4));
-      const members = memberIds.map((sid, idx) => ({
-        _id: new Types.ObjectId(),
-        studentId: new Types.ObjectId(sid),
-        role: idx === 0 ? ('leader' as const) : ('member' as const),
-        joinedAt: randomDate(pastStart, now),
-      }));
-
-      return {
-        _id: new Types.ObjectId(),
-        institutionId: oid,
-        projectId: project._id,
-        courseId: project.courseId,
-        name: `Team ${i + 1}`,
-        status: members.length >= project.teamSizeMin ? 'active' : 'forming',
-        leaderId: members[0]?.studentId ?? null,
-        memberCount: members.length,
-        repoLink: randomBool(0.5) ? `https://github.com/learnova/demo-team-${i + 1}` : null,
-        members,
-        createdBy: userOid,
-        updatedBy: userOid,
-        deletedAt: null,
-      };
-    });
-
-  await ProjectTeamModel.insertMany(teams, { ordered: false });
-
-  const submissions = projects.slice(0, 8).flatMap((project, i) => {
-    const studentId = new Types.ObjectId(refs.studentIds[i % refs.studentIds.length]!);
-    const team = teams.find((t) => String(t.projectId) === String(project._id));
-    const submittedAt = randomDate(pastStart, now);
-    const late = project.dueDate ? submittedAt > project.dueDate : false;
-    const status = randomItem(['submitted', 'late', 'graded', 'draft'] as const);
+  const teamProjects = projects.filter((p) => p.allowTeams);
+  const teams = Array.from({ length: Math.min(100, teamProjects.length * 2) }, (_, i) => {
+    const project = teamProjects[i % teamProjects.length]!;
+    const memberIds = refs.studentIds.slice(
+      (i * 2) % refs.studentIds.length,
+      ((i * 2) % refs.studentIds.length) + randomInt(2, 4),
+    );
+    if (memberIds.length === 0) memberIds.push(refs.studentIds[0]!);
 
     return {
       _id: new Types.ObjectId(),
       institutionId: oid,
       projectId: project._id,
       courseId: project.courseId,
-      studentId,
-      teamId: team?._id ?? null,
-      milestoneId: milestones.find((m) => String(m.projectId) === String(project._id))?._id ?? null,
-      attemptNumber: 1,
-      submittedAt: status === 'draft' ? null : submittedAt,
-      status,
-      deliveryType: randomItem(DELIVERY_TYPES),
-      files: [],
-      textSubmission: randomBool(0.5) ? 'Seeded project submission narrative.' : null,
-      links: randomBool(0.4) ? ['https://example.com/demo-artifact'] : [],
-      repoLink: team?.repoLink ?? null,
-      timeSpentMinutes: randomInt(30, 500),
-      lateSubmission: late,
-      gradeId: null,
+      teamName: `Team ${i + 1}`,
+      status: randomItem(TEAM_STATUSES),
+      leaderId: new Types.ObjectId(memberIds[0]!),
+      memberCount: memberIds.length,
+      repoLink: randomBool(0.5) ? `https://github.com/learnova/demo-team-${i + 1}` : null,
       createdBy: userOid,
       updatedBy: userOid,
       deletedAt: null,
+      _memberIds: memberIds,
     };
   });
 
-  await ProjectSubmissionModel.insertMany(submissions, { ordered: false });
+  const teamDocs = teams.map(({ _memberIds, ...team }) => team);
+  await ProjectTeamModel.insertMany(teamDocs, { ordered: false });
+
+  const members = teams.flatMap((team) =>
+    (team._memberIds as string[]).map((sid, idx) => ({
+      institutionId: oid,
+      teamId: team._id,
+      projectId: team.projectId,
+      studentId: new Types.ObjectId(sid),
+      role: idx === 0 ? ('leader' as const) : ('member' as const),
+      invitationStatus: 'accepted' as const,
+      joinedAt: randomDate(pastStart, now),
+      approvedBy: userOid,
+      deletedAt: null,
+    })),
+  );
+  await ProjectMemberModel.insertMany(members, { ordered: false });
+
+  const submissions = projects.slice(0, 30).flatMap((project, i) => {
+    const count = randomInt(8, 12);
+    return Array.from({ length: Math.ceil(300 / 30) }, (_, j) => {
+      const idx = i * 10 + j;
+      if (idx >= 300) return null;
+      const studentId = new Types.ObjectId(refs.studentIds[idx % refs.studentIds.length]!);
+      const team = teams.find((t) => String(t.projectId) === String(project._id));
+      const submittedAt = randomDate(pastStart, now);
+      const late = project.dueDate ? submittedAt > project.dueDate : false;
+      const status = randomItem(SUBMISSION_STATUSES);
+
+      return {
+        _id: new Types.ObjectId(),
+        institutionId: oid,
+        projectId: project._id,
+        courseId: project.courseId,
+        submittedBy: userOid,
+        studentId,
+        teamId: team?._id ?? null,
+        milestoneId:
+          milestones.find((m) => String(m.projectId) === String(project._id))?._id ?? null,
+        attemptNumber: 1,
+        submittedAt: status === 'draft' ? null : submittedAt,
+        status,
+        deliveryType: randomItem(DELIVERY_TYPES),
+        submissionText: randomBool(0.5) ? 'Seeded project submission narrative.' : null,
+        githubRepository: team?.repoLink ?? null,
+        demoVideo: randomBool(0.2) ? 'https://example.com/demo.mp4' : null,
+        liveDemoURL: randomBool(0.3) ? 'https://example.com/live-demo' : null,
+        attachments: [],
+        links: randomBool(0.4) ? ['https://example.com/demo-artifact'] : [],
+        timeSpentMinutes: randomInt(30, 500),
+        lateSubmission: late,
+        gradeId: null,
+        createdBy: userOid,
+        updatedBy: userOid,
+        deletedAt: null,
+      };
+    }).filter(Boolean);
+  }).flat() as Record<string, unknown>[];
+
+  await ProjectSubmissionModel.insertMany(submissions.slice(0, 300), { ordered: false });
 
   const grades = submissions
     .filter((s) => s.status === 'graded')
+    .slice(0, 80)
     .map((submission) => {
       const project = projects.find((p) => String(p._id) === String(submission.projectId))!;
       const marksObtained = randomInt(30, project.totalMarks);
@@ -280,7 +369,7 @@ export async function seedProjects(
 
   const reviews = submissions
     .filter((s) => s.status !== 'draft')
-    .slice(0, 5)
+    .slice(0, 120)
     .map((submission, i) => ({
       _id: new Types.ObjectId(),
       institutionId: oid,
@@ -289,8 +378,11 @@ export async function seedProjects(
       reviewerId: userOid,
       reviewType: i % 2 === 0 ? ('peer' as const) : ('faculty' as const),
       status: 'submitted' as const,
-      rating: randomInt(5, 10),
+      score: randomInt(50, 100),
       feedback: 'Seeded review feedback.',
+      suggestions: randomBool(0.5) ? 'Consider adding more test coverage.' : null,
+      approval: randomBool(0.7),
+      revisionRequired: randomBool(0.2),
       rubricScores: [],
       submittedAt: randomDate(pastStart, now),
       deletedAt: null,
@@ -298,7 +390,25 @@ export async function seedProjects(
 
   await ProjectReviewModel.insertMany(reviews, { ordered: false });
 
-  const progressRows = refs.studentIds.slice(0, 5).flatMap((studentId, i) => {
+  const comments = submissions.slice(0, 80).flatMap((submission, i) => {
+    const count = randomInt(1, 3);
+    return Array.from({ length: count }, (_, j) => ({
+      institutionId: oid,
+      projectId: submission.projectId,
+      submissionId: submission._id,
+      milestoneId: null,
+      parentCommentId: j > 0 ? null : null,
+      authorId: userOid,
+      authorRole: j % 2 === 0 ? 'faculty' : 'student',
+      body: `Seeded comment ${j + 1} on submission ${i + 1}`,
+      resolved: randomBool(0.3),
+      attachments: [],
+      deletedAt: null,
+    }));
+  });
+  await ProjectCommentModel.insertMany(comments, { ordered: false });
+
+  const progressRows = refs.studentIds.slice(0, 20).flatMap((studentId, i) => {
     const project = projects[i % projects.length];
     if (!project) return [];
     return [
@@ -309,8 +419,9 @@ export async function seedProjects(
         studentId: new Types.ObjectId(studentId),
         teamId: teams.find((t) => String(t.projectId) === String(project._id))?._id ?? null,
         status: randomItem(['not_started', 'in_progress', 'submitted', 'graded'] as const),
-        milestonesCompleted: randomInt(0, 3),
-        totalMilestones: milestones.filter((m) => String(m.projectId) === String(project._id)).length,
+        milestonesCompleted: randomInt(0, 5),
+        totalMilestones: milestones.filter((m) => String(m.projectId) === String(project._id))
+          .length,
         peerReviewsGiven: randomInt(0, 2),
         peerReviewsRequired: project.peerReviewsRequired,
         submissionId: null,
@@ -323,7 +434,7 @@ export async function seedProjects(
 
   await ProjectProgressModel.insertMany(progressRows, { ordered: false });
 
-  const auditLogs = projects.slice(0, 5).map((project) => ({
+  const auditLogs = projects.slice(0, 20).map((project) => ({
     institutionId: oid,
     projectId: project._id,
     submissionId: null,
@@ -343,8 +454,12 @@ export async function seedProjects(
     projects: projects.length,
     milestones: milestones.length,
     teams: teams.length,
-    submissions: submissions.length,
+    members: members.length,
+    submissions: Math.min(submissions.length, 300),
     reviews: reviews.length,
+    comments: comments.length,
+    tags: tags.length,
+    categories: categories.length,
     grades: grades.length,
     progress: progressRows.length,
     auditLogs: auditLogs.length,

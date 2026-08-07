@@ -1,6 +1,6 @@
 # Assessment Core
 
-Shared assessment primitives for **Assignments**, **Practice Labs**, **Quizzes**, **Exams**, and (later) **Projects**.
+Shared assessment primitives for **Assignments**, **Practice Labs**, **Projects**, **Quizzes**, **Exams**, and **Gradebook** integration.
 
 Introduced as Step **9.5** so grading, deadlines, attempts, feedback, audit naming, and permission patterns are defined once — not reimplemented per module.
 
@@ -10,6 +10,8 @@ Assessment Core
 Assignments (9) ✅
   ↓
 Labs (10) ✅  ── uses Coding Assessment Engine
+  ↓
+Projects (11) ✅
   ↓
 Quizzes (optional)
   ↓

@@ -23,6 +23,10 @@ describe('project status transitions', () => {
     expect(canTransitionStatus('draft', 'archived')).toBe(true);
   });
 
+  it('supports open status after published', () => {
+    expect(canTransitionStatus('published', 'open')).toBe(true);
+  });
+
   it('cannot close a draft directly', () => {
     expect(canTransitionStatus('draft', 'closed')).toBe(false);
   });

@@ -60,12 +60,17 @@ export const EVENTS = {
   PROJECT_UPDATED: 'project.updated',
   PROJECT_PUBLISHED: 'project.published',
   PROJECT_ARCHIVED: 'project.archived',
+  PROJECT_DELETED: 'project.deleted',
   PROJECT_SUBMITTED: 'project.submitted',
   PROJECT_GRADED: 'project.graded',
   PROJECT_TEAM_CREATED: 'project.team.created',
   PROJECT_TEAM_JOINED: 'project.team.joined',
+  PROJECT_TEAM_APPROVED: 'project.team.approved',
+  PROJECT_TEAM_REJECTED: 'project.team.rejected',
   PROJECT_MILESTONE_COMPLETED: 'project.milestone.completed',
   PROJECT_REVIEW_SUBMITTED: 'project.review.submitted',
+  PROJECT_REVIEW_CREATED: 'project.review.created',
+  PROJECT_COMMENT_CREATED: 'project.comment.created',
   PROJECT_SUBMISSION_CREATED: 'project.submission.created',
 
   CERTIFICATE_GENERATED: 'certificate.generated',
@@ -271,6 +276,7 @@ export interface EventPayloadMap {
   'project.updated': { projectId: string; courseId: string; institutionId: string };
   'project.published': { projectId: string; courseId: string; institutionId: string };
   'project.archived': { projectId: string; courseId: string; institutionId: string };
+  'project.deleted': { projectId: string; courseId: string; institutionId: string };
   'project.submitted': { projectId: string; userId?: string };
   'project.graded': { projectId: string; gradeId: string; institutionId: string };
   'project.team.created': {
@@ -285,6 +291,19 @@ export interface EventPayloadMap {
     studentId: string;
     institutionId: string;
   };
+  'project.team.approved': {
+    teamId: string;
+    projectId: string;
+    institutionId: string;
+    approvedBy: string;
+  };
+  'project.team.rejected': {
+    teamId: string;
+    projectId: string;
+    institutionId: string;
+    rejectedBy: string;
+    reason?: string;
+  };
   'project.milestone.completed': {
     milestoneId: string;
     projectId: string;
@@ -298,6 +317,22 @@ export interface EventPayloadMap {
     submissionId: string;
     reviewerId: string;
     institutionId: string;
+  };
+  'project.review.created': {
+    reviewId: string;
+    projectId: string;
+    submissionId: string;
+    reviewerId: string;
+    institutionId: string;
+    reviewType: string;
+  };
+  'project.comment.created': {
+    commentId: string;
+    projectId: string;
+    institutionId: string;
+    authorId: string;
+    submissionId?: string;
+    parentCommentId?: string;
   };
   'project.submission.created': {
     submissionId: string;
@@ -454,11 +489,16 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.PROJECT_UPDATED, description: 'Project updated', version: 1 },
   { name: EVENTS.PROJECT_PUBLISHED, description: 'Project published', version: 1 },
   { name: EVENTS.PROJECT_ARCHIVED, description: 'Project archived', version: 1 },
+  { name: EVENTS.PROJECT_DELETED, description: 'Project deleted', version: 1 },
   { name: EVENTS.PROJECT_GRADED, description: 'Project graded', version: 1 },
   { name: EVENTS.PROJECT_TEAM_CREATED, description: 'Project team created', version: 1 },
   { name: EVENTS.PROJECT_TEAM_JOINED, description: 'Student joined project team', version: 1 },
+  { name: EVENTS.PROJECT_TEAM_APPROVED, description: 'Project team approved by faculty', version: 1 },
+  { name: EVENTS.PROJECT_TEAM_REJECTED, description: 'Project team rejected by faculty', version: 1 },
   { name: EVENTS.PROJECT_MILESTONE_COMPLETED, description: 'Project milestone completed', version: 1 },
   { name: EVENTS.PROJECT_REVIEW_SUBMITTED, description: 'Project review submitted', version: 1 },
+  { name: EVENTS.PROJECT_REVIEW_CREATED, description: 'Project review created', version: 1 },
+  { name: EVENTS.PROJECT_COMMENT_CREATED, description: 'Project comment created', version: 1 },
   { name: EVENTS.PROJECT_SUBMISSION_CREATED, description: 'Project submission created', version: 1 },
   { name: EVENTS.CERTIFICATE_REVOKED, description: 'Certificate revoked', version: 1 },
   { name: EVENTS.USER_REGISTERED, description: 'User registered', version: 1 },

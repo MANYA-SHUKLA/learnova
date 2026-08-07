@@ -464,3 +464,234 @@ export async function getReview(req: Request, res: Response, next: NextFunction)
     next(err);
   }
 }
+
+// --------------------------------------------------------------- bulk operations
+
+export async function bulkPublishProjects(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.bulkPublish(
+      (req.body as { projectIds: string[] }).projectIds,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function bulkArchiveProjects(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.bulkArchive(
+      (req.body as { projectIds: string[] }).projectIds,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function bulkDeleteProjects(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.bulkDelete(
+      (req.body as { projectIds: string[] }).projectIds,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function bulkDuplicateProjects(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.bulkDuplicate(
+      (req.body as { projectIds: string[] }).projectIds,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function bulkAssignFacultyProjects(req: Request, res: Response, next: NextFunction) {
+  try {
+    const body = req.body as { projectIds: string[]; facultyIds: string[] };
+    const data = await projectService.bulkAssignFaculty(
+      body.projectIds,
+      body.facultyIds,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ------------------------------------------------------------------ team approval
+
+export async function approveTeam(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.approveTeam(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function rejectTeam(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.rejectTeam(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function inviteTeamMember(req: Request, res: Response, next: NextFunction) {
+  try {
+    const body = req.body as { studentId: string; role?: 'leader' | 'member' };
+    const data = await projectService.inviteMember(
+      req.params.id as string,
+      body.studentId,
+      body.role ?? 'member',
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function transferTeamLeadership(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.transferLeadership(
+      req.params.id as string,
+      (req.body as { newLeaderId: string }).newLeaderId,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function acceptMemberInvitation(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.acceptInvitation(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function rejectMemberInvitation(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.rejectInvitation(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getMyTeams(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.getMyTeams(actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ----------------------------------------------------------------------- comments
+
+export async function listProjectComments(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.listComments(
+      req.params.id as string,
+      req.query.submissionId as string | undefined,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createProjectComment(req: Request, res: Response, next: NextFunction) {
+  try {
+    const body = req.body as {
+      submissionId?: string | null;
+      parentCommentId?: string | null;
+      body: string;
+      attachments?: string[];
+    };
+    const data = await projectService.createComment(
+      {
+        projectId: req.params.id as string,
+        submissionId: body.submissionId,
+        parentCommentId: body.parentCommentId,
+        body: body.body,
+        attachments: body.attachments,
+      },
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resolveProjectComment(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.resolveComment(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ------------------------------------------------------------------ tags/categories
+
+export async function listProjectTags(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.listTags(actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createProjectTag(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.createTag(
+      req.body as { name: string; color?: string | null },
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listProjectCategories(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.listCategories(actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createProjectCategory(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.createCategory(
+      req.body as { name: string; description?: string | null; color?: string | null },
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}

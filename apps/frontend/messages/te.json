@@ -583,6 +583,7 @@
         "assignments": "అసైన్‌మెంట్లు",
         "practiceLabs": "ప్రాక్టీస్ ల్యాబ్స్",
         "projects": "ప్రాజెక్టులు",
+        "myTeam": "నా టీమ్",
         "bookmarks": "బుక్‌మార్కులు",
         "notes": "నోట్స్",
         "activity": "కార్యకలాపం",
@@ -1627,7 +1628,19 @@
         "teamsListTitle": "All teams",
         "teamsListDescription": "Teams across your enrolled projects.",
         "noTeamsPageDescription": "Join or create a team from a project workspace.",
-        "openProject": "Open project"
+        "openProject": "Open project",
+        "tabs": {
+          "overview": "Overview",
+          "timeline": "Timeline",
+          "milestones": "Milestones",
+          "team": "Team",
+          "submit": "Submit work",
+          "comments": "Comments",
+          "reviews": "Reviews"
+        },
+        "pendingInvitations": "Pending invitations",
+        "acceptInvitation": "Accept",
+        "rejectInvitation": "Reject"
       }
     }
   },

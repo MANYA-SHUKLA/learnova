@@ -1,36 +1,50 @@
 import { API_ROUTES, PAGINATION } from '@learnova/constants';
 import type {
   PaginatedMeta,
-  Project,
-  ProjectFacultyDashboard,
   ProjectGrade,
-  ProjectInstitutionDashboard,
   ProjectMilestone,
   ProjectReview,
-  ProjectStudentDashboard,
   ProjectSubmission,
   ProjectTeam,
 } from '@learnova/types';
 import { apiClient } from '@/lib/api/client';
 import type {
+  BulkAssignFacultyBody,
+  BulkIdsBody,
+  BulkResult,
+  CommentCreateBody,
+  CommentListParams,
+  CommentListResult,
+  CommentUpdateBody,
   GradeBody,
   JoinTeamBody,
   MilestoneCreateBody,
+  MilestoneListResult,
   MilestoneUpdateBody,
+  MyTeamListResult,
+  ProjectCategory,
+  ProjectComment,
   ProjectCreateBody,
+  ProjectExtended,
+  ProjectFacultyDashboardExtended,
+  ProjectInstitutionDashboardExtended,
   ProjectListParams,
   ProjectListResult,
+  ProjectStudentDashboardExtended,
+  ProjectTag,
   ProjectUpdateBody,
   ReviewCreateBody,
   ReviewSubmitBody,
   SubmissionListParams,
   SubmissionListResult,
+  SubmitBody,
   TeamCreateBody,
+  TeamInviteBody,
   TeamListParams,
   TeamListResult,
+  TeamRejectBody,
+  TeamTransferLeadershipBody,
   TeamUpdateBody,
-  MilestoneListResult,
-  SubmitBody,
 } from '../types';
 
 const base = API_ROUTES.PROJECTS;
@@ -53,44 +67,79 @@ function toQuery(params: Record<string, string | number | boolean | undefined>):
   return qs ? `?${qs}` : '';
 }
 
+function mapSortParams(params: ProjectListParams): ProjectListParams {
+  if (!params.sort) return params;
+  const sortMap: Record<string, { sortBy: string; sortOrder: 'asc' | 'desc' }> = {
+    newest: { sortBy: 'createdAt', sortOrder: 'desc' },
+    oldest: { sortBy: 'createdAt', sortOrder: 'asc' },
+    deadline: { sortBy: 'dueDate', sortOrder: 'asc' },
+    title: { sortBy: 'title', sortOrder: 'asc' },
+    difficulty: { sortBy: 'difficulty', sortOrder: 'asc' },
+  };
+  const mapped = sortMap[params.sort];
+  if (!mapped) return params;
+  return { ...params, sortBy: mapped.sortBy, sortOrder: mapped.sortOrder };
+}
+
 export const projectApi = {
   list: async (params: ProjectListParams = {}): Promise<ProjectListResult> => {
-    const { data, meta } = await apiClient.getWithMeta<{ items: Project[] }>(
-      `${base}${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+    const query = mapSortParams(params);
+    const { data, meta } = await apiClient.getWithMeta<{ items: ProjectExtended[] }>(
+      `${base}${toQuery(query as Record<string, string | number | boolean | undefined>)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
 
   listMine: async (params: ProjectListParams = {}): Promise<ProjectListResult> => {
-    const { data, meta } = await apiClient.getWithMeta<{ items: Project[] }>(
-      `${base}/me${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+    const query = mapSortParams(params);
+    const { data, meta } = await apiClient.getWithMeta<{ items: ProjectExtended[] }>(
+      `${base}/me${toQuery(query as Record<string, string | number | boolean | undefined>)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
 
   search: async (params: ProjectListParams = {}): Promise<ProjectListResult> => {
-    const { data, meta } = await apiClient.getWithMeta<{ items: Project[] }>(
+    const { data, meta } = await apiClient.getWithMeta<{ items: ProjectExtended[] }>(
       `${base}/search${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
 
-  get: (id: string) => apiClient.get<Project>(`${base}/${id}`),
+  get: (id: string) => apiClient.get<ProjectExtended>(`${base}/${id}`),
 
-  create: (body: ProjectCreateBody) => apiClient.post<Project>(base, body),
+  create: (body: ProjectCreateBody) => apiClient.post<ProjectExtended>(base, body),
 
   update: (id: string, body: ProjectUpdateBody) =>
-    apiClient.patch<Project>(`${base}/${id}`, body),
+    apiClient.patch<ProjectExtended>(`${base}/${id}`, body),
 
   remove: (id: string) => apiClient.delete<{ id: string }>(`${base}/${id}`),
 
-  publish: (id: string) => apiClient.post<Project>(`${base}/${id}/publish`, {}),
+  publish: (id: string) => apiClient.post<ProjectExtended>(`${base}/${id}/publish`, {}),
 
-  archive: (id: string) => apiClient.post<Project>(`${base}/${id}/archive`, {}),
+  archive: (id: string) => apiClient.post<ProjectExtended>(`${base}/${id}/archive`, {}),
 
-  close: (id: string) => apiClient.post<Project>(`${base}/${id}/close`, {}),
+  close: (id: string) => apiClient.post<ProjectExtended>(`${base}/${id}/close`, {}),
 
-  duplicate: (id: string) => apiClient.post<Project>(`${base}/${id}/duplicate`, {}),
+  duplicate: (id: string) => apiClient.post<ProjectExtended>(`${base}/${id}/duplicate`, {}),
+
+  bulkPublish: (body: BulkIdsBody) =>
+    apiClient.post<BulkResult>(`${base}/bulk/publish`, body),
+
+  bulkArchive: (body: BulkIdsBody) =>
+    apiClient.post<BulkResult>(`${base}/bulk/archive`, body),
+
+  bulkDelete: (body: BulkIdsBody) =>
+    apiClient.post<BulkResult>(`${base}/bulk/delete`, body),
+
+  bulkDuplicate: (body: BulkIdsBody) =>
+    apiClient.post<BulkResult>(`${base}/bulk/duplicate`, body),
+
+  bulkAssignFaculty: (body: BulkAssignFacultyBody) =>
+    apiClient.post<BulkResult>(`${base}/bulk/assign-faculty`, body),
+
+  listCategories: () => apiClient.get<{ items: ProjectCategory[] }>(`${base}/categories`),
+
+  listTags: () => apiClient.get<{ items: ProjectTag[] }>(`${base}/tags`),
 
   listMilestones: (projectId: string) =>
     apiClient.get<MilestoneListResult>(`${base}/milestones${toQuery({ projectId })}`),
@@ -128,6 +177,33 @@ export const projectApi = {
   removeTeamMember: (teamId: string, studentId: string) =>
     apiClient.delete<{ id: string }>(`${base}/teams/${teamId}/members/${studentId}`),
 
+  approveTeam: (id: string) => apiClient.post<ProjectTeam>(`${base}/teams/${id}/approve`, {}),
+
+  rejectTeam: (id: string, body: TeamRejectBody = {}) =>
+    apiClient.post<ProjectTeam>(`${base}/teams/${id}/reject`, body),
+
+  inviteToTeam: (id: string, body: TeamInviteBody) =>
+    apiClient.post<{ id: string }>(`${base}/teams/${id}/invite`, body),
+
+  transferTeamLeadership: (id: string, body: TeamTransferLeadershipBody) =>
+    apiClient.post<ProjectTeam>(`${base}/teams/${id}/transfer-leadership`, body),
+
+  acceptInvitation: (invitationId: string) =>
+    apiClient.post<{ id: string }>(`${base}/teams/invitations/${invitationId}/accept`, {}),
+
+  rejectInvitation: (invitationId: string) =>
+    apiClient.post<{ id: string }>(`${base}/teams/invitations/${invitationId}/reject`, {}),
+
+  myTeam: async (params: { page?: number; limit?: number } = {}): Promise<MyTeamListResult> => {
+    const { data, meta } = await apiClient.getWithMeta<MyTeamListResult>(
+      `${base}/my-team${toQuery(params)}`,
+    );
+    return {
+      items: data.items ?? [],
+      meta: meta ?? emptyMeta(params.page, params.limit),
+    };
+  },
+
   listSubmissions: async (params: SubmissionListParams = {}): Promise<SubmissionListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: ProjectSubmission[] }>(
       `${base}/submissions${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
@@ -158,14 +234,34 @@ export const projectApi = {
   submitReview: (id: string, body: ReviewSubmitBody) =>
     apiClient.post<ProjectReview>(`${base}/reviews/${id}/submit`, body),
 
+  listComments: async (params: CommentListParams): Promise<CommentListResult> => {
+    const { projectId, ...rest } = params;
+    const { data, meta } = await apiClient.getWithMeta<{ items: ProjectComment[] }>(
+      `${base}/${projectId}/comments${toQuery(rest as Record<string, string | number | boolean | undefined>)}`,
+    );
+    return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
+  },
+
+  createComment: (body: CommentCreateBody) =>
+    apiClient.post<ProjectComment>(`${base}/${body.projectId}/comments`, body),
+
+  updateComment: (id: string, body: CommentUpdateBody) =>
+    apiClient.patch<ProjectComment>(`${base}/comments/${id}`, body),
+
+  deleteComment: (id: string) =>
+    apiClient.delete<{ id: string }>(`${base}/comments/${id}`),
+
+  resolveComment: (id: string) =>
+    apiClient.post<ProjectComment>(`${base}/comments/${id}/resolve`, {}),
+
   facultyDashboard: () =>
-    apiClient.get<ProjectFacultyDashboard>(`${base}/dashboard/faculty`),
+    apiClient.get<ProjectFacultyDashboardExtended>(`${base}/dashboard/faculty`),
 
   studentDashboard: () =>
-    apiClient.get<ProjectStudentDashboard>(`${base}/dashboard/student`),
+    apiClient.get<ProjectStudentDashboardExtended>(`${base}/dashboard/student`),
 
   institutionDashboard: () =>
-    apiClient.get<ProjectInstitutionDashboard>(`${base}/dashboard/institution`),
+    apiClient.get<ProjectInstitutionDashboardExtended>(`${base}/dashboard/institution`),
 
-  stats: () => apiClient.get<ProjectInstitutionDashboard>(`${base}/stats`),
+  stats: () => apiClient.get<ProjectInstitutionDashboardExtended>(`${base}/stats`),
 };

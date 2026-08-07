@@ -122,6 +122,7 @@ export const APP_ROUTES = {
   STUDENT_PROJECTS: '/student/projects',
   STUDENT_PROJECT_DETAIL: '/student/projects/:id',
   STUDENT_PROJECT_TEAM: '/student/projects/:id/team',
+  STUDENT_MY_TEAM: '/student/my-team',
   STUDENT_SUBMISSIONS: '/student/submissions',
   CHANGE_PASSWORD: '/account/change-password',
 } as const;

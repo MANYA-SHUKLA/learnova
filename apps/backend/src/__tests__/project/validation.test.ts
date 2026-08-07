@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   PROJECT_MAX_FILE_BYTES,
+  bulkAssignFacultySchema,
+  bulkProjectIdsSchema,
   createMilestoneSchema,
   createProjectSchema,
   createReviewSchema,
@@ -22,12 +24,13 @@ describe('project validation', () => {
       title: 'Capstone Build',
     });
 
-    expect(parsed.projectType).toBe('team');
+    expect(parsed.projectType).toBe('major_project');
     expect(parsed.visibility).toBe('enrolled');
     expect(parsed.totalMarks).toBe(100);
     expect(parsed.passingMarks).toBe(40);
     expect(parsed.allowPeerReview).toBe(false);
     expect(parsed.allowMilestones).toBe(true);
+    expect(parsed.difficulty).toBe('intermediate');
   });
 
   it('rejects a non-ObjectId courseId', () => {
@@ -46,26 +49,28 @@ describe('project validation', () => {
     expect(parsed.limit).toBe(50);
   });
 
-  it('validates milestone creation', () => {
+  it('validates milestone creation with weightage', () => {
     const parsed = createMilestoneSchema.parse({
       projectId: OBJECT_ID,
       title: 'Design Review',
     });
-    expect(parsed.weight).toBe(0);
+    expect(parsed.weightage).toBe(0);
+    expect(parsed.milestoneType).toBe('custom');
   });
 
-  it('validates team creation', () => {
+  it('validates team creation with teamName', () => {
     const parsed = createTeamSchema.parse({
       projectId: OBJECT_ID,
-      name: 'Alpha Squad',
+      teamName: 'Alpha Squad',
     });
-    expect(parsed.name).toBe('Alpha Squad');
+    expect(parsed.teamName).toBe('Alpha Squad');
   });
 
-  it('defaults submission payloads', () => {
+  it('defaults submission payloads with new field names', () => {
     const parsed = submitProjectSchema.parse({ projectId: OBJECT_ID });
     expect(parsed.deliveryType).toBe('mixed');
     expect(parsed.links).toEqual([]);
+    expect(parsed.submissionText).toBeUndefined();
   });
 
   it('defaults grading to marks with prepared gradebook flag implied by service', () => {
@@ -74,12 +79,13 @@ describe('project validation', () => {
     expect(parsed.returnToStudent).toBe(false);
   });
 
-  it('validates peer review creation', () => {
+  it('validates faculty review creation with score fields', () => {
     const parsed = createReviewSchema.parse({
       projectId: OBJECT_ID,
       submissionId: OBJECT_ID,
     });
-    expect(parsed.reviewType).toBe('peer');
+    expect(parsed.reviewType).toBe('faculty');
+    expect(parsed.revisionRequired).toBe(false);
   });
 
   it('allows whitelisted upload content types', () => {
@@ -99,6 +105,19 @@ describe('project validation', () => {
   it('defaults draft submission fields', () => {
     const parsed = saveProjectSubmissionDraftSchema.parse({ projectId: OBJECT_ID });
     expect(parsed.deliveryType).toBe('mixed');
-    expect(parsed.repoLink).toBeUndefined();
+    expect(parsed.githubRepository).toBeUndefined();
+  });
+
+  it('validates bulk project ids payload', () => {
+    const parsed = bulkProjectIdsSchema.parse({ projectIds: [OBJECT_ID] });
+    expect(parsed.projectIds).toHaveLength(1);
+  });
+
+  it('validates bulk assign faculty payload', () => {
+    const parsed = bulkAssignFacultySchema.parse({
+      projectIds: [OBJECT_ID],
+      facultyIds: [OBJECT_ID],
+    });
+    expect(parsed.facultyIds).toHaveLength(1);
   });
 });

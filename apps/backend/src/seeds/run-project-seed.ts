@@ -45,7 +45,7 @@ async function main(): Promise<void> {
 
   const force = process.env.SEED_FORCE === '1' || process.env.SEED_FORCE === 'true';
   const refs = await loadRefs(institutionId);
-  const result = await seedProjects(institutionId, refs, { force, projectTarget: 10 });
+  const result = await seedProjects(institutionId, refs, { force, projectTarget: 50 });
 
   logger.info(result, 'Project seed completed');
   await disconnectMongo();

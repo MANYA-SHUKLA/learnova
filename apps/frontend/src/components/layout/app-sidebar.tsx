@@ -1,6 +1,7 @@
 'use client';
 
 import { APP_ROUTES } from '@learnova/constants';
+import { STUDENT_MY_TEAM } from '@/features/project';
 import { Separator } from '@learnova/ui';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -154,6 +155,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'assignments', href: APP_ROUTES.STUDENT_ASSIGNMENTS, icon: ClipboardCheck },
       { id: 'practiceLabs', href: APP_ROUTES.STUDENT_PRACTICE_LABS, icon: Code2 },
       { id: 'projects', href: APP_ROUTES.STUDENT_PROJECTS, icon: FolderKanban },
+      { id: 'myTeam', href: STUDENT_MY_TEAM, icon: UsersRound },
       { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },
       { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },
       { id: 'activity', href: APP_ROUTES.STUDENT_ACTIVITY, icon: Activity },

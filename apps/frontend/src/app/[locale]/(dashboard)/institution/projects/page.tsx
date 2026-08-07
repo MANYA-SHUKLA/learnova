@@ -15,61 +15,112 @@ import {
 import { FolderKanban, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
+import { SuccessPopup } from '@/components/shared/success-popup';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
 import {
   formatDueDate,
+  formatProjectDifficulty,
   formatProjectStatus,
   formatProjectType,
-  useArchiveProjectMutation,
-  useCloseProjectMutation,
+  formatSortOption,
+  useBulkArchiveProjectsMutation,
+  useBulkAssignFacultyMutation,
+  useBulkDeleteProjectsMutation,
+  useBulkDuplicateProjectsMutation,
+  useBulkPublishProjectsMutation,
   useInstitutionProjectDashboard,
+  useProjectCategories,
   useProjectList,
   usePublishProjectMutation,
 } from '@/features/project';
-import type { ProjectStatus } from '@/features/project';
+import type { ProjectDifficulty, ProjectSortOption, ProjectStatus, ProjectTypeSpec } from '@/features/project';
+import { useSuccessPopup } from '@/hooks/use-success-popup';
 import { Link } from '@/lib/i18n/routing';
 
-const STATUS_FILTERS: Array<ProjectStatus | 'all'> = [
+const STATUS_FILTERS: Array<ProjectStatus | 'open' | 'all'> = [
   'all',
   'draft',
   'published',
+  'open',
   'closed',
   'archived',
 ];
 
+const SORT_OPTIONS: ProjectSortOption[] = ['newest', 'oldest', 'deadline', 'title', 'difficulty'];
+
+const DIFFICULTIES: Array<ProjectDifficulty | 'all'> = [
+  'all',
+  'beginner',
+  'intermediate',
+  'advanced',
+  'expert',
+];
+
 export default function InstitutionProjectsPage() {
   const t = useTranslations('dashboard.institution.projects');
+  const tCommon = useTranslations('common');
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<ProjectStatus | 'all'>('all');
+  const [status, setStatus] = useState<ProjectStatus | 'open' | 'all'>('all');
+  const [projectType, setProjectType] = useState<ProjectTypeSpec | 'all'>('all');
+  const [difficulty, setDifficulty] = useState<ProjectDifficulty | 'all'>('all');
+  const [courseId, setCourseId] = useState('');
+  const [facultyId, setFacultyId] = useState('');
+  const [publishedFilter, setPublishedFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [archivedFilter, setArchivedFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [sort, setSort] = useState<ProjectSortOption>('newest');
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [assignFacultyId, setAssignFacultyId] = useState('');
+
+  const { open, message, showSuccess, closeSuccess } = useSuccessPopup(tCommon('savedSuccessfully'));
 
   const params = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
+      projectType: projectType === 'all' ? undefined : projectType,
+      difficulty: difficulty === 'all' ? undefined : difficulty,
+      courseId: courseId || undefined,
+      facultyId: facultyId || undefined,
+      published: publishedFilter === 'all' ? undefined : publishedFilter === 'yes',
+      archived: archivedFilter === 'all' ? undefined : archivedFilter === 'yes',
+      sort,
       page,
       limit: 20,
-      sortBy: 'createdAt',
-      sortOrder: 'desc' as const,
     }),
-    [search, status, page],
+    [search, status, projectType, difficulty, courseId, facultyId, publishedFilter, archivedFilter, sort, page],
   );
 
   const listQuery = useProjectList(params);
   const dashQuery = useInstitutionProjectDashboard();
+  const categoriesQuery = useProjectCategories();
   const publishMutation = usePublishProjectMutation();
-  const archiveMutation = useArchiveProjectMutation();
-  const closeMutation = useCloseProjectMutation();
+  const bulkPublish = useBulkPublishProjectsMutation();
+  const bulkArchive = useBulkArchiveProjectsMutation();
+  const bulkDelete = useBulkDeleteProjectsMutation();
+  const bulkDuplicate = useBulkDuplicateProjectsMutation();
+  const bulkAssignFaculty = useBulkAssignFacultyMutation();
 
   const rows = listQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
   const dash = dashQuery.data;
+  const allSelected = rows.length > 0 && selected.length === rows.length;
+
+  const toggleAll = () => {
+    setSelected(allSelected ? [] : rows.map((r) => r.id));
+  };
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
 
   return (
     <PermissionGate permission={PERMISSIONS.PROJECT_READ} enforce>
       <div className="space-y-8">
+        <SuccessPopup open={open} message={message} onClose={closeSuccess} />
+
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
@@ -78,20 +129,30 @@ export default function InstitutionProjectsPage() {
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
           </div>
-          <Button asChild>
-            <Link href={APP_ROUTES.INSTITUTION_PROJECTS_CREATE}>{t('create')}</Link>
-          </Button>
+          <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
+            <Button asChild>
+              <Link href={APP_ROUTES.INSTITUTION_PROJECTS_CREATE}>{t('create')}</Link>
+            </Button>
+          </PermissionGate>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
           {[
             { label: t('stats.total'), value: dash?.totalProjects },
             { label: t('stats.published'), value: dash?.published },
+            { label: t('stats.active'), value: dash?.active ?? dash?.totalTeams },
+            { label: t('stats.completed'), value: dash?.completed ?? dash?.closed },
+            { label: t('stats.departments'), value: dash?.departments ?? dash?.byDepartment?.length },
             {
               label: t('stats.submissionRate'),
-              value: dash ? `${Math.round(dash.submissionRate * 100)}%` : undefined,
+              value: dash ? `${Math.round((dash.submissionRate ?? 0) * 100)}%` : undefined,
             },
-            { label: t('stats.avgGrade'), value: dash?.averageGrade?.toFixed(1) ?? '—' },
+            {
+              label: t('stats.facultyParticipation'),
+              value: dash?.facultyParticipation != null
+                ? `${Math.round(dash.facultyParticipation * 100)}%`
+                : '—',
+            },
           ].map((stat) => (
             <Card key={stat.label} className="rounded-2xl border-border/80">
               <CardHeader className="pb-2">
@@ -138,6 +199,51 @@ export default function InstitutionProjectsPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Input
+                placeholder={t('filters.courseId')}
+                value={courseId}
+                onChange={(e) => {
+                  setCourseId(e.target.value);
+                  setPage(1);
+                }}
+              />
+              <Input
+                placeholder={t('filters.facultyId')}
+                value={facultyId}
+                onChange={(e) => {
+                  setFacultyId(e.target.value);
+                  setPage(1);
+                }}
+              />
+              <select
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={sort}
+                onChange={(e) => {
+                  setSort(e.target.value as ProjectSortOption);
+                  setPage(1);
+                }}
+              >
+                {SORT_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {formatSortOption(s)}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={publishedFilter}
+                onChange={(e) => {
+                  setPublishedFilter(e.target.value as 'all' | 'yes' | 'no');
+                  setPage(1);
+                }}
+              >
+                <option value="all">{t('filters.publishedAll')}</option>
+                <option value="yes">{t('filters.publishedYes')}</option>
+                <option value="no">{t('filters.publishedNo')}</option>
+              </select>
+            </div>
+
             <div className="flex flex-wrap gap-2">
               {STATUS_FILTERS.map((s) => (
                 <Button
@@ -154,6 +260,109 @@ export default function InstitutionProjectsPage() {
               ))}
             </div>
 
+            <div className="flex flex-wrap gap-2">
+              {DIFFICULTIES.map((d) => (
+                <Button
+                  key={d}
+                  size="sm"
+                  variant={difficulty === d ? 'default' : 'outline'}
+                  onClick={() => {
+                    setDifficulty(d);
+                    setPage(1);
+                  }}
+                >
+                  {d === 'all' ? t('filters.allDifficulties') : formatProjectDifficulty(d)}
+                </Button>
+              ))}
+              <Button
+                size="sm"
+                variant={archivedFilter === 'yes' ? 'default' : 'outline'}
+                onClick={() => {
+                  setArchivedFilter(archivedFilter === 'yes' ? 'all' : 'yes');
+                  setPage(1);
+                }}
+              >
+                {t('filters.archived')}
+              </Button>
+            </div>
+
+            {selected.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/30 p-3">
+                <p className="text-sm font-medium">{t('bulkSelected', { count: selected.length })}</p>
+                <PermissionGate permission={PERMISSIONS.PROJECT_MANAGE}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkPublish.isPending}
+                    onClick={async () => {
+                      await bulkPublish.mutateAsync({ ids: selected });
+                      setSelected([]);
+                      showSuccess(t('bulkSuccess'));
+                    }}
+                  >
+                    {t('bulkPublish')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkArchive.isPending}
+                    onClick={async () => {
+                      await bulkArchive.mutateAsync({ ids: selected });
+                      setSelected([]);
+                      showSuccess(t('bulkSuccess'));
+                    }}
+                  >
+                    {t('bulkArchive')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkDuplicate.isPending}
+                    onClick={async () => {
+                      await bulkDuplicate.mutateAsync({ ids: selected });
+                      setSelected([]);
+                      showSuccess(t('bulkSuccess'));
+                    }}
+                  >
+                    {t('bulkDuplicate')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkDelete.isPending}
+                    onClick={async () => {
+                      await bulkDelete.mutateAsync({ ids: selected });
+                      setSelected([]);
+                      showSuccess(t('bulkSuccess'));
+                    }}
+                  >
+                    {t('bulkDelete')}
+                  </Button>
+                  <Input
+                    className="h-8 w-40"
+                    placeholder={t('assignFacultyId')}
+                    value={assignFacultyId}
+                    onChange={(e) => setAssignFacultyId(e.target.value)}
+                  />
+                  <Button
+                    size="sm"
+                    disabled={bulkAssignFaculty.isPending || !assignFacultyId.trim()}
+                    onClick={async () => {
+                      await bulkAssignFaculty.mutateAsync({
+                        ids: selected,
+                        facultyId: assignFacultyId.trim(),
+                      });
+                      setSelected([]);
+                      setAssignFacultyId('');
+                      showSuccess(t('bulkSuccess'));
+                    }}
+                  >
+                    {t('bulkAssignFaculty')}
+                  </Button>
+                </PermissionGate>
+              </div>
+            ) : null}
+
             {listQuery.isError ? (
               <ErrorState message={t('error')} />
             ) : listQuery.isLoading ? (
@@ -169,66 +378,75 @@ export default function InstitutionProjectsPage() {
                 description={t('emptyDescription')}
               />
             ) : (
-              <ul className="divide-y divide-border rounded-xl border border-border/80">
-                {rows.map((row) => (
-                  <li
-                    key={row.id}
-                    className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Link
-                          href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}
-                          className="truncate font-medium hover:underline"
-                        >
-                          {row.title}
-                        </Link>
-                        <Badge variant="secondary">{formatProjectStatus(row.status)}</Badge>
-                        <Badge variant="outline">{formatProjectType(row.projectType)}</Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t('due')}: {formatDueDate(row.dueDate)} · {row.totalMarks} {t('marks')}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}>
-                          {t('view')}
-                        </Link>
-                      </Button>
-                      {row.status === 'draft' ? (
-                        <Button
-                          size="sm"
-                          disabled={publishMutation.isPending}
-                          onClick={() => void publishMutation.mutateAsync(row.id)}
-                        >
-                          {t('publish')}
-                        </Button>
-                      ) : null}
-                      {row.status === 'published' ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={closeMutation.isPending}
-                          onClick={() => void closeMutation.mutateAsync(row.id)}
-                        >
-                          {t('close')}
-                        </Button>
-                      ) : null}
-                      {row.status !== 'archived' ? (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          disabled={archiveMutation.isPending}
-                          onClick={() => void archiveMutation.mutateAsync(row.id)}
-                        >
-                          {t('archive')}
-                        </Button>
-                      ) : null}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="p-2 text-left">
+                        <input type="checkbox" checked={allSelected} onChange={toggleAll} />
+                      </th>
+                      <th className="p-2 text-left">{t('projectTitle')}</th>
+                      <th className="p-2 text-left">{t('filters.status')}</th>
+                      <th className="p-2 text-left">{t('projectType')}</th>
+                      <th className="p-2 text-left">{t('difficulty')}</th>
+                      <th className="p-2 text-left">{t('due')}</th>
+                      <th className="p-2 text-right">{t('actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row) => (
+                      <tr key={row.id} className="border-b border-border/60">
+                        <td className="p-2">
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(row.id)}
+                            onChange={() => toggleOne(row.id)}
+                          />
+                        </td>
+                        <td className="p-2">
+                          <Link
+                            href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}
+                            className="font-medium hover:underline"
+                          >
+                            {row.title}
+                          </Link>
+                          {row.slug ? (
+                            <p className="text-xs text-muted-foreground">{row.slug}</p>
+                          ) : null}
+                        </td>
+                        <td className="p-2">
+                          <Badge variant="secondary">{formatProjectStatus(row.status)}</Badge>
+                        </td>
+                        <td className="p-2">
+                          <Badge variant="outline">{formatProjectType(row.projectType)}</Badge>
+                        </td>
+                        <td className="p-2">{formatProjectDifficulty(row.difficulty)}</td>
+                        <td className="p-2 text-muted-foreground">{formatDueDate(row.dueDate)}</td>
+                        <td className="p-2 text-right">
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <Button asChild size="sm" variant="outline">
+                              <Link href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}>
+                                {t('view')}
+                              </Link>
+                            </Button>
+                            {row.status === 'draft' ? (
+                              <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
+                                <Button
+                                  size="sm"
+                                  disabled={publishMutation.isPending}
+                                  onClick={() => void publishMutation.mutateAsync(row.id)}
+                                >
+                                  {t('publish')}
+                                </Button>
+                              </PermissionGate>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
 
             {meta && meta.totalPages > 1 ? (
@@ -274,6 +492,12 @@ export default function InstitutionProjectsPage() {
               ))}
             </CardContent>
           </Card>
+        ) : null}
+
+        {categoriesQuery.data?.items?.length ? (
+          <p className="text-xs text-muted-foreground">
+            {t('categoriesCount', { count: categoriesQuery.data.items.length })}
+          </p>
         ) : null}
 
         <p className="text-xs text-muted-foreground">
