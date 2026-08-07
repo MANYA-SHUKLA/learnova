@@ -55,6 +55,11 @@ export const EVENTS = {
   EXAM_STARTED: 'exam.started',
   EXAM_COMPLETED: 'exam.completed',
   EXAM_CANCELLED: 'exam.cancelled',
+  EXAM_SCHEDULED: 'exam.scheduled',
+  EXAM_PUBLISHED: 'exam.published',
+  EXAM_CHECKED_IN: 'exam.checked_in',
+  EXAM_PROCTOR_FLAGGED: 'exam.proctor.flagged',
+  EXAM_PROCTOR_TERMINATED: 'exam.proctor.terminated',
 
   PROJECT_CREATED: 'project.created',
   PROJECT_UPDATED: 'project.updated',

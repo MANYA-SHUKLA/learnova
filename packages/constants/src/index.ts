@@ -11,3 +11,4 @@ export * from './assessment/index.js';
 export * from './practice-lab/index.js';
 export * from './project/index.js';
 export * from './quiz/index.js';
+export * from './examination/index.js';

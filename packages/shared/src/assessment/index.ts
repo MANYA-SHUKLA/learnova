@@ -228,6 +228,15 @@ export {
   computeAveragePercentage,
 } from './question-analytics.js';
 
+export {
+  evaluateExamWindow,
+  canCheckIn,
+  canStartExamAttempt,
+  validateSecureBrowser,
+  evaluateProctorViolation,
+  examinationEngine,
+} from './examination-policies.js';
+
 import { evaluateQuestionAnswer, scoreQuestionAttempt } from './question-evaluation.js';
 import {
   renderQuestionForAttempt,
