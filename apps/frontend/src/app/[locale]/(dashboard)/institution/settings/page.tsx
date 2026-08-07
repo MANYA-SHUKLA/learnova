@@ -22,6 +22,7 @@ import {
   useInstitutionSettings,
   useUpdateInstitutionSettingsMutation,
 } from '@/features/institution';
+import { useMountedTheme } from '@/hooks/use-theme';
 
 const POLICY_KEYS = [
   'attendance',
@@ -35,9 +36,15 @@ const POLICY_KEYS = [
 ] as const;
 
 type PolicyKey = (typeof POLICY_KEYS)[number];
+type ThemePreference = 'light' | 'dark' | 'system';
 
 function stringifyPolicy(value: Record<string, unknown>): string {
   return JSON.stringify(value, null, 2);
+}
+
+function normalizeTheme(value: string | undefined | null): ThemePreference {
+  if (value === 'light' || value === 'dark' || value === 'system') return value;
+  return 'system';
 }
 
 export default function InstitutionSettingsPage() {
@@ -45,8 +52,9 @@ export default function InstitutionSettingsPage() {
   const tCrud = useTranslations('dashboard.institution.crud');
   const { data, isLoading, isError, error, refetch } = useInstitutionSettings();
   const updateMutation = useUpdateInstitutionSettingsMutation();
+  const { theme: clientTheme, setTheme: setClientTheme, mounted } = useMountedTheme();
   const [language, setLanguage] = useState('en');
-  const [theme, setTheme] = useState('system');
+  const [theme, setTheme] = useState<ThemePreference>('system');
   const [policies, setPolicies] = useState<Record<PolicyKey, string>>({
     attendance: '{}',
     gradingScale: '{}',
@@ -59,11 +67,13 @@ export default function InstitutionSettingsPage() {
   });
   const [message, setMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [hydratedFromServer, setHydratedFromServer] = useState(false);
 
   useEffect(() => {
     if (!data) return;
     setLanguage(data.language);
-    setTheme(data.theme);
+    const nextTheme = normalizeTheme(data.theme);
+    setTheme(nextTheme);
     setPolicies({
       attendance: stringifyPolicy(data.attendance),
       gradingScale: stringifyPolicy(data.gradingScale),
@@ -74,7 +84,19 @@ export default function InstitutionSettingsPage() {
       notificationSettings: stringifyPolicy(data.notificationSettings),
       securitySettings: stringifyPolicy(data.securitySettings),
     });
+    setHydratedFromServer(true);
   }, [data]);
+
+  // Apply saved institution theme once after load (does not fight manual toggle afterwards).
+  useEffect(() => {
+    if (!mounted || !hydratedFromServer || !data) return;
+    const saved = normalizeTheme(data.theme);
+    if (clientTheme !== saved) {
+      setClientTheme(saved);
+    }
+    // Only on first hydration from server settings.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-shot sync
+  }, [mounted, hydratedFromServer, data?.theme]);
 
   if (isLoading) {
     return (
@@ -104,6 +126,11 @@ export default function InstitutionSettingsPage() {
     );
   }
 
+  const onThemeChange = (next: ThemePreference) => {
+    setTheme(next);
+    setClientTheme(next);
+  };
+
   const save = async () => {
     setFormError(null);
     setMessage(null);
@@ -129,6 +156,7 @@ export default function InstitutionSettingsPage() {
         notificationSettings: parsed['notificationSettings'],
         securitySettings: parsed['securitySettings'],
       });
+      setClientTheme(theme);
       setMessage(t('saved'));
     } catch (err) {
       setFormError(err instanceof Error ? err.message : t('saveFailed'));
@@ -152,7 +180,9 @@ export default function InstitutionSettingsPage() {
             <Input
               id="language"
               value={language}
-              onChange={(e) => { setLanguage(e.target.value); }}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+              }}
               placeholder="en"
             />
           </div>
@@ -162,9 +192,11 @@ export default function InstitutionSettingsPage() {
             </label>
             <select
               id="theme"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
+              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground"
               value={theme}
-              onChange={(e) => { setTheme(e.target.value); }}
+              onChange={(e) => {
+                onThemeChange(normalizeTheme(e.target.value));
+              }}
             >
               <option value="system">{t('themeSystem')}</option>
               <option value="light">{t('themeLight')}</option>
@@ -187,7 +219,7 @@ export default function InstitutionSettingsPage() {
               </label>
               <textarea
                 id={key}
-                className="min-h-24 w-full rounded-lg border border-input bg-background px-3 py-2 font-mono text-xs"
+                className="min-h-24 w-full rounded-lg border border-input bg-background px-3 py-2 font-mono text-xs text-foreground"
                 value={policies[key]}
                 onChange={(e) => {
                   setPolicies((prev) => ({ ...prev, [key]: e.target.value }));

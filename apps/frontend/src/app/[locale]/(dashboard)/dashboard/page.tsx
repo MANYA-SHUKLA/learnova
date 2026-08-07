@@ -59,12 +59,12 @@ import { cn } from '@/lib/utils';
 const LIST_PARAMS = { limit: 50, page: 1 } as const;
 
 const CHART_COLORS = [
-  'hsl(217 91% 53%)',
-  'hsl(224 76% 48%)',
-  'hsl(262 70% 52%)',
-  'hsl(199 89% 42%)',
-  'hsl(173 58% 39%)',
-  'hsl(215 20% 45%)',
+  'hsl(var(--primary))',
+  'hsl(var(--primary-hover))',
+  'hsl(var(--accent))',
+  'hsl(199 89% 48%)',
+  'hsl(var(--success))',
+  'hsl(var(--muted-foreground))',
 ];
 
 function countFromQuery(data?: { meta?: { total?: number }; items?: unknown[] }) {

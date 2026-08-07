@@ -63,7 +63,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
         <section className="relative w-full overflow-hidden">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,_hsl(var(--primary)/0.16),_transparent_55%),radial-gradient(ellipse_40%_30%_at_85%_15%,_#7C3AED18,_transparent_50%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,_hsl(var(--primary)/0.16),_transparent_55%),radial-gradient(ellipse_40%_30%_at_85%_15%,_hsl(var(--accent)/0.12),_transparent_50%)]"
           />
           <div className={siteContainer('relative pb-20 pt-20 text-center sm:pb-24 sm:pt-28')}>
             <p className="font-display text-5xl font-bold tracking-tight text-primary sm:text-6xl lg:text-7xl">
