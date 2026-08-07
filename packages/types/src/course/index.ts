@@ -3,8 +3,6 @@
  * Enterprise course system with modules, lessons, and progress tracking
  */
 
-import type { Types } from 'mongoose';
-
 export type CourseStatus = 'draft' | 'published' | 'archived';
 
 export type LessonContentType =
