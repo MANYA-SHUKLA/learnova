@@ -73,7 +73,7 @@ export default function FacultyPracticeLabsPage() {
           </CardHeader>
           <CardContent>
             {listQuery.isError ? (
-              <ErrorState title="Unable to load labs." />
+              <ErrorState message="Unable to load labs." />
             ) : listQuery.isLoading ? (
               <Skeleton className="h-24 w-full" />
             ) : rows.length === 0 ? (

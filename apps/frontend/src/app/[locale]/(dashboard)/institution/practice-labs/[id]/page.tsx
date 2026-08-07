@@ -34,7 +34,7 @@ export default function InstitutionPracticeLabDetailPage({
         </Button>
 
         {labQuery.isError ? (
-          <ErrorState title="Unable to load practice lab." />
+          <ErrorState message="Unable to load practice lab." />
         ) : labQuery.isLoading || !lab ? (
           <Skeleton className="h-40 w-full" />
         ) : (

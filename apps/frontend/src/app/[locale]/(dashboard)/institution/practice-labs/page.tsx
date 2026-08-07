@@ -146,7 +146,7 @@ export default function InstitutionPracticeLabsPage() {
             </div>
 
             {listQuery.isError ? (
-              <ErrorState title="Unable to load practice labs." />
+              <ErrorState message="Unable to load practice labs." />
             ) : listQuery.isLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-14 w-full" />

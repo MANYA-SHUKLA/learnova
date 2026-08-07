@@ -27,6 +27,7 @@ import {
   UserRound,
   ClipboardList,
   ClipboardCheck,
+  Code2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -59,6 +60,7 @@ type SidebarItemId =
   | 'enrollments'
   | 'progress'
   | 'assignments'
+  | 'practiceLabs'
   | 'bookmarks'
   | 'notes'
   | 'activity'
@@ -111,6 +113,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'enrollments', href: APP_ROUTES.INSTITUTION_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.INSTITUTION_PROGRESS, icon: BarChart3 },
       { id: 'assignments', href: APP_ROUTES.INSTITUTION_ASSIGNMENTS, icon: ClipboardCheck },
+      { id: 'practiceLabs', href: APP_ROUTES.INSTITUTION_PRACTICE_LABS, icon: Code2 },
     ],
   },
   {
@@ -128,6 +131,7 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'enrollments', href: APP_ROUTES.FACULTY_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.FACULTY_PROGRESS, icon: BarChart3 },
       { id: 'assignments', href: APP_ROUTES.FACULTY_ASSIGNMENTS, icon: ClipboardCheck },
+      { id: 'practiceLabs', href: APP_ROUTES.FACULTY_PRACTICE_LABS, icon: Code2 },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
@@ -144,6 +148,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'enrollments', href: APP_ROUTES.STUDENT_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.STUDENT_PROGRESS, icon: BarChart3 },
       { id: 'assignments', href: APP_ROUTES.STUDENT_ASSIGNMENTS, icon: ClipboardCheck },
+      { id: 'practiceLabs', href: APP_ROUTES.STUDENT_PRACTICE_LABS, icon: Code2 },
       { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },
       { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },
       { id: 'activity', href: APP_ROUTES.STUDENT_ACTIVITY, icon: Activity },

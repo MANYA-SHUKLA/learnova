@@ -117,7 +117,7 @@ export default function InstitutionLabProblemsPage({
           </CardHeader>
           <CardContent>
             {problemsQuery.isError ? (
-              <ErrorState title="Unable to load problems." />
+              <ErrorState message="Unable to load problems." />
             ) : problemsQuery.isLoading ? (
               <Skeleton className="h-24 w-full" />
             ) : problems.length === 0 ? (
