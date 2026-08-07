@@ -7,6 +7,7 @@
 export const EVENTS = {
   COURSE_CREATED: 'course.created',
   COURSE_UPDATED: 'course.updated',
+  COURSE_DELETED: 'course.deleted',
   COURSE_ARCHIVED: 'course.archived',
   COURSE_PUBLISHED: 'course.published',
   COURSE_ENROLLED: 'course.enrolled',
@@ -61,10 +62,11 @@ export interface DomainEvent<T = unknown> {
 
 /** Typed payload map — expand when domain modules land */
 export interface EventPayloadMap {
-  'course.created': { courseId: string; title?: string };
-  'course.updated': { courseId: string };
-  'course.archived': { courseId: string };
-  'course.published': { courseId: string };
+  'course.created': { courseId: string; institutionId: string; title?: string };
+  'course.updated': { courseId: string; institutionId: string };
+  'course.deleted': { courseId: string; institutionId: string };
+  'course.archived': { courseId: string; institutionId: string };
+  'course.published': { courseId: string; institutionId: string };
   'course.enrolled': { courseId: string; userId: string };
   'course.module.created': { courseId: string; moduleId: string };
   'course.lesson.created': { courseId: string; moduleId: string; lessonId: string };
