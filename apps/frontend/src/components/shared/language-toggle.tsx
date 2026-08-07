@@ -6,7 +6,7 @@ import { useLocale } from 'next-intl';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { locales, type AppLocale } from '@/lib/i18n/config';
-import { usePathname, useRouter } from '@/lib/i18n/routing';
+import { usePathname } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
 const LOCALE_LABELS: Record<AppLocale, string> = {
@@ -28,7 +28,6 @@ interface LanguageToggleProps {
 
 export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const locale = useLocale() as AppLocale;
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
@@ -90,9 +89,11 @@ export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) 
   const switchLocale = (next: AppLocale) => {
     setOpen(false);
     if (next === locale) return;
-    const query = window.location.search;
-    const href = query ? `${pathname}${query}` : pathname;
-    router.replace(href, { locale: next });
+
+    // Hard navigation: soft App Router locale swaps were leaving a blank client tree
+    // until a full refresh. Preserve path, query, and hash.
+    const path = pathname === '/' ? '' : pathname;
+    window.location.assign(`/${next}${path}${window.location.search}${window.location.hash}`);
   };
 
   const menu =
