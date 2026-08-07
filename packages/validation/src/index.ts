@@ -71,3 +71,4 @@ export * from './institution.js';
 export * from './faculty.js';
 export * from './student.js';
 export * from './course.js';
+export * from './course-builder.js';

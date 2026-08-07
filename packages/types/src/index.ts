@@ -5,6 +5,7 @@ export * from './institution/index.js';
 export * from './faculty/index.js';
 export * from './student/index.js';
 export * from './course/index.js';
+export * from './course-builder/index.js';
 export * from './modules/index.js';
 export * from './jobs/index.js';
 

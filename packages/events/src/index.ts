@@ -11,8 +11,16 @@ export const EVENTS = {
   COURSE_ARCHIVED: 'course.archived',
   COURSE_PUBLISHED: 'course.published',
   COURSE_ENROLLED: 'course.enrolled',
-  COURSE_MODULE_CREATED: 'course.module.created',
-  COURSE_LESSON_CREATED: 'course.lesson.created',
+  COURSE_MODULE_CREATED: 'module.created',
+  COURSE_MODULE_UPDATED: 'module.updated',
+  COURSE_MODULE_DELETED: 'module.deleted',
+  COURSE_LESSON_CREATED: 'lesson.created',
+  COURSE_LESSON_UPDATED: 'lesson.updated',
+  COURSE_LESSON_DELETED: 'lesson.deleted',
+  COURSE_RESOURCE_UPLOADED: 'resource.uploaded',
+  COURSE_RESOURCE_DELETED: 'resource.deleted',
+  COURSE_BUILDER_REORDERED: 'builder.reordered',
+  COURSE_BUILDER_SAVED: 'builder.saved',
   COURSE_PROGRESS_UPDATED: 'course.progress.updated',
 
   USER_CREATED: 'user.created',
@@ -68,8 +76,41 @@ export interface EventPayloadMap {
   'course.archived': { courseId: string; institutionId: string };
   'course.published': { courseId: string; institutionId: string };
   'course.enrolled': { courseId: string; userId: string };
-  'course.module.created': { courseId: string; moduleId: string };
-  'course.lesson.created': { courseId: string; moduleId: string; lessonId: string };
+  'module.created': { courseId: string; moduleId: string; institutionId: string };
+  'module.updated': { courseId: string; moduleId: string; institutionId: string };
+  'module.deleted': { courseId: string; moduleId: string; institutionId: string };
+  'lesson.created': {
+    courseId: string;
+    moduleId: string;
+    lessonId: string;
+    institutionId: string;
+  };
+  'lesson.updated': {
+    courseId: string;
+    moduleId: string;
+    lessonId: string;
+    institutionId: string;
+  };
+  'lesson.deleted': {
+    courseId: string;
+    moduleId: string;
+    lessonId: string;
+    institutionId: string;
+  };
+  'resource.uploaded': {
+    courseId: string;
+    lessonId: string;
+    resourceId: string;
+    institutionId: string;
+  };
+  'resource.deleted': {
+    courseId: string;
+    lessonId: string;
+    resourceId: string;
+    institutionId: string;
+  };
+  'builder.reordered': { courseId: string; institutionId: string };
+  'builder.saved': { courseId: string; lessonId?: string; institutionId: string };
   'course.progress.updated': { courseId: string; studentId: string; progressPercent: number };
   'user.created': { userId: string; email?: string };
   'user.registered': { userId: string };
@@ -125,7 +166,15 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.COURSE_PUBLISHED, description: 'Course published', version: 1 },
   { name: EVENTS.COURSE_ENROLLED, description: 'Course enrolled', version: 1 },
   { name: EVENTS.COURSE_MODULE_CREATED, description: 'Course module created', version: 1 },
+  { name: EVENTS.COURSE_MODULE_UPDATED, description: 'Course module updated', version: 1 },
+  { name: EVENTS.COURSE_MODULE_DELETED, description: 'Course module deleted', version: 1 },
   { name: EVENTS.COURSE_LESSON_CREATED, description: 'Course lesson created', version: 1 },
+  { name: EVENTS.COURSE_LESSON_UPDATED, description: 'Course lesson updated', version: 1 },
+  { name: EVENTS.COURSE_LESSON_DELETED, description: 'Course lesson deleted', version: 1 },
+  { name: EVENTS.COURSE_RESOURCE_UPLOADED, description: 'Course resource uploaded', version: 1 },
+  { name: EVENTS.COURSE_RESOURCE_DELETED, description: 'Course resource deleted', version: 1 },
+  { name: EVENTS.COURSE_BUILDER_REORDERED, description: 'Course builder reordered', version: 1 },
+  { name: EVENTS.COURSE_BUILDER_SAVED, description: 'Course builder saved', version: 1 },
   { name: EVENTS.COURSE_PROGRESS_UPDATED, description: 'Course progress updated', version: 1 },
   { name: EVENTS.USER_CREATED, description: 'User created', version: 1 },
   { name: EVENTS.EXAM_COMPLETED, description: 'Exam completed', version: 1 },

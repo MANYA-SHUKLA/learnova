@@ -83,6 +83,7 @@ export const APP_ROUTES = {
   INSTITUTION_COURSES_CREATE: '/institution/courses/create',
   INSTITUTION_COURSES_IMPORT: '/institution/courses/import',
   INSTITUTION_COURSES_EXPORT: '/institution/courses/export',
+  INSTITUTION_COURSE_BUILDER: '/institution/courses/:courseId/builder',
 } as const;
 
 export const SOCKET_NAMESPACES = {

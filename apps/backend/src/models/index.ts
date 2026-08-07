@@ -54,4 +54,15 @@ export {
 } from './course-audit-log.model.js';
 export { CourseModuleModel, type CourseModuleDocument } from './course-module.model.js';
 export { CourseLessonModel, type CourseLessonDocument } from './course-lesson.model.js';
+export { CourseResourceModel, type CourseResourceDocument } from './course-resource.model.js';
+export {
+  CourseLessonVersionModel,
+  type CourseLessonVersionDocument,
+} from './course-lesson-version.model.js';
+export {
+  CourseBuilderAuditLogModel,
+  type CourseBuilderAuditLogDocument,
+  type CourseBuilderAuditEvent,
+  COURSE_BUILDER_AUDIT_EVENTS,
+} from './course-builder-audit-log.model.js';
 export { CourseProgressModel, type CourseProgressDocument } from './course-progress.model.js';
