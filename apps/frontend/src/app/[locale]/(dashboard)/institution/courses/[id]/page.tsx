@@ -389,6 +389,13 @@ export default function CourseDetailPage() {
             {[
               ['Enrollment mode', formatCourseEnrollmentMode(course.enrollmentMode)],
               ['Max students', String(course.maxStudents ?? 'Unlimited')],
+              [
+                'Enrollment deadline',
+                course.enrollmentDeadline
+                  ? new Date(course.enrollmentDeadline).toLocaleDateString()
+                  : '—',
+              ],
+              ['Waitlist', course.waitlistEnabled ? 'Enabled' : 'Disabled'],
               ['Certificate enabled', course.certificateEnabled ? 'Yes' : 'No'],
               ['Discussion enabled', course.discussionEnabled ? 'Yes' : 'No'],
               ['Allow downloads', course.allowDownloads ? 'Yes' : 'No'],
