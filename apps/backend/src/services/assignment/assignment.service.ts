@@ -1,9 +1,8 @@
 import { Types } from 'mongoose';
+import type { z } from 'zod';
 import { EVENTS } from '@learnova/events';
 import type {
-  AssignmentExportQuery,
   AssignmentFileUploadInput,
-  AssignmentImportConfirmInput,
   AssignmentListQuery,
   CreateAssignmentInput,
   CreateCommentInput,
@@ -15,7 +14,11 @@ import type {
   UpdateAssignmentInput,
   UpdateRubricInput,
 } from '@learnova/validation';
-import { ASSIGNMENT_MAX_FILE_BYTES } from '@learnova/validation';
+import {
+  ASSIGNMENT_MAX_FILE_BYTES,
+  assignmentExportQuerySchema,
+  assignmentImportConfirmSchema,
+} from '@learnova/validation';
 import type {
   AssignmentFacultyDashboard,
   AssignmentInstitutionDashboard,
@@ -61,6 +64,9 @@ export interface ActorContext {
   institutionId: string | null;
   role: string;
 }
+
+export type AssignmentExportQuery = z.infer<typeof assignmentExportQuerySchema>;
+export type AssignmentImportConfirmInput = z.infer<typeof assignmentImportConfirmSchema>;
 
 const MANAGE_ROLES = new Set(['institution_admin', 'super_admin']);
 
@@ -146,16 +152,6 @@ export class AssignmentService {
     }).exec();
     if (!student) throw new NotFoundError('Student record not found');
     return student;
-  }
-
-  private async resolveFaculty(actor: ActorContext, institutionId: string) {
-    const faculty = await FacultyModel.findOne({
-      institutionId: oid(institutionId),
-      email: actor.email.toLowerCase(),
-      deletedAt: null,
-    }).exec();
-    if (!faculty) throw new NotFoundError('Faculty record not found');
-    return faculty;
   }
 
   private async facultyCourseIds(
@@ -970,8 +966,8 @@ export class AssignmentService {
 
     const window = evaluateSubmissionWindow({
       status: assignment.status as AssignmentStatus,
-      dueDate: assignment.dueDate,
-      closeDate: assignment.closeDate,
+      dueDate: assignment.dueDate ?? null,
+      closeDate: assignment.closeDate ?? null,
       allowLateSubmission: assignment.allowLateSubmission,
     });
     if (!window.allowed) {

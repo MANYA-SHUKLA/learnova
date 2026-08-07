@@ -1,8 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import type {
-  AssignmentExportQuery,
   AssignmentFileUploadInput,
-  AssignmentImportConfirmInput,
   AssignmentListQuery,
   CreateAssignmentInput,
   CreateCommentInput,
@@ -19,6 +17,8 @@ import { sendCreated, sendPaginated, sendSuccess } from '../../utils/response/in
 import {
   assignmentService,
   type ActorContext,
+  type AssignmentExportQuery,
+  type AssignmentImportConfirmInput,
 } from '../../services/assignment/assignment.service.js';
 
 function actorFrom(req: Request): ActorContext {

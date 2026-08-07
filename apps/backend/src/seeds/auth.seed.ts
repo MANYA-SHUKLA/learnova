@@ -158,6 +158,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage institution-wide learning progress analytics',
   },
+  'assignment:read': {
+    resource: 'assignment',
+    action: 'read',
+    description: 'View assignments, submissions and grades',
+  },
+  'assignment:write': {
+    resource: 'assignment',
+    action: 'write',
+    description: 'Create/update assignments, submit and grade work',
+  },
+  'assignment:manage': {
+    resource: 'assignment',
+    action: 'manage',
+    description: 'Manage institution-wide assignments and analytics',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {
