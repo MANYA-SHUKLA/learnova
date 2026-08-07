@@ -487,7 +487,7 @@
       "title": "Sign in",
       "description": "Use the email and password issued for your role — Institution Admin, Faculty, or Student.",
       "email": "Email",
-      "emailPlaceholder": "you@university.edu",
+      "emailPlaceholder": "shuklamanya99@gmail.com",
       "password": "Password",
       "forgotPassword": "Forgot password?",
       "rememberMe": "Remember me",
@@ -520,7 +520,9 @@
       "institutionName": "Institution name",
       "institutionNamePlaceholder": "SOE JNU",
       "adminFirstName": "Admin first name",
+      "adminFirstNamePlaceholder": "Manya",
       "adminLastName": "Admin last name",
+      "adminLastNamePlaceholder": "Shukla",
       "adminEmail": "Admin email",
       "adminEmailPlaceholder": "shuklamanya99@gmail.com",
       "password": "Password",
@@ -632,7 +634,7 @@
         "state": "State",
         "address": "Address",
         "addressPlaceholder": "Campus address",
-        "phonePlaceholder": "+91…"
+        "phonePlaceholder": "8005586588"
       },
       "branding": "Branding",
       "yourInstitution": "Your institution",

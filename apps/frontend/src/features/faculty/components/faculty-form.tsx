@@ -170,7 +170,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
     );
   }
 
-  const field = (key: keyof typeof form, label: string, opts?: { type?: string }) => (
+  const field = (key: keyof typeof form, label: string, opts?: { type?: string; placeholder?: string }) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
         {label}
@@ -180,6 +180,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
         type={opts?.type ?? 'text'}
         value={form[key]}
         disabled={pending}
+        placeholder={opts?.placeholder}
         onChange={(e) => set(key, e.target.value)}
       />
     </div>
@@ -204,12 +205,12 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             {field('employeeId', 'Employee ID')}
             {field('facultyCode', 'Faculty code')}
-            {field('firstName', 'First name')}
+            {field('firstName', 'First name', { placeholder: 'Manya' })}
             {field('middleName', 'Middle name')}
-            {field('lastName', 'Last name')}
-            {field('email', 'Email', { type: 'email' })}
-            {field('phone', 'Phone')}
-            {field('alternatePhone', 'Alternate phone')}
+            {field('lastName', 'Last name', { placeholder: 'Shukla' })}
+            {field('email', 'Email', { type: 'email', placeholder: 'shuklamanya99@gmail.com' })}
+            {field('phone', 'Phone', { placeholder: '8005586588' })}
+            {field('alternatePhone', 'Alternate phone', { placeholder: '8005586588' })}
             {field('dateOfBirth', 'Date of birth', { type: 'date' })}
             {field('joiningDate', 'Joining date', { type: 'date' })}
             {field('experienceYears', 'Experience (years)', { type: 'number' })}
@@ -224,8 +225,8 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
             {field('officeHours', 'Office hours')}
             {field('city', 'City')}
             {field('country', 'Country')}
-            {field('emergencyContactName', 'Emergency contact')}
-            {field('emergencyContactPhone', 'Emergency phone')}
+            {field('emergencyContactName', 'Emergency contact', { placeholder: 'Manya Shukla' })}
+            {field('emergencyContactPhone', 'Emergency phone', { placeholder: '8005586588' })}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">

@@ -124,8 +124,14 @@ export default function RegisterInstitutionPage() {
               placeholder: t('institutionNamePlaceholder'),
             })}
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('adminFirstName', t('adminFirstName'), { autoComplete: 'given-name' })}
-              {field('adminLastName', t('adminLastName'), { autoComplete: 'family-name' })}
+              {field('adminFirstName', t('adminFirstName'), {
+                autoComplete: 'given-name',
+                placeholder: t('adminFirstNamePlaceholder'),
+              })}
+              {field('adminLastName', t('adminLastName'), {
+                autoComplete: 'family-name',
+                placeholder: t('adminLastNamePlaceholder'),
+              })}
             </div>
             {field('adminEmail', t('adminEmail'), {
               type: 'email',

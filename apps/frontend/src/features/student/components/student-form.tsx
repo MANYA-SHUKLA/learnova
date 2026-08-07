@@ -185,7 +185,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
     );
   }
 
-  const field = (key: keyof typeof form, label: string, opts?: { type?: string }) => (
+  const field = (key: keyof typeof form, label: string, opts?: { type?: string; placeholder?: string }) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
         {label}
@@ -195,6 +195,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
         type={opts?.type ?? 'text'}
         value={String(form[key])}
         disabled={pending}
+        placeholder={opts?.placeholder}
         onChange={(e) => set(key, e.target.value)}
       />
     </div>
@@ -237,13 +238,16 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
             {field('admissionNumber', 'Admission number')}
             {field('rollNumber', 'Roll number')}
             {field('registrationNumber', 'Registration number')}
-            {field('firstName', 'First name')}
+            {field('firstName', 'First name', { placeholder: 'Manya' })}
             {field('middleName', 'Middle name')}
-            {field('lastName', 'Last name')}
-            {field('email', 'Email', { type: 'email' })}
-            {field('phone', 'Phone')}
-            {field('alternateEmail', 'Alternate email', { type: 'email' })}
-            {field('alternatePhone', 'Alternate phone')}
+            {field('lastName', 'Last name', { placeholder: 'Shukla' })}
+            {field('email', 'Email', { type: 'email', placeholder: 'shuklamanya99@gmail.com' })}
+            {field('phone', 'Phone', { placeholder: '8005586588' })}
+            {field('alternateEmail', 'Alternate email', {
+              type: 'email',
+              placeholder: 'shuklamanya99@gmail.com',
+            })}
+            {field('alternatePhone', 'Alternate phone', { placeholder: '8005586588' })}
             {field('dateOfBirth', 'Date of birth', { type: 'date' })}
             {field('bloodGroup', 'Blood group')}
             {field('nationality', 'Nationality')}

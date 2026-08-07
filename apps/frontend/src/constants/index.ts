@@ -1,7 +1,7 @@
 export const APP_CONFIG = {
   name: 'Learnova',
   description: 'Enterprise AI Learning Platform',
-  supportEmail: 'support@learnova.app',
+  supportEmail: 'shuklamanya99@gmail.com',
 } as const;
 
 export const ROUTES = {

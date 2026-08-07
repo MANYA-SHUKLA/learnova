@@ -506,7 +506,9 @@
       "institutionName": "संस्थान का नाम",
       "institutionNamePlaceholder": "SOE JNU",
       "adminFirstName": "व्यवस्थापक का पहला नाम",
+      "adminFirstNamePlaceholder": "Manya",
       "adminLastName": "व्यवस्थापक का अंतिम नाम",
+      "adminLastNamePlaceholder": "Shukla",
       "adminEmail": "व्यवस्थापक ईमेल",
       "adminEmailPlaceholder": "shuklamanya99@gmail.com",
       "password": "पासवर्ड",
@@ -618,7 +620,7 @@
         "state": "राज्य",
         "address": "पता",
         "addressPlaceholder": "परिसर का पता",
-        "phonePlaceholder": "+91…"
+        "phonePlaceholder": "8005586588"
       },
       "branding": "ब्रांडिंग",
       "yourInstitution": "आपका संस्थान",

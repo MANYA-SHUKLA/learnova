@@ -506,7 +506,9 @@
       "institutionName": "సంస్థ పేరు",
       "institutionNamePlaceholder": "SOE JNU",
       "adminFirstName": "అడ్మిన్ మొదటి పేరు",
+      "adminFirstNamePlaceholder": "Manya",
       "adminLastName": "అడ్మిన్ ఇంటిపేరు",
+      "adminLastNamePlaceholder": "Shukla",
       "adminEmail": "అడ్మిన్ ఇమెయిల్",
       "adminEmailPlaceholder": "shuklamanya99@gmail.com",
       "password": "పాస్వర్డ్",
@@ -618,7 +620,7 @@
         "state": "రాష్ట్రం",
         "address": "చిరునామా",
         "addressPlaceholder": "క్యాంపస్ చిరునామా",
-        "phonePlaceholder": "+91…"
+        "phonePlaceholder": "8005586588"
       },
       "branding": "బ్రాండింగ్",
       "yourInstitution": "మీ సంస్థ",
