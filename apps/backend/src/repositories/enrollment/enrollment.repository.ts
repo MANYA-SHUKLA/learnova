@@ -55,30 +55,14 @@ export class EnrollmentRepository {
     if (query.studentId) filter.studentId = toObjectId(query.studentId);
     if (query.courseId) filter.courseId = toObjectId(query.courseId);
     if (query.facultyId) filter.facultyId = toObjectId(query.facultyId);
-    if (query.campusId) filter.campusId = toObjectId(query.campusId);
-    if (query.schoolId) filter.schoolId = toObjectId(query.schoolId);
     if (query.departmentId) filter.departmentId = toObjectId(query.departmentId);
     if (query.programId) filter.programId = toObjectId(query.programId);
+    if (query.academicYearId) filter.academicYearId = toObjectId(query.academicYearId);
     if (query.semesterId) filter.semesterId = toObjectId(query.semesterId);
     if (query.sectionId) filter.sectionId = toObjectId(query.sectionId);
-    if (query.batchId) filter.batchId = toObjectId(query.batchId);
     if (query.enrollmentMethod) filter.enrollmentMethod = query.enrollmentMethod;
     if (query.approvalStatus) filter.approvalStatus = query.approvalStatus;
     if (query.completionStatus) filter.completionStatus = query.completionStatus;
-
-    if (query.enrollmentDateFrom || query.enrollmentDateTo) {
-      const enrollmentDate: Record<string, Date> = {};
-      if (query.enrollmentDateFrom) enrollmentDate.$gte = query.enrollmentDateFrom;
-      if (query.enrollmentDateTo) enrollmentDate.$lte = query.enrollmentDateTo;
-      filter.enrollmentDate = enrollmentDate;
-    }
-
-    if (query.progressMin !== undefined || query.progressMax !== undefined) {
-      const progress: Record<string, number> = {};
-      if (query.progressMin !== undefined) progress.$gte = query.progressMin;
-      if (query.progressMax !== undefined) progress.$lte = query.progressMax;
-      filter.progress = progress;
-    }
 
     if (query.q) {
       const regex = new RegExp(escapeRegex(query.q), 'i');

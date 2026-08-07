@@ -3,12 +3,9 @@ import { EVENTS } from '@learnova/events';
 import type {
   CreateEnrollmentInput,
   EnrollmentBulkEnrollInput,
-  EnrollmentBulkApproveInput,
-  EnrollmentBulkRejectInput,
   EnrollmentBulkIdsInput,
   EnrollmentBulkAssignFacultyInput,
   EnrollmentListQuery,
-  EnrollmentSearchQuery,
   EnrollmentExportQuery,
   EnrollmentImportConfirmInput,
   UpdateEnrollmentInput,
@@ -237,17 +234,20 @@ export class EnrollmentService {
       institutionId: new Types.ObjectId(institutionId),
       studentId: new Types.ObjectId(input.studentId),
       courseId: new Types.ObjectId(input.courseId),
-      campusId: input.campusId ? new Types.ObjectId(input.campusId) : student.campusId,
-      schoolId: input.schoolId ? new Types.ObjectId(input.schoolId) : student.schoolId,
+      campusId: student.campusId,
+      schoolId: student.schoolId,
       departmentId: input.departmentId
         ? new Types.ObjectId(input.departmentId)
         : student.departmentId,
       programId: input.programId ? new Types.ObjectId(input.programId) : student.programId,
+      academicYearId: input.academicYearId
+        ? new Types.ObjectId(input.academicYearId)
+        : null,
       semesterId: input.semesterId
         ? new Types.ObjectId(input.semesterId)
         : student.semesterId,
       sectionId: input.sectionId ? new Types.ObjectId(input.sectionId) : student.sectionId,
-      batchId: input.batchId ? new Types.ObjectId(input.batchId) : student.batchId,
+      batchId: student.batchId,
       facultyId: input.facultyId ? new Types.ObjectId(input.facultyId) : null,
       enrollmentDate: input.enrollmentDate ?? new Date(),
       enrollmentMethod: input.enrollmentMethod ?? 'manual',
@@ -290,7 +290,7 @@ export class EnrollmentService {
   }
 
   async search(q: string, page: number, limit: number, actor: ActorContext) {
-    const institutionId = requireTenant(actor);
+    requireTenant(actor);
     const query = { q, page, limit, sortBy: 'createdAt', sortOrder: 'desc' } as EnrollmentListQuery;
     return this.list(query, actor);
   }

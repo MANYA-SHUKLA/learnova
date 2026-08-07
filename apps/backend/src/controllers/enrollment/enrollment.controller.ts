@@ -2,8 +2,6 @@ import type { NextFunction, Request, Response } from 'express';
 import type {
   CreateEnrollmentInput,
   EnrollmentBulkEnrollInput,
-  EnrollmentBulkApproveInput,
-  EnrollmentBulkRejectInput,
   EnrollmentBulkIdsInput,
   EnrollmentBulkAssignFacultyInput,
   EnrollmentListQuery,
@@ -12,7 +10,6 @@ import type {
   EnrollmentImportConfirmInput,
   UpdateEnrollmentInput,
   EnrollmentSelfEnrollInput,
-  EnrollmentApproveInput,
   EnrollmentRejectInput,
   EnrollmentWithdrawInput,
 } from '@learnova/validation';
@@ -49,7 +46,7 @@ export async function searchEnrollments(req: Request, res: Response, next: NextF
   try {
     const query = req.query as unknown as EnrollmentSearchQuery;
     const result = await enrollmentService.search(
-      query.q,
+      query.q ?? '',
       query.page,
       query.limit,
       actorFrom(req),
@@ -224,7 +221,7 @@ export async function bulkEnroll(req: Request, res: Response, next: NextFunction
 export async function bulkApprove(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await enrollmentService.bulkApprove(
-      req.body as EnrollmentBulkApproveInput,
+      req.body as EnrollmentBulkIdsInput,
       actorFrom(req),
     );
     sendSuccess(res, data, { requestId: req.requestId });
@@ -236,7 +233,7 @@ export async function bulkApprove(req: Request, res: Response, next: NextFunctio
 export async function bulkReject(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await enrollmentService.bulkReject(
-      req.body as EnrollmentBulkRejectInput,
+      req.body as EnrollmentBulkIdsInput,
       actorFrom(req),
     );
     sendSuccess(res, data, { requestId: req.requestId });

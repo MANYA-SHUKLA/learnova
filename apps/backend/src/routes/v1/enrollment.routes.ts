@@ -3,8 +3,6 @@ import { PERMISSIONS } from '@learnova/constants';
 import {
   createEnrollmentSchema,
   enrollmentBulkEnrollSchema,
-  enrollmentBulkApproveSchema,
-  enrollmentBulkRejectSchema,
   enrollmentBulkIdsSchema,
   enrollmentBulkAssignFacultySchema,
   enrollmentIdParamsSchema,
@@ -17,7 +15,6 @@ import {
   enrollmentRejectSchema,
   enrollmentWithdrawSchema,
   enrollmentWaitlistJoinSchema,
-  enrollmentWaitlistLeaveSchema,
 } from '@learnova/validation';
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
@@ -93,7 +90,7 @@ enrollmentRoutes.post(
 enrollmentRoutes.post(
   '/enrollments/waitlist/leave',
   ...writeAuth,
-  validate(enrollmentWaitlistLeaveSchema),
+  validate(enrollmentWaitlistJoinSchema),
   ctrl.leaveWaitlist,
 );
 
@@ -121,14 +118,14 @@ enrollmentRoutes.post(
 enrollmentRoutes.post(
   '/enrollments/bulk/approve',
   ...writeAuth,
-  validate(enrollmentBulkApproveSchema),
+  validate(enrollmentBulkIdsSchema),
   ctrl.bulkApprove,
 );
 
 enrollmentRoutes.post(
   '/enrollments/bulk/reject',
   ...writeAuth,
-  validate(enrollmentBulkRejectSchema),
+  validate(enrollmentBulkIdsSchema),
   ctrl.bulkReject,
 );
 
