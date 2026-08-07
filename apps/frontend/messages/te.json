@@ -551,7 +551,9 @@
         "institution": "సంస్థ",
         "academics": "విద్యావేత్తలు",
         "peopleAndLearning": "వ్యక్తులు & నేర్చుకోవడం",
-        "system": "వ్యవస్థ"
+        "system": "వ్యవస్థ",
+        "facultyHome": "ఫ్యాకల్టీ",
+        "studentHome": "అభ్యసనం"
       },
       "items": {
         "dashboard": "డాష్‌బోర్డ్",
@@ -570,7 +572,12 @@
         "students": "విద్యార్థులు",
         "courses": "కోర్సులు",
         "enrollments": "నమోదులు",
-        "sessions": "సెషన్స్"
+        "sessions": "సెషన్స్",
+        "progress": "పురోగతి",
+        "bookmarks": "బుక్‌మార్కులు",
+        "notes": "నోట్స్",
+        "activity": "కార్యకలాపం",
+        "profile": "ప్రొఫైల్"
       },
       "comingSoon": "త్వరలో"
     },
@@ -1078,7 +1085,7 @@
         "emptyDescription": "మీ మొదటి నమోదును జోడించండి లేదా డైరెక్టరీని నింపడానికి CSV దిగుమతి చేయండి।"
       },
       "courseBuilder": {
-        "title": "కోర్సు బిల్డర్",
+        "title": "శీర్షిక",
         "openBuilder": "బిల్డర్ తెరవండి",
         "backToCourse": "కోర్సుకు తిరిగి వెళ్ళండి",
         "modules": "మాడ్యూల్స్",
@@ -1115,7 +1122,6 @@
         "saving": "సేవ్ చేస్తోంది...",
         "saved": "సేవ్ చేయబడింది",
         "unsaved": "సేవ్ చేయని మార్పులు",
-        "title": "శీర్షిక",
         "description": "వివరణ",
         "summary": "సారాంశం",
         "content": "కంటెంట్",
@@ -1139,6 +1145,26 @@
         "deleteResourceConfirm": "ఈ వనరును తొలగించాలా?",
         "loadFailed": "బిల్డర్‌ను లోడ్ చేయడంలో విఫలమైంది",
         "retry": "మళ్లీ ప్రయత్నించండి"
+      },
+      "progress": {
+        "eyebrow": "People & learning",
+        "title": "Learning progress",
+        "description": "Institution-wide progress, engagement, and course activity.",
+        "loadError": "Unable to load progress analytics.",
+        "stats": {
+          "totalHours": "Learning hours",
+          "completionRate": "Completion rate",
+          "engagement": "Engagement",
+          "activeCourses": "Active courses"
+        },
+        "byDepartment": "By department",
+        "byDepartmentDescription": "Average progress across departments.",
+        "byProgram": "By program",
+        "byProgramDescription": "Average progress across programs.",
+        "mostActive": "Most active courses",
+        "mostActiveDescription": "Courses with the highest learning activity.",
+        "studentsCount": "{count} learners",
+        "noData": "No analytics data yet."
       }
     },
     "sessions": {
@@ -1278,6 +1304,30 @@
         "searchPlaceholder": "విద్యార్థి, కోర్సు, నమోదు సంఖ్య శోధించండి…",
         "emptyTitle": "ఇంకా నమోదులు లేవు",
         "emptyDescription": "విద్యార్థులు నమోదు చేసుకున్న తర్వాత కోర్సు నమోదులు ఇక్కడ కనిపిస్తాయి."
+      },
+      "progress": {
+        "eyebrow": "Learning",
+        "title": "Course progress",
+        "description": "Analyze learner progress for a course you teach.",
+        "selectTitle": "Select a course",
+        "selectDescription": "Enter a course ID to load per-course analytics.",
+        "courseIdPlaceholder": "Course ID",
+        "load": "Load analytics",
+        "emptyTitle": "Choose a course",
+        "emptyDescription": "Enter a course ID above to view progress analytics.",
+        "loadError": "Unable to load faculty progress analytics.",
+        "stats": {
+          "averageProgress": "Average progress",
+          "started": "Started",
+          "inProgress": "In progress",
+          "completed": "Completed"
+        },
+        "topLearners": "Top learners",
+        "topLearnersDescription": "Students with the highest progress.",
+        "leastActive": "Least active",
+        "leastActiveDescription": "Students who may need a nudge.",
+        "noLearners": "No learner data yet.",
+        "neverAccessed": "Never accessed"
       }
     },
     "studentHome": {
@@ -1309,6 +1359,89 @@
         "waitlistDescription": "మీరు నమోదు కోసం వేచి ఉన్న కోర్సులు.",
         "emptyTitle": "ఇంకా నమోదులు లేవు",
         "emptyDescription": "మీ మొదటి కోర్సులో నమోదు చేసుకోవడానికి పైన ఉన్న ఫారమ్‌ను ఉపయోగించండి."
+      },
+      "progress": {
+        "eyebrow": "Learning",
+        "title": "My progress",
+        "description": "Track courses, resume learning, and review your activity.",
+        "loadError": "Unable to load progress.",
+        "searchPlaceholder": "Search courses…",
+        "continueTitle": "Continue learning",
+        "continueDescription": "Pick up where you left off.",
+        "continueEmpty": "No courses in progress yet.",
+        "resume": "Resume",
+        "coursesTitle": "Courses",
+        "coursesDescription": "Filter and browse your learning progress.",
+        "viewCourse": "View course",
+        "activityTitle": "Recent activity",
+        "activityDescription": "Your latest learning events.",
+        "activityEmpty": "No activity yet.",
+        "emptyTitle": "No progress yet",
+        "emptyDescription": "Enroll in a course and start learning to see progress here.",
+        "stats": {
+          "inProgress": "In progress",
+          "completed": "Completed",
+          "hoursLearned": "Hours learned",
+          "streak": "Streak",
+          "streakHint": "Days active"
+        },
+        "course": {
+          "eyebrow": "Course progress",
+          "title": "Course detail",
+          "description": "Modules, lessons, and resume controls for this course.",
+          "back": "Back to progress",
+          "resume": "Resume learning",
+          "modulesTitle": "Modules & lessons",
+          "modulesDescription": "Open a lesson to continue or mark it complete.",
+          "open": "Open",
+          "complete": "Complete",
+          "completed": "Completed",
+          "emptyTitle": "No modules yet",
+          "emptyDescription": "This course has no published modules.",
+          "loadError": "Unable to load course progress."
+        },
+        "bookmarks": {
+          "eyebrow": "Learning",
+          "title": "Bookmarks",
+          "description": "Saved modules, lessons, and resources.",
+          "directory": "Saved items",
+          "directoryDescription": "Search and manage your bookmarks.",
+          "searchPlaceholder": "Search bookmarks…",
+          "emptyTitle": "No bookmarks yet",
+          "emptyDescription": "Bookmark lessons and resources while learning.",
+          "open": "Open course",
+          "remove": "Remove",
+          "loadError": "Unable to load bookmarks."
+        },
+        "notes": {
+          "eyebrow": "Learning",
+          "title": "Notes",
+          "description": "Your personal learning notes across courses.",
+          "directory": "All notes",
+          "directoryDescription": "Search, edit, or remove notes.",
+          "searchPlaceholder": "Search notes…",
+          "emptyTitle": "No notes yet",
+          "emptyDescription": "Notes you create while learning will appear here.",
+          "open": "Open course",
+          "edit": "Edit",
+          "save": "Save",
+          "cancel": "Cancel",
+          "remove": "Remove",
+          "loadError": "Unable to load notes."
+        },
+        "activity": {
+          "eyebrow": "Learning",
+          "title": "Activity",
+          "description": "A timeline of your learning events.",
+          "timelineTitle": "Activity timeline",
+          "timelineDescription": "Recent opens, completions, and sessions.",
+          "empty": "No activity yet.",
+          "pagination": "Pages",
+          "pageOf": "Page {page} of {total}",
+          "prev": "Previous",
+          "next": "Next",
+          "loadError": "Unable to load activity."
+        }
       }
     }
   },
