@@ -32,7 +32,15 @@ import {
   verifyRefreshToken,
 } from '../../utils/jwt/index.js';
 import { sendMail } from '../../mail/index.js';
-import { mailHtml, mailText } from '../../mail/mail-copy.js';
+import {
+  mailButton,
+  mailEscape,
+  mailGreeting,
+  mailHtml,
+  mailMuted,
+  mailParagraph,
+  mailText,
+} from '../../mail/mail-copy.js';
 import { env } from '../../config/env.js';
 import { logger } from '../../utils/logger/index.js';
 import {
@@ -221,9 +229,20 @@ async function sendVerificationEmail(
     to: user.email,
     subject: 'Verify your Learnova email',
     html: mailHtml(
-      `<p>Hello ${user.firstName},</p><p>Verify your email: <a href="${link}">${link}</a></p>`,
+      [
+        mailGreeting(user.firstName),
+        mailParagraph(
+          'Thanks for joining Learnova. Please confirm your email address to activate full access to your account.',
+        ),
+        mailButton(link, 'Verify email address'),
+        mailMuted('If the button does not work, copy and paste this link into your browser:'),
+        mailParagraph(`<a href="${link}" style="color:#0f766e;word-break:break-all;">${link}</a>`),
+      ].join('\n'),
+      { preheader: 'Confirm your email to finish setting up Learnova.' },
     ),
-    text: mailText(`Hello ${user.firstName},\n\nVerify your email: ${link}`),
+    text: mailText(
+      `Hello ${user.firstName},\n\nVerify your email:\n${link}\n\nIf you did not create this account, you can ignore this message.`,
+    ),
   });
 
   await auditAuthLogRepository.create({
@@ -300,10 +319,21 @@ export class AuthService {
       to: user.email,
       subject: 'Welcome to Learnova',
       html: mailHtml(
-        `<p>Welcome ${user.firstName}!</p><p>Your institution <strong>${input.institutionName}</strong> is ready. Sign in anytime to finish setup and invite your campus.</p>`,
+        [
+          mailGreeting(user.firstName),
+          mailParagraph(
+            `Your institution <strong>${mailEscape(input.institutionName)}</strong> is ready on Learnova.`,
+          ),
+          mailParagraph(
+            'Sign in anytime to finish setup — branding, campuses, and inviting faculty and students.',
+          ),
+          mailButton(`${frontendBaseUrl()}/en/login`, 'Go to dashboard'),
+          mailMuted('Need help? Reply to this email or use the contact details in the footer.'),
+        ].join('\n'),
+        { preheader: `${input.institutionName} is ready on Learnova.` },
       ),
       text: mailText(
-        `Welcome ${user.firstName}! Your institution ${input.institutionName} is ready. Sign in anytime to finish setup.`,
+        `Hello ${user.firstName},\n\nYour institution ${input.institutionName} is ready on Learnova.\nSign in at ${frontendBaseUrl()}/en/login to finish setup.`,
       ),
     }).catch((err: unknown) => {
       logger.warn({ err, email: user.email }, 'Welcome email failed after registration');
@@ -554,9 +584,22 @@ export class AuthService {
       to: user.email,
       subject: 'Reset your Learnova password',
       html: mailHtml(
-        `<p>Reset your password: <a href="${link}">${link}</a></p><p>This link expires in 1 hour.</p>`,
+        [
+          mailGreeting(user.firstName),
+          mailParagraph(
+            'We received a request to reset the password for your Learnova account. Use the button below to choose a new password.',
+          ),
+          mailButton(link, 'Reset password'),
+          mailParagraph('This link expires in <strong>1 hour</strong>.'),
+          mailMuted(
+            'If you did not request a password reset, you can safely ignore this email. Your password will stay the same.',
+          ),
+        ].join('\n'),
+        { preheader: 'Reset your Learnova password — link expires in 1 hour.' },
       ),
-      text: mailText(`Reset your password: ${link}\nThis link expires in 1 hour.`),
+      text: mailText(
+        `Hello ${user.firstName},\n\nReset your password:\n${link}\n\nThis link expires in 1 hour.\nIf you did not request this, ignore this email.`,
+      ),
     });
 
     await auditAuthLogRepository.create({

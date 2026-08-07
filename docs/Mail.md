@@ -53,12 +53,15 @@ Success prints `SMTP OK` and delivers a test message. Failure with `535 BadCrede
 
 `sendMail()` enqueues to `email` when `MAIL_QUEUE_ENABLED=true`. For local SMTP debugging set `MAIL_QUEUE_ENABLED=false` so mail sends immediately (no worker required).
 
-## Used by
+## Email layout
 
-- Institution register welcome email
-- Email verification
-- Forgot / reset password
-- **Faculty / student temporary credentials** (on create and CSV import)
+All transactional HTML mail goes through `mailHtml()` in `apps/backend/src/mail/mail-copy.ts`:
+
+- Brand header (Learnova)
+- Content body + CTA buttons
+- Footer with **Manya Shukla**, `shuklamanya99@gmail.com`, phone `8005586588`, and WhatsApp link
+
+Used by: welcome, verify email, password reset, faculty/student credentials.
 
 ## Development
 

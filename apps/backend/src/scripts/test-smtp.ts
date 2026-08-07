@@ -6,6 +6,15 @@
 import '../config/load-env.js';
 import { env } from '../config/env.js';
 import { resetMailerForTests, sendMail } from '../mail/index.js';
+import {
+  mailButton,
+  mailGreeting,
+  mailHtml,
+  mailLoginUrl,
+  mailMuted,
+  mailParagraph,
+  mailText,
+} from '../mail/mail-copy.js';
 import { logger } from '../utils/logger/index.js';
 
 async function main() {
@@ -33,11 +42,24 @@ async function main() {
 
   resetMailerForTests();
 
+  const login = mailLoginUrl();
   const result = await sendMail({
     to,
-    subject: 'Learnova SMTP test',
-    html: '<p>SMTP is working for <strong>Learnova</strong>.</p><p>You can use Forgot Password and welcome emails.</p>',
-    text: 'SMTP is working for Learnova. You can use Forgot Password and welcome emails.',
+    subject: 'Learnova SMTP test — looking good',
+    html: mailHtml(
+      [
+        mailGreeting('Manya'),
+        mailParagraph(
+          'SMTP is connected and your Learnova transactional emails are ready — welcome, credentials, verify, and password reset.',
+        ),
+        mailButton(login, 'Open Learnova'),
+        mailMuted('This was a one-time smoke test from your local development environment.'),
+      ].join('\n'),
+      { preheader: 'Learnova SMTP is working.' },
+    ),
+    text: mailText(
+      `Hello Manya,\n\nSMTP is working for Learnova.\nOpen: ${login}\n\nThis was a local smoke test.`,
+    ),
   });
 
   logger.info({ result }, 'SMTP smoke test OK');
