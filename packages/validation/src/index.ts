@@ -77,3 +77,4 @@ export * from './progress.js';
 export * from './assignment.js';
 export * from './assessment.js';
 export * from './practice-lab.js';
+export * from './project.js';

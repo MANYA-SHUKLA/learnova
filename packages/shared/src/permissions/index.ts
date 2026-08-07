@@ -27,6 +27,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'assignment:write',
     'lab:read',
     'lab:write',
+    'project:read',
+    'project:write',
   ],
   faculty: [
     'lms:read',
@@ -56,6 +58,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'assignment:write',
     'lab:read',
     'lab:write',
+    'project:read',
+    'project:write',
   ],
   institution_admin: [
     'lms:read',
@@ -101,10 +105,20 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'lab:read',
     'lab:write',
     'lab:manage',
+    'project:read',
+    'project:write',
+    'project:manage',
   ],
   // Future roles — empty until activated
-  super_admin: [],
-  teaching_assistant: [],
+  super_admin: [
+    'project:read',
+    'project:write',
+    'project:manage',
+  ],
+  teaching_assistant: [
+    'project:read',
+    'project:write',
+  ],
   placement_officer: [],
   parent: [],
 } as const;

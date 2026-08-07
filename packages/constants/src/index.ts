@@ -9,3 +9,4 @@ export * from './http/index.js';
 export * from './limits/index.js';
 export * from './assessment/index.js';
 export * from './practice-lab/index.js';
+export * from './project/index.js';

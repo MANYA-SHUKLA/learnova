@@ -50,7 +50,10 @@ export type Permission =
   | 'assignment:manage'
   | 'lab:read'
   | 'lab:write'
-  | 'lab:manage';
+  | 'lab:manage'
+  | 'project:read'
+  | 'project:write'
+  | 'project:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
 

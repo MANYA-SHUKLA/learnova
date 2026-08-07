@@ -57,8 +57,16 @@ export const EVENTS = {
   EXAM_CANCELLED: 'exam.cancelled',
 
   PROJECT_CREATED: 'project.created',
+  PROJECT_UPDATED: 'project.updated',
+  PROJECT_PUBLISHED: 'project.published',
+  PROJECT_ARCHIVED: 'project.archived',
   PROJECT_SUBMITTED: 'project.submitted',
   PROJECT_GRADED: 'project.graded',
+  PROJECT_TEAM_CREATED: 'project.team.created',
+  PROJECT_TEAM_JOINED: 'project.team.joined',
+  PROJECT_MILESTONE_COMPLETED: 'project.milestone.completed',
+  PROJECT_REVIEW_SUBMITTED: 'project.review.submitted',
+  PROJECT_SUBMISSION_CREATED: 'project.submission.created',
 
   CERTIFICATE_GENERATED: 'certificate.generated',
   CERTIFICATE_REVOKED: 'certificate.revoked',
@@ -259,9 +267,46 @@ export interface EventPayloadMap {
   'exam.started': { examId: string; userId?: string };
   'exam.completed': { examId: string; userId?: string };
   'exam.cancelled': { examId: string };
-  'project.created': { projectId: string };
+  'project.created': { projectId: string; courseId: string; institutionId: string };
+  'project.updated': { projectId: string; courseId: string; institutionId: string };
+  'project.published': { projectId: string; courseId: string; institutionId: string };
+  'project.archived': { projectId: string; courseId: string; institutionId: string };
   'project.submitted': { projectId: string; userId?: string };
-  'project.graded': { projectId: string };
+  'project.graded': { projectId: string; gradeId: string; institutionId: string };
+  'project.team.created': {
+    teamId: string;
+    projectId: string;
+    courseId: string;
+    institutionId: string;
+  };
+  'project.team.joined': {
+    teamId: string;
+    projectId: string;
+    studentId: string;
+    institutionId: string;
+  };
+  'project.milestone.completed': {
+    milestoneId: string;
+    projectId: string;
+    institutionId: string;
+    studentId?: string;
+    teamId?: string;
+  };
+  'project.review.submitted': {
+    reviewId: string;
+    projectId: string;
+    submissionId: string;
+    reviewerId: string;
+    institutionId: string;
+  };
+  'project.submission.created': {
+    submissionId: string;
+    projectId: string;
+    studentId: string;
+    institutionId: string;
+    teamId?: string;
+    milestoneId?: string;
+  };
   'certificate.generated': { certificateId: string; userId?: string };
   'certificate.revoked': { certificateId: string };
   'lab.started': { labId: string; userId?: string };
@@ -399,17 +444,22 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.SUBMISSION_GRADED, description: 'Assignment submission graded', version: 1 },
   { name: EVENTS.FEEDBACK_ADDED, description: 'Assignment feedback/comment added', version: 1 },
   { name: EVENTS.USER_CREATED, description: 'User created', version: 1 },
-  { name: EVENTS.EXAM_COMPLETED, description: 'Exam completed', version: 1 },
-  { name: EVENTS.CERTIFICATE_GENERATED, description: 'Certificate generated', version: 1 },
-  { name: EVENTS.PROJECT_SUBMITTED, description: 'Project submitted', version: 1 },
-  { name: EVENTS.COURSE_UPDATED, description: 'Course updated', version: 1 },
-  { name: EVENTS.COURSE_ARCHIVED, description: 'Course archived', version: 1 },
-  { name: EVENTS.COURSE_ENROLLED, description: 'Course enrolled', version: 1 },
   { name: EVENTS.EXAM_CREATED, description: 'Exam created', version: 1 },
   { name: EVENTS.EXAM_STARTED, description: 'Exam started', version: 1 },
+  { name: EVENTS.EXAM_COMPLETED, description: 'Exam completed', version: 1 },
   { name: EVENTS.EXAM_CANCELLED, description: 'Exam cancelled', version: 1 },
+  { name: EVENTS.CERTIFICATE_GENERATED, description: 'Certificate generated', version: 1 },
+  { name: EVENTS.PROJECT_SUBMITTED, description: 'Project submitted', version: 1 },
   { name: EVENTS.PROJECT_CREATED, description: 'Project created', version: 1 },
+  { name: EVENTS.PROJECT_UPDATED, description: 'Project updated', version: 1 },
+  { name: EVENTS.PROJECT_PUBLISHED, description: 'Project published', version: 1 },
+  { name: EVENTS.PROJECT_ARCHIVED, description: 'Project archived', version: 1 },
   { name: EVENTS.PROJECT_GRADED, description: 'Project graded', version: 1 },
+  { name: EVENTS.PROJECT_TEAM_CREATED, description: 'Project team created', version: 1 },
+  { name: EVENTS.PROJECT_TEAM_JOINED, description: 'Student joined project team', version: 1 },
+  { name: EVENTS.PROJECT_MILESTONE_COMPLETED, description: 'Project milestone completed', version: 1 },
+  { name: EVENTS.PROJECT_REVIEW_SUBMITTED, description: 'Project review submitted', version: 1 },
+  { name: EVENTS.PROJECT_SUBMISSION_CREATED, description: 'Project submission created', version: 1 },
   { name: EVENTS.CERTIFICATE_REVOKED, description: 'Certificate revoked', version: 1 },
   { name: EVENTS.USER_REGISTERED, description: 'User registered', version: 1 },
   { name: EVENTS.USER_LOGGED_IN, description: 'User logged in', version: 1 },
