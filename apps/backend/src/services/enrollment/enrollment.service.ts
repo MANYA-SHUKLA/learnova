@@ -89,18 +89,22 @@ function pageMeta(total: number, page: number, limit: number) {
 }
 
 const CSV_HEADERS = [
+  'enrollmentNumber',
   'studentId',
   'courseId',
   'status',
   'enrollmentMethod',
   'enrollmentDate',
   'approvalStatus',
+  'completionStatus',
   'facultyId',
-  'progress',
-  'grade',
-  'score',
-  'credits',
+  'withdrawReason',
+  'notes',
 ] as const;
+
+function generateEnrollmentNumber(): string {
+  return `ENR-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 function escapeCsv(value: unknown): string {
   const str = value == null ? '' : String(value);
@@ -234,21 +238,19 @@ export class EnrollmentService {
       institutionId: new Types.ObjectId(institutionId),
       studentId: new Types.ObjectId(input.studentId),
       courseId: new Types.ObjectId(input.courseId),
-      campusId: student.campusId,
-      schoolId: student.schoolId,
       departmentId: input.departmentId
         ? new Types.ObjectId(input.departmentId)
         : student.departmentId,
       programId: input.programId ? new Types.ObjectId(input.programId) : student.programId,
       academicYearId: input.academicYearId
         ? new Types.ObjectId(input.academicYearId)
-        : null,
+        : (student.academicYearId ?? null),
       semesterId: input.semesterId
         ? new Types.ObjectId(input.semesterId)
         : student.semesterId,
       sectionId: input.sectionId ? new Types.ObjectId(input.sectionId) : student.sectionId,
-      batchId: student.batchId,
       facultyId: input.facultyId ? new Types.ObjectId(input.facultyId) : null,
+      enrollmentNumber: generateEnrollmentNumber(),
       enrollmentDate: input.enrollmentDate ?? new Date(),
       enrollmentMethod: input.enrollmentMethod ?? 'manual',
       createdBy: new Types.ObjectId(actor.userId),
@@ -392,8 +394,8 @@ export class EnrollmentService {
     const doc = await enrollmentRepository.updateById(institutionId, id, {
       status: 'approved',
       approvalStatus: 'approved',
-      approvalDate: new Date(),
       approvedBy: new Types.ObjectId(actor.userId),
+      updatedBy: new Types.ObjectId(actor.userId),
     });
     if (!doc) throw new NotFoundError('Enrollment not found');
 
@@ -419,12 +421,19 @@ export class EnrollmentService {
     const existing = await enrollmentRepository.findById(institutionId, id);
     if (!existing) throw new NotFoundError('Enrollment not found');
 
+    const rejectionNote = reason?.trim() ? reason.trim() : null;
+    const notes = rejectionNote
+      ? existing.notes
+        ? `${existing.notes}\nRejection: ${rejectionNote}`
+        : rejectionNote
+      : (existing.notes ?? null);
+
     const doc = await enrollmentRepository.updateById(institutionId, id, {
       status: 'rejected',
       approvalStatus: 'rejected',
-      approvalDate: new Date(),
       approvedBy: new Types.ObjectId(actor.userId),
-      rejectionReason: reason ?? null,
+      notes,
+      updatedBy: new Types.ObjectId(actor.userId),
     });
     if (!doc) throw new NotFoundError('Enrollment not found');
 
@@ -465,8 +474,8 @@ export class EnrollmentService {
 
     const doc = await enrollmentRepository.updateById(institutionId, id, {
       status: 'withdrawn',
-      withdrawalDate: new Date(),
-      withdrawalReason: reason ?? null,
+      withdrawReason: reason ?? null,
+      updatedBy: new Types.ObjectId(actor.userId),
     });
     if (!doc) throw new NotFoundError('Enrollment not found');
 
@@ -491,7 +500,7 @@ export class EnrollmentService {
       status: 'completed',
       completionStatus: 'completed',
       completionDate: new Date(),
-      progress: 100,
+      updatedBy: new Types.ObjectId(actor.userId),
     });
     if (!doc) throw new NotFoundError('Enrollment not found');
 
@@ -576,17 +585,17 @@ export class EnrollmentService {
       institutionId: new Types.ObjectId(institutionId),
       studentId: studentRecord._id,
       courseId: new Types.ObjectId(input.courseId),
-      campusId: studentRecord.campusId,
-      schoolId: studentRecord.schoolId,
       departmentId: studentRecord.departmentId,
       programId: studentRecord.programId,
+      academicYearId: studentRecord.academicYearId ?? null,
       semesterId: studentRecord.semesterId,
       sectionId: studentRecord.sectionId,
-      batchId: studentRecord.batchId,
       status,
       approvalStatus,
-      enrollmentMethod: 'self',
+      enrollmentNumber: generateEnrollmentNumber(),
+      enrollmentMethod: 'self_enrollment',
       enrollmentDate: new Date(),
+      notes: input.notes ?? null,
       createdBy: new Types.ObjectId(actor.userId),
     });
 
@@ -718,16 +727,15 @@ export class EnrollmentService {
       institutionId: new Types.ObjectId(institutionId),
       studentId: next.studentId,
       courseId: new Types.ObjectId(courseId),
-      campusId: student.campusId,
-      schoolId: student.schoolId,
       departmentId: student.departmentId,
       programId: student.programId,
+      academicYearId: student.academicYearId ?? null,
       semesterId: student.semesterId,
       sectionId: student.sectionId,
-      batchId: student.batchId,
       status,
       approvalStatus,
-      enrollmentMethod: 'promoted',
+      enrollmentNumber: generateEnrollmentNumber(),
+      enrollmentMethod: 'invite',
       enrollmentDate: new Date(),
       createdBy: new Types.ObjectId(actor.userId),
     });
@@ -843,11 +851,7 @@ export class EnrollmentService {
 
   async getStats(actor: ActorContext) {
     const institutionId = requireTenant(actor);
-    const stats = await enrollmentRepository.getStats(institutionId);
-    return {
-      ...stats,
-      recentEnrollments: stats.recentEnrollments.map(toDto),
-    };
+    return enrollmentRepository.getStats(institutionId);
   }
 
   async previewImport(input: EnrollmentImportConfirmInput, actor: ActorContext) {
@@ -882,10 +886,25 @@ export class EnrollmentService {
         if (!row?.studentId || !row?.courseId) {
           throw new ValidationError('studentId and courseId are required');
         }
+        const student = await StudentModel.findOne({
+          _id: row.studentId,
+          institutionId: new Types.ObjectId(institutionId),
+          deletedAt: null,
+        }).exec();
+        if (!student) {
+          throw new NotFoundError(`Student not found: ${row.studentId}`);
+        }
+
         const doc = await enrollmentRepository.create({
           institutionId: new Types.ObjectId(institutionId),
           studentId: new Types.ObjectId(row.studentId),
           courseId: new Types.ObjectId(row.courseId),
+          departmentId: student.departmentId,
+          programId: student.programId,
+          academicYearId: student.academicYearId ?? null,
+          semesterId: student.semesterId,
+          sectionId: student.sectionId,
+          enrollmentNumber: generateEnrollmentNumber(),
           status: row.status ?? 'active',
           enrollmentMethod: 'bulk_import',
           enrollmentDate: row.enrollmentDate ? new Date(row.enrollmentDate) : new Date(),

@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import type { EnrollmentListQuery } from '@learnova/validation';
+import type { EnrollmentStatus } from '@learnova/types';
 import { EnrollmentModel, type EnrollmentDocument } from '../../models/enrollment.model.js';
 import {
   EnrollmentWaitlistModel,
@@ -19,21 +20,27 @@ export interface EnrollmentListResult {
 
 export interface EnrollmentStats {
   total: number;
-  active: number;
   pending: number;
   approved: number;
   rejected: number;
-  withdrawn: number;
+  active: number;
   completed: number;
+  withdrawn: number;
   dropped: number;
-  suspended: number;
-  archived: number;
-  newThisMonth: number;
-  byStatus: Array<{ _id: string; count: number }>;
-  byEnrollmentMethod: Array<{ _id: string; count: number }>;
-  byCourse: Array<{ _id: Types.ObjectId; count: number }>;
-  byProgram: Array<{ _id: Types.ObjectId; count: number }>;
-  recentEnrollments: EnrollmentDocument[];
+  expired: number;
+  waitlisted: number;
+  byDepartment: Array<{ departmentId: string | null; label: string; count: number }>;
+  byCourse: Array<{ courseId: string; courseCode: string; title: string; count: number }>;
+  byStatus: Array<{ status: EnrollmentStatus; count: number }>;
+  trend: Array<{ date: string; count: number }>;
+  recent: Array<{
+    id: string;
+    enrollmentNumber: string;
+    studentId: string;
+    courseId: string;
+    status: EnrollmentStatus;
+    enrollmentDate: string;
+  }>;
 }
 
 function escapeRegex(value: string) {
@@ -66,7 +73,7 @@ export class EnrollmentRepository {
 
     if (query.q) {
       const regex = new RegExp(escapeRegex(query.q), 'i');
-      filter.$or = [{ notes: regex }, { grade: regex }, { rejectionReason: regex }];
+      filter.$or = [{ notes: regex }, { enrollmentNumber: regex }];
     }
 
     return filter;
@@ -144,7 +151,6 @@ export class EnrollmentRepository {
       {
         $set: {
           deletedAt: new Date(),
-          status: 'archived',
         },
       },
       { new: true },
@@ -184,10 +190,7 @@ export class EnrollmentRepository {
         deletedAt: null,
       },
       {
-        $set: {
-          status,
-          ...(status === 'archived' ? { deletedAt: new Date() } : {}),
-        },
+        $set: { status },
       },
     ).exec();
     return res.modifiedCount;
@@ -200,7 +203,7 @@ export class EnrollmentRepository {
         institutionId: toObjectId(institutionId),
         deletedAt: null,
       },
-      { $set: { deletedAt: new Date(), status: 'archived' } },
+      { $set: { deletedAt: new Date() } },
     ).exec();
     return res.modifiedCount;
   }
@@ -305,30 +308,28 @@ export class EnrollmentRepository {
 
   async getStats(institutionId: string): Promise<EnrollmentStats> {
     const oid = toObjectId(institutionId);
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const trendStart = new Date();
+    trendStart.setDate(trendStart.getDate() - 29);
+    trendStart.setHours(0, 0, 0, 0);
 
     const [
       total,
-      active,
       pending,
       approved,
       rejected,
-      withdrawn,
+      active,
       completed,
+      withdrawn,
       dropped,
-      suspended,
-      archived,
-      newThisMonth,
-      byStatus,
-      byEnrollmentMethod,
-      byCourse,
-      byProgram,
-      recentEnrollments,
+      expired,
+      waitlisted,
+      byDepartmentRaw,
+      byCourseRaw,
+      byStatusRaw,
+      trendRaw,
+      recentDocs,
     ] = await Promise.all([
       EnrollmentModel.countDocuments({ institutionId: oid, deletedAt: null }),
-      EnrollmentModel.countDocuments({ institutionId: oid, deletedAt: null, status: 'active' }),
       EnrollmentModel.countDocuments({ institutionId: oid, deletedAt: null, status: 'pending' }),
       EnrollmentModel.countDocuments({
         institutionId: oid,
@@ -340,69 +341,140 @@ export class EnrollmentRepository {
         deletedAt: null,
         status: 'rejected',
       }),
-      EnrollmentModel.countDocuments({
-        institutionId: oid,
-        deletedAt: null,
-        status: 'withdrawn',
-      }),
+      EnrollmentModel.countDocuments({ institutionId: oid, deletedAt: null, status: 'active' }),
       EnrollmentModel.countDocuments({
         institutionId: oid,
         deletedAt: null,
         status: 'completed',
       }),
+      EnrollmentModel.countDocuments({
+        institutionId: oid,
+        deletedAt: null,
+        status: 'withdrawn',
+      }),
       EnrollmentModel.countDocuments({ institutionId: oid, deletedAt: null, status: 'dropped' }),
-      EnrollmentModel.countDocuments({
+      EnrollmentModel.countDocuments({ institutionId: oid, deletedAt: null, status: 'expired' }),
+      EnrollmentWaitlistModel.countDocuments({
         institutionId: oid,
-        deletedAt: null,
-        status: 'suspended',
+        status: 'waiting',
       }),
-      EnrollmentModel.countDocuments({ institutionId: oid, status: 'archived' }),
-      EnrollmentModel.countDocuments({
-        institutionId: oid,
-        deletedAt: null,
-        createdAt: { $gte: startOfMonth },
-      }),
+      EnrollmentModel.aggregate([
+        { $match: { institutionId: oid, deletedAt: null } },
+        { $group: { _id: '$departmentId', count: { $sum: 1 } } },
+        {
+          $lookup: {
+            from: 'departments',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'department',
+          },
+        },
+        {
+          $project: {
+            departmentId: {
+              $cond: [{ $eq: ['$_id', null] }, null, { $toString: '$_id' }],
+            },
+            label: {
+              $ifNull: [{ $arrayElemAt: ['$department.name', 0] }, 'Unassigned'],
+            },
+            count: 1,
+          },
+        },
+        { $sort: { count: -1 } },
+      ]),
+      EnrollmentModel.aggregate([
+        { $match: { institutionId: oid, deletedAt: null } },
+        { $group: { _id: '$courseId', count: { $sum: 1 } } },
+        {
+          $lookup: {
+            from: 'courses',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'course',
+          },
+        },
+        {
+          $project: {
+            courseId: { $toString: '$_id' },
+            courseCode: {
+              $ifNull: [{ $arrayElemAt: ['$course.courseCode', 0] }, ''],
+            },
+            title: {
+              $ifNull: [{ $arrayElemAt: ['$course.title', 0] }, 'Unknown'],
+            },
+            count: 1,
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+      ]),
       EnrollmentModel.aggregate([
         { $match: { institutionId: oid, deletedAt: null } },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
       EnrollmentModel.aggregate([
-        { $match: { institutionId: oid, deletedAt: null } },
-        { $group: { _id: '$enrollmentMethod', count: { $sum: 1 } } },
-      ]),
-      EnrollmentModel.aggregate([
-        { $match: { institutionId: oid, deletedAt: null } },
-        { $group: { _id: '$courseId', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-        { $limit: 10 },
-      ]),
-      EnrollmentModel.aggregate([
-        { $match: { institutionId: oid, deletedAt: null, programId: { $ne: null } } },
-        { $group: { _id: '$programId', count: { $sum: 1 } } },
+        {
+          $match: {
+            institutionId: oid,
+            deletedAt: null,
+            createdAt: { $gte: trendStart },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
       ]),
       EnrollmentModel.find({ institutionId: oid, deletedAt: null })
         .sort({ createdAt: -1 })
         .limit(10)
+        .select('enrollmentNumber studentId courseId status enrollmentDate')
         .exec(),
     ]);
 
+    const byStatus = byStatusRaw.map((row) => ({
+      status: row._id as EnrollmentStatus,
+      count: row.count as number,
+    }));
+
+    const trend = trendRaw.map((row) => ({
+      date: row._id as string,
+      count: row.count as number,
+    }));
+
+    const recent = recentDocs.map((doc) => ({
+      id: String(doc._id),
+      enrollmentNumber: doc.enrollmentNumber,
+      studentId: String(doc.studentId),
+      courseId: String(doc.courseId),
+      status: doc.status as EnrollmentStatus,
+      enrollmentDate:
+        doc.enrollmentDate instanceof Date
+          ? doc.enrollmentDate.toISOString()
+          : String(doc.enrollmentDate),
+    }));
+
     return {
       total,
-      active,
       pending,
       approved,
       rejected,
-      withdrawn,
+      active,
       completed,
+      withdrawn,
       dropped,
-      suspended,
-      archived,
-      newThisMonth,
+      expired,
+      waitlisted,
+      byDepartment: byDepartmentRaw as EnrollmentStats['byDepartment'],
+      byCourse: byCourseRaw as EnrollmentStats['byCourse'],
       byStatus,
-      byEnrollmentMethod,
-      byCourse,
-      byProgram,
-      recentEnrollments,
+      trend,
+      recent,
     };
   }
 

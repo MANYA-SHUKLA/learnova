@@ -29,22 +29,20 @@ async function main(): Promise<void> {
       process.env.SEED_FACULTY_IDS ||
       '507f1f77bcf86cd79943902f,507f1f77bcf86cd799439030,507f1f77bcf86cd799439031'
     ).split(','),
-    campusIds: (process.env.SEED_CAMPUS_IDS || '507f1f77bcf86cd799439012').split(','),
-    schoolIds: (process.env.SEED_SCHOOL_IDS || '507f1f77bcf86cd799439013').split(','),
     departmentIds: (
       process.env.SEED_DEPARTMENT_IDS || '507f1f77bcf86cd799439014,507f1f77bcf86cd799439015'
     ).split(','),
     programIds: (
       process.env.SEED_PROGRAM_IDS || '507f1f77bcf86cd799439019,507f1f77bcf86cd79943901a'
     ).split(','),
+    academicYearIds: (
+      process.env.SEED_ACADEMIC_YEAR_IDS || '507f1f77bcf86cd79943901d'
+    ).split(','),
     semesterIds: (
       process.env.SEED_SEMESTER_IDS || '507f1f77bcf86cd79943901e,507f1f77bcf86cd79943902d'
     ).split(','),
     sectionIds: (
       process.env.SEED_SECTION_IDS || '507f1f77bcf86cd799439070,507f1f77bcf86cd799439071'
-    ).split(','),
-    batchIds: (
-      process.env.SEED_BATCH_IDS || '507f1f77bcf86cd799439080,507f1f77bcf86cd799439081'
     ).split(','),
     userId: process.env.SEED_USER_ID || '507f1f77bcf86cd799439034',
   };

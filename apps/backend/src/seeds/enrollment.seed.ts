@@ -11,20 +11,21 @@ const STATUSES = [
   'withdrawn',
   'completed',
   'dropped',
-  'suspended',
-  'archived',
+  'expired',
 ] as const;
 
-const ENROLLMENT_METHODS = ['self', 'manual', 'bulk', 'import', 'invite', 'promoted'] as const;
-const APPROVAL_STATUSES = ['pending', 'approved', 'rejected'] as const;
-const COMPLETION_STATUSES = ['not_started', 'in_progress', 'completed', 'failed'] as const;
+const ENROLLMENT_METHODS = [
+  'manual',
+  'bulk_import',
+  'self_enrollment',
+  'invite',
+  'api',
+] as const;
+const APPROVAL_STATUSES = ['pending', 'approved', 'rejected', 'not_required'] as const;
+const COMPLETION_STATUSES = ['not_started', 'in_progress', 'completed'] as const;
 
 function randomItem<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]!;
-}
-
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function randomBool(probability = 0.5): boolean {
@@ -35,17 +36,19 @@ function randomDate(start: Date, end: Date): Date {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
+function generateEnrollmentNumber(index: number): string {
+  return `ENR-${Date.now()}-${index.toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
 interface SeedRefs {
   studentIds: string[];
   courseIds: string[];
   facultyIds: string[];
-  campusIds: string[];
-  schoolIds: string[];
   departmentIds: string[];
   programIds: string[];
+  academicYearIds: string[];
   semesterIds: string[];
   sectionIds: string[];
-  batchIds: string[];
   userId: string;
 }
 
@@ -79,49 +82,43 @@ export async function seedEnrollments(institutionId: string, refs: SeedRefs): Pr
     const status = randomItem(STATUSES);
     const enrollmentMethod = randomItem(ENROLLMENT_METHODS);
     const approvalStatus = randomItem(APPROVAL_STATUSES);
-    const completionStatus = randomItem(COMPLETION_STATUSES);
+    const completionStatus =
+      status === 'completed' ? 'completed' : randomItem(COMPLETION_STATUSES);
     const enrollmentDate = randomDate(startDate, endDate);
 
     const enrollment: Record<string, unknown> = {
       institutionId: oid,
       studentId: new Types.ObjectId(studentId),
       courseId: new Types.ObjectId(courseId),
-      campusId: randomBool(0.8) ? new Types.ObjectId(randomItem(refs.campusIds)) : null,
-      schoolId: randomBool(0.8) ? new Types.ObjectId(randomItem(refs.schoolIds)) : null,
       departmentId: randomBool(0.8) ? new Types.ObjectId(randomItem(refs.departmentIds)) : null,
       programId: randomBool(0.8) ? new Types.ObjectId(randomItem(refs.programIds)) : null,
+      academicYearId: randomBool(0.8)
+        ? new Types.ObjectId(randomItem(refs.academicYearIds))
+        : null,
       semesterId: randomBool(0.7) ? new Types.ObjectId(randomItem(refs.semesterIds)) : null,
       sectionId: randomBool(0.6)
         ? new Types.ObjectId(randomItem(refs.sectionIds))
         : null,
-      batchId: randomBool(0.5) ? new Types.ObjectId(randomItem(refs.batchIds)) : null,
       facultyId: randomBool(0.7) ? new Types.ObjectId(randomItem(refs.facultyIds)) : null,
+      enrollmentNumber: generateEnrollmentNumber(i),
       status,
       enrollmentMethod,
       enrollmentDate,
       approvalStatus,
-      approvalDate:
-        approvalStatus === 'approved' || approvalStatus === 'rejected'
-          ? randomDate(enrollmentDate, endDate)
-          : null,
       approvedBy:
         approvalStatus === 'approved' || approvalStatus === 'rejected' ? userOid : null,
-      rejectionReason:
-        approvalStatus === 'rejected' ? 'Does not meet prerequisites' : null,
-      withdrawalDate: status === 'withdrawn' ? randomDate(enrollmentDate, endDate) : null,
-      withdrawalReason: status === 'withdrawn' ? 'Personal reasons' : null,
+      withdrawReason: status === 'withdrawn' ? 'Personal reasons' : null,
       completionDate: status === 'completed' ? randomDate(enrollmentDate, endDate) : null,
       completionStatus,
-      progress: status === 'completed' ? 100 : randomInt(0, 90),
-      grade: status === 'completed' ? randomItem(['A', 'B+', 'B', 'C+', 'C', 'D']) : null,
-      score: status === 'completed' ? randomInt(60, 100) : randomInt(0, 80),
-      credits: randomInt(1, 4),
-      attendance: randomBool(0.7) ? randomInt(50, 100) : null,
-      notes: randomBool(0.2) ? 'Sample notes' : null,
-      metadata: {},
+      notes:
+        approvalStatus === 'rejected'
+          ? 'Does not meet prerequisites'
+          : randomBool(0.2)
+            ? 'Sample notes'
+            : null,
       createdBy: userOid,
       updatedBy: userOid,
-      deletedAt: status === 'archived' ? new Date() : null,
+      deletedAt: null,
     };
 
     enrollments.push(enrollment);

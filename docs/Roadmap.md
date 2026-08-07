@@ -17,17 +17,21 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **6.5** | **System Integration & Demo** | ✅ Complete |
 | **7** | **Course Management (catalog)** | ✅ Complete |
 | **7.5** | **Course Builder & Content Management** | ✅ Complete |
-| 8 | Enrollments | Planned |
+| **8** | **Enrollments** | ✅ Complete |
+| **8.25** | **Enrollment Integration Checkpoint** | 🔄 Required before 8.5 |
 | 8.5 | Progress Tracking | Planned |
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
+
+**Hard rule:** Do **not** start Progress Tracking (8.5) until Step **8.25** enrollment integration checks pass. Enrollments are the source of truth for each learner’s journey.
 
 | Item often called “rest of Step 7” | Actual home |
 | --- | --- |
 | Course builder UI | **7.5** Content Builder |
 | Modules / lessons CRUD UI | **7.5** Content Builder |
-| Progress tracking UI | **8.5** (after content + enrollments) |
+| Progress tracking UI | **8.5** (after **8.25** checkpoint) |
 | Enrollments | **8** |
+| Enrollment integration | **8.25** |
 | Richer search / filters | Catalog polish on **7** (optional) or content search in **7.5** |
 | Import / export | **7** catalog ✅ shipped; content import/export in **7.5** |
 | Analytics | **14** (platform) + course widgets deepen after enrollments |
@@ -276,7 +280,7 @@ CRUD · Permissions · Publishing · Archive · Duplicate · Search · Filters �
 | Step | Scope | State |
 | --- | --- | --- |
 | **7.5** | Course Content Builder (modules / lessons / resources) | ✅ Complete |
-| **8** | Enrollments | Planned |
+| **8** | Enrollments | ✅ Complete |
 | **8.5** | Progress tracking | Planned |
 | 9 | Practice Labs / Coding | Planned |
 | 10 | Projects / Ideation | Planned |
