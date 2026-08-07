@@ -156,6 +156,8 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
       allowPreview: form.allowPreview === 'true',
       maxStudents: Number(form.maxStudents) || null,
       enrollmentMode: form.enrollmentMode as CourseCreateBody['enrollmentMode'],
+      enrollmentDeadline: form.enrollmentDeadline || null,
+      waitlistEnabled: form.waitlistEnabled === 'true',
       publishDate: form.publishDate || null,
       archiveDate: form.archiveDate || null,
       seoTitle: form.seoTitle.trim() || null,
