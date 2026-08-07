@@ -7,6 +7,7 @@ import studentRoutes from './student.routes.js';
 import courseRoutes from './course.routes.js';
 import { courseBuilderRoutes } from './course-builder.routes.js';
 import enrollmentRoutes from './enrollment.routes.js';
+import progressRoutes from './progress.routes.js';
 import {
   healthCheck,
   livenessCheck,
@@ -28,6 +29,7 @@ v1Router.use(studentRoutes);
 v1Router.use(courseRoutes);
 v1Router.use(courseBuilderRoutes);
 v1Router.use(enrollmentRoutes);
+v1Router.use(progressRoutes);
 v1Router.get('/live', livenessCheck);
 v1Router.get('/ready', readinessCheck);
 v1Router.get('/version', versionCheck);

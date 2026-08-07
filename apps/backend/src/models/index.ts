@@ -66,6 +66,33 @@ export {
   COURSE_BUILDER_AUDIT_EVENTS,
 } from './course-builder-audit-log.model.js';
 export { CourseProgressModel, type CourseProgressDocument } from './course-progress.model.js';
+export { ModuleProgressModel, type ModuleProgressDocument } from './module-progress.model.js';
+export { LessonProgressModel, type LessonProgressDocument } from './lesson-progress.model.js';
+export {
+  ResourceProgressModel,
+  type ResourceProgressDocument,
+} from './resource-progress.model.js';
+export {
+  LearningBookmarkModel,
+  type LearningBookmarkDocument,
+} from './learning-bookmark.model.js';
+export { LearningNoteModel, type LearningNoteDocument } from './learning-note.model.js';
+export {
+  LearningActivityModel,
+  type LearningActivityDocument,
+  type LearningActivityEventType,
+  LEARNING_ACTIVITY_TYPES,
+} from './learning-activity.model.js';
+export {
+  LearningSessionModel,
+  type LearningSessionDocument,
+} from './learning-session.model.js';
+export {
+  ProgressAuditLogModel,
+  type ProgressAuditLogDocument,
+  type ProgressAuditEvent,
+  PROGRESS_AUDIT_EVENTS,
+} from './progress-audit-log.model.js';
 export { EnrollmentModel, type EnrollmentDocument } from './enrollment.model.js';
 export {
   EnrollmentWaitlistModel,
