@@ -2,53 +2,116 @@
  * Seed enrollments into MongoDB.
  * Usage: pnpm --filter @learnova/backend seed:enrollments
  *
- * Prerequisites:
- * - Institution, Students, Courses, Faculty, and related entities must exist
- * - Pass IDs via environment variables or modify this script
+ * Loads real Student / Course / Faculty / academic IDs for SEED_INSTITUTION_ID.
+ * Requires enough unique student×course pairs for 1000+ enrollments
+ * (e.g. seed:students + seed:courses first).
+ *
+ * Set SEED_FORCE=1 to replace existing enrollments for the institution.
  */
 
 import '../config/load-env.js';
+import { Types } from 'mongoose';
 import { connectMongo, disconnectMongo } from '../database/index.js';
+import {
+  AcademicYearModel,
+  CourseModel,
+  DepartmentModel,
+  FacultyModel,
+  ProgramModel,
+  SectionModel,
+  SemesterModel,
+  StudentModel,
+  UserModel,
+} from '../models/index.js';
 import { logger } from '../utils/logger/index.js';
-import { seedEnrollments } from './enrollment.seed.js';
+import { seedEnrollments, type SeedRefs } from './enrollment.seed.js';
+
+async function loadRefs(institutionId: string): Promise<SeedRefs> {
+  const oid = new Types.ObjectId(institutionId);
+
+  const [
+    students,
+    courses,
+    faculty,
+    departments,
+    programs,
+    academicYears,
+    semesters,
+    sections,
+    user,
+  ] = await Promise.all([
+    StudentModel.find({ institutionId: oid, deletedAt: null }).select('_id').lean(),
+    CourseModel.find({ institutionId: oid, deletedAt: null }).select('_id').lean(),
+    FacultyModel.find({ institutionId: oid, deletedAt: null }).select('_id').lean(),
+    DepartmentModel.find({ institutionId: oid, deletedAt: null }).select('_id').lean(),
+    ProgramModel.find({ institutionId: oid, deletedAt: null }).select('_id').lean(),
+    AcademicYearModel.find({ institutionId: oid, deletedAt: null }).select('_id').lean(),
+    SemesterModel.find({ institutionId: oid, deletedAt: null }).select('_id').lean(),
+    SectionModel.find({ institutionId: oid, deletedAt: null }).select('_id').lean(),
+    UserModel.findOne({ institutionId: oid }).select('_id').lean(),
+  ]);
+
+  const studentIds = students.map((d) => String(d._id));
+  const courseIds = courses.map((d) => String(d._id));
+  const capacity = studentIds.length * courseIds.length;
+
+  logger.info(
+    {
+      students: studentIds.length,
+      courses: courseIds.length,
+      faculty: faculty.length,
+      capacity,
+    },
+    'Loaded enrollment seed refs from database',
+  );
+
+  if (studentIds.length === 0 || courseIds.length === 0) {
+    throw new Error(
+      'No students and/or courses found for SEED_INSTITUTION_ID. Run seed:students and seed:courses first.',
+    );
+  }
+
+  if (capacity < 1000) {
+    throw new Error(
+      `Not enough unique student×course pairs (${capacity}). Need ≥1000. ` +
+        `Have ${studentIds.length} students × ${courseIds.length} courses. ` +
+        `Run: pnpm --filter @learnova/backend seed:students && pnpm --filter @learnova/backend seed:courses`,
+    );
+  }
+
+  const facultyIds = faculty.map((d) => String(d._id));
+  const departmentIds = departments.map((d) => String(d._id));
+  const programIds = programs.map((d) => String(d._id));
+  const academicYearIds = academicYears.map((d) => String(d._id));
+  const semesterIds = semesters.map((d) => String(d._id));
+  const sectionIds = sections.map((d) => String(d._id));
+
+  return {
+    studentIds,
+    courseIds,
+    facultyIds: facultyIds.length > 0 ? facultyIds : [studentIds[0]!],
+    departmentIds: departmentIds.length > 0 ? departmentIds : [studentIds[0]!],
+    programIds: programIds.length > 0 ? programIds : [studentIds[0]!],
+    academicYearIds: academicYearIds.length > 0 ? academicYearIds : [studentIds[0]!],
+    semesterIds: semesterIds.length > 0 ? semesterIds : [studentIds[0]!],
+    sectionIds: sectionIds.length > 0 ? sectionIds : [studentIds[0]!],
+    userId: user ? String(user._id) : studentIds[0]!,
+  };
+}
 
 async function main(): Promise<void> {
   await connectMongo();
 
-  const institutionId = process.env.SEED_INSTITUTION_ID || '507f1f77bcf86cd799439011';
-  const refs = {
-    studentIds: (
-      process.env.SEED_STUDENT_IDS ||
-      '507f1f77bcf86cd799439050,507f1f77bcf86cd799439051,507f1f77bcf86cd799439052,507f1f77bcf86cd799439053,507f1f77bcf86cd799439054'
-    ).split(','),
-    courseIds: (
-      process.env.SEED_COURSE_IDS ||
-      '507f1f77bcf86cd799439060,507f1f77bcf86cd799439061,507f1f77bcf86cd799439062,507f1f77bcf86cd799439063,507f1f77bcf86cd799439064'
-    ).split(','),
-    facultyIds: (
-      process.env.SEED_FACULTY_IDS ||
-      '507f1f77bcf86cd79943902f,507f1f77bcf86cd799439030,507f1f77bcf86cd799439031'
-    ).split(','),
-    departmentIds: (
-      process.env.SEED_DEPARTMENT_IDS || '507f1f77bcf86cd799439014,507f1f77bcf86cd799439015'
-    ).split(','),
-    programIds: (
-      process.env.SEED_PROGRAM_IDS || '507f1f77bcf86cd799439019,507f1f77bcf86cd79943901a'
-    ).split(','),
-    academicYearIds: (
-      process.env.SEED_ACADEMIC_YEAR_IDS || '507f1f77bcf86cd79943901d'
-    ).split(','),
-    semesterIds: (
-      process.env.SEED_SEMESTER_IDS || '507f1f77bcf86cd79943901e,507f1f77bcf86cd79943902d'
-    ).split(','),
-    sectionIds: (
-      process.env.SEED_SECTION_IDS || '507f1f77bcf86cd799439070,507f1f77bcf86cd799439071'
-    ).split(','),
-    userId: process.env.SEED_USER_ID || '507f1f77bcf86cd799439034',
-  };
+  const institutionId = process.env.SEED_INSTITUTION_ID;
+  if (!institutionId) {
+    throw new Error('SEED_INSTITUTION_ID is required in apps/backend/.env');
+  }
 
-  await seedEnrollments(institutionId, refs);
-  logger.info('Enrollment seed completed (1000+ enrollments)');
+  const force = process.env.SEED_FORCE === '1' || process.env.SEED_FORCE === 'true';
+  const refs = await loadRefs(institutionId);
+  const result = await seedEnrollments(institutionId, refs, { force, target: 1200 });
+
+  logger.info(result, 'Enrollment seed completed');
   await disconnectMongo();
 }
 
