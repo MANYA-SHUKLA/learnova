@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
             {/* Top accent line that expands on card hover */}
             <div
               aria-hidden
-              className="absolute inset-x-0 top-0 h-[2px] origin-center scale-x-25 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50 transition-all duration-500 group-hover:scale-x-100 group-hover:opacity-100"
+              className="absolute inset-x-0 top-0 h-[2px] origin-center scale-x-[0.28] bg-gradient-to-r from-transparent via-primary to-transparent opacity-50 transition-all duration-500 group-hover:scale-x-100 group-hover:opacity-100"
             />
 
             <CardHeader className="space-y-4 pb-2 pt-8 text-center">
