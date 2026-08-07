@@ -7,6 +7,12 @@ import {
   outputsMatch,
   slugifyProblemTitle,
 } from '../../services/practice-lab/practice-lab.helpers.js';
+import {
+  computeSubmissionScore as engineScore,
+  mapJudge0StatusToExecutionStatus as engineMap,
+  outputsMatch as engineMatch,
+  verdictToExecutionStatus,
+} from '@learnova/shared';
 
 describe('practice lab helpers', () => {
   it('normalizes trailing whitespace for output compare', () => {
@@ -56,5 +62,17 @@ describe('practice lab helpers', () => {
     expect(mapJudge0StatusToExecutionStatus(5)).toBe('time_limit_exceeded');
     expect(mapJudge0StatusToExecutionStatus(6)).toBe('compilation_error');
     expect(mapJudge0StatusToExecutionStatus(7)).toBe('runtime_error');
+  });
+});
+
+describe('coding engine shared scoring (reusable by exams)', () => {
+  it('re-exports the same pure scoring contract from @learnova/shared', () => {
+    expect(engineMatch('ok\n', 'ok')).toBe(true);
+    expect(
+      engineScore([{ passed: true, weight: 1, status: 'accepted' }]).verdict,
+    ).toBe('accepted');
+    expect(engineMap(3)).toBe('accepted');
+    expect(verdictToExecutionStatus('partial')).toBe('wrong_answer');
+    expect(verdictToExecutionStatus('accepted')).toBe('accepted');
   });
 });

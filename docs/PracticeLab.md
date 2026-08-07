@@ -11,12 +11,15 @@ This is **not** an exam, quiz, or assignment — it is a practice platform.
 ```
 Student / Faculty UI (Monaco)
   → Express API (/api/v1/practice-labs)
-  → PracticeLabService
+  → PracticeLabService   (lab authorship, permissions, progress UX)
+  → Coding Assessment Engine   (run / evaluate / languages / scoring / history)
   → Judge0 CE (Docker-isolated)  [or offline mock when JUDGE0_API_URL unset]
   → MongoDB (labs, problems, tests, submissions, history, progress)
   → Socket.IO /practice (execution status)
   → BullMQ compile queue (async execution jobs)
 ```
+
+Practice Lab is a **consumer** of the [Coding Assessment Engine](./CodingEngine.md). Coding Exams must reuse that engine rather than adding a second runner.
 
 ## Models
 
@@ -69,10 +72,11 @@ Targets: 30 labs · 300 problems · ~5000 test cases · ~10000 submissions.
 
 ## Related
 
+- [CodingEngine.md](./CodingEngine.md) — shared execution infrastructure (required for exams)
 - [Problem.md](./Problem.md)
 - [Judge0.md](./Judge0.md)
 - [Execution.md](./Execution.md)
-- [Submission.md](./Submission.md) (assignment submissions — lab submissions use `student_code_submissions`)
+- [PracticeSubmission.md](./PracticeSubmission.md)
 - [Leaderboard.md](./Leaderboard.md)
 - [AssessmentCore.md](./AssessmentCore.md)
 - [ADR 0005 — Code Runner](./adr/0005-code-runner.md)

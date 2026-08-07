@@ -15,7 +15,9 @@ Compose service is commented in `docker/development/docker-compose.yml` until en
 
 ## Client
 
-`apps/backend/src/services/practice-lab/judge0.client.ts`
+Canonical location: `apps/backend/src/services/coding-engine/judge0.client.ts`
+
+Practice Lab re-exports for compatibility only — new code (including exams) must import from the coding engine.
 
 - Create / poll / batch submissions (`base64_encoded=true`)
 - Maps Judge0 status ids → `ExecutionStatus`

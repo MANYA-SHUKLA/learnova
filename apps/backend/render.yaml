@@ -1,0 +1,15 @@
+# Render — when Root Directory is set to `apps/backend`
+#
+# Render UI settings:
+#   Root Directory: apps/backend
+#   Build Command:  bash scripts/render-build.sh
+#   Start Command:  bash scripts/render-start.sh
+#   Health Check:   /api/v1/live
+#
+# The scripts always `cd` to the monorepo root so pnpm workspace packages resolve.
+# Prefer the root `render.yaml` blueprint when possible.
+
+runtime: node
+buildCommand: bash scripts/render-build.sh
+startCommand: bash scripts/render-start.sh
+healthCheckPath: /api/v1/live

@@ -25,7 +25,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs,json,md,yml,yaml,css}\"",
     "test": "turbo run test",
     "clean": "turbo run clean && rimraf node_modules",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "docker:dev": "docker compose -f docker/development/docker-compose.yml up --build",
     "docker:dev:down": "docker compose -f docker/development/docker-compose.yml down",
     "docker:staging": "docker compose -f docker/staging/docker-compose.yml up --build -d",

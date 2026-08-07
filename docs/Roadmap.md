@@ -468,12 +468,13 @@ Practice Labs (10) ✅, Quizzes, and Exams **must** import Assessment Core helpe
 ### Shipped
 
 - Models: PracticeLab · LabProblem · ProblemTestCase · StudentCodeSubmission · ExecutionHistory · Language · LabProgress · audit
+- **Coding Assessment Engine** (`services/coding-engine`) — Judge0, languages, evaluate/score, pluggable storage
+- Practice Lab as engine consumer (CRUD, permissions, progress, dashboards)
 - API: CRUD, run, submit, history, leaderboard, dashboards, import/export/duplicate/archive
-- Judge0 client + offline mock · Socket.IO `/practice` · BullMQ `execute-code`
 - Frontend: institution / faculty / student routes + Monaco editor
 - Seed: `seed:practice-labs` (30 / 300 / 5k / 10k targets)
-- Tests: validation · permissions · helpers
-- Docs: `PracticeLab.md` · `Problem.md` · `Judge0.md` · `Execution.md` · `PracticeSubmission.md` · `Leaderboard.md`
+- Tests: validation · permissions · helpers (+ shared coding scoring)
+- Docs: `PracticeLab.md` · `CodingEngine.md` · `Problem.md` · `Judge0.md` · `Execution.md` · `PracticeSubmission.md` · `Leaderboard.md`
 
 ### Explicitly out of scope
 
@@ -481,9 +482,11 @@ Projects · Quizzes · MCQ/coding exams · Certificates · Gradebook · Attendan
 
 ### Exit criteria (DoD — met)
 
-✓ Practice Lab Module · ✓ Problem Bank · ✓ Monaco · ✓ Judge0 · ✓ Run/Submit · ✓ Hidden tests · ✓ Execution history · ✓ Leaderboard · ✓ Progress · ✓ Queue/Socket · ✓ Search/Filters · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed · ✓ Tests · ✓ Docs
+✓ Practice Lab Module · ✓ Problem Bank · ✓ Monaco · ✓ Judge0 · ✓ **Reusable Coding Engine** · ✓ Run/Submit · ✓ Hidden tests · ✓ Execution history · ✓ Leaderboard · ✓ Progress · ✓ Queue/Socket · ✓ Search/Filters · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed · ✓ Tests · ✓ Docs
 
 **Hard rule:** Stop after Practice Labs. Do **not** start Projects, Quizzes, or Exams.
+
+**Hard rule for Exams (later):** Coding Exams must reuse `services/coding-engine` — only add scheduling, proctoring, attempt rules, and grading policies. No second code runner.
 
 ---
 
@@ -522,6 +525,7 @@ Projects · Quizzes · MCQ/coding exams · Certificates · Gradebook · Attendan
 - [Assignment](./Assignment.md) · [AssignmentAPI](./AssignmentAPI.md) · [Submission](./Submission.md)
 - [Rubrics](./Rubrics.md) · [AssignmentPermissions](./AssignmentPermissions.md)
 - [AssessmentCore](./AssessmentCore.md) · [ADR 0006](./adr/0006-assessment-core.md)
-- [PracticeLab](./PracticeLab.md) · [Problem](./Problem.md) · [Judge0](./Judge0.md) · [Execution](./Execution.md)
+- [PracticeLab](./PracticeLab.md) · [CodingEngine](./CodingEngine.md) · [Problem](./Problem.md) · [Judge0](./Judge0.md) · [Execution](./Execution.md)
 - [PracticeSubmission](./PracticeSubmission.md) · [Leaderboard](./Leaderboard.md)
 - [AccessModel](./AccessModel.md) · [Auth](./Auth.md) · [Architecture](./Architecture.md)
+- [Deploy](./Deploy.md) — Vercel (frontend) + Render (backend)

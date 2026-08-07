@@ -1,0 +1,73 @@
+# Render Blueprint — Learnova API
+# https://render.com/docs/blueprint-spec
+#
+# Option A (recommended): connect the GitHub repo and use this blueprint
+#   Root of service stays the monorepo; build/start run from repo root.
+#
+# Option B: create a Web Service manually with Root Directory = apps/backend
+#   Build:  bash scripts/render-build.sh
+#   Start:  bash scripts/render-start.sh
+#   (those scripts cd to the monorepo root for pnpm workspaces)
+
+services:
+  - type: web
+    name: learnova-api
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm exec turbo run build --filter=@learnova/backend
+    startCommand: pnpm --filter @learnova/backend start:prod
+    healthCheckPath: /api/v1/live
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: learnova
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: SAAS_MODE
+        value: "false"
+      - key: MAIL_DRIVER
+        value: console
+      - key: STORAGE_DRIVER
+        value: local
+      - key: LOG_LEVEL
+        value: info
+      - key: PNPM_VERSION
+        value: 10.32.1
+
+  # Optional background worker (uncomment when you need BullMQ consumers on Render)
+  # - type: worker
+  #   name: learnova-worker
+  #   runtime: node
+  #   plan: starter
+  #   rootDir: .
+  #   buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm exec turbo run build --filter=@learnova/worker
+  #   startCommand: pnpm --filter @learnova/worker start
+  #   envVars:
+  #     - key: NODE_ENV
+  #       value: production
+  #     - key: MONGODB_URI
+  #       fromService:
+  #         type: web
+  #         name: learnova-api
+  #         envVarKey: MONGODB_URI
+  #     - key: REDIS_URL
+  #       fromService:
+  #         type: web
+  #         name: learnova-api
+  #         envVarKey: REDIS_URL

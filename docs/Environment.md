@@ -10,6 +10,8 @@ Use local env files only (gitignored — never commit secrets):
 
 Generate strong JWT secrets (≥ 32 chars) for anything beyond local toy usage.
 
+Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
+
 ---
 
 ## Frontend (`apps/frontend`)

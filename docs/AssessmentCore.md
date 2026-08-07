@@ -9,11 +9,11 @@ Assessment Core
   ↓
 Assignments (9) ✅
   ↓
-Labs (10)
+Labs (10) ✅  ── uses Coding Assessment Engine
   ↓
 Quizzes (optional)
   ↓
-Exams (12)
+Exams (12)  ── must reuse Coding Assessment Engine (no second runner)
   ↓
 Gradebook (13)
 ```
@@ -84,16 +84,19 @@ Domain event names stay dotted (`assignment.published`, `submission.graded`, `fe
 | Module | Owns |
 | --- | --- |
 | Assignments | Types (homework/essay/…), ERP attachment UX, assignment routes/UI |
-| Labs | Judge0 / IDE session, code delivery, auto-grade runners |
+| Labs | Problem bank, practice UX — **execution via Coding Engine** |
+| Coding Engine | Judge0, languages, evaluate/score, execution history (shared) |
 | Quizzes | Question banks, timed questions, shuffle |
-| Exams | Proctoring, seating, timed windows, integrity |
+| Exams | Scheduling, proctoring, seating, integrity — **reuse Coding Engine for code questions** |
 | Gradebook | Aggregation across activities |
 
 ## Assignments integration
 
 Assignment helpers (`assignment.helpers.ts`) are **thin adapters** over Assessment Core. Assignment Zod schemas re-use core lifecycle / attempt / upload schemas.
 
-New labs/quizzes/exams **must** import core helpers — do not copy deadline or grading logic.
+New labs/quizzes/exams **must** import Assessment Core helpers — do not copy deadline or grading policy logic.
+
+Coding Exams **must** import the [Coding Assessment Engine](./CodingEngine.md) for run/evaluate/score — do not copy Judge0 or test-case scoring.
 
 ## Tests
 
@@ -102,5 +105,6 @@ New labs/quizzes/exams **must** import core helpers — do not copy deadline or 
 ## Related
 
 - [ADR 0006 — Assessment Core](./adr/0006-assessment-core.md)
+- [CodingEngine.md](./CodingEngine.md)
 - [Assignment.md](./Assignment.md)
 - [Roadmap.md](./Roadmap.md) Step 9.5

@@ -86,6 +86,8 @@ function canManage(actor: ActorContext): boolean {
   return MANAGE_ROLES.has(actor.role);
 }
 
+const labCodingStorage = createPracticeLabCodingStorage();
+
 function emitPracticeStatus(room: string, payload: Record<string, unknown>) {
   try {
     const io = getSocketServer();
@@ -93,6 +95,12 @@ function emitPracticeStatus(room: string, payload: Record<string, unknown>) {
   } catch {
     // socket optional during tests / early boot
   }
+}
+
+function getLabCodingEngine() {
+  return createCodingEngine(labCodingStorage, ({ room, ...payload }) => {
+    emitPracticeStatus(room, payload);
+  });
 }
 
 function toLabDto(doc: {
@@ -937,7 +945,7 @@ class PracticeLabService {
     return { id };
   }
 
-  // ------------------------------------------------------------------ run / submit
+  // ------------------------------------------------------------------ run / submit (via Coding Engine)
 
   async runCode(input: RunCodeInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
@@ -949,7 +957,6 @@ class PracticeLabService {
     if (actor.role === 'student') {
       studentId = await this.resolveStudentId(actor);
     } else {
-      // faculty/admin dry-run uses a synthetic student pointer = user id string stored as ObjectId if student exists else skip progress
       const existing = await StudentModel.findOne({ userId: actor.userId, institutionId })
         .select('_id')
         .lean();
@@ -985,105 +992,66 @@ class PracticeLabService {
     }
 
     if (!Types.ObjectId.isValid(studentId)) {
-      // faculty without student profile — still allow execution history under a placeholder ObjectId from user
       studentId = actor.userId;
     }
 
-    const execution = await practiceLabRepository.createExecution({
-      institutionId,
-      practiceLabId,
-      problemId,
-      studentId,
-      language: input.language,
-      sourceCode: input.sourceCode,
-      stdin,
-      status: 'queued',
-      isSubmission: false,
-    });
-
-    emitPracticeStatus(`user:${actor.userId}`, {
-      executionId: String(execution._id),
-      status: 'queued',
-      queuePosition: 1,
-    });
+    const engine = getLabCodingEngine();
+    const result = await engine.run(
+      {
+        institutionId,
+        studentId,
+        language: input.language,
+        sourceCode: input.sourceCode,
+        stdin,
+        timeLimitMS,
+        memoryLimitMB,
+        activity: labActivityRef(practiceLabId, problemId),
+      },
+      { notifyRoom: `user:${actor.userId}` },
+    );
 
     eventBus.emit(EVENTS.EXECUTION_STARTED, {
-      executionId: String(execution._id),
+      executionId: result.executionId,
       studentId,
       institutionId,
+    });
+    eventBus.emit(EVENTS.EXECUTION_FINISHED, {
+      executionId: result.executionId,
+      studentId,
+      institutionId,
+      status: result.status,
+    });
+    eventBus.emit(EVENTS.EXECUTION_COMPLETED, {
+      executionId: result.executionId,
+      studentId,
+      institutionId,
+      status: result.status,
     });
     await this.audit('execution_started', actor, {
       institutionId,
       practiceLabId,
       problemId,
-      executionId: String(execution._id),
+      executionId: result.executionId,
       studentId,
-    });
-
-    emitPracticeStatus(`user:${actor.userId}`, {
-      executionId: String(execution._id),
-      status: 'running',
-    });
-
-    const result = await judge0Client.createSubmissionAndWait({
-      sourceCode: input.sourceCode,
-      languageId: judge0IdForLanguage(input.language),
-      stdin,
-      cpuTimeLimit: timeLimitMS,
-      wallTimeLimit: timeLimitMS + 1000,
-      memoryLimit: memoryLimitMB,
-    });
-
-    let status = mapJudge0StatusToExecutionStatus(result.status.id);
-    // For run (not submit), treat Judge0 "Accepted" as successful run; WA only applies when comparing expected
-    if (status === 'wrong_answer') status = 'accepted';
-
-    const updated = await practiceLabRepository.updateExecution(String(execution._id), {
-      status,
-      stdout: result.stdout,
-      stderr: result.stderr,
-      compileOutput: result.compile_output,
-      exitCode: result.exit_code,
-      executionTimeMS: result.time ? Math.round(parseFloat(result.time) * 1000) : null,
-      memoryKB: result.memory,
-      judge0Token: result.token,
-    });
-
-    emitPracticeStatus(`user:${actor.userId}`, {
-      executionId: String(execution._id),
-      status,
-    });
-
-    eventBus.emit(EVENTS.EXECUTION_FINISHED, {
-      executionId: String(execution._id),
-      studentId,
-      institutionId,
-      status,
-    });
-    eventBus.emit(EVENTS.EXECUTION_COMPLETED, {
-      executionId: String(execution._id),
-      studentId,
-      institutionId,
-      status,
     });
     await this.audit('execution_finished', actor, {
       institutionId,
       practiceLabId,
       problemId,
-      executionId: String(execution._id),
+      executionId: result.executionId,
       studentId,
-      metadata: { status },
+      metadata: { status: result.status },
     });
 
     return {
-      executionId: String(execution._id),
-      status,
-      stdout: updated?.stdout ?? result.stdout,
-      stderr: updated?.stderr ?? result.stderr,
-      compileOutput: updated?.compileOutput ?? result.compile_output,
-      executionTimeMS: updated?.executionTimeMS ?? null,
-      memoryKB: updated?.memoryKB ?? result.memory,
-      exitCode: updated?.exitCode ?? result.exit_code,
+      executionId: result.executionId,
+      status: result.status,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      compileOutput: result.compileOutput,
+      executionTimeMS: result.executionTimeMS,
+      memoryKB: result.memoryKB,
+      exitCode: result.exitCode,
       queuePosition: null,
     };
   }
@@ -1123,24 +1091,24 @@ class PracticeLabService {
       throw new ValidationError('Problem has no test cases');
     }
 
-    const submission = await practiceLabRepository.createSubmission({
+    const storage = labCodingStorage;
+    if (!storage.createSubmission || !storage.updateSubmission) {
+      throw new ValidationError('Submission storage unavailable');
+    }
+
+    const created = await storage.createSubmission({
       institutionId,
-      practiceLabId: problem.practiceLabId,
-      problemId: input.problemId,
       studentId,
       language: input.language,
       sourceCode: input.sourceCode,
-      verdict: 'pending',
-      score: 0,
-      maxScore: testCases.reduce((s, t) => s + t.weight, 0),
-      passedCount: 0,
-      totalCount: testCases.length,
+      activity: labActivityRef(String(problem.practiceLabId), input.problemId),
       attemptNumber: attemptCheck.nextAttempt,
-      results: [],
+      maxScore: testCases.reduce((s, t) => s + t.weight, 0),
+      totalCount: testCases.length,
     });
 
     eventBus.emit(EVENTS.LAB_SUBMISSION_CREATED, {
-      submissionId: String(submission._id),
+      submissionId: created.id,
       problemId: input.problemId,
       practiceLabId: String(problem.practiceLabId),
       studentId,
@@ -1154,99 +1122,33 @@ class PracticeLabService {
       institutionId,
       practiceLabId: String(problem.practiceLabId),
       problemId: input.problemId,
-      submissionId: String(submission._id),
+      submissionId: created.id,
       studentId,
     });
 
-    emitPracticeStatus(`user:${actor.userId}`, {
-      executionId: String(submission._id),
-      submissionId: String(submission._id),
-      status: 'running',
-    });
-
-    const results: StudentSubmission['results'] = [];
-    let compileOutput: string | null = null;
-    let maxTime: number | null = null;
-    let maxMem: number | null = null;
-
-    for (const tc of testCases) {
-      const judge = await judge0Client.createSubmissionAndWait({
+    const engine = getLabCodingEngine();
+    const scored = await engine.evaluate(
+      {
+        institutionId,
+        studentId,
+        language: input.language,
         sourceCode: input.sourceCode,
-        languageId: judge0IdForLanguage(input.language),
-        stdin: tc.input,
-        cpuTimeLimit: tc.timeoutMS ?? problem.timeLimitMS,
-        wallTimeLimit: (tc.timeoutMS ?? problem.timeLimitMS) + 1000,
-        memoryLimit: tc.memoryLimitMB ?? problem.memoryLimitMB,
-      });
-
-      let status = mapJudge0StatusToExecutionStatus(judge.status.id);
-      if (judge.compile_output) compileOutput = judge.compile_output;
-
-      const timeMs = judge.time ? Math.round(parseFloat(judge.time) * 1000) : null;
-      if (timeMs != null) maxTime = Math.max(maxTime ?? 0, timeMs);
-      if (judge.memory != null) maxMem = Math.max(maxMem ?? 0, judge.memory);
-
-      let passed = false;
-      if (status === 'compilation_error') {
-        passed = false;
-      } else if (status === 'accepted' || status === 'wrong_answer') {
-        passed = outputsMatch(judge.stdout, tc.expectedOutput);
-        status = passed ? 'accepted' : 'wrong_answer';
-      }
-
-      results.push({
-        testCaseId: String(tc._id),
-        visibility: tc.visibility as 'public' | 'hidden',
-        status,
-        stdout: judge.stdout,
-        stderr: judge.stderr,
-        expectedOutput: tc.expectedOutput,
-        executionTimeMS: timeMs,
-        memoryKB: judge.memory,
-        weight: tc.weight,
-        passed,
-      });
-
-      if (status === 'compilation_error') break;
-    }
-
-    const scored = computeSubmissionScore(results);
-    const updated = await practiceLabRepository.updateSubmission(String(submission._id), {
-      verdict: scored.verdict,
-      score: scored.score,
-      maxScore: scored.maxScore,
-      passedCount: scored.passedCount,
-      totalCount: scored.totalCount,
-      executionTimeMS: maxTime,
-      memoryKB: maxMem,
-      compileOutput,
-      results,
-    });
-
-    await practiceLabRepository.createExecution({
-      institutionId,
-      practiceLabId: problem.practiceLabId,
-      problemId: input.problemId,
-      studentId,
-      language: input.language,
-      sourceCode: input.sourceCode,
-      stdin: null,
-      stdout: null,
-      stderr: null,
-      compileOutput,
-      status:
-        scored.verdict === 'accepted'
-          ? 'accepted'
-          : scored.verdict === 'compilation_error'
-            ? 'compilation_error'
-            : scored.verdict === 'runtime_error'
-              ? 'runtime_error'
-              : 'wrong_answer',
-      executionTimeMS: maxTime,
-      memoryKB: maxMem,
-      submissionId: submission._id,
-      isSubmission: true,
-    });
+        timeLimitMS: problem.timeLimitMS,
+        memoryLimitMB: problem.memoryLimitMB,
+        testCases: testCases.map((tc) => ({
+          id: String(tc._id),
+          input: tc.input,
+          expectedOutput: tc.expectedOutput,
+          visibility: tc.visibility as 'public' | 'hidden',
+          weight: tc.weight,
+          timeoutMS: tc.timeoutMS,
+          memoryLimitMB: tc.memoryLimitMB,
+        })),
+        activity: labActivityRef(String(problem.practiceLabId), input.problemId),
+        submissionId: created.id,
+      },
+      { notifyRoom: `user:${actor.userId}` },
+    );
 
     await this.updateProgressAfterSubmission({
       institutionId,
@@ -1258,7 +1160,7 @@ class PracticeLabService {
 
     if (scored.verdict === 'accepted') {
       eventBus.emit(EVENTS.LAB_SUBMISSION_ACCEPTED, {
-        submissionId: String(submission._id),
+        submissionId: created.id,
         problemId: input.problemId,
         practiceLabId: String(problem.practiceLabId),
         studentId,
@@ -1269,18 +1171,18 @@ class PracticeLabService {
         practiceLabId: String(problem.practiceLabId),
         studentId,
         institutionId,
-        submissionId: String(submission._id),
+        submissionId: created.id,
       });
       await this.audit('submission_accepted', actor, {
         institutionId,
         practiceLabId: String(problem.practiceLabId),
         problemId: input.problemId,
-        submissionId: String(submission._id),
+        submissionId: created.id,
         studentId,
       });
     } else {
       eventBus.emit(EVENTS.LAB_SUBMISSION_FAILED, {
-        submissionId: String(submission._id),
+        submissionId: created.id,
         problemId: input.problemId,
         practiceLabId: String(problem.practiceLabId),
         studentId,
@@ -1291,19 +1193,15 @@ class PracticeLabService {
         institutionId,
         practiceLabId: String(problem.practiceLabId),
         problemId: input.problemId,
-        submissionId: String(submission._id),
+        submissionId: created.id,
         studentId,
         metadata: { verdict: scored.verdict },
       });
     }
 
-    emitPracticeStatus(`user:${actor.userId}`, {
-      executionId: String(submission._id),
-      submissionId: String(submission._id),
-      status: scored.verdict,
-    });
-
-    return toSubmissionDto(updated!);
+    const updated = await practiceLabRepository.findSubmissionById(institutionId, created.id);
+    if (!updated) throw new NotFoundError('Submission not found');
+    return toSubmissionDto(updated);
   }
 
   private async updateProgressAfterSubmission(input: {
@@ -1576,31 +1474,7 @@ class PracticeLabService {
   }
 
   async listLanguages() {
-    let langs = await practiceLabRepository.listLanguages(true);
-    if (langs.length === 0) {
-      await practiceLabRepository.upsertLanguages(
-        PRACTICE_LANGUAGES.map((key, order) => ({
-          key,
-          name: PRACTICE_LANGUAGE_META[key].name,
-          judge0Id: JUDGE0_LANGUAGE_IDS[key],
-          monacoLanguage: PRACTICE_LANGUAGE_META[key].monacoLanguage,
-          version: PRACTICE_LANGUAGE_META[key].version,
-          enabled: true,
-          order,
-        })),
-      );
-      langs = await practiceLabRepository.listLanguages(true);
-    }
-    return langs.map((l) => ({
-      id: String(l._id),
-      key: l.key as PracticeLanguage,
-      name: l.name,
-      judge0Id: l.judge0Id,
-      monacoLanguage: l.monacoLanguage,
-      version: l.version ?? null,
-      enabled: l.enabled,
-      order: l.order,
-    }));
+    return codingLanguageService.listEnabled();
   }
 
   async institutionDashboard(actor: ActorContext): Promise<PracticeLabStats> {
