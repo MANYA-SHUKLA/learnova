@@ -15,6 +15,7 @@ import {
   timeoutMiddleware,
 } from './middlewares/index.js';
 import routes from './routes/index.js';
+import { mountSwagger } from './docs/swagger.js';
 
 export function createApp(): Express {
   const app = express();
@@ -22,7 +23,19 @@ export function createApp(): Express {
   app.set('trust proxy', 1);
   app.disable('x-powered-by');
 
-  app.use(helmet());
+  // Relax CSP for Swagger UI assets; keep defaults elsewhere
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          'script-src': ["'self'", "'unsafe-inline'"],
+          'style-src': ["'self'", "'unsafe-inline'"],
+          'img-src': ["'self'", 'data:', 'https:'],
+        },
+      },
+    }),
+  );
   app.use(securityHeadersMiddleware);
   app.use(
     cors({
@@ -45,6 +58,8 @@ export function createApp(): Express {
   app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok' });
   });
+
+  mountSwagger(app);
 
   app.use(routes);
 
