@@ -71,8 +71,8 @@ export function CredentialsHandoff({ credentials, onDone }: CredentialsHandoffPr
       <CardHeader>
         <CardTitle>{credentials.title ?? 'Created successfully'}</CardTitle>
         <CardDescription>
-          Copy these credentials now — the temporary password is shown only once and is never
-          stored in plain text.
+          A copy was emailed to {credentials.email}. The temporary password is shown only once
+          here and is never stored in plain text.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -94,7 +94,8 @@ export function CredentialsHandoff({ credentials, onDone }: CredentialsHandoffPr
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Share via official email, WhatsApp, printed letter, or HR — not through public channels.
+          They must sign in and change the password on first login. Keep a backup copy in case
+          the email is delayed.
         </p>
         <Button type="button" className="w-full" onClick={onDone}>
           Done

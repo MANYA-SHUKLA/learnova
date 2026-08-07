@@ -217,6 +217,15 @@ export class FacultyService {
           employeeId: input.employeeId,
           facultyCode: input.facultyCode.toUpperCase(),
         };
+        const { sendCredentialsEmail } = await import('../../mail/credentials-email.js');
+        void sendCredentialsEmail({
+          to: credentials.email,
+          firstName: input.firstName,
+          role: 'faculty',
+          temporaryPassword: credentials.temporaryPassword,
+          displayIdLabel: 'Employee ID',
+          displayId: credentials.employeeId,
+        });
       }
     } catch (err) {
       logger.warn({ err, email: input.email }, 'Faculty login user provisioning skipped/failed');

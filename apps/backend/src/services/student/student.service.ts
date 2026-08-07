@@ -253,6 +253,15 @@ export class StudentService {
           studentId: input.studentId,
           admissionNumber: input.admissionNumber,
         };
+        const { sendCredentialsEmail } = await import('../../mail/credentials-email.js');
+        void sendCredentialsEmail({
+          to: credentials.email,
+          firstName: input.firstName,
+          role: 'student',
+          temporaryPassword: credentials.temporaryPassword,
+          displayIdLabel: 'Student ID',
+          displayId: credentials.studentId,
+        });
       }
     } catch (err) {
       logger.warn({ err, email: input.email }, 'Student login user provisioning skipped/failed');
@@ -797,6 +806,7 @@ export class StudentService {
     }
 
     const createdIds: string[] = [];
+    let emailed = 0;
 
     try {
       for (let i = 0; i < input.rows.length; i += 1) {
@@ -841,9 +851,24 @@ export class StudentService {
 
         const created = await this.create(parsed, actor);
         createdIds.push(created.id);
+        if (created.credentials) {
+          emailed += 1;
+        }
       }
     } catch (err) {
       for (const id of createdIds) {
+        const existing = await studentRepository.findByIdIncludingDeleted(institutionId, id);
+        if (existing?.email) {
+          try {
+            const { userRepository } = await import('../../repositories/auth/index.js');
+            const loginUser = await userRepository.findByEmail(existing.email);
+            if (loginUser) {
+              await userRepository.deleteById(String(loginUser._id));
+            }
+          } catch (cleanupErr) {
+            logger.warn({ cleanupErr, studentId: id }, 'Orphan login cleanup after import rollback failed');
+          }
+        }
         await studentRepository.hardDelete(institutionId, id);
       }
       logger.error({ err, institutionId }, 'Student import rolled back');
@@ -852,6 +877,7 @@ export class StudentService {
 
     await this.audit('student.import.completed', actor, institutionId, null, {
       imported: createdIds.length,
+      credentialsEmailed: emailed,
     });
     await this.audit('student.imported', actor, institutionId, null, {
       imported: createdIds.length,
@@ -867,6 +893,7 @@ export class StudentService {
       failed: 0,
       errors: [] as Array<{ row: number; message: string }>,
       studentIds: createdIds,
+      credentialsEmailed: emailed,
       totalRows: preview.totalRows,
       validRows: preview.validRows,
       invalidRows: preview.invalidRows,

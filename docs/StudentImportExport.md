@@ -5,7 +5,14 @@
 1. Upload CSV on `/institution/students/import`
 2. Preview via `POST /students/import/preview`
 3. Confirm via `POST /students/import`
-4. Failures roll back created rows (hard delete)
+4. Failures roll back created rows (hard delete) **and** provisioned login users
+
+Each successful row runs the normal **create** path:
+
+- Login user provisioned with random temporary password
+- `mustChangePassword: true`
+- Credentials emailed via SMTP to the student email
+- Response includes `credentialsEmailed` count
 
 ### Required columns
 
@@ -22,7 +29,7 @@ Rows conflicting on `studentId`, `admissionNumber`, or `email` (within file or e
 ### Audit
 
 - `student.import.started`
-- `student.import.completed`
+- `student.import.completed` (metadata includes `credentialsEmailed`)
 - `student.imported`
 
 ## Export

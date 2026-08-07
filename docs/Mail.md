@@ -58,6 +58,11 @@ Success prints `SMTP OK` and delivers a test message. Failure with `535 BadCrede
 - Institution register welcome email
 - Email verification
 - Forgot / reset password
+- **Faculty / student temporary credentials** (on create and CSV import)
+
+## Development
+
+Keep `NODE_ENV=development`. Local mail can use `MAIL_DRIVER=console` (logs only) or `MAIL_DRIVER=smtp` with a Gmail App Password for real inbox testing. Do not treat this as production mail setup.
 
 ## Security
 

@@ -13,9 +13,11 @@ When Institution Admin creates Faculty or Student:
 1. System generates a **random 12-character temporary password** (never typed by admin)
 2. Password is stored as **bcrypt hash** only (`passwordHash`); plain text is returned **once** in the create API response
 3. User record has `mustChangePassword: true`
-4. Admin UI shows Copy / Print / Save PDF credentials for offline delivery (email, WhatsApp, HR letter)
+4. Credentials are **emailed via SMTP** to the faculty/student address (and shown in admin UI: Copy / Print / Save PDF)
 5. On first login, user is forced to `/account/change-password` (cannot skip)
 6. After change → `mustChangePassword: false` → role dashboard
+
+CSV bulk import uses the same create path — each imported student/faculty is provisioned and emailed.
 
 Institution Admin from registration chooses their own password → `mustChangePassword: false` → direct dashboard.
 

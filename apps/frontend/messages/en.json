@@ -973,9 +973,9 @@
         "import": {
           "eyebrow": "Students",
           "title": "Import CSV",
-          "description": "Upload, preview, validate, and import. Failed imports are rolled back.",
+          "description": "Upload, preview, validate, and import. Each new student gets a login account, temporary password email (SMTP), and must change password on first login. Failed imports are rolled back.",
           "uploadTitle": "CSV upload",
-          "uploadDescription": "Required columns: studentId, admissionNumber, firstName, lastName, email.",
+          "uploadDescription": "Required columns: studentId, admissionNumber, firstName, lastName, email. Use real inboxes you can check — credentials are emailed on import.",
           "confirmImport": "Confirm import",
           "importing": "Importing…",
           "previewFailed": "Preview failed",

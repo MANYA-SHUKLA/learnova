@@ -72,6 +72,11 @@ export class UserRepository {
     ).exec();
     return user?.tokenVersion ?? 0;
   }
+
+  async deleteById(id: string): Promise<boolean> {
+    const result = await UserModel.findByIdAndDelete(id).exec();
+    return Boolean(result);
+  }
 }
 
 export const userRepository = new UserRepository();
