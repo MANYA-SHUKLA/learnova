@@ -7,7 +7,6 @@ import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
   formatExamStatus,
-  useExam,
   useExamList,
   useLiveMonitoringQuery,
 } from '@/features/examination';
