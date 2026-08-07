@@ -42,7 +42,7 @@ export default function FacultyProctoringPage() {
                       {t('secureBrowser')}: {exam.proctoring.secureBrowser}
                     </p>
                   </div>
-                  <Button variant="destructive" size="sm" disabled>
+                  <Button variant="danger" size="sm" disabled>
                     {t('monitor')}
                   </Button>
                 </div>

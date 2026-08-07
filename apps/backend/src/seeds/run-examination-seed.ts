@@ -62,8 +62,8 @@ async function main(): Promise<void> {
   const refs = await loadRefs(institutionId);
   const result = await seedExaminations(institutionId, refs, {
     force,
-    examTarget: 20,
-    attemptTarget: 500,
+    examTarget: 50,
+    attemptTarget: 1000,
   });
 
   logger.info(result, 'Examination seed completed');

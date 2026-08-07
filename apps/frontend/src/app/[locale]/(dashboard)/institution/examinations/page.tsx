@@ -11,7 +11,6 @@ import {
   Input,
   Skeleton,
 } from '@learnova/ui';
-import { ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
@@ -40,7 +39,6 @@ export default function InstitutionExaminationsPage() {
   const dashQuery = useInstitutionExamDashboard();
   const publishMutation = usePublishExamMutation();
   const rows = listQuery.data?.items ?? [];
-  const meta = listQuery.data?.meta;
   const dash = dashQuery.data;
 
   return (
@@ -120,7 +118,7 @@ export default function InstitutionExaminationsPage() {
             </div>
           ) : rows.length === 0 ? (
             <div className="p-6">
-              <EmptyState icon={ShieldCheck} title={t('emptyTitle')} description={t('emptyDescription')} />
+              <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
             </div>
           ) : (
             <div className="divide-y divide-border/60">

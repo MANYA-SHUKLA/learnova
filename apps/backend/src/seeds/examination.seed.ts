@@ -9,6 +9,11 @@ import { ExamSeatingModel } from '../models/exam-seating.model.js';
 import { ExamProctorSessionModel } from '../models/exam-proctor-session.model.js';
 import { ExamProctorEventModel } from '../models/exam-proctor-event.model.js';
 import { ExamAuditLogModel } from '../models/exam-audit-log.model.js';
+import { ExamViolationModel } from '../models/exam-violation.model.js';
+import { ExamRoomModel } from '../models/exam-room.model.js';
+import { ExamAttendanceModel } from '../models/exam-attendance.model.js';
+import { ExamPolicyModel } from '../models/exam-policy.model.js';
+import { ExamDeviceModel } from '../models/exam-device.model.js';
 import { QuestionModel } from '../models/question.model.js';
 import { generateSlug } from '../services/examination/examination.helpers.js';
 import { logger } from '../utils/logger/index.js';
@@ -64,6 +69,11 @@ export interface ExaminationSeedResult {
   results: number;
   seating: number;
   proctorSessions: number;
+  policies: number;
+  rooms: number;
+  violations: number;
+  attendance: number;
+  devices: number;
   auditLogs: number;
 }
 
@@ -74,8 +84,8 @@ export async function seedExaminations(
 ): Promise<ExaminationSeedResult> {
   const oid = new Types.ObjectId(institutionId);
   const userOid = new Types.ObjectId(refs.userId);
-  const examTarget = options.examTarget ?? 20;
-  const attemptTarget = options.attemptTarget ?? 500;
+  const examTarget = options.examTarget ?? 50;
+  const attemptTarget = options.attemptTarget ?? 1000;
 
   logger.info({ institutionId, examTarget, attemptTarget }, 'Starting examination seed');
 
@@ -91,6 +101,11 @@ export async function seedExaminations(
         results: 0,
         seating: 0,
         proctorSessions: 0,
+        policies: 0,
+        rooms: 0,
+        violations: 0,
+        attendance: 0,
+        devices: 0,
         auditLogs: 0,
       };
     }
@@ -108,6 +123,11 @@ export async function seedExaminations(
       ExamProctorSessionModel.deleteMany({ institutionId: oid }),
       ExamProctorEventModel.deleteMany({ institutionId: oid }),
       ExamAuditLogModel.deleteMany({ institutionId: oid }),
+      ExamViolationModel.deleteMany({ institutionId: oid }),
+      ExamRoomModel.deleteMany({ institutionId: oid }),
+      ExamAttendanceModel.deleteMany({ institutionId: oid }),
+      ExamPolicyModel.deleteMany({ institutionId: oid }),
+      ExamDeviceModel.deleteMany({ institutionId: oid }),
     ]);
   }
 
@@ -194,6 +214,35 @@ export async function seedExaminations(
   const exams = await ExamModel.insertMany(examDocs);
   let sectionsCreated = 0;
 
+  const policies = await ExamPolicyModel.insertMany(
+    ['Standard Secure', 'High Stakes', 'Open Book', 'Lab Practical', 'Mock Test'].map((name, i) => ({
+      institutionId: oid,
+      name,
+      description: `Seed policy ${name}`,
+      attemptLimit: i % 2 === 0 ? 1 : 2,
+      negativeMarking: i % 3 === 0,
+      secureBrowser: i % 2 === 0 ? 'required' : 'recommended',
+      requireWebcam: i % 2 === 0,
+      requireMicrophone: false,
+      createdBy: userOid,
+      deletedAt: null,
+    })),
+  );
+  let roomsCreated = 0;
+  for (const exam of exams.slice(0, 15)) {
+    await ExamRoomModel.create({
+      institutionId: oid,
+      examId: exam._id,
+      roomCode: `RM${String(roomsCreated + 1).padStart(3, '0')}`,
+      name: `Virtual Room ${String(roomsCreated + 1)}`,
+      invigilatorIds: [userOid],
+      capacity: 50,
+      studentCount: randomInt(5, 40),
+      isVirtual: true,
+    });
+    roomsCreated += 1;
+  }
+
   for (const exam of exams) {
     const sectionQuestions = exam.questionIds.slice(0, Math.ceil(exam.questionIds.length / 2));
     const section = await ExamSectionModel.create({
@@ -217,6 +266,9 @@ export async function seedExaminations(
   let resultsCreated = 0;
   let seatingCreated = 0;
   let proctorSessionsCreated = 0;
+  let violationsCreated = 0;
+  let attendanceCreated = 0;
+  let devicesCreated = 0;
 
   while (attemptsCreated < attemptTarget) {
     const exam = randomItem(exams);
@@ -249,6 +301,55 @@ export async function seedExaminations(
       terminatedReason: status === 'terminated' ? 'Tab switch limit exceeded' : null,
     });
     attemptsCreated += 1;
+
+    if (attempt.checkedInAt) {
+      await ExamAttendanceModel.create({
+        institutionId: oid,
+        examId: exam._id,
+        studentId,
+        attemptId: attempt._id,
+        status: randomBool(0.15) ? 'late' : 'present',
+        checkedInAt: attempt.checkedInAt,
+        autoRecorded: true,
+      });
+      attendanceCreated += 1;
+    }
+
+    if (status === 'started' || status === 'completed') {
+      await ExamDeviceModel.create({
+        institutionId: oid,
+        attemptId: attempt._id,
+        studentId,
+        ipAddress: `10.0.${randomInt(1, 255)}.${randomInt(1, 255)}`,
+        userAgent: 'Mozilla/5.0 (Seed Browser)',
+        browser: randomItem(['Chrome', 'Firefox', 'Safari'] as const),
+        os: randomItem(['macOS', 'Windows', 'Linux'] as const),
+        screenWidth: 1920,
+        screenHeight: 1080,
+      });
+      devicesCreated += 1;
+    }
+
+    if ((attempt.violationCount ?? 0) > 0) {
+      for (let v = 0; v < (attempt.violationCount ?? 0); v += 1) {
+        await ExamViolationModel.create({
+          institutionId: oid,
+          examId: exam._id,
+          attemptId: attempt._id,
+          studentId,
+          violationType: randomItem([
+            'tab_switch',
+            'fullscreen_exit',
+            'camera_blocked',
+            'clipboard_attempt',
+          ] as const),
+          severity: randomItem(['low', 'medium', 'high'] as const),
+          autoAction: randomItem(['warning', 'record_event'] as const),
+          metadata: { seed: true },
+        });
+        violationsCreated += 1;
+      }
+    }
 
     if (exam.seatingEnabled && randomBool(0.7)) {
       await ExamSeatingModel.create({
@@ -339,6 +440,11 @@ export async function seedExaminations(
     results: resultsCreated,
     seating: seatingCreated,
     proctorSessions: proctorSessionsCreated,
+    policies: policies.length,
+    rooms: roomsCreated,
+    violations: violationsCreated,
+    attendance: attendanceCreated,
+    devices: devicesCreated,
     auditLogs: 20,
   };
 

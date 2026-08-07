@@ -329,3 +329,61 @@ export async function institutionDashboard(req: Request, res: Response, next: Ne
     next(err);
   }
 }
+
+export async function getLiveMonitoring(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.getLiveMonitoring(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listViolations(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listViolations(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listAttendance(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listAttendance(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listPolicies(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listPolicies(actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createPolicy(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.createPolicy(req.body, actorFrom(req));
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function reportStudentViolation(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.reportStudentViolation(
+      req.params.id as string,
+      req.body,
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}

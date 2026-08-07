@@ -121,4 +121,37 @@ export const examinationApi = {
 
   institutionDashboard: () =>
     apiClient.get<ExamInstitutionDashboard>(`${base}/dashboard/institution`),
+
+  getLiveMonitoring: (examId: string) =>
+    apiClient.get<{
+      examId: string;
+      title: string;
+      status: string | null;
+      endsAt: string | null;
+      stats: {
+        online: number;
+        started: number;
+        submitted: number;
+        disconnected: number;
+        warnings: number;
+        violations: number;
+      };
+      attempts: ExamAttempt[];
+      recentViolations: Array<{ id: string; violationType: string; severity: string }>;
+    }>(`${base}/${examId}/live`),
+
+  listViolations: (examId: string) =>
+    apiClient.get<Array<{ id: string; violationType: string; severity: string }>>(
+      `${base}/${examId}/violations`,
+    ),
+
+  listAttendance: (examId: string) =>
+    apiClient.get<Array<{ id: string; status: string; checkedInAt: string | null }>>(
+      `${base}/${examId}/attendance`,
+    ),
+
+  reportViolation: (
+    attemptId: string,
+    body: { violationType: string; message?: string | null },
+  ) => apiClient.post(`${base}/attempts/${attemptId}/violations`, body),
 };

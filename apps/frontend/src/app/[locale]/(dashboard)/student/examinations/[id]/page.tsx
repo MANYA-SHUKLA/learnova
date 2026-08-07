@@ -2,7 +2,6 @@
 
 import { PERMISSIONS } from '@learnova/constants';
 import {
-  Badge,
   Button,
   Card,
   CardDescription,

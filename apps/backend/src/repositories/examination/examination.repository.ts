@@ -16,6 +16,11 @@ import {
   type ExamProctorEventDocument,
 } from '../../models/exam-proctor-event.model.js';
 import { ExamAuditLogModel, type ExamAuditEvent } from '../../models/exam-audit-log.model.js';
+import { ExamViolationModel, type ExamViolationDocument } from '../../models/exam-violation.model.js';
+import { ExamAttendanceModel, type ExamAttendanceDocument } from '../../models/exam-attendance.model.js';
+import { ExamPolicyModel, type ExamPolicyDocument } from '../../models/exam-policy.model.js';
+import { ExamDeviceModel, type ExamDeviceDocument } from '../../models/exam-device.model.js';
+import { ExamRoomModel, type ExamRoomDocument } from '../../models/exam-room.model.js';
 import { QuestionModel, type QuestionDocument } from '../../models/question.model.js';
 
 export interface ExamListResult {
@@ -569,6 +574,129 @@ export class ExaminationRepository {
           : null,
       violationCount: violationCount[0]?.total ?? 0,
       questionStats: stats,
+    };
+  }
+
+  async createViolation(
+    data: Omit<ExamViolationDocument, '_id' | 'createdAt'>,
+  ): Promise<ExamViolationDocument> {
+    return ExamViolationModel.create(data);
+  }
+
+  async listViolations(
+    institutionId: string,
+    examId: string,
+    limit = 50,
+  ): Promise<ExamViolationDocument[]> {
+    return ExamViolationModel.find({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .exec();
+  }
+
+  async upsertAttendance(
+    data: Omit<ExamAttendanceDocument, '_id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ExamAttendanceDocument> {
+    return ExamAttendanceModel.findOneAndUpdate(
+      {
+        institutionId: data.institutionId,
+        examId: data.examId,
+        studentId: data.studentId,
+      },
+      { $set: data },
+      { upsert: true, new: true },
+    ).exec();
+  }
+
+  async listAttendance(
+    institutionId: string,
+    examId: string,
+  ): Promise<ExamAttendanceDocument[]> {
+    return ExamAttendanceModel.find({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+    })
+      .sort({ checkedInAt: -1 })
+      .exec();
+  }
+
+  async createDevice(
+    data: Omit<ExamDeviceDocument, '_id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ExamDeviceDocument> {
+    return ExamDeviceModel.findOneAndUpdate(
+      { institutionId: data.institutionId, attemptId: data.attemptId },
+      { $set: data },
+      { upsert: true, new: true },
+    ).exec();
+  }
+
+  async listPolicies(institutionId: string): Promise<ExamPolicyDocument[]> {
+    return ExamPolicyModel.find({
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    })
+      .sort({ name: 1 })
+      .exec();
+  }
+
+  async createPolicy(
+    data: Omit<ExamPolicyDocument, '_id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ExamPolicyDocument> {
+    return ExamPolicyModel.create(data);
+  }
+
+  async listRooms(institutionId: string, examId: string): Promise<ExamRoomDocument[]> {
+    return ExamRoomModel.find({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+    })
+      .sort({ roomCode: 1 })
+      .exec();
+  }
+
+  async getLiveSnapshot(institutionId: string, examId: string) {
+    const examOid = toObjectId(examId);
+    const instOid = toObjectId(institutionId);
+    const activeStatuses = ['checked_in', 'started'];
+
+    const [attempts, violations, endsAtRow] = await Promise.all([
+      ExamAttemptModel.find({
+        institutionId: instOid,
+        examId: examOid,
+      })
+        .sort({ updatedAt: -1 })
+        .limit(200)
+        .exec(),
+      ExamViolationModel.find({ institutionId: instOid, examId: examOid })
+        .sort({ createdAt: -1 })
+        .limit(30)
+        .exec(),
+      ExamModel.findOne({ _id: examOid, institutionId: instOid }).select('schedule.endsAt status').lean(),
+    ]);
+
+    const online = attempts.filter((a) => activeStatuses.includes(a.status)).length;
+    const started = attempts.filter((a) => a.status === 'started').length;
+    const submitted = attempts.filter((a) =>
+      ['submitted', 'completed', 'terminated'].includes(a.status),
+    ).length;
+    const warnings = attempts.reduce((sum, a) => sum + (a.violationCount ?? 0), 0);
+
+    return {
+      endsAt: endsAtRow?.schedule?.endsAt ?? null,
+      status: endsAtRow?.status ?? null,
+      stats: {
+        online,
+        started,
+        submitted,
+        disconnected: attempts.filter((a) => a.status === 'expired').length,
+        warnings,
+        violations: violations.length,
+      },
+      attempts,
+      recentViolations: violations,
     };
   }
 }

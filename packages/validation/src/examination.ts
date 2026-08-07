@@ -13,6 +13,11 @@ export const examTypeSchema = z.enum([
   'external',
   'practical',
   'viva',
+  'lab_exam',
+  'online',
+  'offline',
+  'supplementary',
+  'mock',
 ]);
 
 export const examStatusSchema = z.enum([
@@ -163,7 +168,23 @@ export const proctorEventSchema = z.object({
 
 export const examBulkActionSchema = z.object({
   ids: z.array(objectIdField).min(1).max(100),
-  action: z.enum(['publish', 'schedule', 'archive', 'cancel', 'duplicate', 'delete']),
+  action: z.enum(['publish', 'schedule', 'archive', 'cancel', 'duplicate', 'delete', 'export']),
+});
+
+export const reportStudentViolationSchema = z.object({
+  violationType: z.enum([
+    'fullscreen_exit',
+    'tab_switch',
+    'multiple_faces',
+    'face_missing',
+    'camera_blocked',
+    'microphone_blocked',
+    'browser_resize',
+    'shortcut_attempt',
+    'clipboard_attempt',
+  ]),
+  message: optionalString(1000),
+  metadata: z.record(z.unknown()).optional().default({}),
 });
 
 export const assignSeatingSchema = z.object({
@@ -192,3 +213,4 @@ export type SubmitExamAnswerInput = z.infer<typeof submitExamAnswerSchema>;
 export type ProctorEventInput = z.infer<typeof proctorEventSchema>;
 export type ExamBulkActionInput = z.infer<typeof examBulkActionSchema>;
 export type AssignSeatingInput = z.infer<typeof assignSeatingSchema>;
+export type ReportStudentViolationInput = z.infer<typeof reportStudentViolationSchema>;

@@ -321,11 +321,30 @@ export {
   ExamProctorSessionModel,
   type ExamProctorSessionDocument,
 } from './exam-proctor-session.model.js';
+/** Alias — ExamSession is the proctor/monitoring session for an attempt. */
+export {
+  ExamProctorSessionModel as ExamSessionModel,
+  type ExamProctorSessionDocument as ExamSessionDocument,
+} from './exam-proctor-session.model.js';
 export {
   ExamProctorEventModel,
   type ExamProctorEventDocument,
   PROCTOR_EVENT_TYPES,
 } from './exam-proctor-event.model.js';
+export {
+  ExamViolationModel,
+  type ExamViolationDocument,
+  EXAM_VIOLATION_TYPES,
+  EXAM_AUTO_ACTIONS,
+} from './exam-violation.model.js';
+export { ExamRoomModel, type ExamRoomDocument } from './exam-room.model.js';
+export { ExamDeviceModel, type ExamDeviceDocument } from './exam-device.model.js';
+export {
+  ExamAttendanceModel,
+  type ExamAttendanceDocument,
+  EXAM_ATTENDANCE_STATUSES,
+} from './exam-attendance.model.js';
+export { ExamPolicyModel, type ExamPolicyDocument } from './exam-policy.model.js';
 export {
   ExamAuditLogModel,
   type ExamAuditLogDocument,

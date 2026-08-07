@@ -9,6 +9,7 @@ import {
   examIdParamsSchema,
   examListQuerySchema,
   proctorEventSchema,
+  reportStudentViolationSchema,
   startExamAttemptSchema,
   submitExamAnswerSchema,
   submitExamSchema,
@@ -39,6 +40,10 @@ const proctorAuth = [
   authenticate({ required: true }),
   requirePermission(PERMISSIONS.EXAMINATION_PROCTOR),
 ] as RequestHandler[];
+
+examinationRoutes.get('/examinations/policies', ...readAuth, ctrl.listPolicies);
+
+examinationRoutes.post('/examinations/policies', ...writeAuth, ctrl.createPolicy);
 
 // ------------------------------------------------------------------ collection
 
@@ -107,6 +112,14 @@ examinationRoutes.get(
   ...readAuth,
   validate(attemptIdParamsSchema, 'params'),
   ctrl.getAttempt,
+);
+
+examinationRoutes.post(
+  '/examinations/attempts/:id/violations',
+  ...writeAuth,
+  validate(attemptIdParamsSchema, 'params'),
+  validate(reportStudentViolationSchema),
+  ctrl.reportStudentViolation,
 );
 
 examinationRoutes.post(
@@ -225,6 +238,27 @@ examinationRoutes.get(
   ...readAuth,
   validate(examIdParamsSchema, 'params'),
   ctrl.listSeating,
+);
+
+examinationRoutes.get(
+  '/examinations/:id/live',
+  ...proctorAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.getLiveMonitoring,
+);
+
+examinationRoutes.get(
+  '/examinations/:id/violations',
+  ...readAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.listViolations,
+);
+
+examinationRoutes.get(
+  '/examinations/:id/attendance',
+  ...readAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.listAttendance,
 );
 
 examinationRoutes.get(

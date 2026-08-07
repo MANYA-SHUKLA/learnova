@@ -22,6 +22,7 @@ import type {
   AssessmentQuestionType,
 } from '@learnova/types';
 import { eventBus } from '../../events/index.js';
+import { emitAttemptLive, emitExamLive } from '../../socket/exam-live.js';
 import { CourseModel } from '../../models/course.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { ExamAttemptModel } from '../../models/exam-attempt.model.js';
@@ -56,6 +57,18 @@ export interface ActorContext {
 }
 
 const MANAGE_ROLES = new Set(['institution_admin', 'super_admin']);
+
+const PROCTOR_TO_VIOLATION: Record<string, string> = {
+  tab_switch: 'tab_switch',
+  fullscreen_exit: 'fullscreen_exit',
+  camera_off: 'camera_blocked',
+  microphone_off: 'microphone_blocked',
+  suspicious_activity: 'shortcut_attempt',
+};
+
+function mapViolationType(eventType: string): string | null {
+  return PROCTOR_TO_VIOLATION[eventType] ?? null;
+}
 
 function requireTenant(actor: ActorContext): string {
   if (!actor.institutionId) {
@@ -846,6 +859,23 @@ export class ExaminationService {
       institutionId,
     });
 
+    const isLate = checkedInAt > exam.schedule.startsAt;
+    await examinationRepository.upsertAttendance({
+      institutionId: oid(institutionId),
+      examId: exam._id,
+      studentId: student._id,
+      attemptId: attempt._id,
+      status: isLate ? 'late' : 'present',
+      checkedInAt,
+      autoRecorded: true,
+    });
+
+    emitExamLive(input.examId, 'live.attempt.updated', {
+      attemptId: String(attempt._id),
+      status: 'checked_in',
+      studentId: String(student._id),
+    });
+
     return toDto(attempt);
   }
 
@@ -957,6 +987,24 @@ export class ExaminationService {
       attemptId: String(attempt._id),
       studentId: String(student._id),
       institutionId,
+    });
+
+    emitExamLive(input.examId, 'live.attempt.updated', {
+      attemptId: String(attempt._id),
+      status: 'started',
+      studentId: String(student._id),
+    });
+    emitAttemptLive(String(attempt._id), 'live.countdown', {
+      remainingSeconds: examinationEngine.remainingAttemptSeconds(
+        {
+          activityId: input.examId,
+          attemptId: String(attempt._id),
+          studentId: String(student._id),
+          startedAt,
+          durationMinutes: exam.rules.durationMinutes,
+        },
+        startedAt,
+      ),
     });
 
     return {
@@ -1147,6 +1195,25 @@ export class ExaminationService {
       attemptId: input.attemptId,
       institutionId,
     });
+    eventBus.emit(EVENTS.EXAM_SUBMITTED, {
+      examId: String(exam._id),
+      attemptId: input.attemptId,
+      userId: String(student._id),
+      institutionId,
+    });
+    eventBus.emit(EVENTS.EXAM_FINISHED, {
+      examId: String(exam._id),
+      attemptId: input.attemptId,
+      userId: String(student._id),
+      institutionId,
+    });
+
+    emitExamLive(String(exam._id), 'live.attempt.submitted', {
+      attemptId: input.attemptId,
+      studentId: String(student._id),
+      score: result.score,
+      passed: result.passed,
+    });
 
     const response: Record<string, unknown> = {
       attempt: toDto(updatedAttempt!),
@@ -1284,6 +1351,51 @@ export class ExaminationService {
         toProctoringPolicy(exam.proctoring),
         updatedAttempt.violationCount,
       );
+
+      const mappedType = mapViolationType(input.eventType);
+      if (mappedType) {
+        const autoAction = violation.terminate ? 'auto_submit' : 'warning';
+        await examinationRepository.createViolation({
+          institutionId: oid(institutionId),
+          examId: attempt.examId,
+          attemptId: attempt._id,
+          studentId: attempt.studentId,
+          violationType: mappedType,
+          severity: input.severity === 'critical' ? 'critical' : 'medium',
+          screenshotUrl: null,
+          autoAction,
+          metadata: input.metadata ?? {},
+        });
+
+        await this.audit('violation.recorded', actor, institutionId, {
+          examId: String(attempt.examId),
+          attemptId: input.attemptId,
+          metadata: { violationType: mappedType, autoAction },
+        });
+
+        eventBus.emit(EVENTS.VIOLATION_RECORDED, {
+          examId: String(attempt.examId),
+          attemptId: input.attemptId,
+          violationType: mappedType,
+          severity: input.severity,
+          institutionId,
+        });
+        eventBus.emit(EVENTS.VIOLATION_DETECTED, {
+          examId: String(attempt.examId),
+          attemptId: input.attemptId,
+          violationType: mappedType,
+          autoAction,
+          institutionId,
+        });
+
+        emitExamLive(String(attempt.examId), 'live.violation.recorded', {
+          attemptId: input.attemptId,
+          violationType: mappedType,
+          severity: input.severity ?? 'medium',
+          violationCount: updatedAttempt.violationCount,
+        });
+      }
+
       if (violation.terminate) {
         await this.terminateAttempt(input.attemptId, violation.reason ?? 'Proctor violation', actor);
       }
@@ -1582,6 +1694,112 @@ export class ExaminationService {
       passRate: passRow ? (passRow.passed / passRow.total) * 100 : 0,
       proctoredSessions,
     };
+  }
+
+  async reportStudentViolation(
+    attemptId: string,
+    input: { violationType: string; message?: string | null; metadata?: Record<string, unknown> },
+    actor: ActorContext,
+  ) {
+    const institutionId = requireTenant(actor);
+    if (actor.role !== 'student') {
+      throw new ForbiddenError('Only students can report violations during an attempt');
+    }
+    const attempt = await examinationRepository.findAttemptById(institutionId, attemptId);
+    if (!attempt) throw new NotFoundError('Attempt not found');
+    const student = await this.resolveStudent(actor, institutionId);
+    if (String(attempt.studentId) !== String(student._id)) {
+      throw new ForbiddenError('Can only report violations for your own attempt');
+    }
+
+    const eventMap: Record<string, string> = {
+      fullscreen_exit: 'fullscreen_exit',
+      tab_switch: 'tab_switch',
+      camera_blocked: 'camera_off',
+      microphone_blocked: 'microphone_off',
+      clipboard_attempt: 'suspicious_activity',
+      shortcut_attempt: 'suspicious_activity',
+      browser_resize: 'suspicious_activity',
+      multiple_faces: 'suspicious_activity',
+      face_missing: 'suspicious_activity',
+    };
+
+    return this.logProctorEvent(
+      {
+        attemptId,
+        eventType: eventMap[input.violationType] ?? 'suspicious_activity',
+        severity: 'warning',
+        message: input.message ?? input.violationType,
+        metadata: { ...input.metadata, violationType: input.violationType, reportedBy: 'student' },
+      },
+      actor,
+    );
+  }
+
+  async getLiveMonitoring(examId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const exam = await examinationRepository.findExamById(institutionId, examId);
+    if (!exam) throw new NotFoundError('Exam not found');
+
+    const snapshot = await examinationRepository.getLiveSnapshot(institutionId, examId);
+    return {
+      examId,
+      title: exam.title,
+      status: snapshot.status,
+      endsAt: snapshot.endsAt,
+      stats: snapshot.stats,
+      attempts: snapshot.attempts.map((a) => toDto(a)),
+      recentViolations: snapshot.recentViolations.map((v) => toDto(v)),
+    };
+  }
+
+  async listViolations(examId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const rows = await examinationRepository.listViolations(institutionId, examId);
+    return rows.map((r) => toDto(r));
+  }
+
+  async listAttendance(examId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const rows = await examinationRepository.listAttendance(institutionId, examId);
+    return rows.map((r) => toDto(r));
+  }
+
+  async listPolicies(actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const rows = await examinationRepository.listPolicies(institutionId);
+    return rows.map((r) => toDto(r));
+  }
+
+  async createPolicy(
+    input: {
+      name: string;
+      description?: string | null;
+      attemptLimit?: number;
+      negativeMarking?: boolean;
+      secureBrowser?: string;
+      requireWebcam?: boolean;
+      requireMicrophone?: boolean;
+    },
+    actor: ActorContext,
+  ) {
+    const institutionId = requireTenant(actor);
+    if (!canManage(actor) && actor.role !== 'faculty') {
+      throw new ForbiddenError('Cannot create exam policies');
+    }
+    const doc = await examinationRepository.createPolicy({
+      institutionId: oid(institutionId),
+      name: input.name,
+      description: input.description ?? null,
+      attemptLimit: input.attemptLimit ?? 1,
+      negativeMarking: input.negativeMarking ?? false,
+      createdBy: oid(actor.userId),
+      deletedAt: null,
+      ...(input.secureBrowser ? { secureBrowser: input.secureBrowser } : {}),
+      ...(input.requireWebcam !== undefined ? { requireWebcam: input.requireWebcam } : {}),
+      ...(input.requireMicrophone !== undefined ? { requireMicrophone: input.requireMicrophone } : {}),
+    });
+    return toDto(doc);
   }
 }
 

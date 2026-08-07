@@ -60,6 +60,10 @@ export const EVENTS = {
   EXAM_CHECKED_IN: 'exam.checked_in',
   EXAM_PROCTOR_FLAGGED: 'exam.proctor.flagged',
   EXAM_PROCTOR_TERMINATED: 'exam.proctor.terminated',
+  EXAM_SUBMITTED: 'exam.submitted',
+  EXAM_FINISHED: 'exam.finished',
+  VIOLATION_RECORDED: 'violation.recorded',
+  VIOLATION_DETECTED: 'violation.detected',
 
   PROJECT_CREATED: 'project.created',
   PROJECT_UPDATED: 'project.updated',
@@ -296,6 +300,22 @@ export interface EventPayloadMap {
   'exam.checked_in': { examId: string; userId: string; seatingId?: string };
   'exam.proctor.flagged': { examId: string; attemptId: string; proctorId?: string; reason?: string };
   'exam.proctor.terminated': { examId: string; attemptId: string; proctorId?: string; reason?: string };
+  'exam.submitted': { examId: string; attemptId: string; userId?: string; institutionId?: string };
+  'exam.finished': { examId: string; attemptId: string; userId?: string; institutionId?: string };
+  'violation.recorded': {
+    examId: string;
+    attemptId: string;
+    violationType: string;
+    severity?: string;
+    institutionId?: string;
+  };
+  'violation.detected': {
+    examId: string;
+    attemptId: string;
+    violationType: string;
+    autoAction?: string;
+    institutionId?: string;
+  };
   'project.created': { projectId: string; courseId: string; institutionId: string };
   'project.updated': { projectId: string; courseId: string; institutionId: string };
   'project.published': { projectId: string; courseId: string; institutionId: string };
@@ -540,6 +560,10 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.EXAM_CHECKED_IN, description: 'Student checked in for exam', version: 1 },
   { name: EVENTS.EXAM_PROCTOR_FLAGGED, description: 'Proctor flagged exam attempt', version: 1 },
   { name: EVENTS.EXAM_PROCTOR_TERMINATED, description: 'Proctor terminated exam attempt', version: 1 },
+  { name: EVENTS.EXAM_SUBMITTED, description: 'Exam attempt submitted', version: 1 },
+  { name: EVENTS.EXAM_FINISHED, description: 'Exam attempt finished', version: 1 },
+  { name: EVENTS.VIOLATION_RECORDED, description: 'Exam violation recorded', version: 1 },
+  { name: EVENTS.VIOLATION_DETECTED, description: 'Exam violation detected', version: 1 },
   { name: EVENTS.CERTIFICATE_GENERATED, description: 'Certificate generated', version: 1 },
   { name: EVENTS.PROJECT_SUBMITTED, description: 'Project submitted', version: 1 },
   { name: EVENTS.PROJECT_CREATED, description: 'Project created', version: 1 },

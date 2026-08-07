@@ -5,6 +5,11 @@ export const EXAM_TYPES = [
   'external',
   'practical',
   'viva',
+  'lab_exam',
+  'online',
+  'offline',
+  'supplementary',
+  'mock',
 ] as const;
 
 export const EXAM_STATUSES = [
@@ -61,6 +66,7 @@ export const EXAM_AUDIT_EVENTS = [
   'attempt.submitted',
   'proctor.flagged',
   'proctor.cleared',
+  'violation.recorded',
 ] as const;
 
 export const EXAM_BULK_ACTIONS = [
@@ -70,7 +76,30 @@ export const EXAM_BULK_ACTIONS = [
   'cancel',
   'duplicate',
   'delete',
+  'export',
 ] as const;
+
+export const EXAM_VIOLATION_TYPES = [
+  'fullscreen_exit',
+  'tab_switch',
+  'multiple_faces',
+  'face_missing',
+  'camera_blocked',
+  'microphone_blocked',
+  'browser_resize',
+  'shortcut_attempt',
+  'clipboard_attempt',
+] as const;
+
+export const EXAM_AUTO_ACTIONS = [
+  'warning',
+  'record_event',
+  'auto_submit',
+  'lock_exam',
+  'notify_faculty',
+] as const;
+
+export const EXAM_ATTENDANCE_STATUSES = ['present', 'absent', 'late'] as const;
 
 export const EXAM_DEFAULTS = {
   PASSING_MARKS: 40,

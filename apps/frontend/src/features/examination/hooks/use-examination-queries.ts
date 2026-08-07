@@ -8,7 +8,6 @@ import type {
   CheckInBody,
   ExamCreateBody,
   ExamListParams,
-  ExamUpdateBody,
   ProctorEventBody,
   StartAttemptBody,
   SubmitExamBody,
