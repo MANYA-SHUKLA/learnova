@@ -4,6 +4,7 @@ import type {
   AuditJobPayload,
   EmailJobPayload,
   GradingJobPayload,
+  LabExecutionJobPayload,
   NotificationJobPayload,
 } from '@learnova/types';
 import { QUEUE_NAMES, type QueueName } from '@learnova/constants';
@@ -92,6 +93,13 @@ export async function enqueueCompile(
   opts?: EnqueueOptions,
 ): Promise<string | undefined> {
   return addJob(QUEUE_NAMES.COMPILE, 'compile-code', payload, opts);
+}
+
+export async function enqueueLabExecution(
+  payload: LabExecutionJobPayload,
+  opts?: EnqueueOptions,
+): Promise<string | undefined> {
+  return addJob(QUEUE_NAMES.COMPILE, JOB_NAMES.EXECUTE_CODE, payload, opts);
 }
 
 export async function enqueueCleanup(

@@ -119,8 +119,8 @@ export const cookiesConfig = {
   path: env.COOKIE_PATH ?? '/',
 } as const;
 
-export const sessionConfig = {
-  ttlSeconds: env.SESSION_TTL_SECONDS ?? 60 * 60 * 24 * 7,
-  prefix: env.SESSION_PREFIX ?? 'session:',
-  sliding: (env.SESSION_SLIDING ?? 'true') !== 'false',
+export const judge0Config = {
+  apiUrl: env.JUDGE0_API_URL,
+  apiKey: env.JUDGE0_API_KEY,
+  timeoutMs: env.JUDGE0_TIMEOUT_MS ?? 15_000,
 } as const;

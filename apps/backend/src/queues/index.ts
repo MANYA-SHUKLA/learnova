@@ -16,6 +16,7 @@ export {
   enqueueCertificate,
   enqueueAi,
   enqueueCompile,
+  enqueueLabExecution,
   enqueueCleanup,
   type EnqueueOptions,
 } from './producer.js';

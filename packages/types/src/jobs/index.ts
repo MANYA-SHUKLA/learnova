@@ -52,12 +52,24 @@ export interface AuditJobPayload {
   occurredAt?: string;
 }
 
+export interface LabExecutionJobPayload {
+  executionId: string;
+  submissionId?: string;
+  institutionId: string;
+  studentId: string;
+  mode: 'run' | 'submit';
+  correlationId?: string;
+}
+
 export const JOB_NAMES = {
   SEND_EMAIL: 'send-email',
   SEND_NOTIFICATION: 'send-notification',
   GRADE_SUBMISSION: 'grade-submission',
   TRACK_ANALYTICS: 'track-analytics',
   WRITE_AUDIT: 'write-audit',
+  EXECUTE_CODE: 'execute-code',
+  GRADE_LAB_SUBMISSION: 'grade-lab-submission',
+  CLEANUP_EXECUTIONS: 'cleanup-executions',
 } as const;
 
 export type JobName = (typeof JOB_NAMES)[keyof typeof JOB_NAMES];

@@ -141,3 +141,29 @@ export {
   type AssignmentAuditEvent,
   ASSIGNMENT_AUDIT_EVENTS,
 } from './assignment-audit-log.model.js';
+export {
+  PracticeLabModel,
+  type PracticeLabDocument,
+  PRACTICE_LAB_VISIBILITIES,
+} from './practice-lab.model.js';
+export { LabProblemModel, type LabProblemDocument } from './lab-problem.model.js';
+export {
+  ProblemTestCaseModel,
+  type ProblemTestCaseDocument,
+} from './problem-test-case.model.js';
+export {
+  StudentCodeSubmissionModel,
+  type StudentCodeSubmissionDocument,
+} from './student-code-submission.model.js';
+export {
+  ExecutionHistoryModel,
+  type ExecutionHistoryDocument,
+} from './execution-history.model.js';
+export { LanguageModel, type LanguageDocument } from './language.model.js';
+export { LabProgressModel, type LabProgressDocument } from './lab-progress.model.js';
+export {
+  PracticeLabAuditLogModel,
+  type PracticeLabAuditLogDocument,
+  type PracticeLabAuditEvent,
+  PRACTICE_LAB_AUDIT_EVENTS,
+} from './practice-lab-audit-log.model.js';
