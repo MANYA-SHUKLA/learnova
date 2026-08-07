@@ -52,7 +52,7 @@ export default function InstitutionSettingsPage() {
   const tCrud = useTranslations('dashboard.institution.crud');
   const { data, isLoading, isError, error, refetch } = useInstitutionSettings();
   const updateMutation = useUpdateInstitutionSettingsMutation();
-  const { theme: clientTheme, setTheme: setClientTheme, mounted } = useMountedTheme();
+  const { setTheme: setClientTheme } = useMountedTheme();
   const [language, setLanguage] = useState('en');
   const [theme, setTheme] = useState<ThemePreference>('system');
   const [policies, setPolicies] = useState<Record<PolicyKey, string>>({
@@ -67,13 +67,11 @@ export default function InstitutionSettingsPage() {
   });
   const [message, setMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [hydratedFromServer, setHydratedFromServer] = useState(false);
 
   useEffect(() => {
     if (!data) return;
     setLanguage(data.language);
-    const nextTheme = normalizeTheme(data.theme);
-    setTheme(nextTheme);
+    setTheme(normalizeTheme(data.theme));
     setPolicies({
       attendance: stringifyPolicy(data.attendance),
       gradingScale: stringifyPolicy(data.gradingScale),
@@ -84,19 +82,7 @@ export default function InstitutionSettingsPage() {
       notificationSettings: stringifyPolicy(data.notificationSettings),
       securitySettings: stringifyPolicy(data.securitySettings),
     });
-    setHydratedFromServer(true);
   }, [data]);
-
-  // Apply saved institution theme once after load (does not fight manual toggle afterwards).
-  useEffect(() => {
-    if (!mounted || !hydratedFromServer || !data) return;
-    const saved = normalizeTheme(data.theme);
-    if (clientTheme !== saved) {
-      setClientTheme(saved);
-    }
-    // Only on first hydration from server settings.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-shot sync
-  }, [mounted, hydratedFromServer, data?.theme]);
 
   if (isLoading) {
     return (
