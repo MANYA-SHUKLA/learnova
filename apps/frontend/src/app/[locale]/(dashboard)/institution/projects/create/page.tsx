@@ -279,7 +279,7 @@ export default function CreateProjectPage() {
                   try {
                     const project = await createMutation.mutateAsync({
                       courseId,
-                      slug: slug || null,
+                      slug: slug || undefined,
                       title,
                       objective: objective || null,
                       problemStatement: problemStatement || null,

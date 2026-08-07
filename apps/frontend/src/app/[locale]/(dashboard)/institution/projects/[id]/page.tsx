@@ -279,7 +279,7 @@ export default function InstitutionProjectDetailPage({
                         await updateMutation.mutateAsync({
                           id,
                           body: {
-                            slug: slug || null,
+                            slug: slug || undefined,
                             title: title.trim(),
                             objective: objective || null,
                             problemStatement: problemStatement || null,

@@ -1739,6 +1739,13 @@ export class ProjectService {
       institutionId,
     });
 
+    eventBus.emit('review.completed' as typeof EVENTS.PROJECT_REVIEW_SUBMITTED, {
+      reviewId: id,
+      projectId: String(doc.projectId),
+      submissionId: String(doc.submissionId),
+      institutionId,
+    });
+
     return toDto(doc);
   }
 
