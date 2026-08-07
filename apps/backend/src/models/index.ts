@@ -66,3 +66,14 @@ export {
   COURSE_BUILDER_AUDIT_EVENTS,
 } from './course-builder-audit-log.model.js';
 export { CourseProgressModel, type CourseProgressDocument } from './course-progress.model.js';
+export { EnrollmentModel, type EnrollmentDocument } from './enrollment.model.js';
+export {
+  EnrollmentWaitlistModel,
+  type EnrollmentWaitlistDocument,
+} from './enrollment-waitlist.model.js';
+export {
+  EnrollmentAuditLogModel,
+  type EnrollmentAuditLogDocument,
+  type EnrollmentAuditEvent,
+  ENROLLMENT_AUDIT_EVENTS,
+} from './enrollment-audit-log.model.js';
