@@ -103,6 +103,19 @@ export const EVENTS = {
   STUDENT_DELETED: 'student.deleted',
   STUDENT_STATUS_CHANGED: 'student.status.changed',
   STUDENT_IMPORTED: 'student.imported',
+
+  QUIZ_CREATED: 'quiz.created',
+  QUIZ_UPDATED: 'quiz.updated',
+  QUIZ_DELETED: 'quiz.deleted',
+  QUIZ_PUBLISHED: 'quiz.published',
+  QUIZ_STARTED: 'quiz.started',
+  QUIZ_COMPLETED: 'quiz.completed',
+  QUESTION_CREATED: 'question.created',
+  QUESTION_UPDATED: 'question.updated',
+  ATTEMPT_CREATED: 'attempt.created',
+  ATTEMPT_STARTED: 'attempt.started',
+  ATTEMPT_SUBMITTED: 'attempt.submitted',
+  QUESTION_ANSWERED: 'question.answered',
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
@@ -434,6 +447,28 @@ export interface EventPayloadMap {
     status: string;
   };
   'student.imported': { institutionId: string; count: number };
+  'quiz.created': { quizId: string; institutionId: string; courseId: string };
+  'quiz.updated': { quizId: string; institutionId: string };
+  'quiz.deleted': { quizId: string; institutionId: string };
+  'quiz.published': { quizId: string; institutionId: string; courseId: string };
+  'quiz.started': { quizId: string; studentId: string; attemptId: string };
+  'quiz.completed': { quizId: string; studentId: string; attemptId: string; score: number };
+  'question.created': { questionId: string; institutionId: string; questionBankId: string };
+  'question.updated': { questionId: string; institutionId: string };
+  'attempt.created': { attemptId: string; quizId: string; studentId: string; institutionId: string };
+  'attempt.started': { attemptId: string; quizId: string; studentId: string; institutionId: string };
+  'attempt.submitted': {
+    attemptId: string;
+    quizId: string;
+    studentId: string;
+    institutionId: string;
+    score: number;
+  };
+  'question.answered': {
+    attemptId: string;
+    questionId: string;
+    isCorrect: boolean | null;
+  };
 }
 
 export type TypedEventName = keyof EventPayloadMap;
@@ -535,6 +570,18 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.STUDENT_DELETED, description: 'Student deleted', version: 1 },
   { name: EVENTS.STUDENT_STATUS_CHANGED, description: 'Student status changed', version: 1 },
   { name: EVENTS.STUDENT_IMPORTED, description: 'Student CSV import completed', version: 1 },
+  { name: EVENTS.QUIZ_CREATED, description: 'Quiz created', version: 1 },
+  { name: EVENTS.QUIZ_UPDATED, description: 'Quiz updated', version: 1 },
+  { name: EVENTS.QUIZ_DELETED, description: 'Quiz deleted', version: 1 },
+  { name: EVENTS.QUIZ_PUBLISHED, description: 'Quiz published', version: 1 },
+  { name: EVENTS.QUIZ_STARTED, description: 'Quiz attempt started by student', version: 1 },
+  { name: EVENTS.QUIZ_COMPLETED, description: 'Quiz attempt completed', version: 1 },
+  { name: EVENTS.QUESTION_CREATED, description: 'Question bank question created', version: 1 },
+  { name: EVENTS.QUESTION_UPDATED, description: 'Question bank question updated', version: 1 },
+  { name: EVENTS.ATTEMPT_CREATED, description: 'Quiz attempt record created', version: 1 },
+  { name: EVENTS.ATTEMPT_STARTED, description: 'Quiz attempt started', version: 1 },
+  { name: EVENTS.ATTEMPT_SUBMITTED, description: 'Quiz attempt submitted', version: 1 },
+  { name: EVENTS.QUESTION_ANSWERED, description: 'Quiz question answered during attempt', version: 1 },
 ] as const;
 
 export function isRegisteredEvent(name: string): name is EventName {

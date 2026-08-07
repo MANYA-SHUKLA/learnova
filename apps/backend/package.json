@@ -25,6 +25,7 @@
     "seed:enrollment-stack": "tsx --env-file=.env src/seeds/run-enrollment-stack-seed.ts",
     "seed:progress": "tsx --env-file=.env src/seeds/run-progress-seed.ts",
     "seed:assignments": "tsx --env-file=.env src/seeds/run-assignment-seed.ts",
+    "seed:quizzes": "tsx --env-file=.env src/seeds/run-quiz-seed.ts",
     "seed:projects": "tsx --env-file=.env src/seeds/run-project-seed.ts",
     "seed:practice-labs": "tsx --env-file=.env src/seeds/run-practice-lab-seed.ts",
     "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",

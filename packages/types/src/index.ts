@@ -12,6 +12,7 @@ export * from './assignment/index.js';
 export * from './assessment/index.js';
 export * from './practice-lab/index.js';
 export * from './project/index.js';
+export * from './quiz/index.js';
 export * from './modules/index.js';
 export * from './jobs/index.js';
 

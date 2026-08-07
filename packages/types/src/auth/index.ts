@@ -53,7 +53,10 @@ export type Permission =
   | 'lab:manage'
   | 'project:read'
   | 'project:write'
-  | 'project:manage';
+  | 'project:manage'
+  | 'quiz:read'
+  | 'quiz:write'
+  | 'quiz:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
 

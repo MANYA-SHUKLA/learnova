@@ -197,3 +197,66 @@ export function extensionForContentType(contentType: string): string {
   };
   return map[contentType] ?? 'bin';
 }
+
+export {
+  evaluateQuestionAnswer,
+  scoreQuestionAttempt,
+} from './question-evaluation.js';
+
+export {
+  renderQuestionForAttempt,
+  renderQuestionForReview,
+  selectQuestionsForActivity,
+  type QuestionDocumentLike,
+} from './question-renderer.js';
+
+export {
+  isTimedAttemptExpired,
+  remainingAttemptSeconds,
+  computeAttemptDurationSeconds,
+  resolveTimedAttemptStatus,
+  canStartQuestionAttempt,
+  nextQuestionAttemptNumber,
+} from './timed-attempt.js';
+
+export {
+  computeQuestionAccuracy,
+  computePassRate,
+  computeIncorrectRate,
+  buildQuestionStatRow,
+  rankMostIncorrectQuestions,
+  computeAveragePercentage,
+} from './question-analytics.js';
+
+import { evaluateQuestionAnswer, scoreQuestionAttempt } from './question-evaluation.js';
+import {
+  renderQuestionForAttempt,
+  renderQuestionForReview,
+  selectQuestionsForActivity,
+} from './question-renderer.js';
+import {
+  canStartQuestionAttempt,
+  computeAttemptDurationSeconds,
+  isTimedAttemptExpired,
+  nextQuestionAttemptNumber,
+  remainingAttemptSeconds,
+  resolveTimedAttemptStatus,
+} from './timed-attempt.js';
+
+/**
+ * Question-based assessment engine — reusable by Quiz (12) and Exam (13).
+ * I/O-free: rendering, attempt lifecycle, auto-evaluation, scoring, analytics helpers.
+ */
+export const assessmentQuestionEngine = {
+  evaluateQuestionAnswer,
+  scoreQuestionAttempt,
+  renderQuestionForAttempt,
+  renderQuestionForReview,
+  selectQuestionsForActivity,
+  isTimedAttemptExpired,
+  remainingAttemptSeconds,
+  computeAttemptDurationSeconds,
+  resolveTimedAttemptStatus,
+  canStartQuestionAttempt,
+  nextQuestionAttemptNumber,
+};

@@ -78,3 +78,4 @@ export * from './assignment.js';
 export * from './assessment.js';
 export * from './practice-lab.js';
 export * from './project.js';
+export * from './quiz.js';

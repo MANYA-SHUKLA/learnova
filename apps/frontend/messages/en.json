@@ -596,6 +596,9 @@
         "assignments": "Assignments",
         "practiceLabs": "Practice Labs",
         "projects": "Projects",
+        "quizzes": "Quizzes",
+        "questionBank": "Question bank",
+        "quizResults": "Quiz results",
         "myTeam": "My team",
         "bookmarks": "Bookmarks",
         "notes": "Notes",
@@ -1297,6 +1300,47 @@
         "resolved": "Resolved",
         "reviewsHint": "Faculty and peer reviews appear on submissions."
       },
+      "quizzes": {
+        "eyebrow": "Enterprise",
+        "title": "Quizzes",
+        "description": "Institution quiz catalog, question banks, attempts, and analytics.",
+        "questionBank": "Question bank",
+        "stats": {
+          "total": "Total quizzes",
+          "bankSize": "Question bank size",
+          "attempts": "Attempts",
+          "avgScore": "Average score",
+          "passRate": "Pass rate"
+        },
+        "listTitle": "Quiz directory",
+        "listDescription": "Search, publish, archive, and manage quizzes.",
+        "searchPlaceholder": "Search quizzes…",
+        "search": "Search",
+        "marks": "marks",
+        "publish": "Publish",
+        "view": "View",
+        "previous": "Previous",
+        "next": "Next",
+        "error": "Unable to load quizzes.",
+        "emptyTitle": "No quizzes yet",
+        "emptyDescription": "Faculty can create quizzes for enrolled courses."
+      },
+      "questionBank": {
+        "eyebrow": "Enterprise",
+        "title": "Question bank",
+        "description": "Central reusable repository for quiz questions.",
+        "banksTitle": "Question banks",
+        "banksDescription": "Organize questions by subject or topic.",
+        "recentQuestions": "Recent questions",
+        "recentQuestionsDescription": "Latest questions added to the bank.",
+        "questions": "questions",
+        "marks": "marks",
+        "emptyBanks": "No question banks",
+        "emptyBanksDescription": "Create a bank to start adding questions.",
+        "emptyQuestions": "No questions yet",
+        "emptyQuestionsDescription": "Add questions to your banks.",
+        "error": "Unable to load question bank."
+      },
       "courseBuilder": {
         "title": "Course Builder",
         "openBuilder": "Open Builder",
@@ -1625,6 +1669,37 @@
         "resolveComment": "Mark resolved",
         "resolved": "Resolved",
         "reviewsHint": "Peer and faculty reviews are linked to submissions."
+      },
+      "quizzes": {
+        "eyebrow": "Enterprise",
+        "title": "Quizzes",
+        "description": "Create quizzes, manage question banks, and review results.",
+        "questionBank": "Question bank",
+        "stats": {
+          "created": "Created",
+          "attempts": "Attempts",
+          "avgScore": "Average score",
+          "completion": "Completion rate"
+        },
+        "listTitle": "Your quizzes",
+        "listDescription": "Quizzes you created or manage.",
+        "searchPlaceholder": "Search quizzes…",
+        "search": "Search",
+        "marks": "marks",
+        "publish": "Publish",
+        "error": "Unable to load quizzes.",
+        "emptyTitle": "No quizzes yet",
+        "emptyDescription": "Create a quiz for one of your courses."
+      },
+      "questionBank": {
+        "eyebrow": "Enterprise",
+        "title": "Question bank",
+        "description": "Reusable questions for quizzes and assessments.",
+        "banks": "Banks",
+        "questions": "Questions",
+        "marks": "marks",
+        "emptyTitle": "No questions yet",
+        "emptyDescription": "Add questions to your bank to use them in quizzes."
       }
     },
       "roleLabel": "Student",
@@ -1881,6 +1956,53 @@
         "acceptInvitation": "Accept",
         "rejectInvitation": "Reject",
         "memberList": "{count} member(s)"
+      },
+      "quizzes": {
+        "eyebrow": "Learning",
+        "title": "Quizzes",
+        "description": "Take quizzes for your enrolled courses and track your scores.",
+        "results": "My results",
+        "stats": {
+          "upcoming": "Upcoming",
+          "completed": "Completed",
+          "pending": "Pending",
+          "avgScore": "Average score"
+        },
+        "attempts": "attempts",
+        "passMarks": "pass marks",
+        "start": "Start quiz",
+        "previous": "Previous",
+        "next": "Next",
+        "error": "Unable to load quizzes.",
+        "emptyTitle": "No quizzes available",
+        "emptyDescription": "Published quizzes from your courses will appear here."
+      },
+      "quizAttempt": {
+        "eyebrow": "Quiz",
+        "instructions": "Instructions",
+        "passMarks": "pass marks",
+        "startQuiz": "Start quiz",
+        "submitQuiz": "Submit quiz",
+        "resultTitle": "Quiz complete",
+        "score": "Score",
+        "passed": "Passed",
+        "failed": "Did not pass",
+        "viewResults": "View all results",
+        "error": "Unable to load quiz."
+      },
+      "results": {
+        "eyebrow": "Learning",
+        "title": "Quiz results",
+        "description": "Review your quiz attempts and scores.",
+        "stats": {
+          "completed": "Completed",
+          "pending": "Pending",
+          "avgScore": "Average score"
+        },
+        "attempt": "Attempt",
+        "points": "points",
+        "emptyTitle": "No results yet",
+        "emptyDescription": "Complete a quiz to see your results here."
       }
     }
   },

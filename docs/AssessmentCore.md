@@ -13,11 +13,11 @@ Labs (10) ✅  ── uses Coding Assessment Engine
   ↓
 Projects (11) ✅  ── uses Collaboration Engine (no grading in Step 11)
   ↓
-Quizzes (optional)
+Quizzes (12) ✅  ── uses Assessment Core question engine (rendering, attempts, auto-scoring)
   ↓
-Exams (12)  ── must reuse Coding Assessment Engine (no second runner)
+Exams (13)  ── reuses Assessment Core question engine + Coding Engine (no second runner)
   ↓
-Gradebook (13)
+Gradebook (14)
 ```
 
 ## Packages
@@ -27,7 +27,7 @@ Gradebook (13)
 | `@learnova/types` | `packages/types/src/assessment` | Interfaces & unions |
 | `@learnova/constants` | `packages/constants/src/assessment` | Enums, file limits, enrollment gate, permission helper |
 | `@learnova/validation` | `packages/validation/src/assessment.ts` | Zod schemas (deadlines, attempts, marks, grade, feedback, upload) |
-| `@learnova/shared` | `packages/shared/src/assessment` | Pure helpers (lifecycle, window, attempts, grade outcome) |
+| `@learnova/shared` | `packages/shared/src/assessment` | Pure helpers (lifecycle, window, attempts, grade outcome) + **question engine** (rendering, auto-evaluation, scoring, analytics) |
 
 Import helpers from `@learnova/shared` (or `@learnova/shared/assessment`).
 
@@ -81,6 +81,26 @@ Canonical actions: `created` · `updated` · `deleted` · `published` · `archiv
 
 Domain event names stay dotted (`assignment.published`, `submission.graded`, `feedback.added`). Use `assessmentAuditEventName(kind, action)` when generating names from core actions.
 
+## Question-based assessment engine
+
+Shared by **Quiz Management (12)** and **Exam Management (13)**. Lives in `@learnova/shared` as `assessmentQuestionEngine` — I/O-free, no Mongo/Express.
+
+```
+Assessment Core (question engine)
+  ├── Question rendering      renderQuestionForAttempt · renderQuestionForReview
+  ├── Question selection      selectQuestionsForActivity (sections + shuffle)
+  ├── Attempt lifecycle       canStartQuestionAttempt · isTimedAttemptExpired · resolveTimedAttemptStatus
+  ├── Auto-evaluation         evaluateQuestionAnswer (MCQ · T/F · match · fill-blank)
+  ├── Scoring                 scoreQuestionAttempt → score · percentage · pass/fail
+  └── Analytics helpers       computeQuestionAccuracy · computePassRate · rankMostIncorrectQuestions
+```
+
+Backend adapter: `apps/backend/src/services/quiz-engine/` re-exports `@learnova/shared` — **do not add logic there**.
+
+Types: `EvaluableQuestion`, `QuestionAnswerInput`, `RenderedAssessmentQuestion`, `QuestionStatRow` in `@learnova/types` (`packages/types/src/assessment`).
+
+Tests: `apps/backend/src/__tests__/assessment/question-evaluation.test.ts`
+
 ## What stays module-specific
 
 | Module | Owns |
@@ -89,8 +109,8 @@ Domain event names stay dotted (`assignment.published`, `submission.graded`, `fe
 | Labs | Problem bank, practice UX — **execution via Coding Engine** |
 | Coding Engine | Judge0, languages, evaluate/score, execution history (shared) |
 | Projects | Team/milestone/submission/review collaboration — **via Collaboration Engine**; evaluation ready only (no marks in Step 11) |
-| Quizzes | Question banks, timed questions, shuffle |
-| Exams | Scheduling, proctoring, seating, integrity — **reuse Coding Engine for code questions** |
+| Quizzes | Question banks, quiz builder, routes/UI — **via Assessment Core question engine** |
+| Exams | Scheduling, proctoring, seating, integrity — **reuse Assessment Core question engine** for MCQ/quiz questions and **Coding Engine** for code questions |
 | Gradebook | Aggregation across activities |
 
 ## Assignments integration
@@ -98,6 +118,10 @@ Domain event names stay dotted (`assignment.published`, `submission.graded`, `fe
 Assignment helpers (`assignment.helpers.ts`) are **thin adapters** over Assessment Core. Assignment Zod schemas re-use core lifecycle / attempt / upload schemas.
 
 New labs/quizzes/exams **must** import Assessment Core helpers — do not copy deadline or grading policy logic.
+
+Quiz Management **must** import **`assessmentQuestionEngine`** from `@learnova/shared` (backend adapter: `services/quiz-engine`) for rendering, attempt rules, and auto-scoring — do not duplicate evaluation logic.
+
+Exams (Step 13) **must** reuse **`assessmentQuestionEngine`** for all quiz-style questions (MCQ, T/F, match, fill-blank) — only add scheduling, proctoring, secure browser, exam rules, and invigilation policies on top.
 
 Coding Exams **must** import the [Coding Assessment Engine](./CodingEngine.md) for run/evaluate/score — do not copy Judge0 or test-case scoring.
 
@@ -112,4 +136,5 @@ Project Management **must** import the [Collaboration Engine](./CollaborationEng
 - [ADR 0006 — Assessment Core](./adr/0006-assessment-core.md)
 - [CodingEngine.md](./CodingEngine.md)
 - [Assignment.md](./Assignment.md)
+- [QuizManagement.md](./QuizManagement.md)
 - [Roadmap.md](./Roadmap.md) Step 9.5

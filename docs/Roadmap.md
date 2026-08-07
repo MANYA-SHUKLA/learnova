@@ -23,10 +23,12 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **9** | **Assignment Management** | ✅ Complete |
 | **9.5** | **Assessment Core (shared)** | ✅ Complete |
 | **10** | **Practice Labs / Coding** | ✅ Complete |
+| **11** | **Enterprise Project Management** | ✅ Complete |
+| **12** | **Enterprise Quiz Management** | ✅ Complete |
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Progress (8.5), Assignments (9), Assessment Core (9.5), and **Practice Labs (10)** are complete. Do **not** start Projects (11) until Labs DoD is met. Enrollments remain the source of truth for each learner’s journey.
+**Hard rule:** Progress (8.5), Assignments (9), Assessment Core (9.5), Practice Labs (10), Projects (11), and **Quiz Management (12)** are complete. Do **not** start Examinations (13) until Quiz DoD is met. Enrollments remain the source of truth for each learner’s journey.
 
 ### Platform phases (enterprise order)
 
@@ -43,13 +45,15 @@ Assessment Core (9.5) ✅
   ↓
 Labs (10) ✅
   ↓
-Projects (11)
+Projects (11) ✅
   ↓
-Exams (12)
+Quizzes (12) ✅
   ↓
-Gradebook (13)
+Exams (13)
   ↓
-Certificates (14)
+Gradebook (14)
+  ↓
+Certificates (15)
 ```
 
 | Item often called “rest of Step 7” | Actual home |
@@ -456,7 +460,7 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 
 ### Hard rule
 
-Practice Labs (10) ✅, Quizzes, and Exams **must** import Assessment Core helpers — do not duplicate deadline or grading logic.
+Practice Labs (10) ✅, Quizzes (12), and Exams **must** import Assessment Core helpers — do not duplicate deadline or grading logic.
 
 ---
 
@@ -524,7 +528,44 @@ AI ideation · Quizzes · Exams · Gradebook sync · Certificates · Attendance 
 
 ✓ Collaboration Engine · ✓ Course/Student/Faculty integration · ✓ Evaluation ready (no grading) · ✓ Team approval workflow · ✓ Invitations & transfer leadership · ✓ Milestone types · ✓ Submission (GitHub, demo, live URL) · ✓ Comments (threaded, resolve) · ✓ Reviews (score, suggestions, approval, revision) · ✓ Bulk ops & assign faculty · ✓ Tags & categories · ✓ `/student/my-team` route · ✓ Institution/Faculty/Student dashboards · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed scale · ✓ Tests · ✓ Docs
 
-**Hard rule:** Stop after Projects. Do **not** start Exams or Gradebook from this step. Gradebook (Step 13) will consume prepared project grades.
+**Hard rule:** Stop after Projects. Do **not** start Quizzes or Gradebook from this step. Gradebook (Step 14) will consume prepared project grades.
+
+---
+
+## Step 12 — Enterprise Quiz Management
+
+**Status:** ✅ Complete  
+**Goal:** Full quiz lifecycle — reusable question banks, quiz builder with sections and randomization, enrollment-gated attempts, auto-evaluation, results, and analytics. **Not** proctored exams, gradebook sync, or certificates.
+
+### Shipped
+
+- Models: Quiz · QuizSection · QuestionBank · Question · QuestionCategory · QuestionTag · QuizAttempt · QuizAnswer · QuizResult · Audit
+- **Assessment Core question engine** (`@learnova/shared` → `assessmentQuestionEngine`; backend adapter `services/quiz-engine`) — rendering, randomization, attempt rules, auto-scoring (MCQ, T/F, match, fill-blank)
+- Question types: single_choice · multiple_choice · true_false · assertion_reason · match_following · fill_blank
+- Quiz types: practice · lesson · module · course · revision
+- Sections with per-section randomization and question pools
+- Negative marking · shuffle questions/options · timed attempts · attempt limits
+- Publish · archive · close · duplicate lifecycle
+- Bulk ops: publish · archive · delete · duplicate · assign faculty
+- API: CRUD, question banks, categories/tags, attempts, analytics, dashboards, import/export
+- Permissions (`quiz:read|write|manage`), audit, domain events, seed (100/5k/10k), tests
+- UI: `/institution/quizzes` · `/institution/question-bank` · `/faculty/quizzes` · `/faculty/question-bank` · `/student/quizzes` · `/student/results`
+
+### Explicitly out of scope
+
+Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certificates · Coding questions (Judge0) · Attendance · AI question generation
+
+### Documentation
+
+- `QuizManagement.md` · `QuizBuilder.md` · `QuestionBank.md` · `QuizAPI.md` · `QuizPermissions.md` · `QuizAnalytics.md`
+
+### Exit criteria (DoD — met)
+
+✓ Assessment Core question engine · ✓ Question Bank · ✓ Quiz Builder (sections, randomization, autosave) · ✓ Attempt flow · ✓ Auto evaluation · ✓ Results · ✓ Analytics · ✓ Bulk ops · ✓ Import/export · ✓ Dashboards · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed scale · ✓ Tests · ✓ Docs
+
+**Hard rule:** Stop after Quiz Management. Do **not** start Examinations or Gradebook from this step. Exams (Step 13) **must** reuse `assessmentQuestionEngine` from Assessment Core — only add scheduling, proctoring, secure browser, exam rules, and invigilation policies.
+
+**Hard rule for Exams (later):** Coding Exams must also reuse `services/coding-engine` — no second code runner.
 
 ---
 
@@ -540,15 +581,16 @@ AI ideation · Quizzes · Exams · Gradebook sync · Certificates · Attendance 
 | **9.5** | **Assessment Core (shared)** | ✅ Complete |
 | **10** | Practice Labs / Coding | ✅ Complete |
 | **11** | **Enterprise Project Management** | ✅ Complete |
-| **12** | Examinations | Planned |
-| **13** | Gradebook | Planned |
-| **14** | Certificates (platform-wide) | Planned |
-| **15** | Analytics & Notifications | Planned |
-| **16** | AI content generation | Planned |
+| **12** | **Enterprise Quiz Management** | ✅ Complete |
+| **13** | Examinations | Planned |
+| **14** | Gradebook | Planned |
+| **15** | Certificates (platform-wide) | Planned |
+| **16** | Analytics & Notifications | Planned |
+| **17** | AI content generation | Planned |
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
-**Boundary:** Practice Labs (10) DoD met — consume Assessment Core. Projects (11) DoD met — consume Assessment Core. **Next is Examinations (12).** Do not start gradebook from this step.
+**Boundary:** Practice Labs (10) DoD met — consume Assessment Core. Projects (11) DoD met — consume Assessment Core. Quiz Management (12) DoD met — consume Assessment Core + `assessmentQuestionEngine`. **Next is Examinations (13).** Do not start gradebook from this step.
 
 ---
 
@@ -566,5 +608,6 @@ AI ideation · Quizzes · Exams · Gradebook sync · Certificates · Attendance 
 - [PracticeLab](./PracticeLab.md) · [CodingEngine](./CodingEngine.md) · [Problem](./Problem.md) · [Judge0](./Judge0.md) · [Execution](./Execution.md)
 - [PracticeSubmission](./PracticeSubmission.md) · [Leaderboard](./Leaderboard.md)
 - [ProjectManagement](./ProjectManagement.md) · [ProjectAPI](./ProjectAPI.md) · [ProjectPermissions](./ProjectPermissions.md) · [ProjectTeams](./ProjectTeams.md) · [ProjectMilestones](./ProjectMilestones.md) · [ProjectReviews](./ProjectReviews.md)
+- [QuizManagement](./QuizManagement.md) · [QuizBuilder](./QuizBuilder.md) · [QuestionBank](./QuestionBank.md) · [QuizAPI](./QuizAPI.md) · [QuizPermissions](./QuizPermissions.md) · [QuizAnalytics](./QuizAnalytics.md)
 - [AccessModel](./AccessModel.md) · [Auth](./Auth.md) · [Architecture](./Architecture.md)
 - [Deploy](./Deploy.md) — Vercel (frontend) + Render (backend)

@@ -49,6 +49,9 @@ export const PERMISSIONS = {
   PROJECT_READ: 'project:read',
   PROJECT_WRITE: 'project:write',
   PROJECT_MANAGE: 'project:manage',
+  QUIZ_READ: 'quiz:read',
+  QUIZ_WRITE: 'quiz:write',
+  QUIZ_MANAGE: 'quiz:manage',
 } as const;
 
 export type PermissionConstant = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

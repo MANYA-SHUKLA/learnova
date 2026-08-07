@@ -237,3 +237,53 @@ export {
   type ProjectAuditEvent,
   PROJECT_AUDIT_EVENTS,
 } from './project-audit-log.model.js';
+export {
+  QuizModel,
+  type QuizDocument,
+  QUIZ_TYPES,
+  QUIZ_STATUSES,
+  QUIZ_VISIBILITIES,
+  QUIZ_DIFFICULTIES,
+} from './quiz.model.js';
+export {
+  QuizSectionModel,
+  type QuizSectionDocument,
+} from './quiz-section.model.js';
+export {
+  QuestionBankModel,
+  type QuestionBankDocument,
+  QUESTION_BANK_STATUSES,
+} from './question-bank.model.js';
+export {
+  QuestionModel,
+  type QuestionDocument,
+  QUESTION_TYPES,
+  QUESTION_DIFFICULTIES,
+} from './question.model.js';
+export {
+  QuestionCategoryModel,
+  type QuestionCategoryDocument,
+} from './question-category.model.js';
+export {
+  QuestionTagModel,
+  type QuestionTagDocument,
+} from './question-tag.model.js';
+export {
+  QuizAttemptModel,
+  type QuizAttemptDocument,
+  QUIZ_ATTEMPT_STATUSES,
+} from './quiz-attempt.model.js';
+export {
+  QuizAnswerModel,
+  type QuizAnswerDocument,
+} from './quiz-answer.model.js';
+export {
+  QuizResultModel,
+  type QuizResultDocument,
+} from './quiz-result.model.js';
+export {
+  QuizAuditLogModel,
+  type QuizAuditLogDocument,
+  type QuizAuditEvent,
+  QUIZ_AUDIT_EVENTS,
+} from './quiz-audit-log.model.js';

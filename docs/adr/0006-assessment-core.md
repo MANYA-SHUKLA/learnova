@@ -46,5 +46,6 @@ Introduce an **Assessment Core** (Step **9.5**) **before Practice Labs**:
 ## Follow-ups
 
 - Labs (10) consume core for attempts + auto grading method
-- Exams (12) extend lifecycle with proctor-specific states without forking deadline helpers
-- Gradebook (13) consumes `AssessmentGradeResult` shapes
+- Quizzes (12) consume **assessmentQuestionEngine** for question rendering, evaluation, scoring
+- Exams (13) reuse **assessmentQuestionEngine** + Coding Engine; add proctoring/scheduling only — do not fork evaluation
+- Gradebook (14) consumes `AssessmentGradeResult` shapes

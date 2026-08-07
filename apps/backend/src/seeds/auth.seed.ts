@@ -188,6 +188,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage institution-wide projects and analytics',
   },
+  'quiz:read': {
+    resource: 'quiz',
+    action: 'read',
+    description: 'View quizzes, question banks, and own results',
+  },
+  'quiz:write': {
+    resource: 'quiz',
+    action: 'write',
+    description: 'Create quizzes, manage question banks, and attempt quizzes',
+  },
+  'quiz:manage': {
+    resource: 'quiz',
+    action: 'manage',
+    description: 'Manage institution-wide quizzes, imports, and analytics',
+  },
   'lab:read': {
     resource: 'lab',
     action: 'read',

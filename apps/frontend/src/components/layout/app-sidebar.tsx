@@ -30,6 +30,8 @@ import {
   ClipboardCheck,
   Code2,
   FolderKanban,
+  ListChecks,
+  Library,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -64,6 +66,9 @@ type SidebarItemId =
   | 'assignments'
   | 'practiceLabs'
   | 'projects'
+  | 'quizzes'
+  | 'questionBank'
+  | 'quizResults'
   | 'myTeam'
   | 'bookmarks'
   | 'notes'
@@ -119,6 +124,8 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'assignments', href: APP_ROUTES.INSTITUTION_ASSIGNMENTS, icon: ClipboardCheck },
       { id: 'practiceLabs', href: APP_ROUTES.INSTITUTION_PRACTICE_LABS, icon: Code2 },
       { id: 'projects', href: APP_ROUTES.INSTITUTION_PROJECTS, icon: FolderKanban },
+      { id: 'quizzes', href: APP_ROUTES.INSTITUTION_QUIZZES, icon: ListChecks },
+      { id: 'questionBank', href: APP_ROUTES.INSTITUTION_QUESTION_BANK, icon: Library },
     ],
   },
   {
@@ -138,6 +145,8 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'assignments', href: APP_ROUTES.FACULTY_ASSIGNMENTS, icon: ClipboardCheck },
       { id: 'practiceLabs', href: APP_ROUTES.FACULTY_PRACTICE_LABS, icon: Code2 },
       { id: 'projects', href: APP_ROUTES.FACULTY_PROJECTS, icon: FolderKanban },
+      { id: 'quizzes', href: APP_ROUTES.FACULTY_QUIZZES, icon: ListChecks },
+      { id: 'questionBank', href: APP_ROUTES.FACULTY_QUESTION_BANK, icon: Library },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
@@ -156,6 +165,8 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'assignments', href: APP_ROUTES.STUDENT_ASSIGNMENTS, icon: ClipboardCheck },
       { id: 'practiceLabs', href: APP_ROUTES.STUDENT_PRACTICE_LABS, icon: Code2 },
       { id: 'projects', href: APP_ROUTES.STUDENT_PROJECTS, icon: FolderKanban },
+      { id: 'quizzes', href: APP_ROUTES.STUDENT_QUIZZES, icon: ListChecks },
+      { id: 'quizResults', href: APP_ROUTES.STUDENT_QUIZ_RESULTS, icon: ClipboardCheck },
       { id: 'myTeam', href: STUDENT_MY_TEAM, icon: UsersRound },
       { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },
       { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },

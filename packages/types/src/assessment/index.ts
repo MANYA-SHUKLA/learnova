@@ -179,3 +179,90 @@ export function assessmentAuditEventName(
   if (action === 'attachment_uploaded') return `${kind}.attachment_uploaded`;
   return `${kind}.${action}`;
 }
+
+/** Question types shared by Quiz Management and Exam Management */
+export type AssessmentQuestionType =
+  | 'single_choice'
+  | 'multiple_choice'
+  | 'true_false'
+  | 'assertion_reason'
+  | 'match_following'
+  | 'fill_blank';
+
+/** Minimal question shape for auto-evaluation (I/O-free) */
+export interface EvaluableQuestion {
+  id: string;
+  questionType: AssessmentQuestionType;
+  marks: number;
+  negativeMarks: number;
+  options: Array<{ id: string; isCorrect: boolean }>;
+  matchPairs: Array<{ id: string; left: string; right: string }>;
+  fillBlankAnswers: string[];
+}
+
+export interface QuestionAnswerInput {
+  questionId: string;
+  selectedOptionIds: string[];
+  textAnswer: string | null;
+  matchAnswers: Record<string, string>;
+}
+
+export interface EvaluatedQuestionAnswer {
+  questionId: string;
+  isCorrect: boolean | null;
+  marksAwarded: number;
+  skipped: boolean;
+}
+
+export interface QuestionAttemptScore {
+  evaluated: EvaluatedQuestionAnswer[];
+  score: number;
+  percentage: number;
+  correct: number;
+  incorrect: number;
+  skipped: number;
+  passed: boolean;
+}
+
+export interface QuestionAttemptSettings {
+  passingMarks: number;
+  totalMarks: number;
+  negativeMarking: boolean;
+}
+
+export interface TimedAttemptContext {
+  activityId: string;
+  attemptId: string;
+  studentId: string;
+  startedAt: Date;
+  durationMinutes: number | null;
+}
+
+export type TimedAttemptStatus =
+  | 'started'
+  | 'submitted'
+  | 'completed'
+  | 'expired'
+  | 'abandoned';
+
+export interface RenderedAssessmentQuestion {
+  id: string;
+  question: string;
+  description: string | null;
+  questionType: AssessmentQuestionType;
+  difficulty: string;
+  marks: number;
+  hint: string | null;
+  attachments: unknown[];
+  options: Array<{ id: string; optionText: string; displayOrder: number }>;
+  matchPairs: Array<{ id: string; left: string; displayOrder: number }>;
+}
+
+export interface QuestionStatRow {
+  questionId: string;
+  title: string;
+  accuracy: number;
+  averageTimeSeconds: number;
+  difficulty: string;
+  incorrectRate: number;
+}

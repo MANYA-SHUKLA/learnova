@@ -9,6 +9,7 @@ import { courseBuilderRoutes } from './course-builder.routes.js';
 import enrollmentRoutes from './enrollment.routes.js';
 import progressRoutes from './progress.routes.js';
 import assignmentRoutes from './assignment.routes.js';
+import quizRoutes from './quiz.routes.js';
 import projectRoutes from './project.routes.js';
 import practiceLabRoutes from './practice-lab.routes.js';
 import {
@@ -34,6 +35,7 @@ v1Router.use(courseBuilderRoutes);
 v1Router.use(enrollmentRoutes);
 v1Router.use(progressRoutes);
 v1Router.use(assignmentRoutes);
+v1Router.use(quizRoutes);
 v1Router.use(projectRoutes);
 v1Router.use(practiceLabRoutes);
 v1Router.get('/live', livenessCheck);
