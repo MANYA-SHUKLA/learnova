@@ -98,7 +98,7 @@ export async function seedProgress(
 
   const courseIds = [...new Set(enrollments.map((e) => String(e.courseId)))];
 
-  const [modules, lessons] = await Promise.all([
+  let [modules, lessons] = await Promise.all([
     CourseModuleModel.find({
       institutionId: oid,
       courseId: { $in: courseIds.map((id) => new Types.ObjectId(id)) },
@@ -116,6 +116,81 @@ export async function seedProgress(
       .lean()
       .exec(),
   ]);
+
+  // Bootstrap minimal published content for courses that have enrollments but no builder tree
+  const coursesWithModules = new Set(modules.map((m) => String(m.courseId)));
+  const missingContentCourseIds = courseIds.filter((id) => !coursesWithModules.has(id));
+  if (missingContentCourseIds.length > 0) {
+    logger.info(
+      { count: missingContentCourseIds.length },
+      'Bootstrapping seed modules/lessons for courses without builder content',
+    );
+    const newModules: Record<string, unknown>[] = [];
+    const newLessons: Record<string, unknown>[] = [];
+    for (const courseId of missingContentCourseIds) {
+      const courseOid = new Types.ObjectId(courseId);
+      for (let mi = 0; mi < 2; mi++) {
+        const moduleId = new Types.ObjectId();
+        newModules.push({
+          _id: moduleId,
+          courseId: courseOid,
+          institutionId: oid,
+          title: `Seed Module ${mi + 1}`,
+          slug: `seed-module-${courseId.slice(-6)}-${mi + 1}`,
+          description: 'Auto-created for progress seed',
+          moduleNumber: mi + 1,
+          orderIndex: mi,
+          estimatedMinutes: 45,
+          visibility: 'enrolled',
+          status: 'published',
+          deletedAt: null,
+        });
+        for (let li = 0; li < 3; li++) {
+          newLessons.push({
+            courseId: courseOid,
+            moduleId,
+            institutionId: oid,
+            title: `Seed Lesson ${mi + 1}.${li + 1}`,
+            slug: `seed-lesson-${courseId.slice(-6)}-${mi + 1}-${li + 1}`,
+            lessonNumber: li + 1,
+            orderIndex: li,
+            description: 'Auto-created for progress seed',
+            summary: null,
+            content: 'Seed lesson content for learning progress demos.',
+            estimatedMinutes: 15,
+            visibility: 'enrolled',
+            status: 'published',
+            lessonType: 'rich_text',
+            deletedAt: null,
+          });
+        }
+      }
+    }
+    if (newModules.length > 0) {
+      await CourseModuleModel.insertMany(newModules, { ordered: false });
+    }
+    if (newLessons.length > 0) {
+      await CourseLessonModel.insertMany(newLessons, { ordered: false });
+    }
+    [modules, lessons] = await Promise.all([
+      CourseModuleModel.find({
+        institutionId: oid,
+        courseId: { $in: courseIds.map((id) => new Types.ObjectId(id)) },
+        status: 'published',
+        deletedAt: null,
+      })
+        .lean()
+        .exec(),
+      CourseLessonModel.find({
+        institutionId: oid,
+        courseId: { $in: courseIds.map((id) => new Types.ObjectId(id)) },
+        status: 'published',
+        deletedAt: null,
+      })
+        .lean()
+        .exec(),
+    ]);
+  }
 
   const modulesByCourse = new Map<string, typeof modules>();
   for (const m of modules) {

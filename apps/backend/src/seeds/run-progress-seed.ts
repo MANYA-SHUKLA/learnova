@@ -2,8 +2,9 @@
  * Seed progress tracking into MongoDB.
  * Usage: pnpm --filter @learnova/backend seed:progress
  *
- * Loads real enrollments + published modules/lessons for SEED_INSTITUTION_ID.
- * If builder content is missing for a course, creates course progress with random %.
+ * Loads real enrollments. If published modules/lessons are missing, bootstraps
+ * minimal seed modules/lessons per course, then generates realistic progress,
+ * bookmarks, notes, and activities.
  *
  * Set SEED_FORCE=1 to replace existing progress for the institution.
  */
