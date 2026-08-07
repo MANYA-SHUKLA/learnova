@@ -31,7 +31,7 @@
     "security": "భద్రత",
     "home": "హోమ్",
     "pricing": "ధర నిర్ణయించడం",
-    "faq": "FAQ",
+    "faq": "తరచుగా అడిగే ప్రశ్నలు",
     "requestDemo": "డెమో అభ్యర్థించండి",
     "institutionLogin": "సంస్థ లాగిన్",
     "learnMore": "మరింత తెలుసుకోండి",
@@ -87,7 +87,7 @@
     "header": {
       "features": "ఫీచర్లు",
       "pricing": "ధర నిర్ణయించడం",
-      "faq": "FAQ",
+      "faq": "తరచుగా అడిగే ప్రశ్నలు",
       "contact": "సంప్రదించండి",
       "institutionLogin": "సంస్థ లాగిన్"
     },
@@ -535,14 +535,14 @@
   "dashboard": {
     "sidebar": {
       "groups": {
-        "institution": "Institution",
+        "institution": "సంస్థ",
         "academics": "విద్యావేత్తలు",
         "peopleAndLearning": "వ్యక్తులు & నేర్చుకోవడం",
         "system": "వ్యవస్థ"
       },
       "items": {
         "dashboard": "డాష్‌బోర్డ్",
-        "institution": "Institution",
+        "institution": "సంస్థ",
         "departments": "విభాగాలు",
         "programs": "కార్యక్రమాలు",
         "academicYears": "విద్యా సంవత్సరాలు",
@@ -603,6 +603,8 @@
       "unableToFinish": "సెటప్‌ని పూర్తి చేయడం సాధ్యపడలేదు."
     },
     "institution": {
+      "navAriaLabel": "సంస్థ విభాగాలు",
+      "accessDenied": "సంస్థ నిర్వహణను యాక్సెస్ చేయడానికి మీకు institution:read అనుమతి అవసరం.",
       "overview": {
         "eyebrow": "సంస్థ",
         "title": "సంస్థ",
