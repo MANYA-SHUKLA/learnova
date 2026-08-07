@@ -1,15 +1,27 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { RoleWelcome } from '@/components/shared/role-welcome';
 
 export default function CoursesPlaceholderPage() {
+  const t = useTranslations('dashboard.courses');
+
   return (
     <RoleWelcome
-      roleLabel="Courses"
-      title="Courses"
-      preparingLine="The courses workspace is being prepared."
-      modulesIntro="Course catalogs and enrollments will appear here once your institution assigns programs."
-      modules={['Course catalog', 'Enrollments', 'Schedules', 'Materials', 'Assessments']}
+      roleLabel={t('roleLabel')}
+      title={t('title')}
+      preparingLine={t('preparingLine')}
+      modulesIntro={t('modulesIntro')}
+      welcome={t('welcome')}
+      welcomeNamed={t('welcomeNamed')}
+      contactAdmin={t('contactAdmin')}
+      modules={[
+        t('modules.catalog'),
+        t('modules.enrollments'),
+        t('modules.schedules'),
+        t('modules.materials'),
+        t('modules.assessments'),
+      ]}
     />
   );
 }

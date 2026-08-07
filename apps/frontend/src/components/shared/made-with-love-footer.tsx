@@ -1,4 +1,7 @@
+'use client';
+
 import { Heart } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { siteGutter } from '@/lib/layout';
 import { cn } from '@/lib/utils';
 
@@ -7,6 +10,8 @@ interface MadeWithLoveFooterProps {
 }
 
 export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
+  const t = useTranslations('common.madeWithLove');
+
   return (
     <footer
       className={cn(
@@ -16,13 +21,10 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
       )}
     >
       <p className="inline-flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground sm:text-sm">
-        <span>Made with</span>
-        <Heart
-          className="size-3.5 fill-danger text-danger"
-          aria-hidden
-        />
+        <span>{t('madeWith')}</span>
+        <Heart className="size-3.5 fill-danger text-danger" aria-hidden />
         <span>
-          by{' '}
+          {t('by')}{' '}
           <a
             href="https://wa.me/918005586588"
             target="_blank"
@@ -32,7 +34,7 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
             Manya Shukla
           </a>
           {' · '}
-          2026 · SOE JNU Minor Project
+          {t('project')}
         </span>
       </p>
     </footer>

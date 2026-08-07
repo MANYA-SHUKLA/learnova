@@ -1,15 +1,27 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { RoleWelcome } from '@/components/shared/role-welcome';
 
 export default function StudentDashboardPage() {
+  const t = useTranslations('dashboard.studentHome');
+
   return (
     <RoleWelcome
-      roleLabel="Student"
-      title="Student Dashboard"
-      preparingLine="Your learning workspace is being prepared."
-      modulesIntro="The following modules will appear automatically once you are enrolled in courses."
-      modules={['My Courses', 'Assignments', 'Exams', 'Practice Labs', 'Projects']}
+      roleLabel={t('roleLabel')}
+      title={t('title')}
+      preparingLine={t('preparingLine')}
+      modulesIntro={t('modulesIntro')}
+      welcome={t('welcome')}
+      welcomeNamed={t('welcomeNamed')}
+      contactAdmin={t('contactAdmin')}
+      modules={[
+        t('modules.myCourses'),
+        t('modules.assignments'),
+        t('modules.exams'),
+        t('modules.practiceLabs'),
+        t('modules.projects'),
+      ]}
     />
   );
 }

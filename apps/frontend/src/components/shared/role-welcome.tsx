@@ -9,8 +9,11 @@ interface RoleWelcomeProps {
   roleLabel: string;
   title: string;
   modules: string[];
-  preparingLine?: string;
-  modulesIntro?: string;
+  preparingLine: string;
+  modulesIntro: string;
+  welcome: string;
+  welcomeNamed: string;
+  contactAdmin: string;
 }
 
 function displayName(firstName?: string | null, lastName?: string | null) {
@@ -22,8 +25,11 @@ export function RoleWelcome({
   roleLabel,
   title,
   modules,
-  preparingLine = 'Your dashboard is being prepared.',
-  modulesIntro = 'The following modules will appear automatically once courses are assigned.',
+  preparingLine,
+  modulesIntro,
+  welcome,
+  welcomeNamed,
+  contactAdmin,
 }: RoleWelcomeProps) {
   const { user } = useAuth();
   const name = displayName(user?.firstName, user?.lastName);
@@ -49,7 +55,7 @@ export function RoleWelcome({
         <Card className="overflow-hidden border-border/80 shadow-soft-md">
           <div className="border-b border-border bg-hero px-6 py-6 sm:px-8">
             <p className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
-              Welcome{name ? ` ${name}` : ''}
+              {name ? welcomeNamed.replace('{name}', name) : welcome}
             </p>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">{preparingLine}</p>
           </div>
@@ -72,7 +78,7 @@ export function RoleWelcome({
               ))}
             </ul>
             <p className="border-t border-border pt-5 text-sm text-muted-foreground">
-              Contact your administrator if you believe this is incorrect.
+              {contactAdmin}
             </p>
           </CardContent>
         </Card>
