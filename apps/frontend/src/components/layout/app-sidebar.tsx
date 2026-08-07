@@ -33,7 +33,7 @@ import { Logo } from './logo';
 
 const SESSIONS_ROUTE = '/sessions';
 
-type SidebarGroupId = 'institution' | 'academics' | 'peopleAndLearning' | 'system';
+type SidebarGroupId = 'institution' | 'academics' | 'peopleAndLearning' | 'system' | 'facultyHome' | 'studentHome';
 type SidebarItemId =
   | 'dashboard'
   | 'institution'
@@ -50,7 +50,8 @@ type SidebarItemId =
   | 'faculty'
   | 'students'
   | 'courses'
-  | 'sessions';
+  | 'sessions'
+  | 'profile';
 
 interface NavItem {
   id: SidebarItemId;
@@ -65,6 +66,7 @@ interface NavGroup {
   items: NavItem[];
 }
 
+// Institution admin navigation
 const NAV_GROUPS: NavGroup[] = [
   {
     id: 'institution',
@@ -102,6 +104,31 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
+// Faculty navigation
+const FACULTY_NAV_GROUPS: NavGroup[] = [
+  {
+    id: 'facultyHome',
+    items: [
+      { id: 'dashboard', href: APP_ROUTES.FACULTY_DASHBOARD, icon: LayoutDashboard, exact: true },
+      { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
+      { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
+      { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
+    ],
+  },
+];
+
+// Student navigation
+const STUDENT_NAV_GROUPS: NavGroup[] = [
+  {
+    id: 'studentHome',
+    items: [
+      { id: 'dashboard', href: APP_ROUTES.STUDENT_DASHBOARD, icon: LayoutDashboard, exact: true },
+      { id: 'profile', href: APP_ROUTES.STUDENT_PROFILE, icon: UserRound },
+      { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
+    ],
+  },
+];
+
 function isNavActive(pathname: string, href: string, exact?: boolean) {
   if (exact) {
     return pathname === href || pathname.endsWith(href);
@@ -118,10 +145,17 @@ function SidebarNav({
 }) {
   const pathname = usePathname();
   const t = useTranslations('dashboard.sidebar');
+  const { user } = useAuth();
+  
+  // Select navigation groups based on user role
+  const navGroups = 
+    user?.role === 'faculty' ? FACULTY_NAV_GROUPS :
+    user?.role === 'student' ? STUDENT_NAV_GROUPS :
+    NAV_GROUPS; // default to institution admin
 
   return (
     <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-4">
-      {NAV_GROUPS.map((group) => {
+      {navGroups.map((group) => {
         const groupLabel = t(`groups.${group.id}`);
         return (
           <div key={group.id} className="space-y-1.5">

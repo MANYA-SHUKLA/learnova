@@ -77,6 +77,7 @@ export const APP_ROUTES = {
   INSTITUTION_STUDENTS_IMPORT: '/institution/students/import',
   INSTITUTION_STUDENTS_EXPORT: '/institution/students/export',
   STUDENT_PROFILE: '/student/profile',
+  FACULTY_PROFILE: '/faculty/profile',
 } as const;
 
 export const SOCKET_NAMESPACES = {
