@@ -281,23 +281,78 @@
     text-wrap: balance;
   }
 
-  /** Shared interactive card motion — lift, border, and shadow on hover */
+  /** Shared interactive card motion — lift, accent, shine, and shadow */
   .card-interactive {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    will-change: transform, box-shadow;
     transition:
-      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
-      border-color 220ms ease,
-      background-color 220ms ease;
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 280ms ease,
+      background-color 280ms ease;
+  }
+
+  .card-interactive::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 2;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--primary) / 0.85) 50%,
+      transparent 100%
+    );
+    transform: scaleX(0.22);
+    opacity: 0.45;
+    transition:
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 280ms ease;
+  }
+
+  .card-interactive::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      115deg,
+      transparent 35%,
+      hsl(var(--primary) / 0.07) 48%,
+      transparent 62%
+    );
+    transform: translateX(-120%);
+    transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .card-interactive:hover {
-    transform: translateY(-3px);
-    border-color: hsl(var(--primary) / 0.28);
+    transform: translateY(-6px) scale(1.012);
+    border-color: hsl(var(--primary) / 0.38);
     box-shadow: var(--shadow-lg);
   }
 
+  .card-interactive:hover::before {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+
+  .card-interactive:hover::after {
+    transform: translateX(120%);
+  }
+
   .card-interactive:active {
-    transform: translateY(-1px);
+    transform: translateY(-2px) scale(1.004);
+  }
+
+  .card-interactive:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -306,6 +361,15 @@
     .card-interactive:active {
       transition: border-color 160ms ease, box-shadow 160ms ease;
       transform: none;
+    }
+
+    .card-interactive::before,
+    .card-interactive::after,
+    .card-interactive:hover::before,
+    .card-interactive:hover::after {
+      transition: none;
+      transform: none;
+      opacity: 0;
     }
   }
 }
