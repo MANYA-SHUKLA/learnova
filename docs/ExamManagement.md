@@ -60,7 +60,7 @@ import { examinationEngine } from '../examination-engine/index.js';
 
 ```bash
 pnpm --filter @learnova/backend seed:quizzes      # questions required
-pnpm --filter @learnova/backend seed:examinations  # 20 exams · 500 attempts
+pnpm --filter @learnova/backend seed:examinations  # 50 exams · 1000 attempts
 ```
 
 ## Out of scope (Step 13)

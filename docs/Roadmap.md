@@ -584,7 +584,7 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 - Schedule & publish · seating & check-in · secure browser acknowledgement · proctor sessions/events · flag/clear/terminate
 - Backend routes `/api/v1/examinations` · seeds (`seed:examinations` — 20 exams · 500 attempts) · 50+ tests
 - Frontend: institution/faculty/student examination pages · faculty proctoring console · sidebar + i18n
-- Docs: [ExamManagement](./ExamManagement.md) · [ExamProctoring](./ExamProctoring.md) · [ExamAPI](./ExamAPI.md) · [ExamPermissions](./ExamPermissions.md)
+- Docs: [ExamManagement](./ExamManagement.md) · [ExamPolicies](./ExamPolicies.md) · [SecureBrowser](./SecureBrowser.md) · [ExamProctoring](./ExamProctoring.md) · [LiveMonitoring](./LiveMonitoring.md) · [ExamAPI](./ExamAPI.md) · [ExamPermissions](./ExamPermissions.md)
 
 ### Definition of done
 
