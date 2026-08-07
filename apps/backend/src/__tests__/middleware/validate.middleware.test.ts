@@ -28,22 +28,21 @@ function makeGetterOnlyReq(query: Record<string, unknown>) {
 }
 
 describe('validate middleware (Express 5 query)', () => {
-  it('mutates getter-only req.query without reassignment', async () => {
+  it('mutates getter-only req.query without reassignment', () => {
     const schema = z.object({
       page: z.coerce.number().default(1),
-      includeDeleted: z.coerce.boolean().default(false),
+      limit: z.coerce.number().default(20),
     });
-    const req = makeGetterOnlyReq({ page: '2', includeDeleted: 'false' });
+    const req = makeGetterOnlyReq({ page: '2', limit: '50' });
     const next = vi.fn() as unknown as NextFunction;
 
     validate(schema, 'query')(req, {} as Response, next);
 
     expect(next).toHaveBeenCalledWith();
     expect(req.query.page).toBe(2);
-    expect(req.query.includeDeleted).toBe(false);
+    expect(req.query.limit).toBe(50);
 
     expect(() => {
-      // Express 5: reassignment must still throw
       (req as { query: unknown }).query = { page: 1 };
     }).toThrow(/only a getter|Cannot set property query/i);
   });
