@@ -12,6 +12,7 @@ import { ProjectSubmissionModel } from '../../models/project-submission.model.js
 import { QuizResultModel } from '../../models/quiz-result.model.js';
 import { QuizModel } from '../../models/quiz.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
+import { resolveAssessmentPurpose } from '@learnova/shared';
 import { pickAttemptByPolicy, ACTIVE_ENROLLMENT_STATUSES, oid } from './gradebook.helpers.js';
 
 export interface IngestDraft {
@@ -178,6 +179,7 @@ export async function ingestExamResult(sourceRefId: string): Promise<IngestDraft
   );
 
   const rules = exam.rules as { totalMarks?: number; passingMarks?: number };
+  const examType = (exam as { examType?: string }).examType ?? 'internal';
 
   return {
     institutionId: result.institutionId as Types.ObjectId,
@@ -200,7 +202,8 @@ export async function ingestExamResult(sourceRefId: string): Promise<IngestDraft
     metadata: {
       attemptId: String(result.attemptId),
       releasedAt: result.releasedAt?.toISOString(),
-      examType: (exam as { examType?: string }).examType ?? 'internal',
+      examType,
+      assessmentPurpose: resolveAssessmentPurpose(examType),
     },
   };
 }

@@ -4,6 +4,7 @@ import { GRADEBOOK_DEFAULTS } from '@learnova/constants';
 import {
   aggregateWeightedPercentage,
   computeCgpa,
+  computeGpaWithFormula,
   computeSemesterGpa,
   gradeDistribution,
   gradePointsFromPercentage,
@@ -45,6 +46,8 @@ import {
 } from './gradebook.helpers.js';
 import type { ActorContext } from './gradebook.service.js';
 import { gradebookService } from './gradebook.service.js';
+import { loadInstitutionPolicy } from './gradebook-policies.helper.js';
+import { policyConfigFromDoc } from './gradebook-policies.helper.js';
 
 const MANAGE_ROLES = new Set(['institution_admin', 'super_admin']);
 const WRITE_ROLES = new Set(['faculty', 'institution_admin', 'super_admin', 'teaching_assistant']);
@@ -405,6 +408,8 @@ export class GradebookEnterpriseService {
   async recomputeSemesterGrades(query: SemesterGradeQuery, actor: ActorContext) {
     if (!canWrite(actor)) throw new ForbiddenError('Gradebook write access required');
     const institutionId = requireTenant(actor);
+    const policyDoc = await loadInstitutionPolicy(institutionId);
+    const policy = policyConfigFromDoc(policyDoc as Record<string, unknown> | null);
 
     const filter: Record<string, unknown> = { institutionId: oid(institutionId) };
     if (query.studentId) filter.studentId = oid(query.studentId);
@@ -434,7 +439,13 @@ export class GradebookEnterpriseService {
         .exec();
       const creditMap = new Map(courses.map((c) => [String(c._id), c.credits ?? 0]));
 
-      const semesterGpa = computeSemesterGpa(
+      const semesterGpa = computeGpaWithFormula(
+        rows.map((row) => ({
+          gradePoints: row.gradePoints,
+          credits: creditMap.get(String(row.courseId)) ?? 0,
+        })),
+        policy.gpaFormula,
+      ) ?? computeSemesterGpa(
         rows.map((row) => ({
           gradePoints: row.gradePoints,
           credits: creditMap.get(String(row.courseId)) ?? 0,
@@ -483,12 +494,22 @@ export class GradebookEnterpriseService {
     }
 
     const semesters = await gradebookRepository.listSemesterGrades(institutionId, studentId);
-    const cgpa = computeCgpa(
-      semesters.map((s) => ({
-        semesterGpa: s.semesterGpa,
-        totalCredits: s.totalCredits,
-      })),
-    );
+    const policyDoc = await loadInstitutionPolicy(institutionId);
+    const policy = policyConfigFromDoc(policyDoc as Record<string, unknown> | null);
+    const cgpa =
+      computeGpaWithFormula(
+        semesters.map((s) => ({
+          gradePoints: s.semesterGpa,
+          credits: s.totalCredits,
+        })),
+        policy.cgpaFormula,
+      ) ??
+      computeCgpa(
+        semesters.map((s) => ({
+          semesterGpa: s.semesterGpa,
+          totalCredits: s.totalCredits,
+        })),
+      );
     const totalCredits = semesters.reduce((sum, s) => sum + s.totalCredits, 0);
 
     const enrollment = await EnrollmentModel.findOne({

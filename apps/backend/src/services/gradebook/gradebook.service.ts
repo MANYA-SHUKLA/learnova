@@ -3,9 +3,9 @@ import { EVENTS } from '@learnova/events';
 import { GRADEBOOK_DEFAULTS } from '@learnova/constants';
 import {
   aggregateWeightedPercentage,
+  evaluatePassFail,
   gradePointsFromPercentage,
   letterGradeFromPercentage,
-  resultFromPercentage,
   sumMarks,
 } from '@learnova/shared';
 import type {
@@ -50,6 +50,12 @@ import {
   pageMeta,
   toDto,
 } from './gradebook.helpers.js';
+import {
+  applyRelativeLetterGrades,
+  collapseExamEntriesForPolicy,
+  loadInstitutionPolicy,
+  policyConfigFromDoc,
+} from './gradebook-policies.helper.js';
 
 export interface ActorContext {
   userId: string;
@@ -165,6 +171,9 @@ async function recomputeStudentSummary(
   const existing = await gradebookRepository.getSummary(institutionId, courseId, studentId);
   if (existing?.locked) return existing;
 
+  const policyDoc = await loadInstitutionPolicy(institutionId);
+  const policy = policyConfigFromDoc(policyDoc as Record<string, unknown> | null);
+
   const entries = await gradebookRepository.listEntriesForStudentCourse(
     institutionId,
     courseId,
@@ -183,27 +192,49 @@ async function recomputeStudentSummary(
     extraCreditWeight: GRADEBOOK_DEFAULTS.EXTRA_CREDIT_WEIGHT,
   };
 
-  const weightMap = distributeWeightage(
+  const collapsedEntries = collapseExamEntriesForPolicy(
     entries.map((entry) => ({
       _id: entry._id,
       activityKind: entry.activityKind,
+      activityId: entry.activityId as Types.ObjectId,
+      activityTitle: entry.activityTitle,
+      sourceRefId: entry.sourceRefId as Types.ObjectId,
+      percentage: entry.percentage,
+      marksObtained: entry.marksObtained,
+      totalMarks: entry.totalMarks,
+      weightage: entry.weightage,
+      status: entry.status,
+      consumedAt: entry.consumedAt as Date,
       metadata: entry.metadata as Record<string, unknown>,
+    })),
+    policy,
+  );
+
+  const collapsedIds = new Set(collapsedEntries.map((entry) => String(entry._id)));
+
+  const weightMap = distributeWeightage(
+    collapsedEntries.map((entry) => ({
+      _id: entry._id,
+      activityKind: entry.activityKind,
+      metadata: entry.metadata,
     })),
     scheme as Record<string, number>,
   );
   for (const entry of entries) {
-    const weightage = weightMap.get(String(entry._id)) ?? 0;
+    const weightage = collapsedIds.has(String(entry._id))
+      ? (weightMap.get(String(entry._id)) ?? 0)
+      : 0;
     if (entry.weightage !== weightage) {
       entry.weightage = weightage;
       await entry.save();
     }
   }
 
-  const rows = entries
+  const rows = collapsedEntries
     .filter((entry) => entry.status !== 'pending')
     .map((entry) => ({
       percentage: entry.percentage,
-      weightage: entry.weightage,
+      weightage: weightMap.get(String(entry._id)) ?? entry.weightage,
       activityKind: entry.activityKind,
       marksObtained: entry.marksObtained,
       totalMarks: entry.totalMarks,
@@ -221,9 +252,26 @@ async function recomputeStudentSummary(
     .lean()
     .exec();
 
-  const letterGrade = letterGradeFromPercentage(weightedPercentage);
-  const gradePoints = gradePointsFromPercentage(weightedPercentage);
-  const result = resultFromPercentage(weightedPercentage, GRADEBOOK_DEFAULTS.PASSING_PERCENTAGE);
+  const letterGrade =
+    policy.gradingScheme === 'relative'
+      ? null
+      : letterGradeFromPercentage(weightedPercentage);
+  const gradePoints =
+    policy.gradingScheme === 'relative' ? null : gradePointsFromPercentage(weightedPercentage);
+  const passingMarks =
+    marks.possible > 0
+      ? (marks.possible * policy.passingPercentage) / 100
+      : null;
+  const result = evaluatePassFail(
+    {
+      percentage: weightedPercentage,
+      letterGrade,
+      marksObtained: marks.earned,
+      totalMarks: marks.possible,
+      passingMarks,
+    },
+    policy,
+  );
 
   const summary = await gradebookRepository.upsertSummary({
     institutionId: oid(institutionId),
@@ -240,7 +288,7 @@ async function recomputeStudentSummary(
     result,
     totalMarksEarned: marks.earned,
     totalMarksPossible: marks.possible,
-    entryCount: entries.length,
+    entryCount: collapsedEntries.length,
   });
 
   await eventBus.emit(
@@ -249,6 +297,45 @@ async function recomputeStudentSummary(
   );
 
   return summary;
+}
+
+async function applyRelativeGradesForCourse(institutionId: string, courseId: string) {
+  const policyDoc = await loadInstitutionPolicy(institutionId);
+  const policy = policyConfigFromDoc(policyDoc as Record<string, unknown> | null);
+  if (policy.gradingScheme !== 'relative') return;
+
+  const summaries = await gradebookRepository.listSummariesForCourse(institutionId, courseId);
+  const letterMap = applyRelativeLetterGrades(
+    summaries.map((row) => ({
+      studentId: String(row.studentId),
+      weightedPercentage: row.weightedPercentage,
+      letterGrade: row.letterGrade,
+    })),
+  );
+
+  for (const summary of summaries) {
+    const studentId = String(summary.studentId);
+    const letterGrade = letterMap.get(studentId) ?? summary.letterGrade;
+    const gradePoints = gradePointsFromPercentage(summary.weightedPercentage);
+    const result = evaluatePassFail(
+      {
+        percentage: summary.weightedPercentage,
+        letterGrade,
+        marksObtained: summary.totalMarksEarned,
+        totalMarks: summary.totalMarksPossible,
+        passingMarks:
+          summary.totalMarksPossible > 0
+            ? (summary.totalMarksPossible * policy.passingPercentage) / 100
+            : null,
+      },
+      policy,
+    );
+
+    summary.letterGrade = letterGrade;
+    summary.gradePoints = gradePoints;
+    summary.result = result;
+    await summary.save();
+  }
 }
 
 export class GradebookService {
@@ -461,6 +548,7 @@ export class GradebookService {
     for (const studentId of studentIds) {
       await recomputeStudentSummary(institutionId, input.courseId, studentId);
     }
+    await applyRelativeGradesForCourse(institutionId, input.courseId);
 
     await gradebookRepository.appendAudit({
       institutionId,

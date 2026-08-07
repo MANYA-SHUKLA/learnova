@@ -9,6 +9,10 @@ import { GradeCommentModel } from '../../models/grade-comment.model.js';
 import { GradeHistoryModel } from '../../models/grade-history.model.js';
 import { SemesterGradeModel } from '../../models/semester-grade.model.js';
 import { CGPARecordModel } from '../../models/cgpa-record.model.js';
+import { GradebookAcademicPolicyModel } from '../../models/gradebook-academic-policy.model.js';
+import { GradeModerationRecordModel } from '../../models/grade-moderation-record.model.js';
+import { GradebookSnapshotModel } from '../../models/gradebook-snapshot.model.js';
+import { AcademicStandingModel } from '../../models/academic-standing.model.js';
 import type { IngestDraft } from '../../services/gradebook/gradebook-ingestion.js';
 import { oid } from './gradebook.helpers.js';
 
@@ -477,5 +481,172 @@ export const gradebookRepository = {
       lockedSummaries,
       averageWeightedPercentage: avgResult[0]?.avg ?? 0,
     };
+  },
+
+  async getAcademicPolicy(institutionId: string) {
+    return GradebookAcademicPolicyModel.findOne({ institutionId: oid(institutionId) }).exec();
+  },
+
+  async upsertAcademicPolicy(institutionId: string, payload: Record<string, unknown>) {
+    return GradebookAcademicPolicyModel.findOneAndUpdate(
+      { institutionId: oid(institutionId) },
+      { $set: { ...payload, institutionId: oid(institutionId) } },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    ).exec();
+  },
+
+  async createModerationRecord(payload: {
+    institutionId: string;
+    courseId: string;
+    courseGradeId?: string | null;
+    studentId?: string | null;
+    stage: string;
+    actorId?: string | null;
+    actorRole?: string | null;
+    notes?: string | null;
+  }) {
+    return GradeModerationRecordModel.create({
+      institutionId: oid(payload.institutionId),
+      courseId: oid(payload.courseId),
+      courseGradeId: payload.courseGradeId ? oid(payload.courseGradeId) : null,
+      studentId: payload.studentId ? oid(payload.studentId) : null,
+      stage: payload.stage,
+      actorId: payload.actorId ? oid(payload.actorId) : null,
+      actorRole: payload.actorRole ?? null,
+      notes: payload.notes ?? null,
+    });
+  },
+
+  async createModerationRecords(
+    records: Array<{
+      institutionId: string;
+      courseId: string;
+      courseGradeId?: string | null;
+      studentId?: string | null;
+      stage: string;
+      actorId?: string | null;
+      actorRole?: string | null;
+      notes?: string | null;
+    }>,
+  ) {
+    if (records.length === 0) return [];
+    return GradeModerationRecordModel.insertMany(
+      records.map((payload) => ({
+        institutionId: oid(payload.institutionId),
+        courseId: oid(payload.courseId),
+        courseGradeId: payload.courseGradeId ? oid(payload.courseGradeId) : null,
+        studentId: payload.studentId ? oid(payload.studentId) : null,
+        stage: payload.stage,
+        actorId: payload.actorId ? oid(payload.actorId) : null,
+        actorRole: payload.actorRole ?? null,
+        notes: payload.notes ?? null,
+      })),
+    );
+  },
+
+  async listModerationRecords(institutionId: string, courseId: string, studentId?: string) {
+    const filter: Record<string, unknown> = {
+      institutionId: oid(institutionId),
+      courseId: oid(courseId),
+    };
+    if (studentId) filter.studentId = oid(studentId);
+    return GradeModerationRecordModel.find(filter).sort({ createdAt: -1 }).exec();
+  },
+
+  async createSnapshot(payload: {
+    institutionId: string;
+    courseId: string;
+    studentId: string;
+    courseGradeId: string;
+    version: number;
+    summary: Record<string, unknown>;
+    entries: Array<Record<string, unknown>>;
+    frozenAt: Date;
+    frozenBy?: string | null;
+  }) {
+    return GradebookSnapshotModel.create({
+      institutionId: oid(payload.institutionId),
+      courseId: oid(payload.courseId),
+      studentId: oid(payload.studentId),
+      courseGradeId: oid(payload.courseGradeId),
+      version: payload.version,
+      summary: payload.summary,
+      entries: payload.entries,
+      frozenAt: payload.frozenAt,
+      frozenBy: payload.frozenBy ? oid(payload.frozenBy) : null,
+      immutable: true,
+    });
+  },
+
+  async listSnapshots(institutionId: string, courseId: string, studentId?: string) {
+    const filter: Record<string, unknown> = {
+      institutionId: oid(institutionId),
+      courseId: oid(courseId),
+    };
+    if (studentId) filter.studentId = oid(studentId);
+    return GradebookSnapshotModel.find(filter).sort({ version: -1 }).exec();
+  },
+
+  async getSnapshot(
+    institutionId: string,
+    courseId: string,
+    studentId: string,
+    version: number,
+  ) {
+    return GradebookSnapshotModel.findOne({
+      institutionId: oid(institutionId),
+      courseId: oid(courseId),
+      studentId: oid(studentId),
+      version,
+    }).exec();
+  },
+
+  async upsertAcademicStanding(payload: {
+    institutionId: Types.ObjectId;
+    studentId: Types.ObjectId;
+    semesterId: Types.ObjectId | null;
+    programId: Types.ObjectId | null;
+    standing: string;
+    semesterGpa: number | null;
+    cgpa: number | null;
+    failedCourseCount: number;
+    publishedCourseCount: number;
+    computedAt: Date;
+  }) {
+    const filter: Record<string, unknown> = {
+      institutionId: payload.institutionId,
+      studentId: payload.studentId,
+    };
+    if (payload.semesterId) {
+      filter.semesterId = payload.semesterId;
+    } else {
+      filter.semesterId = null;
+    }
+
+    return AcademicStandingModel.findOneAndUpdate(
+      filter,
+      { $set: payload },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    ).exec();
+  },
+
+  async listAcademicStandings(institutionId: string, studentId?: string, semesterId?: string) {
+    const filter: Record<string, unknown> = { institutionId: oid(institutionId) };
+    if (studentId) filter.studentId = oid(studentId);
+    if (semesterId) filter.semesterId = oid(semesterId);
+    return AcademicStandingModel.find(filter).sort({ computedAt: -1 }).exec();
+  },
+
+  async listSummariesForCourseWithFilter(
+    institutionId: string,
+    courseId: string,
+    studentIds?: string[],
+  ) {
+    const filter: Record<string, unknown> = {
+      institutionId: oid(institutionId),
+      courseId: oid(courseId),
+    };
+    if (studentIds?.length) filter.studentId = { $in: studentIds.map(oid) };
+    return CourseGradeSummaryModel.find(filter).exec();
   },
 };

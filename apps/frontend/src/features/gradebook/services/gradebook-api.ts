@@ -104,4 +104,46 @@ export const gradebookApi = {
 
   exportReport: (params: Record<string, string | undefined>) =>
     apiClient.get<string>(`${base}/reports${toQuery({ ...params, format: 'csv' })}`),
+
+  academicPolicy: () => apiClient.get<Record<string, unknown>>(`${base}/policy`),
+
+  upsertAcademicPolicy: (body: Record<string, unknown>) =>
+    apiClient.put<Record<string, unknown>>(`${base}/policy`, body),
+
+  submitModeration: (courseId: string, notes?: string) =>
+    apiClient.post<{ submitted: number }>(`${base}/moderation/submit`, { courseId, notes }),
+
+  approveModeration: (courseId: string, notes?: string) =>
+    apiClient.post<{ approved: number }>(`${base}/moderation/approve`, { courseId, notes }),
+
+  publishModeration: (courseId: string, notes?: string) =>
+    apiClient.post<{ published: number; snapshots: number }>(`${base}/moderation/publish`, {
+      courseId,
+      notes,
+    }),
+
+  moderationTimeline: (courseId: string, studentId?: string) =>
+    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+      `${base}/moderation/${courseId}/timeline${toQuery({ studentId })}`,
+    ),
+
+  listSnapshots: (courseId: string, studentId?: string) =>
+    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+      `${base}/snapshots${toQuery({ courseId, studentId })}`,
+    ),
+
+  compareSnapshots: (params: {
+    courseId: string;
+    studentId: string;
+    versionFrom: number;
+    versionTo: number;
+  }) => apiClient.get<Record<string, unknown>>(`${base}/snapshots/compare${toQuery(params)}`),
+
+  computeStanding: (body?: { studentId?: string; semesterId?: string }) =>
+    apiClient.post<{ computed: number }>(`${base}/standing/compute`, body ?? {}),
+
+  listStanding: (params?: { studentId?: string; semesterId?: string }) =>
+    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+      `${base}/standing${toQuery(params ?? {})}`,
+    ),
 };

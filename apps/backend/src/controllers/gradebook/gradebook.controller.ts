@@ -15,10 +15,15 @@ import type {
   SyncCourseGradebookInput,
   UnlockCourseGradesInput,
   UpsertWeightSchemeInput,
+  UpsertAcademicPolicyInput,
+  ModerationActionInput,
+  CompareSnapshotsQuery,
+  ComputeStandingInput,
 } from '@learnova/validation';
 import { UnauthorizedError } from '../../utils/errors/index.js';
 import { sendCreated, sendSuccess } from '../../utils/response/index.js';
 import { gradebookEnterpriseService } from '../../services/gradebook/gradebook-enterprise.service.js';
+import { gradebookPoliciesService } from '../../services/gradebook/gradebook-policies.service.js';
 import { gradebookService, type ActorContext } from '../../services/gradebook/gradebook.service.js';
 
 function actorFrom(req: Request): ActorContext {
@@ -367,6 +372,128 @@ export async function generateReport(req: Request, res: Response, next: NextFunc
       return;
     }
     sendSuccess(res, result, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getAcademicPolicy(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookPoliciesService.getAcademicPolicy(actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function upsertAcademicPolicy(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookPoliciesService.upsertAcademicPolicy(
+      req.body as UpsertAcademicPolicyInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function submitModeration(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookPoliciesService.submitForReview(
+      req.body as ModerationActionInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function approveModeration(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookPoliciesService.approveDepartment(
+      req.body as ModerationActionInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function publishModeration(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookPoliciesService.publishWithSnapshots(
+      req.body as ModerationActionInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listModerationTimeline(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await gradebookPoliciesService.listModerationTimeline(
+      req.params.courseId as string,
+      actorFrom(req),
+      req.query.studentId as string | undefined,
+    );
+    sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listSnapshots(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await gradebookPoliciesService.listSnapshots(
+      {
+        courseId: req.query.courseId as string,
+        studentId: req.query.studentId as string | undefined,
+      },
+      actorFrom(req),
+    );
+    sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function compareSnapshots(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookPoliciesService.compareSnapshots(
+      req.query as unknown as CompareSnapshotsQuery,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function computeStanding(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookPoliciesService.computeStanding(
+      req.body as ComputeStandingInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listStanding(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await gradebookPoliciesService.listStanding(
+      actorFrom(req),
+      req.query.studentId as string | undefined,
+      req.query.semesterId as string | undefined,
+    );
+    sendSuccess(res, { items }, { requestId: req.requestId });
   } catch (err) {
     next(err);
   }

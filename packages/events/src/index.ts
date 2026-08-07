@@ -132,6 +132,11 @@ export const EVENTS = {
   GRADE_CALCULATED: 'grade.calculated',
   GRADE_APPEAL_CREATED: 'grade.appeal.created',
   GRADE_APPEAL_RESOLVED: 'grade.appeal.resolved',
+  GRADE_MODERATION_SUBMITTED: 'grade.moderation.submitted',
+  GRADE_MODERATION_DEPARTMENT_APPROVED: 'grade.moderation.department_approved',
+  GRADE_MODERATION_PUBLISHED: 'grade.moderation.published',
+  GRADE_SNAPSHOT_CREATED: 'grade.snapshot.created',
+  GRADE_STANDING_COMPUTED: 'grade.standing.computed',
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
@@ -640,6 +645,11 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.GRADE_CALCULATED, description: 'Course grade recalculated from sources', version: 1 },
   { name: EVENTS.GRADE_APPEAL_CREATED, description: 'Student grade appeal submitted', version: 1 },
   { name: EVENTS.GRADE_APPEAL_RESOLVED, description: 'Grade appeal resolved by faculty', version: 1 },
+  { name: EVENTS.GRADE_MODERATION_SUBMITTED, description: 'Faculty submitted grades for department review', version: 1 },
+  { name: EVENTS.GRADE_MODERATION_DEPARTMENT_APPROVED, description: 'Department approved moderated grades', version: 1 },
+  { name: EVENTS.GRADE_MODERATION_PUBLISHED, description: 'Institution published moderated grades', version: 1 },
+  { name: EVENTS.GRADE_SNAPSHOT_CREATED, description: 'Immutable gradebook snapshot version created', version: 1 },
+  { name: EVENTS.GRADE_STANDING_COMPUTED, description: 'Academic standing computed for students', version: 1 },
 ] as const;
 
 export function isRegisteredEvent(name: string): name is EventName {

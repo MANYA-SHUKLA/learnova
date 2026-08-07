@@ -89,6 +89,7 @@ export const GRADEBOOK_AUDIT_EVENTS = [
   'moderation.published',
   'snapshot.created',
   'standing.computed',
+  'policy.updated',
 ] as const;
 
 export const GRADEBOOK_BULK_ACTIONS = [

@@ -1,6 +1,7 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
 import {
   COURSE_GRADE_STATUSES,
+  GRADE_MODERATION_STAGES,
   GRADE_RESULTS,
 } from '@learnova/constants';
 
@@ -39,6 +40,19 @@ const courseGradeSummarySchema = new Schema(
     finalizedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     lockedAt: { type: Date, default: null },
     lockedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    moderationStage: {
+      type: String,
+      enum: GRADE_MODERATION_STAGES,
+      default: 'draft',
+      index: true,
+    },
+    facultySubmittedAt: { type: Date, default: null },
+    facultySubmittedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    departmentApprovedAt: { type: Date, default: null },
+    departmentApprovedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    institutionPublishedAt: { type: Date, default: null },
+    institutionPublishedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    snapshotVersion: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true, collection: 'course_grade_summaries' },
 );

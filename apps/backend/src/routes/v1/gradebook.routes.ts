@@ -17,6 +17,11 @@ import {
   syncCourseGradebookSchema,
   unlockCourseGradesSchema,
   upsertWeightSchemeSchema,
+  upsertAcademicPolicySchema,
+  moderationActionSchema,
+  compareSnapshotsQuerySchema,
+  listSnapshotsQuerySchema,
+  computeStandingSchema,
 } from '@learnova/validation';
 import { z } from 'zod';
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
@@ -168,5 +173,59 @@ gradebookRoutes.get(
   validate(gradeReportQuerySchema, 'query'),
   ctrl.generateReport,
 );
+
+gradebookRoutes.get('/gradebook/policy', ...readAuth, ctrl.getAcademicPolicy);
+gradebookRoutes.put(
+  '/gradebook/policy',
+  ...manageAuth,
+  validate(upsertAcademicPolicySchema),
+  ctrl.upsertAcademicPolicy,
+);
+
+gradebookRoutes.post(
+  '/gradebook/moderation/submit',
+  ...writeAuth,
+  validate(moderationActionSchema),
+  ctrl.submitModeration,
+);
+gradebookRoutes.post(
+  '/gradebook/moderation/approve',
+  ...manageAuth,
+  validate(moderationActionSchema),
+  ctrl.approveModeration,
+);
+gradebookRoutes.post(
+  '/gradebook/moderation/publish',
+  ...manageAuth,
+  validate(moderationActionSchema),
+  ctrl.publishModeration,
+);
+gradebookRoutes.get(
+  '/gradebook/moderation/:courseId/timeline',
+  ...readAuth,
+  validate(gradebookCourseIdParamsSchema, 'params'),
+  ctrl.listModerationTimeline,
+);
+
+gradebookRoutes.get(
+  '/gradebook/snapshots',
+  ...readAuth,
+  validate(listSnapshotsQuerySchema, 'query'),
+  ctrl.listSnapshots,
+);
+gradebookRoutes.get(
+  '/gradebook/snapshots/compare',
+  ...readAuth,
+  validate(compareSnapshotsQuerySchema, 'query'),
+  ctrl.compareSnapshots,
+);
+
+gradebookRoutes.post(
+  '/gradebook/standing/compute',
+  ...writeAuth,
+  validate(computeStandingSchema),
+  ctrl.computeStanding,
+);
+gradebookRoutes.get('/gradebook/standing', ...readAuth, ctrl.listStanding);
 
 export default gradebookRoutes;
