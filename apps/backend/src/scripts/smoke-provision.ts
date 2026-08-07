@@ -53,7 +53,11 @@ async function api<T>(
 async function main(): Promise<void> {
   await connectMongo();
   const db = mongoose.connection.db!;
-  const iid = new mongoose.Types.ObjectId(env.SEED_INSTITUTION_ID);
+  const institutionId = process.env.SEED_INSTITUTION_ID?.trim();
+  if (!institutionId) {
+    throw new Error('SEED_INSTITUTION_ID is required in apps/backend/.env');
+  }
+  const iid = new mongoose.Types.ObjectId(institutionId);
   const adminRole = await roleRepository.findByName('institution_admin');
   if (!adminRole) throw new Error('Run seed:auth first');
 
@@ -105,6 +109,8 @@ async function main(): Promise<void> {
       firstName: 'Smoke',
       lastName: 'Faculty',
       email: facultyEmail,
+      designation: 'assistant_professor',
+      employmentType: 'full_time',
       status: 'active',
     },
   });

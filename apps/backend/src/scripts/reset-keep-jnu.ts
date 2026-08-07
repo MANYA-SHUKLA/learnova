@@ -9,7 +9,6 @@ import '../config/load-env.js';
 import mongoose from 'mongoose';
 import { connectMongo, disconnectMongo } from '../database/index.js';
 import { logger } from '../utils/logger/index.js';
-import { env } from '../config/env.js';
 import { roleRepository } from '../repositories/auth/index.js';
 
 const KEEP_COLLECTIONS = new Set(['institutions', 'roles', 'permissions']);
@@ -25,9 +24,9 @@ const WIPE_ENTIRELY = new Set([
 ]);
 
 async function main(): Promise<void> {
-  const institutionId = env.SEED_INSTITUTION_ID;
+  const institutionId = process.env.SEED_INSTITUTION_ID?.trim();
   if (!institutionId) {
-    throw new Error('SEED_INSTITUTION_ID is required');
+    throw new Error('SEED_INSTITUTION_ID is required in apps/backend/.env');
   }
 
   await connectMongo();
