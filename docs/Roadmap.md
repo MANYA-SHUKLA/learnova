@@ -22,10 +22,11 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **8.5** | **Progress Tracking** | ✅ Complete |
 | **9** | **Assignment Management** | ✅ Complete |
 | **9.5** | **Assessment Core (shared)** | ✅ Complete |
+| **10** | **Practice Labs / Coding** | ✅ Complete |
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Progress (8.5), Assignments (9), and **Assessment Core (9.5)** are complete. Do **not** start Practice Labs (Step **10**) until consuming Assessment Core. Enrollments remain the source of truth for each learner’s journey.
+**Hard rule:** Progress (8.5), Assignments (9), Assessment Core (9.5), and **Practice Labs (10)** are complete. Do **not** start Projects (11) until Labs DoD is met. Enrollments remain the source of truth for each learner’s journey.
 
 ### Platform phases (enterprise order)
 
@@ -38,9 +39,9 @@ Learning Progress (8.5) ✅
   ↓
 Assignments (9) ✅
   ↓
-Assessment Core (9.5) ✅  ← shared primitives for Labs / Quizzes / Exams
+Assessment Core (9.5) ✅
   ↓
-Labs (10)
+Labs (10) ✅
   ↓
 Projects (11)
   ↓
@@ -469,7 +470,7 @@ Practice Labs (10), Quizzes, and Exams **must** import Assessment Core helpers �
 | **8.5** | Progress tracking | ✅ Complete |
 | **9** | **Assignment Management** | ✅ Complete |
 | **9.5** | **Assessment Core (shared)** | ✅ Complete |
-| **10** | Practice Labs / Coding | Planned |
+| **10** | Practice Labs / Coding | ✅ Complete |
 | **11** | Projects / Ideation | Planned |
 | **12** | Examinations | Planned |
 | **13** | Gradebook | Planned |
@@ -479,7 +480,7 @@ Practice Labs (10), Quizzes, and Exams **must** import Assessment Core helpers �
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
-**Boundary:** Assessment Core (9.5) DoD met — Labs (10) may start only when ready to consume the core. **Do not duplicate grading/submission logic.**
+**Boundary:** Practice Labs (10) DoD met — consume Assessment Core; next is Projects (11). **Do not start quizzes/exams from this step.**
 
 ---
 
