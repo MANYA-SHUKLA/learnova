@@ -14,6 +14,7 @@
     "clean": "rimraf dist",
     "seed:auth": "tsx --env-file=.env src/seeds/run-auth-seed.ts",
     "seed:students": "tsx --env-file=.env src/seeds/run-student-seed.ts",
+    "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
