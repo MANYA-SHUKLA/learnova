@@ -74,3 +74,4 @@ export * from './course.js';
 export * from './course-builder.js';
 export * from './enrollment.js';
 export * from './progress.js';
+export * from './assignment.js';

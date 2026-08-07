@@ -38,6 +38,14 @@ export const EVENTS = {
   BOOKMARK_CREATED: 'bookmark.created',
   NOTE_CREATED: 'note.created',
 
+  ASSIGNMENT_CREATED: 'assignment.created',
+  ASSIGNMENT_UPDATED: 'assignment.updated',
+  ASSIGNMENT_DELETED: 'assignment.deleted',
+  ASSIGNMENT_PUBLISHED: 'assignment.published',
+  SUBMISSION_CREATED: 'submission.created',
+  SUBMISSION_GRADED: 'submission.graded',
+  FEEDBACK_ADDED: 'feedback.added',
+
   USER_CREATED: 'user.created',
   USER_REGISTERED: 'user.registered',
   USER_LOGGED_IN: 'user.logged_in',
@@ -194,6 +202,45 @@ export interface EventPayloadMap {
     lessonId: string;
     institutionId: string;
   };
+  'assignment.created': {
+    assignmentId: string;
+    courseId: string;
+    institutionId: string;
+  };
+  'assignment.updated': {
+    assignmentId: string;
+    courseId: string;
+    institutionId: string;
+  };
+  'assignment.deleted': {
+    assignmentId: string;
+    courseId: string;
+    institutionId: string;
+  };
+  'assignment.published': {
+    assignmentId: string;
+    courseId: string;
+    institutionId: string;
+  };
+  'submission.created': {
+    submissionId: string;
+    assignmentId: string;
+    studentId: string;
+    institutionId: string;
+  };
+  'submission.graded': {
+    submissionId: string;
+    assignmentId: string;
+    studentId: string;
+    institutionId: string;
+    gradeId: string;
+  };
+  'feedback.added': {
+    commentId: string;
+    assignmentId: string;
+    submissionId: string | null;
+    institutionId: string;
+  };
   'user.created': { userId: string; email?: string };
   'user.registered': { userId: string };
   'user.logged_in': { userId: string };
@@ -273,6 +320,13 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.COURSE_COMPLETED, description: 'Course learning completed', version: 1 },
   { name: EVENTS.BOOKMARK_CREATED, description: 'Learning bookmark created', version: 1 },
   { name: EVENTS.NOTE_CREATED, description: 'Learning note created', version: 1 },
+  { name: EVENTS.ASSIGNMENT_CREATED, description: 'Assignment created', version: 1 },
+  { name: EVENTS.ASSIGNMENT_UPDATED, description: 'Assignment updated', version: 1 },
+  { name: EVENTS.ASSIGNMENT_DELETED, description: 'Assignment deleted', version: 1 },
+  { name: EVENTS.ASSIGNMENT_PUBLISHED, description: 'Assignment published', version: 1 },
+  { name: EVENTS.SUBMISSION_CREATED, description: 'Assignment submission created', version: 1 },
+  { name: EVENTS.SUBMISSION_GRADED, description: 'Assignment submission graded', version: 1 },
+  { name: EVENTS.FEEDBACK_ADDED, description: 'Assignment feedback/comment added', version: 1 },
   { name: EVENTS.USER_CREATED, description: 'User created', version: 1 },
   { name: EVENTS.EXAM_COMPLETED, description: 'Exam completed', version: 1 },
   { name: EVENTS.CERTIFICATE_GENERATED, description: 'Certificate generated', version: 1 },

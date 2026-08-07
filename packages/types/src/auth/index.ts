@@ -44,7 +44,10 @@ export type Permission =
   | 'enrollment:manage'
   | 'progress:read'
   | 'progress:write'
-  | 'progress:manage';
+  | 'progress:manage'
+  | 'assignment:read'
+  | 'assignment:write'
+  | 'assignment:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
 
