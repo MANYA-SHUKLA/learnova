@@ -59,9 +59,9 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex w-full min-w-0 flex-1 items-center justify-center py-6 sm:py-10">
+    <div className="mx-auto flex min-h-[calc(100svh-9rem)] w-full max-w-md items-center justify-center py-8">
       <motion.div
-        className="relative w-full max-w-md"
+        className="relative w-full"
         initial={{ opacity: 0, y: 28, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
@@ -87,13 +87,10 @@ export default function ForgotPasswordPage() {
               'group-hover:border-primary/35 group-hover:shadow-soft-lg',
             )}
           >
-            {/* Top accent line that sweeps on hover */}
-            <motion.div
+            {/* Top accent line that expands on card hover */}
+            <div
               aria-hidden
-              className="absolute inset-x-0 top-0 h-[2px] origin-left bg-gradient-to-r from-transparent via-primary to-transparent"
-              initial={{ scaleX: 0.2, opacity: 0.4 }}
-              whileHover={{ scaleX: 1, opacity: 1 }}
-              transition={{ duration: 0.45 }}
+              className="absolute inset-x-0 top-0 h-[2px] origin-center scale-x-25 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50 transition-all duration-500 group-hover:scale-x-100 group-hover:opacity-100"
             />
 
             <CardHeader className="space-y-4 pb-2 pt-8 text-center">
