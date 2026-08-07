@@ -7,3 +7,4 @@ export * from './errors/index.js';
 export * from './regex/index.js';
 export * from './http/index.js';
 export * from './limits/index.js';
+export * from './assessment/index.js';

@@ -30,6 +30,10 @@
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "import": "./dist/errors/index.js"
+    },
+    "./assessment": {
+      "types": "./dist/assessment/index.d.ts",
+      "import": "./dist/assessment/index.js"
     }
   },
   "scripts": {

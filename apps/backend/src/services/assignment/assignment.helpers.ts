@@ -1,13 +1,39 @@
 import type {
+  AssessmentGradingMethod,
+  AssessmentLifecycleStatus,
+  AssessmentAttemptStatus,
   AssignmentGradingMethod,
   AssignmentStatus,
   AssignmentSubmissionStatus,
 } from '@learnova/types';
+import {
+  ASSESSMENT_ENROLLMENT_STATUSES,
+  applyLatePenalty,
+  canTransitionLifecycle,
+  computePercentage,
+  computeSubmissionRate,
+  evaluateAttempt as evaluateAttemptCore,
+  evaluateSubmissionWindow as evaluateSubmissionWindowCore,
+  extensionForContentType,
+  isPassing,
+  isPastClose,
+  isPastDue,
+  resolveAttemptStatus,
+  resolveGradeOutcome as resolveGradeOutcomeCore,
+  rubricTotalPoints,
+  type AttemptCheckResult,
+  type GradeOutcome,
+  type SubmissionWindowResult,
+} from '@learnova/shared';
 
-/** Enrollment states that grant a student access to a course's assignments. */
-export const ACTIVE_ENROLLMENT_STATUSES = ['active', 'approved', 'completed'] as const;
+/**
+ * Assignment helpers — thin adapters over Assessment Core.
+ * Prefer importing primitives from `@learnova/shared/assessment` in new modules.
+ */
 
-/** Allowed assignment lifecycle moves. Anything else is rejected. */
+/** @deprecated Prefer ASSESSMENT_ENROLLMENT_STATUSES from @learnova/constants */
+export const ACTIVE_ENROLLMENT_STATUSES = ASSESSMENT_ENROLLMENT_STATUSES;
+
 export const ASSIGNMENT_STATUS_TRANSITIONS: Record<AssignmentStatus, AssignmentStatus[]> = {
   draft: ['published', 'archived'],
   published: ['closed', 'archived'],
@@ -16,30 +42,22 @@ export const ASSIGNMENT_STATUS_TRANSITIONS: Record<AssignmentStatus, AssignmentS
 };
 
 export function canTransitionStatus(from: AssignmentStatus, to: AssignmentStatus): boolean {
-  if (from === to) return false;
-  return ASSIGNMENT_STATUS_TRANSITIONS[from].includes(to);
+  return canTransitionLifecycle(
+    from as AssessmentLifecycleStatus,
+    to as AssessmentLifecycleStatus,
+  );
 }
 
-export function isPastDue(dueDate: Date | null | undefined, now: Date = new Date()): boolean {
-  if (!dueDate) return false;
-  return now.getTime() > dueDate.getTime();
-}
+export { isPastDue, applyLatePenalty, computePercentage, isPassing, rubricTotalPoints, computeSubmissionRate };
 
 export function isClosed(closeDate: Date | null | undefined, now: Date = new Date()): boolean {
-  if (!closeDate) return false;
-  return now.getTime() > closeDate.getTime();
+  return isPastClose(closeDate, now);
 }
 
-export interface SubmissionWindow {
-  allowed: boolean;
-  late: boolean;
-  reason?: string;
-}
+export type SubmissionWindow = SubmissionWindowResult;
+export type AttemptCheck = AttemptCheckResult;
+export type { GradeOutcome };
 
-/**
- * Decides whether a student may submit right now, and whether the attempt
- * counts as late. A closed window always wins over the late-submission flag.
- */
 export function evaluateSubmissionWindow(input: {
   status: AssignmentStatus;
   dueDate: Date | null;
@@ -47,27 +65,17 @@ export function evaluateSubmissionWindow(input: {
   allowLateSubmission: boolean;
   now?: Date;
 }): SubmissionWindow {
-  const now = input.now ?? new Date();
-
-  if (input.status !== 'published') {
-    return { allowed: false, late: false, reason: 'Assignment is not open for submissions' };
+  const result = evaluateSubmissionWindowCore({
+    ...input,
+    status: input.status as AssessmentLifecycleStatus,
+  });
+  if (result.reason === 'Activity is not open for submissions') {
+    return { ...result, reason: 'Assignment is not open for submissions' };
   }
-  if (isClosed(input.closeDate, now)) {
-    return { allowed: false, late: false, reason: 'Assignment submission window has closed' };
+  if (result.reason === 'Submission window has closed') {
+    return { ...result, reason: 'Assignment submission window has closed' };
   }
-
-  const late = isPastDue(input.dueDate, now);
-  if (late && !input.allowLateSubmission) {
-    return { allowed: false, late: true, reason: 'Late submissions are not allowed' };
-  }
-
-  return { allowed: true, late };
-}
-
-export interface AttemptCheck {
-  allowed: boolean;
-  nextAttempt: number;
-  reason?: string;
+  return result;
 }
 
 export function evaluateAttempt(input: {
@@ -75,52 +83,13 @@ export function evaluateAttempt(input: {
   maxAttempts: number;
   allowResubmission: boolean;
 }): AttemptCheck {
-  const nextAttempt = input.previousAttempts + 1;
-
-  if (input.previousAttempts > 0 && !input.allowResubmission) {
-    return { allowed: false, nextAttempt, reason: 'Resubmission is not allowed' };
-  }
-  if (nextAttempt > input.maxAttempts) {
-    return {
-      allowed: false,
-      nextAttempt,
-      reason: `Maximum attempts (${String(input.maxAttempts)}) reached`,
-    };
-  }
-
-  return { allowed: true, nextAttempt };
+  return evaluateAttemptCore(input);
 }
 
 export function resolveSubmissionStatus(late: boolean): AssignmentSubmissionStatus {
-  return late ? 'late' : 'submitted';
+  return resolveAttemptStatus(late) as AssignmentSubmissionStatus;
 }
 
-export function applyLatePenalty(marks: number, penaltyPercent: number): number {
-  if (!Number.isFinite(marks) || marks <= 0) return Math.max(0, marks || 0);
-  const penalty = Math.min(100, Math.max(0, penaltyPercent));
-  return Math.round(marks * (1 - penalty / 100) * 100) / 100;
-}
-
-export function computePercentage(marksObtained: number, totalMarks: number): number {
-  if (totalMarks <= 0) return 0;
-  const pct = (marksObtained / totalMarks) * 100;
-  return Math.round(Math.max(0, Math.min(100, pct)) * 100) / 100;
-}
-
-export function isPassing(marksObtained: number, passingMarks: number): boolean {
-  return marksObtained >= passingMarks;
-}
-
-export interface GradeOutcome {
-  marksObtained: number | null;
-  percentage: number | null;
-  passed: boolean | null;
-}
-
-/**
- * Normalizes a grading payload into marks / percentage / pass across all
- * grading methods so downstream analytics can rely on a single shape.
- */
 export function resolveGradeOutcome(input: {
   gradingMethod: AssignmentGradingMethod;
   marksObtained?: number | null;
@@ -132,47 +101,10 @@ export function resolveGradeOutcome(input: {
   late: boolean;
   latePenaltyPercent: number;
 }): GradeOutcome {
-  let marks: number | null = null;
-
-  if (input.gradingMethod === 'rubric') {
-    const scores = input.rubricScores ?? [];
-    marks = scores.reduce((sum, s) => sum + (Number.isFinite(s.points) ? s.points : 0), 0);
-  } else if (input.gradingMethod === 'percentage') {
-    marks =
-      input.percentage == null
-        ? null
-        : Math.round((input.percentage / 100) * input.totalMarks * 100) / 100;
-  } else if (input.gradingMethod === 'pass_fail') {
-    if (input.passed == null) {
-      return { marksObtained: null, percentage: null, passed: null };
-    }
-    marks = input.passed ? input.totalMarks : 0;
-  } else {
-    marks = input.marksObtained ?? null;
-  }
-
-  if (marks == null) {
-    return { marksObtained: null, percentage: null, passed: input.passed ?? null };
-  }
-
-  const penalized = input.late ? applyLatePenalty(marks, input.latePenaltyPercent) : marks;
-  const capped = Math.max(0, Math.min(input.totalMarks, penalized));
-  const percentage = computePercentage(capped, input.totalMarks);
-  const passed =
-    input.gradingMethod === 'pass_fail'
-      ? (input.passed ?? isPassing(capped, input.passingMarks))
-      : isPassing(capped, input.passingMarks);
-
-  return { marksObtained: capped, percentage, passed };
-}
-
-export function rubricTotalPoints(criteria: { maxPoints: number }[]): number {
-  return criteria.reduce((sum, c) => sum + (Number.isFinite(c.maxPoints) ? c.maxPoints : 0), 0);
-}
-
-export function computeSubmissionRate(submissions: number, expected: number): number {
-  if (expected <= 0) return 0;
-  return Math.round(Math.min(100, (submissions / expected) * 100) * 100) / 100;
+  return resolveGradeOutcomeCore({
+    ...input,
+    gradingMethod: input.gradingMethod as AssessmentGradingMethod,
+  });
 }
 
 export function pageMeta(total: number, page: number, limit: number) {
@@ -237,21 +169,6 @@ export function rowsToCsv(
   return `${lines.join('\n')}\n`;
 }
 
-/** File extension for a whitelisted upload content type. */
 export function extensionFor(contentType: string): string {
-  const map: Record<string, string> = {
-    'application/pdf': 'pdf',
-    'application/msword': 'doc',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
-    'application/zip': 'zip',
-    'application/x-zip-compressed': 'zip',
-    'image/jpeg': 'jpg',
-    'image/png': 'png',
-    'image/webp': 'webp',
-    'image/gif': 'gif',
-    'video/mp4': 'mp4',
-    'video/webm': 'webm',
-    'video/quicktime': 'mov',
-  };
-  return map[contentType] ?? 'bin';
+  return extensionForContentType(contentType);
 }

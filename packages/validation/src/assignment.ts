@@ -1,5 +1,14 @@
 import { z } from 'zod';
-import { REGEX } from '@learnova/constants';
+import { ASSESSMENT_MAX_FILE_BYTES, REGEX } from '@learnova/constants';
+import {
+  assessmentAttemptStatusSchema,
+  assessmentDeliveryTypeSchema,
+  assessmentFileUploadSchema,
+  assessmentGradeInputSchema,
+  assessmentGradingMethodSchema,
+  assessmentLifecycleStatusSchema,
+  assessmentVisibilitySchema,
+} from './assessment.js';
 
 const objectIdField = z.string().regex(REGEX.OBJECT_ID, 'Invalid ObjectId');
 const optionalString = (max: number) => z.string().trim().max(max).optional().nullable();
@@ -17,22 +26,17 @@ export const assignmentTypeSchema = z.enum([
   'mixed',
 ]);
 
-export const assignmentStatusSchema = z.enum(['draft', 'published', 'archived', 'closed']);
-
-export const assignmentVisibilitySchema = z.enum(['institution', 'enrolled', 'faculty']);
-
-export const assignmentSubmissionStatusSchema = z.enum([
-  'draft',
-  'submitted',
-  'late',
-  'returned',
-  'graded',
-  'missing',
+/** Assignment lifecycle/status = Assessment Core lifecycle */
+export const assignmentStatusSchema = assessmentLifecycleStatusSchema;
+export const assignmentVisibilitySchema = assessmentVisibilitySchema;
+export const assignmentSubmissionStatusSchema = assessmentAttemptStatusSchema;
+export const assignmentSubmissionTypeSchema = assessmentDeliveryTypeSchema.extract([
+  'text',
+  'file',
+  'link',
+  'mixed',
 ]);
-
-export const assignmentSubmissionTypeSchema = z.enum(['text', 'file', 'link', 'mixed']);
-
-export const assignmentGradingMethodSchema = z.enum([
+export const assignmentGradingMethodSchema = assessmentGradingMethodSchema.extract([
   'manual',
   'rubric',
   'pass_fail',
@@ -40,29 +44,12 @@ export const assignmentGradingMethodSchema = z.enum([
   'percentage',
 ]);
 
-/** Max upload size: 50MB (base64-decoded bytes) */
-export const ASSIGNMENT_MAX_FILE_BYTES = 50 * 1024 * 1024;
+/** @deprecated Prefer ASSESSMENT_MAX_FILE_BYTES — kept for assignment callers */
+export const ASSIGNMENT_MAX_FILE_BYTES = ASSESSMENT_MAX_FILE_BYTES;
 
-export const assignmentAllowedContentTypes = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/zip',
-  'application/x-zip-compressed',
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'video/mp4',
-  'video/webm',
-  'video/quicktime',
-] as const;
+export const assignmentAllowedContentTypes = assessmentFileUploadSchema.shape.contentType.options;
 
-export const assignmentFileUploadSchema = z.object({
-  fileName: z.string().trim().min(1).max(255),
-  contentType: z.enum(assignmentAllowedContentTypes),
-  data: z.string().min(1).max(70_000_000),
-});
+export const assignmentFileUploadSchema = assessmentFileUploadSchema;
 
 export const assignmentListQuerySchema = z.object({
   q: z.string().trim().max(200).optional(),

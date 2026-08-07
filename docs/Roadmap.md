@@ -24,7 +24,7 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Progress Tracking (8.5) is **complete**. Assignment Management (Step **9**) is **complete**. Do **not** start Practice Labs until quizzes (if any) or Labs step DoD — next after assignments is Labs only when Assessment coursework slice is done. Enrollments remain the source of truth for each learner’s journey.
+**Hard rule:** Progress Tracking (8.5) and Assignment Management (Step **9**) are **complete**. Do **not** start Practice Labs (Step **10**). Enrollments remain the source of truth for each learner’s journey.
 
 ### Platform phases (enterprise order)
 
