@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
   Skeleton,
-  Textarea,
 } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
 import { use, useState } from 'react';
@@ -93,7 +92,8 @@ export default function StudentAssignmentDetailPage({
                 <CardDescription>{t('submitDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Textarea
+                <textarea
+                  className="min-h-[160px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   rows={8}
                   value={text}
                   onChange={(e) => setText(e.target.value)}
@@ -155,7 +155,8 @@ export default function StudentAssignmentDetailPage({
                     ))}
                   </ul>
                 )}
-                <Textarea
+                <textarea
+                  className="min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   rows={3}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}

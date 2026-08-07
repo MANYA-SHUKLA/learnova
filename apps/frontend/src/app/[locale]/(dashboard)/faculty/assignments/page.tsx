@@ -239,7 +239,7 @@ export default function FacultyAssignmentsPage() {
                     className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
                   >
                     <span className="truncate">{sub.assignmentId}</span>
-                    <Badge variant="destructive">{t('late')}</Badge>
+                    <Badge variant="danger">{t('late')}</Badge>
                   </div>
                 ))
               )}

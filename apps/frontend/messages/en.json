@@ -575,6 +575,7 @@
         "courses": "Courses",
         "enrollments": "Enrollments",
         "progress": "Progress",
+        "assignments": "Assignments",
         "bookmarks": "Bookmarks",
         "notes": "Notes",
         "activity": "Activity",
@@ -1502,6 +1503,48 @@
           "next": "Next",
           "loadError": "Unable to load activity."
         }
+      },
+      "assignments": {
+        "eyebrow": "Assessment",
+        "title": "My assignments",
+        "description": "Upcoming coursework, submissions, and grades.",
+        "stats": {
+          "upcoming": "Upcoming",
+          "submitted": "Submitted",
+          "pending": "Pending",
+          "late": "Late",
+          "grades": "Grades received"
+        },
+        "listTitle": "Published assignments",
+        "listDescription": "Assignments for your enrolled courses.",
+        "due": "Due",
+        "marks": "marks",
+        "open": "Open",
+        "previous": "Previous",
+        "next": "Next",
+        "error": "Unable to load assignments.",
+        "emptyTitle": "No assignments yet",
+        "emptyDescription": "Published assignments from your courses will appear here."
+      },
+      "assignmentDetail": {
+        "back": "Back to assignments",
+        "error": "Unable to load assignment.",
+        "due": "Due",
+        "marks": "marks",
+        "instructions": "Instructions",
+        "noDescription": "No description provided.",
+        "noInstructions": "No instructions provided.",
+        "submitTitle": "Your submission",
+        "submitDescription": "Write your response, save a draft, or submit for grading.",
+        "textPlaceholder": "Write your submission…",
+        "saveDraft": "Save draft",
+        "submit": "Submit",
+        "submitSuccess": "Submitted successfully.",
+        "commentsTitle": "Feedback & comments",
+        "noComments": "No comments yet",
+        "noCommentsDescription": "Faculty feedback will appear here.",
+        "commentPlaceholder": "Reply or ask a question…",
+        "addComment": "Add comment"
       }
     }
   },

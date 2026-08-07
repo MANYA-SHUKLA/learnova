@@ -20,11 +20,11 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **8** | **Enrollments** | ✅ Complete |
 | **8.25** | **Enrollment Integration Checkpoint** | ✅ Complete |
 | **8.5** | **Progress Tracking** | ✅ Complete |
-| **9** | **Assessment** | 🔜 Next |
+| **9** | **Assignment Management** | ✅ Complete |
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Progress Tracking (8.5) is **complete**. Next is **Assessment (Step 9)** — the start of the Academic Assessment Platform. Do **not** start Practice Labs until Assessment DoD is met. Enrollments remain the source of truth for each learner’s journey.
+**Hard rule:** Progress Tracking (8.5) is **complete**. Assignment Management (Step **9**) is **complete**. Do **not** start Practice Labs until quizzes (if any) or Labs step DoD — next after assignments is Labs only when Assessment coursework slice is done. Enrollments remain the source of truth for each learner’s journey.
 
 ### Platform phases (enterprise order)
 
@@ -35,7 +35,7 @@ LMS Core (7–8) ✅
   ↓
 Learning Progress (8.5) ✅
   ↓
-Assessment (9)  ← next
+Assessment / Assignments (9) ✅
   ↓
 Labs (10)
   ↓
@@ -400,30 +400,38 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 
 ---
 
-## Step 9 — Assessment (Academic Assessment Platform)
+## Step 9 — Assignment Management
 
-**Status:** 🔜 Next  
-**Goal:** First assessment layer after learning progress — assignments and quizzes (formative/summative coursework), submissions, scoring foundations, and role-scoped dashboards. This is **not** full examinations, gradebook, labs, or certificates.
+**Status:** ✅ Complete  
+**Goal:** Enterprise assignment coursework — create, publish, submit, grade, comment, rubrics, attachments, role dashboards. **Not** exams, labs, quizzes, projects, gradebook, or certificates.
 
-### In scope (planned)
+### Shipped
 
-- Assignments · quizzes · question banks (as needed for coursework assessment)
-- Student submit / attempt flows (enrollment-gated)
-- Faculty review / score foundations
-- Permissions, audit, events, seed, tests, docs
+- Models: Assignment · Submission · Attachment · Comment · Rubric · Grade · Audit
+- CRUD · Publish · Archive · Close · Submit · Grade · Comment · Import/Export
+- Manual / marks / percentage / pass-fail / rubric grading
+- File uploads (PDF · DOCX · ZIP · images · video) with validation
+- Search · filters · faculty / student / institution dashboards
+- Permissions (`assignment:read|write|manage`), audit, domain events, seed, tests, docs
+- UI: `/institution/assignments` · `/faculty/assignments` · `/student/assignments` · `/student/assignments/:id`
 
-### Explicitly out of scope for Step 9
+### Explicitly out of scope (Do not start)
 
 | Deferred to | Scope |
 | --- | --- |
 | **10** | Practice Labs / coding |
 | **11** | Projects / ideation |
-| **12** | Examinations (timed / proctored exam engine) |
-| **13** | Gradebook (aggregated academic grades) |
-| **14** | Certificates |
-| later | Attendance · AI generation |
+| later | Quizzes · Examinations · Gradebook · Certificates · Attendance · AI |
 
-**Hard rule:** Do **not** start Practice Labs (Step **10**) until Assessment DoD is met.
+### Documentation
+
+- `Assignment.md` · `AssignmentAPI.md` · `Submission.md` · `Rubrics.md` · `AssignmentPermissions.md`
+
+### Exit criteria (DoD — met)
+
+✓ Assignment Model · ✓ Submission Model · ✓ Rubrics · ✓ CRUD · ✓ Submission Flow · ✓ Manual Grading · ✓ Comments · ✓ Attachments · ✓ Search · ✓ Filters · ✓ Faculty / Student / Institution Dashboards · ✓ Validation · ✓ Audit · ✓ Events · ✓ Tests · ✓ Documentation  
+
+**Hard rule:** Assignment DoD is met. Do **not** start Practice Labs (Step **10**).
 
 ---
 
@@ -435,7 +443,7 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 | **8** | Enrollments | ✅ Complete |
 | **8.25** | Enrollment Integration Checkpoint | ✅ Complete |
 | **8.5** | Progress tracking | ✅ Complete |
-| **9** | **Assessment** (assignments · quizzes · coursework) | 🔜 Next |
+| **9** | **Assignment Management** | ✅ Complete |
 | **10** | Practice Labs / Coding | Planned |
 | **11** | Projects / Ideation | Planned |
 | **12** | Examinations | Planned |
@@ -446,7 +454,7 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
-**Boundary:** Progress (8.5) DoD met — **Assessment (9)** is next. Labs come after Assessment.
+**Boundary:** Assignment Management (9) DoD met — **do not start Practice Labs**.
 
 ---
 
@@ -458,4 +466,6 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 - [Enrollment](./Enrollment.md) · [EnrollmentWorkflow](./EnrollmentWorkflow.md)
 - [Progress](./Progress.md) · [CourseProgress](./CourseProgress.md) · [LessonProgress](./LessonProgress.md)
 - [Bookmarks](./Bookmarks.md) · [LearningActivity](./LearningActivity.md)
+- [Assignment](./Assignment.md) · [AssignmentAPI](./AssignmentAPI.md) · [Submission](./Submission.md)
+- [Rubrics](./Rubrics.md) · [AssignmentPermissions](./AssignmentPermissions.md)
 - [Auth](./Auth.md) · [Architecture](./Architecture.md)
