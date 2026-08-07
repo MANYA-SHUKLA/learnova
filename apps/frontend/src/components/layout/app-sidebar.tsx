@@ -95,7 +95,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: 'faculty', href: APP_ROUTES.INSTITUTION_FACULTY, icon: UserRound },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
-      { id: 'courses', href: APP_ROUTES.COURSES, icon: BookOpen },
+      { id: 'courses', href: APP_ROUTES.INSTITUTION_COURSES, icon: BookOpen },
     ],
   },
   {

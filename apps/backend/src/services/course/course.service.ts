@@ -374,9 +374,16 @@ export class CourseService {
     const newCourseCode = `${existing.courseCode}-COPY`;
     const newSlug = `${existing.slug}-copy-${Date.now()}`;
 
+    const existingObj = typeof existing.toObject === 'function' ? existing.toObject() : existing;
+    const { _id, createdAt, updatedAt, __v, ...rest } = existingObj as Record<string, unknown> & {
+      _id?: Types.ObjectId;
+      createdAt?: Date;
+      updatedAt?: Date;
+      __v?: number;
+    };
+
     const doc = await courseRepository.create({
-      ...existing.toObject(),
-      _id: undefined,
+      ...rest,
       courseCode: newCourseCode,
       slug: newSlug,
       title: `${existing.title} (Copy)`,
@@ -386,8 +393,6 @@ export class CourseService {
       createdBy: new Types.ObjectId(actor.userId),
       updatedBy: new Types.ObjectId(actor.userId),
       deletedAt: null,
-      createdAt: undefined,
-      updatedAt: undefined,
     });
 
     await this.audit('course.duplicated', actor, institutionId, String(doc._id), {

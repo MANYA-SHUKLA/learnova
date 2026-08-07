@@ -961,6 +961,74 @@
         },
         "emptyTitle": "No students yet",
         "emptyDescription": "Add your first student or import a CSV to populate the directory."
+      },
+      "courses": {
+        "eyebrow": "Learning",
+        "title": "Courses",
+        "description": "Manage course catalog, academic mappings, faculty assignments, and enrollment settings.",
+        "addCourse": "Add course",
+        "catalog": "Catalog",
+        "catalogDescription": "Search, filter, and run bulk actions.",
+        "searchPlaceholder": "Search title, code, category…",
+        "stats": {
+          "total": "Total",
+          "published": "Published",
+          "draft": "Draft",
+          "review": "In Review",
+          "archived": "Archived",
+          "programs": "Programs"
+        },
+        "table": {
+          "code": "Code",
+          "title": "Title",
+          "category": "Category",
+          "difficulty": "Difficulty",
+          "credits": "Credits",
+          "status": "Status",
+          "visibility": "Visibility"
+        },
+        "bulkSelected": "{count} selected",
+        "bulkPublish": "Publish",
+        "bulkUnpublish": "Unpublish",
+        "bulkArchive": "Archive",
+        "pagination": {
+          "showing": "Showing {start}–{end} of {total}"
+        },
+        "create": {
+          "eyebrow": "Courses",
+          "title": "Add course"
+        },
+        "edit": {
+          "eyebrow": "Courses",
+          "title": "Edit {name}",
+          "notFound": "Course not found."
+        },
+        "import": {
+          "eyebrow": "Courses",
+          "title": "Import CSV",
+          "description": "Upload, preview, validate, and import. Failed imports are rolled back.",
+          "uploadTitle": "CSV upload",
+          "uploadDescription": "Required columns: courseCode, slug, title, category, difficulty, language, credits, status, visibility.",
+          "confirmImport": "Confirm import",
+          "importing": "Importing…",
+          "previewFailed": "Preview failed",
+          "importFailed": "Import failed and was rolled back",
+          "totalRows": "Total rows: {count}",
+          "valid": "Valid: {count}",
+          "invalid": "Invalid: {count}",
+          "duplicates": "Duplicates in file: {count}",
+          "rowError": "Row {row}{field}: {message}"
+        },
+        "export": {
+          "eyebrow": "Courses",
+          "title": "Export",
+          "description": "Download the course catalog as CSV, Excel-compatible, or PDF. Use print for a hard copy.",
+          "formatsTitle": "Export formats",
+          "formatsDescription": "Exports are audited as courses.export."
+        },
+        "emptyTitle": "No courses yet",
+        "emptyDescription": "Add your first course or import a CSV to populate the catalog.",
+        "loadError": "Unable to load courses."
       }
     },
     "sessions": {

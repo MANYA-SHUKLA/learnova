@@ -961,6 +961,74 @@
         },
         "emptyTitle": "अभी कोई छात्र नहीं",
         "emptyDescription": "अपना पहला छात्र जोड़ें या निर्देशिका भरने के लिए CSV आयात करें।"
+      },
+      "courses": {
+        "eyebrow": "शिक्षा",
+        "title": "पाठ्यक्रम",
+        "description": "पाठ्यक्रम कैटलॉग, शैक्षणिक मानचित्रण, संकाय असाइनमेंट और नामांकन सेटिंग्स प्रबंधित करें।",
+        "addCourse": "पाठ्यक्रम जोड़ें",
+        "catalog": "कैटलॉग",
+        "catalogDescription": "खोजें, फ़िल्टर करें और बल्क कार्रवाई करें।",
+        "searchPlaceholder": "शीर्षक, कोड, श्रेणी खोजें…",
+        "stats": {
+          "total": "कुल",
+          "published": "प्रकाशित",
+          "draft": "ड्राफ्ट",
+          "review": "समीक्षाधीन",
+          "archived": "संग्रहीत",
+          "programs": "कार्यक्रम"
+        },
+        "table": {
+          "code": "कोड",
+          "title": "शीर्षक",
+          "category": "श्रेणी",
+          "difficulty": "कठिनाई",
+          "credits": "क्रेडिट",
+          "status": "स्थिति",
+          "visibility": "दृश्यता"
+        },
+        "bulkSelected": "{count} चयनित",
+        "bulkPublish": "प्रकाशित करें",
+        "bulkUnpublish": "अप्रकाशित करें",
+        "bulkArchive": "संग्रहीत करें",
+        "pagination": {
+          "showing": "{total} में से {start}–{end} दिखा रहे हैं"
+        },
+        "create": {
+          "eyebrow": "पाठ्यक्रम",
+          "title": "पाठ्यक्रम जोड़ें"
+        },
+        "edit": {
+          "eyebrow": "पाठ्यक्रम",
+          "title": "{name} संपादित करें",
+          "notFound": "पाठ्यक्रम नहीं मिला।"
+        },
+        "import": {
+          "eyebrow": "पाठ्यक्रम",
+          "title": "CSV आयात करें",
+          "description": "अपलोड करें, पूर्वावलोकन करें, सत्यापित करें और आयात करें। विफल आयात रोलबैक हो जाते हैं।",
+          "uploadTitle": "CSV अपलोड",
+          "uploadDescription": "आवश्यक कॉलम: courseCode, slug, title, category, difficulty, language, credits, status, visibility.",
+          "confirmImport": "आयात की पुष्टि करें",
+          "importing": "आयात किया जा रहा है…",
+          "previewFailed": "पूर्वावलोकन विफल",
+          "importFailed": "आयात विफल और रोलबैक किया गया",
+          "totalRows": "कुल पंक्तियाँ: {count}",
+          "valid": "मान्य: {count}",
+          "invalid": "अमान्य: {count}",
+          "duplicates": "फ़ाइल में डुप्लिकेट: {count}",
+          "rowError": "पंक्ति {row}{field}: {message}"
+        },
+        "export": {
+          "eyebrow": "पाठ्यक्रम",
+          "title": "निर्यात",
+          "description": "पाठ्यक्रम कैटलॉग को CSV, Excel-संगत या PDF के रूप में डाउनलोड करें। हार्ड कॉपी के लिए प्रिंट का उपयोग करें।",
+          "formatsTitle": "निर्यात प्रारूप",
+          "formatsDescription": "निर्यात को courses.export के रूप में ऑडिट किया जाता है।"
+        },
+        "emptyTitle": "अभी तक कोई पाठ्यक्रम नहीं",
+        "emptyDescription": "अपना पहला पाठ्यक्रम जोड़ें या कैटलॉग को पॉप्युलेट करने के लिए CSV आयात करें।",
+        "loadError": "पाठ्यक्रम लोड करने में असमर्थ।"
       }
     },
     "sessions": {
