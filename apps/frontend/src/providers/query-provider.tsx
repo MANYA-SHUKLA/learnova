@@ -12,6 +12,10 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             staleTime: 60_000,
             retry: 1,
             refetchOnWindowFocus: false,
+            // After a backend outage/fix, remount must not keep a cached error forever
+            refetchOnMount: (query) =>
+              query.state.status === 'error' ? 'always' : true,
+            retryOnMount: true,
           },
           mutations: {
             retry: 0,

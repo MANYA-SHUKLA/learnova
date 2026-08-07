@@ -54,6 +54,8 @@
     "import": "Import",
     "view": "View",
     "actions": "Actions",
+    "all": "All",
+    "clear": "Clear",
     "empty": "No items found",
     "refresh": "Refresh",
     "liveSync": "Live sync",
