@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { getTranslations } from 'next-intl/server';
 import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { siteContainer } from '@/lib/layout';
@@ -6,9 +7,9 @@ import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
 const LEGAL_NAV = [
-  { href: '/privacy', label: 'Privacy' },
-  { href: '/terms', label: 'Terms' },
-  { href: '/security', label: 'Security' },
+  { href: '/privacy', labelKey: 'privacy' },
+  { href: '/terms', labelKey: 'terms' },
+  { href: '/security', labelKey: 'security' },
 ] as const;
 
 interface LegalPageShellProps {
@@ -19,13 +20,16 @@ interface LegalPageShellProps {
   children: ReactNode;
 }
 
-export function LegalPageShell({
+export async function LegalPageShell({
   title,
   description,
-  updated = 'August 2026',
+  updated,
   activeHref,
   children,
 }: LegalPageShellProps) {
+  const t = await getTranslations('marketing.legal.shell');
+  const updatedLabel = t('lastUpdated', { date: updated ?? t('updatedDate') });
+
   return (
     <>
       <SiteHeader />
@@ -37,7 +41,7 @@ export function LegalPageShell({
           />
           <div className={siteContainer('relative pb-12 pt-16 sm:pb-16 sm:pt-20')}>
             <p className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-              Legal
+              {t('eyebrow')}
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
               {title}
@@ -45,12 +49,9 @@ export function LegalPageShell({
             <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               {description}
             </p>
-            <p className="mt-3 text-sm text-muted-foreground">Last updated: {updated}</p>
+            <p className="mt-3 text-sm text-muted-foreground">{updatedLabel}</p>
 
-            <nav
-              aria-label="Legal pages"
-              className="mt-8 flex flex-wrap gap-2"
-            >
+            <nav aria-label={t('navAria')} className="mt-8 flex flex-wrap gap-2">
               {LEGAL_NAV.map((item) => {
                 const active = item.href === activeHref;
                 return (
@@ -64,7 +65,7 @@ export function LegalPageShell({
                         : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground',
                     )}
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 );
               })}
