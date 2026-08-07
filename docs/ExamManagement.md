@@ -69,5 +69,5 @@ Gradebook sync · Certificates · AI question generation · Notifications
 
 ## Related
 
-- [ExamProctoring.md](./ExamProctoring.md) · [ExamAPI.md](./ExamAPI.md) · [ExamPermissions.md](./ExamPermissions.md)
+- [ExamEnterpriseFeatures.md](./ExamEnterpriseFeatures.md) · [ExamProctoring.md](./ExamProctoring.md) · [ExamAPI.md](./ExamAPI.md) · [ExamPermissions.md](./ExamPermissions.md)
 - [QuizManagement.md](./QuizManagement.md) · [AssessmentCore.md](./AssessmentCore.md)

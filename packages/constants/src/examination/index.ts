@@ -32,6 +32,7 @@ export const EXAM_ATTEMPT_STATUSES = [
   'scheduled',
   'checked_in',
   'started',
+  'disconnected',
   'submitted',
   'completed',
   'expired',
@@ -101,6 +102,26 @@ export const EXAM_AUTO_ACTIONS = [
 
 export const EXAM_ATTENDANCE_STATUSES = ['present', 'absent', 'late'] as const;
 
+export const INVIGILATOR_ROLES = ['view_only', 'monitor', 'intervene'] as const;
+
+export const EXAM_INCIDENT_TYPES = [
+  'exam.published',
+  'exam.version_created',
+  'attempt.checked_in',
+  'attempt.started',
+  'attempt.disconnected',
+  'attempt.reconnected',
+  'attempt.submitted',
+  'attempt.terminated',
+  'warning.issued',
+  'violation.recorded',
+  'proctor.flagged',
+  'proctor.cleared',
+  'accessibility.applied',
+] as const;
+
+export const ACCESSIBILITY_FONT_SIZES = ['default', 'large', 'xlarge'] as const;
+
 export const EXAM_DEFAULTS = {
   PASSING_MARKS: 40,
   TOTAL_MARKS: 100,
@@ -109,4 +130,6 @@ export const EXAM_DEFAULTS = {
   LATE_ENTRY_MINUTES: 15,
   GRACE_PERIOD_MINUTES: 5,
   MAX_TAB_SWITCHES: 3,
+  RECONNECTION_GRACE_MINUTES: 5,
+  EXTENDED_TIME_PERCENT: 25,
 } as const;

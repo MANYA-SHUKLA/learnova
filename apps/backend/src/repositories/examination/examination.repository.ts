@@ -21,6 +21,21 @@ import { ExamAttendanceModel, type ExamAttendanceDocument } from '../../models/e
 import { ExamPolicyModel, type ExamPolicyDocument } from '../../models/exam-policy.model.js';
 import { ExamDeviceModel, type ExamDeviceDocument } from '../../models/exam-device.model.js';
 import { ExamRoomModel, type ExamRoomDocument } from '../../models/exam-room.model.js';
+import { ExamBlueprintModel, type ExamBlueprintDocument } from '../../models/exam-blueprint.model.js';
+import { ExamTemplateModel, type ExamTemplateDocument } from '../../models/exam-template.model.js';
+import {
+  ExamInvigilatorModel,
+  type ExamInvigilatorDocument,
+} from '../../models/exam-invigilator.model.js';
+import {
+  ExamIncidentModel,
+  type ExamIncidentDocument,
+} from '../../models/exam-incident.model.js';
+import {
+  ExamAccessibilityModel,
+  type ExamAccessibilityDocument,
+} from '../../models/exam-accessibility.model.js';
+import { ExamVersionModel, type ExamVersionDocument } from '../../models/exam-version.model.js';
 import { QuestionModel, type QuestionDocument } from '../../models/question.model.js';
 
 export interface ExamListResult {
@@ -698,6 +713,169 @@ export class ExaminationRepository {
       attempts,
       recentViolations: violations,
     };
+  }
+
+  async createBlueprint(data: Record<string, unknown>): Promise<ExamBlueprintDocument> {
+    return ExamBlueprintModel.create(data);
+  }
+
+  async listBlueprints(institutionId: string): Promise<ExamBlueprintDocument[]> {
+    return ExamBlueprintModel.find({ institutionId: toObjectId(institutionId), deletedAt: null })
+      .sort({ name: 1 })
+      .exec();
+  }
+
+  async findBlueprintById(
+    institutionId: string,
+    id: string,
+  ): Promise<ExamBlueprintDocument | null> {
+    return ExamBlueprintModel.findOne({
+      _id: toObjectId(id),
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    }).exec();
+  }
+
+  async createTemplate(data: Record<string, unknown>): Promise<ExamTemplateDocument> {
+    return ExamTemplateModel.create(data);
+  }
+
+  async listTemplates(institutionId: string): Promise<ExamTemplateDocument[]> {
+    return ExamTemplateModel.find({ institutionId: toObjectId(institutionId), deletedAt: null })
+      .sort({ name: 1 })
+      .exec();
+  }
+
+  async findTemplateById(
+    institutionId: string,
+    id: string,
+  ): Promise<ExamTemplateDocument | null> {
+    return ExamTemplateModel.findOne({
+      _id: toObjectId(id),
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    }).exec();
+  }
+
+  async upsertInvigilator(data: Record<string, unknown>): Promise<ExamInvigilatorDocument> {
+    return ExamInvigilatorModel.findOneAndUpdate(
+      {
+        institutionId: data.institutionId,
+        examId: data.examId,
+        userId: data.userId,
+      },
+      { $set: data },
+      { upsert: true, new: true },
+    ).exec() as Promise<ExamInvigilatorDocument>;
+  }
+
+  async listInvigilators(
+    institutionId: string,
+    examId: string,
+  ): Promise<ExamInvigilatorDocument[]> {
+    return ExamInvigilatorModel.find({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+    }).exec();
+  }
+
+  async findInvigilator(
+    institutionId: string,
+    examId: string,
+    userId: string,
+  ): Promise<ExamInvigilatorDocument | null> {
+    return ExamInvigilatorModel.findOne({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+      userId: toObjectId(userId),
+    }).exec();
+  }
+
+  async createIncident(data: Record<string, unknown>): Promise<ExamIncidentDocument> {
+    return ExamIncidentModel.create(data);
+  }
+
+  async listIncidents(
+    institutionId: string,
+    examId: string,
+    attemptId?: string,
+  ): Promise<ExamIncidentDocument[]> {
+    const filter: Record<string, unknown> = {
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+    };
+    if (attemptId) filter.attemptId = toObjectId(attemptId);
+    return ExamIncidentModel.find(filter).sort({ createdAt: 1 }).limit(500).exec();
+  }
+
+  async upsertAccessibility(data: Record<string, unknown>): Promise<ExamAccessibilityDocument> {
+    return ExamAccessibilityModel.findOneAndUpdate(
+      {
+        institutionId: data.institutionId,
+        examId: data.examId,
+        studentId: data.studentId,
+      },
+      { $set: data },
+      { upsert: true, new: true },
+    ).exec() as Promise<ExamAccessibilityDocument>;
+  }
+
+  async findAccessibility(
+    institutionId: string,
+    examId: string,
+    studentId: string,
+  ): Promise<ExamAccessibilityDocument | null> {
+    return ExamAccessibilityModel.findOne({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+      studentId: toObjectId(studentId),
+    }).exec();
+  }
+
+  async listAccessibility(
+    institutionId: string,
+    examId: string,
+  ): Promise<ExamAccessibilityDocument[]> {
+    return ExamAccessibilityModel.find({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+    }).exec();
+  }
+
+  async createExamVersion(data: Record<string, unknown>): Promise<ExamVersionDocument> {
+    return ExamVersionModel.create(data);
+  }
+
+  async findExamVersionById(
+    institutionId: string,
+    id: string,
+  ): Promise<ExamVersionDocument | null> {
+    return ExamVersionModel.findOne({
+      _id: toObjectId(id),
+      institutionId: toObjectId(institutionId),
+    }).exec();
+  }
+
+  async listExamVersions(
+    institutionId: string,
+    examId: string,
+  ): Promise<ExamVersionDocument[]> {
+    return ExamVersionModel.find({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+    })
+      .sort({ versionNumber: -1 })
+      .exec();
+  }
+
+  async findAttemptBySessionToken(
+    institutionId: string,
+    sessionToken: string,
+  ): Promise<ExamAttemptDocument | null> {
+    return ExamAttemptModel.findOne({
+      institutionId: toObjectId(institutionId),
+      sessionToken,
+    }).exec();
   }
 }
 

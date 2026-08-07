@@ -122,6 +122,23 @@ export const examinationApi = {
   institutionDashboard: () =>
     apiClient.get<ExamInstitutionDashboard>(`${base}/dashboard/institution`),
 
+  resumeAttempt: (body: { sessionToken: string }) =>
+    apiClient.post<{
+      attempt: ExamAttempt;
+      questions: unknown[];
+      answers: unknown[];
+      remainingSeconds: number | null;
+      accessibilityFontSize: string;
+    }>(`${base}/attempts/resume`, body),
+
+  heartbeatAttempt: (body: { sessionToken: string; connected: boolean }) =>
+    apiClient.post(`${base}/attempts/heartbeat`, body),
+
+  getIncidentTimeline: (examId: string, attemptId?: string) =>
+    apiClient.get<Array<{ id: string; incidentType: string; message: string | null; createdAt: string }>>(
+      `${base}/${examId}/incidents${attemptId ? `?attemptId=${attemptId}` : ''}`,
+    ),
+
   getLiveMonitoring: (examId: string) =>
     apiClient.get<{
       examId: string;

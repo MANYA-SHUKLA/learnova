@@ -387,3 +387,135 @@ export async function reportStudentViolation(req: Request, res: Response, next: 
     next(err);
   }
 }
+
+export async function createBlueprint(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.createBlueprint(req.body, actorFrom(req));
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listBlueprints(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listBlueprints(actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function applyBlueprint(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.applyBlueprint(req.body, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createTemplate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.createTemplate(req.body, actorFrom(req));
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listTemplates(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listTemplates(actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createExamFromTemplate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.createExamFromTemplate(req.body, actorFrom(req));
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function assignInvigilators(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.assignInvigilators(req.body, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listInvigilators(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listInvigilators(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getIncidentTimeline(req: Request, res: Response, next: NextFunction) {
+  try {
+    const attemptId = typeof req.query.attemptId === 'string' ? req.query.attemptId : undefined;
+    const data = await examinationService.getIncidentTimeline(
+      req.params.id as string,
+      actorFrom(req),
+      attemptId,
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function upsertAccessibility(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.upsertAccessibility(req.body, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listAccessibility(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listAccessibility(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resumeAttempt(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.resumeAttempt(req.body, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function heartbeatAttempt(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.heartbeatAttempt(req.body, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listExamVersions(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listExamVersions(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+

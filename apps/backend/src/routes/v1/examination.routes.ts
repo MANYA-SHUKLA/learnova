@@ -2,18 +2,26 @@ import { Router, type RequestHandler } from 'express';
 import { PERMISSIONS } from '@learnova/constants';
 import {
   assignSeatingSchema,
+  assignInvigilatorsSchema,
+  applyExamBlueprintSchema,
   attemptIdParamsSchema,
   checkInExamSchema,
+  createExamBlueprintSchema,
+  createExamFromTemplateSchema,
   createExamSchema,
+  createExamTemplateSchema,
   examBulkActionSchema,
   examIdParamsSchema,
   examListQuerySchema,
+  heartbeatExamAttemptSchema,
   proctorEventSchema,
   reportStudentViolationSchema,
+  resumeExamAttemptSchema,
   startExamAttemptSchema,
   submitExamAnswerSchema,
   submitExamSchema,
   updateExamSchema,
+  upsertExamAccessibilitySchema,
 } from '@learnova/validation';
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
@@ -44,6 +52,87 @@ const proctorAuth = [
 examinationRoutes.get('/examinations/policies', ...readAuth, ctrl.listPolicies);
 
 examinationRoutes.post('/examinations/policies', ...writeAuth, ctrl.createPolicy);
+
+examinationRoutes.get('/examinations/blueprints', ...readAuth, ctrl.listBlueprints);
+examinationRoutes.post(
+  '/examinations/blueprints',
+  ...writeAuth,
+  validate(createExamBlueprintSchema),
+  ctrl.createBlueprint,
+);
+examinationRoutes.post(
+  '/examinations/blueprints/apply',
+  ...writeAuth,
+  validate(applyExamBlueprintSchema),
+  ctrl.applyBlueprint,
+);
+
+examinationRoutes.get('/examinations/templates', ...readAuth, ctrl.listTemplates);
+examinationRoutes.post(
+  '/examinations/templates',
+  ...writeAuth,
+  validate(createExamTemplateSchema),
+  ctrl.createTemplate,
+);
+examinationRoutes.post(
+  '/examinations/templates/create-exam',
+  ...writeAuth,
+  validate(createExamFromTemplateSchema),
+  ctrl.createExamFromTemplate,
+);
+
+examinationRoutes.post(
+  '/examinations/invigilators/assign',
+  ...writeAuth,
+  validate(assignInvigilatorsSchema),
+  ctrl.assignInvigilators,
+);
+examinationRoutes.get(
+  '/examinations/:id/invigilators',
+  ...readAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.listInvigilators,
+);
+
+examinationRoutes.get(
+  '/examinations/:id/incidents',
+  ...readAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.getIncidentTimeline,
+);
+
+examinationRoutes.post(
+  '/examinations/accessibility',
+  ...writeAuth,
+  validate(upsertExamAccessibilitySchema),
+  ctrl.upsertAccessibility,
+);
+examinationRoutes.get(
+  '/examinations/:id/accessibility',
+  ...readAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.listAccessibility,
+);
+
+examinationRoutes.post(
+  '/examinations/attempts/resume',
+  ...writeAuth,
+  validate(resumeExamAttemptSchema),
+  ctrl.resumeAttempt,
+);
+examinationRoutes.post(
+  '/examinations/attempts/heartbeat',
+  ...writeAuth,
+  validate(heartbeatExamAttemptSchema),
+  ctrl.heartbeatAttempt,
+);
+
+examinationRoutes.get(
+  '/examinations/:id/versions',
+  ...readAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.listExamVersions,
+);
 
 // ------------------------------------------------------------------ collection
 

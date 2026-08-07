@@ -54,4 +54,4 @@ Permissions: `examination:read` · `examination:write` · `examination:manage` �
 | POST | `/examinations/policies` | write | Create policy template |
 | POST | `/examinations/attempts/:id/violations` | write | Student reports violation (secure browser) |
 
-See [ExamProctoring.md](./ExamProctoring.md) for proctor endpoints. See [LiveMonitoring.md](./LiveMonitoring.md) for Socket.IO events.
+See [ExamProctoring.md](./ExamProctoring.md) for proctor endpoints. See [LiveMonitoring.md](./LiveMonitoring.md) for Socket.IO events. See [ExamEnterpriseFeatures.md](./ExamEnterpriseFeatures.md) for blueprints, templates, invigilation roles, incident timeline, reconnection, accessibility, and versioning.

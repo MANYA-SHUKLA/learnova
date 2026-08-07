@@ -235,7 +235,9 @@ export {
   validateSecureBrowser,
   evaluateProctorViolation,
   examinationEngine,
+  selectQuestionsByBlueprint,
 } from './examination-policies.js';
+export type { BlueprintSlot, SelectableQuestionRow } from './blueprint-selection.js';
 
 import { evaluateQuestionAnswer, scoreQuestionAttempt } from './question-evaluation.js';
 import {

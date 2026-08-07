@@ -5,6 +5,8 @@ import {
   renderQuestionForReview,
   selectQuestionsForActivity,
 } from './question-renderer.js';
+export { selectQuestionsByBlueprint } from './blueprint-selection.js';
+import { selectQuestionsByBlueprint } from './blueprint-selection.js';
 import {
   canStartQuestionAttempt,
   computeAttemptDurationSeconds,
@@ -143,4 +145,5 @@ export const examinationEngine = {
   canStartExamAttempt,
   validateSecureBrowser,
   evaluateProctorViolation,
+  selectQuestionsByBlueprint,
 };

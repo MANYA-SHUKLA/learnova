@@ -11,7 +11,7 @@ import {
 } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { ErrorState } from '@/features/institution';
 import {
@@ -22,6 +22,7 @@ import {
   useReportViolationMutation,
   useStartExamAttemptMutation,
   useSubmitExamMutation,
+  examinationApi,
 } from '@/features/examination';
 import { useExamSocket } from '@/features/examination/hooks/use-exam-socket';
 import { useProctorMedia } from '@/features/examination/hooks/use-proctor-media';
@@ -81,6 +82,37 @@ export default function StudentExamDetailPage() {
     enabled: Boolean(attemptId),
   });
 
+  useEffect(() => {
+    if (!attemptId || submitted) return;
+    const token = sessionStorage.getItem(`exam-session-${examId}`);
+    if (!token) return;
+
+    const interval = window.setInterval(() => {
+      void examinationApi.heartbeatAttempt({ sessionToken: token, connected: navigator.onLine });
+    }, 15_000);
+
+    const onOffline = () => {
+      void examinationApi.heartbeatAttempt({ sessionToken: token, connected: false });
+    };
+    const onOnline = () => {
+      void examinationApi
+        .resumeAttempt({ sessionToken: token })
+        .then((data) => {
+          setQuestions((data.questions as typeof questions) ?? []);
+        })
+        .catch(() => undefined);
+    };
+
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('online', onOnline);
+    };
+  }, [attemptId, examId, submitted]);
+
   const handleCheckIn = async () => {
     await checkInMutation.mutateAsync({ examId });
     setCheckedIn(true);
@@ -94,6 +126,9 @@ export default function StudentExamDetailPage() {
     setAttemptId(data.attempt.id);
     setQuestions((data.questions as typeof questions) ?? []);
     setActiveAttempt(examId, data.attempt.id);
+    if ('sessionToken' in data && typeof data.sessionToken === 'string') {
+      sessionStorage.setItem(`exam-session-${examId}`, data.sessionToken);
+    }
   };
 
   const handleSubmit = async () => {

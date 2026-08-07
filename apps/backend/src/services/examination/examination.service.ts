@@ -48,6 +48,7 @@ import {
   parseDate,
   toExamScheduleDto,
 } from './examination.helpers.js';
+import * as enterprise from './examination-enterprise.js';
 
 export interface ActorContext {
   userId: string;
@@ -600,6 +601,15 @@ export class ExaminationService {
     });
 
     if (to === 'published') {
+      await enterprise.createPublishedExamVersion(institutionId, id, actor.userId);
+      await enterprise.recordExamIncident({
+        institutionId,
+        examId: id,
+        actorId: actor.userId,
+        incidentType: 'exam.published',
+        message: 'Exam published',
+        metadata: { from, to },
+      });
       eventBus.emit(EVENTS.EXAM_PUBLISHED, { examId: id, institutionId });
     } else if (to === 'scheduled') {
       eventBus.emit(EVENTS.EXAM_SCHEDULED, { examId: id, institutionId });
@@ -876,6 +886,15 @@ export class ExaminationService {
       studentId: String(student._id),
     });
 
+    await enterprise.recordExamIncident({
+      institutionId,
+      examId: input.examId,
+      attemptId: String(attempt._id),
+      actorId: actor.userId,
+      incidentType: 'attempt.checked_in',
+      message: 'Student checked in',
+    });
+
     return toDto(attempt);
   }
 
@@ -890,18 +909,20 @@ export class ExaminationService {
     const exam = await examinationRepository.findExamById(institutionId, input.examId);
     if (!exam) throw new NotFoundError('Exam not found');
 
+    const examContext = await enterprise.resolveVersionSnapshot(institutionId, exam);
+
     if (!['published', 'in_progress'].includes(exam.status)) {
       throw new ConflictError('Exam is not available for attempts');
     }
 
-    const schedule = scheduleFromDoc(exam);
+    const schedule = scheduleFromDoc(examContext);
     const window = examinationEngine.canStartExamAttempt(schedule);
     if (!window.allowed) {
       throw new ConflictError(window.reason ?? 'Exam window is not open');
     }
 
     const browserCheck = examinationEngine.validateSecureBrowser(
-      exam.proctoring.secureBrowser,
+      examContext.proctoring.secureBrowser,
       input.secureBrowserAcknowledged ?? false,
     );
     if (!browserCheck.allowed) {
@@ -916,36 +937,25 @@ export class ExaminationService {
       String(student._id),
     );
     if (
-      !examinationEngine.canStartQuestionAttempt(existingCount, exam.rules.attemptLimit)
+      !examinationEngine.canStartQuestionAttempt(existingCount, examContext.rules.attemptLimit)
     ) {
       throw new ConflictError('Maximum attempt limit reached');
     }
 
     const attemptNumber = examinationEngine.nextQuestionAttemptNumber(existingCount);
     const startedAt = new Date();
+    const accommodation = await examinationRepository.findAccessibility(
+      institutionId,
+      input.examId,
+      String(student._id),
+    );
+    const extendedDurationMinutes = enterprise.computeExtendedDurationMinutes(
+      examContext.rules.durationMinutes,
+      accommodation,
+    );
+    const token = enterprise.sessionToken();
 
-    const attempt = await examinationRepository.createAttempt({
-      institutionId: oid(institutionId),
-      examId: exam._id,
-      studentId: student._id,
-      courseId: exam.courseId,
-      attemptNumber,
-      startedAt,
-      status: 'started',
-      score: 0,
-      percentage: 0,
-      timeTakenSeconds: 0,
-      autoSubmitted: false,
-      violationCount: 0,
-    });
-
-    if (exam.status === 'published') {
-      await examinationRepository.updateExamById(institutionId, input.examId, {
-        status: 'in_progress',
-      });
-    }
-
-    const questionIds = exam.questionIds.map(String);
+    const questionIds = examContext.questionIds.map(String);
     const sections = await examinationRepository.listSectionsByExam(institutionId, input.examId);
     for (const section of sections) {
       for (const qid of section.questionIds) {
@@ -962,18 +972,74 @@ export class ExaminationService {
         randomizeQuestions: s.randomizeQuestions,
         randomQuestionCount: s.randomQuestionCount ?? null,
       })),
-      exam.rules.shuffleQuestions,
+      examContext.rules.shuffleQuestions,
     );
+
+    const attempt = await examinationRepository.createAttempt({
+      institutionId: oid(institutionId),
+      examId: exam._id,
+      studentId: student._id,
+      courseId: exam.courseId,
+      attemptNumber,
+      startedAt,
+      status: 'started',
+      score: 0,
+      percentage: 0,
+      timeTakenSeconds: 0,
+      autoSubmitted: false,
+      violationCount: 0,
+      examVersionId: exam.publishedVersionId ?? null,
+      selectedQuestionIds: selectedIds.map(oid),
+      sessionToken: token,
+      lastSeenAt: startedAt,
+      extendedDurationMinutes,
+      accessibilityFontSize: accommodation?.fontSize ?? 'default',
+    });
+
+    if (exam.status === 'published') {
+      await examinationRepository.updateExamById(institutionId, input.examId, {
+        status: 'in_progress',
+      });
+    }
+
     const questions = await examinationRepository.findQuestionsByIds(
       institutionId,
       selectedIds,
     );
     const rendered = questions.map((q) =>
       examinationEngine.renderQuestionForAttempt(q, {
-        shuffleOptions: exam.rules.shuffleOptions,
+        shuffleOptions: examContext.rules.shuffleOptions,
         hideCorrectAnswers: true,
       }),
     );
+
+    await enterprise.recordExamIncident({
+      institutionId,
+      examId: input.examId,
+      attemptId: String(attempt._id),
+      actorId: actor.userId,
+      incidentType: 'attempt.started',
+      message: 'Exam attempt started',
+      metadata: {
+        attemptNumber,
+        examVersionId: exam.publishedVersionId ? String(exam.publishedVersionId) : null,
+      },
+    });
+
+    if (accommodation) {
+      await enterprise.recordExamIncident({
+        institutionId,
+        examId: input.examId,
+        attemptId: String(attempt._id),
+        actorId: actor.userId,
+        incidentType: 'accessibility.applied',
+        message: 'Accessibility accommodations applied for attempt',
+        metadata: {
+          extendedDurationMinutes,
+          fontSize: accommodation.fontSize,
+        },
+      });
+    }
 
     await this.audit('attempt.started', actor, institutionId, {
       examId: input.examId,
@@ -1001,7 +1067,7 @@ export class ExaminationService {
           attemptId: String(attempt._id),
           studentId: String(student._id),
           startedAt,
-          durationMinutes: exam.rules.durationMinutes,
+          durationMinutes: examContext.rules.durationMinutes + extendedDurationMinutes,
         },
         startedAt,
       ),
@@ -1010,17 +1076,19 @@ export class ExaminationService {
     return {
       attempt: toDto(attempt),
       questions: rendered,
+      sessionToken: token,
+      accessibilityFontSize: accommodation?.fontSize ?? 'default',
       remainingSeconds: examinationEngine.remainingAttemptSeconds(
         {
           activityId: input.examId,
           attemptId: String(attempt._id),
           studentId: String(student._id),
           startedAt,
-          durationMinutes: exam.rules.durationMinutes,
+          durationMinutes: examContext.rules.durationMinutes + extendedDurationMinutes,
         },
         startedAt,
       ),
-      proctoring: exam.proctoring,
+      proctoring: examContext.proctoring,
     };
   }
 
@@ -1054,7 +1122,8 @@ export class ExaminationService {
         attemptId,
         studentId: String(student._id),
         startedAt: attempt.startedAt!,
-        durationMinutes: exam.rules.durationMinutes,
+        durationMinutes:
+          exam.rules.durationMinutes + (attempt.extendedDurationMinutes ?? 0),
       },
       new Date(),
     );
@@ -1213,6 +1282,16 @@ export class ExaminationService {
       studentId: String(student._id),
       score: result.score,
       passed: result.passed,
+    });
+
+    await enterprise.recordExamIncident({
+      institutionId,
+      examId: String(exam._id),
+      attemptId: input.attemptId,
+      actorId: actor.userId,
+      incidentType: 'attempt.submitted',
+      message: 'Exam attempt submitted',
+      metadata: { score: result.score, passed: result.passed },
     });
 
     const response: Record<string, unknown> = {
@@ -1424,6 +1503,10 @@ export class ExaminationService {
   }
 
   async flagAttempt(attemptId: string, message: string | null, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const attempt = await examinationRepository.findAttemptById(institutionId, attemptId);
+    if (!attempt) throw new NotFoundError('Attempt not found');
+    await enterprise.assertInvigilatorPermission(String(attempt.examId), actor, 'monitor');
     return this.logProctorEvent(
       {
         attemptId,
@@ -1453,6 +1536,7 @@ export class ExaminationService {
     const institutionId = requireTenant(actor);
     const attempt = await examinationRepository.findAttemptById(institutionId, attemptId);
     if (!attempt) throw new NotFoundError('Attempt not found');
+    await enterprise.assertInvigilatorPermission(String(attempt.examId), actor, 'intervene');
 
     const updated = await examinationRepository.updateAttemptById(institutionId, attemptId, {
       status: 'terminated',
@@ -1800,6 +1884,75 @@ export class ExaminationService {
       ...(input.requireMicrophone !== undefined ? { requireMicrophone: input.requireMicrophone } : {}),
     });
     return toDto(doc);
+  }
+
+  async createBlueprint(input: import('@learnova/validation').CreateExamBlueprintInput, actor: ActorContext) {
+    return enterprise.createBlueprint(input, actor);
+  }
+
+  async listBlueprints(actor: ActorContext) {
+    return enterprise.listBlueprints(actor);
+  }
+
+  async applyBlueprint(input: import('@learnova/validation').ApplyExamBlueprintInput, actor: ActorContext) {
+    return enterprise.applyBlueprint(input, actor);
+  }
+
+  async createTemplate(input: import('@learnova/validation').CreateExamTemplateInput, actor: ActorContext) {
+    return enterprise.createTemplate(input, actor);
+  }
+
+  async listTemplates(actor: ActorContext) {
+    return enterprise.listTemplates(actor);
+  }
+
+  async createExamFromTemplate(
+    input: import('@learnova/validation').CreateExamFromTemplateInput,
+    actor: ActorContext,
+  ) {
+    return enterprise.createExamFromTemplate(input, actor, (body, act) =>
+      this.create(body as CreateExamInput, act),
+    );
+  }
+
+  async assignInvigilators(input: import('@learnova/validation').AssignInvigilatorsInput, actor: ActorContext) {
+    return enterprise.assignInvigilators(input, actor);
+  }
+
+  async listInvigilators(examId: string, actor: ActorContext) {
+    return enterprise.listInvigilators(examId, actor);
+  }
+
+  async getIncidentTimeline(examId: string, actor: ActorContext, attemptId?: string) {
+    return enterprise.getIncidentTimeline(examId, actor, attemptId);
+  }
+
+  async upsertAccessibility(
+    input: import('@learnova/validation').UpsertExamAccessibilityInput,
+    actor: ActorContext,
+  ) {
+    return enterprise.upsertAccessibility(input, actor);
+  }
+
+  async listAccessibility(examId: string, actor: ActorContext) {
+    return enterprise.listAccessibility(examId, actor);
+  }
+
+  async resumeAttempt(input: import('@learnova/validation').ResumeExamAttemptInput, actor: ActorContext) {
+    return enterprise.resumeAttempt(input, actor);
+  }
+
+  async heartbeatAttempt(
+    input: import('@learnova/validation').HeartbeatExamAttemptInput,
+    actor: ActorContext,
+  ) {
+    return enterprise.heartbeatAttempt(input, actor);
+  }
+
+  async listExamVersions(examId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const rows = await examinationRepository.listExamVersions(institutionId, examId);
+    return rows.map((r) => toDto(r));
   }
 }
 

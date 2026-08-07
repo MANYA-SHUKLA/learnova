@@ -40,6 +40,7 @@ export const examAttemptStatusSchema = z.enum([
   'scheduled',
   'checked_in',
   'started',
+  'disconnected',
   'submitted',
   'completed',
   'expired',
@@ -214,3 +215,93 @@ export type ProctorEventInput = z.infer<typeof proctorEventSchema>;
 export type ExamBulkActionInput = z.infer<typeof examBulkActionSchema>;
 export type AssignSeatingInput = z.infer<typeof assignSeatingSchema>;
 export type ReportStudentViolationInput = z.infer<typeof reportStudentViolationSchema>;
+
+const blueprintSlotSchema = z.object({
+  difficulty: z.string().trim().max(32).optional().nullable(),
+  category: z.string().trim().max(120).optional().nullable(),
+  marks: z.number().min(0).optional().nullable(),
+  count: z.number().int().min(1).max(200),
+});
+
+export const createExamBlueprintSchema = z.object({
+  courseId: objectIdField.optional().nullable(),
+  name: z.string().trim().min(1).max(120),
+  description: optionalString(2000),
+  totalMarks: z.number().min(0).max(10000).default(100),
+  slots: z.array(blueprintSlotSchema).min(1).max(50),
+  questionPoolIds: z.array(objectIdField).max(500).optional().default([]),
+});
+
+export const applyExamBlueprintSchema = z.object({
+  blueprintId: objectIdField,
+  examId: objectIdField,
+});
+
+export const createExamTemplateSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  description: optionalString(2000),
+  examType: examTypeSchema.default('internal'),
+  visibility: examVisibilitySchema.default('enrolled'),
+  durationMinutes: z.number().int().min(1).max(600).default(120),
+  totalMarks: z.number().min(0).default(100),
+  passingMarks: z.number().min(0).default(40),
+  attemptLimit: z.number().int().min(1).max(5).default(1),
+  negativeMarking: z.boolean().default(false),
+  proctoringMode: proctoringModeSchema.default('none'),
+  secureBrowser: secureBrowserPolicySchema.default('recommended'),
+  requireWebcam: z.boolean().default(false),
+  requireMicrophone: z.boolean().default(false),
+  shuffleQuestions: z.boolean().default(true),
+  shuffleOptions: z.boolean().default(true),
+  reconnectionGraceMinutes: z.number().int().min(0).max(60).default(5),
+  policyId: objectIdField.optional().nullable(),
+  blueprintId: objectIdField.optional().nullable(),
+});
+
+export const createExamFromTemplateSchema = z.object({
+  templateId: objectIdField,
+  courseId: objectIdField,
+  title: z.string().trim().min(1).max(200),
+  schedule: examScheduleSchema,
+});
+
+export const assignInvigilatorsSchema = z.object({
+  examId: objectIdField,
+  assignments: z
+    .array(
+      z.object({
+        userId: objectIdField,
+        role: z.enum(['view_only', 'monitor', 'intervene']),
+      }),
+    )
+    .min(1)
+    .max(50),
+});
+
+export const upsertExamAccessibilitySchema = z.object({
+  examId: objectIdField,
+  studentId: objectIdField,
+  extendedTimePercent: z.number().min(0).max(200).default(0),
+  extraMinutes: z.number().int().min(0).max(240).default(0),
+  fontSize: z.enum(['default', 'large', 'xlarge']).default('default'),
+  screenReaderAllowed: z.boolean().default(false),
+  notes: optionalString(2000),
+});
+
+export const resumeExamAttemptSchema = z.object({
+  sessionToken: z.string().trim().min(8).max(128),
+});
+
+export const heartbeatExamAttemptSchema = z.object({
+  sessionToken: z.string().trim().min(8).max(128),
+  connected: z.boolean().default(true),
+});
+
+export type CreateExamBlueprintInput = z.infer<typeof createExamBlueprintSchema>;
+export type ApplyExamBlueprintInput = z.infer<typeof applyExamBlueprintSchema>;
+export type CreateExamTemplateInput = z.infer<typeof createExamTemplateSchema>;
+export type CreateExamFromTemplateInput = z.infer<typeof createExamFromTemplateSchema>;
+export type AssignInvigilatorsInput = z.infer<typeof assignInvigilatorsSchema>;
+export type UpsertExamAccessibilityInput = z.infer<typeof upsertExamAccessibilitySchema>;
+export type ResumeExamAttemptInput = z.infer<typeof resumeExamAttemptSchema>;
+export type HeartbeatExamAttemptInput = z.infer<typeof heartbeatExamAttemptSchema>;

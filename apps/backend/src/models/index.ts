@@ -345,6 +345,24 @@ export {
   EXAM_ATTENDANCE_STATUSES,
 } from './exam-attendance.model.js';
 export { ExamPolicyModel, type ExamPolicyDocument } from './exam-policy.model.js';
+export { ExamBlueprintModel, type ExamBlueprintDocument } from './exam-blueprint.model.js';
+export { ExamTemplateModel, type ExamTemplateDocument } from './exam-template.model.js';
+export {
+  ExamInvigilatorModel,
+  type ExamInvigilatorDocument,
+  INVIGILATOR_ROLES,
+} from './exam-invigilator.model.js';
+export {
+  ExamIncidentModel,
+  type ExamIncidentDocument,
+  EXAM_INCIDENT_TYPES,
+} from './exam-incident.model.js';
+export {
+  ExamAccessibilityModel,
+  type ExamAccessibilityDocument,
+  ACCESSIBILITY_FONT_SIZES,
+} from './exam-accessibility.model.js';
+export { ExamVersionModel, type ExamVersionDocument } from './exam-version.model.js';
 export {
   ExamAuditLogModel,
   type ExamAuditLogDocument,

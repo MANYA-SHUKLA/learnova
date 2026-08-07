@@ -577,18 +577,18 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 
 ### Shipped
 
-- Models: Exam · ExamSection · ExamSeating · ExamAttempt · ExamAnswer · ExamResult · ExamProctorSession · ExamProctorEvent · Audit
-- **`examinationEngine`** (`@learnova/shared` → question engine + exam policies; backend adapter `services/examination-engine`)
-- Reuses **Question Bank** (`Question`, `QuestionBank` from Quiz module) — questions referenced by ID
-- Reuses **attempt lifecycle**, **auto-evaluation**, **scoring**, **analytics** from `assessmentQuestionEngine`
-- Schedule & publish · seating & check-in · secure browser acknowledgement · proctor sessions/events · flag/clear/terminate
-- Backend routes `/api/v1/examinations` · seeds (`seed:examinations` — 20 exams · 500 attempts) · 50+ tests
-- Frontend: institution/faculty/student examination pages · faculty proctoring console · sidebar + i18n
-- Docs: [ExamManagement](./ExamManagement.md) · [ExamPolicies](./ExamPolicies.md) · [SecureBrowser](./SecureBrowser.md) · [ExamProctoring](./ExamProctoring.md) · [LiveMonitoring](./LiveMonitoring.md) · [ExamAPI](./ExamAPI.md) · [ExamPermissions](./ExamPermissions.md)
+- Models: Exam · ExamSection · ExamSeating · ExamAttempt · ExamAnswer · ExamResult · ExamProctorSession · ExamProctorEvent · ExamViolation · ExamRoom · ExamDevice · ExamAttendance · ExamPolicy · **ExamBlueprint · ExamTemplate · ExamInvigilator · ExamIncident · ExamAccessibility · ExamVersion**
+- **`examinationEngine`** + **`selectQuestionsByBlueprint`** (`@learnova/shared`; backend adapter `services/examination-engine`)
+- **Enterprise:** blueprints · templates · role-based invigilation · incident timeline · graceful reconnection · accessibility accommodations · immutable exam versioning on publish
+- Reuses **Question Bank** — questions referenced by ID; evaluation via `assessmentQuestionEngine`
+- Schedule & publish · seating & check-in · secure browser · Socket.IO live monitoring · proctor flag/clear/terminate
+- Backend routes `/api/v1/examinations` · seeds (`seed:examinations` — 50 exams · 1000 attempts) · **436 tests**
+- Frontend: `/exams` routes · live dashboard · secure browser + proctor hooks · reconnection heartbeat/resume
+- Docs: [ExamManagement](./ExamManagement.md) · [ExamEnterpriseFeatures](./ExamEnterpriseFeatures.md) · [ExamPolicies](./ExamPolicies.md) · [SecureBrowser](./SecureBrowser.md) · [ExamProctoring](./ExamProctoring.md) · [LiveMonitoring](./LiveMonitoring.md) · [ExamAPI](./ExamAPI.md) · [ExamPermissions](./ExamPermissions.md)
 
 ### Definition of done
 
-✓ Reuses assessmentQuestionEngine · ✓ Question Bank (no duplicate) · ✓ Attempt lifecycle · ✓ Auto evaluation · ✓ Scoring · ✓ Analytics · ✓ Scheduling · ✓ Seating · ✓ Check-in · ✓ Secure browser policy · ✓ Proctoring · ✓ Dashboards · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed scale · ✓ Tests · ✓ Docs
+✓ Reuses assessmentQuestionEngine · ✓ Question Bank · ✓ Blueprints · ✓ Templates · ✓ Invigilation roles · ✓ Incident timeline · ✓ Reconnection · ✓ Accessibility · ✓ Exam versioning · ✓ Live monitoring · ✓ Secure browser · ✓ Proctoring · ✓ Seed scale · ✓ Tests · ✓ Docs
 
 **Hard rule:** Stop after Exam Management. Do **not** start Gradebook (14) from this step.
 

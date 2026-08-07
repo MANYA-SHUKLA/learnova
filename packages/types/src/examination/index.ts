@@ -256,3 +256,69 @@ export interface ExamAnalytics {
     incorrectRate: number;
   }>;
 }
+
+export type InvigilatorRole = 'view_only' | 'monitor' | 'intervene';
+
+export interface ExamBlueprintSlot {
+  difficulty?: string | null;
+  category?: string | null;
+  marks?: number | null;
+  count: number;
+}
+
+export interface ExamBlueprint {
+  id: ID;
+  institutionId: ID;
+  courseId: ID | null;
+  name: string;
+  description: string | null;
+  totalMarks: number;
+  slots: ExamBlueprintSlot[];
+  questionPoolIds: ID[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExamTemplate {
+  id: ID;
+  institutionId: ID;
+  name: string;
+  description: string | null;
+  examType: ExamType;
+  visibility: ExamVisibility;
+  durationMinutes: number;
+  totalMarks: number;
+  passingMarks: number;
+  attemptLimit: number;
+  reconnectionGraceMinutes: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExamIncident {
+  id: ID;
+  examId: ID;
+  attemptId: ID | null;
+  incidentType: string;
+  severity: 'info' | 'warning' | 'critical';
+  message: string | null;
+  createdAt: string;
+}
+
+export interface ExamAccessibilityAccommodation {
+  id: ID;
+  examId: ID;
+  studentId: ID;
+  extendedTimePercent: number;
+  extraMinutes: number;
+  fontSize: 'default' | 'large' | 'xlarge';
+  screenReaderAllowed: boolean;
+}
+
+export interface ExamVersion {
+  id: ID;
+  examId: ID;
+  versionNumber: number;
+  publishedAt: string;
+  immutable: boolean;
+}
