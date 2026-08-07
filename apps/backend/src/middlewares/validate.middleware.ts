@@ -4,9 +4,20 @@ import { ValidationError } from '../utils/errors/index.js';
 
 type RequestTarget = 'body' | 'query' | 'params';
 
+function replaceRequestBag(
+  target: Record<string, unknown>,
+  data: unknown,
+): void {
+  for (const key of Object.keys(target)) {
+    delete target[key];
+  }
+  Object.assign(target, data as Record<string, unknown>);
+}
+
 /**
  * Validation middleware factory — Zod schemas as the validation layer.
- * Express 5: `req.query` / `req.params` are getter-only — redefine via defineProperty.
+ * Express 5: `req.query` / `req.params` are getter-only — mutate the returned
+ * object in place instead of reassigning the property.
  */
 export function validate(schema: ZodSchema<unknown>, target: RequestTarget = 'body') {
   return (req: Request, _res: Response, next: NextFunction): void => {
@@ -27,19 +38,9 @@ export function validate(schema: ZodSchema<unknown>, target: RequestTarget = 'bo
     if (target === 'body') {
       req.body = result.data;
     } else if (target === 'query') {
-      Object.defineProperty(req, 'query', {
-        value: result.data,
-        writable: true,
-        configurable: true,
-        enumerable: true,
-      });
+      replaceRequestBag(req.query as Record<string, unknown>, result.data);
     } else {
-      Object.defineProperty(req, 'params', {
-        value: result.data,
-        writable: true,
-        configurable: true,
-        enumerable: true,
-      });
+      replaceRequestBag(req.params as Record<string, unknown>, result.data);
     }
     next();
   };
