@@ -12,7 +12,6 @@ import {
   Input,
   Skeleton,
 } from '@learnova/ui';
-import { motion } from 'framer-motion';
 import { BookOpen, CheckCircle2, Search, UserRound, XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
@@ -37,7 +36,6 @@ const STATUS_FILTERS: Array<EnrollmentStatus | 'all'> = [
 
 export default function FacultyEnrollmentsPage() {
   const t = useTranslations('dashboard.faculty.enrollments');
-  const tCommon = useTranslations('common');
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<EnrollmentStatus | 'all'>('all');

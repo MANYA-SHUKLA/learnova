@@ -61,7 +61,7 @@ export default function EnrollmentListPage() {
   const [status, setStatus] = useState<EnrollmentStatus | 'all'>('all');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
-  const [includeDeleted, setIncludeDeleted] = useState(false);
+  const includeDeleted = status === 'withdrawn';
 
   const params = useMemo(
     () => ({

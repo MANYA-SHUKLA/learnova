@@ -1,6 +1,6 @@
 'use client';
 
-import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
+import { PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,
@@ -27,11 +27,9 @@ import {
   useWithdrawEnrollmentMutation,
 } from '@/features/enrollment';
 import { ApiClientError } from '@/lib/api/client';
-import { Link } from '@/lib/i18n/routing';
 
 export default function StudentEnrollmentsPage() {
   const t = useTranslations('dashboard.student.enrollments');
-  const tCommon = useTranslations('common');
   const myQuery = useMyEnrollments();
   const waitlistQuery = useWaitlist();
   const selfEnrollMutation = useSelfEnrollMutation();

@@ -13,7 +13,6 @@ import {
 } from '@learnova/ui';
 import { ArrowLeft, BookOpen, Calendar, CheckCircle2, UserRound, XCircle } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { ErrorState } from '@/features/institution';
 import {
@@ -28,11 +27,10 @@ import {
   useWithdrawEnrollmentMutation,
 } from '@/features/enrollment';
 import { Link } from '@/lib/i18n/routing';
-import { cn } from '@/lib/utils';
 
 export default function EnrollmentDetailPage() {
   const params = useParams();
-  const id = typeof params.id === 'string' ? params.id : '';
+  const id = typeof params['id'] === 'string' ? params['id'] : '';
   const query = useEnrollment(id);
   const enrollment = query.data;
 
@@ -40,8 +38,6 @@ export default function EnrollmentDetailPage() {
   const rejectMutation = useRejectEnrollmentMutation();
   const withdrawMutation = useWithdrawEnrollmentMutation();
   const completeMutation = useCompleteEnrollmentMutation();
-
-  const [reason, setReason] = useState('');
 
   if (query.isLoading) {
     return (

@@ -747,22 +747,28 @@ export class EnrollmentService {
     const institutionId = requireTenant(actor);
     const results: Array<{ studentId: string; courseId: string; success: boolean; error?: string }> = [];
 
-    for (const item of input.enrollments) {
+    for (const studentId of input.studentIds) {
       try {
         await this.create(
           {
-            studentId: item.studentId,
-            courseId: item.courseId,
-            status: item.status ?? 'active',
-            enrollmentMethod: 'bulk',
+            studentId,
+            courseId: input.courseId,
+            departmentId: input.departmentId,
+            programId: input.programId,
+            academicYearId: input.academicYearId,
+            semesterId: input.semesterId,
+            sectionId: input.sectionId,
+            facultyId: input.facultyId,
+            enrollmentMethod: 'bulk_import',
+            notes: input.notes,
           },
           actor,
         );
-        results.push({ studentId: item.studentId, courseId: item.courseId, success: true });
+        results.push({ studentId, courseId: input.courseId, success: true });
       } catch (error) {
         results.push({
-          studentId: item.studentId,
-          courseId: item.courseId,
+          studentId,
+          courseId: input.courseId,
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
         });
@@ -774,7 +780,7 @@ export class EnrollmentService {
     return { results };
   }
 
-  async bulkApprove(input: EnrollmentBulkApproveInput, actor: ActorContext) {
+  async bulkApprove(input: EnrollmentBulkIdsInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     let count = 0;
 
@@ -792,13 +798,13 @@ export class EnrollmentService {
     return { count };
   }
 
-  async bulkReject(input: EnrollmentBulkRejectInput, actor: ActorContext) {
+  async bulkReject(input: EnrollmentBulkIdsInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     let count = 0;
 
     for (const id of input.ids) {
       try {
-        await this.reject(id, input.reason ?? null, actor);
+        await this.reject(id, null, actor);
         count++;
       } catch (error) {
         logger.warn({ error, enrollmentId: id }, 'Failed to reject enrollment');
@@ -844,10 +850,11 @@ export class EnrollmentService {
   }
 
   async previewImport(input: EnrollmentImportConfirmInput, actor: ActorContext) {
-    const institutionId = requireTenant(actor);
+    requireTenant(actor);
     return {
-      total: input.data.length,
-      preview: input.data.slice(0, 10),
+      total: input.rows.length,
+      preview: input.rows.slice(0, 10),
+      dryRun: true,
     };
   }
 
@@ -856,44 +863,58 @@ export class EnrollmentService {
     const results: Array<{ row: number; success: boolean; error?: string }> = [];
     const created: string[] = [];
 
-    for (let i = 0; i < input.data.length; i++) {
-      const row = input.data[i];
+    if (input.dryRun) {
+      for (let i = 0; i < input.rows.length; i++) {
+        const row = input.rows[i];
+        if (!row?.studentId || !row?.courseId) {
+          results.push({ row: i + 1, success: false, error: 'studentId and courseId are required' });
+        } else {
+          results.push({ row: i + 1, success: true });
+        }
+      }
+      return { results, dryRun: true };
+    }
+
+    for (let i = 0; i < input.rows.length; i++) {
+      const row = input.rows[i];
       try {
+        if (!row?.studentId || !row?.courseId) {
+          throw new ValidationError('studentId and courseId are required');
+        }
         const doc = await enrollmentRepository.create({
           institutionId: new Types.ObjectId(institutionId),
           studentId: new Types.ObjectId(row.studentId),
           courseId: new Types.ObjectId(row.courseId),
           status: row.status ?? 'active',
-          enrollmentMethod: 'import',
+          enrollmentMethod: 'bulk_import',
           enrollmentDate: row.enrollmentDate ? new Date(row.enrollmentDate) : new Date(),
           createdBy: new Types.ObjectId(actor.userId),
         });
         created.push(String(doc._id));
         results.push({ row: i + 1, success: true });
       } catch (error) {
-        results.push({
-          row: i + 1,
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-
-        if (input.rollbackOnError) {
-          for (const id of created) {
-            await enrollmentRepository.hardDelete(institutionId, id);
-          }
-          throw new ValidationError(`Import failed at row ${i + 1}, rolled back`);
+        for (const id of created) {
+          await enrollmentRepository.hardDelete(institutionId, id);
         }
+        throw new ValidationError(
+          `Import failed at row ${i + 1}, rolled back: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
+        );
       }
     }
 
-    await this.audit('enrollment_imported', actor, institutionId, null, null, null, { total: input.data.length, success: results.filter((r) => r.success).length });
+    await this.audit('enrollment_imported', actor, institutionId, null, null, null, {
+      total: input.rows.length,
+      success: results.filter((r) => r.success).length,
+    });
 
     eventBus.emit(EVENTS.ENROLLMENT_IMPORTED, {
       institutionId,
       count: results.filter((r) => r.success).length,
     });
 
-    return { results };
+    return { results, dryRun: false };
   }
 
   async export(query: EnrollmentExportQuery, actor: ActorContext) {
@@ -930,7 +951,7 @@ export class EnrollmentService {
   }
 
   async getOwnEnrollments(actor: ActorContext) {
-    const institutionId = requireTenant(actor);
+    requireTenant(actor);
     if (actor.role !== 'student') {
       throw new ForbiddenError('Only students can view own enrollments');
     }
