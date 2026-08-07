@@ -167,3 +167,50 @@ export {
   type PracticeLabAuditEvent,
   PRACTICE_LAB_AUDIT_EVENTS,
 } from './practice-lab-audit-log.model.js';
+export {
+  ProjectModel,
+  type ProjectDocument,
+  projectFileRefSchema,
+  PROJECT_TYPES,
+  PROJECT_STATUSES,
+  PROJECT_VISIBILITIES,
+} from './project.model.js';
+export {
+  ProjectMilestoneModel,
+  type ProjectMilestoneDocument,
+  PROJECT_MILESTONE_STATUSES,
+} from './project-milestone.model.js';
+export {
+  ProjectTeamModel,
+  type ProjectTeamDocument,
+  PROJECT_TEAM_STATUSES,
+  PROJECT_TEAM_MEMBER_ROLES,
+} from './project-team.model.js';
+export {
+  ProjectSubmissionModel,
+  type ProjectSubmissionDocument,
+  PROJECT_SUBMISSION_STATUSES,
+  PROJECT_DELIVERY_TYPES,
+} from './project-submission.model.js';
+export {
+  ProjectReviewModel,
+  type ProjectReviewDocument,
+  PROJECT_REVIEW_TYPES,
+  PROJECT_REVIEW_STATUSES,
+} from './project-review.model.js';
+export {
+  ProjectGradeModel,
+  type ProjectGradeDocument,
+  PROJECT_GRADING_METHODS,
+} from './project-grade.model.js';
+export {
+  ProjectProgressModel,
+  type ProjectProgressDocument,
+  PROJECT_PROGRESS_STATUSES,
+} from './project-progress.model.js';
+export {
+  ProjectAuditLogModel,
+  type ProjectAuditLogDocument,
+  type ProjectAuditEvent,
+  PROJECT_AUDIT_EVENTS,
+} from './project-audit-log.model.js';

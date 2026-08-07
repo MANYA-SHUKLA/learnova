@@ -173,6 +173,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage institution-wide assignments and analytics',
   },
+  'project:read': {
+    resource: 'project',
+    action: 'read',
+    description: 'View projects, teams, submissions and grades',
+  },
+  'project:write': {
+    resource: 'project',
+    action: 'write',
+    description: 'Create/update projects, submit work and grade submissions',
+  },
+  'project:manage': {
+    resource: 'project',
+    action: 'manage',
+    description: 'Manage institution-wide projects and analytics',
+  },
   'lab:read': {
     resource: 'lab',
     action: 'read',

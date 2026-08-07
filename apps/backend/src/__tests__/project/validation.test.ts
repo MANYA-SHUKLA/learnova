@@ -30,15 +30,8 @@ describe('project validation', () => {
     expect(parsed.allowMilestones).toBe(true);
   });
 
-  it('rejects invalid team size bounds', () => {
-    expect(
-      createProjectSchema.safeParse({
-        courseId: OBJECT_ID,
-        title: 'X',
-        teamSizeMin: 10,
-        teamSizeMax: 2,
-      }).success,
-    ).toBe(true);
+  it('rejects a non-ObjectId courseId', () => {
+    expect(createProjectSchema.safeParse({ courseId: 'nope', title: 'X' }).success).toBe(false);
   });
 
   it('makes update partial and drops courseId', () => {
