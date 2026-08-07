@@ -291,7 +291,7 @@ export default function CreateProjectPage() {
                       projectType,
                       difficulty,
                       categoryId: categoryId || null,
-                      tagIds: selectedTags,
+                      tags: selectedTags,
                       minimumTeamSize: Number(minimumTeamSize) || 2,
                       maximumTeamSize: Number(maximumTeamSize) || 5,
                       totalMarks: Number(totalMarks) || 100,

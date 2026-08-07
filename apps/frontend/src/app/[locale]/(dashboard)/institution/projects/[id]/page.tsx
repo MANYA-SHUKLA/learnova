@@ -143,8 +143,8 @@ export default function InstitutionProjectDetailPage({
                   {project.difficulty ? (
                     <Badge variant="outline">{formatProjectDifficulty(project.difficulty)}</Badge>
                   ) : null}
-                  {project.category?.name ? (
-                    <Badge variant="outline">{project.category.name}</Badge>
+                  {project.categoryId ? (
+                    <Badge variant="outline">{project.categoryId}</Badge>
                   ) : null}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">

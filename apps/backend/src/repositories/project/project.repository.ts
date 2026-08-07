@@ -93,10 +93,10 @@ export interface ProjectStats {
   byType: { projectType: string; count: number }[];
 }
 
-export interface ExtendedProjectListQuery extends Partial<ProjectListQuery> {
+export type ExtendedProjectListQuery = Partial<ProjectListQuery> & {
   facultyId?: string;
   sortBy?: ProjectListQuery['sortBy'] | 'newest' | 'oldest';
-}
+};
 
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
