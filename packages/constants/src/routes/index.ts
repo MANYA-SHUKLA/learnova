@@ -23,6 +23,7 @@ export const API_ROUTES = {
   ENROLLMENTS: '/enrollments',
   PROGRESS: '/progress',
   ASSIGNMENTS: '/assignments',
+  PRACTICE_LABS: '/practice-labs',
   LMS: '/lms',
   ERP: '/erp',
   EXAMINATION: '/examination',
@@ -104,6 +105,14 @@ export const APP_ROUTES = {
   FACULTY_ASSIGNMENTS: '/faculty/assignments',
   STUDENT_ASSIGNMENTS: '/student/assignments',
   STUDENT_ASSIGNMENT_DETAIL: '/student/assignments/:id',
+  INSTITUTION_PRACTICE_LABS: '/institution/practice-labs',
+  INSTITUTION_PRACTICE_LABS_CREATE: '/institution/practice-labs/create',
+  INSTITUTION_PRACTICE_LAB_DETAIL: '/institution/practice-labs/:id',
+  INSTITUTION_PRACTICE_LAB_PROBLEMS: '/institution/practice-labs/:id/problems',
+  FACULTY_PRACTICE_LABS: '/faculty/practice-labs',
+  STUDENT_PRACTICE_LABS: '/student/practice-labs',
+  STUDENT_PRACTICE_PROBLEM: '/student/practice-labs/:problemId',
+  STUDENT_SUBMISSIONS: '/student/submissions',
   CHANGE_PASSWORD: '/account/change-password',
 } as const;
 
@@ -111,4 +120,5 @@ export const SOCKET_NAMESPACES = {
   IDE: '/ide',
   EXAM: '/exam',
   NOTIFICATIONS: '/notifications',
+  PRACTICE: '/practice',
 } as const;

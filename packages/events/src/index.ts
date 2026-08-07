@@ -266,6 +266,67 @@ export interface EventPayloadMap {
   'certificate.revoked': { certificateId: string };
   'lab.started': { labId: string; userId?: string };
   'lab.submitted': { labId: string; userId?: string };
+  'lab.completed': {
+    labId: string;
+    studentId: string;
+    institutionId: string;
+  };
+  'practice.created': {
+    practiceLabId: string;
+    courseId: string;
+    institutionId: string;
+  };
+  'problem.created': {
+    problemId: string;
+    practiceLabId: string;
+    institutionId: string;
+  };
+  'problem.solved': {
+    problemId: string;
+    practiceLabId: string;
+    studentId: string;
+    institutionId: string;
+    submissionId: string;
+  };
+  'lab.submission.created': {
+    submissionId: string;
+    problemId: string;
+    practiceLabId: string;
+    studentId: string;
+    institutionId: string;
+  };
+  'lab.submission.accepted': {
+    submissionId: string;
+    problemId: string;
+    practiceLabId: string;
+    studentId: string;
+    institutionId: string;
+  };
+  'lab.submission.failed': {
+    submissionId: string;
+    problemId: string;
+    practiceLabId: string;
+    studentId: string;
+    institutionId: string;
+    verdict: string;
+  };
+  'execution.started': {
+    executionId: string;
+    studentId: string;
+    institutionId: string;
+  };
+  'execution.finished': {
+    executionId: string;
+    studentId: string;
+    institutionId: string;
+    status: string;
+  };
+  'execution.completed': {
+    executionId: string;
+    studentId: string;
+    institutionId: string;
+    status: string;
+  };
   'ide.session_started': { sessionId: string; userId?: string };
   'ide.session_stopped': { sessionId: string };
   'faculty.created': { facultyId: string; institutionId: string };
@@ -355,6 +416,16 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.USER_LOGGED_OUT, description: 'User logged out', version: 1 },
   { name: EVENTS.LAB_STARTED, description: 'Lab started', version: 1 },
   { name: EVENTS.LAB_SUBMITTED, description: 'Lab submitted', version: 1 },
+  { name: EVENTS.LAB_COMPLETED, description: 'Practice lab completed by learner', version: 1 },
+  { name: EVENTS.PRACTICE_CREATED, description: 'Practice lab created', version: 1 },
+  { name: EVENTS.PROBLEM_CREATED, description: 'Lab problem created', version: 1 },
+  { name: EVENTS.PROBLEM_SOLVED, description: 'Lab problem solved', version: 1 },
+  { name: EVENTS.LAB_SUBMISSION_CREATED, description: 'Lab submission created', version: 1 },
+  { name: EVENTS.LAB_SUBMISSION_ACCEPTED, description: 'Lab submission accepted', version: 1 },
+  { name: EVENTS.LAB_SUBMISSION_FAILED, description: 'Lab submission failed', version: 1 },
+  { name: EVENTS.EXECUTION_STARTED, description: 'Code execution started', version: 1 },
+  { name: EVENTS.EXECUTION_FINISHED, description: 'Code execution finished', version: 1 },
+  { name: EVENTS.EXECUTION_COMPLETED, description: 'Code execution completed', version: 1 },
   { name: EVENTS.IDE_SESSION_STARTED, description: 'IDE session started', version: 1 },
   { name: EVENTS.IDE_SESSION_STOPPED, description: 'IDE session stopped', version: 1 },
   { name: EVENTS.FACULTY_CREATED, description: 'Faculty member created', version: 1 },
