@@ -109,7 +109,7 @@ export default function InstitutionProjectMilestonesPage({
                   projectId: id,
                   title: title.trim(),
                   description: description || null,
-                  weight: Number(weight) || 0,
+                      weightage: Number(weight) || 0,
                 });
                 setTitle('');
                 setDescription('');
@@ -148,8 +148,8 @@ export default function InstitutionProjectMilestonesPage({
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium">{m.title}</p>
                         <Badge variant="secondary">{formatMilestoneStatus(m.status)}</Badge>
-                        {m.weight > 0 ? (
-                          <Badge variant="outline">{m.weight}%</Badge>
+                        {m.weightage > 0 ? (
+                          <Badge variant="outline">{m.weightage}%</Badge>
                         ) : null}
                       </div>
                       <p className="text-xs text-muted-foreground">

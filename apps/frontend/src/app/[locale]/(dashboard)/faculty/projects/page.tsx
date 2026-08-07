@@ -97,8 +97,8 @@ export default function FacultyProjectsPage() {
           {[
             { label: t('stats.created'), value: dash?.projectsCreated },
             { label: t('stats.pendingReviews'), value: dash?.pendingReviews },
-            { label: t('stats.upcomingDeadlines'), value: dash?.upcomingDeadlines ?? dash?.pendingGrades },
-            { label: t('stats.studentTeams'), value: dash?.studentTeams ?? dash?.activeTeams },
+            { label: t('stats.upcomingDeadlines'), value: dash?.upcomingDeadlines?.length },
+            { label: t('stats.studentTeams'), value: dash?.studentTeams },
             { label: t('stats.lateSubmissions'), value: dash?.lateSubmissions ?? late.length },
           ].map((stat) => (
             <Card key={stat.label} className="rounded-2xl border-border/80">
@@ -127,7 +127,7 @@ export default function FacultyProjectsPage() {
                   className="flex flex-col gap-2 rounded-xl border border-border/80 p-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <p className="font-medium">{team.name}</p>
+                    <p className="font-medium">{team.teamName}</p>
                     <p className="text-xs text-muted-foreground">
                       {team.memberCount} {t('members')} · {formatTeamStatus(team.status)}
                     </p>

@@ -265,9 +265,9 @@ export default function InstitutionProjectDetailPage({
                   </div>
                   {project.tags?.length ? (
                     <div className="flex flex-wrap gap-2">
-                      {project.tags.map((tag) => (
-                        <Badge key={tag.id} variant="outline">
-                          {tag.name}
+                      {project.tags.map((tagId) => (
+                        <Badge key={tagId} variant="outline">
+                          {tagId}
                         </Badge>
                       ))}
                     </div>
@@ -395,7 +395,7 @@ export default function InstitutionProjectDetailPage({
                       {teams.map((team) => (
                         <li key={team.id} className="flex items-center justify-between px-4 py-3 text-sm">
                           <div>
-                            <p className="font-medium">{team.name}</p>
+                            <p className="font-medium">{team.teamName}</p>
                             <p className="text-xs text-muted-foreground">
                               {team.memberCount} {t('members')}
                             </p>

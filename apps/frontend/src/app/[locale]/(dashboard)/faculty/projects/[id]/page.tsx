@@ -202,14 +202,14 @@ export default function FacultyProjectDetailPage({
                     className="flex flex-col gap-2 rounded-xl border border-border/80 p-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="font-medium">{team.name}</p>
+                      <p className="font-medium">{team.teamName}</p>
                       <p className="text-xs text-muted-foreground">
                         {team.memberCount} {t('members')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">{formatTeamStatus(team.status)}</Badge>
-                      {team.status === 'pending' || team.status === 'forming' ? (
+                      {team.status === 'pending' ? (
                         <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
                           <Button
                             size="sm"

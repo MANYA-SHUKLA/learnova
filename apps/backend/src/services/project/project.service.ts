@@ -1942,11 +1942,10 @@ export class ProjectService {
 
     return {
       projectsCreated,
-      activeTeams,
       pendingReviews,
-      pendingGrades,
-      milestoneCompletionRate,
-      submissionRate: computeSubmissionRate(totalSubmissions, projects.length * 10),
+      upcomingDeadlines: [],
+      studentTeams: activeTeams,
+      lateSubmissions: pendingGrades,
     };
   }
 
@@ -1994,12 +1993,17 @@ export class ProjectService {
     const graded = submissions.filter((s) => s.status === 'graded').length;
 
     return {
-      active: publishedProjects.length,
-      inProgress: publishedProjects.filter((p) => !submittedProjectIds.has(String(p._id))).length,
-      submitted: submissions.length,
-      graded,
-      overdueMilestones,
-      pendingPeerReviews,
+      myProjects: publishedProjects.length,
+      currentTeam: null,
+      milestones: [],
+      upcomingDeadlines: [],
+      submissionHistory: submissions.map((s) => ({
+        submissionId: String(s._id),
+        projectId: String(s.projectId),
+        status: s.status,
+        submittedAt: null,
+      })),
+      reviewFeedback: [],
     };
   }
 
@@ -2018,15 +2022,11 @@ export class ProjectService {
     return {
       totalProjects: stats.total,
       published: stats.published,
-      closed: stats.closed,
-      totalTeams: stats.totalTeams,
-      totalSubmissions: stats.totalSubmissions,
-      gradedSubmissions: stats.gradedSubmissions,
-      lateSubmissions: stats.lateSubmissions,
+      active: stats.totalTeams,
+      completed: stats.closed,
+      departments: stats.byDepartment,
       submissionRate,
-      averageGrade: stats.averageGrade,
-      byDepartment: stats.byDepartment,
-      byCourse: stats.byCourse,
+      facultyParticipation: stats.byCourse.length,
     };
   }
 

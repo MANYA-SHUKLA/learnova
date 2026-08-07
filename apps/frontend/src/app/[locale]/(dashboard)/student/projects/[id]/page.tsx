@@ -199,7 +199,7 @@ export default function StudentProjectDetailPage({
               </Card>
             ) : null}
 
-            {tab === 'team' && project.projectType !== 'individual' ? (
+            {tab === 'team' && project.allowTeams ? (
               <Card className="rounded-2xl border-border/80">
                 <CardHeader>
                   <CardTitle className="text-base">{t('teamTitle')}</CardTitle>
@@ -220,9 +220,9 @@ export default function StudentProjectDetailPage({
                           className="flex items-center justify-between px-3 py-2 text-sm"
                         >
                           <div>
-                            <p className="font-medium">{team.name}</p>
+                            <p className="font-medium">{team.teamName}</p>
                             <p className="text-xs text-muted-foreground">
-                              {team.memberCount} / {project.teamSizeMax} {t('members')}
+                              {team.memberCount} / {project.maximumTeamSize} {t('members')}
                             </p>
                           </div>
                           <Badge variant="outline">{formatTeamStatus(team.status)}</Badge>
@@ -266,7 +266,7 @@ export default function StudentProjectDetailPage({
                           <option value="">{t('selectTeam')}</option>
                           {teams.map((team) => (
                             <option key={team.id} value={team.id}>
-                              {team.name}
+                              {team.teamName}
                             </option>
                           ))}
                         </select>
