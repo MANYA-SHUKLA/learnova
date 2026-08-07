@@ -424,7 +424,8 @@ export const gradebookRepository = {
   },
 
   async aggregateCourseStats(institutionId: string, courseId: string) {
-    const [entryCount, finalizedSummaries, avgResult] = await Promise.all([
+    const [entryCount, finalizedSummaries, publishedSummaries, lockedSummaries, avgResult] =
+      await Promise.all([
       GradebookEntryModel.countDocuments({
         institutionId: oid(institutionId),
         courseId: oid(courseId),
@@ -433,7 +434,17 @@ export const gradebookRepository = {
       CourseGradeSummaryModel.countDocuments({
         institutionId: oid(institutionId),
         courseId: oid(courseId),
-        status: 'finalized',
+        status: { $in: ['finalized', 'published'] },
+      }).exec(),
+      CourseGradeSummaryModel.countDocuments({
+        institutionId: oid(institutionId),
+        courseId: oid(courseId),
+        published: true,
+      }).exec(),
+      CourseGradeSummaryModel.countDocuments({
+        institutionId: oid(institutionId),
+        courseId: oid(courseId),
+        locked: true,
       }).exec(),
       CourseGradeSummaryModel.aggregate<{ avg: number | null }>([
         {
@@ -450,6 +461,8 @@ export const gradebookRepository = {
     return {
       entryCount,
       finalizedSummaries,
+      publishedSummaries,
+      lockedSummaries,
       averageWeightedPercentage: avgResult[0]?.avg ?? 0,
     };
   },
