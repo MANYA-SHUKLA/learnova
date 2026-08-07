@@ -145,3 +145,26 @@ export function useAssignSeatingMutation() {
       void qc.invalidateQueries({ queryKey: examinationKeys.seating(body.examId) }),
   });
 }
+
+export function useLiveMonitoringQuery(examId: string | null) {
+  return useQuery({
+    queryKey: [...examinationKeys.all, 'live', examId],
+    queryFn: () => examinationApi.getLiveMonitoring(examId!),
+    enabled: Boolean(examId),
+    refetchInterval: 10_000,
+  });
+}
+
+export function useReportViolationMutation() {
+  return useMutation({
+    mutationFn: ({
+      attemptId,
+      violationType,
+      message,
+    }: {
+      attemptId: string;
+      violationType: string;
+      message?: string;
+    }) => examinationApi.reportViolation(attemptId, { violationType, message }),
+  });
+}

@@ -19,9 +19,14 @@ import {
   formatProctoringMode,
   useCheckInExamMutation,
   useExam,
+  useReportViolationMutation,
   useStartExamAttemptMutation,
   useSubmitExamMutation,
 } from '@/features/examination';
+import { useExamSocket } from '@/features/examination/hooks/use-exam-socket';
+import { useProctorMedia } from '@/features/examination/hooks/use-proctor-media';
+import { useSecureExamMode } from '@/features/examination/hooks/use-secure-exam-mode';
+import { useExamStore } from '@/features/examination/store/exam-store';
 
 export default function StudentExamDetailPage() {
   const t = useTranslations('dashboard.student.examDetail');
@@ -32,6 +37,11 @@ export default function StudentExamDetailPage() {
   const checkInMutation = useCheckInExamMutation();
   const startMutation = useStartExamAttemptMutation();
   const submitMutation = useSubmitExamMutation();
+  const reportViolationMutation = useReportViolationMutation();
+  const setActiveAttempt = useExamStore((s) => s.setActiveAttempt);
+  const clearActiveAttempt = useExamStore((s) => s.clearActiveAttempt);
+  const remainingSeconds = useExamStore((s) => s.remainingSeconds);
+  const warnings = useExamStore((s) => s.warnings);
 
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<
