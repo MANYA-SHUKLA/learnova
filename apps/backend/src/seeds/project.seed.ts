@@ -420,7 +420,7 @@ export async function seedProjects(
     comments: comments.length,
     tags: tags.length,
     categories: categories.length,
-    grades: grades.length,
+    grades: 0, // Gradebook (Step 13) — not seeded in Step 11
     progress: progressRows.length,
     auditLogs: auditLogs.length,
   };
