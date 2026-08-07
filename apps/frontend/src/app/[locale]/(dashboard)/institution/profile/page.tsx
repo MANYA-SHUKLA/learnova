@@ -15,6 +15,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { SuccessPopup } from '@/components/shared/success-popup';
 import {
   BrandingUpload,
   EmptyState,
@@ -25,9 +26,11 @@ import {
   useUpdateBrandingMutation,
   useUpdateInstitutionMutation,
 } from '@/features/institution';
+import { useSuccessPopup } from '@/hooks/use-success-popup';
 
 export default function InstitutionProfilePage() {
   const t = useTranslations('dashboard.institution.profile');
+  const tCommon = useTranslations('common');
   const tf = useTranslations('dashboard.institution.fields');
   const tCrud = useTranslations('dashboard.institution.crud');
   const { data, isLoading, isError, error, refetch } = useMyInstitution();
@@ -52,8 +55,8 @@ export default function InstitutionProfilePage() {
     logo: null,
     favicon: null,
   });
-  const [message, setMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const { open, message, showSuccess, closeSuccess } = useSuccessPopup(t('profileSaved'));
 
   useEffect(() => {
     if (!data) return;
@@ -104,7 +107,6 @@ export default function InstitutionProfilePage() {
 
   const saveProfile = async () => {
     setFormError(null);
-    setMessage(null);
     try {
       await updateMutation.mutateAsync({
         id: data.id,
@@ -123,7 +125,7 @@ export default function InstitutionProfilePage() {
           address: form.address || null,
         },
       });
-      setMessage(t('profileSaved'));
+      showSuccess(t('profileSaved'));
     } catch (err) {
       setFormError(err instanceof Error ? err.message : t('saveProfileFailed'));
     }
@@ -131,13 +133,12 @@ export default function InstitutionProfilePage() {
 
   const saveBranding = async () => {
     setFormError(null);
-    setMessage(null);
     try {
       await brandingMutation.mutateAsync({
         id: data.id,
         body: branding,
       });
-      setMessage(t('brandingSaved'));
+      showSuccess(t('brandingSaved'));
     } catch (err) {
       setFormError(err instanceof Error ? err.message : t('saveBrandingFailed'));
     }
@@ -165,6 +166,12 @@ export default function InstitutionProfilePage() {
 
   return (
     <div className="w-full min-w-0">
+      <SuccessPopup
+        open={open}
+        message={message}
+        dismissLabel={tCommon('dismissNotification')}
+        onClose={closeSuccess}
+      />
       <PageHeader
         title={t('title')}
         description={t('description')}
@@ -257,7 +264,6 @@ export default function InstitutionProfilePage() {
         </CardContent>
       </Card>
 
-      {message ? <p className="mt-4 text-sm text-success">{message}</p> : null}
       {formError ? <p className="mt-4 text-sm text-danger">{formError}</p> : null}
     </div>
   );

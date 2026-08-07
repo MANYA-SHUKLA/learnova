@@ -12,8 +12,10 @@ import {
   Skeleton,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useState, useRef } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { SuccessPopup } from '@/components/shared/success-popup';
 import { ErrorState } from '@/features/institution';
 import {
   formatStudentStatus,
@@ -23,18 +25,20 @@ import {
   useStudentPhotoUploadMutation,
   type StudentUpdateProfileBody,
 } from '@/features/student';
+import { useSuccessPopup } from '@/hooks/use-success-popup';
 import { ApiClientError } from '@/lib/api/client';
 
 export default function StudentProfilePage() {
+  const t = useTranslations('common');
   const query = useMyStudentProfile();
   const updateMutation = useUpdateMyStudentProfileMutation();
   const photoMutation = useStudentPhotoUploadMutation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const { open, message, showSuccess, closeSuccess } = useSuccessPopup(t('savedSuccessfully'));
 
   const [form, setForm] = useState<StudentUpdateProfileBody>({});
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
 
   if (query.isLoading) {
@@ -78,6 +82,7 @@ export default function StudentProfilePage() {
         contentType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
         data,
       });
+      showSuccess(t('savedSuccessfully'));
     } catch (err) {
       setPhotoError(err instanceof Error ? err.message : 'Upload failed');
     }
@@ -85,10 +90,9 @@ export default function StudentProfilePage() {
 
   const onSubmit = async () => {
     setError(null);
-    setSuccess(null);
     try {
       await updateMutation.mutateAsync(form);
-      setSuccess('Profile updated successfully.');
+      showSuccess(t('savedSuccessfully'));
       setEditing(false);
       setForm({});
     } catch (err) {
@@ -102,6 +106,12 @@ export default function StudentProfilePage() {
 
   return (
     <PermissionGate permission={PERMISSIONS.STUDENT_WRITE} enforce>
+      <SuccessPopup
+        open={open}
+        message={message}
+        dismissLabel={t('dismissNotification')}
+        onClose={closeSuccess}
+      />
       <div className="space-y-6">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight">My Profile</h1>
@@ -223,7 +233,6 @@ export default function StudentProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {error ? <p className="text-sm text-danger">{error}</p> : null}
-              {success ? <p className="text-sm text-success">{success}</p> : null}
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
                   ['phone', 'Phone'],
@@ -277,7 +286,6 @@ export default function StudentProfilePage() {
                     setEditing(false);
                     setForm({});
                     setError(null);
-                    setSuccess(null);
                   }}
                 >
                   Cancel
