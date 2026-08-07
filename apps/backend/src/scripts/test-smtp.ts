@@ -11,7 +11,7 @@ import { logger } from '../utils/logger/index.js';
 async function main() {
   const to = process.argv[2] ?? env.MAIL_FROM ?? env.SMTP_USER;
   if (!to) {
-    throw new Error('Provide a recipient: tsx ... test-smtp.ts you@example.com');
+    throw new Error('Provide a recipient: tsx ... test-smtp.ts shuklamanya99@gmail.com');
   }
 
   logger.info(

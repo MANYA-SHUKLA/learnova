@@ -296,18 +296,25 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">Guardian details</h3>
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('guardianName', 'Guardian name')}
+              {field('guardianName', 'Guardian name', { placeholder: 'Manya Shukla' })}
               {field('guardianRelation', 'Guardian relation')}
-              {field('guardianPhone', 'Guardian phone')}
-              {field('guardianEmail', 'Guardian email', { type: 'email' })}
+              {field('guardianPhone', 'Guardian phone', { placeholder: '8005586588' })}
+              {field('guardianEmail', 'Guardian email', {
+                type: 'email',
+                placeholder: 'shuklamanya99@gmail.com',
+              })}
             </div>
           </div>
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">Emergency contact</h3>
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('emergencyContactName', 'Emergency contact name')}
-              {field('emergencyContactPhone', 'Emergency contact phone')}
+              {field('emergencyContactName', 'Emergency contact name', {
+                placeholder: 'Manya Shukla',
+              })}
+              {field('emergencyContactPhone', 'Emergency contact phone', {
+                placeholder: '8005586588',
+              })}
             </div>
           </div>
 

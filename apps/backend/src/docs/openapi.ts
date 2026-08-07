@@ -131,7 +131,7 @@ export const openApiDocument: Json = {
       '',
       'Authenticate with `Authorization: Bearer <accessToken>` from `POST /api/v1/auth/login`.',
     ].join('\n'),
-    contact: { name: 'Learnova', email: 'shuklamanya99@gmail.com' },
+    contact: { name: 'Manya Shukla', email: 'shuklamanya99@gmail.com' },
   },
   servers: [
     { url: 'http://localhost:4000', description: 'Local development' },

@@ -18,11 +18,11 @@ In `apps/backend/.env`:
 
 ```env
 MAIL_DRIVER=smtp
-MAIL_FROM=you@gmail.com
+MAIL_FROM=shuklamanya99@gmail.com
 MAIL_QUEUE_ENABLED=false
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=you@gmail.com
+SMTP_USER=shuklamanya99@gmail.com
 SMTP_PASS=xxxx xxxx xxxx xxxx
 SMTP_SECURE=false
 ```
@@ -44,7 +44,7 @@ SMTP_SECURE=false
 ```bash
 pnpm --filter @learnova/backend mail:test
 # or send to another inbox:
-pnpm --filter @learnova/backend exec tsx --env-file=.env src/scripts/test-smtp.ts other@example.com
+pnpm --filter @learnova/backend exec tsx --env-file=.env src/scripts/test-smtp.ts shuklamanya99@gmail.com
 ```
 
 Success prints `SMTP OK` and delivers a test message. Failure with `535 BadCredentials` means the App Password is wrong/revoked or 2FA is off.
