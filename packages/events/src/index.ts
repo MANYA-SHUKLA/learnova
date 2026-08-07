@@ -62,6 +62,7 @@ export const EVENTS = {
   PROJECT_ARCHIVED: 'project.archived',
   PROJECT_DELETED: 'project.deleted',
   PROJECT_SUBMITTED: 'project.submitted',
+  PROJECT_EVALUATION_READY: 'project.evaluation.ready',
   PROJECT_GRADED: 'project.graded',
   PROJECT_TEAM_CREATED: 'project.team.created',
   PROJECT_TEAM_JOINED: 'project.team.joined',
@@ -278,6 +279,12 @@ export interface EventPayloadMap {
   'project.archived': { projectId: string; courseId: string; institutionId: string };
   'project.deleted': { projectId: string; courseId: string; institutionId: string };
   'project.submitted': { projectId: string; userId?: string };
+  'project.evaluation.ready': {
+    projectId: string;
+    submissionId: string;
+    institutionId: string;
+    courseId: string;
+  };
   'project.graded': { projectId: string; gradeId: string; institutionId: string };
   'project.team.created': {
     teamId: string;

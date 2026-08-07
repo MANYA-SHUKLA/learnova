@@ -112,6 +112,7 @@ const projectSchema = new Schema(
     assignedFacultyIds: [{ type: Schema.Types.ObjectId, ref: 'Faculty' }],
     attachments: { type: [projectFileRefSchema], default: [] },
     rubricId: { type: Schema.Types.ObjectId, default: null },
+    linkedAssignmentId: { type: Schema.Types.ObjectId, ref: 'Assignment', default: null },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     deletedAt: { type: Date, default: null, index: true },

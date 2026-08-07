@@ -11,7 +11,7 @@ Assignments (9) ✅
   ↓
 Labs (10) ✅  ── uses Coding Assessment Engine
   ↓
-Projects (11) ✅
+Projects (11) ✅  ── uses Collaboration Engine (no grading in Step 11)
   ↓
 Quizzes (optional)
   ↓
@@ -88,6 +88,7 @@ Domain event names stay dotted (`assignment.published`, `submission.graded`, `fe
 | Assignments | Types (homework/essay/…), ERP attachment UX, assignment routes/UI |
 | Labs | Problem bank, practice UX — **execution via Coding Engine** |
 | Coding Engine | Judge0, languages, evaluate/score, execution history (shared) |
+| Projects | Team/milestone/submission/review collaboration — **via Collaboration Engine**; evaluation ready only (no marks in Step 11) |
 | Quizzes | Question banks, timed questions, shuffle |
 | Exams | Scheduling, proctoring, seating, integrity — **reuse Coding Engine for code questions** |
 | Gradebook | Aggregation across activities |
@@ -99,6 +100,8 @@ Assignment helpers (`assignment.helpers.ts`) are **thin adapters** over Assessme
 New labs/quizzes/exams **must** import Assessment Core helpers — do not copy deadline or grading policy logic.
 
 Coding Exams **must** import the [Coding Assessment Engine](./CodingEngine.md) for run/evaluate/score — do not copy Judge0 or test-case scoring.
+
+Project Management **must** import the [Collaboration Engine](./CollaborationEngine.md) — do not assign marks or certificates in Step 11; Gradebook consumes evaluation-ready submissions.
 
 ## Tests
 

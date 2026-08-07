@@ -7,7 +7,7 @@ import {
   createProjectSchema,
   createReviewSchema,
   createTeamSchema,
-  gradeProjectSubmissionSchema,
+  markEvaluationReadySchema,
   projectFileUploadSchema,
   projectListQuerySchema,
   saveProjectSubmissionDraftSchema,
@@ -73,9 +73,8 @@ describe('project validation', () => {
     expect(parsed.submissionText).toBeUndefined();
   });
 
-  it('defaults grading to marks with prepared gradebook flag implied by service', () => {
-    const parsed = gradeProjectSubmissionSchema.parse({});
-    expect(parsed.gradingMethod).toBe('marks');
+  it('validates mark evaluation ready payload', () => {
+    const parsed = markEvaluationReadySchema.parse({ notes: 'Ready for gradebook export' });
     expect(parsed.returnToStudent).toBe(false);
   });
 

@@ -10,7 +10,7 @@ import {
   createReviewSchema,
   createTagSchema,
   createTeamSchema,
-  gradeProjectSubmissionSchema,
+  markEvaluationReadySchema,
   inviteMemberSchema,
   joinTeamSchema,
   projectCommentIdParamsSchema,
@@ -306,11 +306,11 @@ projectRoutes.get(
 );
 
 projectRoutes.post(
-  '/projects/submissions/:id/grade',
+  '/projects/submissions/:id/mark-evaluation-ready',
   ...writeAuth,
   validate(projectSubmissionIdParamsSchema, 'params'),
-  validate(gradeProjectSubmissionSchema),
-  ctrl.gradeSubmission,
+  validate(markEvaluationReadySchema),
+  ctrl.markEvaluationReady,
 );
 
 projectRoutes.post(

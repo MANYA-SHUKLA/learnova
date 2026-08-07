@@ -72,8 +72,10 @@ export const projectProgressStatusSchema = z.enum([
   'not_started',
   'in_progress',
   'submitted',
-  'graded',
+  'evaluation_ready',
 ]);
+
+export const projectEvaluationStatusSchema = z.enum(['pending', 'ready', 'exported']);
 
 /** @deprecated Prefer ASSESSMENT_MAX_FILE_BYTES — kept for project callers */
 export const PROJECT_MAX_FILE_BYTES = ASSESSMENT_MAX_FILE_BYTES;
@@ -274,6 +276,12 @@ export const submitProjectSchema = saveProjectSubmissionDraftSchema.extend({
   attemptNumber: z.number().int().min(1).max(20).optional(),
 });
 
+export const markEvaluationReadySchema = z.object({
+  notes: optionalString(5000),
+  returnToStudent: z.boolean().optional().default(false),
+});
+
+/** @deprecated Step 11 does not grade — use markEvaluationReadySchema. Gradebook (Step 13) consumes evaluation-ready data. */
 export const gradeProjectSubmissionSchema = z.object({
   gradingMethod: projectGradingMethodSchema.default('marks'),
   marksObtained: z.number().min(0).max(10000).optional().nullable(),
@@ -449,6 +457,7 @@ export type TransferLeadershipInput = z.infer<typeof transferLeadershipSchema>;
 export type SaveProjectSubmissionDraftInput = z.infer<typeof saveProjectSubmissionDraftSchema>;
 export type SubmitProjectInput = z.infer<typeof submitProjectSchema>;
 export type GradeProjectSubmissionInput = z.infer<typeof gradeProjectSubmissionSchema>;
+export type MarkEvaluationReadyInput = z.infer<typeof markEvaluationReadySchema>;
 export type CreateReviewInput = z.infer<typeof createReviewSchema>;
 export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;
 export type SubmitReviewInput = z.infer<typeof submitReviewSchema>;

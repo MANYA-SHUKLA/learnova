@@ -1,10 +1,11 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
 import {
   PROJECT_DELIVERY_TYPES,
+  PROJECT_EVALUATION_STATUSES,
   PROJECT_SUBMISSION_STATUSES,
 } from '@learnova/constants';
 
-export { PROJECT_SUBMISSION_STATUSES, PROJECT_DELIVERY_TYPES };
+export { PROJECT_SUBMISSION_STATUSES, PROJECT_DELIVERY_TYPES, PROJECT_EVALUATION_STATUSES };
 
 const projectSubmissionSchema = new Schema(
   {
@@ -56,6 +57,15 @@ const projectSubmissionSchema = new Schema(
     links: { type: [String], default: [] },
     timeSpentMinutes: { type: Number, default: null },
     lateSubmission: { type: Boolean, default: false, index: true },
+    evaluationStatus: {
+      type: String,
+      enum: PROJECT_EVALUATION_STATUSES,
+      default: 'pending',
+      index: true,
+    },
+    evaluationReadyAt: { type: Date, default: null },
+    evaluationReadyBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    evaluationNotes: { type: String, default: null },
     gradeId: { type: Schema.Types.ObjectId, ref: 'ProjectGrade', default: null },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },

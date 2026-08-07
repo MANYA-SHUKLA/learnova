@@ -73,8 +73,11 @@ export const PROJECT_PROGRESS_STATUSES = [
   'not_started',
   'in_progress',
   'submitted',
-  'graded',
+  'evaluation_ready',
 ] as const;
+
+/** Evaluation export lifecycle — Gradebook (Step 13) consumes `ready` records */
+export const PROJECT_EVALUATION_STATUSES = ['pending', 'ready', 'exported'] as const;
 
 export const PROJECT_AUDIT_EVENTS = [
   'project_created',
@@ -93,7 +96,7 @@ export const PROJECT_AUDIT_EVENTS = [
   'milestone_updated',
   'milestone_completed',
   'submission_created',
-  'submission_graded',
+  'submission_evaluation_ready',
   'review_submitted',
   'review_created',
   'comment_created',

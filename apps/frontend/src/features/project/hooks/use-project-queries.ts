@@ -9,6 +9,7 @@ import type {
   CommentListParams,
   CommentUpdateBody,
   GradeBody,
+  MarkEvaluationReadyBody,
   JoinTeamBody,
   MilestoneCreateBody,
   MilestoneUpdateBody,
@@ -479,10 +480,26 @@ export function useSubmitProjectMutation() {
   });
 }
 
+export function useMarkEvaluationReadyMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: MarkEvaluationReadyBody }) =>
+      projectApi.markEvaluationReady(id, body),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: projectKeys.all });
+    },
+  });
+}
+
+/** @deprecated Use useMarkEvaluationReadyMutation — Gradebook (Step 13) assigns marks */
 export function useGradeSubmissionMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: GradeBody }) => projectApi.grade(id, body),
+    mutationFn: ({ id, body }: { id: string; body: GradeBody }) =>
+      projectApi.markEvaluationReady(id, {
+        notes: body.feedback ?? null,
+        returnToStudent: body.returnToStudent,
+      }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: projectKeys.all });
     },

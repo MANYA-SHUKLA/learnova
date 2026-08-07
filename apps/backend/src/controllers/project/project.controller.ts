@@ -5,6 +5,7 @@ import type {
   CreateReviewInput,
   CreateTeamInput,
   GradeProjectSubmissionInput,
+  MarkEvaluationReadyInput,
   JoinTeamInput,
   ProjectFileUploadInput,
   ProjectListQuery,
@@ -406,14 +407,28 @@ export async function getSubmission(req: Request, res: Response, next: NextFunct
   }
 }
 
+export async function markEvaluationReady(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await projectService.markEvaluationReady(
+      req.params.id as string,
+      req.body as MarkEvaluationReadyInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/** @deprecated — returns 400 directing callers to mark-evaluation-ready */
 export async function gradeSubmission(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await projectService.prepareGrade(
+    await projectService.prepareGrade(
       req.params.id as string,
       req.body as GradeProjectSubmissionInput,
       actorFrom(req),
     );
-    sendSuccess(res, data, { requestId: req.requestId });
+    sendSuccess(res, {}, { requestId: req.requestId });
   } catch (err) {
     next(err);
   }

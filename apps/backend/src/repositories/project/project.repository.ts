@@ -84,8 +84,9 @@ export interface ProjectStats {
   archived: number;
   totalTeams: number;
   totalSubmissions: number;
-  gradedSubmissions: number;
+  evaluationReadySubmissions: number;
   lateSubmissions: number;
+  /** Reserved for Gradebook (Step 13) */
   averageGrade: number | null;
   byDepartment: { departmentId: string | null; label: string; count: number }[];
   byCourse: { courseId: string; courseCode: string; title: string; count: number }[];
@@ -700,9 +701,9 @@ export class ProjectRepository {
       archived,
       totalTeams,
       totalSubmissions,
-      gradedSubmissions,
+      evaluationReadySubmissions,
       lateSubmissions,
-      averageGrade,
+      _averageGrade,
       byDepartmentRaw,
       byCourseRaw,
       byStatusRaw,
@@ -715,9 +716,9 @@ export class ProjectRepository {
       ProjectModel.countDocuments({ ...base, status: 'archived' }),
       ProjectTeamModel.countDocuments({ ...base, status: { $in: ['approved', 'completed'] } }),
       ProjectSubmissionModel.countDocuments({ ...base, status: { $ne: 'draft' } }),
-      ProjectSubmissionModel.countDocuments({ ...base, status: 'graded' }),
+      ProjectSubmissionModel.countDocuments({ ...base, evaluationStatus: 'ready' }),
       ProjectSubmissionModel.countDocuments({ ...base, lateSubmission: true }),
-      this.averageGrade({ institutionId: oid }),
+      Promise.resolve(null as number | null),
       ProjectModel.aggregate([
         { $match: base },
         {
@@ -796,9 +797,9 @@ export class ProjectRepository {
       archived,
       totalTeams,
       totalSubmissions,
-      gradedSubmissions,
+      evaluationReadySubmissions,
       lateSubmissions,
-      averageGrade,
+      averageGrade: null,
       byDepartment: byDepartmentRaw as ProjectStats['byDepartment'],
       byCourse: byCourseRaw as ProjectStats['byCourse'],
       byStatus: byStatusRaw.map((row) => ({

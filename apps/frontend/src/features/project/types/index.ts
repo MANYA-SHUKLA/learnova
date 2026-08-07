@@ -267,6 +267,12 @@ export type SubmitBody = {
   attemptNumber?: number;
 };
 
+export type MarkEvaluationReadyBody = {
+  notes?: string | null;
+  returnToStudent?: boolean;
+};
+
+/** @deprecated Gradebook (Step 13) assigns marks */
 export type GradeBody = {
   gradingMethod?: 'manual' | 'rubric' | 'pass_fail' | 'marks' | 'percentage';
   marksObtained?: number | null;

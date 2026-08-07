@@ -14,19 +14,14 @@ import { ProjectReviewModel } from '../models/project-review.model.js';
 import { ProjectCommentModel } from '../models/project-comment.model.js';
 import { ProjectTagModel } from '../models/project-tag.model.js';
 import { ProjectCategoryModel } from '../models/project-category.model.js';
-import { ProjectGradeModel } from '../models/project-grade.model.js';
 import { ProjectProgressModel } from '../models/project-progress.model.js';
 import { ProjectAuditLogModel } from '../models/project-audit-log.model.js';
 import { logger } from '../utils/logger/index.js';
-import {
-  computePercentage,
-  generateSlug,
-  isPassing,
-} from '../services/project/project.helpers.js';
+import { generateSlug } from '../services/project/project.helpers.js';
 
 const DELIVERY_TYPES = ['text', 'file', 'link', 'mixed'] as const;
 const TEAM_STATUSES = ['pending', 'approved', 'rejected', 'completed'] as const;
-const SUBMISSION_STATUSES = ['submitted', 'late', 'graded', 'draft'] as const;
+const SUBMISSION_STATUSES = ['submitted', 'late', 'returned', 'draft'] as const;
 
 const TITLE_PREFIXES = [
   'Capstone Build',
@@ -136,7 +131,6 @@ export async function seedProjects(
       ProjectCommentModel.deleteMany({ institutionId: oid }),
       ProjectTagModel.deleteMany({ institutionId: oid }),
       ProjectCategoryModel.deleteMany({ institutionId: oid }),
-      ProjectGradeModel.deleteMany({ institutionId: oid }),
       ProjectProgressModel.deleteMany({ institutionId: oid }),
       ProjectAuditLogModel.deleteMany({ institutionId: oid }),
     ]);
@@ -295,6 +289,7 @@ export async function seedProjects(
       const submittedAt = randomDate(pastStart, now);
       const late = project.dueDate ? submittedAt > project.dueDate : false;
       const status = randomItem(SUBMISSION_STATUSES);
+      const evaluationReady = status !== 'draft' && randomBool(0.35);
 
       return {
         _id: new Types.ObjectId(),
@@ -318,6 +313,10 @@ export async function seedProjects(
         links: randomBool(0.4) ? ['https://example.com/demo-artifact'] : [],
         timeSpentMinutes: randomInt(30, 500),
         lateSubmission: late,
+        evaluationStatus: status === 'draft' ? 'pending' : evaluationReady ? 'ready' : 'pending',
+        evaluationReadyAt: evaluationReady ? submittedAt : null,
+        evaluationReadyBy: evaluationReady ? userOid : null,
+        evaluationNotes: null,
         gradeId: null,
         createdBy: userOid,
         updatedBy: userOid,
@@ -327,44 +326,6 @@ export async function seedProjects(
   ).flat() as Record<string, unknown>[];
 
   await ProjectSubmissionModel.insertMany(submissions.slice(0, 300), { ordered: false });
-
-  const grades = submissions
-    .filter((s) => s.status === 'graded')
-    .slice(0, 80)
-    .map((submission) => {
-      const project = projects.find((p) => String(p._id) === String(submission.projectId))!;
-      const marksObtained = randomInt(30, project.totalMarks);
-      const percentage = computePercentage(marksObtained, project.totalMarks);
-
-      return {
-        _id: new Types.ObjectId(),
-        institutionId: oid,
-        projectId: submission.projectId,
-        submissionId: submission._id,
-        studentId: submission.studentId,
-        teamId: submission.teamId,
-        gradingMethod: 'marks' as const,
-        marksObtained,
-        percentage,
-        passed: isPassing(marksObtained, project.passingMarks),
-        feedback: 'Seeded faculty feedback on project deliverables.',
-        rubricScores: [],
-        preparedForGradebook: false,
-        gradedBy: userOid,
-        gradedAt: randomDate(pastStart, now),
-        deletedAt: null,
-      };
-    });
-
-  if (grades.length > 0) {
-    await ProjectGradeModel.insertMany(grades, { ordered: false });
-    for (const grade of grades) {
-      await ProjectSubmissionModel.updateOne(
-        { _id: grade.submissionId },
-        { $set: { gradeId: grade._id } },
-      ).exec();
-    }
-  }
 
   const reviews = submissions
     .filter((s) => s.status !== 'draft')
@@ -417,7 +378,7 @@ export async function seedProjects(
         courseId: project.courseId,
         studentId: new Types.ObjectId(studentId),
         teamId: teams.find((t) => String(t.projectId) === String(project._id))?._id ?? null,
-        status: randomItem(['not_started', 'in_progress', 'submitted', 'graded'] as const),
+        status: randomItem(['not_started', 'in_progress', 'submitted', 'evaluation_ready'] as const),
         milestonesCompleted: randomInt(0, 5),
         totalMilestones: milestones.filter((m) => String(m.projectId) === String(project._id))
           .length,

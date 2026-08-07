@@ -2,7 +2,6 @@ import { API_ROUTES, PAGINATION } from '@learnova/constants';
 import type {
   PaginatedMeta,
   Project,
-  ProjectGrade,
   ProjectMilestone,
   ProjectReview,
   ProjectSubmission,
@@ -220,9 +219,9 @@ export const projectApi = {
   submit: (body: SubmitBody) =>
     apiClient.post<ProjectSubmission>(`${base}/submissions/submit`, body),
 
-  grade: (submissionId: string, body: GradeBody) =>
-    apiClient.post<{ submission: ProjectSubmission; grade: ProjectGrade }>(
-      `${base}/submissions/${submissionId}/grade`,
+  markEvaluationReady: (submissionId: string, body: MarkEvaluationReadyBody) =>
+    apiClient.post<ProjectSubmission>(
+      `${base}/submissions/${submissionId}/mark-evaluation-ready`,
       body,
     ),
 

@@ -498,7 +498,8 @@ Projects · Quizzes · MCQ/coding exams · Certificates · Gradebook · Attendan
 ### Shipped
 
 - Models: Project · ProjectMember · Milestone · Team · Submission · Comment · Tag · Category · Review · Grade · Progress · Audit
-- Assessment Core consumer (deadlines, attempts, grading via shared helpers)
+- Evaluation handoff: `evaluationStatus` pending → ready (no grading in Step 11)
+- **Collaboration Engine** (`services/collaboration-engine`) — enrollment gate, evaluation-ready workflow
 - Academic project types: mini_project · major_project · capstone · research · case_study · industry_project · innovation_challenge · open_project
 - Project fields: slug · objective · problemStatement · learningOutcomes · difficulty · category · tags · resources
 - Team workflow: pending/approved/rejected/completed · invite · accept/reject · transfer leadership · faculty approval
@@ -517,11 +518,11 @@ AI ideation · Quizzes · Exams · Gradebook sync · Certificates · Attendance 
 
 ### Documentation
 
-- `ProjectManagement.md` · `ProjectAPI.md` · `ProjectPermissions.md` · `ProjectTeams.md` · `ProjectMilestones.md` · `ProjectReviews.md`
+- `CollaborationEngine.md` · `ProjectManagement.md` · `ProjectAPI.md` · `ProjectPermissions.md` · `ProjectTeams.md` · `ProjectMilestones.md` · `ProjectReviews.md`
 
 ### Exit criteria (DoD — met)
 
-✓ Project model (slug, objective, outcomes, difficulty, category, tags) · ✓ ProjectMember · ✓ Team approval workflow · ✓ Invitations & transfer leadership · ✓ Milestone types · ✓ Submission (GitHub, demo, live URL) · ✓ Comments (threaded, resolve) · ✓ Reviews (score, suggestions, approval, revision) · ✓ Bulk ops & assign faculty · ✓ Tags & categories · ✓ `/student/my-team` route · ✓ Institution/Faculty/Student dashboards · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed scale · ✓ Tests · ✓ Docs
+✓ Collaboration Engine · ✓ Course/Student/Faculty integration · ✓ Evaluation ready (no grading) · ✓ Team approval workflow · ✓ Invitations & transfer leadership · ✓ Milestone types · ✓ Submission (GitHub, demo, live URL) · ✓ Comments (threaded, resolve) · ✓ Reviews (score, suggestions, approval, revision) · ✓ Bulk ops & assign faculty · ✓ Tags & categories · ✓ `/student/my-team` route · ✓ Institution/Faculty/Student dashboards · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed scale · ✓ Tests · ✓ Docs
 
 **Hard rule:** Stop after Projects. Do **not** start Exams or Gradebook from this step. Gradebook (Step 13) will consume prepared project grades.
 

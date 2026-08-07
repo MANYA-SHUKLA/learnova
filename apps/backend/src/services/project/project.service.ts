@@ -7,6 +7,7 @@ import type {
   CreateReviewInput,
   CreateTeamInput,
   GradeProjectSubmissionInput,
+  MarkEvaluationReadyInput,
   JoinTeamInput,
   ProjectFileUploadInput,
   ProjectListQuery,
@@ -44,6 +45,11 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { projectRepository } from '../../repositories/project/index.js';
+import {
+  canMarkEvaluationReady,
+  progressStatusAfterEvaluationReady,
+  submissionStatusAfterEvaluationReady,
+} from '../collaboration-engine/index.js';
 import {
   ACTIVE_ENROLLMENT_STATUSES,
   PROJECT_CSV_HEADERS,
@@ -1449,6 +1455,7 @@ export class ProjectService {
       ...this.submissionPayload(input),
       lateSubmission: window.late,
       status: resolveSubmissionStatus(window.late),
+      evaluationStatus: 'pending',
       submittedAt: new Date(),
       attemptNumber: attempt.nextAttempt,
       updatedBy: oid(actor.userId),
@@ -1525,8 +1532,8 @@ export class ProjectService {
       if (String(submission.studentId) !== String(student._id)) {
         throw new ForbiddenError('Can only attach files to your own submission');
       }
-      if (submission.status === 'graded') {
-        throw new ConflictError('Cannot modify a graded submission');
+      if (submission.evaluationStatus === 'ready' || submission.evaluationStatus === 'exported') {
+        throw new ConflictError('Cannot modify a submission marked evaluation ready');
       }
     } else {
       const project = await projectRepository.findProjectById(
@@ -1560,20 +1567,25 @@ export class ProjectService {
     return toDto(doc);
   }
 
-  async prepareGrade(
+  async markEvaluationReady(
     submissionId: string,
-    input: GradeProjectSubmissionInput,
+    input: MarkEvaluationReadyInput,
     actor: ActorContext,
   ) {
     const institutionId = requireTenant(actor);
     if (actor.role === 'student') {
-      throw new ForbiddenError('Students cannot grade submissions');
+      throw new ForbiddenError('Students cannot mark submissions evaluation ready');
     }
 
     const submission = await projectRepository.findSubmissionById(institutionId, submissionId);
     if (!submission) throw new NotFoundError('Submission not found');
-    if (submission.status === 'draft') {
-      throw new ConflictError('Cannot grade a draft submission');
+
+    const check = canMarkEvaluationReady({
+      submissionStatus: submission.status,
+      evaluationStatus: submission.evaluationStatus as 'pending' | 'ready' | 'exported' | undefined,
+    });
+    if (!check.ok) {
+      throw new ConflictError(check.reason);
     }
 
     const project = await projectRepository.findProjectById(
@@ -1583,40 +1595,13 @@ export class ProjectService {
     if (!project) throw new NotFoundError('Project not found');
     await this.assertProjectWriteAccess(project, actor, institutionId);
 
-    const outcome = resolveGradeOutcome({
-      gradingMethod: input.gradingMethod,
-      marksObtained: input.marksObtained,
-      percentage: input.percentage,
-      passed: input.passed,
-      rubricScores: input.rubricScores,
-      totalMarks: project.totalMarks,
-      passingMarks: project.passingMarks,
-      late: submission.lateSubmission,
-      latePenaltyPercent: project.latePenalty ?? (project as { latePenaltyPercent?: number }).latePenaltyPercent ?? 0,
-    });
-
-    await projectRepository.softDeleteGradesForSubmission(submissionId);
-
-    const grade = await projectRepository.createGrade({
-      institutionId: oid(institutionId),
-      projectId: submission.projectId,
-      submissionId: submission._id,
-      studentId: submission.studentId,
-      teamId: submission.teamId,
-      gradingMethod: input.gradingMethod,
-      marksObtained: outcome.marksObtained,
-      percentage: outcome.percentage,
-      passed: outcome.passed,
-      feedback: input.feedback ?? null,
-      rubricScores: input.rubricScores,
-      preparedForGradebook: false,
-      gradedBy: oid(actor.userId),
-      gradedAt: new Date(),
-    });
-
+    const now = new Date();
     const doc = await projectRepository.updateSubmissionById(institutionId, submissionId, {
-      gradeId: grade._id,
-      status: input.returnToStudent ? 'returned' : 'graded',
+      evaluationStatus: 'ready',
+      evaluationReadyAt: now,
+      evaluationReadyBy: oid(actor.userId),
+      evaluationNotes: input.notes ?? null,
+      status: submissionStatusAfterEvaluationReady(input.returnToStudent ?? false),
       updatedBy: oid(actor.userId),
     });
     if (!doc) throw new NotFoundError('Submission not found');
@@ -1627,34 +1612,39 @@ export class ProjectService {
         String(submission.projectId),
         String(submission.studentId),
         {
-          status: 'graded',
-          gradeId: grade._id,
-          lastActivityAt: new Date(),
+          status: progressStatusAfterEvaluationReady(),
+          lastActivityAt: now,
         },
       );
     }
 
-    await this.audit('submission_graded', actor, institutionId, {
+    await this.audit('submission_evaluation_ready', actor, institutionId, {
       projectId: String(submission.projectId),
       submissionId,
       courseId: String(submission.courseId),
       studentId: submission.studentId ? String(submission.studentId) : null,
-      metadata: {
-        gradingMethod: input.gradingMethod,
-        marksObtained: outcome.marksObtained,
-        preparedForGradebook: false,
-      },
+      metadata: { returnToStudent: input.returnToStudent ?? false },
     });
 
-    eventBus.emit(EVENTS.PROJECT_GRADED, {
+    eventBus.emit(EVENTS.PROJECT_EVALUATION_READY, {
       submissionId,
       projectId: String(submission.projectId),
-      studentId: submission.studentId ? String(submission.studentId) : null,
       institutionId,
-      gradeId: String(grade._id),
+      courseId: String(submission.courseId),
     });
 
-    return { submission: toDto(doc), grade: toDto(grade) };
+    return toDto(doc);
+  }
+
+  /** @deprecated Step 11 — use markEvaluationReady. Gradebook (Step 13) assigns marks. */
+  async prepareGrade(
+    submissionId: string,
+    _input: GradeProjectSubmissionInput,
+    _actor: ActorContext,
+  ) {
+    throw new ValidationError(
+      'Project grading is handled by the Gradebook module. Mark the submission evaluation ready instead.',
+    );
   }
 
   // ------------------------------------------------------------------- reviews
@@ -1901,7 +1891,7 @@ export class ProjectService {
       projectsCreated,
       activeTeams,
       pendingReviews,
-      pendingGrades,
+      pendingEvaluation,
     ] = await Promise.all([
       ProjectModel.countDocuments({
         institutionId: institutionOid,
@@ -1921,7 +1911,7 @@ export class ProjectService {
       projectRepository.countSubmissions({
         ...submissionBase,
         status: { $in: ['submitted', 'late'] },
-        gradeId: null,
+        evaluationStatus: 'pending',
       }),
     ]);
 
@@ -1930,7 +1920,7 @@ export class ProjectService {
       pendingReviews,
       upcomingDeadlines: [],
       studentTeams: activeTeams,
-      lateSubmissions: pendingGrades,
+      lateSubmissions: pendingEvaluation,
     };
   }
 

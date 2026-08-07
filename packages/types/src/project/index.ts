@@ -59,7 +59,9 @@ export type ProjectProgressStatus =
   | 'not_started'
   | 'in_progress'
   | 'submitted'
-  | 'graded';
+  | 'evaluation_ready';
+
+export type ProjectEvaluationStatus = 'pending' | 'ready' | 'exported';
 
 export interface ProjectFileRef {
   id: ID;
@@ -125,6 +127,8 @@ export interface Project {
   assignedFacultyIds: ID[];
   attachments: ProjectFileRef[];
   rubricId: ID | null;
+  /** Future Assignment module linkage — no assignment logic in Step 11 */
+  linkedAssignmentId: ID | null;
   createdBy: ID | null;
   updatedBy: ID | null;
   createdAt: string;
@@ -244,6 +248,11 @@ export interface ProjectSubmission {
   links: string[];
   timeSpentMinutes: number | null;
   lateSubmission: boolean;
+  evaluationStatus: ProjectEvaluationStatus;
+  evaluationReadyAt: string | null;
+  evaluationReadyBy: ID | null;
+  evaluationNotes: string | null;
+  /** Reserved for Gradebook (Step 13) — not set in Step 11 */
   gradeId: ID | null;
   createdBy: ID | null;
   updatedBy: ID | null;
@@ -295,6 +304,7 @@ export interface ProjectReview {
   deletedAt: string | null;
 }
 
+/** @deprecated Gradebook (Step 13) owns marks — not used in Step 11 collaboration flow */
 export interface ProjectGrade {
   id: ID;
   institutionId: ID;

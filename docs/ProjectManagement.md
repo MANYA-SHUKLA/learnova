@@ -8,6 +8,27 @@ Shared deadline, attempt, and grading primitives live in **[Assessment Core](./A
 Institution creates Project → Publish → Teams form & approve → Milestones → Submit work → Comments & Reviews → Grade prepared
 ```
 
+## Architecture
+
+Project Management is an **independent collaboration system** implemented via the **[Collaboration Engine](./CollaborationEngine.md)** (`apps/backend/src/services/collaboration-engine/`).
+
+It integrates with:
+
+| Module | Integration |
+| --- | --- |
+| **Courses** | Every project belongs to a course; enrollment-gated participation |
+| **Students** | Individual or team work via `ProjectMember` |
+| **Faculty** | Supervision, team approval, reviews — not final grading |
+| **Assignments** (future) | Optional `linkedAssignmentId` only |
+| **Learning Progress** (future) | Milestone events reserved for progress bridge |
+| **Gradebook** (Step 13) | Consumes `evaluationStatus: ready` submissions |
+
+**Step 11 does not implement grading or certificates.** Faculty mark submissions **evaluation ready**; Gradebook assigns marks later.
+
+```
+Collaboration Engine → Project Management → evaluation ready → Gradebook (future)
+```
+
 ## Capabilities
 
 - Project CRUD with academic types (Mini Project, Capstone, Research, …)
@@ -20,7 +41,8 @@ Institution creates Project → Publish → Teams form & approve → Milestones 
 - Student/team draft + submit (GitHub, demo video, live demo URL)
 - Threaded comments with resolve
 - Peer review + faculty review (score, feedback, suggestions, approval, revision required)
-- Manual / marks / percentage / pass-fail / rubric grading (**prepared**, not pushed to gradebook)
+- Mark submission **evaluation ready** for Gradebook export (Step 11 does not assign marks)
+- Project marks metadata retained for future Gradebook reference only
 - File uploads (PDF · DOCX · ZIP · images · video)
 - Search & filters (course · faculty · status · type · difficulty · published · archived)
 - Import / export · duplicate
@@ -41,7 +63,7 @@ Institution creates Project → Publish → Teams form & approve → Milestones 
 | `innovation_challenge` | Innovation / hackathon style |
 | `open_project` | Open-ended exploration |
 
-Legacy participation modes (`individual`, `team`, `hybrid`) remain supported for backward compatibility.
+Participation is controlled via `allowIndividual` and `allowTeams` on each project (students may work alone, in teams, or both).
 
 ## Status (activity lifecycle)
 
@@ -69,6 +91,7 @@ Legacy participation modes (`individual`, `team`, `hybrid`) remain supported for
 
 ## Related docs
 
+- [CollaborationEngine.md](./CollaborationEngine.md)
 - [ProjectAPI.md](./ProjectAPI.md)
 - [ProjectPermissions.md](./ProjectPermissions.md)
 - [ProjectTeams.md](./ProjectTeams.md)
