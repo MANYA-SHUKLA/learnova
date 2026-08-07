@@ -70,7 +70,8 @@ export default function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL(`/${locale}/institution/dashboard`, request.url));
+    // Presence cookie has no role — land on /dashboard which client-routes by role.
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
   }
 
   const response = intlMiddleware(request);
