@@ -17,8 +17,8 @@ import {
   projectSearchQuerySchema,
   projectSubmissionIdParamsSchema,
   projectTeamIdParamsSchema,
-  saveSubmissionDraftSchema,
-  submissionListQuerySchema,
+  projectSubmissionListQuerySchema,
+  saveProjectSubmissionDraftSchema,
   submitProjectSchema,
   submitReviewSchema,
   teamListQuerySchema,
@@ -171,14 +171,14 @@ projectRoutes.delete(
 projectRoutes.get(
   '/projects/submissions',
   ...readAuth,
-  validate(submissionListQuerySchema, 'query'),
+  validate(projectSubmissionListQuerySchema, 'query'),
   ctrl.listSubmissions,
 );
 
 projectRoutes.post(
   '/projects/submissions/draft',
   ...writeAuth,
-  validate(saveSubmissionDraftSchema),
+  validate(saveProjectSubmissionDraftSchema),
   ctrl.saveSubmissionDraft,
 );
 

@@ -15,7 +15,6 @@ import {
 } from '../../services/project/project.helpers.js';
 
 const NOW = new Date('2026-08-07T12:00:00.000Z');
-const YESTERDAY = new Date('2026-08-06T12:00:00.000Z');
 const TOMORROW = new Date('2026-08-08T12:00:00.000Z');
 
 describe('project status transitions', () => {

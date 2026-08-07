@@ -8,7 +8,7 @@ import {
   gradeProjectSubmissionSchema,
   projectFileUploadSchema,
   projectListQuerySchema,
-  saveSubmissionDraftSchema,
+  saveProjectSubmissionDraftSchema,
   submitProjectSchema,
   updateProjectSchema,
 } from '@learnova/validation';
@@ -97,8 +97,8 @@ describe('project validation', () => {
   });
 
   it('defaults draft submission fields', () => {
-    const parsed = saveSubmissionDraftSchema.parse({ projectId: OBJECT_ID });
+    const parsed = saveProjectSubmissionDraftSchema.parse({ projectId: OBJECT_ID });
     expect(parsed.deliveryType).toBe('mixed');
-    expect(parsed.repoLink).toBeNull();
+    expect(parsed.repoLink).toBeUndefined();
   });
 });

@@ -10,7 +10,7 @@ import type {
   ProjectListQuery,
   ProjectSubmissionListQuery,
   ProjectTeamListQuery,
-  SaveSubmissionDraftInput,
+  SaveProjectSubmissionDraftInput,
   SubmitProjectInput,
   SubmitReviewInput,
   UpdateMilestoneInput,
@@ -379,7 +379,7 @@ export async function listSubmissions(req: Request, res: Response, next: NextFun
 export async function saveSubmissionDraft(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await projectService.saveDraft(
-      req.body as SaveSubmissionDraftInput,
+      req.body as SaveProjectSubmissionDraftInput,
       actorFrom(req),
     );
     sendSuccess(res, data, { requestId: req.requestId });

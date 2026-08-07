@@ -10,12 +10,11 @@ import type {
   JoinTeamInput,
   ProjectFileUploadInput,
   ProjectListQuery,
-  SaveSubmissionDraftInput,
+  SaveProjectSubmissionDraftInput,
   SubmitProjectInput,
   SubmitReviewInput,
   UpdateMilestoneInput,
   UpdateProjectInput,
-  UpdateReviewInput,
   UpdateTeamInput,
 } from '@learnova/validation';
 import {
@@ -674,15 +673,37 @@ export class ProjectService {
     if (!existing) throw new NotFoundError('Project not found');
     await this.assertProjectWriteAccess(existing, actor, institutionId);
 
-    const raw = existing.toObject();
-    const { _id, createdAt, updatedAt, ...rest } = raw;
-
     const doc = await projectRepository.createProject({
-      ...rest,
+      institutionId: existing.institutionId,
+      courseId: existing.courseId,
+      moduleId: existing.moduleId,
+      lessonId: existing.lessonId,
       title: `${existing.title} (Copy)`,
+      description: existing.description,
+      instructions: existing.instructions,
+      projectType: existing.projectType,
+      teamSizeMin: existing.teamSizeMin,
+      teamSizeMax: existing.teamSizeMax,
+      allowSelfTeamFormation: existing.allowSelfTeamFormation,
+      allowPeerReview: existing.allowPeerReview,
+      peerReviewsRequired: existing.peerReviewsRequired,
+      allowRepoLink: existing.allowRepoLink,
+      allowMilestones: existing.allowMilestones,
+      visibility: existing.visibility,
       status: 'draft',
+      totalMarks: existing.totalMarks,
+      passingMarks: existing.passingMarks,
+      weightage: existing.weightage,
+      allowLateSubmission: existing.allowLateSubmission,
+      latePenaltyPercent: existing.latePenaltyPercent,
+      allowResubmission: existing.allowResubmission,
+      maxAttempts: existing.maxAttempts,
       publishDate: null,
+      dueDate: existing.dueDate,
+      closeDate: existing.closeDate,
+      estimatedMinutes: existing.estimatedMinutes,
       attachments: [],
+      rubricId: existing.rubricId,
       createdBy: oid(actor.userId),
       updatedBy: oid(actor.userId),
       deletedAt: null,
@@ -1181,7 +1202,7 @@ export class ProjectService {
     return toDto(doc);
   }
 
-  async saveDraft(input: SaveSubmissionDraftInput, actor: ActorContext) {
+  async saveDraft(input: SaveProjectSubmissionDraftInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const project = await projectRepository.findProjectById(institutionId, input.projectId);
     if (!project) throw new NotFoundError('Project not found');
