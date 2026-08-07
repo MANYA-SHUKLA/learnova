@@ -8,6 +8,44 @@ import type {
   ProjectSubmission,
   ProjectTeam,
 } from '@learnova/types';
+import { apiClient } from '@/lib/api/client';
+import type {
+  BulkAssignFacultyBody,
+  BulkIdsBody,
+  BulkResult,
+  CommentCreateBody,
+  CommentListParams,
+  CommentListResult,
+  CommentUpdateBody,
+  GradeBody,
+  JoinTeamBody,
+  MilestoneCreateBody,
+  MilestoneListResult,
+  MilestoneUpdateBody,
+  MyTeamListResult,
+  ProjectCategory,
+  ProjectComment,
+  ProjectCreateBody,
+  ProjectFacultyDashboard,
+  ProjectInstitutionDashboard,
+  ProjectListParams,
+  ProjectListResult,
+  ProjectStudentDashboard,
+  ProjectTag,
+  ProjectUpdateBody,
+  ReviewCreateBody,
+  ReviewSubmitBody,
+  SubmissionListParams,
+  SubmissionListResult,
+  SubmitBody,
+  TeamCreateBody,
+  TeamInviteBody,
+  TeamListParams,
+  TeamListResult,
+  TeamRejectBody,
+  TeamTransferLeadershipBody,
+  TeamUpdateBody,
+} from '../types';
 
 const base = API_ROUTES.PROJECTS;
 
@@ -46,7 +84,7 @@ function mapSortParams(params: ProjectListParams): ProjectListParams {
 export const projectApi = {
   list: async (params: ProjectListParams = {}): Promise<ProjectListResult> => {
     const query = mapSortParams(params);
-    const { data, meta } = await apiClient.getWithMeta<{ items: ProjectExtended[] }>(
+    const { data, meta } = await apiClient.getWithMeta<{ items: Project[] }>(
       `${base}${toQuery(query as Record<string, string | number | boolean | undefined>)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
@@ -54,14 +92,14 @@ export const projectApi = {
 
   listMine: async (params: ProjectListParams = {}): Promise<ProjectListResult> => {
     const query = mapSortParams(params);
-    const { data, meta } = await apiClient.getWithMeta<{ items: ProjectExtended[] }>(
+    const { data, meta } = await apiClient.getWithMeta<{ items: Project[] }>(
       `${base}/me${toQuery(query as Record<string, string | number | boolean | undefined>)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
 
   search: async (params: ProjectListParams = {}): Promise<ProjectListResult> => {
-    const { data, meta } = await apiClient.getWithMeta<{ items: ProjectExtended[] }>(
+    const { data, meta } = await apiClient.getWithMeta<{ items: Project[] }>(
       `${base}/search${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };

@@ -12,7 +12,6 @@ import {
 } from '@learnova/constants';
 import {
   applyLatePenalty,
-  canTransitionLifecycle,
   computePercentage,
   computeSubmissionRate,
   evaluateAttempt as evaluateAttemptCore,
@@ -183,7 +182,7 @@ export function generateSlug(title: string): string {
 }
 
 export async function ensureUniqueProjectSlug(
-  institutionId: string,
+  _institutionId: string,
   baseSlug: string,
   exists: (slug: string) => Promise<boolean>,
 ): Promise<string> {
