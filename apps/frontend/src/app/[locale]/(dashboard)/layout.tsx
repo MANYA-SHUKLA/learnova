@@ -18,13 +18,23 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
     pathname.endsWith('/account/change-password');
 
   useEffect(() => {
-    if (isLoading || !isAuthenticated || !user) return;
+    if (isLoading) return;
+
+    if (!isAuthenticated || !user) {
+      const next = pathname && pathname !== APP_ROUTES.LOGIN ? pathname : undefined;
+      const loginPath = next
+        ? `${APP_ROUTES.LOGIN}?next=${encodeURIComponent(next)}`
+        : APP_ROUTES.LOGIN;
+      router.replace(loginPath);
+      return;
+    }
+
     if (user.mustChangePassword && !onChangePasswordPage) {
       router.replace(APP_ROUTES.CHANGE_PASSWORD);
     }
-  }, [isLoading, isAuthenticated, user, onChangePasswordPage, router]);
+  }, [isLoading, isAuthenticated, user, onChangePasswordPage, pathname, router]);
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated || !user) {
     return (
       <div className="flex flex-1 items-center justify-center bg-background">
         <Spinner size="lg" />
@@ -32,7 +42,7 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
     );
   }
 
-  if (user?.mustChangePassword && !onChangePasswordPage) {
+  if (user.mustChangePassword && !onChangePasswordPage) {
     return (
       <div className="flex flex-1 items-center justify-center bg-background">
         <Spinner size="lg" />
@@ -40,7 +50,7 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
     );
   }
 
-  if (user?.mustChangePassword && onChangePasswordPage) {
+  if (user.mustChangePassword && onChangePasswordPage) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 

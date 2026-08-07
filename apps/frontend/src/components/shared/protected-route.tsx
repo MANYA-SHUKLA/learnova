@@ -79,8 +79,15 @@ export function PermissionGate({
   fallback?: ReactNode;
   enforce?: boolean;
 }) {
-  const { permissions } = useAuth();
+  const { permissions, isLoading, isAuthenticated } = useAuth();
   if (!enforce) return <>{children}</>;
-  if (!can(permissions, permission)) return <>{fallback}</>;
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+  if (!isAuthenticated || !can(permissions, permission)) return <>{fallback}</>;
   return <>{children}</>;
 }

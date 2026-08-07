@@ -171,11 +171,14 @@ function SidebarNav({
   const t = useTranslations('dashboard.sidebar');
   const { user } = useAuth();
   
-  // Select navigation groups based on user role
-  const navGroups = 
-    user?.role === 'faculty' ? FACULTY_NAV_GROUPS :
-    user?.role === 'student' ? STUDENT_NAV_GROUPS :
-    NAV_GROUPS; // default to institution admin
+  const navGroups =
+    user?.role === 'faculty'
+      ? FACULTY_NAV_GROUPS
+      : user?.role === 'student'
+        ? STUDENT_NAV_GROUPS
+        : user?.role === 'institution_admin'
+          ? NAV_GROUPS
+          : [];
 
   return (
     <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-4">
