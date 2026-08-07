@@ -4,39 +4,26 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 
 ---
 
-## Completed
+## Status
 
 | Step | Scope | State |
 | --- | --- | --- |
-| 1 | Foundation (monorepo, packages, API shell, theme, docs) | ✅ Complete |
-| 2 | Infrastructure (Mongo, Redis, BullMQ, cache, mail, storage, events, health) | ✅ Complete |
-| 3 | Authentication & Authorization | ✅ Complete |
+| 1 | Foundation | ✅ Complete |
+| 2 | Infrastructure | ✅ Complete |
+| 3 | Authentication | ✅ Complete |
 | 4 | Institution & Academic Structure | ✅ Complete |
 | 5 | Faculty Management | ✅ Complete |
 | 6 | Student Management | ✅ Complete |
+| **6.5** | **System Integration & Demo** | 🔄 In progress |
+| 7 | Course Management (LMS) | 🔒 After 6.5 |
 
-Together, Steps 1–6 form the **ERP people & structure core**: institution hierarchy, faculty, students, auth, permissions, and audit.
-
-### Canonical ERP spine
-
-```
-Institution → Campus → School → Department → Program
-  → Academic Year → Semester → Section → Batch
-  → Faculty → Students
-```
+**Hard rule:** ERP core (1–6) + Integration Demo (6.5) before LMS Course Management.
 
 ---
 
-## Step 6.5 — System Integration & Demo *(recommended before Courses)*
+## Canonical ERP spine
 
-**Status:** 🔲 Pending  
-**Goal:** Prove the ERP core is stable end-to-end before LMS features (Courses, Enrollments, Lessons).
-
-This checkpoint reduces the chance of discovering structural issues after several more modules have been built.
-
-### Verify relationships (ERP spine)
-
-Walk the chain top-down and confirm every link holds in API + UI:
+Everything in Steps 1–6 should already be connected. Step 6.5 verifies the spine end-to-end.
 
 ```
 Institution
@@ -62,72 +49,201 @@ Faculty
 Students
 ```
 
-- [ ] Institution → Campus → School → Department → Program
-- [ ] Academic Year → Semester → Section → Batch
-- [ ] Faculty linked under the hierarchy (campus / school / department / programs)
-- [ ] Students linked through campus → … → batch (+ year / semester / section)
-- [ ] Soft delete / archive / restore behave correctly across modules
+---
 
-### Role-based logins
+## Step 6.5 — System Integration & Demo
 
-- [ ] **Institution Admin** — full institution, faculty, and student management
-- [ ] **Faculty** — scoped student visibility (assigned departments); own profile
-- [ ] **Student** — own profile only (`/student/profile`); no admin directory access
+**Status:** 🔄 In progress  
+**Goal:** Prove the ERP core is stable before starting LMS (Courses).
 
-### Search, filters, import / export
+### Authentication
 
-- [ ] Faculty & Student list search (name, IDs, email)
-- [ ] Filters (status, department, program, section, batch, etc.)
-- [ ] Pagination & sorting
-- [ ] CSV import preview + commit + rollback on failure
-- [ ] Export (CSV / Excel / PDF) + audit of export events
+- [ ] ✅ Institution Login
+- [ ] ✅ Faculty Login
+- [ ] ✅ Student Login
 
-### Permissions & audit
+### Permissions
 
-- [ ] Re-seed auth permissions so roles include `faculty:*` and `student:*`
-- [ ] `PermissionGate` / API middleware deny unauthorized actions
-- [ ] Audit trails for create / update / archive / restore / import / export / status change
-- [ ] Domain events published for faculty & student lifecycle
+```
+Institution Admin
+  ↓
+Faculty
+  ↓
+Student
+```
 
-### Responsive UI
+- [ ] Institution Admin — full institution / faculty / student management
+- [ ] Faculty — scoped access (own profile, assigned-department students)
+- [ ] Student — own profile only
 
-- [ ] Marketing, auth, institution, faculty, and student surfaces on desktop / tablet / mobile
-- [ ] Dark mode across ERP modules
-- [ ] Empty, loading (skeletons), and error states with retry
+### Search
 
-### Demo script (suggested)
+- [ ] Faculty Search
+- [ ] Student Search
+- [ ] Department Search
+- [ ] Program Search
 
-1. Log in as Institution Admin → finish institution setup if needed  
-2. Create / confirm academic hierarchy (campus → … → batch)  
-3. Add or import faculty → open a faculty profile  
-4. Add or import students → confirm academic assignments  
-5. Search / filter / bulk action / export on both directories  
-6. Log in as Faculty → confirm scoped student list  
-7. Log in as Student → confirm own profile only  
-8. Spot-check audit logs for recent actions  
+### Bulk operations
+
+- [ ] Faculty Import
+- [ ] Faculty Export
+- [ ] Student Import
+- [ ] Student Export
+
+### Dashboard
+
+- [ ] Statistics
+- [ ] Charts
+- [ ] Cards
+- [ ] Tables
+
+### Experience
+
+- [ ] Responsive (desktop / tablet / mobile)
+- [ ] Dark Mode across ERP modules
+
+### Audit — everything logged
+
+- [ ] Faculty Created
+- [ ] Student Created
+- [ ] Login
+- [ ] Exports
+- [ ] Imports
+- [ ] Updates
 
 ### Exit criteria
 
-Step 6.5 is done when the checklist above is signed off and a short demo can be run without blockers. **Do not start Courses until this checkpoint passes.**
+Step 6.5 is done when the checklist above is signed off and a short demo runs without blockers. **Do not start Step 7 until this checkpoint passes.**
+
+### Suggested demo script
+
+1. Log in as Institution Admin → confirm hierarchy (campus → … → batch)  
+2. Import / create faculty → export → confirm audit  
+3. Import / create students → search / filter → export → confirm audit  
+4. Log in as Faculty → scoped student list  
+5. Log in as Student → own profile only  
+6. Toggle dark mode · check responsive layouts · spot-check dashboard stats/charts/tables  
 
 ---
 
-## Upcoming (LMS & beyond)
+## After Step 6.5 — LMS begins
+
+---
+
+## Step 7 — Course Management
+
+**Status:** 🔒 Blocked on Step 6.5  
+**Scale:** Largest module after Exams. Enterprise LMS course system — not just title + description.
+
+### Course hierarchy
+
+```
+Course
+  ↓
+Modules
+  ↓
+Lessons
+  ↓
+Topics
+  ↓
+Resources
+  ↓
+Assignments
+  ↓
+Practice Labs
+  ↓
+Projects
+  ↓
+Quizzes
+  ↓
+Exams
+  ↓
+Certificates
+```
+
+### Course database (enterprise fields)
+
+| Area | Fields |
+| --- | --- |
+| Identity | `id`, `courseCode`, `title`, `slug`, `description`, `thumbnail`, `banner` |
+| Classification | `category`, `level`, `language`, `tags`, `difficulty` |
+| Academic links | `department`, `program`, `semester`, `credits`, `estimatedHours` |
+| People | `facultyIds`, `coordinatorId` |
+| Pedagogy | `prerequisites`, `outcomes`, `requirements` |
+| Access | `visibility`, `status`, `enrollmentMode`, `maxStudents` |
+| Features | `certificateEnabled`, `discussionEnabled` |
+| Lifecycle | `version`, `publishedAt`, `archivedAt`, `createdBy`, `updatedBy`, timestamps |
+
+### Course builder
+
+```
+Module → Lesson → Content
+```
+
+**Content types:** Video · PDF · Markdown · HTML · Image · Audio · External Link · Embed · Code Block · Download · Presentation
+
+### Student progress (per lesson)
+
+Started · Completed · Watch % · Reading % · Time · Bookmarks · Notes · Last Position
+
+### Role features
+
+| Role | Capabilities |
+| --- | --- |
+| **Faculty** | Create · Edit · Duplicate · Archive · Publish · Preview · Assign Faculty · Assign Students · Manage Modules · Upload Files · Generate AI Content (later) · View Analytics |
+| **Student** | Enroll · Continue Learning · Bookmarks · Notes · Downloads · Progress · Discussion · Certificate |
+| **Institution Admin** | Approve · Assign Faculty · Archive · Restore · Duplicate · Publish · Analytics · Export |
+
+### Permissions
+
+| Role | Access |
+| --- | --- |
+| Institution | Everything |
+| Faculty | Own courses |
+| Student | Enrolled courses |
+
+### Search & filters
+
+**Search:** Title · Code · Faculty · Department · Program · Semester · Tags  
+
+**Filters:** Published · Draft · Archived · Department · Credits · Difficulty · Faculty · Language
+
+### Course dashboard
+
+Total Courses · Published · Draft · Enrollments · Completion · Faculty · Recent Updates
+
+### AI *(later — not in initial Step 7 ship)*
+
+Generate Outline · Lessons · Quiz · Assignment · Lab · Project
+
+### Documentation (generate with Step 7)
+
+- `Course.md`
+- `CourseAPI.md`
+- `CoursePermissions.md`
+- `CourseBuilder.md`
+- `CourseProgress.md`
+
+### Testing (Step 7 DoD)
+
+CRUD · Permissions · Builder · Publishing · Search · Filters · Progress · Analytics · Import · Export
+
+---
+
+## Later LMS & platform steps
 
 | Step | Scope | State |
 | --- | --- | --- |
-| 7 | Courses | 🔒 Blocked on Step 6.5 |
-| 8 | Enrollments | Planned |
-| 9 | Lessons / content | Planned |
-| 10 | Practice Labs / Coding | Planned |
-| 11 | Projects / Ideation | Planned |
-| 12 | Examinations | Planned |
-| 13 | Attendance / Grades | Planned |
-| 14 | Certificates | Planned |
-| 15 | Analytics & Notifications | Planned |
-| 16 | AI features | Planned |
+| 8 | Enrollments (if not folded into Course) | Planned |
+| 9 | Practice Labs / Coding | Planned |
+| 10 | Projects / Ideation | Planned |
+| 11 | Examinations | Planned |
+| 12 | Attendance / Grades | Planned |
+| 13 | Certificates (platform-wide) | Planned |
+| 14 | Analytics & Notifications | Planned |
+| 15 | AI content generation | Planned |
 
-Exact ordering of Steps 8+ may shift; the hard rule is: **ERP core (1–6) + Integration Demo (6.5) before LMS Course Management.**
+Ordering of Steps 8+ may shift as Course Management lands; exams remain a peer-scale module.
 
 ---
 

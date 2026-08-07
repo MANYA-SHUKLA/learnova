@@ -10,22 +10,27 @@ LMS · University ERP · Online Examination · Coding Platform · Cloud IDE · A
 
 | Step | Scope | State |
 | --- | --- | --- |
-| 1 | Foundation (monorepo, packages, API shell, theme, docs) | ✅ Complete |
-| 2 | Infrastructure (Mongo, Redis, BullMQ, cache, mail, storage, events, health) | ✅ Complete |
-| 3 | Authentication & Authorization | ✅ Complete |
+| 1 | Foundation | ✅ Complete |
+| 2 | Infrastructure | ✅ Complete |
+| 3 | Authentication | ✅ Complete |
 | 4 | Institution & Academic Structure | ✅ Complete |
 | 5 | Faculty Management | ✅ Complete |
 | 6 | Student Management | ✅ Complete |
-| **6.5** | **System Integration & Demo** (ERP core verification) | 🔲 Next |
-| 7 | Courses | 🔒 After 6.5 |
+| **6.5** | **System Integration & Demo** | 🔄 In progress |
+| 7 | Course Management (LMS) | 🔒 After 6.5 |
 
-**Next milestone:** [System Integration & Demo](./docs/Roadmap.md) — verify Institution → Departments → Programs → Faculty → Students relationships, role-based logins, search/filters/import-export, permissions & audit, and responsive UI **before** starting Courses.
+**Now:** Verify the connected ERP core — auth roles, permissions, search, import/export, dashboards, responsive + dark mode, audit logs.  
+**Next (after 6.5):** Enterprise Course Management (modules → lessons → content → progress → certificates).
 
-Full phased plan: [docs/Roadmap.md](./docs/Roadmap.md).
+Full plan + checklists: [docs/Roadmap.md](./docs/Roadmap.md).
 
-Auth covers register (institution bootstrap), login/logout, JWT access + rotating refresh cookies, sessions, password reset/change, email verification, RBAC middleware, seeds, and auth UI.
+```
+Institution → Campus → School → Department → Program
+  → Academic Year → Semester → Section → Batch
+  → Faculty → Students
+```
 
-Step 4 covers the academic hierarchy (institution → campus/school/department/program → academic year/semester/section/batch/calendar + settings). Steps 5–6 add faculty and student CRUD, bulk import/export, permissions, and audit. LMS domains (courses, enrollments, exams, labs, analytics) start only after Step 6.5.
+LMS domains (courses, enrollments, exams, labs, analytics) start **only after Step 6.5**.
 
 ## Stack
 
