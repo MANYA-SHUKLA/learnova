@@ -1,2 +1,15 @@
-export * from './api';
-export * from './hooks';
+export { courseApi } from './services/course-api';
+export * from './hooks/use-course-queries';
+export type * from './types';
+export {
+  COURSE_CATEGORY_LABELS,
+  COURSE_DIFFICULTY_LABELS,
+  COURSE_ENROLLMENT_MODE_LABELS,
+  COURSE_STATUS_LABELS,
+  COURSE_VISIBILITY_LABELS,
+  formatCourseCategory,
+  formatCourseDifficulty,
+  formatCourseEnrollmentMode,
+  formatCourseStatus,
+  formatCourseVisibility,
+} from './lib/labels';
