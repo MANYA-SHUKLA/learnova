@@ -1,0 +1,715 @@
+/**
+ * OpenAPI 3.0 document for Learnova API v1.
+ * Served at /docs (Swagger UI) and /openapi.json.
+ */
+
+import type { OpenAPIV3 } from 'openapi-types';
+
+const bearer: OpenAPIV3.SecurityRequirementObject = { bearerAuth: [] };
+
+function jsonBody(schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): OpenAPIV3.RequestBodyObject {
+  return {
+    required: true,
+    content: { 'application/json': { schema } },
+  };
+}
+
+function ok(
+  description: string,
+  schema?: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
+): OpenAPIV3.ResponseObject {
+  return {
+    description,
+    content: {
+      'application/json': {
+        schema: schema ?? {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            data: { type: 'object' },
+            requestId: { type: 'string', format: 'uuid' },
+            timestamp: { type: 'string', format: 'date-time' },
+          },
+        },
+      },
+    },
+  };
+}
+
+const errorResponses: Record<string, OpenAPIV3.ResponseObject> = {
+  '400': { description: 'Validation error' },
+  '401': { description: 'Unauthorized — missing or invalid bearer token' },
+  '403': { description: 'Forbidden — insufficient permission' },
+  '404': { description: 'Not found' },
+  '429': { description: 'Rate limited' },
+  '500': { description: 'Internal server error' },
+};
+
+function op(
+  summary: string,
+  opts: {
+    tags: string[];
+    security?: boolean;
+    parameters?: OpenAPIV3.ParameterObject[];
+    requestBody?: OpenAPIV3.RequestBodyObject;
+    description?: string;
+  },
+): OpenAPIV3.OperationObject {
+  return {
+    summary,
+    description: opts.description,
+    tags: opts.tags,
+    security: opts.security === false ? [] : [bearer],
+    parameters: opts.parameters,
+    requestBody: opts.requestBody,
+    responses: {
+      '200': ok(summary),
+      ...errorResponses,
+    },
+  };
+}
+
+const objectIdParam = (name: string, description?: string): OpenAPIV3.ParameterObject => ({
+  name,
+  in: 'path',
+  required: true,
+  schema: { type: 'string', pattern: '^[a-fA-F0-9]{24}$' },
+  description: description ?? 'MongoDB ObjectId',
+});
+
+const pageParams: OpenAPIV3.ParameterObject[] = [
+  { name: 'page', in: 'query', schema: { type: 'integer', minimum: 1, default: 1 } },
+  { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
+  { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Search query' },
+  {
+    name: 'sortBy',
+    in: 'query',
+    schema: { type: 'string' },
+  },
+  {
+    name: 'sortOrder',
+    in: 'query',
+    schema: { type: 'string', enum: ['asc', 'desc'] },
+  },
+];
+
+function crudCollection(
+  tag: string,
+  base: string,
+  idName = 'id',
+): OpenAPIV3.PathsObject {
+  return {
+    [base]: {
+      get: op(`List ${tag}`, { tags: [tag], parameters: pageParams }),
+      post: op(`Create ${tag.slice(0, -1) || tag}`, {
+        tags: [tag],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    [`${base}/{${idName}}`]: {
+      get: op(`Get ${tag} by id`, {
+        tags: [tag],
+        parameters: [objectIdParam(idName)],
+      }),
+      put: op(`Replace ${tag.slice(0, -1) || tag}`, {
+        tags: [tag],
+        parameters: [objectIdParam(idName)],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      patch: op(`Update ${tag.slice(0, -1) || tag}`, {
+        tags: [tag],
+        parameters: [objectIdParam(idName)],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      delete: op(`Archive/delete ${tag.slice(0, -1) || tag}`, {
+        tags: [tag],
+        parameters: [objectIdParam(idName)],
+      }),
+    },
+  };
+}
+
+function orgResource(name: string, path: string): OpenAPIV3.PathsObject {
+  return crudCollection(name, path);
+}
+
+export const openApiDocument: OpenAPIV3.Document = {
+  openapi: '3.0.3',
+  info: {
+    title: 'Learnova API',
+    version: '0.1.0',
+    description: [
+      'Enterprise AI learning platform API (v1).',
+      '',
+      '**Architecture layers**',
+      '- Step 7 — Course catalog (metadata / publishing)',
+      '- Step 7.5 — Course builder (modules / lessons / resources)',
+      '- Step 8 — Enrollments (student ↔ course)',
+      '- Step 8.5 — Progress tracking (learning state only — not grades)',
+      '',
+      'Authenticate with `Authorization: Bearer <accessToken>` from `POST /api/v1/auth/login`.',
+    ].join('\n'),
+    contact: { name: 'Learnova', email: 'shuklamanya99@gmail.com' },
+  },
+  servers: [
+    { url: 'http://localhost:4000', description: 'Local development' },
+    { url: '/ ', description: 'Current host' },
+  ],
+  tags: [
+    { name: 'Health', description: 'Liveness / readiness' },
+    { name: 'Auth', description: 'Login, sessions, password' },
+    { name: 'Institution', description: 'Tenant + academic hierarchy' },
+    { name: 'Faculty', description: 'Faculty directory' },
+    { name: 'Students', description: 'Student directory' },
+    { name: 'Courses', description: 'Course catalog (Step 7)' },
+    { name: 'Course Builder', description: 'Modules / lessons / resources (Step 7.5)' },
+    { name: 'Enrollments', description: 'Enrollment management (Step 8)' },
+    { name: 'Progress', description: 'Learning progress tracking (Step 8.5)' },
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Access token from POST /api/v1/auth/login',
+      },
+    },
+    schemas: {
+      LoginRequest: {
+        type: 'object',
+        required: ['email', 'password'],
+        properties: {
+          email: { type: 'string', format: 'email', example: 'faculty.demo@learnova.test' },
+          password: { type: 'string', format: 'password', example: 'Demo@12345' },
+        },
+      },
+      ApiSuccess: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {},
+          meta: { type: 'object' },
+          requestId: { type: 'string' },
+          timestamp: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
+  },
+  paths: {
+    '/health': {
+      get: op('Root health probe', { tags: ['Health'], security: false }),
+    },
+    '/api/v1/health': {
+      get: op('API health (Mongo, Redis, mail, storage)', {
+        tags: ['Health'],
+        security: false,
+      }),
+    },
+    '/api/v1/live': {
+      get: op('Liveness', { tags: ['Health'], security: false }),
+    },
+    '/api/v1/ready': {
+      get: op('Readiness', { tags: ['Health'], security: false }),
+    },
+    '/api/v1/version': {
+      get: op('Build version', { tags: ['Health'], security: false }),
+    },
+
+    '/api/v1/auth/register': {
+      post: op('Register institution + admin', {
+        tags: ['Auth'],
+        security: false,
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/auth/login': {
+      post: {
+        ...op('Login', {
+          tags: ['Auth'],
+          security: false,
+          requestBody: jsonBody({ $ref: '#/components/schemas/LoginRequest' }),
+        }),
+        responses: {
+          '200': ok('Login success — returns accessToken + user'),
+          ...errorResponses,
+        },
+      },
+    },
+    '/api/v1/auth/logout': {
+      post: op('Logout current session', { tags: ['Auth'] }),
+    },
+    '/api/v1/auth/logout-all': {
+      post: op('Logout all sessions', { tags: ['Auth'] }),
+    },
+    '/api/v1/auth/refresh': {
+      post: op('Refresh access token (cookie + optional bearer)', {
+        tags: ['Auth'],
+        security: false,
+      }),
+    },
+    '/api/v1/auth/forgot-password': {
+      post: op('Request password reset', {
+        tags: ['Auth'],
+        security: false,
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['email'],
+          properties: { email: { type: 'string', format: 'email' } },
+        }),
+      }),
+    },
+    '/api/v1/auth/reset-password': {
+      post: op('Complete password reset', {
+        tags: ['Auth'],
+        security: false,
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/auth/change-password': {
+      post: op('Change password', {
+        tags: ['Auth'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/auth/verify-email': {
+      post: op('Verify email', {
+        tags: ['Auth'],
+        security: false,
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/auth/resend-verification': {
+      post: op('Resend verification email', {
+        tags: ['Auth'],
+        security: false,
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/auth/me': {
+      get: op('Current user profile', { tags: ['Auth'] }),
+    },
+    '/api/v1/auth/session': {
+      get: op('Current session', { tags: ['Auth'] }),
+    },
+    '/api/v1/auth/sessions': {
+      get: op('List sessions', { tags: ['Auth'] }),
+    },
+    '/api/v1/auth/sessions/{sessionId}': {
+      delete: op('Revoke session', {
+        tags: ['Auth'],
+        parameters: [{ name: 'sessionId', in: 'path', required: true, schema: { type: 'string' } }],
+      }),
+    },
+
+    '/api/v1/institutions/me': {
+      get: op('My institution', { tags: ['Institution'] }),
+    },
+    ...orgResource('Institution', '/api/v1/institutions'),
+    ...orgResource('Campuses', '/api/v1/campuses'),
+    ...orgResource('Schools', '/api/v1/schools'),
+    ...orgResource('Departments', '/api/v1/departments'),
+    ...orgResource('Programs', '/api/v1/programs'),
+    ...orgResource('Academic Years', '/api/v1/academic-years'),
+    ...orgResource('Semesters', '/api/v1/semesters'),
+    ...orgResource('Sections', '/api/v1/sections'),
+    ...orgResource('Batches', '/api/v1/batches'),
+    ...orgResource('Academic Calendars', '/api/v1/academic-calendars'),
+    '/api/v1/institution-settings': {
+      get: op('Get institution settings', { tags: ['Institution'] }),
+      put: op('Replace institution settings', {
+        tags: ['Institution'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      patch: op('Patch institution settings', {
+        tags: ['Institution'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+
+    ...crudCollection('Faculty', '/api/v1/faculty'),
+    '/api/v1/faculty/stats': {
+      get: op('Faculty stats', { tags: ['Faculty'] }),
+    },
+    '/api/v1/faculty/search': {
+      get: op('Search faculty', { tags: ['Faculty'], parameters: pageParams }),
+    },
+    '/api/v1/faculty/me': {
+      get: op('Own faculty profile', { tags: ['Faculty'] }),
+      patch: op('Update own faculty profile', {
+        tags: ['Faculty'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/faculty/export': {
+      get: op('Export faculty', { tags: ['Faculty'], parameters: pageParams }),
+    },
+    '/api/v1/faculty/import': {
+      post: op('Import faculty', {
+        tags: ['Faculty'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/faculty/import/preview': {
+      post: op('Preview faculty import', {
+        tags: ['Faculty'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+
+    ...crudCollection('Students', '/api/v1/students'),
+    '/api/v1/students/stats': {
+      get: op('Student stats', { tags: ['Students'] }),
+    },
+    '/api/v1/students/search': {
+      get: op('Search students', { tags: ['Students'], parameters: pageParams }),
+    },
+    '/api/v1/students/me': {
+      get: op('Own student profile', { tags: ['Students'] }),
+      patch: op('Update own student profile', {
+        tags: ['Students'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/students/export': {
+      get: op('Export students', { tags: ['Students'], parameters: pageParams }),
+    },
+    '/api/v1/students/import': {
+      post: op('Import students', {
+        tags: ['Students'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+
+    ...crudCollection('Courses', '/api/v1/courses'),
+    '/api/v1/courses/stats': {
+      get: op('Course catalog stats', { tags: ['Courses'] }),
+    },
+    '/api/v1/courses/search': {
+      get: op('Search courses', { tags: ['Courses'], parameters: pageParams }),
+    },
+    '/api/v1/courses/export': {
+      get: op('Export courses', { tags: ['Courses'], parameters: pageParams }),
+    },
+    '/api/v1/courses/{id}/publish': {
+      post: op('Publish course', {
+        tags: ['Courses'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/courses/{id}/unpublish': {
+      post: op('Unpublish course', {
+        tags: ['Courses'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/courses/{id}/duplicate': {
+      post: op('Duplicate course', {
+        tags: ['Courses'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/courses/{id}/restore': {
+      post: op('Restore archived course', {
+        tags: ['Courses'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+
+    '/api/v1/courses/{courseId}/builder': {
+      get: op('Get course builder tree', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId')],
+      }),
+    },
+    '/api/v1/courses/{courseId}/modules': {
+      get: op('List modules', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId')],
+      }),
+      post: op('Create module', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/courses/{courseId}/modules/{moduleId}': {
+      get: op('Get module', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('moduleId')],
+      }),
+      patch: op('Update module', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('moduleId')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      delete: op('Delete module', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('moduleId')],
+      }),
+    },
+    '/api/v1/courses/{courseId}/modules/{moduleId}/lessons': {
+      get: op('List lessons', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('moduleId')],
+      }),
+      post: op('Create lesson', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('moduleId')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/courses/{courseId}/lessons/{lessonId}': {
+      get: op('Get lesson', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('lessonId')],
+      }),
+      patch: op('Update lesson', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('lessonId')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      delete: op('Delete lesson', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('lessonId')],
+      }),
+    },
+    '/api/v1/courses/{courseId}/lessons/{lessonId}/resources': {
+      get: op('List resources', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('lessonId')],
+      }),
+      post: op('Add resource', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('lessonId')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/courses/{courseId}/resources/{resourceId}': {
+      patch: op('Update resource', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('resourceId')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      delete: op('Delete resource', {
+        tags: ['Course Builder'],
+        parameters: [objectIdParam('courseId'), objectIdParam('resourceId')],
+      }),
+    },
+
+    ...crudCollection('Enrollments', '/api/v1/enrollments'),
+    '/api/v1/enrollments/stats': {
+      get: op('Enrollment stats', { tags: ['Enrollments'] }),
+    },
+    '/api/v1/enrollments/search': {
+      get: op('Search enrollments', { tags: ['Enrollments'], parameters: pageParams }),
+    },
+    '/api/v1/enrollments/me': {
+      get: op('My enrollments (student)', { tags: ['Enrollments'], parameters: pageParams }),
+    },
+    '/api/v1/enrollments/waitlist': {
+      get: op('List waitlist', { tags: ['Enrollments'] }),
+    },
+    '/api/v1/enrollments/self': {
+      post: op('Self-enroll', {
+        tags: ['Enrollments'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['courseId'],
+          properties: { courseId: { type: 'string' } },
+        }),
+      }),
+    },
+    '/api/v1/enrollments/{id}/approve': {
+      post: op('Approve enrollment', {
+        tags: ['Enrollments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/enrollments/{id}/reject': {
+      post: op('Reject enrollment', {
+        tags: ['Enrollments'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/enrollments/{id}/withdraw': {
+      post: op('Withdraw enrollment', {
+        tags: ['Enrollments'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/enrollments/{id}/complete': {
+      post: op('Mark enrollment completed', {
+        tags: ['Enrollments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/enrollments/{id}/restore': {
+      post: op('Restore enrollment', {
+        tags: ['Enrollments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+
+    '/api/v1/progress/me': {
+      get: op('My course progress list', {
+        tags: ['Progress'],
+        parameters: pageParams,
+        description: 'Student learning state across enrolled courses (not grades).',
+      }),
+    },
+    '/api/v1/progress/course/{courseId}': {
+      get: op('Course progress detail (modules/lessons)', {
+        tags: ['Progress'],
+        parameters: [objectIdParam('courseId')],
+      }),
+    },
+    '/api/v1/progress/resume/{courseId}': {
+      get: op('Resume learning position', {
+        tags: ['Progress'],
+        parameters: [objectIdParam('courseId')],
+      }),
+    },
+    '/api/v1/progress/lessons/open': {
+      post: op('Open lesson (start/track visit)', {
+        tags: ['Progress'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['courseId', 'moduleId', 'lessonId'],
+          properties: {
+            courseId: { type: 'string' },
+            moduleId: { type: 'string' },
+            lessonId: { type: 'string' },
+            position: { type: 'number' },
+          },
+        }),
+      }),
+    },
+    '/api/v1/progress/lessons/complete': {
+      post: op('Complete lesson (triggers module/course rollup)', {
+        tags: ['Progress'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['courseId', 'moduleId', 'lessonId'],
+          properties: {
+            courseId: { type: 'string' },
+            moduleId: { type: 'string' },
+            lessonId: { type: 'string' },
+            watchPercentage: { type: 'number' },
+            readingPercentage: { type: 'number' },
+          },
+        }),
+      }),
+    },
+    '/api/v1/progress/lessons': {
+      patch: op('Update lesson progress (watch/read/time/resume)', {
+        tags: ['Progress'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/progress/resources': {
+      post: op('Update resource progress (viewed/downloaded)', {
+        tags: ['Progress'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/progress/sessions/start': {
+      post: op('Start learning session', {
+        tags: ['Progress'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['courseId'],
+          properties: {
+            courseId: { type: 'string' },
+            lessonId: { type: 'string' },
+          },
+        }),
+      }),
+    },
+    '/api/v1/progress/sessions/end': {
+      post: op('End learning session (idle/active time)', {
+        tags: ['Progress'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/progress/bookmarks': {
+      get: op('List bookmarks', { tags: ['Progress'], parameters: pageParams }),
+      post: op('Create bookmark', {
+        tags: ['Progress'],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+    },
+    '/api/v1/progress/bookmarks/{id}': {
+      delete: op('Delete bookmark', {
+        tags: ['Progress'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/progress/notes': {
+      get: op('List notes', { tags: ['Progress'], parameters: pageParams }),
+      post: op('Create note', {
+        tags: ['Progress'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['courseId', 'lessonId', 'text'],
+          properties: {
+            courseId: { type: 'string' },
+            lessonId: { type: 'string' },
+            text: { type: 'string' },
+          },
+        }),
+      }),
+    },
+    '/api/v1/progress/notes/{id}': {
+      patch: op('Update note', {
+        tags: ['Progress'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['text'],
+          properties: { text: { type: 'string' } },
+        }),
+      }),
+      delete: op('Delete note', {
+        tags: ['Progress'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/progress/notes/export': {
+      get: op('Export notes', { tags: ['Progress'] }),
+    },
+    '/api/v1/progress/activity': {
+      get: op('Activity timeline', { tags: ['Progress'], parameters: pageParams }),
+    },
+    '/api/v1/progress/dashboard/student': {
+      get: op('Student progress dashboard', { tags: ['Progress'] }),
+    },
+    '/api/v1/progress/dashboard/faculty': {
+      get: op('Faculty course progress analytics', {
+        tags: ['Progress'],
+        parameters: [
+          {
+            name: 'courseId',
+            in: 'query',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+      }),
+    },
+    '/api/v1/progress/dashboard/institution': {
+      get: op('Institution progress analytics', { tags: ['Progress'] }),
+    },
+    '/api/v1/progress/stats': {
+      get: op('Progress stats', { tags: ['Progress'] }),
+    },
+    '/api/v1/progress/search': {
+      get: op('Search progress / bookmarks / notes', {
+        tags: ['Progress'],
+        parameters: pageParams,
+      }),
+    },
+  },
+};
