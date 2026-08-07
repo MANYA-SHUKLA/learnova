@@ -61,19 +61,18 @@ export default function EnrollmentListPage() {
   const [status, setStatus] = useState<EnrollmentStatus | 'all'>('all');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
-  const includeDeleted = status === 'withdrawn';
 
   const params = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
-      includeDeleted,
+      includeDeleted: false,
       page,
       limit: 20,
       sortBy: 'enrollmentDate',
       sortOrder: 'desc' as const,
     }),
-    [search, status, includeDeleted, page],
+    [search, status, page],
   );
 
   const listQuery = useEnrollmentList(params);
