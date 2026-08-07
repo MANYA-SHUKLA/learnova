@@ -258,10 +258,10 @@ export const projectApi = {
     apiClient.get<ProjectFacultyDashboard>(`${base}/dashboard/faculty`),
 
   studentDashboard: () =>
-    apiClient.get<ProjectStudentDashboardExtended>(`${base}/dashboard/student`),
+    apiClient.get<ProjectStudentDashboard>(`${base}/dashboard/student`),
 
   institutionDashboard: () =>
-    apiClient.get<ProjectInstitutionDashboardExtended>(`${base}/dashboard/institution`),
+    apiClient.get<ProjectInstitutionDashboard>(`${base}/dashboard/institution`),
 
-  stats: () => apiClient.get<ProjectInstitutionDashboardExtended>(`${base}/stats`),
+  stats: () => apiClient.get<ProjectInstitutionDashboard>(`${base}/stats`),
 };

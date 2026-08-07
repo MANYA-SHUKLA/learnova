@@ -286,9 +286,8 @@ export async function seedProjects(
   );
   await ProjectMemberModel.insertMany(members, { ordered: false });
 
-  const submissions = projects.slice(0, 30).flatMap((project, i) => {
-    const count = randomInt(8, 12);
-    return Array.from({ length: Math.ceil(300 / 30) }, (_, j) => {
+  const submissions = projects.slice(0, 30).flatMap((project, i) =>
+    Array.from({ length: Math.ceil(300 / 30) }, (_, j) => {
       const idx = i * 10 + j;
       if (idx >= 300) return null;
       const studentId = new Types.ObjectId(refs.studentIds[idx % refs.studentIds.length]!);
@@ -324,8 +323,8 @@ export async function seedProjects(
         updatedBy: userOid,
         deletedAt: null,
       };
-    }).filter(Boolean);
-  }).flat() as Record<string, unknown>[];
+    }).filter(Boolean),
+  ).flat() as Record<string, unknown>[];
 
   await ProjectSubmissionModel.insertMany(submissions.slice(0, 300), { ordered: false });
 
