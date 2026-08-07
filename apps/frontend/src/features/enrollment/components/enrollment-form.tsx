@@ -18,19 +18,18 @@ import {
   ENROLLMENT_METHOD_LABELS,
   useCreateEnrollmentMutation,
   type EnrollmentCreateBody,
+  type EnrollmentMethod,
 } from '@/features/enrollment';
 import { ApiClientError } from '@/lib/api/client';
 import { useRouter } from '@/lib/i18n/routing';
 
-const METHODS = Object.keys(ENROLLMENT_METHOD_LABELS) as Array<
-  keyof typeof ENROLLMENT_METHOD_LABELS
->;
+const METHODS = Object.keys(ENROLLMENT_METHOD_LABELS) as EnrollmentMethod[];
 
 interface EnrollmentFormProps {
   mode: 'create';
 }
 
-export function EnrollmentForm({ mode }: EnrollmentFormProps) {
+export function EnrollmentForm(_props: EnrollmentFormProps) {
   const router = useRouter();
   const createMutation = useCreateEnrollmentMutation();
   const pending = createMutation.isPending;
@@ -44,7 +43,7 @@ export function EnrollmentForm({ mode }: EnrollmentFormProps) {
     semesterId: '',
     sectionId: '',
     facultyId: '',
-    enrollmentMethod: 'manual' as EnrollmentCreateBody['enrollmentMethod'],
+    enrollmentMethod: 'manual' as EnrollmentMethod,
     notes: '',
   });
   const [error, setError] = useState<string | null>(null);
@@ -127,9 +126,7 @@ export function EnrollmentForm({ mode }: EnrollmentFormProps) {
               className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
               value={form.enrollmentMethod ?? 'manual'}
               disabled={pending}
-              onChange={(e) =>
-                set('enrollmentMethod', e.target.value as EnrollmentCreateBody['enrollmentMethod'])
-              }
+              onChange={(e) => set('enrollmentMethod', e.target.value)}
             >
               {METHODS.map((m) => (
                 <option key={m} value={m}>
