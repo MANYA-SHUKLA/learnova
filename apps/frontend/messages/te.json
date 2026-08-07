@@ -961,6 +961,74 @@
         },
         "emptyTitle": "ఇంకా విద్యార్థులు లేరు",
         "emptyDescription": "మీ మొదటి విద్యార్థిని జోడించండి లేదా డైరెక్టరీని నింపడానికి CSV దిగుమతి చేయండి."
+      },
+      "courses": {
+        "eyebrow": "అభ్యాసం",
+        "title": "కోర్సులు",
+        "description": "కోర్సు కేటలాగ్, విద్యా మ్యాపింగ్, అధ్యాపక నియామకాలు మరియు నమోదు సెట్టింగ్‌లను నిర్వహించండి.",
+        "addCourse": "కోర్సును జోడించండి",
+        "catalog": "కేటలాగ్",
+        "catalogDescription": "శోధించండి, ఫిల్టర్ చేయండి మరియు బల్క్ చర్యలు చేయండి.",
+        "searchPlaceholder": "శీర్షిక, కోడ్, వర్గం శోధించండి…",
+        "stats": {
+          "total": "మొత్తం",
+          "published": "ప్రచురించబడింది",
+          "draft": "ముసాయిదా",
+          "review": "సమీక్షలో",
+          "archived": "ఆర్కైవ్ చేయబడింది",
+          "programs": "కార్యక్రమాలు"
+        },
+        "table": {
+          "code": "కోడ్",
+          "title": "శీర్షిక",
+          "category": "వర్గం",
+          "difficulty": "కష్టం",
+          "credits": "క్రెడిట్లు",
+          "status": "స్థితి",
+          "visibility": "దృశ్యత"
+        },
+        "bulkSelected": "{count} ఎంచుకోబడింది",
+        "bulkPublish": "ప్రచురించండి",
+        "bulkUnpublish": "ప్రచురణ రద్దు చేయండి",
+        "bulkArchive": "ఆర్కైవ్ చేయండి",
+        "pagination": {
+          "showing": "{total}లో {start}–{end} చూపిస్తోంది"
+        },
+        "create": {
+          "eyebrow": "కోర్సులు",
+          "title": "కోర్సును జోడించండి"
+        },
+        "edit": {
+          "eyebrow": "కోర్సులు",
+          "title": "{name} సవరించండి",
+          "notFound": "కోర్సు కనుగొనబడలేదు."
+        },
+        "import": {
+          "eyebrow": "కోర్సులు",
+          "title": "CSV దిగుమతి చేయండి",
+          "description": "అప్‌లోడ్ చేయండి, ప్రివ్యూ చేయండి, ధృవీకరించండి మరియు దిగుమతి చేయండి. విఫలమైన దిగుమతులు రోల్‌బ్యాక్ చేయబడతాయి.",
+          "uploadTitle": "CSV అప్‌లోడ్",
+          "uploadDescription": "అవసరమైన కాలమ్‌లు: courseCode, slug, title, category, difficulty, language, credits, status, visibility.",
+          "confirmImport": "దిగుమతిని నిర్ధారించండి",
+          "importing": "దిగుమతి చేస్తోంది…",
+          "previewFailed": "ప్రివ్యూ విఫలమైంది",
+          "importFailed": "దిగుమతి విఫలమై రోల్‌బ్యాక్ చేయబడింది",
+          "totalRows": "మొత్తం వరుసలు: {count}",
+          "valid": "చెల్లుబాటు: {count}",
+          "invalid": "చెల్లని: {count}",
+          "duplicates": "ఫైల్‌లో డూప్లికేట్‌లు: {count}",
+          "rowError": "వరుస {row}{field}: {message}"
+        },
+        "export": {
+          "eyebrow": "కోర్సులు",
+          "title": "ఎగుమతి",
+          "description": "కోర్సు కేటలాగ్‌ను CSV, Excel-అనుకూలమైన లేదా PDFగా డౌన్‌లోడ్ చేయండి. హార్డ్ కాపీ కోసం ప్రింట్ ఉపయోగించండి.",
+          "formatsTitle": "ఎగుమతి ఫార్మాట్‌లు",
+          "formatsDescription": "ఎగుమతులు courses.exportగా ఆడిట్ చేయబడతాయి."
+        },
+        "emptyTitle": "ఇంకా కోర్సులు లేవు",
+        "emptyDescription": "మీ మొదటి కోర్సును జోడించండి లేదా కేటలాగ్‌ను పాప్యులేట్ చేయడానికి CSV దిగుమతి చేయండి.",
+        "loadError": "కోర్సులను లోడ్ చేయడం సాధ్యం కాలేదు."
       }
     },
     "sessions": {

@@ -374,22 +374,50 @@ export class CourseService {
     const newCourseCode = `${existing.courseCode}-COPY`;
     const newSlug = `${existing.slug}-copy-${Date.now()}`;
 
-    const existingObj = typeof existing.toObject === 'function' ? existing.toObject() : existing;
-    const { _id, createdAt, updatedAt, __v, ...rest } = existingObj as Record<string, unknown> & {
-      _id?: Types.ObjectId;
-      createdAt?: Date;
-      updatedAt?: Date;
-      __v?: number;
-    };
-
     const doc = await courseRepository.create({
-      ...rest,
       courseCode: newCourseCode,
       slug: newSlug,
       title: `${existing.title} (Copy)`,
+      subtitle: existing.subtitle,
+      description: existing.description,
+      shortDescription: existing.shortDescription,
+      thumbnail: existing.thumbnail,
+      banner: existing.banner,
+      icon: existing.icon,
+      institutionId: existing.institutionId,
+      campusId: existing.campusId,
+      schoolId: existing.schoolId,
+      departmentId: existing.departmentId,
+      programIds: existing.programIds,
+      semesterIds: existing.semesterIds,
+      facultyIds: existing.facultyIds,
+      coordinatorId: existing.coordinatorId,
+      category: existing.category,
+      difficulty: existing.difficulty,
+      language: existing.language,
+      credits: existing.credits,
+      estimatedHours: existing.estimatedHours,
+      duration: existing.duration,
       status: 'draft',
+      visibility: existing.visibility,
+      version: 1,
+      tags: existing.tags,
+      learningObjectives: existing.learningObjectives,
+      prerequisites: existing.prerequisites,
+      requirements: existing.requirements,
+      outcomes: existing.outcomes,
+      skills: existing.skills,
+      certificateEnabled: existing.certificateEnabled,
+      discussionEnabled: existing.discussionEnabled,
+      allowDownloads: existing.allowDownloads,
+      allowPreview: existing.allowPreview,
+      maxStudents: existing.maxStudents,
+      enrollmentMode: existing.enrollmentMode,
       publishDate: null,
       archiveDate: null,
+      seoTitle: existing.seoTitle,
+      seoDescription: existing.seoDescription,
+      seoKeywords: existing.seoKeywords,
       createdBy: new Types.ObjectId(actor.userId),
       updatedBy: new Types.ObjectId(actor.userId),
       deletedAt: null,
