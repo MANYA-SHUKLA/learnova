@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { generateTemporaryPassword } from '../../security/temp-password.js';
 import { passwordSchema } from '@learnova/validation';
 

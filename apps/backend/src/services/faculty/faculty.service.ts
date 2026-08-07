@@ -222,8 +222,9 @@ export class FacultyService {
       logger.warn({ err, email: input.email }, 'Faculty login user provisioning skipped/failed');
     }
 
+    const dto = toDto(doc) as { id: string } & Record<string, unknown>;
     return {
-      ...toDto(doc),
+      ...dto,
       credentials,
     };
   }
@@ -696,7 +697,7 @@ export class FacultyService {
         }
 
         const created = await this.create(parsed, actor);
-        createdIds.push(String((created as { id: string }).id));
+        createdIds.push(created.id);
       }
     } catch (err) {
       for (const id of createdIds) {
