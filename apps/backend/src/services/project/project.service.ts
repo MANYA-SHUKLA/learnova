@@ -30,7 +30,6 @@ import type {
 } from '@learnova/types';
 import { eventBus } from '../../events/index.js';
 import { ProjectModel } from '../../models/project.model.js';
-import { ProjectMilestoneModel } from '../../models/project-milestone.model.js';
 import { ProjectSubmissionModel } from '../../models/project-submission.model.js';
 import { CourseModel } from '../../models/course.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';

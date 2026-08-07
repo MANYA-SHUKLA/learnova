@@ -157,7 +157,7 @@ export class ProjectRepository {
     query: Pick<ExtendedProjectListQuery, 'sortBy' | 'sortOrder'>,
   ): { field: string; dir: 1 | -1 } {
     const sortOrder = query.sortOrder === 'asc' ? 1 : -1;
-    const sortBy = query.sortBy ?? 'createdAt';
+    const sortBy = String(query.sortBy ?? 'createdAt');
     if (sortBy === 'newest') return { field: 'createdAt', dir: -1 };
     if (sortBy === 'oldest') return { field: 'createdAt', dir: 1 };
     if (sortBy === 'deadline') return { field: 'dueDate', dir: sortOrder };
