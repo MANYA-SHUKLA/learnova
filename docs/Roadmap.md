@@ -17,6 +17,14 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 
 Together, Steps 1–6 form the **ERP people & structure core**: institution hierarchy, faculty, students, auth, permissions, and audit.
 
+### Canonical ERP spine
+
+```
+Institution → Campus → School → Department → Program
+  → Academic Year → Semester → Section → Batch
+  → Faculty → Students
+```
+
 ---
 
 ## Step 6.5 — System Integration & Demo *(recommended before Courses)*
@@ -26,12 +34,38 @@ Together, Steps 1–6 form the **ERP people & structure core**: institution hier
 
 This checkpoint reduces the chance of discovering structural issues after several more modules have been built.
 
-### Verify relationships
+### Verify relationships (ERP spine)
 
-- [ ] Institution → Campuses → Schools → Departments → Programs
-- [ ] Academic Year → Semesters → Sections → Batches
-- [ ] Faculty linked to campus / school / department / programs
-- [ ] Students linked to campus / school / department / program / year / semester / section / batch
+Walk the chain top-down and confirm every link holds in API + UI:
+
+```
+Institution
+  ↓
+Campus
+  ↓
+School
+  ↓
+Department
+  ↓
+Program
+  ↓
+Academic Year
+  ↓
+Semester
+  ↓
+Section
+  ↓
+Batch
+  ↓
+Faculty
+  ↓
+Students
+```
+
+- [ ] Institution → Campus → School → Department → Program
+- [ ] Academic Year → Semester → Section → Batch
+- [ ] Faculty linked under the hierarchy (campus / school / department / programs)
+- [ ] Students linked through campus → … → batch (+ year / semester / section)
 - [ ] Soft delete / archive / restore behave correctly across modules
 
 ### Role-based logins

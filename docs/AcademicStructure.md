@@ -1,6 +1,34 @@
 # Academic Structure
 
-Hierarchy under an institution. No courses, faculty CRUD, or student CRUD in this module.
+Canonical ERP hierarchy under an institution. Faculty and Students attach after Batch in the operational spine (Steps 5–6). Courses / enrollments start only after Step 6.5.
+
+## ERP spine
+
+```
+Institution
+  ↓
+Campus
+  ↓
+School
+  ↓
+Department
+  ↓
+Program
+  ↓
+Academic Year
+  ↓
+Semester
+  ↓
+Section
+  ↓
+Batch
+  ↓
+Faculty
+  ↓
+Students
+```
+
+## Structural tree (parents & children)
 
 ```
 Institution
@@ -13,6 +41,8 @@ Institution
  ├─ Academic Year
  │   ├─ Semester (odd / even / summer)
  │   └─ Academic Calendar (events)
+ ├─ Faculty (campus / school / department / programs)
+ ├─ Students (campus → … → batch + academic assignments)
  └─ Institution Settings
 ```
 
@@ -29,6 +59,8 @@ Institution
 | `sections` | `institutionId`, `programId`, `semesterId` |
 | `batches` | `institutionId`, `programId` |
 | `academic_calendars` | `institutionId`, `academicYearId` |
+| `faculty` | `institutionId`, optional campus/school/department/program/year/semester |
+| `students` | `institutionId`, optional campus → batch + year/semester/section |
 
 ## Entity notes
 
