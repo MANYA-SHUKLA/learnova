@@ -11,6 +11,7 @@ import {
   CardTitle,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 import {
@@ -30,12 +31,9 @@ function formatDate(value: string) {
   }
 }
 
-function sessionLabel(session: Session) {
-  const parts = [session.browser, session.os, session.deviceType].filter(Boolean);
-  return parts.length > 0 ? parts.join(' · ') : 'Unknown device';
-}
-
 export default function SessionsPage() {
+  const t = useTranslations('dashboard.sessions');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: sessions, isLoading, isError, error, refetch } = useSessions(
@@ -43,6 +41,11 @@ export default function SessionsPage() {
   );
   const revokeMutation = useRevokeSessionMutation();
   const logoutAllMutation = useLogoutAllMutation();
+
+  const sessionLabel = (session: Session) => {
+    const parts = [session.browser, session.os, session.deviceType].filter(Boolean);
+    return parts.length > 0 ? parts.join(' · ') : t('unknownDevice');
+  };
 
   if (authLoading || (isAuthenticated && isLoading)) {
     return (
@@ -57,8 +60,8 @@ export default function SessionsPage() {
       <div className="w-full min-w-0">
         <Card>
           <CardHeader>
-            <CardTitle>Sessions</CardTitle>
-            <CardDescription>Sign in to manage your active sessions.</CardDescription>
+            <CardTitle>{t('title')}</CardTitle>
+            <CardDescription>{t('signInPrompt')}</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -81,10 +84,8 @@ export default function SessionsPage() {
     <div className="w-full min-w-0">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Sessions</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Devices where you are currently signed in.
-          </p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{t('title')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('description')}</p>
         </div>
         <Button
           variant="danger"
@@ -95,10 +96,10 @@ export default function SessionsPage() {
           {logoutAllMutation.isPending ? (
             <>
               <Spinner size="sm" />
-              Signing out…
+              {t('signingOut')}
             </>
           ) : (
-            'Sign out all devices'
+            t('signOutAll')
           )}
         </Button>
       </div>
@@ -107,10 +108,10 @@ export default function SessionsPage() {
         <Card className="mb-4">
           <CardContent className="flex items-center justify-between gap-4 pt-6">
             <p className="text-sm text-danger">
-              {error instanceof Error ? error.message : 'Failed to load sessions.'}
+              {error instanceof Error ? error.message : t('loadFailed')}
             </p>
             <Button variant="outline" size="sm" onClick={() => void refetch()}>
-              Retry
+              {tCommon('retry')}
             </Button>
           </CardContent>
         </Card>
@@ -123,17 +124,19 @@ export default function SessionsPage() {
               <div className="min-w-0 space-y-1.5">
                 <CardTitle className="text-base">{sessionLabel(session)}</CardTitle>
                 <CardDescription className="break-words">
-                  Last active {formatDate(session.lastActivityAt)}
+                  {t('lastActive', { when: formatDate(session.lastActivityAt) })}
                   {session.ipAddress ? ` · ${session.ipAddress}` : ''}
                   {session.country ? ` · ${session.country}` : ''}
                 </CardDescription>
               </div>
-              {session.isCurrent ? <Badge variant="success">Current</Badge> : null}
+              {session.isCurrent ? <Badge variant="success">{t('current')}</Badge> : null}
             </CardHeader>
             <CardContent className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-xs text-muted-foreground">
-                Started {formatDate(session.createdAt)} · Expires{' '}
-                {formatDate(session.expiresAt)}
+                {t('startedExpires', {
+                  started: formatDate(session.createdAt),
+                  expires: formatDate(session.expiresAt),
+                })}
               </p>
               <Button
                 variant={session.isCurrent ? 'danger' : 'outline'}
@@ -141,7 +144,7 @@ export default function SessionsPage() {
                 disabled={revokeMutation.isPending}
                 onClick={() => void handleRevoke(session.id, session.isCurrent)}
               >
-                {session.isCurrent ? 'Sign out' : 'Revoke'}
+                {session.isCurrent ? t('signOut') : t('revoke')}
               </Button>
             </CardContent>
           </Card>
@@ -149,9 +152,7 @@ export default function SessionsPage() {
 
         {!isLoading && (sessions?.length ?? 0) === 0 ? (
           <Card>
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-              No active sessions found.
-            </CardContent>
+            <CardContent className="pt-6 text-sm text-muted-foreground">{t('empty')}</CardContent>
           </Card>
         ) : null}
       </div>

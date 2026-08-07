@@ -2,6 +2,7 @@
 
 import { Button } from '@learnova/ui';
 import { Download, Printer } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { exportToCsv, type CsvCell } from '../utils/export';
 
 interface ExportMenuProps {
@@ -12,6 +13,7 @@ interface ExportMenuProps {
 }
 
 export function ExportMenu({ filename, headers, rows, disabled }: ExportMenuProps) {
+  const t = useTranslations('dashboard.institution.crud');
   return (
     <div className="flex flex-wrap items-center gap-2 print:hidden">
       <Button
@@ -32,7 +34,7 @@ export function ExportMenu({ filename, headers, rows, disabled }: ExportMenuProp
         onClick={() => { window.print(); }}
       >
         <Printer className="size-3.5" />
-        Print / PDF
+        {t('printPdf')}
       </Button>
     </div>
   );

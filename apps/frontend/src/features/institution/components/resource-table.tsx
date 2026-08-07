@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge, Button, Skeleton } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import type { OrgEntityStatus } from '../types';
@@ -156,10 +157,11 @@ export function PaginationControls({
   total,
   onPageChange,
 }: PaginationControlsProps) {
+  const t = useTranslations('dashboard.institution.crud');
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 print:hidden">
       <p className="text-xs text-muted-foreground">
-        Page {page} of {Math.max(totalPages, 1)} · {total} total
+        {t('pageOf', { page, totalPages: Math.max(totalPages, 1), total })}
       </p>
       <div className="flex w-full gap-2 sm:w-auto">
         <Button
@@ -170,7 +172,7 @@ export function PaginationControls({
           disabled={!hasPrevPage}
           onClick={() => { onPageChange(page - 1); }}
         >
-          Previous
+          {t('previous')}
         </Button>
         <Button
           type="button"
@@ -180,7 +182,7 @@ export function PaginationControls({
           disabled={!hasNextPage}
           onClick={() => { onPageChange(page + 1); }}
         >
-          Next
+          {t('next')}
         </Button>
       </div>
     </div>

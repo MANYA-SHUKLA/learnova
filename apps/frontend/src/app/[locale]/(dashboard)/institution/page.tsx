@@ -25,6 +25,7 @@ import {
   Settings2,
   Users,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   EmptyState,
   ErrorState,
@@ -39,52 +40,8 @@ import {
 import { Link } from '@/lib/i18n/routing';
 import { isInstitutionNotFound } from '@/lib/onboarding';
 
-const MODULES = [
-  {
-    href: APP_ROUTES.INSTITUTION_PROFILE,
-    title: 'Profile & branding',
-    description: 'Identity, contact, and brand assets.',
-    icon: Building2,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_CAMPUSES,
-    title: 'Campuses',
-    description: 'Locations and campus contacts.',
-    icon: School,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_SCHOOLS,
-    title: 'Schools',
-    description: 'Schools and faculties.',
-    icon: GraduationCap,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_DEPARTMENTS,
-    title: 'Departments',
-    description: 'Departments under schools.',
-    icon: Network,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_PROGRAMS,
-    title: 'Programs',
-    description: 'Degree and certificate programs.',
-    icon: BookOpen,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS,
-    title: 'Academic years',
-    description: 'Year ranges and active terms.',
-    icon: CalendarDays,
-  },
-  {
-    href: APP_ROUTES.INSTITUTION_SETTINGS,
-    title: 'Settings',
-    description: 'Theme, grading, and policies.',
-    icon: Settings2,
-  },
-] as const;
-
 export default function InstitutionDashboardPage() {
+  const t = useTranslations('dashboard.institution.overview');
   const { data: institution, isLoading, isError, error, refetch } = useMyInstitution();
   const campuses = useCampuses({ limit: 1 });
   const schools = useSchools({ limit: 1 });
@@ -92,32 +49,91 @@ export default function InstitutionDashboardPage() {
   const programs = usePrograms({ limit: 1 });
   const years = useAcademicYears({ limit: 1 });
 
-  const stats = [
-    { label: 'Campuses', value: campuses.data?.meta.total ?? 0, icon: School },
-    { label: 'Schools', value: schools.data?.meta.total ?? 0, icon: GraduationCap },
-    { label: 'Departments', value: departments.data?.meta.total ?? 0, icon: Network },
-    { label: 'Programs', value: programs.data?.meta.total ?? 0, icon: BookOpen },
-    { label: 'Academic years', value: years.data?.meta.total ?? 0, icon: CalendarDays },
+  const modules = [
     {
-      label: 'Student capacity',
+      href: APP_ROUTES.INSTITUTION_PROFILE,
+      title: t('modulesList.profile.title'),
+      description: t('modulesList.profile.description'),
+      icon: Building2,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_CAMPUSES,
+      title: t('modulesList.campuses.title'),
+      description: t('modulesList.campuses.description'),
+      icon: School,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_SCHOOLS,
+      title: t('modulesList.schools.title'),
+      description: t('modulesList.schools.description'),
+      icon: GraduationCap,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_DEPARTMENTS,
+      title: t('modulesList.departments.title'),
+      description: t('modulesList.departments.description'),
+      icon: Network,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_PROGRAMS,
+      title: t('modulesList.programs.title'),
+      description: t('modulesList.programs.description'),
+      icon: BookOpen,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS,
+      title: t('modulesList.academicYears.title'),
+      description: t('modulesList.academicYears.description'),
+      icon: CalendarDays,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_SETTINGS,
+      title: t('modulesList.settings.title'),
+      description: t('modulesList.settings.description'),
+      icon: Settings2,
+    },
+  ] as const;
+
+  const stats = [
+    { label: t('stats.campuses'), value: campuses.data?.meta.total ?? 0, icon: School },
+    { label: t('stats.schools'), value: schools.data?.meta.total ?? 0, icon: GraduationCap },
+    { label: t('stats.departments'), value: departments.data?.meta.total ?? 0, icon: Network },
+    { label: t('stats.programs'), value: programs.data?.meta.total ?? 0, icon: BookOpen },
+    { label: t('stats.academicYears'), value: years.data?.meta.total ?? 0, icon: CalendarDays },
+    {
+      label: t('stats.studentCapacity'),
       value: institution?.maxStudents ?? 0,
       icon: Users,
     },
   ];
 
+  const setupEmpty = (
+    <EmptyState
+      title={t('finishSetupTitle')}
+      description={t('finishSetupDescription')}
+      action={
+        <Button asChild>
+          <Link href={APP_ROUTES.INSTITUTION_SETUP}>{t('continueSetup')}</Link>
+        </Button>
+      }
+    />
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-primary">Organization</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">Institution</h1>
+          <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+            {t('title')}
+          </h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
-            Structure, academic calendar, and tenant settings for your campus.
+            {t('description')}
           </p>
         </div>
         <Button asChild className="w-full sm:w-auto">
           <Link href={APP_ROUTES.INSTITUTION_PROFILE}>
-            Edit profile
+            {t('editProfile')}
             <ArrowRight className="size-4" />
           </Link>
         </Button>
@@ -129,30 +145,14 @@ export default function InstitutionDashboardPage() {
           <Skeleton className="h-40 rounded-2xl" />
         </div>
       ) : isError && isInstitutionNotFound(error) ? (
-        <EmptyState
-          title="Finish institution setup"
-          description="Add logo, contact details, and branding to unlock campuses, schools, and programs."
-          action={
-            <Button asChild>
-              <Link href={APP_ROUTES.INSTITUTION_SETUP}>Continue setup</Link>
-            </Button>
-          }
-        />
+        setupEmpty
       ) : isError ? (
         <ErrorState
-          message={error instanceof Error ? error.message : 'Failed to load institution.'}
+          message={error instanceof Error ? error.message : t('loadFailed')}
           onRetry={() => void refetch()}
         />
       ) : !institution ? (
-        <EmptyState
-          title="Finish institution setup"
-          description="Add logo, contact details, and branding to unlock campuses, schools, and programs."
-          action={
-            <Button asChild>
-              <Link href={APP_ROUTES.INSTITUTION_SETUP}>Continue setup</Link>
-            </Button>
-          }
-        />
+        setupEmpty
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -193,7 +193,7 @@ export default function InstitutionDashboardPage() {
                     <MapPin className="size-3.5" />
                     {[institution.city, institution.state, institution.country]
                       .filter(Boolean)
-                      .join(', ') || 'Location not set'}
+                      .join(', ') || t('locationNotSet')}
                   </p>
                 </div>
               </div>
@@ -208,21 +208,24 @@ export default function InstitutionDashboardPage() {
           <div className="grid gap-4 p-6 sm:grid-cols-3 sm:px-8">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Contact
+                {t('contact')}
               </p>
               <p className="mt-1 text-sm font-medium">{institution.email}</p>
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Capacity
+                {t('capacity')}
               </p>
               <p className="mt-1 text-sm font-medium">
-                {institution.maxStudents} students · {institution.maxFaculty} faculty
+                {t('capacityLine', {
+                  students: institution.maxStudents,
+                  faculty: institution.maxFaculty,
+                })}
               </p>
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Locale
+                {t('locale')}
               </p>
               <p className="mt-1 text-sm font-medium">
                 {institution.timezone} · {institution.currency}
@@ -260,11 +263,11 @@ export default function InstitutionDashboardPage() {
       <div>
         <div className="mb-4 flex items-center gap-2">
           <Layers3 className="size-5 text-primary" />
-          <h2 className="font-display text-xl font-semibold tracking-tight">Modules</h2>
-          <Badge variant="secondary">{MODULES.length}</Badge>
+          <h2 className="font-display text-xl font-semibold tracking-tight">{t('modules')}</h2>
+          <Badge variant="secondary">{modules.length}</Badge>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {MODULES.map((mod) => (
+          {modules.map((mod) => (
             <Link key={mod.href} href={mod.href} className="group block">
               <Card className="h-full">
                 <CardHeader className="flex flex-row items-start gap-4 space-y-0">

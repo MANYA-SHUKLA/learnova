@@ -1,6 +1,7 @@
 'use client';
 
 import type { Batch } from '@learnova/types';
+import { useTranslations } from 'next-intl';
 import {
   ResourceCrudPage,
   useArchiveBatchMutation,
@@ -13,36 +14,39 @@ import {
   type ResourceColumn,
 } from '@/features/institution';
 
-const columns: ResourceColumn<Batch>[] = [
-  { id: 'name', header: 'Name', cell: (r) => r.name, exportValue: (r) => r.name },
-  { id: 'year', header: 'Year', cell: (r) => r.year, exportValue: (r) => r.year },
-  {
-    id: 'programId',
-    header: 'Program ID',
-    cell: (r) => <span className="font-mono text-xs">{r.programId}</span>,
-    exportValue: (r) => r.programId,
-  },
-];
-
 export default function BatchesPage() {
+  const t = useTranslations('dashboard.institution.batches');
+  const tf = useTranslations('dashboard.institution.fields');
+  const ts = useTranslations('dashboard.institution.status');
   const { data: programsData } = usePrograms({ limit: 100 });
   const programOptions =
     programsData?.items.map((p) => ({ value: p.id, label: `${p.name} (${p.code})` })) ?? [];
 
+  const columns: ResourceColumn<Batch>[] = [
+    { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
+    { id: 'year', header: tf('year'), cell: (r) => r.year, exportValue: (r) => r.year },
+    {
+      id: 'programId',
+      header: tf('programId'),
+      cell: (r) => <span className="font-mono text-xs">{r.programId}</span>,
+      exportValue: (r) => r.programId,
+    },
+  ];
+
   const fields: FormField[] = [
     {
       name: 'programId',
-      label: 'Program',
+      label: tf('program'),
       type: 'select',
       required: true,
       options: programOptions.length
         ? programOptions
-        : [{ value: '', label: 'No programs available' }],
+        : [{ value: '', label: tf('noPrograms') }],
     },
-    { name: 'name', label: 'Name', type: 'text', required: true },
+    { name: 'name', label: tf('name'), type: 'text', required: true },
     {
       name: 'year',
-      label: 'Year',
+      label: tf('year'),
       type: 'number',
       required: true,
       min: 1990,
@@ -50,19 +54,20 @@ export default function BatchesPage() {
     },
     {
       name: 'status',
-      label: 'Status',
+      label: tf('status'),
       type: 'select',
       options: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' },
+        { value: 'active', label: ts('active') },
+        { value: 'inactive', label: ts('inactive') },
       ],
     },
   ];
 
   return (
     <ResourceCrudPage<Batch>
-      title="Batches"
-      description="Student cohorts by program and intake year."
+      title={t('title')}
+      singularLabel={t('singular')}
+      description={t('description')}
       exportFilename="batches"
       columns={columns}
       fields={fields}

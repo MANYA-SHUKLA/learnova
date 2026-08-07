@@ -1,6 +1,7 @@
 'use client';
 
 import type { Program } from '@learnova/types';
+import { useTranslations } from 'next-intl';
 import {
   ResourceCrudPage,
   useArchiveProgramMutation,
@@ -13,25 +14,11 @@ import {
   type ResourceColumn,
 } from '@/features/institution';
 
-const columns: ResourceColumn<Program>[] = [
-  { id: 'name', header: 'Name', cell: (r) => r.name, exportValue: (r) => r.name },
-  { id: 'code', header: 'Code', cell: (r) => r.code, exportValue: (r) => r.code },
-  { id: 'level', header: 'Level', cell: (r) => r.level, exportValue: (r) => r.level },
-  {
-    id: 'duration',
-    header: 'Years',
-    cell: (r) => r.durationYears,
-    exportValue: (r) => r.durationYears,
-  },
-  {
-    id: 'credits',
-    header: 'Credits',
-    cell: (r) => r.credits,
-    exportValue: (r) => r.credits,
-  },
-];
-
 export default function ProgramsPage() {
+  const t = useTranslations('dashboard.institution.programs');
+  const tf = useTranslations('dashboard.institution.fields');
+  const ts = useTranslations('dashboard.institution.status');
+  const tl = useTranslations('dashboard.institution.levels');
   const { data: departmentsData } = useDepartments({ limit: 100 });
   const departmentOptions =
     departmentsData?.items.map((d) => ({
@@ -39,21 +26,39 @@ export default function ProgramsPage() {
       label: `${d.name} (${d.code})`,
     })) ?? [];
 
+  const columns: ResourceColumn<Program>[] = [
+    { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
+    { id: 'code', header: tf('code'), cell: (r) => r.code, exportValue: (r) => r.code },
+    { id: 'level', header: tf('level'), cell: (r) => r.level, exportValue: (r) => r.level },
+    {
+      id: 'duration',
+      header: tf('years'),
+      cell: (r) => r.durationYears,
+      exportValue: (r) => r.durationYears,
+    },
+    {
+      id: 'credits',
+      header: tf('credits'),
+      cell: (r) => r.credits,
+      exportValue: (r) => r.credits,
+    },
+  ];
+
   const fields: FormField[] = [
     {
       name: 'departmentId',
-      label: 'Department',
+      label: tf('department'),
       type: 'select',
       required: true,
       options: departmentOptions.length
         ? departmentOptions
-        : [{ value: '', label: 'No departments available' }],
+        : [{ value: '', label: tf('noDepartments') }],
     },
-    { name: 'name', label: 'Name', type: 'text', required: true },
-    { name: 'code', label: 'Code', type: 'text', required: true },
+    { name: 'name', label: tf('name'), type: 'text', required: true },
+    { name: 'code', label: tf('code'), type: 'text', required: true },
     {
       name: 'durationYears',
-      label: 'Duration (years)',
+      label: tf('durationYears'),
       type: 'number',
       required: true,
       min: 0.5,
@@ -62,7 +67,7 @@ export default function ProgramsPage() {
     },
     {
       name: 'credits',
-      label: 'Credits',
+      label: tf('credits'),
       type: 'number',
       required: true,
       min: 1,
@@ -70,32 +75,33 @@ export default function ProgramsPage() {
     },
     {
       name: 'level',
-      label: 'Level',
+      label: tf('level'),
       type: 'select',
       required: true,
       options: [
-        { value: 'certificate', label: 'Certificate' },
-        { value: 'diploma', label: 'Diploma' },
-        { value: 'undergraduate', label: 'Undergraduate' },
-        { value: 'postgraduate', label: 'Postgraduate' },
-        { value: 'doctoral', label: 'Doctoral' },
+        { value: 'certificate', label: tl('certificate') },
+        { value: 'diploma', label: tl('diploma') },
+        { value: 'undergraduate', label: tl('undergraduate') },
+        { value: 'postgraduate', label: tl('postgraduate') },
+        { value: 'doctoral', label: tl('doctoral') },
       ],
     },
     {
       name: 'status',
-      label: 'Status',
+      label: tf('status'),
       type: 'select',
       options: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' },
+        { value: 'active', label: ts('active') },
+        { value: 'inactive', label: ts('inactive') },
       ],
     },
   ];
 
   return (
     <ResourceCrudPage<Program>
-      title="Programs"
-      description="Academic programs offered by departments."
+      title={t('title')}
+      singularLabel={t('singular')}
+      description={t('description')}
       exportFilename="programs"
       columns={columns}
       fields={fields}

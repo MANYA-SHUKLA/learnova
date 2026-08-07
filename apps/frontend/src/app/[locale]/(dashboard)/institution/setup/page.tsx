@@ -15,6 +15,7 @@ import {
 } from '@learnova/ui';
 import { Building2, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { BrandingUpload } from '@/features/institution/components/branding-upload';
 import {
@@ -46,9 +47,10 @@ const TIMEZONES = [
   'Australia/Sydney',
 ] as const;
 
-const STEPS = ['Create Institution', 'Configure Profile', 'Start Managing'] as const;
+const STEP_KEYS = ['create', 'configure', 'manage'] as const;
 
 export default function InstitutionSetupPage() {
+  const t = useTranslations('dashboard.setup');
   const router = useRouter();
   const { user } = useAuth();
   const institutionQuery = useMyInstitution();
@@ -178,7 +180,7 @@ export default function InstitutionSetupPage() {
           ? err.message
           : err instanceof Error
             ? err.message
-            : 'Unable to finish setup.',
+            : t('unableToFinish'),
       );
     } finally {
       setSaving(false);
@@ -198,21 +200,20 @@ export default function InstitutionSetupPage() {
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8">
       <div>
-        <p className="text-sm font-medium text-primary">Onboarding</p>
+        <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
         <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-          Institution setup
+          {t('title')}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Complete your campus profile, then start managing academic structure.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
       </div>
 
       <ol className="grid gap-3 sm:grid-cols-3">
-        {STEPS.map((label, index) => {
+        {STEP_KEYS.map((stepKey, index) => {
+          const label = t(`steps.${stepKey}`);
           const done = index < activeStep;
           const current = index === activeStep;
           return (
-            <li key={label}>
+            <li key={stepKey}>
               <div
                 className={[
                   'flex items-center gap-3 rounded-2xl border px-3 py-3 text-sm',
@@ -250,10 +251,8 @@ export default function InstitutionSetupPage() {
                 <Building2 className="size-5" />
               </span>
               <div>
-                <CardTitle className="text-lg">Configure profile</CardTitle>
-                <CardDescription>
-                  Logo, contact details, location, and branding for your institution.
-                </CardDescription>
+                <CardTitle className="text-lg">{t('cardTitle')}</CardTitle>
+                <CardDescription>{t('cardDescription')}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -269,28 +268,32 @@ export default function InstitutionSetupPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
-                label="Institution name"
+                id="institution-name"
+                label={t('fields.name')}
                 value={form.name}
                 onChange={(v) => setField('name', v)}
                 disabled={saving}
                 required
               />
               <Field
-                label="Short name"
+                id="short-name"
+                label={t('fields.shortName')}
                 value={form.shortName}
                 onChange={(v) => setField('shortName', v)}
                 disabled={saving}
                 required
               />
               <Field
-                label="Institution code"
+                id="institution-code"
+                label={t('fields.code')}
                 value={form.code}
                 onChange={(v) => setField('code', v)}
                 disabled={saving || Boolean(institution)}
                 required
               />
               <Field
-                label="Institution email"
+                id="institution-email"
+                label={t('fields.email')}
                 type="email"
                 value={form.email}
                 onChange={(v) => setField('email', v)}
@@ -298,16 +301,17 @@ export default function InstitutionSetupPage() {
                 required
               />
               <Field
-                label="Phone"
+                id="phone"
+                label={t('fields.phone')}
                 type="tel"
                 value={form.phone}
                 onChange={(v) => setField('phone', v)}
                 disabled={saving}
-                placeholder="+91…"
+                placeholder={t('fields.phonePlaceholder')}
               />
               <div className="space-y-1.5">
                 <label htmlFor="timezone" className="text-sm font-medium">
-                  Timezone
+                  {t('fields.timezone')}
                 </label>
                 <select
                   id="timezone"
@@ -324,44 +328,47 @@ export default function InstitutionSetupPage() {
                 </select>
               </div>
               <Field
-                label="Country"
+                id="country"
+                label={t('fields.country')}
                 value={form.country}
                 onChange={(v) => setField('country', v)}
                 disabled={saving}
                 required
               />
               <Field
-                label="City"
+                id="city"
+                label={t('fields.city')}
                 value={form.city}
                 onChange={(v) => setField('city', v)}
                 disabled={saving}
               />
               <Field
-                label="State"
+                id="state"
+                label={t('fields.state')}
                 value={form.state}
                 onChange={(v) => setField('state', v)}
                 disabled={saving}
               />
               <div className="space-y-1.5 sm:col-span-2">
                 <label htmlFor="address" className="text-sm font-medium">
-                  Address
+                  {t('fields.address')}
                 </label>
                 <Input
                   id="address"
                   value={form.address}
                   disabled={saving}
                   onChange={(e) => setField('address', e.target.value)}
-                  placeholder="Campus address"
+                  placeholder={t('fields.addressPlaceholder')}
                 />
               </div>
             </div>
 
             <div className="space-y-3 border-t border-border pt-5">
-              <p className="text-sm font-medium">Branding</p>
+              <p className="text-sm font-medium">{t('branding')}</p>
               <BrandingUpload
                 logo={branding.logo}
                 favicon={branding.favicon}
-                institutionName={form.name || 'Your institution'}
+                institutionName={form.name || t('yourInstitution')}
                 shortName={form.shortName || 'LN'}
                 onChange={setBranding}
                 disabled={saving}
@@ -379,10 +386,10 @@ export default function InstitutionSetupPage() {
               {saving ? (
                 <>
                   <Spinner size="sm" />
-                  Saving…
+                  {t('saving')}
                 </>
               ) : (
-                'Finish Setup'
+                t('finishSetup')
               )}
             </Button>
           </CardFooter>
@@ -393,6 +400,7 @@ export default function InstitutionSetupPage() {
 }
 
 function Field({
+  id,
   label,
   value,
   onChange,
@@ -401,6 +409,7 @@ function Field({
   required,
   placeholder,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -409,7 +418,6 @@ function Field({
   required?: boolean;
   placeholder?: string;
 }) {
-  const id = label.toLowerCase().replace(/\s+/g, '-');
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium">

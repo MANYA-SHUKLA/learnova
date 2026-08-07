@@ -1,6 +1,7 @@
 'use client';
 
 import type { Section } from '@learnova/types';
+import { useTranslations } from 'next-intl';
 import {
   ResourceCrudPage,
   useArchiveSectionMutation,
@@ -14,29 +15,10 @@ import {
   type ResourceColumn,
 } from '@/features/institution';
 
-const columns: ResourceColumn<Section>[] = [
-  { id: 'name', header: 'Name', cell: (r) => r.name, exportValue: (r) => r.name },
-  {
-    id: 'capacity',
-    header: 'Capacity',
-    cell: (r) => r.capacity,
-    exportValue: (r) => r.capacity,
-  },
-  {
-    id: 'programId',
-    header: 'Program ID',
-    cell: (r) => <span className="font-mono text-xs">{r.programId}</span>,
-    exportValue: (r) => r.programId,
-  },
-  {
-    id: 'semesterId',
-    header: 'Semester ID',
-    cell: (r) => <span className="font-mono text-xs">{r.semesterId}</span>,
-    exportValue: (r) => r.semesterId,
-  },
-];
-
 export default function SectionsPage() {
+  const t = useTranslations('dashboard.institution.sections');
+  const tf = useTranslations('dashboard.institution.fields');
+  const ts = useTranslations('dashboard.institution.status');
   const { data: programsData } = usePrograms({ limit: 100 });
   const { data: semestersData } = useSemesters({ limit: 100 });
 
@@ -45,29 +27,51 @@ export default function SectionsPage() {
   const semesterOptions =
     semestersData?.items.map((s) => ({ value: s.id, label: s.name })) ?? [];
 
+  const columns: ResourceColumn<Section>[] = [
+    { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
+    {
+      id: 'capacity',
+      header: tf('capacity'),
+      cell: (r) => r.capacity,
+      exportValue: (r) => r.capacity,
+    },
+    {
+      id: 'programId',
+      header: tf('programId'),
+      cell: (r) => <span className="font-mono text-xs">{r.programId}</span>,
+      exportValue: (r) => r.programId,
+    },
+    {
+      id: 'semesterId',
+      header: tf('semesterId'),
+      cell: (r) => <span className="font-mono text-xs">{r.semesterId}</span>,
+      exportValue: (r) => r.semesterId,
+    },
+  ];
+
   const fields: FormField[] = [
     {
       name: 'programId',
-      label: 'Program',
+      label: tf('program'),
       type: 'select',
       required: true,
       options: programOptions.length
         ? programOptions
-        : [{ value: '', label: 'No programs available' }],
+        : [{ value: '', label: tf('noPrograms') }],
     },
     {
       name: 'semesterId',
-      label: 'Semester',
+      label: tf('semester'),
       type: 'select',
       required: true,
       options: semesterOptions.length
         ? semesterOptions
-        : [{ value: '', label: 'No semesters available' }],
+        : [{ value: '', label: tf('noSemesters') }],
     },
-    { name: 'name', label: 'Name', type: 'text', required: true, placeholder: 'A' },
+    { name: 'name', label: tf('name'), type: 'text', required: true, placeholder: 'A' },
     {
       name: 'capacity',
-      label: 'Capacity',
+      label: tf('capacity'),
       type: 'number',
       required: true,
       min: 1,
@@ -75,19 +79,20 @@ export default function SectionsPage() {
     },
     {
       name: 'status',
-      label: 'Status',
+      label: tf('status'),
       type: 'select',
       options: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' },
+        { value: 'active', label: ts('active') },
+        { value: 'inactive', label: ts('inactive') },
       ],
     },
   ];
 
   return (
     <ResourceCrudPage<Section>
-      title="Sections"
-      description="Class sections by program and semester."
+      title={t('title')}
+      singularLabel={t('singular')}
+      description={t('description')}
       exportFilename="sections"
       columns={columns}
       fields={fields}

@@ -1,6 +1,7 @@
 'use client';
 
 import type { Department } from '@learnova/types';
+import { useTranslations } from 'next-intl';
 import {
   ResourceCrudPage,
   useArchiveDepartmentMutation,
@@ -13,50 +14,54 @@ import {
   type ResourceColumn,
 } from '@/features/institution';
 
-const columns: ResourceColumn<Department>[] = [
-  { id: 'name', header: 'Name', cell: (r) => r.name, exportValue: (r) => r.name },
-  { id: 'code', header: 'Code', cell: (r) => r.code, exportValue: (r) => r.code },
-  {
-    id: 'schoolId',
-    header: 'School ID',
-    cell: (r) => <span className="font-mono text-xs">{r.schoolId}</span>,
-    exportValue: (r) => r.schoolId,
-  },
-];
-
 export default function DepartmentsPage() {
+  const t = useTranslations('dashboard.institution.departments');
+  const tf = useTranslations('dashboard.institution.fields');
+  const ts = useTranslations('dashboard.institution.status');
   const { data: schoolsData } = useSchools({ limit: 100 });
   const schoolOptions =
     schoolsData?.items.map((s) => ({ value: s.id, label: `${s.name} (${s.code})` })) ?? [];
 
+  const columns: ResourceColumn<Department>[] = [
+    { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
+    { id: 'code', header: tf('code'), cell: (r) => r.code, exportValue: (r) => r.code },
+    {
+      id: 'schoolId',
+      header: tf('schoolId'),
+      cell: (r) => <span className="font-mono text-xs">{r.schoolId}</span>,
+      exportValue: (r) => r.schoolId,
+    },
+  ];
+
   const fields: FormField[] = [
     {
       name: 'schoolId',
-      label: 'School',
+      label: tf('school'),
       type: 'select',
       required: true,
       options: schoolOptions.length
         ? schoolOptions
-        : [{ value: '', label: 'No schools available' }],
+        : [{ value: '', label: tf('noSchools') }],
     },
-    { name: 'name', label: 'Name', type: 'text', required: true },
-    { name: 'code', label: 'Code', type: 'text', required: true },
-    { name: 'description', label: 'Description', type: 'textarea' },
+    { name: 'name', label: tf('name'), type: 'text', required: true },
+    { name: 'code', label: tf('code'), type: 'text', required: true },
+    { name: 'description', label: tf('description'), type: 'textarea' },
     {
       name: 'status',
-      label: 'Status',
+      label: tf('status'),
       type: 'select',
       options: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' },
+        { value: 'active', label: ts('active') },
+        { value: 'inactive', label: ts('inactive') },
       ],
     },
   ];
 
   return (
     <ResourceCrudPage<Department>
-      title="Departments"
-      description="Departments belong to a school within the institution."
+      title={t('title')}
+      singularLabel={t('singular')}
+      description={t('description')}
       exportFilename="departments"
       columns={columns}
       fields={fields}

@@ -52,7 +52,12 @@
     "actions": "क्रियाएं",
     "empty": "कोई आइटम नहीं मिला",
     "refresh": "रीफ़्रेश करें",
-    "liveSync": "लाइव सिंक"
+    "liveSync": "लाइव सिंक",
+    "madeWithLove": {
+      "madeWith": "प्यार से बनाया",
+      "by": "द्वारा",
+      "project": "2026 · SOE JNU माइनर प्रोजेक्ट"
+    }
   },
   "nav": {
     "dashboard": "डैशबोर्ड",
@@ -563,6 +568,484 @@
     "breadcrumb": {
       "home": "होम",
       "dashboard": "डैशबोर्ड"
+    },
+    "setup": {
+      "eyebrow": "ऑनबोर्डिंग",
+      "title": "संस्थान सेटअप",
+      "description": "अपना परिसर प्रोफ़ाइल पूरा करें, फिर शैक्षणिक संरचना प्रबंधित करना शुरू करें।",
+      "steps": {
+        "create": "संस्थान बनाएं",
+        "configure": "प्रोफ़ाइल कॉन्फ़िगर करें",
+        "manage": "प्रबंधन शुरू करें"
+      },
+      "cardTitle": "प्रोफ़ाइल कॉन्फ़िगर करें",
+      "cardDescription": "आपके संस्थान के लिए लोगो, संपर्क विवरण, स्थान और ब्रांडिंग।",
+      "fields": {
+        "name": "संस्थान का नाम",
+        "shortName": "संक्षिप्त नाम",
+        "code": "संस्थान कोड",
+        "email": "संस्थान ईमेल",
+        "phone": "फ़ोन",
+        "timezone": "समय क्षेत्र",
+        "country": "देश",
+        "city": "शहर",
+        "state": "राज्य",
+        "address": "पता",
+        "addressPlaceholder": "परिसर का पता",
+        "phonePlaceholder": "+91…"
+      },
+      "branding": "ब्रांडिंग",
+      "yourInstitution": "आपका संस्थान",
+      "finishSetup": "सेटअप पूरा करें",
+      "saving": "सहेजा जा रहा है…",
+      "unableToFinish": "सेटअप पूरा नहीं हो सका।"
+    },
+    "institution": {
+      "overview": {
+        "eyebrow": "संगठन",
+        "title": "संस्थान",
+        "description": "आपके परिसर के लिए संरचना, शैक्षणिक कैलेंडर और टेनेंट सेटिंग्स।",
+        "editProfile": "प्रोफ़ाइल संपादित करें",
+        "finishSetupTitle": "संस्थान सेटअप पूरा करें",
+        "finishSetupDescription": "परिसर, स्कूल और कार्यक्रम अनलॉक करने के लिए लोगो, संपर्क विवरण और ब्रांडिंग जोड़ें।",
+        "continueSetup": "सेटअप जारी रखें",
+        "loadFailed": "संस्थान लोड करने में विफल।",
+        "locationNotSet": "स्थान सेट नहीं है",
+        "contact": "संपर्क",
+        "capacity": "क्षमता",
+        "locale": "लोकेल",
+        "capacityLine": "{students} छात्र · {faculty} संकाय",
+        "modules": "मॉड्यूल",
+        "stats": {
+          "campuses": "परिसर",
+          "schools": "स्कूल",
+          "departments": "विभाग",
+          "programs": "कार्यक्रम",
+          "academicYears": "शैक्षणिक वर्ष",
+          "studentCapacity": "छात्र क्षमता"
+        },
+        "modulesList": {
+          "profile": {
+            "title": "प्रोफ़ाइल और ब्रांडिंग",
+            "description": "पहचान, संपर्क और ब्रांड संपत्तियाँ।"
+          },
+          "campuses": {
+            "title": "परिसर",
+            "description": "स्थान और परिसर संपर्क।"
+          },
+          "schools": {
+            "title": "स्कूल",
+            "description": "स्कूल और संकाय।"
+          },
+          "departments": {
+            "title": "विभाग",
+            "description": "स्कूलों के अंतर्गत विभाग।"
+          },
+          "programs": {
+            "title": "कार्यक्रम",
+            "description": "डिग्री और प्रमाणपत्र कार्यक्रम।"
+          },
+          "academicYears": {
+            "title": "शैक्षणिक वर्ष",
+            "description": "वर्ष सीमाएँ और सक्रिय सत्र।"
+          },
+          "settings": {
+            "title": "सेटिंग्स",
+            "description": "थीम, ग्रेडिंग और नीतियाँ।"
+          }
+        }
+      },
+      "crud": {
+        "search": "खोजें",
+        "searchPlaceholder": "नाम या कोड से खोजें…",
+        "status": "स्थिति",
+        "allStatuses": "सभी स्थितियाँ",
+        "includeArchived": "संग्रहीत शामिल करें",
+        "apply": "लागू करें",
+        "loadFailed": "डेटा लोड करने में विफल।",
+        "emptyTitle": "अभी कोई {resource} नहीं",
+        "emptyDescription": "रिकॉर्ड बनाएं या परिणाम देखने के लिए फ़िल्टर समायोजित करें।",
+        "createFirst": "पहला रिकॉर्ड बनाएं",
+        "restore": "पुनर्स्थापित करें",
+        "archive": "संग्रहित करें",
+        "createTitle": "{resource} बनाएं",
+        "editTitle": "{resource} संपादित करें",
+        "update": "अपडेट करें",
+        "saveFailed": "सहेजना विफल।",
+        "printPdf": "प्रिंट / PDF",
+        "pageOf": "पृष्ठ {page} / {totalPages} · कुल {total}",
+        "previous": "पिछला",
+        "next": "अगला",
+        "noRecords": "कोई रिकॉर्ड नहीं मिला।",
+        "closeDialog": "डायलॉग बंद करें",
+        "saving": "सहेजा जा रहा है…"
+      },
+      "status": {
+        "active": "सक्रिय",
+        "inactive": "निष्क्रिय",
+        "archived": "संग्रहीत"
+      },
+      "fields": {
+        "name": "नाम",
+        "code": "कोड",
+        "description": "विवरण",
+        "status": "स्थिति",
+        "address": "पता",
+        "city": "शहर",
+        "state": "राज्य",
+        "country": "देश",
+        "phone": "फ़ोन",
+        "email": "ईमेल",
+        "school": "स्कूल",
+        "schoolId": "स्कूल ID",
+        "department": "विभाग",
+        "level": "स्तर",
+        "years": "वर्ष",
+        "credits": "क्रेडिट",
+        "durationYears": "अवधि (वर्ष)",
+        "start": "प्रारंभ",
+        "end": "समाप्ति",
+        "startDate": "प्रारंभ तिथि",
+        "endDate": "समाप्ति तिथि",
+        "isActive": "सक्रिय",
+        "markActiveYear": "सक्रिय वर्ष के रूप में चिह्नित करें",
+        "current": "वर्तमान",
+        "number": "संख्या",
+        "term": "सत्र",
+        "yearId": "वर्ष ID",
+        "academicYear": "शैक्षणिक वर्ष",
+        "capacity": "क्षमता",
+        "program": "कार्यक्रम",
+        "programId": "कार्यक्रम ID",
+        "semester": "सेमेस्टर",
+        "semesterId": "सेमेस्टर ID",
+        "year": "वर्ष",
+        "events": "इवेंट",
+        "noSchools": "कोई स्कूल उपलब्ध नहीं",
+        "noDepartments": "कोई विभाग उपलब्ध नहीं",
+        "noAcademicYears": "कोई शैक्षणिक वर्ष उपलब्ध नहीं",
+        "noPrograms": "कोई कार्यक्रम उपलब्ध नहीं",
+        "noSemesters": "कोई सेमेस्टर उपलब्ध नहीं"
+      },
+      "levels": {
+        "certificate": "प्रमाणपत्र",
+        "diploma": "डिप्लोमा",
+        "undergraduate": "स्नातक",
+        "postgraduate": "स्नातकोत्तर",
+        "doctoral": "डॉक्टरेट"
+      },
+      "terms": {
+        "odd": "विषम",
+        "even": "सम",
+        "summer": "ग्रीष्म"
+      },
+      "campuses": {
+        "title": "परिसर",
+        "singular": "परिसर",
+        "description": "अपने संस्थान के परिसर स्थान प्रबंधित करें।"
+      },
+      "schools": {
+        "title": "स्कूल",
+        "singular": "स्कूल",
+        "description": "संस्थान के अंतर्गत संकाय और स्कूल व्यवस्थित करें।"
+      },
+      "departments": {
+        "title": "विभाग",
+        "singular": "विभाग",
+        "description": "विभाग संस्थान के भीतर एक स्कूल से संबंधित होते हैं।"
+      },
+      "programs": {
+        "title": "कार्यक्रम",
+        "singular": "कार्यक्रम",
+        "description": "विभागों द्वारा प्रस्तावित शैक्षणिक कार्यक्रम।"
+      },
+      "academicYears": {
+        "title": "शैक्षणिक वर्ष",
+        "singular": "शैक्षणिक वर्ष",
+        "description": "शैक्षणिक वर्ष सीमाएँ और वर्तमान सक्रिय वर्ष परिभाषित करें।"
+      },
+      "semesters": {
+        "title": "सेमेस्टर",
+        "singular": "सेमेस्टर",
+        "description": "शैक्षणिक वर्ष के अंतर्गत सत्र।"
+      },
+      "sections": {
+        "title": "सेक्शन",
+        "singular": "सेक्शन",
+        "description": "कार्यक्रम और सेमेस्टर के अनुसार कक्षा सेक्शन।"
+      },
+      "batches": {
+        "title": "बैच",
+        "singular": "बैच",
+        "description": "कार्यक्रम और प्रवेश वर्ष के अनुसार छात्र समूह।"
+      },
+      "settings": {
+        "title": "संस्थान सेटिंग्स",
+        "description": "भाषा, थीम, उपस्थिति, ग्रेडिंग, परीक्षा, प्रमाणपत्र, स्टोरेज, AI, सूचनाएँ और सुरक्षा।",
+        "loadFailed": "सेटिंग्स लोड करने में विफल।",
+        "emptyTitle": "कोई सेटिंग्स नहीं",
+        "emptyDescription": "सेटिंग्स रिकॉर्ड नहीं मिला।",
+        "preferences": "प्राथमिकताएँ",
+        "preferencesDescription": "प्राथमिक लोकेल और UI थीम प्राथमिकता।",
+        "language": "भाषा",
+        "theme": "थीम",
+        "themeSystem": "सिस्टम",
+        "themeLight": "लाइट",
+        "themeDark": "डार्क",
+        "policyBlocks": "नीति ब्लॉक",
+        "policyBlocksDescription": "परिचालन नीतियों के लिए JSON कॉन्फ़िगरेशन। अमान्य JSON सेव को रोकता है।",
+        "saveSettings": "सेटिंग्स सहेजें",
+        "saved": "सेटिंग्स सहेजी गईं।",
+        "invalidJson": "एक या अधिक नीति ब्लॉक में अमान्य JSON है।",
+        "saveFailed": "सेटिंग्स सहेजने में विफल।",
+        "policies": {
+          "attendance": "उपस्थिति",
+          "gradingScale": "ग्रेडिंग स्केल",
+          "examRules": "परीक्षा नियम",
+          "certificateSettings": "प्रमाणपत्र सेटिंग्स",
+          "storageSettings": "स्टोरेज सेटिंग्स",
+          "aiSettings": "AI सेटिंग्स",
+          "notificationSettings": "सूचना सेटिंग्स",
+          "securitySettings": "सुरक्षा सेटिंग्स"
+        }
+      },
+      "profile": {
+        "title": "संस्थान प्रोफ़ाइल",
+        "description": "पहचान, संपर्क विवरण और ब्रांडिंग URL अपडेट करें।",
+        "loadFailed": "प्रोफ़ाइल लोड करने में विफल।",
+        "emptyTitle": "कोई संस्थान नहीं",
+        "emptyDescription": "दिखाने के लिए कुछ नहीं।",
+        "details": "विवरण",
+        "codeSlug": "कोड {code} · स्लग {slug}",
+        "branding": "ब्रांडिंग",
+        "brandingDescription": "लाइव वर्कस्पेस पूर्वावलोकन के साथ होस्टेड छवि URL। फ़ाइल अपलोड बाद में स्टोरेज के साथ आएगा।",
+        "saveProfile": "प्रोफ़ाइल सहेजें",
+        "saveBranding": "ब्रांडिंग सहेजें",
+        "profileSaved": "प्रोफ़ाइल सहेजी गई।",
+        "brandingSaved": "ब्रांडिंग सहेजी गई।",
+        "saveProfileFailed": "प्रोफ़ाइल सहेजने में विफल।",
+        "saveBrandingFailed": "ब्रांडिंग सहेजने में विफल।",
+        "website": "वेबसाइट",
+        "currency": "मुद्रा",
+        "postalCode": "पिन कोड",
+        "shortName": "संक्षिप्त नाम",
+        "timezone": "समय क्षेत्र"
+      },
+      "calendar": {
+        "title": "शैक्षणिक कैलेंडर",
+        "singular": "कैलेंडर",
+        "description": "सेमेस्टर प्रारंभ/समाप्ति, परीक्षा अवधि, छुट्टियाँ और संस्थान इवेंट।",
+        "newCalendar": "नया कैलेंडर",
+        "searchPlaceholder": "कैलेंडर खोजें…",
+        "emptyTitle": "अभी कोई कैलेंडर नहीं",
+        "emptyDescription": "शैक्षणिक वर्ष के लिए कैलेंडर बनाएं और मुख्य तिथियाँ जोड़ें।",
+        "loadFailed": "कैलेंडर लोड करने में विफल।",
+        "eventNeedsFields": "प्रत्येक इवेंट में शीर्षक, प्रारंभ तिथि और समाप्ति तिथि होनी चाहिए।",
+        "saveFailed": "सहेजना विफल",
+        "calendarName": "कैलेंडर नाम",
+        "eventTypes": {
+          "semester_start": "सेमेस्टर प्रारंभ",
+          "semester_end": "सेमेस्टर समाप्ति",
+          "exam_start": "परीक्षा प्रारंभ",
+          "exam_end": "परीक्षा समाप्ति",
+          "holiday": "अवकाश",
+          "event": "इवेंट"
+        }
+      },
+      "faculty": {
+        "eyebrow": "लोग",
+        "title": "संकाय",
+        "description": "संकाय रिकॉर्ड, रोजगार स्थिति और शैक्षणिक असाइनमेंट प्रबंधित करें।",
+        "addFaculty": "संकाय जोड़ें",
+        "directory": "निर्देशिका",
+        "directoryDescription": "खोजें, फ़िल्टर करें और बल्क क्रियाएँ चलाएँ।",
+        "searchPlaceholder": "नाम, कर्मचारी ID, कोड, ईमेल खोजें…",
+        "stats": {
+          "total": "कुल",
+          "active": "सक्रिय",
+          "inactive": "निष्क्रिय",
+          "onLeave": "अवकाश पर",
+          "departments": "विभाग",
+          "newThisMonth": "इस माह नए"
+        },
+        "create": {
+          "eyebrow": "संकाय",
+          "title": "संकाय जोड़ें"
+        },
+        "edit": {
+          "eyebrow": "संकाय",
+          "title": "{name} संपादित करें",
+          "notFound": "संकाय नहीं मिला।"
+        },
+        "import": {
+          "eyebrow": "संकाय",
+          "title": "CSV आयात",
+          "description": "अपलोड, पूर्वावलोकन, सत्यापन और आयात। विफल आयात वापस लिए जाते हैं।",
+          "uploadTitle": "CSV अपलोड",
+          "uploadDescription": "आवश्यक कॉलम: employeeId, facultyCode, firstName, lastName, email, designation, employmentType.",
+          "confirmImport": "आयात की पुष्टि करें",
+          "importing": "आयात हो रहा है…",
+          "previewFailed": "पूर्वावलोकन विफल",
+          "importFailed": "आयात विफल और वापस ले लिया गया",
+          "totalRows": "कुल पंक्तियाँ: {count}",
+          "valid": "मान्य: {count}",
+          "invalid": "अमान्य: {count}",
+          "duplicates": "फ़ाइल में डुप्लिकेट: {count}",
+          "rowError": "पंक्ति {row}{field}: {message}"
+        },
+        "export": {
+          "eyebrow": "संकाय",
+          "title": "निर्यात",
+          "description": "संकाय निर्देशिका CSV, Excel-संगत या PDF के रूप में डाउनलोड करें। हार्ड कॉपी के लिए प्रिंट उपयोग करें।",
+          "formatsTitle": "निर्यात प्रारूप",
+          "formatsDescription": "निर्यात faculty.export के रूप में ऑडिट होते हैं।"
+        },
+        "emptyTitle": "अभी कोई संकाय नहीं",
+        "emptyDescription": "अपना पहला संकाय सदस्य जोड़ें या निर्देशिका भरने के लिए CSV आयात करें।"
+      }
+    },
+    "sessions": {
+      "title": "सत्र",
+      "description": "वे डिवाइस जहाँ आप वर्तमान में साइन इन हैं।",
+      "signInPrompt": "अपने सक्रिय सत्र प्रबंधित करने के लिए साइन इन करें।",
+      "signOutAll": "सभी डिवाइस से साइन आउट",
+      "signingOut": "साइन आउट हो रहा है…",
+      "loadFailed": "सत्र लोड करने में विफल।",
+      "unknownDevice": "अज्ञात डिवाइस",
+      "lastActive": "अंतिम सक्रिय {when}",
+      "current": "वर्तमान",
+      "startedExpires": "शुरू {started} · समाप्ति {expires}",
+      "signOut": "साइन आउट",
+      "revoke": "रद्द करें",
+      "empty": "कोई सक्रिय सत्र नहीं मिला।"
+    },
+    "home": {
+      "eyebrow": "अवलोकन",
+      "title": "संस्थान डैशबोर्ड",
+      "description": "संरचना, क्षमता और शैक्षणिक गतिविधि एक नज़र में।",
+      "errorTitle": "डैशबोर्ड",
+      "errorDescription": "संस्थान अवलोकन",
+      "finishSetupTitle": "संस्थान सेटअप पूरा करें",
+      "finishSetupDescription": "कार्यक्षेत्र अनलॉक करने के लिए अपनी प्रोफ़ाइल, ब्रांडिंग और संपर्क विवरण पूरा करें।",
+      "continueSetup": "सेटअप जारी रखें",
+      "loadFailed": "संस्थान डैशबोर्ड लोड नहीं हो सका।",
+      "editBranding": "ब्रांडिंग संपादित करें",
+      "openInstitution": "संस्थान खोलें",
+      "structureReadiness": "संरचना तैयारी",
+      "modulesHaveRecords": "{total} में से {ready} मॉड्यूल में रिकॉर्ड हैं",
+      "students": "छात्र",
+      "faculty": "संकाय",
+      "planCapacity": "योजना क्षमता",
+      "planBadge": "{plan} योजना",
+      "noInstitutionTitle": "कोई संस्थान लिंक नहीं",
+      "noInstitutionDescription": "शैक्षणिक कार्यक्षेत्र अनलॉक करने के लिए संस्थान प्रोफ़ाइल कनेक्ट या बनाएं।",
+      "emptyStructureTitle": "आपकी शैक्षणिक संरचना खाली है",
+      "emptyStructureDescription": "इस डैशबोर्ड को जीवंत बनाने के लिए परिसर, स्कूल और कार्यक्रम जोड़ना शुरू करें।",
+      "addCampus": "परिसर जोड़ें",
+      "moduleDistribution": "मॉड्यूल वितरण",
+      "moduleDistributionDescription": "आपके संस्थान कार्यक्षेत्र में गणना",
+      "calendarSummary": "कैलेंडर सारांश",
+      "loadingCalendars": "कैलेंडर लोड हो रहे हैं…",
+      "calendarSummaryMeta": "{calendars} · {batches}",
+      "calendarCount": "{count} कैलेंडर",
+      "calendarCountOne": "{count} कैलेंडर",
+      "batchCount": "{count} बैच",
+      "batchCountOne": "{count} बैच",
+      "noUpcomingEvents": "अभी कोई आगामी कार्यक्रम नहीं। शैक्षणिक कैलेंडर पर तिथियाँ जोड़ें।",
+      "structurePulse": "संरचना स्थिति",
+      "structurePulseDescription": "आपके कार्यक्षेत्र में क्या तैयार है",
+      "quickActionsTitle": "त्वरित क्रियाएँ",
+      "quickActionsDescription": "जिन मॉड्यूल का आप सबसे अधिक प्रबंधन करते हैं, उनमें जाएँ।",
+      "stats": {
+        "campuses": "परिसर",
+        "schools": "स्कूल",
+        "departments": "विभाग",
+        "programs": "कार्यक्रम",
+        "academicYears": "शैक्षणिक वर्ष",
+        "semesters": "सेमेस्टर"
+      },
+      "chart": {
+        "campuses": "परिसर",
+        "schools": "स्कूल",
+        "departments": "विभाग",
+        "programs": "कार्यक्रम",
+        "years": "वर्ष",
+        "semesters": "सेमेस्टर"
+      },
+      "actions": {
+        "campuses": {
+          "title": "परिसर",
+          "description": "स्थान प्रबंधित करें"
+        },
+        "schools": {
+          "title": "स्कूल",
+          "description": "संकाय और स्कूल"
+        },
+        "departments": {
+          "title": "विभाग",
+          "description": "संगठन संरचना"
+        },
+        "programs": {
+          "title": "कार्यक्रम",
+          "description": "डिग्री ऑफरिंग"
+        },
+        "academicYears": {
+          "title": "शैक्षणिक वर्ष",
+          "description": "वर्ष श्रेणियाँ"
+        },
+        "calendar": {
+          "title": "कैलेंडर",
+          "description": "मुख्य तिथियाँ"
+        }
+      }
+    },
+    "courses": {
+      "roleLabel": "पाठ्यक्रम",
+      "title": "पाठ्यक्रम",
+      "preparingLine": "पाठ्यक्रम कार्यक्षेत्र तैयार किया जा रहा है।",
+      "modulesIntro": "आपके संस्थान द्वारा कार्यक्रम असाइन होने पर पाठ्यक्रम कैटलॉग और नामांकन यहाँ दिखाई देंगे।",
+      "welcome": "स्वागत है",
+      "welcomeNamed": "स्वागत है {name}",
+      "contactAdmin": "यदि आपको लगता है कि यह गलत है, तो अपने व्यवस्थापक से संपर्क करें।",
+      "modules": {
+        "catalog": "पाठ्यक्रम कैटलॉग",
+        "enrollments": "नामांकन",
+        "schedules": "समय-सारणी",
+        "materials": "सामग्री",
+        "assessments": "मूल्यांकन"
+      }
+    },
+    "facultyHome": {
+      "roleLabel": "संकाय",
+      "title": "संकाय डैशबोर्ड",
+      "preparingLine": "आपका डैशबोर्ड तैयार किया जा रहा है।",
+      "modulesIntro": "पाठ्यक्रम असाइन होने के बाद निम्नलिखित मॉड्यूल स्वचालित रूप से दिखाई देंगे।",
+      "welcome": "स्वागत है",
+      "welcomeNamed": "स्वागत है {name}",
+      "contactAdmin": "यदि आपको लगता है कि यह गलत है, तो अपने व्यवस्थापक से संपर्क करें।",
+      "modules": {
+        "myCourses": "मेरे पाठ्यक्रम",
+        "students": "छात्र",
+        "exams": "परीक्षाएँ",
+        "practiceLabs": "प्रैक्टिस लैब्स",
+        "projects": "परियोजनाएँ"
+      }
+    },
+    "studentHome": {
+      "roleLabel": "छात्र",
+      "title": "छात्र डैशबोर्ड",
+      "preparingLine": "आपका अधिगम कार्यक्षेत्र तैयार किया जा रहा है।",
+      "modulesIntro": "पाठ्यक्रमों में नामांकन के बाद निम्नलिखित मॉड्यूल स्वचालित रूप से दिखाई देंगे।",
+      "welcome": "स्वागत है",
+      "welcomeNamed": "स्वागत है {name}",
+      "contactAdmin": "यदि आपको लगता है कि यह गलत है, तो अपने व्यवस्थापक से संपर्क करें।",
+      "modules": {
+        "myCourses": "मेरे पाठ्यक्रम",
+        "assignments": "असाइनमेंट",
+        "exams": "परीक्षाएँ",
+        "practiceLabs": "प्रैक्टिस लैब्स",
+        "projects": "परियोजनाएँ"
+      }
     }
   },
   "errors": {

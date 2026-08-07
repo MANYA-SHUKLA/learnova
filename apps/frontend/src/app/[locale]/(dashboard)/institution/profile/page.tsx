@@ -12,6 +12,7 @@ import {
   Skeleton,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
@@ -26,6 +27,9 @@ import {
 } from '@/features/institution';
 
 export default function InstitutionProfilePage() {
+  const t = useTranslations('dashboard.institution.profile');
+  const tf = useTranslations('dashboard.institution.fields');
+  const tCrud = useTranslations('dashboard.institution.crud');
   const { data, isLoading, isError, error, refetch } = useMyInstitution();
   const updateMutation = useUpdateInstitutionMutation();
   const brandingMutation = useUpdateBrandingMutation();
@@ -83,7 +87,7 @@ export default function InstitutionProfilePage() {
     return (
       <div className="w-full min-w-0">
         <ErrorState
-          message={error instanceof Error ? error.message : 'Failed to load profile.'}
+          message={error instanceof Error ? error.message : t('loadFailed')}
           onRetry={() => void refetch()}
         />
       </div>
@@ -93,7 +97,7 @@ export default function InstitutionProfilePage() {
   if (!data) {
     return (
       <div className="w-full min-w-0">
-        <EmptyState title="No institution" description="Nothing to display." />
+        <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       </div>
     );
   }
@@ -119,9 +123,9 @@ export default function InstitutionProfilePage() {
           address: form.address || null,
         },
       });
-      setMessage('Profile saved.');
+      setMessage(t('profileSaved'));
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to save profile.');
+      setFormError(err instanceof Error ? err.message : t('saveProfileFailed'));
     }
   };
 
@@ -133,9 +137,9 @@ export default function InstitutionProfilePage() {
         id: data.id,
         body: branding,
       });
-      setMessage('Branding saved.');
+      setMessage(t('brandingSaved'));
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to save branding.');
+      setFormError(err instanceof Error ? err.message : t('saveBrandingFailed'));
     }
   };
 
@@ -161,34 +165,33 @@ export default function InstitutionProfilePage() {
   return (
     <div className="w-full min-w-0">
       <PageHeader
-        title="Institution profile"
-        description="Update identity, contact details, and branding URLs."
+        title={t('title')}
+        description={t('description')}
         actions={<StatusBadge status={data.status} />}
       />
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Details</CardTitle>
+          <CardTitle className="text-base">{t('details')}</CardTitle>
           <CardDescription>
-            Code <span className="font-medium text-foreground">{data.code}</span> · Slug{' '}
-            <span className="font-medium text-foreground">{data.slug}</span>
+            {t('codeSlug', { code: data.code, slug: data.slug })}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          {field('name', 'Name')}
-          {field('shortName', 'Short name')}
-          {field('email', 'Email', { type: 'email' })}
-          {field('phone', 'Phone')}
-          {field('website', 'Website', { type: 'url' })}
-          {field('timezone', 'Timezone')}
-          {field('currency', 'Currency')}
-          {field('country', 'Country')}
-          {field('state', 'State')}
-          {field('city', 'City')}
-          {field('postalCode', 'Postal code')}
+          {field('name', tf('name'))}
+          {field('shortName', t('shortName'))}
+          {field('email', tf('email'), { type: 'email' })}
+          {field('phone', tf('phone'))}
+          {field('website', t('website'), { type: 'url' })}
+          {field('timezone', t('timezone'))}
+          {field('currency', t('currency'))}
+          {field('country', tf('country'))}
+          {field('state', tf('state'))}
+          {field('city', tf('city'))}
+          {field('postalCode', t('postalCode'))}
           <div className="space-y-1.5 sm:col-span-2">
             <label className="text-sm font-medium" htmlFor="address">
-              Address
+              {tf('address')}
             </label>
             <Input
               id="address"
@@ -206,10 +209,10 @@ export default function InstitutionProfilePage() {
                 {updateMutation.isPending ? (
                   <>
                     <Spinner size="sm" />
-                    Saving…
+                    {tCrud('saving')}
                   </>
                 ) : (
-                  'Save profile'
+                  t('saveProfile')
                 )}
               </Button>
             </div>
@@ -219,10 +222,8 @@ export default function InstitutionProfilePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Branding</CardTitle>
-          <CardDescription>
-            Hosted image URLs with a live workspace preview. File upload lands with storage later.
-          </CardDescription>
+          <CardTitle className="text-base">{t('branding')}</CardTitle>
+          <CardDescription>{t('brandingDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <BrandingUpload
@@ -242,10 +243,10 @@ export default function InstitutionProfilePage() {
               {brandingMutation.isPending ? (
                 <>
                   <Spinner size="sm" />
-                  Saving…
+                  {tCrud('saving')}
                 </>
               ) : (
-                'Save branding'
+                t('saveBranding')
               )}
             </Button>
           </PermissionGate>

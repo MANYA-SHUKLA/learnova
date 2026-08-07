@@ -10,6 +10,7 @@ import {
   CardTitle,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { facultyApi, useFacultyImportMutation } from '@/features/faculty';
@@ -35,6 +36,8 @@ function parseCsv(text: string): Array<Record<string, string>> {
 }
 
 export default function FacultyImportPage() {
+  const t = useTranslations('dashboard.institution.faculty.import');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const importMutation = useFacultyImportMutation();
   const [preview, setPreview] = useState<FacultyImportPreview | null>(null);
@@ -51,7 +54,7 @@ export default function FacultyImportPage() {
       const result = await facultyApi.previewImport(parsed);
       setPreview(result);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : 'Preview failed');
+      setError(err instanceof ApiClientError ? err.message : t('previewFailed'));
     }
   };
 
@@ -61,7 +64,7 @@ export default function FacultyImportPage() {
       await importMutation.mutateAsync(rows);
       router.push(APP_ROUTES.INSTITUTION_FACULTY);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : 'Import failed and was rolled back');
+      setError(err instanceof ApiClientError ? err.message : t('importFailed'));
     }
   };
 
@@ -69,19 +72,18 @@ export default function FacultyImportPage() {
     <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE} enforce>
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
-          <p className="text-sm font-medium text-primary">Faculty</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">Import CSV</h1>
+          <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">{t('title')}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Upload, preview, validate, and import. Failed imports are rolled back.
+            {t('description')}
           </p>
         </div>
 
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle className="text-base">CSV upload</CardTitle>
+            <CardTitle className="text-base">{t('uploadTitle')}</CardTitle>
             <CardDescription>
-              Required columns: employeeId, facultyCode, firstName, lastName, email, designation,
-              employmentType.
+              {t('uploadDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -93,14 +95,17 @@ export default function FacultyImportPage() {
             {error ? <p className="text-sm text-danger">{error}</p> : null}
             {preview ? (
               <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4 text-sm">
-                <p>Total rows: {preview.totalRows}</p>
-                <p>Valid: {preview.validRows}</p>
-                <p>Invalid: {preview.invalidRows}</p>
-                <p>Duplicates in file: {preview.duplicates}</p>
+                <p>{t('totalRows', { count: preview.totalRows })}</p>
+                <p>{t('valid', { count: preview.validRows })}</p>
+                <p>{t('invalid', { count: preview.invalidRows })}</p>
+                <p>{t('duplicates', { count: preview.duplicates })}</p>
                 {preview.errors.slice(0, 8).map((err) => (
                   <p key={`${err.row}-${err.message}`} className="text-danger">
-                    Row {err.row}
-                    {err.field ? ` · ${err.field}` : ''}: {err.message}
+                    {t('rowError', {
+                      row: err.row,
+                      field: err.field ? ` · ${err.field}` : '',
+                      message: err.message,
+                    })}
                   </p>
                 ))}
               </div>
@@ -114,14 +119,14 @@ export default function FacultyImportPage() {
                 {importMutation.isPending ? (
                   <>
                     <Spinner size="sm" />
-                    Importing…
+                    {t('importing')}
                   </>
                 ) : (
-                  'Confirm import'
+                  t('confirmImport')
                 )}
               </Button>
               <Button asChild variant="outline">
-                <Link href={APP_ROUTES.INSTITUTION_FACULTY}>Cancel</Link>
+                <Link href={APP_ROUTES.INSTITUTION_FACULTY}>{tCommon('cancel')}</Link>
               </Button>
             </div>
           </CardContent>

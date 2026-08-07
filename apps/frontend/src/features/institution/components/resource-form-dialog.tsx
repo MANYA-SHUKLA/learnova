@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Input, Spinner } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useEffect, useId, useState, type ReactNode, type SyntheticEvent } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -80,13 +81,16 @@ export function ResourceFormDialog({
   description,
   fields,
   initialValues,
-  submitLabel = 'Save',
+  submitLabel,
   isSubmitting,
   error,
   onClose,
   onSubmit,
   children,
 }: ResourceFormDialogProps) {
+  const tCommon = useTranslations('common');
+  const tCrud = useTranslations('dashboard.institution.crud');
+  const resolvedSubmitLabel = submitLabel ?? tCommon('save');
   const titleId = useId();
   const [values, setValues] = useState(() => buildDefaults(fields, initialValues));
 
@@ -116,7 +120,7 @@ export function ResourceFormDialog({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center print:hidden">
       <button
         type="button"
-        aria-label="Close dialog"
+        aria-label={tCrud('closeDialog')}
         className="absolute inset-0 bg-foreground/40"
         disabled={isSubmitting}
         onClick={onClose}
@@ -231,16 +235,16 @@ export function ResourceFormDialog({
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" disabled={isSubmitting} onClick={onClose}>
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Spinner size="sm" />
-                  Saving…
+                  {tCrud('saving')}
                 </>
               ) : (
-                submitLabel
+                resolvedSubmitLabel
               )}
             </Button>
           </div>

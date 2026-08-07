@@ -52,7 +52,12 @@
     "actions": "Actions",
     "empty": "No items found",
     "refresh": "Refresh",
-    "liveSync": "Live sync"
+    "liveSync": "Live sync",
+    "madeWithLove": {
+      "madeWith": "Made with",
+      "by": "by",
+      "project": "2026 · SOE JNU Minor Project"
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -563,6 +568,484 @@
     "breadcrumb": {
       "home": "Home",
       "dashboard": "Dashboard"
+    },
+    "setup": {
+      "eyebrow": "Onboarding",
+      "title": "Institution setup",
+      "description": "Complete your campus profile, then start managing academic structure.",
+      "steps": {
+        "create": "Create Institution",
+        "configure": "Configure Profile",
+        "manage": "Start Managing"
+      },
+      "cardTitle": "Configure profile",
+      "cardDescription": "Logo, contact details, location, and branding for your institution.",
+      "fields": {
+        "name": "Institution name",
+        "shortName": "Short name",
+        "code": "Institution code",
+        "email": "Institution email",
+        "phone": "Phone",
+        "timezone": "Timezone",
+        "country": "Country",
+        "city": "City",
+        "state": "State",
+        "address": "Address",
+        "addressPlaceholder": "Campus address",
+        "phonePlaceholder": "+91…"
+      },
+      "branding": "Branding",
+      "yourInstitution": "Your institution",
+      "finishSetup": "Finish Setup",
+      "saving": "Saving…",
+      "unableToFinish": "Unable to finish setup."
+    },
+    "institution": {
+      "overview": {
+        "eyebrow": "Organization",
+        "title": "Institution",
+        "description": "Structure, academic calendar, and tenant settings for your campus.",
+        "editProfile": "Edit profile",
+        "finishSetupTitle": "Finish institution setup",
+        "finishSetupDescription": "Add logo, contact details, and branding to unlock campuses, schools, and programs.",
+        "continueSetup": "Continue setup",
+        "loadFailed": "Failed to load institution.",
+        "locationNotSet": "Location not set",
+        "contact": "Contact",
+        "capacity": "Capacity",
+        "locale": "Locale",
+        "capacityLine": "{students} students · {faculty} faculty",
+        "modules": "Modules",
+        "stats": {
+          "campuses": "Campuses",
+          "schools": "Schools",
+          "departments": "Departments",
+          "programs": "Programs",
+          "academicYears": "Academic years",
+          "studentCapacity": "Student capacity"
+        },
+        "modulesList": {
+          "profile": {
+            "title": "Profile & branding",
+            "description": "Identity, contact, and brand assets."
+          },
+          "campuses": {
+            "title": "Campuses",
+            "description": "Locations and campus contacts."
+          },
+          "schools": {
+            "title": "Schools",
+            "description": "Schools and faculties."
+          },
+          "departments": {
+            "title": "Departments",
+            "description": "Departments under schools."
+          },
+          "programs": {
+            "title": "Programs",
+            "description": "Degree and certificate programs."
+          },
+          "academicYears": {
+            "title": "Academic years",
+            "description": "Year ranges and active terms."
+          },
+          "settings": {
+            "title": "Settings",
+            "description": "Theme, grading, and policies."
+          }
+        }
+      },
+      "crud": {
+        "search": "Search",
+        "searchPlaceholder": "Search by name or code…",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "includeArchived": "Include archived",
+        "apply": "Apply",
+        "loadFailed": "Failed to load data.",
+        "emptyTitle": "No {resource} yet",
+        "emptyDescription": "Create a record or adjust filters to see results.",
+        "createFirst": "Create first record",
+        "restore": "Restore",
+        "archive": "Archive",
+        "createTitle": "Create {resource}",
+        "editTitle": "Edit {resource}",
+        "update": "Update",
+        "saveFailed": "Save failed.",
+        "printPdf": "Print / PDF",
+        "pageOf": "Page {page} of {totalPages} · {total} total",
+        "previous": "Previous",
+        "next": "Next",
+        "noRecords": "No records found.",
+        "closeDialog": "Close dialog",
+        "saving": "Saving…"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "archived": "Archived"
+      },
+      "fields": {
+        "name": "Name",
+        "code": "Code",
+        "description": "Description",
+        "status": "Status",
+        "address": "Address",
+        "city": "City",
+        "state": "State",
+        "country": "Country",
+        "phone": "Phone",
+        "email": "Email",
+        "school": "School",
+        "schoolId": "School ID",
+        "department": "Department",
+        "level": "Level",
+        "years": "Years",
+        "credits": "Credits",
+        "durationYears": "Duration (years)",
+        "start": "Start",
+        "end": "End",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "isActive": "Active",
+        "markActiveYear": "Mark as active year",
+        "current": "Current",
+        "number": "Number",
+        "term": "Term",
+        "yearId": "Year ID",
+        "academicYear": "Academic year",
+        "capacity": "Capacity",
+        "program": "Program",
+        "programId": "Program ID",
+        "semester": "Semester",
+        "semesterId": "Semester ID",
+        "year": "Year",
+        "events": "Events",
+        "noSchools": "No schools available",
+        "noDepartments": "No departments available",
+        "noAcademicYears": "No academic years available",
+        "noPrograms": "No programs available",
+        "noSemesters": "No semesters available"
+      },
+      "levels": {
+        "certificate": "Certificate",
+        "diploma": "Diploma",
+        "undergraduate": "Undergraduate",
+        "postgraduate": "Postgraduate",
+        "doctoral": "Doctoral"
+      },
+      "terms": {
+        "odd": "Odd",
+        "even": "Even",
+        "summer": "Summer"
+      },
+      "campuses": {
+        "title": "Campuses",
+        "singular": "Campus",
+        "description": "Manage campus locations for your institution."
+      },
+      "schools": {
+        "title": "Schools",
+        "singular": "School",
+        "description": "Organize faculties and schools under the institution."
+      },
+      "departments": {
+        "title": "Departments",
+        "singular": "Department",
+        "description": "Departments belong to a school within the institution."
+      },
+      "programs": {
+        "title": "Programs",
+        "singular": "Program",
+        "description": "Academic programs offered by departments."
+      },
+      "academicYears": {
+        "title": "Academic years",
+        "singular": "Academic year",
+        "description": "Define academic year ranges and the currently active year."
+      },
+      "semesters": {
+        "title": "Semesters",
+        "singular": "Semester",
+        "description": "Terms nested under an academic year."
+      },
+      "sections": {
+        "title": "Sections",
+        "singular": "Section",
+        "description": "Class sections by program and semester."
+      },
+      "batches": {
+        "title": "Batches",
+        "singular": "Batch",
+        "description": "Student cohorts by program and intake year."
+      },
+      "settings": {
+        "title": "Institution settings",
+        "description": "Language, theme, attendance, grading, exams, certificates, storage, AI, notifications, and security.",
+        "loadFailed": "Failed to load settings.",
+        "emptyTitle": "No settings",
+        "emptyDescription": "Settings record was not found.",
+        "preferences": "Preferences",
+        "preferencesDescription": "Primary locale and UI theme preference.",
+        "language": "Language",
+        "theme": "Theme",
+        "themeSystem": "System",
+        "themeLight": "Light",
+        "themeDark": "Dark",
+        "policyBlocks": "Policy blocks",
+        "policyBlocksDescription": "JSON configuration for operational policies. Invalid JSON blocks save attempts.",
+        "saveSettings": "Save settings",
+        "saved": "Settings saved.",
+        "invalidJson": "One or more policy blocks contain invalid JSON.",
+        "saveFailed": "Failed to save settings.",
+        "policies": {
+          "attendance": "Attendance",
+          "gradingScale": "Grading scale",
+          "examRules": "Exam rules",
+          "certificateSettings": "Certificate settings",
+          "storageSettings": "Storage settings",
+          "aiSettings": "AI settings",
+          "notificationSettings": "Notification settings",
+          "securitySettings": "Security settings"
+        }
+      },
+      "profile": {
+        "title": "Institution profile",
+        "description": "Update identity, contact details, and branding URLs.",
+        "loadFailed": "Failed to load profile.",
+        "emptyTitle": "No institution",
+        "emptyDescription": "Nothing to display.",
+        "details": "Details",
+        "codeSlug": "Code {code} · Slug {slug}",
+        "branding": "Branding",
+        "brandingDescription": "Hosted image URLs with a live workspace preview. File upload lands with storage later.",
+        "saveProfile": "Save profile",
+        "saveBranding": "Save branding",
+        "profileSaved": "Profile saved.",
+        "brandingSaved": "Branding saved.",
+        "saveProfileFailed": "Failed to save profile.",
+        "saveBrandingFailed": "Failed to save branding.",
+        "website": "Website",
+        "currency": "Currency",
+        "postalCode": "Postal code",
+        "shortName": "Short name",
+        "timezone": "Timezone"
+      },
+      "calendar": {
+        "title": "Academic calendars",
+        "singular": "Calendar",
+        "description": "Semester starts/ends, exam windows, holidays, and institutional events.",
+        "newCalendar": "New calendar",
+        "searchPlaceholder": "Search calendars…",
+        "emptyTitle": "No calendars yet",
+        "emptyDescription": "Create a calendar for an academic year and add key dates.",
+        "loadFailed": "Failed to load calendars.",
+        "eventNeedsFields": "Each event needs a title, start date, and end date.",
+        "saveFailed": "Save failed",
+        "calendarName": "Calendar name",
+        "eventTypes": {
+          "semester_start": "Semester start",
+          "semester_end": "Semester end",
+          "exam_start": "Exam start",
+          "exam_end": "Exam end",
+          "holiday": "Holiday",
+          "event": "Event"
+        }
+      },
+      "faculty": {
+        "eyebrow": "People",
+        "title": "Faculty",
+        "description": "Manage faculty records, employment status, and academic assignments.",
+        "addFaculty": "Add faculty",
+        "directory": "Directory",
+        "directoryDescription": "Search, filter, and run bulk actions.",
+        "searchPlaceholder": "Search name, employee ID, code, email…",
+        "stats": {
+          "total": "Total",
+          "active": "Active",
+          "inactive": "Inactive",
+          "onLeave": "On Leave",
+          "departments": "Departments",
+          "newThisMonth": "New this month"
+        },
+        "create": {
+          "eyebrow": "Faculty",
+          "title": "Add faculty"
+        },
+        "edit": {
+          "eyebrow": "Faculty",
+          "title": "Edit {name}",
+          "notFound": "Faculty not found."
+        },
+        "import": {
+          "eyebrow": "Faculty",
+          "title": "Import CSV",
+          "description": "Upload, preview, validate, and import. Failed imports are rolled back.",
+          "uploadTitle": "CSV upload",
+          "uploadDescription": "Required columns: employeeId, facultyCode, firstName, lastName, email, designation, employmentType.",
+          "confirmImport": "Confirm import",
+          "importing": "Importing…",
+          "previewFailed": "Preview failed",
+          "importFailed": "Import failed and was rolled back",
+          "totalRows": "Total rows: {count}",
+          "valid": "Valid: {count}",
+          "invalid": "Invalid: {count}",
+          "duplicates": "Duplicates in file: {count}",
+          "rowError": "Row {row}{field}: {message}"
+        },
+        "export": {
+          "eyebrow": "Faculty",
+          "title": "Export",
+          "description": "Download the faculty directory as CSV, Excel-compatible, or PDF. Use print for a hard copy.",
+          "formatsTitle": "Export formats",
+          "formatsDescription": "Exports are audited as faculty.export."
+        },
+        "emptyTitle": "No faculty yet",
+        "emptyDescription": "Add your first faculty member or import a CSV to populate the directory."
+      }
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Devices where you are currently signed in.",
+      "signInPrompt": "Sign in to manage your active sessions.",
+      "signOutAll": "Sign out all devices",
+      "signingOut": "Signing out…",
+      "loadFailed": "Failed to load sessions.",
+      "unknownDevice": "Unknown device",
+      "lastActive": "Last active {when}",
+      "current": "Current",
+      "startedExpires": "Started {started} · Expires {expires}",
+      "signOut": "Sign out",
+      "revoke": "Revoke",
+      "empty": "No active sessions found."
+    },
+    "home": {
+      "eyebrow": "Overview",
+      "title": "Institution dashboard",
+      "description": "Structure, capacity, and academic pulse at a glance.",
+      "errorTitle": "Dashboard",
+      "errorDescription": "Institution overview",
+      "finishSetupTitle": "Finish institution setup",
+      "finishSetupDescription": "Complete your profile, branding, and contact details to unlock the workspace.",
+      "continueSetup": "Continue setup",
+      "loadFailed": "Unable to load institution dashboard.",
+      "editBranding": "Edit branding",
+      "openInstitution": "Open institution",
+      "structureReadiness": "Structure readiness",
+      "modulesHaveRecords": "{ready} of {total} modules have records",
+      "students": "Students",
+      "faculty": "Faculty",
+      "planCapacity": "Plan capacity",
+      "planBadge": "{plan} plan",
+      "noInstitutionTitle": "No institution linked",
+      "noInstitutionDescription": "Connect or create an institution profile to unlock the academic workspace.",
+      "emptyStructureTitle": "Your academic structure is empty",
+      "emptyStructureDescription": "Start by adding campuses, schools, and programs to bring this dashboard to life.",
+      "addCampus": "Add a campus",
+      "moduleDistribution": "Module distribution",
+      "moduleDistributionDescription": "Counts across your institution workspace",
+      "calendarSummary": "Calendar summary",
+      "loadingCalendars": "Loading calendars…",
+      "calendarSummaryMeta": "{calendars} · {batches}",
+      "calendarCount": "{count} calendars",
+      "calendarCountOne": "{count} calendar",
+      "batchCount": "{count} batches",
+      "batchCountOne": "{count} batch",
+      "noUpcomingEvents": "No upcoming events yet. Add dates on the academic calendar.",
+      "structurePulse": "Structure pulse",
+      "structurePulseDescription": "What’s ready in your workspace",
+      "quickActionsTitle": "Quick actions",
+      "quickActionsDescription": "Jump into the modules you manage most often.",
+      "stats": {
+        "campuses": "Campuses",
+        "schools": "Schools",
+        "departments": "Departments",
+        "programs": "Programs",
+        "academicYears": "Academic Years",
+        "semesters": "Semesters"
+      },
+      "chart": {
+        "campuses": "Campuses",
+        "schools": "Schools",
+        "departments": "Departments",
+        "programs": "Programs",
+        "years": "Years",
+        "semesters": "Semesters"
+      },
+      "actions": {
+        "campuses": {
+          "title": "Campuses",
+          "description": "Manage locations"
+        },
+        "schools": {
+          "title": "Schools",
+          "description": "Faculties & schools"
+        },
+        "departments": {
+          "title": "Departments",
+          "description": "Org structure"
+        },
+        "programs": {
+          "title": "Programs",
+          "description": "Degree offerings"
+        },
+        "academicYears": {
+          "title": "Academic years",
+          "description": "Year ranges"
+        },
+        "calendar": {
+          "title": "Calendar",
+          "description": "Key dates"
+        }
+      }
+    },
+    "courses": {
+      "roleLabel": "Courses",
+      "title": "Courses",
+      "preparingLine": "The courses workspace is being prepared.",
+      "modulesIntro": "Course catalogs and enrollments will appear here once your institution assigns programs.",
+      "welcome": "Welcome",
+      "welcomeNamed": "Welcome {name}",
+      "contactAdmin": "Contact your administrator if you believe this is incorrect.",
+      "modules": {
+        "catalog": "Course catalog",
+        "enrollments": "Enrollments",
+        "schedules": "Schedules",
+        "materials": "Materials",
+        "assessments": "Assessments"
+      }
+    },
+    "facultyHome": {
+      "roleLabel": "Faculty",
+      "title": "Faculty Dashboard",
+      "preparingLine": "Your dashboard is being prepared.",
+      "modulesIntro": "The following modules will appear automatically once courses are assigned.",
+      "welcome": "Welcome",
+      "welcomeNamed": "Welcome {name}",
+      "contactAdmin": "Contact your administrator if you believe this is incorrect.",
+      "modules": {
+        "myCourses": "My Courses",
+        "students": "Students",
+        "exams": "Exams",
+        "practiceLabs": "Practice Labs",
+        "projects": "Projects"
+      }
+    },
+    "studentHome": {
+      "roleLabel": "Student",
+      "title": "Student Dashboard",
+      "preparingLine": "Your learning workspace is being prepared.",
+      "modulesIntro": "The following modules will appear automatically once you are enrolled in courses.",
+      "welcome": "Welcome",
+      "welcomeNamed": "Welcome {name}",
+      "contactAdmin": "Contact your administrator if you believe this is incorrect.",
+      "modules": {
+        "myCourses": "My Courses",
+        "assignments": "Assignments",
+        "exams": "Exams",
+        "practiceLabs": "Practice Labs",
+        "projects": "Projects"
+      }
     }
   },
   "errors": {

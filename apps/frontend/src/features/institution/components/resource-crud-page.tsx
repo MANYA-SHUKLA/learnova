@@ -3,6 +3,7 @@
 import { PERMISSIONS } from '@learnova/constants';
 import { Button, Card, CardContent, Input } from '@learnova/ui';
 import { Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useMemo, useState, type ReactNode } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import type { OrgEntityStatus, OrgListParams, OrgListResult } from '../types';
@@ -20,18 +21,12 @@ import {
   type ResourceColumn,
 } from './resource-table';
 
-const STATUS_OPTIONS: { value: '' | OrgEntityStatus; label: string }[] = [
-  { value: '', label: 'All statuses' },
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'archived', label: 'Archived' },
-];
-
 interface SoftRow { id: string; status: OrgEntityStatus; deletedAt: string | null }
 
 interface ResourceCrudPageProps<T extends SoftRow> {
   title: string;
   description: string;
+  singularLabel?: string;
   exportFilename: string;
   columns: ResourceColumn<T>[];
   fields: FormField[];
@@ -89,6 +84,7 @@ function defaultMapValues(
 export function ResourceCrudPage<T extends SoftRow>({
   title,
   description,
+  singularLabel,
   exportFilename,
   columns,
   fields,
@@ -102,6 +98,18 @@ export function ResourceCrudPage<T extends SoftRow>({
   extraFilters,
   extraListParams,
 }: ResourceCrudPageProps<T>) {
+  const t = useTranslations('dashboard.institution.crud');
+  const tStatus = useTranslations('dashboard.institution.status');
+  const tCommon = useTranslations('common');
+  const itemLabel = singularLabel ?? title;
+
+  const statusOptions: { value: '' | OrgEntityStatus; label: string }[] = [
+    { value: '', label: t('allStatuses') },
+    { value: 'active', label: tStatus('active') },
+    { value: 'inactive', label: tStatus('inactive') },
+    { value: 'archived', label: tStatus('archived') },
+  ];
+
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'' | OrgEntityStatus>('');
@@ -170,7 +178,7 @@ export function ResourceCrudPage<T extends SoftRow>({
       }
       setDialogOpen(false);
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Save failed.');
+      setFormError(err instanceof Error ? err.message : t('saveFailed'));
     }
   };
 
@@ -195,7 +203,7 @@ export function ResourceCrudPage<T extends SoftRow>({
             <PermissionGate permission={PERMISSIONS.INSTITUTION_MANAGE} enforce>
               <Button type="button" size="sm" onClick={openCreate}>
                 <Plus className="size-3.5" />
-                Create
+                {tCommon('create')}
               </Button>
             </PermissionGate>
           </>
@@ -205,10 +213,10 @@ export function ResourceCrudPage<T extends SoftRow>({
       <Card className="print:hidden">
         <CardContent className="grid gap-3 pt-6 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto] lg:items-end">
           <div className="min-w-0 space-y-1.5 sm:col-span-2 lg:col-span-1">
-            <label className="text-xs font-medium text-muted-foreground">Search</label>
+            <label className="text-xs font-medium text-muted-foreground">{t('search')}</label>
             <Input
               value={q}
-              placeholder="Search by name or code…"
+              placeholder={t('searchPlaceholder')}
               className="w-full min-w-0"
               onChange={(e) => { setQ(e.target.value); }}
               onKeyDown={(e) => {
@@ -217,7 +225,7 @@ export function ResourceCrudPage<T extends SoftRow>({
             />
           </div>
           <div className="min-w-0 space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Status</label>
+            <label className="text-xs font-medium text-muted-foreground">{t('status')}</label>
             <select
               className="flex h-10 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm"
               value={status}
@@ -226,7 +234,7 @@ export function ResourceCrudPage<T extends SoftRow>({
                 setPage(1);
               }}
             >
-              {STATUS_OPTIONS.map((opt) => (
+              {statusOptions.map((opt) => (
                 <option key={opt.label} value={opt.value}>
                   {opt.label}
                 </option>
@@ -243,13 +251,13 @@ export function ResourceCrudPage<T extends SoftRow>({
               }}
               className="size-4 shrink-0 rounded border-input"
             />
-            Include archived
+            {t('includeArchived')}
           </label>
           {extraFilters ? (
             <div className="min-w-0 sm:col-span-2 lg:col-span-full">{extraFilters}</div>
           ) : null}
           <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={applySearch}>
-            Apply
+            {t('apply')}
           </Button>
         </CardContent>
       </Card>
@@ -257,7 +265,7 @@ export function ResourceCrudPage<T extends SoftRow>({
       {isError ? (
         <div className="mb-4">
           <ErrorState
-            message={error instanceof Error ? error.message : 'Failed to load data.'}
+            message={error instanceof Error ? error.message : t('loadFailed')}
             onRetry={() => void refetch()}
           />
         </div>
@@ -265,12 +273,12 @@ export function ResourceCrudPage<T extends SoftRow>({
 
       {!isLoading && !isError && rows.length === 0 ? (
         <EmptyState
-          title={`No ${title.toLowerCase()} yet`}
-          description="Create a record or adjust filters to see results."
+          title={t('emptyTitle', { resource: title.toLowerCase() })}
+          description={t('emptyDescription')}
           action={
             <PermissionGate permission={PERMISSIONS.INSTITUTION_MANAGE} enforce>
               <Button type="button" onClick={openCreate}>
-                Create first record
+                {t('createFirst')}
               </Button>
             </PermissionGate>
           }
@@ -282,7 +290,7 @@ export function ResourceCrudPage<T extends SoftRow>({
               ...columns,
               {
                 id: 'status',
-                header: 'Status',
+                header: t('status'),
                 cell: (row) => <StatusBadge status={row.status} />,
                 exportValue: (row) => row.status,
               },
@@ -293,7 +301,7 @@ export function ResourceCrudPage<T extends SoftRow>({
               <PermissionGate permission={PERMISSIONS.INSTITUTION_MANAGE} enforce>
                 <>
                   <Button type="button" variant="ghost" size="sm" onClick={() => { openEdit(row); }}>
-                    Edit
+                    {tCommon('edit')}
                   </Button>
                   {row.deletedAt || row.status === 'archived' ? (
                     <Button
@@ -303,7 +311,7 @@ export function ResourceCrudPage<T extends SoftRow>({
                       disabled={restore.isPending}
                       onClick={() => void restore.mutateAsync(row.id)}
                     >
-                      Restore
+                      {t('restore')}
                     </Button>
                   ) : (
                     <Button
@@ -313,7 +321,7 @@ export function ResourceCrudPage<T extends SoftRow>({
                       disabled={archive.isPending}
                       onClick={() => void archive.mutateAsync(row.id)}
                     >
-                      Archive
+                      {t('archive')}
                     </Button>
                   )}
                 </>
@@ -335,14 +343,18 @@ export function ResourceCrudPage<T extends SoftRow>({
 
       <ResourceFormDialog
         open={dialogOpen}
-        title={editing ? `Edit ${title.slice(0, -1) || title}` : `Create ${title.slice(0, -1) || title}`}
+        title={
+          editing
+            ? t('editTitle', { resource: itemLabel })
+            : t('createTitle', { resource: itemLabel })
+        }
         fields={fields}
         initialValues={editing ? getEditValues?.(editing) : undefined}
         isSubmitting={create.isPending || update.isPending}
         error={formError}
         onClose={() => { setDialogOpen(false); }}
         onSubmit={handleSubmit}
-        submitLabel={editing ? 'Update' : 'Create'}
+        submitLabel={editing ? t('update') : tCommon('create')}
       />
     </div>
   );

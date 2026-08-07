@@ -12,6 +12,7 @@ import {
   Input,
   Skeleton,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
@@ -33,13 +34,13 @@ import {
   type ResourceColumn,
 } from '@/features/institution';
 
-const EVENT_TYPES: { value: CalendarEventType; label: string }[] = [
-  { value: 'semester_start', label: 'Semester start' },
-  { value: 'semester_end', label: 'Semester end' },
-  { value: 'exam_start', label: 'Exam start' },
-  { value: 'exam_end', label: 'Exam end' },
-  { value: 'holiday', label: 'Holiday' },
-  { value: 'event', label: 'Event' },
+const EVENT_TYPE_VALUES: CalendarEventType[] = [
+  'semester_start',
+  'semester_end',
+  'exam_start',
+  'exam_end',
+  'holiday',
+  'event',
 ];
 
 interface DraftEvent {
@@ -58,23 +59,27 @@ const emptyEvent = (): DraftEvent => ({
   endDate: '',
 });
 
-const columns: ResourceColumn<AcademicCalendar>[] = [
-  { id: 'name', header: 'Name', cell: (r) => r.name, exportValue: (r) => r.name },
-  {
-    id: 'events',
-    header: 'Events',
-    cell: (r) => r.events.length,
-    exportValue: (r) => r.events.length,
-  },
-  {
-    id: 'status',
-    header: 'Status',
-    cell: (r) => <StatusBadge status={r.status} />,
-    exportValue: (r) => r.status,
-  },
-];
-
 export default function AcademicCalendarPage() {
+  const t = useTranslations('dashboard.institution.calendar');
+  const tf = useTranslations('dashboard.institution.fields');
+  const ts = useTranslations('dashboard.institution.status');
+  const tCommon = useTranslations('common');
+  const tCrud = useTranslations('dashboard.institution.crud');
+  const columns: ResourceColumn<AcademicCalendar>[] = [
+    { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
+    {
+      id: 'events',
+      header: tf('events'),
+      cell: (r) => r.events.length,
+      exportValue: (r) => r.events.length,
+    },
+    {
+      id: 'status',
+      header: tf('status'),
+      cell: (r) => <StatusBadge status={r.status} />,
+      exportValue: (r) => r.status,
+    },
+  ];
   const [page, setPage] = useState(1);
   const [q, setQ] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -95,25 +100,25 @@ export default function AcademicCalendarPage() {
     return [
       {
         name: 'academicYearId',
-        label: 'Academic year',
+        label: tf('academicYear'),
         type: 'select',
         required: true,
         options: yearOptions.length
           ? yearOptions
-          : [{ value: '', label: 'No academic years available' }],
+          : [{ value: '', label: tf('noAcademicYears') }],
       },
-      { name: 'name', label: 'Calendar name', type: 'text', required: true },
+      { name: 'name', label: t('calendarName'), type: 'text', required: true },
       {
         name: 'status',
-        label: 'Status',
+        label: tf('status'),
         type: 'select',
         options: [
-          { value: 'active', label: 'Active' },
-          { value: 'inactive', label: 'Inactive' },
+          { value: 'active', label: ts('active') },
+          { value: 'inactive', label: ts('inactive') },
         ],
       },
     ];
-  }, [yearsData?.items]);
+  }, [yearsData?.items, t, tf, ts]);
 
   const openCreate = () => {
     setEditing(null);
@@ -141,7 +146,7 @@ export default function AcademicCalendarPage() {
     setFormError(null);
     for (const ev of events) {
       if (!ev.title.trim() || !ev.startDate || !ev.endDate) {
-        setFormError('Each event needs a title, start date, and end date.');
+        setFormError(t('eventNeedsFields'));
         return;
       }
     }
@@ -165,7 +170,7 @@ export default function AcademicCalendarPage() {
       }
       setDialogOpen(false);
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Save failed');
+      setFormError(err instanceof Error ? err.message : t('saveFailed'));
     }
   };
 
@@ -185,7 +190,7 @@ export default function AcademicCalendarPage() {
           message={
             listQuery.error instanceof Error
               ? listQuery.error.message
-              : 'Failed to load calendars.'
+              : t('loadFailed')
           }
           onRetry={() => void listQuery.refetch()}
         />
@@ -199,8 +204,8 @@ export default function AcademicCalendarPage() {
   return (
     <div className="w-full min-w-0">
       <PageHeader
-        title="Academic calendars"
-        description="Semester starts/ends, exam windows, holidays, and institutional events."
+        title={t('title')}
+        description={t('description')}
         actions={
           <div className="flex flex-wrap gap-2">
             <ExportMenu
@@ -212,7 +217,7 @@ export default function AcademicCalendarPage() {
             />
             <PermissionGate permission={PERMISSIONS.INSTITUTION_MANAGE} enforce>
               <Button type="button" onClick={openCreate}>
-                New calendar
+                {t('newCalendar')}
               </Button>
             </PermissionGate>
           </div>
@@ -222,7 +227,7 @@ export default function AcademicCalendarPage() {
       <div className="mb-4 flex flex-wrap gap-3">
         <Input
           className="w-full min-w-0 sm:max-w-xs"
-          placeholder="Search calendars…"
+          placeholder={t('searchPlaceholder')}
           value={q}
           onChange={(e) => {
             setPage(1);
@@ -233,8 +238,8 @@ export default function AcademicCalendarPage() {
 
       {items.length === 0 ? (
         <EmptyState
-          title="No calendars yet"
-          description="Create a calendar for an academic year and add key dates."
+          title={t('emptyTitle')}
+          description={t('emptyDescription')}
         />
       ) : (
         <>
@@ -245,7 +250,7 @@ export default function AcademicCalendarPage() {
               <PermissionGate permission={PERMISSIONS.INSTITUTION_MANAGE} enforce>
                 <>
                   <Button type="button" variant="ghost" size="sm" onClick={() => { openEdit(row); }}>
-                    Edit
+                    {tCommon('edit')}
                   </Button>
                   {row.deletedAt ? (
                     <Button
@@ -254,7 +259,7 @@ export default function AcademicCalendarPage() {
                       size="sm"
                       onClick={() => void restoreMutation.mutateAsync(row.id)}
                     >
-                      Restore
+                      {tCrud('restore')}
                     </Button>
                   ) : (
                     <Button
@@ -263,7 +268,7 @@ export default function AcademicCalendarPage() {
                       size="sm"
                       onClick={() => void archiveMutation.mutateAsync(row.id)}
                     >
-                      Archive
+                      {tCrud('archive')}
                     </Button>
                   )}
                 </>
@@ -285,8 +290,12 @@ export default function AcademicCalendarPage() {
 
       <ResourceFormDialog
         open={dialogOpen}
-        title={editing ? 'Edit calendar' : 'Create calendar'}
-        description="Add semester, exam, holiday, and event entries."
+        title={
+          editing
+            ? tCrud('editTitle', { resource: t('singular') })
+            : tCrud('createTitle', { resource: t('singular') })
+        }
+        description={t('description')}
         fields={fields}
         initialValues={
           editing
@@ -304,10 +313,8 @@ export default function AcademicCalendarPage() {
       >
         <Card className="border-dashed">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Events</CardTitle>
-            <CardDescription>
-              Semester start/end, exams, holidays, and custom events.
-            </CardDescription>
+            <CardTitle className="text-sm">{tf('events')}</CardTitle>
+            <CardDescription>{t('description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {events.map((ev, index) => (
@@ -324,14 +331,14 @@ export default function AcademicCalendarPage() {
                     setEvents(next);
                   }}
                 >
-                  {EVENT_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
+                  {EVENT_TYPE_VALUES.map((type) => (
+                    <option key={type} value={type}>
+                      {t(`eventTypes.${type}`)}
                     </option>
                   ))}
                 </select>
                 <Input
-                  placeholder="Title"
+                  placeholder={tf('name')}
                   value={ev.title}
                   onChange={(e) => {
                     const next = [...events];

@@ -2,6 +2,7 @@
 
 import { Button, Card, CardContent } from '@learnova/ui';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import {
   EmptyIllustration,
@@ -51,13 +52,14 @@ interface ErrorStateProps {
 }
 
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
+  const t = useTranslations('common');
   return (
     <Card className="border-danger/20 bg-danger/5">
       <CardContent className="flex flex-wrap items-center justify-between gap-4 py-6">
         <p className="text-sm text-danger">{message}</p>
         {onRetry ? (
           <Button variant="outline" size="sm" onClick={onRetry}>
-            Retry
+            {t('retry')}
           </Button>
         ) : null}
       </CardContent>

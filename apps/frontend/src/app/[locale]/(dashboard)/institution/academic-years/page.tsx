@@ -2,6 +2,7 @@
 
 import type { AcademicYear } from '@learnova/types';
 import { Badge } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import {
   ResourceCrudPage,
   useAcademicYears,
@@ -17,50 +18,59 @@ function toDateInput(value: string) {
   return value.slice(0, 10);
 }
 
-const columns: ResourceColumn<AcademicYear>[] = [
-  { id: 'name', header: 'Name', cell: (r) => r.name, exportValue: (r) => r.name },
-  {
-    id: 'startDate',
-    header: 'Start',
-    cell: (r) => toDateInput(r.startDate),
-    exportValue: (r) => r.startDate,
-  },
-  {
-    id: 'endDate',
-    header: 'End',
-    cell: (r) => toDateInput(r.endDate),
-    exportValue: (r) => r.endDate,
-  },
-  {
-    id: 'isActive',
-    header: 'Active',
-    cell: (r) =>
-      r.isActive ? <Badge variant="success">Current</Badge> : <span className="text-muted-foreground">—</span>,
-    exportValue: (r) => r.isActive,
-  },
-];
-
-const fields: FormField[] = [
-  { name: 'name', label: 'Name', type: 'text', required: true, placeholder: '2025-26' },
-  { name: 'startDate', label: 'Start date', type: 'date', required: true },
-  { name: 'endDate', label: 'End date', type: 'date', required: true },
-  { name: 'isActive', label: 'Mark as active year', type: 'checkbox' },
-  {
-    name: 'status',
-    label: 'Status',
-    type: 'select',
-    options: [
-      { value: 'active', label: 'Active' },
-      { value: 'inactive', label: 'Inactive' },
-    ],
-  },
-];
-
 export default function AcademicYearsPage() {
+  const t = useTranslations('dashboard.institution.academicYears');
+  const tf = useTranslations('dashboard.institution.fields');
+  const ts = useTranslations('dashboard.institution.status');
+
+  const columns: ResourceColumn<AcademicYear>[] = [
+    { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
+    {
+      id: 'startDate',
+      header: tf('start'),
+      cell: (r) => toDateInput(r.startDate),
+      exportValue: (r) => r.startDate,
+    },
+    {
+      id: 'endDate',
+      header: tf('end'),
+      cell: (r) => toDateInput(r.endDate),
+      exportValue: (r) => r.endDate,
+    },
+    {
+      id: 'isActive',
+      header: tf('isActive'),
+      cell: (r) =>
+        r.isActive ? (
+          <Badge variant="success">{tf('current')}</Badge>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+      exportValue: (r) => r.isActive,
+    },
+  ];
+
+  const fields: FormField[] = [
+    { name: 'name', label: tf('name'), type: 'text', required: true, placeholder: '2025-26' },
+    { name: 'startDate', label: tf('startDate'), type: 'date', required: true },
+    { name: 'endDate', label: tf('endDate'), type: 'date', required: true },
+    { name: 'isActive', label: tf('markActiveYear'), type: 'checkbox' },
+    {
+      name: 'status',
+      label: tf('status'),
+      type: 'select',
+      options: [
+        { value: 'active', label: ts('active') },
+        { value: 'inactive', label: ts('inactive') },
+      ],
+    },
+  ];
+
   return (
     <ResourceCrudPage<AcademicYear>
-      title="Academic years"
-      description="Define academic year ranges and the currently active year."
+      title={t('title')}
+      singularLabel={t('singular')}
+      description={t('description')}
       exportFilename="academic-years"
       columns={columns}
       fields={fields}

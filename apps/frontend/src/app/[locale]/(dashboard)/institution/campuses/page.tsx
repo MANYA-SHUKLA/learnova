@@ -1,6 +1,7 @@
 'use client';
 
 import type { Campus } from '@learnova/types';
+import { useTranslations } from 'next-intl';
 import {
   ResourceCrudPage,
   useArchiveCampusMutation,
@@ -12,48 +13,53 @@ import {
   type ResourceColumn,
 } from '@/features/institution';
 
-const columns: ResourceColumn<Campus>[] = [
-  { id: 'name', header: 'Name', cell: (r) => r.name, exportValue: (r) => r.name },
-  { id: 'code', header: 'Code', cell: (r) => r.code, exportValue: (r) => r.code },
-  {
-    id: 'city',
-    header: 'City',
-    cell: (r) => r.city ?? '—',
-    exportValue: (r) => r.city,
-  },
-  {
-    id: 'country',
-    header: 'Country',
-    cell: (r) => r.country ?? '—',
-    exportValue: (r) => r.country,
-  },
-];
-
-const fields: FormField[] = [
-  { name: 'name', label: 'Name', type: 'text', required: true },
-  { name: 'code', label: 'Code', type: 'text', required: true },
-  { name: 'address', label: 'Address', type: 'text' },
-  { name: 'city', label: 'City', type: 'text' },
-  { name: 'state', label: 'State', type: 'text' },
-  { name: 'country', label: 'Country', type: 'text' },
-  { name: 'phone', label: 'Phone', type: 'text' },
-  { name: 'email', label: 'Email', type: 'email' },
-  {
-    name: 'status',
-    label: 'Status',
-    type: 'select',
-    options: [
-      { value: 'active', label: 'Active' },
-      { value: 'inactive', label: 'Inactive' },
-    ],
-  },
-];
-
 export default function CampusesPage() {
+  const t = useTranslations('dashboard.institution.campuses');
+  const tf = useTranslations('dashboard.institution.fields');
+  const ts = useTranslations('dashboard.institution.status');
+
+  const columns: ResourceColumn<Campus>[] = [
+    { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
+    { id: 'code', header: tf('code'), cell: (r) => r.code, exportValue: (r) => r.code },
+    {
+      id: 'city',
+      header: tf('city'),
+      cell: (r) => r.city ?? '—',
+      exportValue: (r) => r.city,
+    },
+    {
+      id: 'country',
+      header: tf('country'),
+      cell: (r) => r.country ?? '—',
+      exportValue: (r) => r.country,
+    },
+  ];
+
+  const fields: FormField[] = [
+    { name: 'name', label: tf('name'), type: 'text', required: true },
+    { name: 'code', label: tf('code'), type: 'text', required: true },
+    { name: 'address', label: tf('address'), type: 'text' },
+    { name: 'city', label: tf('city'), type: 'text' },
+    { name: 'state', label: tf('state'), type: 'text' },
+    { name: 'country', label: tf('country'), type: 'text' },
+    { name: 'phone', label: tf('phone'), type: 'text' },
+    { name: 'email', label: tf('email'), type: 'email' },
+    {
+      name: 'status',
+      label: tf('status'),
+      type: 'select',
+      options: [
+        { value: 'active', label: ts('active') },
+        { value: 'inactive', label: ts('inactive') },
+      ],
+    },
+  ];
+
   return (
     <ResourceCrudPage<Campus>
-      title="Campuses"
-      description="Manage campus locations for your institution."
+      title={t('title')}
+      singularLabel={t('singular')}
+      description={t('description')}
       exportFilename="campuses"
       columns={columns}
       fields={fields}

@@ -12,6 +12,7 @@ import {
   Skeleton,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
@@ -23,23 +24,25 @@ import {
 } from '@/features/institution';
 
 const POLICY_KEYS = [
-  ['attendance', 'Attendance'],
-  ['gradingScale', 'Grading scale'],
-  ['examRules', 'Exam rules'],
-  ['certificateSettings', 'Certificate settings'],
-  ['storageSettings', 'Storage settings'],
-  ['aiSettings', 'AI settings'],
-  ['notificationSettings', 'Notification settings'],
-  ['securitySettings', 'Security settings'],
+  'attendance',
+  'gradingScale',
+  'examRules',
+  'certificateSettings',
+  'storageSettings',
+  'aiSettings',
+  'notificationSettings',
+  'securitySettings',
 ] as const;
 
-type PolicyKey = (typeof POLICY_KEYS)[number][0];
+type PolicyKey = (typeof POLICY_KEYS)[number];
 
 function stringifyPolicy(value: Record<string, unknown>): string {
   return JSON.stringify(value, null, 2);
 }
 
 export default function InstitutionSettingsPage() {
+  const t = useTranslations('dashboard.institution.settings');
+  const tCrud = useTranslations('dashboard.institution.crud');
   const { data, isLoading, isError, error, refetch } = useInstitutionSettings();
   const updateMutation = useUpdateInstitutionSettingsMutation();
   const [language, setLanguage] = useState('en');
@@ -86,7 +89,7 @@ export default function InstitutionSettingsPage() {
     return (
       <div className="w-full min-w-0">
         <ErrorState
-          message={error instanceof Error ? error.message : 'Failed to load settings.'}
+          message={error instanceof Error ? error.message : t('loadFailed')}
           onRetry={() => void refetch()}
         />
       </div>
@@ -96,7 +99,7 @@ export default function InstitutionSettingsPage() {
   if (!data) {
     return (
       <div className="w-full min-w-0">
-        <EmptyState title="No settings" description="Settings record was not found." />
+        <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       </div>
     );
   }
@@ -106,11 +109,11 @@ export default function InstitutionSettingsPage() {
     setMessage(null);
     const parsed: Record<string, Record<string, unknown>> = {};
     try {
-      for (const [key] of POLICY_KEYS) {
+      for (const key of POLICY_KEYS) {
         parsed[key] = JSON.parse(policies[key] || '{}') as Record<string, unknown>;
       }
     } catch {
-      setFormError('One or more policy blocks contain invalid JSON.');
+      setFormError(t('invalidJson'));
       return;
     }
     try {
@@ -126,28 +129,25 @@ export default function InstitutionSettingsPage() {
         notificationSettings: parsed['notificationSettings'],
         securitySettings: parsed['securitySettings'],
       });
-      setMessage('Settings saved.');
+      setMessage(t('saved'));
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to save settings.');
+      setFormError(err instanceof Error ? err.message : t('saveFailed'));
     }
   };
 
   return (
     <div className="w-full min-w-0">
-      <PageHeader
-        title="Institution settings"
-        description="Language, theme, attendance, grading, exams, certificates, storage, AI, notifications, and security."
-      />
+      <PageHeader title={t('title')} description={t('description')} />
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Preferences</CardTitle>
-          <CardDescription>Primary locale and UI theme preference.</CardDescription>
+          <CardTitle className="text-base">{t('preferences')}</CardTitle>
+          <CardDescription>{t('preferencesDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label className="text-sm font-medium" htmlFor="language">
-              Language
+              {t('language')}
             </label>
             <Input
               id="language"
@@ -158,7 +158,7 @@ export default function InstitutionSettingsPage() {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium" htmlFor="theme">
-              Theme
+              {t('theme')}
             </label>
             <select
               id="theme"
@@ -166,9 +166,9 @@ export default function InstitutionSettingsPage() {
               value={theme}
               onChange={(e) => { setTheme(e.target.value); }}
             >
-              <option value="system">System</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
+              <option value="system">{t('themeSystem')}</option>
+              <option value="light">{t('themeLight')}</option>
+              <option value="dark">{t('themeDark')}</option>
             </select>
           </div>
         </CardContent>
@@ -176,16 +176,14 @@ export default function InstitutionSettingsPage() {
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Policy blocks</CardTitle>
-          <CardDescription>
-            JSON configuration for operational policies. Invalid JSON blocks save attempts.
-          </CardDescription>
+          <CardTitle className="text-base">{t('policyBlocks')}</CardTitle>
+          <CardDescription>{t('policyBlocksDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          {POLICY_KEYS.map(([key, label]) => (
+          {POLICY_KEYS.map((key) => (
             <div key={key} className="space-y-1.5">
               <label className="text-sm font-medium" htmlFor={key}>
-                {label}
+                {t(`policies.${key}`)}
               </label>
               <textarea
                 id={key}
@@ -206,10 +204,10 @@ export default function InstitutionSettingsPage() {
           {updateMutation.isPending ? (
             <>
               <Spinner size="sm" />
-              Saving…
+              {tCrud('saving')}
             </>
           ) : (
-            'Save settings'
+            t('saveSettings')
           )}
         </Button>
       </PermissionGate>

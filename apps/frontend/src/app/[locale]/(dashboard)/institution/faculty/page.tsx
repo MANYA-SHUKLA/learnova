@@ -22,6 +22,7 @@ import {
   UserRound,
   Users,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
@@ -56,6 +57,8 @@ const STATUS_FILTERS: Array<FacultyStatus | 'all'> = [
 ];
 
 export default function FacultyListPage() {
+  const t = useTranslations('dashboard.institution.faculty');
+  const tCommon = useTranslations('common');
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<FacultyStatus | 'all'>('all');
@@ -118,32 +121,32 @@ export default function FacultyListPage() {
       <div className="space-y-8">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-medium text-primary">People</p>
+            <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
             <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-              Faculty
+              {t('title')}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Manage faculty records, employment status, and academic assignments.
+              {t('description')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline">
               <Link href={APP_ROUTES.INSTITUTION_FACULTY_IMPORT}>
                 <Upload className="size-4" />
-                Import
+                {tCommon('import')}
               </Link>
             </Button>
             <Button asChild variant="outline">
               <Link href={APP_ROUTES.INSTITUTION_FACULTY_EXPORT}>
                 <Download className="size-4" />
-                Export
+                {tCommon('export')}
               </Link>
             </Button>
             <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
               <Button asChild>
                 <Link href={APP_ROUTES.INSTITUTION_FACULTY_CREATE}>
                   <Plus className="size-4" />
-                  Add faculty
+                  {t('addFaculty')}
                 </Link>
               </Button>
             </PermissionGate>
@@ -161,12 +164,12 @@ export default function FacultyListPage() {
                 </Card>
               ))
             : [
-                { label: 'Total', value: stats?.total ?? 0 },
-                { label: 'Active', value: stats?.active ?? 0 },
-                { label: 'Inactive', value: stats?.inactive ?? 0 },
-                { label: 'On Leave', value: stats?.onLeave ?? 0 },
-                { label: 'Departments', value: stats?.departments ?? 0 },
-                { label: 'New this month', value: stats?.newThisMonth ?? 0 },
+                { label: t('stats.total'), value: stats?.total ?? 0 },
+                { label: t('stats.active'), value: stats?.active ?? 0 },
+                { label: t('stats.inactive'), value: stats?.inactive ?? 0 },
+                { label: t('stats.onLeave'), value: stats?.onLeave ?? 0 },
+                { label: t('stats.departments'), value: stats?.departments ?? 0 },
+                { label: t('stats.newThisMonth'), value: stats?.newThisMonth ?? 0 },
               ].map((card, i) => (
                 <motion.div
                   key={card.label}
@@ -190,8 +193,8 @@ export default function FacultyListPage() {
 
         <Card className="rounded-2xl border-border/80">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Directory</CardTitle>
-            <CardDescription>Search, filter, and run bulk actions.</CardDescription>
+            <CardTitle className="text-base">{t('directory')}</CardTitle>
+            <CardDescription>{t('directoryDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col gap-3 lg:flex-row">
@@ -199,7 +202,7 @@ export default function FacultyListPage() {
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9"
-                  placeholder="Search name, employee ID, code, email…"
+                  placeholder={t('searchPlaceholder')}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   onKeyDown={(e) => {
@@ -299,12 +302,12 @@ export default function FacultyListPage() {
             ) : rows.length === 0 ? (
               <EmptyState
                 illustration="faculty"
-                title="No faculty yet"
-                description="Add your first faculty member or import a CSV to populate the directory."
+                title={t('emptyTitle')}
+                description={t('emptyDescription')}
                 action={
                   <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
                     <Button asChild>
-                      <Link href={APP_ROUTES.INSTITUTION_FACULTY_CREATE}>Add faculty</Link>
+                      <Link href={APP_ROUTES.INSTITUTION_FACULTY_CREATE}>{t('addFaculty')}</Link>
                     </Button>
                   </PermissionGate>
                 }
