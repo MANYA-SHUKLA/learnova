@@ -760,6 +760,7 @@ export class EnrollmentService {
             sectionId: input.sectionId,
             facultyId: input.facultyId,
             enrollmentMethod: 'bulk_import',
+            completionStatus: 'not_started',
             notes: input.notes,
           },
           actor,
