@@ -19,6 +19,7 @@
     "seed:enrollments": "tsx --env-file=.env src/seeds/run-enrollment-seed.ts",
     "seed:enrollment-stack": "tsx --env-file=.env src/seeds/run-enrollment-stack-seed.ts",
     "seed:progress": "tsx --env-file=.env src/seeds/run-progress-seed.ts",
+    "seed:assignments": "tsx --env-file=.env src/seeds/run-assignment-seed.ts",
     "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",
     "test": "vitest run",
     "test:watch": "vitest"
