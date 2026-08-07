@@ -12,7 +12,7 @@ import {
   Skeleton,
   Spinner,
 } from '@learnova/ui';
-import { ArrowLeft, Copy, Pencil } from 'lucide-react';
+import { ArrowLeft, Copy, Pencil, FolderOpen } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
@@ -148,8 +148,16 @@ export default function CourseDetailPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            <PermissionGate permission={PERMISSIONS.COURSE_WRITE}>
+              <Button asChild variant="default">
+                <Link href={`/institution/courses/${course.id}/builder`}>
+                  <FolderOpen className="size-4" />
+                  Open Builder
+                </Link>
+              </Button>
+            </PermissionGate>
             <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
-              <Button asChild>
+              <Button asChild variant="outline">
                 <Link href={`${APP_ROUTES.INSTITUTION_COURSES}/${course.id}/edit`}>
                   <Pencil className="size-4" />
                   Edit
