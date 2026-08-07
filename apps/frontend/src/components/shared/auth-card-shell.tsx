@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * Shared auth card shell — same visual language as forgot-password:
- * centered, spring entrance, hover lift, ambient orb, accent line.
+ * Shared auth card shell — centered spring entrance, ambient orb,
+ * and shared Card hover (lift, accent, shine via card-interactive).
  */
 
 import { Card, CardDescription, CardHeader, CardTitle } from '@learnova/ui';
@@ -48,27 +48,16 @@ export function AuthCardShell({
           transition={{ delay: 0.15, duration: 0.7 }}
         />
 
-        <motion.div
-          whileHover={{ y: -6, scale: 1.01 }}
-          transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-          className="group relative"
-        >
+        <motion.div className="group relative">
           <Card
             className={cn(
-              'relative w-full overflow-hidden rounded-2xl border-border/80 bg-card/95 shadow-soft-lg backdrop-blur-sm',
-              'transition-[border-color,box-shadow] duration-300',
-              'group-hover:border-primary/35 group-hover:shadow-soft-lg',
+              'relative w-full rounded-2xl border-border/80 bg-card/95 shadow-soft-lg backdrop-blur-sm',
               className,
             )}
           >
-            <div
-              aria-hidden
-              className="absolute inset-x-0 top-0 h-[2px] origin-center scale-x-[0.28] bg-gradient-to-r from-transparent via-primary to-transparent opacity-50 transition-all duration-500 group-hover:scale-x-100 group-hover:opacity-100"
-            />
-
             <CardHeader className="space-y-4 pb-2 pt-8 text-center">
               <motion.div
-                className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary"
+                className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110"
                 whileHover={{ rotate: [-2, 2, 0], scale: 1.08 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 14 }}
               >

@@ -107,7 +107,7 @@ function HeroVisual() {
       aria-hidden
     >
       <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/20 via-accent/10 to-transparent blur-2xl" />
-      <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/90 shadow-soft-lg backdrop-blur-sm">
+      <div className="card-interactive relative overflow-hidden rounded-2xl border border-border/80 bg-card/90 shadow-soft-lg backdrop-blur-sm">
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <span className="size-2.5 rounded-full bg-danger/70" />
           <span className="size-2.5 rounded-full bg-warning/70" />
@@ -306,7 +306,7 @@ function DashboardPreview() {
           title={t('title')}
           description={t('description')}
         />
-        <div className="mt-12 overflow-hidden rounded-2xl border border-border bg-card shadow-soft-lg">
+        <div className="card-interactive mt-12 overflow-hidden rounded-2xl border border-border bg-card shadow-soft-lg">
           <div className="grid lg:grid-cols-[minmax(0,13.75rem)_minmax(0,1fr)]">
             <aside className="hidden min-w-0 border-r border-border bg-muted/30 p-5 lg:block">
               <p className="font-display text-sm font-semibold text-foreground">
