@@ -15,7 +15,6 @@ import {
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
-  BookOpen,
   Download,
   Plus,
   Search,
@@ -33,19 +32,14 @@ import {
   formatCourseDifficulty,
   formatCourseStatus,
   formatCourseVisibility,
-  useArchiveCourseMutation,
   useBulkArchiveCourseMutation,
   useBulkPublishCourseMutation,
   useBulkUnpublishCourseMutation,
   useCourseList,
   useCourseStats,
-  useRestoreCourseMutation,
 } from '@/features/course';
 import type { CourseStatus } from '@/features/course';
 import { Link } from '@/lib/i18n/routing';
-import { env } from '@/config/env';
-import { getAccessToken } from '@/lib/auth/jwt';
-import { cn } from '@/lib/utils';
 
 const STATUS_FILTERS: Array<CourseStatus | 'all'> = [
   'all',
@@ -64,25 +58,22 @@ export default function CourseListPage() {
   const [status, setStatus] = useState<CourseStatus | 'all'>('all');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
-  const [includeDeleted, setIncludeDeleted] = useState(false);
 
   const params = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
-      includeDeleted: includeDeleted || status === 'archived',
+      includeDeleted: status === 'archived',
       page,
       limit: 20,
       sortBy: 'createdAt',
       sortOrder: 'desc' as const,
     }),
-    [search, status, includeDeleted, page],
+    [search, status, page],
   );
 
   const listQuery = useCourseList(params);
   const statsQuery = useCourseStats();
-  const archiveMutation = useArchiveCourseMutation();
-  const restoreMutation = useRestoreCourseMutation();
   const bulkArchive = useBulkArchiveCourseMutation();
   const bulkPublish = useBulkPublishCourseMutation();
   const bulkUnpublish = useBulkUnpublishCourseMutation();
@@ -98,22 +89,6 @@ export default function CourseListPage() {
 
   const toggleOne = (id: string) => {
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  };
-
-  const downloadExport = async (format: 'csv' | 'excel' | 'pdf') => {
-    const token = getAccessToken();
-    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/courses/export?format=${format}`, {
-      credentials: 'include',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    if (!res.ok) return;
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `course-export.${format === 'excel' ? 'xls' : format}`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -303,11 +278,16 @@ export default function CourseListPage() {
               />
             ) : rows.length === 0 ? (
               <EmptyState
+                illustration="courses"
                 title={t('emptyTitle')}
                 description={t('emptyDescription')}
-                icon={BookOpen}
-                actionLabel={t('addCourse')}
-                actionHref={APP_ROUTES.INSTITUTION_COURSES_CREATE}
+                action={
+                  <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
+                    <Button asChild>
+                      <Link href={APP_ROUTES.INSTITUTION_COURSES_CREATE}>{t('addCourse')}</Link>
+                    </Button>
+                  </PermissionGate>
+                }
               />
             ) : (
               <div className="overflow-x-auto">

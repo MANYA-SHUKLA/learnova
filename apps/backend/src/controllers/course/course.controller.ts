@@ -162,6 +162,15 @@ export async function bulkPublishCourses(req: Request, res: Response, next: Next
   }
 }
 
+export async function bulkUnpublishCourses(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await courseService.bulkUnpublish(req.body as CourseBulkIdsInput, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function bulkArchiveCourses(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await courseService.bulkArchive(req.body as CourseBulkIdsInput, actorFrom(req));

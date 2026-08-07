@@ -517,6 +517,22 @@ export class CourseService {
     return { modified };
   }
 
+  async bulkUnpublish(input: CourseBulkIdsInput, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const modified = await courseRepository.bulkUpdateStatus(
+      institutionId,
+      input.ids,
+      'draft',
+    );
+    await this.audit('course.updated', actor, institutionId, null, {
+      bulk: true,
+      action: 'unpublish',
+      ids: input.ids,
+      modified,
+    });
+    return { modified };
+  }
+
   async bulkArchive(input: CourseBulkIdsInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const modified = await courseRepository.bulkArchive(institutionId, input.ids);

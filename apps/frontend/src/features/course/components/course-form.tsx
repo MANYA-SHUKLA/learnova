@@ -11,9 +11,8 @@ import {
   CardTitle,
   Input,
   Spinner,
-  Textarea,
 } from '@learnova/ui';
-import { useState } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
   COURSE_CATEGORY_LABELS,
@@ -184,12 +183,13 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
         {label}
       </label>
       {opts?.rows ? (
-        <Textarea
+        <textarea
           id={key}
           rows={opts.rows}
+          className="min-h-28 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
           value={form[key]}
           disabled={pending}
-          onChange={(e) => set(key, e.target.value)}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => set(key, e.target.value)}
         />
       ) : (
         <Input

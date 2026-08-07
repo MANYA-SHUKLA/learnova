@@ -1,6 +1,7 @@
 export { courseApi } from './services/course-api';
 export * from './hooks/use-course-queries';
 export type * from './types';
+export { CourseForm } from './components/course-form';
 export {
   COURSE_CATEGORY_LABELS,
   COURSE_DIFFICULTY_LABELS,

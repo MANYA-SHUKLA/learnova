@@ -14,10 +14,10 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | 4 | Institution & Academic Structure | ✅ Complete |
 | 5 | Faculty Management | ✅ Complete |
 | 6 | Student Management | ✅ Complete |
-| **6.5** | **System Integration & Demo** | 🔄 In progress |
-| 7 | Course Management (LMS) | 🔄 Foundation started |
+| **6.5** | **System Integration & Demo** | ✅ Complete |
+| **7** | **Course Management (catalog)** | ✅ Complete |
 
-**Hard rule:** ERP core (1–6) + Integration Demo (6.5) before LMS Course Management.
+**Hard rule:** ERP core (1–6) + Integration Demo (6.5) before LMS Course Management. Step 7 (catalog) is complete; lesson builder is a later step.
 
 ---
 
@@ -53,7 +53,7 @@ Students
 
 ## Step 6.5 — System Integration & Demo
 
-**Status:** 🔄 In progress  
+**Status:** ✅ Complete  
 **Goal:** Prove the ERP core is stable before starting LMS (Courses).
 
 ### Authentication

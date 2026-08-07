@@ -90,6 +90,13 @@ courseRoutes.post(
 );
 
 courseRoutes.post(
+  '/courses/bulk/unpublish',
+  ...manageAuth,
+  validate(courseBulkIdsSchema),
+  ctrl.bulkUnpublishCourses,
+);
+
+courseRoutes.post(
   '/courses/bulk/archive',
   ...manageAuth,
   validate(courseBulkIdsSchema),

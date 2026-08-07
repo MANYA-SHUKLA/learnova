@@ -1,85 +1,65 @@
 # Course Management
 
-## Overview
+Enterprise LMS course catalog module (Step 7). Manages course metadata, academic mapping, faculty assignment, lifecycle, import/export, and analytics — not lesson content.
 
-The Course Management module enables institutions to create, organize, and deliver structured learning content. It provides a comprehensive system for managing courses, modules, lessons, and tracking student progress.
+## Capabilities
 
-## Key Features
+- CRUD with soft delete (archive / restore)
+- Lifecycle: draft · review · published · scheduled · archived
+- Publish · unpublish · archive · duplicate
+- Search, filters, pagination, sorting
+- Bulk publish / unpublish / archive / delete / status / assign faculty / programs / semesters
+- CSV import with preview + rollback
+- CSV / Excel / PDF export
+- Thumbnail upload / replace / remove
+- Academic mapping: institution, campus, school, department, programs, semesters
+- Faculty assignment + coordinator
+- Enrollment settings (max students, mode, waitlist flags on model)
+- Audit trail + domain events
+- Role-based permissions with faculty scoping to own/assigned courses
 
-- **Course Creation & Management**: Create and manage courses with metadata (code, title, description, credits, status)
-- **Hierarchical Structure**: Organize content into Courses → Modules → Lessons
-- **Multiple Content Types**: Support for video, PDF, markdown, HTML, images, audio, links, embeds, code, downloads, presentations
-- **Course Status Management**: Draft, Published, Archived states
-- **Faculty Assignment**: Assign faculty members and coordinators to courses
-- **Department & Program Mapping**: Link courses to departments, programs, and semesters
-- **Progress Tracking**: Track student progress through courses and lessons
-- **Rich Metadata**: Objectives, prerequisites, syllabus, tags, thumbnails, banners
+## Out of scope (later steps)
 
-## Course Structure
+Lessons · modules · videos · assignments · projects · labs · exams · grades · attendance · certificates · AI
 
-### Course
-The top-level entity representing a complete course offering.
+## UI routes
 
-**Key Fields**:
-- courseCode: Unique identifier
-- title, slug, description
-- departmentId, programId, semesterId
-- credits: Course credit hours
-- status: draft | published | archived
-- facultyIds: Assigned faculty members
-- coordinatorId: Course coordinator
-- objectives: Learning objectives
-- prerequisites: Required prior knowledge
-- syllabus: Course outline
-- tags: Searchable tags
+| Route | Purpose |
+| --- | --- |
+| `/institution/courses` | Dashboard widgets + directory |
+| `/institution/courses/create` | Create |
+| `/institution/courses/:id` | Detail / overview |
+| `/institution/courses/:id/edit` | Edit |
+| `/institution/courses/import` | CSV import |
+| `/institution/courses/export` | Export center |
 
-### Module
-A logical grouping of lessons within a course.
+## Status values
 
-**Key Fields**:
-- courseId: Parent course
-- title, description
-- order: Display sequence
-- isActive: Visibility toggle
+`draft` · `review` · `published` · `scheduled` · `archived`
 
-### Lesson
-Individual learning unit with specific content.
+## Visibility
 
-**Key Fields**:
-- courseId, moduleId: Parent references
-- title, description
-- order: Display sequence
-- contentType: Type of lesson content
-- contentUrl, contentText, contentMetadata
-- durationMinutes: Estimated completion time
-- isActive: Visibility toggle
+`private` · `institution` · `public` · `invite_only`
 
-### Progress
-Tracks student engagement and completion.
+## Difficulty
 
-**Key Fields**:
-- courseId, studentId
-- moduleId, lessonId: Current position
-- status: not_started | in_progress | completed
-- progressPercent: Completion percentage
-- lastAccessedAt, completedAt
-- timeSpentMinutes: Total time invested
+`beginner` · `intermediate` · `advanced` · `expert`
 
-## API Endpoints
+## Category
 
-See `CourseAPI.md` for detailed API documentation.
+`programming` · `cyber_security` · `ai` · `cloud` · `networking` · `database` · `electronics` · `mechanical` · `mathematics` · `general` · `custom`
 
-## Permissions
+## Seed
 
-See `CoursePermissions.md` for role-based access control.
+```bash
+pnpm --filter @learnova/backend seed:courses
+```
 
-## Future Enhancements
+Generates at least 30 courses across departments, programs, semesters, and faculty with mixed statuses. Set `SEED_INSTITUTION_ID` and related ref IDs via env.
 
-- AI-powered content recommendations
-- Adaptive learning paths
-- Automated assessments and quizzes
-- Interactive assignments and labs
-- Certificate generation upon completion
-- Course analytics and insights
-- Discussion forums and collaboration
-- Live sessions and webinars
+## Related docs
+
+- [CourseAPI.md](./CourseAPI.md)
+- [CoursePermissions.md](./CoursePermissions.md)
+- [CourseImportExport.md](./CourseImportExport.md)
+- [CourseDashboard.md](./CourseDashboard.md)

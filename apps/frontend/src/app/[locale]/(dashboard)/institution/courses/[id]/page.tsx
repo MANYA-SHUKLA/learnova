@@ -32,7 +32,6 @@ import {
   useRestoreCourseMutation,
   useUnpublishCourseMutation,
 } from '@/features/course';
-import { ApiClientError } from '@/lib/api/client';
 import { Link } from '@/lib/i18n/routing';
 
 export default function CourseDetailPage() {
