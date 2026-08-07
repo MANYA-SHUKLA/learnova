@@ -173,6 +173,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage institution-wide assignments and analytics',
   },
+  'lab:read': {
+    resource: 'lab',
+    action: 'read',
+    description: 'View practice labs, problems, and submissions',
+  },
+  'lab:write': {
+    resource: 'lab',
+    action: 'write',
+    description: 'Create labs/problems, run and submit code',
+  },
+  'lab:manage': {
+    resource: 'lab',
+    action: 'manage',
+    description: 'Manage institution-wide practice labs and analytics',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {
