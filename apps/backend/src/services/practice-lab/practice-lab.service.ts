@@ -38,7 +38,6 @@ import type {
 import { eventBus } from '../../events/index.js';
 import { CourseModel } from '../../models/course.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
-import { FacultyModel } from '../../models/faculty.model.js';
 import { StudentModel } from '../../models/student.model.js';
 import { UserModel } from '../../models/user.model.js';
 import { LabProblemModel } from '../../models/lab-problem.model.js';
@@ -79,7 +78,7 @@ export interface ActorContext {
   role: string;
 }
 
-type DuplicateLabBody = { title?: string; courseId?: string };
+type DuplicateLabBody = DuplicateLabInput;
 type ImportProblemsBody = ImportProblemsInput;
 
 const MANAGE_ROLES = new Set(['institution_admin', 'super_admin']);
@@ -1839,7 +1838,3 @@ class PracticeLabService {
 }
 
 export const practiceLabService = new PracticeLabService();
-
-// re-export unused type guards for compile
-void FacultyModel;
-void DuplicateLabInput;
