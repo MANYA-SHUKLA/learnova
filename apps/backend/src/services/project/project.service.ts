@@ -2088,7 +2088,7 @@ export class ProjectService {
   }
 
   async bulkDuplicate(ids: string[], actor: ActorContext) {
-    const institutionId = requireTenant(actor);
+    requireTenant(actor);
     if (actor.role === 'student') throw new ForbiddenError('Students cannot bulk duplicate');
     const duplicated: string[] = [];
     for (const id of ids) {
