@@ -24,6 +24,8 @@ import type { ReactNode } from 'react';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass } from '@/lib/cta';
 import { Link } from '@/lib/i18n/routing';
+import { dashboardPathForRole } from '@/lib/auth/redirects';
+import { useAuth } from '@/providers/auth-provider';
 import { cn } from '@/lib/utils';
 
 const fadeUp: Variants = {
@@ -170,6 +172,10 @@ function HeroVisual() {
 
 function Hero() {
   const t = useTranslations('marketing.landing.hero');
+  const tHeader = useTranslations('marketing.header');
+  const { user, isAuthenticated } = useAuth();
+  const primaryHref = isAuthenticated ? dashboardPathForRole(user?.role) : '/login';
+  const primaryLabel = isAuthenticated ? tHeader('goToDashboard') : t('loginCta');
 
   return (
     <section className="relative overflow-hidden">
@@ -200,7 +206,7 @@ function Hero() {
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Button asChild size="lg" className={ctaButtonClass}>
-              <Link href="/login">{t('loginCta')}</Link>
+              <Link href={primaryHref}>{primaryLabel}</Link>
             </Button>
             <Button asChild variant="ghost" size="lg">
               <Link href="/features">{t('exploreCta')}</Link>
@@ -851,6 +857,10 @@ function Pricing() {
 
 function FinalCta() {
   const t = useTranslations('marketing.landing.finalCta');
+  const tHeader = useTranslations('marketing.header');
+  const { user, isAuthenticated } = useAuth();
+  const primaryHref = isAuthenticated ? dashboardPathForRole(user?.role) : '/login';
+  const primaryLabel = isAuthenticated ? tHeader('goToDashboard') : t('cta');
 
   return (
     <MotionSection className="w-full pb-0 pt-8 sm:pb-28 sm:pt-10">
@@ -869,7 +879,7 @@ function FinalCta() {
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href="/login">{t('cta')}</Link>
+                <Link href={primaryHref}>{primaryLabel}</Link>
               </Button>
             </div>
           </div>

@@ -20,10 +20,33 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **8** | **Enrollments** | ✅ Complete |
 | **8.25** | **Enrollment Integration Checkpoint** | ✅ Complete |
 | **8.5** | **Progress Tracking** | ✅ Complete |
+| **9** | **Assessment** | 🔜 Next |
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Progress Tracking (8.5) is **complete** (DoD met). Practice Labs (Step **9**) is next and must **not** start until Progress DoD is met — now met. Enrollments remain the source of truth for each learner’s journey.
+**Hard rule:** Progress Tracking (8.5) is **complete**. Next is **Assessment (Step 9)** — the start of the Academic Assessment Platform. Do **not** start Practice Labs until Assessment DoD is met. Enrollments remain the source of truth for each learner’s journey.
+
+### Platform phases (enterprise order)
+
+```
+ERP Core (1–6.5) ✅
+  ↓
+LMS Core (7–8) ✅
+  ↓
+Learning Progress (8.5) ✅
+  ↓
+Assessment (9)  ← next
+  ↓
+Labs (10)
+  ↓
+Projects (11)
+  ↓
+Exams (12)
+  ↓
+Gradebook (13)
+  ↓
+Certificates (14)
+```
 
 | Item often called “rest of Step 7” | Actual home |
 | --- | --- |
@@ -176,7 +199,7 @@ These are **next steps**, not open Step 7 work:
 | **14** | Richer analytics (completion, enrollments, faculty load) |
 
 ```
-Modules → Lessons → Topics → Resources → Assignments → Labs → Projects → Quizzes → Exams → Certificates
+Modules → Lessons → Topics → Resources → Assessment → Labs → Projects → Exams → Gradebook → Certificates
 ```
 
 Optional catalog polish (still container-only): richer multi-filter UI, saved views, enrollment-count sort once enrollments exist.
@@ -193,15 +216,15 @@ Topics
   ↓
 Resources
   ↓
-Assignments
+Assessment (assignments · quizzes · formative)
   ↓
 Practice Labs
   ↓
 Projects
   ↓
-Quizzes
-  ↓
 Exams
+  ↓
+Gradebook
   ↓
 Certificates
 ```
@@ -359,7 +382,7 @@ For every lifecycle action, confirm audit log + domain event:
 
 ### Out of scope (later)
 
-Practice labs · projects · assignments · quizzes · exams · gradebook · attendance · certificates · AI
+Assessment · practice labs · projects · exams · gradebook · attendance · certificates · AI
 
 ### Documentation
 
@@ -373,11 +396,38 @@ Practice labs · projects · assignments · quizzes · exams · gradebook · att
 
 ✓ Enrollment-gated writes · ✓ Published-content rollup · ✓ Permissions + scoping · ✓ Audit/events · ✓ Dashboards · ✓ Seed/tests/docs  
 
-**Hard rule:** Progress DoD is met. Do **not** start Practice Labs (Step **9**) until this DoD is met — **now met**.
+**Hard rule:** Progress DoD is met. Next is **Assessment (Step 9)**. Do **not** start Practice Labs until Assessment DoD is met.
 
 ---
 
-## Later LMS & platform steps
+## Step 9 — Assessment (Academic Assessment Platform)
+
+**Status:** 🔜 Next  
+**Goal:** First assessment layer after learning progress — assignments and quizzes (formative/summative coursework), submissions, scoring foundations, and role-scoped dashboards. This is **not** full examinations, gradebook, labs, or certificates.
+
+### In scope (planned)
+
+- Assignments · quizzes · question banks (as needed for coursework assessment)
+- Student submit / attempt flows (enrollment-gated)
+- Faculty review / score foundations
+- Permissions, audit, events, seed, tests, docs
+
+### Explicitly out of scope for Step 9
+
+| Deferred to | Scope |
+| --- | --- |
+| **10** | Practice Labs / coding |
+| **11** | Projects / ideation |
+| **12** | Examinations (timed / proctored exam engine) |
+| **13** | Gradebook (aggregated academic grades) |
+| **14** | Certificates |
+| later | Attendance · AI generation |
+
+**Hard rule:** Do **not** start Practice Labs (Step **10**) until Assessment DoD is met.
+
+---
+
+## Later Academic Assessment & platform steps
 
 | Step | Scope | State |
 | --- | --- | --- |
@@ -385,22 +435,24 @@ Practice labs · projects · assignments · quizzes · exams · gradebook · att
 | **8** | Enrollments | ✅ Complete |
 | **8.25** | Enrollment Integration Checkpoint | ✅ Complete |
 | **8.5** | Progress tracking | ✅ Complete |
-| 9 | Practice Labs / Coding | Planned |
-| 10 | Projects / Ideation | Planned |
-| 11 | Examinations | Planned |
-| 12 | Attendance / Grades | Planned |
-| 13 | Certificates (platform-wide) | Planned |
-| 14 | Analytics & Notifications | Planned |
-| 15 | AI content generation | Planned |
+| **9** | **Assessment** (assignments · quizzes · coursework) | 🔜 Next |
+| **10** | Practice Labs / Coding | Planned |
+| **11** | Projects / Ideation | Planned |
+| **12** | Examinations | Planned |
+| **13** | Gradebook | Planned |
+| **14** | Certificates (platform-wide) | Planned |
+| **15** | Analytics & Notifications | Planned |
+| **16** | AI content generation | Planned |
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
-**Boundary:** Progress (8.5) DoD met — Practice Labs (9) is next; do not start labs until Progress DoD is met (now met).
+**Boundary:** Progress (8.5) DoD met — **Assessment (9)** is next. Labs come after Assessment.
 
 ---
 
 ## Related docs
 
+- [API (Swagger)](./API.md) — interactive docs at `http://localhost:4000/docs`
 - [Institution](./Institution.md) · [Academic Structure](./AcademicStructure.md)
 - [Faculty](./Faculty.md) · [Student](./Student.md) · [Course](./Course.md)
 - [Enrollment](./Enrollment.md) · [EnrollmentWorkflow](./EnrollmentWorkflow.md)

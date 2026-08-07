@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@learnova/ui';
+import { Button, Skeleton } from '@learnova/ui';
 import { Menu, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -8,6 +8,8 @@ import { LanguageToggle } from '@/components/shared/language-toggle';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
+import { dashboardPathForRole } from '@/lib/auth/redirects';
+import { useAuth } from '@/providers/auth-provider';
 import { LogoMark } from './logo-mark';
 
 const NAV_LINKS = [
@@ -21,6 +23,11 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const t = useTranslations('marketing.header');
   const tCommon = useTranslations('common');
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  const dashboardHref = dashboardPathForRole(user?.role);
+  const primaryCtaLabel = isAuthenticated ? t('goToDashboard') : t('institutionLogin');
+  const primaryCtaHref = isAuthenticated ? dashboardHref : '/login';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-[var(--glass-bg)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--glass-bg)]">
@@ -48,9 +55,13 @@ export function SiteHeader() {
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <LanguageToggle />
           <ThemeToggle />
-          <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link href="/login">{t('institutionLogin')}</Link>
-          </Button>
+          {isLoading ? (
+            <Skeleton className="hidden h-9 w-28 rounded-md sm:inline-flex" />
+          ) : (
+            <Button asChild size="sm" className="hidden sm:inline-flex">
+              <Link href={primaryCtaHref}>{primaryCtaLabel}</Link>
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -85,16 +96,18 @@ export function SiteHeader() {
             </nav>
             <div className="mt-4 flex items-center gap-2">
               <LanguageToggle className="shrink-0" />
-              <Button asChild className="w-full">
-                <Link
-                  href="/login"
-                  onClick={() => {
-                    setOpen(false);
-                  }}
-                >
-                  {t('institutionLogin')}
-                </Link>
-              </Button>
+              {!isLoading ? (
+                <Button asChild className="w-full">
+                  <Link
+                    href={primaryCtaHref}
+                    onClick={() => {
+                      setOpen(false);
+                    }}
+                  >
+                    {primaryCtaLabel}
+                  </Link>
+                </Button>
+              ) : null}
             </div>
           </div>
         </div>
