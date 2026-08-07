@@ -159,6 +159,65 @@ export const semesterGradeQuerySchema = z.object({
 export const gradebookCourseIdParamsSchema = z.object({ courseId: objectIdField });
 export const gradeAppealIdParamsSchema = z.object({ appealId: objectIdField });
 
+export const upsertAcademicPolicySchema = z.object({
+  creditBasedGrading: z.boolean().default(true),
+  passingCriteria: z.enum(['marks', 'grade', 'both']).default('both'),
+  passingPercentage: z.number().min(0).max(100).default(60),
+  passingGradeLetters: z.array(z.string()).default(['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-']),
+  gradingScheme: z.enum(['absolute', 'relative']).default('absolute'),
+  gpaFormula: z.enum(['credit_weighted', 'arithmetic_mean', 'cumulative_credits']).default('credit_weighted'),
+  cgpaFormula: z.enum(['credit_weighted', 'arithmetic_mean', 'cumulative_credits']).default('credit_weighted'),
+  gradeReplacementPolicy: z
+    .enum(['best', 'latest', 'replace_if_higher', 'keep_original'])
+    .default('replace_if_higher'),
+  makeupAttemptPolicy: z.enum(['best', 'latest', 'average']).default('best'),
+  improvementAttemptPolicy: z.enum(['best', 'latest', 'average']).default('best'),
+  improvementExamTypes: z.array(z.string()).default([]),
+  standingThresholds: z
+    .object({
+      probationGpa: z.number().min(0).max(4).default(1.5),
+      warningGpa: z.number().min(0).max(4).default(2.0),
+      honorsGpa: z.number().min(0).max(4).default(3.5),
+      distinctionGpa: z.number().min(0).max(4).default(3.8),
+      failedCourseLimit: z.number().int().min(0).default(2),
+    })
+    .default({
+      probationGpa: 1.5,
+      warningGpa: 2.0,
+      honorsGpa: 3.5,
+      distinctionGpa: 3.8,
+      failedCourseLimit: 2,
+    }),
+});
+
+export const moderationActionSchema = z.object({
+  courseId: objectIdField,
+  notes: z.string().trim().max(2000).optional(),
+});
+
+export const compareSnapshotsQuerySchema = z.object({
+  courseId: objectIdField,
+  studentId: objectIdField,
+  versionFrom: z.coerce.number().int().min(1),
+  versionTo: z.coerce.number().int().min(1),
+});
+
+export const listSnapshotsQuerySchema = z.object({
+  courseId: objectIdField,
+  studentId: objectIdField.optional(),
+});
+
+export const computeStandingSchema = z.object({
+  studentId: objectIdField.optional(),
+  semesterId: objectIdField.optional(),
+});
+
+export type UpsertAcademicPolicyInput = z.infer<typeof upsertAcademicPolicySchema>;
+export type ModerationActionInput = z.infer<typeof moderationActionSchema>;
+export type CompareSnapshotsQuery = z.infer<typeof compareSnapshotsQuerySchema>;
+export type ListSnapshotsQuery = z.infer<typeof listSnapshotsQuerySchema>;
+export type ComputeStandingInput = z.infer<typeof computeStandingSchema>;
+
 export type GradebookListQuery = z.infer<typeof gradebookListQuerySchema>;
 export type IngestGradebookSourceInput = z.infer<typeof ingestGradebookSourceSchema>;
 export type SyncCourseGradebookInput = z.infer<typeof syncCourseGradebookSchema>;

@@ -5,5 +5,5 @@ export * from './utils/index.js';
 export * from './validators/index.js';
 export * from './errors/index.js';
 export * from './assessment/index.js';
-export * from './gradebook/aggregation.js';
+export * from './gradebook/index.js';
 export * from './coding/index.js';

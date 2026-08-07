@@ -84,6 +84,11 @@ export const GRADEBOOK_AUDIT_EVENTS = [
   'appeal.resolved',
   'project.graded',
   'course.synced',
+  'moderation.submitted',
+  'moderation.department_approved',
+  'moderation.published',
+  'snapshot.created',
+  'standing.computed',
 ] as const;
 
 export const GRADEBOOK_BULK_ACTIONS = [
@@ -102,3 +107,44 @@ export const GRADEBOOK_REPORT_TYPES = [
   'program',
   'institution',
 ] as const;
+
+export const PASSING_CRITERIA_MODES = ['marks', 'grade', 'both'] as const;
+
+export const GRADING_SCHEME_MODES = ['absolute', 'relative'] as const;
+
+export const GPA_FORMULAS = ['credit_weighted', 'arithmetic_mean', 'cumulative_credits'] as const;
+
+export const GRADE_REPLACEMENT_POLICIES = [
+  'best',
+  'latest',
+  'replace_if_higher',
+  'keep_original',
+] as const;
+
+export const GRADE_MODERATION_STAGES = [
+  'draft',
+  'faculty_submitted',
+  'department_review',
+  'department_approved',
+  'institution_published',
+  'returned_for_revision',
+] as const;
+
+export const ASSESSMENT_PURPOSES = ['regular', 'supplementary', 'improvement'] as const;
+
+export const ACADEMIC_STANDING_TYPES = [
+  'good_standing',
+  'academic_warning',
+  'probation',
+  'failed_semester',
+  'honors',
+  'distinction',
+] as const;
+
+export const DEFAULT_STANDING_THRESHOLDS = {
+  PROBATION_GPA: 1.5,
+  WARNING_GPA: 2.0,
+  HONORS_GPA: 3.5,
+  DISTINCTION_GPA: 3.8,
+  FAILED_COURSE_LIMIT: 2,
+} as const;
