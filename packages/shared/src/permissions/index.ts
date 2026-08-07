@@ -18,6 +18,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'faculty:read',
     'student:read',
     'student:write',
+    'course:read',
   ],
   faculty: [
     'lms:read',
@@ -37,6 +38,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'faculty:read',
     'faculty:write',
     'student:read',
+    'course:read',
+    'course:write',
   ],
   institution_admin: [
     'lms:read',

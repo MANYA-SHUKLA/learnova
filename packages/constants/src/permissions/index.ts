@@ -31,6 +31,9 @@ export const PERMISSIONS = {
   STUDENT_READ: 'student:read',
   STUDENT_WRITE: 'student:write',
   STUDENT_MANAGE: 'student:manage',
+  COURSE_READ: 'course:read',
+  COURSE_WRITE: 'course:write',
+  COURSE_MANAGE: 'course:manage',
 } as const;
 
 export type PermissionConstant = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
