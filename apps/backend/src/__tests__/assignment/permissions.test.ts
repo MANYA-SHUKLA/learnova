@@ -38,7 +38,7 @@ describe('assignment permissions', () => {
       'import',
     ];
     const rolesWithManage = (
-      Object.keys(ROLE_PERMISSIONS) as Array<keyof typeof ROLE_PERMISSIONS>
+      Object.keys(ROLE_PERMISSIONS) as (keyof typeof ROLE_PERMISSIONS)[]
     ).filter((role) => ROLE_PERMISSIONS[role].includes('assignment:manage'));
 
     expect(manageOnly).toContain('stats');

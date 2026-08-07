@@ -126,7 +126,7 @@ export function resolveGradeOutcome(input: {
   marksObtained?: number | null;
   percentage?: number | null;
   passed?: boolean | null;
-  rubricScores?: Array<{ points: number }>;
+  rubricScores?: { points: number }[];
   totalMarks: number;
   passingMarks: number;
   late: boolean;
@@ -166,7 +166,7 @@ export function resolveGradeOutcome(input: {
   return { marksObtained: capped, percentage, passed };
 }
 
-export function rubricTotalPoints(criteria: Array<{ maxPoints: number }>): number {
+export function rubricTotalPoints(criteria: { maxPoints: number }[]): number {
   return criteria.reduce((sum, c) => sum + (Number.isFinite(c.maxPoints) ? c.maxPoints : 0), 0);
 }
 
@@ -220,7 +220,7 @@ export function escapeCsv(value: unknown): string {
 }
 
 export function rowsToCsv(
-  rows: Array<Record<string, unknown>>,
+  rows: Record<string, unknown>[],
   headers: readonly string[] = ASSIGNMENT_CSV_HEADERS,
 ): string {
   const lines = [headers.join(',')];

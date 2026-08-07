@@ -57,10 +57,10 @@ export interface AssignmentStats {
   gradedSubmissions: number;
   lateSubmissions: number;
   averageGrade: number | null;
-  byDepartment: Array<{ departmentId: string | null; label: string; count: number }>;
-  byCourse: Array<{ courseId: string; courseCode: string; title: string; count: number }>;
-  byStatus: Array<{ status: string; count: number }>;
-  byType: Array<{ assignmentType: string; count: number }>;
+  byDepartment: { departmentId: string | null; label: string; count: number }[];
+  byCourse: { courseId: string; courseCode: string; title: string; count: number }[];
+  byStatus: { status: string; count: number }[];
+  byType: { assignmentType: string; count: number }[];
 }
 
 function escapeRegex(value: string) {

@@ -48,7 +48,7 @@ export async function listAssignments(req: Request, res: Response, next: NextFun
 export async function searchAssignments(req: Request, res: Response, next: NextFunction) {
   try {
     const result = await assignmentService.search(
-      req.query as unknown as Partial<AssignmentListQuery>,
+      req.query,
       actorFrom(req),
     );
     sendPaginated(res, result.items, result.meta, { requestId: req.requestId });

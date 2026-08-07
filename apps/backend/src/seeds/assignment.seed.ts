@@ -149,7 +149,7 @@ export async function seedAssignments(
   await AssignmentRubricModel.insertMany(rubrics, { ordered: false });
 
   // -------------------------------------------------------------- assignments
-  const assignments: Array<Record<string, unknown>> = [];
+  const assignments: Record<string, unknown>[] = [];
   for (let i = 0; i < assignmentTarget; i++) {
     const courseId = new Types.ObjectId(refs.courseIds[i % refs.courseIds.length]!);
     const status = i < assignmentTarget * 0.7 ? 'published' : randomItem(STATUSES);
@@ -199,9 +199,9 @@ export async function seedAssignments(
   );
 
   // -------------------------------------------------------------- submissions
-  const submissions: Array<Record<string, unknown>> = [];
-  const grades: Array<Record<string, unknown>> = [];
-  const comments: Array<Record<string, unknown>> = [];
+  const submissions: Record<string, unknown>[] = [];
+  const grades: Record<string, unknown>[] = [];
+  const comments: Record<string, unknown>[] = [];
 
   outer: for (const assignment of submittableAssignments) {
     const assignmentId = assignment._id as Types.ObjectId;

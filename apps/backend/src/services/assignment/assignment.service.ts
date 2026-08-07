@@ -16,8 +16,8 @@ import type {
 } from '@learnova/validation';
 import {
   ASSIGNMENT_MAX_FILE_BYTES,
-  assignmentExportQuerySchema,
-  assignmentImportConfirmSchema,
+  type assignmentExportQuerySchema,
+  type assignmentImportConfirmSchema,
 } from '@learnova/validation';
 import type {
   AssignmentFacultyDashboard,
@@ -428,7 +428,7 @@ export class AssignmentService {
         limit: query.limit ?? 20,
         sortBy: query.sortBy ?? 'createdAt',
         sortOrder: query.sortOrder ?? 'desc',
-      } as AssignmentListQuery,
+      },
       actor,
     );
   }
@@ -540,7 +540,7 @@ export class AssignmentService {
     if (!existing) throw new NotFoundError('Assignment not found');
     await this.assertAssignmentWriteAccess(existing, actor, institutionId);
 
-    const from = existing.status as AssignmentStatus;
+    const from = existing.status;
     if (!canTransitionStatus(from, to)) {
       throw new ConflictError(`Cannot change assignment status from ${from} to ${to}`);
     }
@@ -915,7 +915,7 @@ export class AssignmentService {
         {
           submissionType: input.submissionType,
           textSubmission: input.textSubmission ?? null,
-          links: input.links ?? [],
+          links: input.links,
           timeSpentMinutes: input.timeSpentMinutes ?? null,
           updatedBy: oid(actor.userId),
         },
@@ -940,7 +940,7 @@ export class AssignmentService {
       submissionType: input.submissionType,
       files: [],
       textSubmission: input.textSubmission ?? null,
-      links: input.links ?? [],
+      links: input.links,
       timeSpentMinutes: input.timeSpentMinutes ?? null,
       lateSubmission: false,
       createdBy: oid(actor.userId),
@@ -965,7 +965,7 @@ export class AssignmentService {
     await this.assertEnrollment(institutionId, student._id, assignment.courseId);
 
     const window = evaluateSubmissionWindow({
-      status: assignment.status as AssignmentStatus,
+      status: assignment.status,
       dueDate: assignment.dueDate ?? null,
       closeDate: assignment.closeDate ?? null,
       allowLateSubmission: assignment.allowLateSubmission,
@@ -990,7 +990,7 @@ export class AssignmentService {
     const payload = {
       submissionType: input.submissionType,
       textSubmission: input.textSubmission ?? null,
-      links: input.links ?? [],
+      links: input.links,
       timeSpentMinutes: input.timeSpentMinutes ?? null,
       lateSubmission: window.late,
       status: resolveSubmissionStatus(window.late),
@@ -1083,7 +1083,7 @@ export class AssignmentService {
       percentage: outcome.percentage,
       passed: outcome.passed,
       feedback: input.feedback ?? null,
-      rubricScores: input.rubricScores ?? [],
+      rubricScores: input.rubricScores,
       gradedBy: oid(actor.userId),
       gradedAt: new Date(),
     });
@@ -1217,7 +1217,7 @@ export class AssignmentService {
       throw new ForbiddenError('Students cannot import assignments');
     }
 
-    const errors: Array<{ row: number; field?: string; message: string }> = [];
+    const errors: { row: number; field?: string; message: string }[] = [];
     const assignmentIds: string[] = [];
 
     for (let i = 0; i < input.rows.length; i++) {

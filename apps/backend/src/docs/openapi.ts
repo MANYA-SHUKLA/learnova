@@ -147,6 +147,7 @@ export const openApiDocument: Json = {
     { name: 'Course Builder', description: 'Modules / lessons / resources (Step 7.5)' },
     { name: 'Enrollments', description: 'Enrollment management (Step 8)' },
     { name: 'Progress', description: 'Learning progress tracking (Step 8.5)' },
+    { name: 'Assignments', description: 'Assignments, submissions, rubrics and grading' },
   ],
   components: {
     securitySchemes: {
@@ -660,6 +661,308 @@ export const openApiDocument: Json = {
       get: op('Search progress / bookmarks / notes', {
         tags: ['Progress'],
         parameters: pageParams,
+      }),
+    },
+
+    '/api/v1/assignments': {
+      get: op('List assignments', {
+        tags: ['Assignments'],
+        parameters: [
+          ...pageParams,
+          { name: 'courseId', in: 'query', schema: { type: 'string' } },
+          { name: 'moduleId', in: 'query', schema: { type: 'string' } },
+          { name: 'lessonId', in: 'query', schema: { type: 'string' } },
+          {
+            name: 'status',
+            in: 'query',
+            schema: { type: 'string', enum: ['draft', 'published', 'archived', 'closed'] },
+          },
+          {
+            name: 'due',
+            in: 'query',
+            schema: { type: 'string', enum: ['upcoming', 'overdue', 'none'] },
+          },
+        ],
+        description:
+          'Scoped by role: admins see all, faculty see own plus non-draft course assignments, students see published assignments for enrolled courses.',
+      }),
+      post: op('Create assignment (draft)', {
+        tags: ['Assignments'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['courseId', 'title'],
+          properties: {
+            courseId: { type: 'string' },
+            title: { type: 'string' },
+            description: { type: 'string', nullable: true },
+            instructions: { type: 'string', nullable: true },
+            assignmentType: { type: 'string', default: 'homework' },
+            totalMarks: { type: 'number', default: 100 },
+            passingMarks: { type: 'number', default: 40 },
+            dueDate: { type: 'string', format: 'date-time', nullable: true },
+            closeDate: { type: 'string', format: 'date-time', nullable: true },
+            rubricId: { type: 'string', nullable: true },
+          },
+        }),
+      }),
+    },
+    '/api/v1/assignments/search': {
+      get: op('Search assignments', { tags: ['Assignments'], parameters: pageParams }),
+    },
+    '/api/v1/assignments/stats': {
+      get: op('Assignment stats (institution)', { tags: ['Assignments'] }),
+    },
+    '/api/v1/assignments/audit': {
+      get: op('Assignment audit log', { tags: ['Assignments'] }),
+    },
+    '/api/v1/assignments/dashboard/faculty': {
+      get: op('Faculty assignment dashboard', {
+        tags: ['Assignments'],
+        description: 'Assignments created, pending reviews, late submissions, average grade.',
+      }),
+    },
+    '/api/v1/assignments/dashboard/student': {
+      get: op('Student assignment dashboard', {
+        tags: ['Assignments'],
+        description: 'Upcoming, submitted, pending, late and graded counts.',
+      }),
+    },
+    '/api/v1/assignments/dashboard/institution': {
+      get: op('Institution assignment analytics', { tags: ['Assignments'] }),
+    },
+    '/api/v1/assignments/export': {
+      get: op('Export assignments (JSON or CSV)', {
+        tags: ['Assignments'],
+        parameters: [
+          { name: 'courseId', in: 'query', schema: { type: 'string' } },
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+          {
+            name: 'format',
+            in: 'query',
+            schema: { type: 'string', enum: ['json', 'csv'], default: 'json' },
+          },
+        ],
+      }),
+    },
+    '/api/v1/assignments/import': {
+      post: op('Import assignments', {
+        tags: ['Assignments'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['rows'],
+          properties: {
+            rows: { type: 'array', items: { type: 'object', additionalProperties: true } },
+            publish: { type: 'boolean', default: false },
+          },
+        }),
+      }),
+    },
+    '/api/v1/assignments/me': {
+      get: op('My published assignments (student)', {
+        tags: ['Assignments'],
+        parameters: pageParams,
+      }),
+    },
+    '/api/v1/assignments/rubrics': {
+      get: op('List rubrics', { tags: ['Assignments'], parameters: pageParams }),
+      post: op('Create rubric', {
+        tags: ['Assignments'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['title', 'criteria'],
+          properties: {
+            title: { type: 'string' },
+            description: { type: 'string', nullable: true },
+            reusable: { type: 'boolean', default: true },
+            criteria: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                required: ['title', 'maxPoints'],
+                properties: {
+                  title: { type: 'string' },
+                  description: { type: 'string', nullable: true },
+                  weight: { type: 'number', default: 0 },
+                  maxPoints: { type: 'number' },
+                },
+              },
+            },
+          },
+        }),
+      }),
+    },
+    '/api/v1/assignments/rubrics/{id}': {
+      get: op('Get rubric by id', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+      }),
+      patch: op('Update rubric', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      delete: op('Delete rubric', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/assignments/submissions': {
+      get: op('List submissions', {
+        tags: ['Assignments'],
+        parameters: [
+          ...pageParams,
+          { name: 'assignmentId', in: 'query', schema: { type: 'string' } },
+          { name: 'studentId', in: 'query', schema: { type: 'string' } },
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+          { name: 'late', in: 'query', schema: { type: 'string', enum: ['true', 'false'] } },
+          { name: 'graded', in: 'query', schema: { type: 'string', enum: ['true', 'false'] } },
+        ],
+      }),
+    },
+    '/api/v1/assignments/submissions/draft': {
+      post: op('Save submission draft (student)', {
+        tags: ['Assignments'],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['assignmentId'],
+          properties: {
+            assignmentId: { type: 'string' },
+            submissionType: { type: 'string', default: 'mixed' },
+            textSubmission: { type: 'string', nullable: true },
+            links: { type: 'array', items: { type: 'string', format: 'uri' } },
+          },
+        }),
+      }),
+    },
+    '/api/v1/assignments/submissions/submit': {
+      post: op('Submit assignment (student)', {
+        tags: ['Assignments'],
+        description:
+          'Enforces dueDate / closeDate, the late-submission flag, maxAttempts and resubmission rules.',
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['assignmentId'],
+          properties: {
+            assignmentId: { type: 'string' },
+            submissionType: { type: 'string', default: 'mixed' },
+            textSubmission: { type: 'string', nullable: true },
+            links: { type: 'array', items: { type: 'string', format: 'uri' } },
+          },
+        }),
+      }),
+    },
+    '/api/v1/assignments/submissions/{id}': {
+      get: op('Get submission by id', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/assignments/submissions/{id}/grade': {
+      post: op('Grade submission', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({
+          type: 'object',
+          properties: {
+            gradingMethod: {
+              type: 'string',
+              enum: ['manual', 'rubric', 'pass_fail', 'marks', 'percentage'],
+              default: 'marks',
+            },
+            marksObtained: { type: 'number', nullable: true },
+            percentage: { type: 'number', nullable: true },
+            passed: { type: 'boolean', nullable: true },
+            feedback: { type: 'string', nullable: true },
+            rubricScores: { type: 'array', items: { type: 'object', additionalProperties: true } },
+            returnToStudent: { type: 'boolean', default: false },
+          },
+        }),
+      }),
+    },
+    '/api/v1/assignments/submissions/{id}/files': {
+      post: op('Upload submission file (base64)', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['fileName', 'contentType', 'data'],
+          properties: {
+            fileName: { type: 'string' },
+            contentType: { type: 'string' },
+            data: { type: 'string', description: 'Base64-encoded file, max 50MB decoded' },
+          },
+        }),
+      }),
+    },
+    '/api/v1/assignments/{id}': {
+      get: op('Get assignment by id', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+      }),
+      patch: op('Update assignment', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({ type: 'object', additionalProperties: true }),
+      }),
+      delete: op('Soft-delete assignment', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/assignments/{id}/publish': {
+      post: op('Publish assignment', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/assignments/{id}/archive': {
+      post: op('Archive assignment', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/assignments/{id}/close': {
+      post: op('Close assignment for submissions', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+      }),
+    },
+    '/api/v1/assignments/{id}/attachments': {
+      post: op('Upload assignment attachment (base64)', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['fileName', 'contentType', 'data'],
+          properties: {
+            fileName: { type: 'string' },
+            contentType: { type: 'string' },
+            data: { type: 'string', description: 'Base64-encoded file, max 50MB decoded' },
+          },
+        }),
+      }),
+    },
+    '/api/v1/assignments/{id}/comments': {
+      get: op('List assignment comments', {
+        tags: ['Assignments'],
+        parameters: [
+          objectIdParam('id'),
+          { name: 'submissionId', in: 'query', schema: { type: 'string' } },
+        ],
+      }),
+      post: op('Add assignment comment / feedback', {
+        tags: ['Assignments'],
+        parameters: [objectIdParam('id')],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['body'],
+          properties: {
+            body: { type: 'string' },
+            submissionId: { type: 'string', nullable: true },
+            parentCommentId: { type: 'string', nullable: true },
+          },
+        }),
       }),
     },
   },
