@@ -9,6 +9,7 @@ ADRs capture **why** Learnova chose a technology or pattern — not just what we
 | [0003](0003-db.md) | Data stores (MongoDB + Redis) | Accepted |
 | [0004](0004-ai.md) | AI provider (Gemini) | Accepted |
 | [0005](0005-code-runner.md) | Code execution (Judge0) | Accepted |
+| [0006](0006-assessment-core.md) | Shared Assessment Core | Accepted |
 
 ## Template
 

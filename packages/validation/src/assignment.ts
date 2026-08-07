@@ -4,7 +4,6 @@ import {
   assessmentAttemptStatusSchema,
   assessmentDeliveryTypeSchema,
   assessmentFileUploadSchema,
-  assessmentGradeInputSchema,
   assessmentGradingMethodSchema,
   assessmentLifecycleStatusSchema,
   assessmentVisibilitySchema,

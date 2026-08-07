@@ -21,10 +21,11 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **8.25** | **Enrollment Integration Checkpoint** | ✅ Complete |
 | **8.5** | **Progress Tracking** | ✅ Complete |
 | **9** | **Assignment Management** | ✅ Complete |
+| **9.5** | **Assessment Core (shared)** | ✅ Complete |
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Progress Tracking (8.5) and Assignment Management (Step **9**) are **complete**. Do **not** start Practice Labs (Step **10**). Enrollments remain the source of truth for each learner’s journey.
+**Hard rule:** Progress (8.5), Assignments (9), and **Assessment Core (9.5)** are complete. Do **not** start Practice Labs (Step **10**) until consuming Assessment Core. Enrollments remain the source of truth for each learner’s journey.
 
 ### Platform phases (enterprise order)
 
@@ -35,7 +36,9 @@ LMS Core (7–8) ✅
   ↓
 Learning Progress (8.5) ✅
   ↓
-Assessment / Assignments (9) ✅
+Assignments (9) ✅
+  ↓
+Assessment Core (9.5) ✅  ← shared primitives for Labs / Quizzes / Exams
   ↓
 Labs (10)
   ↓
@@ -431,7 +434,28 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 
 ✓ Assignment Model · ✓ Submission Model · ✓ Rubrics · ✓ CRUD · ✓ Submission Flow · ✓ Manual Grading · ✓ Comments · ✓ Attachments · ✓ Search · ✓ Filters · ✓ Faculty / Student / Institution Dashboards · ✓ Validation · ✓ Audit · ✓ Events · ✓ Tests · ✓ Documentation  
 
-**Hard rule:** Assignment DoD is met. Do **not** start Practice Labs (Step **10**).
+**Hard rule:** Assignment DoD is met. Assessment Core (9.5) is next before Labs — **now met**. Do **not** start Practice Labs (Step **10**) without consuming Assessment Core.
+
+---
+
+## Step 9.5 — Assessment Core
+
+**Status:** ✅ Complete  
+**Goal:** Shared interfaces, statuses, grading primitives, deadlines, attempts, feedback schemas, audit/event naming, and permission contracts for all assessment modules.
+
+### Shipped
+
+- `@learnova/types` → `assessment/*`
+- `@learnova/constants` → assessment enums, file limits, enrollment gate, `assessmentPermission`
+- `@learnova/validation` → shared deadline / attempt / marks / grade / feedback / upload schemas
+- `@learnova/shared` → pure helpers (lifecycle, submission window, attempts, grade outcome)
+- Assignments adapted as thin consumers of the core
+- Tests: `__tests__/assessment/core.test.ts`
+- Docs: `AssessmentCore.md`, ADR `0006-assessment-core.md`
+
+### Hard rule
+
+Practice Labs (10), Quizzes, and Exams **must** import Assessment Core helpers — do not duplicate deadline or grading logic.
 
 ---
 
@@ -444,6 +468,7 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 | **8.25** | Enrollment Integration Checkpoint | ✅ Complete |
 | **8.5** | Progress tracking | ✅ Complete |
 | **9** | **Assignment Management** | ✅ Complete |
+| **9.5** | **Assessment Core (shared)** | ✅ Complete |
 | **10** | Practice Labs / Coding | Planned |
 | **11** | Projects / Ideation | Planned |
 | **12** | Examinations | Planned |
@@ -454,7 +479,7 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
-**Boundary:** Assignment Management (9) DoD met — **do not start Practice Labs**.
+**Boundary:** Assessment Core (9.5) DoD met — Labs (10) may start only when ready to consume the core. **Do not duplicate grading/submission logic.**
 
 ---
 
@@ -468,4 +493,5 @@ Assessment · practice labs · projects · exams · gradebook · attendance · c
 - [Bookmarks](./Bookmarks.md) · [LearningActivity](./LearningActivity.md)
 - [Assignment](./Assignment.md) · [AssignmentAPI](./AssignmentAPI.md) · [Submission](./Submission.md)
 - [Rubrics](./Rubrics.md) · [AssignmentPermissions](./AssignmentPermissions.md)
+- [AssessmentCore](./AssessmentCore.md) · [ADR 0006](./adr/0006-assessment-core.md)
 - [Auth](./Auth.md) · [Architecture](./Architecture.md)
