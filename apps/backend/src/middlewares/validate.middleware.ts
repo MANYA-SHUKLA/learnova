@@ -6,6 +6,7 @@ type RequestTarget = 'body' | 'query' | 'params';
 
 /**
  * Validation middleware factory — Zod schemas as the validation layer.
+ * Express 5: `req.query` / `req.params` are getter-only — redefine via defineProperty.
  */
 export function validate(schema: ZodSchema<unknown>, target: RequestTarget = 'body') {
   return (req: Request, _res: Response, next: NextFunction): void => {
@@ -26,9 +27,19 @@ export function validate(schema: ZodSchema<unknown>, target: RequestTarget = 'bo
     if (target === 'body') {
       req.body = result.data;
     } else if (target === 'query') {
-      req.query = result.data as Request['query'];
+      Object.defineProperty(req, 'query', {
+        value: result.data,
+        writable: true,
+        configurable: true,
+        enumerable: true,
+      });
     } else {
-      req.params = result.data as Request['params'];
+      Object.defineProperty(req, 'params', {
+        value: result.data,
+        writable: true,
+        configurable: true,
+        enumerable: true,
+      });
     }
     next();
   };
