@@ -80,3 +80,4 @@ export * from './practice-lab.js';
 export * from './project.js';
 export * from './quiz.js';
 export * from './examination.js';
+export * from './gradebook.js';

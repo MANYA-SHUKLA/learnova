@@ -71,6 +71,7 @@ type SidebarItemId =
   | 'questionBank'
   | 'quizResults'
   | 'examinations'
+  | 'gradebook'
   | 'proctoring'
   | 'myTeam'
   | 'bookmarks'
@@ -130,6 +131,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'quizzes', href: APP_ROUTES.INSTITUTION_QUIZZES, icon: ListChecks },
       { id: 'questionBank', href: APP_ROUTES.INSTITUTION_QUESTION_BANK, icon: Library },
       { id: 'examinations', href: APP_ROUTES.INSTITUTION_EXAMS, icon: ShieldCheck },
+      { id: 'gradebook', href: APP_ROUTES.INSTITUTION_GRADEBOOK, icon: GraduationCap },
     ],
   },
   {
@@ -152,6 +154,7 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'quizzes', href: APP_ROUTES.FACULTY_QUIZZES, icon: ListChecks },
       { id: 'questionBank', href: APP_ROUTES.FACULTY_QUESTION_BANK, icon: Library },
       { id: 'examinations', href: APP_ROUTES.FACULTY_EXAMS, icon: ShieldCheck },
+      { id: 'gradebook', href: APP_ROUTES.FACULTY_GRADEBOOK, icon: GraduationCap },
       { id: 'proctoring', href: APP_ROUTES.FACULTY_EXAMS_LIVE, icon: Shield },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
@@ -174,6 +177,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'quizzes', href: APP_ROUTES.STUDENT_QUIZZES, icon: ListChecks },
       { id: 'quizResults', href: APP_ROUTES.STUDENT_QUIZ_RESULTS, icon: ClipboardCheck },
       { id: 'examinations', href: APP_ROUTES.STUDENT_EXAMS, icon: ShieldCheck },
+      { id: 'gradebook', href: APP_ROUTES.STUDENT_GRADEBOOK, icon: GraduationCap },
       { id: 'myTeam', href: STUDENT_MY_TEAM, icon: UsersRound },
       { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },
       { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },

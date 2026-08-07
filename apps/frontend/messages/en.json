@@ -600,6 +600,7 @@
         "questionBank": "Question bank",
         "quizResults": "Quiz results",
         "examinations": "Examinations",
+        "gradebook": "Gradebook",
         "proctoring": "Proctoring",
         "myTeam": "My team",
         "bookmarks": "Bookmarks",
@@ -1363,6 +1364,32 @@
         "emptyTitle": "No examinations yet",
         "emptyDescription": "Schedule proctored exams for enrolled courses."
       },
+      "gradebook": {
+        "eyebrow": "Academic results",
+        "title": "Gradebook",
+        "description": "Single source of truth for course grades — consumes scores from assignments, labs, quizzes, exams, and projects.",
+        "courseScope": "Course scope",
+        "courseScopeDescription": "Enter a course ID to sync consumed grades and view summaries.",
+        "courseIdPlaceholder": "Course ID",
+        "loadCourse": "Load course",
+        "sync": "Sync from sources",
+        "finalize": "Finalize grades",
+        "stats": {
+          "enrollments": "Enrollments",
+          "entries": "Grade entries",
+          "finalized": "Finalized summaries",
+          "pendingProjects": "Pending project grades",
+          "average": "Average weighted %"
+        },
+        "listTitle": "Consumed grade entries",
+        "listDescription": "Normalized results imported from assessment modules — not recalculated here.",
+        "selectCourseTitle": "Select a course",
+        "selectCourseDescription": "Load a course to sync and review academic results.",
+        "emptyTitle": "No grade entries",
+        "emptyDescription": "Sync the course to import grades from source modules.",
+        "error": "Unable to load gradebook.",
+        "weight": "Weight {value}%"
+      },
       "courseBuilder": {
         "title": "Course Builder",
         "openBuilder": "Open Builder",
@@ -1737,6 +1764,29 @@
         "emptyTitle": "No examinations",
         "emptyDescription": "Published exams will appear here."
       },
+      "gradebook": {
+        "eyebrow": "Academic results",
+        "title": "Gradebook",
+        "description": "Review consumed grades for your assigned courses.",
+        "courseScope": "Course scope",
+        "courseScopeDescription": "Enter a course ID to view synced grade entries.",
+        "courseIdPlaceholder": "Course ID",
+        "loadCourse": "Load course",
+        "sync": "Sync from sources",
+        "stats": {
+          "enrollments": "Enrollments",
+          "entries": "Grade entries",
+          "pendingProjects": "Pending project grades",
+          "average": "Average weighted %"
+        },
+        "listTitle": "Grade entries",
+        "listDescription": "Scores consumed from assignments, labs, quizzes, exams, and projects.",
+        "selectCourseTitle": "Select a course",
+        "selectCourseDescription": "Load a course to review student results.",
+        "emptyTitle": "No grade entries",
+        "emptyDescription": "Sync the course to import grades from source modules.",
+        "error": "Unable to load gradebook."
+      },
       "proctoring": {
         "eyebrow": "Proctoring",
         "title": "Live proctoring",
@@ -2064,6 +2114,23 @@
         "open": "Open exam",
         "emptyTitle": "No examinations scheduled",
         "emptyDescription": "Published exams will appear here before the start time."
+      },
+      "gradebook": {
+        "eyebrow": "Academic results",
+        "title": "My grades",
+        "description": "Official course results consolidated from all assessment activities.",
+        "stats": {
+          "courses": "Enrolled courses",
+          "finalized": "Finalized courses",
+          "average": "Average %"
+        },
+        "listTitle": "Recent grade entries",
+        "listDescription": "Marks and percentages consumed from quizzes, exams, assignments, labs, and projects.",
+        "emptyTitle": "No grades yet",
+        "emptyDescription": "Grades appear after faculty syncs the course gradebook.",
+        "error": "Unable to load grades.",
+        "passed": "Passed",
+        "notPassed": "Not passed"
       },
       "examDetail": {
         "eyebrow": "Exam",

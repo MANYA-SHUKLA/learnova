@@ -28,6 +28,7 @@ export const API_ROUTES = {
   QUIZZES: '/quizzes',
   QUESTION_BANK: '/question-bank',
   EXAMINATIONS: '/examinations',
+  GRADEBOOK: '/gradebook',
   LMS: '/lms',
   ERP: '/erp',
   EXAMINATION: '/examination',
@@ -145,6 +146,9 @@ export const APP_ROUTES = {
   STUDENT_EXAM_DETAIL: '/student/examinations/:id',
   STUDENT_EXAM_DETAIL_ALIAS: '/student/exams/:id',
   STUDENT_EXAM_CHECKIN: '/student/examinations/:id/check-in',
+  INSTITUTION_GRADEBOOK: '/institution/gradebook',
+  FACULTY_GRADEBOOK: '/faculty/gradebook',
+  STUDENT_GRADEBOOK: '/student/gradebook',
   CHANGE_PASSWORD: '/account/change-password',
 } as const;
 
