@@ -8,7 +8,11 @@ export const EVENTS = {
   COURSE_CREATED: 'course.created',
   COURSE_UPDATED: 'course.updated',
   COURSE_ARCHIVED: 'course.archived',
+  COURSE_PUBLISHED: 'course.published',
   COURSE_ENROLLED: 'course.enrolled',
+  COURSE_MODULE_CREATED: 'course.module.created',
+  COURSE_LESSON_CREATED: 'course.lesson.created',
+  COURSE_PROGRESS_UPDATED: 'course.progress.updated',
 
   USER_CREATED: 'user.created',
   USER_REGISTERED: 'user.registered',
@@ -60,7 +64,11 @@ export interface EventPayloadMap {
   'course.created': { courseId: string; title?: string };
   'course.updated': { courseId: string };
   'course.archived': { courseId: string };
+  'course.published': { courseId: string };
   'course.enrolled': { courseId: string; userId: string };
+  'course.module.created': { courseId: string; moduleId: string };
+  'course.lesson.created': { courseId: string; moduleId: string; lessonId: string };
+  'course.progress.updated': { courseId: string; studentId: string; progressPercent: number };
   'user.created': { userId: string; email?: string };
   'user.registered': { userId: string };
   'user.logged_in': { userId: string };
@@ -109,6 +117,13 @@ export interface EventDefinition {
 /** Event registry — discoverable catalog for tooling & docs */
 export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.COURSE_CREATED, description: 'Course created', version: 1 },
+  { name: EVENTS.COURSE_UPDATED, description: 'Course updated', version: 1 },
+  { name: EVENTS.COURSE_ARCHIVED, description: 'Course archived', version: 1 },
+  { name: EVENTS.COURSE_PUBLISHED, description: 'Course published', version: 1 },
+  { name: EVENTS.COURSE_ENROLLED, description: 'Course enrolled', version: 1 },
+  { name: EVENTS.COURSE_MODULE_CREATED, description: 'Course module created', version: 1 },
+  { name: EVENTS.COURSE_LESSON_CREATED, description: 'Course lesson created', version: 1 },
+  { name: EVENTS.COURSE_PROGRESS_UPDATED, description: 'Course progress updated', version: 1 },
   { name: EVENTS.USER_CREATED, description: 'User created', version: 1 },
   { name: EVENTS.EXAM_COMPLETED, description: 'Exam completed', version: 1 },
   { name: EVENTS.CERTIFICATE_GENERATED, description: 'Certificate generated', version: 1 },

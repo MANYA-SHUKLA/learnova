@@ -70,6 +70,9 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'student:read',
     'student:write',
     'student:manage',
+    'course:read',
+    'course:write',
+    'course:manage',
   ],
   // Future roles — empty until activated
   super_admin: [],
