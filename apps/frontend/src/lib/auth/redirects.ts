@@ -22,7 +22,6 @@ export function dashboardPathForRole(role: ActiveRole | string | null | undefine
 
 /**
  * Institution admins without a completed profile go to /institution/setup.
- * Email verification still happens before login (backend).
  */
 export async function resolvePostLoginPath(
   role: ActiveRole | string | null | undefined,

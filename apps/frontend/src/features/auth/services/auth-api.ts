@@ -21,11 +21,7 @@ export const authApi = {
     lastName: string;
     institutionName: string;
   }) {
-    return apiClient.post<{ user: AuthSessionResponse['user']; message: string }>(
-      `${BASE}/register`,
-      body,
-      { auth: false },
-    );
+    return apiClient.post<AuthSessionResponse>(`${BASE}/register`, body, { auth: false });
   },
 
   logout() {

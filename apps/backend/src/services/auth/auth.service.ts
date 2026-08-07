@@ -257,10 +257,10 @@ export class AuthService {
       lastName: input.lastName,
       roleId: role._id,
       institutionId,
-      // Local/dev: skip inbox dependency when SMTP is misconfigured.
-      isEmailVerified: env.NODE_ENV !== 'production',
+      isEmailVerified: true,
       passwordHistory: [],
       lastPasswordChangedAt: new Date(),
+      lastLoginAt: new Date(),
     });
 
     await auditAuthLogRepository.create({
@@ -273,23 +273,44 @@ export class AuthService {
       metadata: { institutionName: input.institutionName, institutionId: String(institutionId) },
     });
 
-    await sendVerificationEmail(user, ctx);
+    const permissions = [...getPermissionsForRole('institution_admin')] as Permission[];
+    const issued = await issueSessionTokens(user, 'institution_admin', permissions, ctx);
 
-    await sendMail({
+    await loginAttemptRepository.create({
+      email: input.email,
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+      success: true,
+      userId: user._id,
+    });
+
+    await auditAuthLogRepository.create({
+      event: 'user.login',
+      userId: user._id,
+      email: user.email,
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+      correlationId: ctx.correlationId,
+      metadata: { sessionId: issued.session.id, source: 'register' },
+    });
+
+    void sendMail({
       to: user.email,
       subject: 'Welcome to Learnova',
       html: mailHtml(
-        `<p>Welcome ${user.firstName}!</p><p>Your institution <strong>${input.institutionName}</strong> is ready. Please verify your email to sign in.</p>`,
+        `<p>Welcome ${user.firstName}!</p><p>Your institution <strong>${input.institutionName}</strong> is ready. Sign in anytime to finish setup and invite your campus.</p>`,
       ),
       text: mailText(
-        `Welcome ${user.firstName}! Your institution ${input.institutionName} is ready. Verify your email to sign in.`,
+        `Welcome ${user.firstName}! Your institution ${input.institutionName} is ready. Sign in anytime to finish setup.`,
       ),
+    }).catch((err: unknown) => {
+      logger.warn({ err, email: user.email }, 'Welcome email failed after registration');
     });
 
-    const permissions = [...getPermissionsForRole('institution_admin')] as Permission[];
     return {
       user: toAuthUser(user, 'institution_admin', permissions),
-      message: 'Registration successful. Please verify your email before signing in.',
+      session: issued.session,
+      tokens: issued.tokens,
     };
   }
 

@@ -1,18 +1,31 @@
 /**
  * JWT client utilities.
- * Access token lives in sessionStorage; refresh token is HttpOnly cookie.
+ * Access token lives in sessionStorage; refresh token is HttpOnly cookie (API host).
+ * A lightweight presence cookie is set on the app origin so Next middleware can gate routes.
  */
 
 import type { JwtPayload } from '@learnova/types';
+import { AUTH } from '@learnova/constants';
 
 const ACCESS_TOKEN_KEY = 'learnova_access_token';
 const REFRESH_TOKEN_KEY = 'learnova_refresh_token';
+
+function setAuthPresenceCookie(maxAgeSeconds = Math.floor(AUTH.REFRESH_TTL_MS / 1000)): void {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${AUTH.REFRESH_COOKIE_NAME}=1; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
+}
+
+function clearAuthPresenceCookie(): void {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${AUTH.REFRESH_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
 
 /** Prefer this — refresh token is cookie-only */
 export function storeAccessToken(accessToken: string): void {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  setAuthPresenceCookie();
 }
 
 /**
@@ -37,6 +50,7 @@ export function clearTokens(): void {
   if (typeof window === 'undefined') return;
   sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  clearAuthPresenceCookie();
 }
 
 /** Decode JWT payload without verification (client-side display only) */

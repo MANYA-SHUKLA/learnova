@@ -14,6 +14,7 @@ export class UserRepository {
     isEmailVerified?: boolean;
     passwordHistory?: string[];
     lastPasswordChangedAt?: Date;
+    lastLoginAt?: Date;
   }): Promise<UserEntity> {
     return UserModel.create(data);
   }

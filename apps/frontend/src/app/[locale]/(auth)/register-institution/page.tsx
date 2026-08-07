@@ -23,6 +23,7 @@ import {
   useRegisterInstitutionMutation,
 } from '@/features/auth';
 import { ApiClientError } from '@/lib/api/client';
+import { resolvePostLoginPath } from '@/lib/auth/redirects';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
 export default function RegisterInstitutionPage() {
@@ -51,14 +52,15 @@ export default function RegisterInstitutionPage() {
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     void handleSubmit(async (values) => {
       try {
-        await registerMutation.mutateAsync({
+        const session = await registerMutation.mutateAsync({
           institutionName: values.institutionName,
           email: values.adminEmail,
           password: values.password,
           firstName: values.adminFirstName,
           lastName: values.adminLastName,
         });
-        router.replace('/login?registered=1');
+        const destination = await resolvePostLoginPath(session.user.role);
+        router.replace(destination);
       } catch (err) {
         const message =
           err instanceof ApiClientError ? err.message : t('errorMessage');

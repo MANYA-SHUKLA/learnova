@@ -48,6 +48,9 @@ export function useLoginMutation() {
 }
 
 export function useRegisterInstitutionMutation() {
+  const queryClient = useQueryClient();
+  const setAuth = useAuthStore((s) => s.setAuth);
+
   return useMutation({
     mutationFn: (body: {
       email: string;
@@ -56,6 +59,15 @@ export function useRegisterInstitutionMutation() {
       lastName: string;
       institutionName: string;
     }) => authApi.registerInstitution(body),
+    onSuccess: (data) => {
+      storeAccessToken(data.accessToken);
+      setAuth({
+        user: data.user,
+        accessToken: data.accessToken,
+        session: data.session,
+      });
+      void queryClient.invalidateQueries({ queryKey: authKeys.all });
+    },
   });
 }
 

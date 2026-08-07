@@ -478,12 +478,12 @@
       "signingIn": "Signing in…",
       "needAccountLabel": "Need an account?",
       "needAccountText": "Contact your Institution Administrator",
-      "registeredMessage": "Institution registered. Verify your email, then sign in to finish institution setup.",
+      "registeredMessage": "Institution registered. Sign in to finish institution setup.",
       "errorMessage": "Unable to sign in. Try again."
     },
     "registerInstitution": {
       "title": "Register your institution",
-      "subtitle": "Create the Institution Admin account. After email verification, sign in to finish setup — logo, contact details, and branding.",
+      "subtitle": "Create the Institution Admin account. After signup you are signed in to finish setup — logo, contact details, and branding.",
       "cardTitle": "Create admin account",
       "cardDescription": "Students and faculty are invited by your administrators — there is no public signup.",
       "institutionName": "Institution name",
