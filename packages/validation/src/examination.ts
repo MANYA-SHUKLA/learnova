@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { REGEX } from '@learnova/constants';
-import { assessmentLifecycleStatusSchema, assessmentVisibilitySchema } from './assessment.js';
+import { assessmentVisibilitySchema } from './assessment.js';
 import { quizSectionSchema } from './quiz.js';
 
 const objectIdField = z.string().regex(REGEX.OBJECT_ID, 'Invalid ObjectId');
@@ -131,7 +131,6 @@ export const examListQuerySchema = z.object({
 });
 
 export const examIdParamsSchema = z.object({ id: objectIdField });
-export const attemptIdParamsSchema = z.object({ id: objectIdField });
 
 export const checkInExamSchema = z.object({ examId: objectIdField, seatNumber: optionalString(20) });
 

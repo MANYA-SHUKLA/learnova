@@ -287,10 +287,15 @@ export interface EventPayloadMap {
   'user.registered': { userId: string };
   'user.logged_in': { userId: string };
   'user.logged_out': { userId: string };
-  'exam.created': { examId: string };
-  'exam.started': { examId: string; userId?: string };
-  'exam.completed': { examId: string; userId?: string };
-  'exam.cancelled': { examId: string };
+  'exam.created': { examId: string; institutionId?: string };
+  'exam.started': { examId: string; userId?: string; attemptId?: string };
+  'exam.completed': { examId: string; userId?: string; attemptId?: string };
+  'exam.cancelled': { examId: string; institutionId?: string };
+  'exam.scheduled': { examId: string; institutionId?: string; scheduledAt?: string };
+  'exam.published': { examId: string; institutionId?: string };
+  'exam.checked_in': { examId: string; userId: string; seatingId?: string };
+  'exam.proctor.flagged': { examId: string; attemptId: string; proctorId?: string; reason?: string };
+  'exam.proctor.terminated': { examId: string; attemptId: string; proctorId?: string; reason?: string };
   'project.created': { projectId: string; courseId: string; institutionId: string };
   'project.updated': { projectId: string; courseId: string; institutionId: string };
   'project.published': { projectId: string; courseId: string; institutionId: string };
@@ -530,6 +535,11 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.EXAM_STARTED, description: 'Exam started', version: 1 },
   { name: EVENTS.EXAM_COMPLETED, description: 'Exam completed', version: 1 },
   { name: EVENTS.EXAM_CANCELLED, description: 'Exam cancelled', version: 1 },
+  { name: EVENTS.EXAM_SCHEDULED, description: 'Exam scheduled', version: 1 },
+  { name: EVENTS.EXAM_PUBLISHED, description: 'Exam published', version: 1 },
+  { name: EVENTS.EXAM_CHECKED_IN, description: 'Student checked in for exam', version: 1 },
+  { name: EVENTS.EXAM_PROCTOR_FLAGGED, description: 'Proctor flagged exam attempt', version: 1 },
+  { name: EVENTS.EXAM_PROCTOR_TERMINATED, description: 'Proctor terminated exam attempt', version: 1 },
   { name: EVENTS.CERTIFICATE_GENERATED, description: 'Certificate generated', version: 1 },
   { name: EVENTS.PROJECT_SUBMITTED, description: 'Project submitted', version: 1 },
   { name: EVENTS.PROJECT_CREATED, description: 'Project created', version: 1 },

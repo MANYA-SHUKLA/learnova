@@ -15,7 +15,7 @@ Projects (11) ✅  ── uses Collaboration Engine (no grading in Step 11)
   ↓
 Quizzes (12) ✅  ── uses Assessment Core question engine (rendering, attempts, auto-scoring)
   ↓
-Exams (13)  ── reuses Assessment Core question engine + Coding Engine (no second runner)
+Exams (13) ✅  ── reuses Assessment Core question engine + examinationEngine (policies only) + Coding Engine (no second runner)
   ↓
 Gradebook (14)
 ```
@@ -101,6 +101,20 @@ Types: `EvaluableQuestion`, `QuestionAnswerInput`, `RenderedAssessmentQuestion`,
 
 Tests: `apps/backend/src/__tests__/assessment/question-evaluation.test.ts`
 
+## Examination policy engine
+
+Exam Management (Step **13**) adds **`examinationEngine`** in `@learnova/shared` (`packages/shared/src/assessment/examination-policies.ts`). It **wraps** `assessmentQuestionEngine` — no duplicate evaluation logic.
+
+```
+examinationEngine
+  ├── Re-exports question engine   render · select · evaluate · score · analytics
+  └── Exam-only policies           schedule windows · check-in · secure browser · proctor violations · seating
+```
+
+Backend adapter: `apps/backend/src/services/examination-engine/` re-exports `@learnova/shared` — **do not add logic there**.
+
+Question storage remains in the Quiz module (`Question`, `QuestionBank`). Exams reference question IDs.
+
 ## What stays module-specific
 
 | Module | Owns |
@@ -137,4 +151,5 @@ Project Management **must** import the [Collaboration Engine](./CollaborationEng
 - [CodingEngine.md](./CodingEngine.md)
 - [Assignment.md](./Assignment.md)
 - [QuizManagement.md](./QuizManagement.md)
+- [ExamManagement.md](./ExamManagement.md)
 - [Roadmap.md](./Roadmap.md) Step 9.5

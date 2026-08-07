@@ -25,10 +25,11 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **10** | **Practice Labs / Coding** | ✅ Complete |
 | **11** | **Enterprise Project Management** | ✅ Complete |
 | **12** | **Enterprise Quiz Management** | ✅ Complete |
+| **13** | **Enterprise Examination & Secure Proctoring** | ✅ Complete |
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Progress (8.5), Assignments (9), Assessment Core (9.5), Practice Labs (10), Projects (11), and **Quiz Management (12)** are complete. Do **not** start Examinations (13) until Quiz DoD is met. Enrollments remain the source of truth for each learner’s journey.
+**Hard rule:** Progress (8.5), Assignments (9), Assessment Core (9.5), Practice Labs (10), Projects (11), **Quiz Management (12)**, and **Examinations (13)** are complete. Do **not** start Gradebook (14) until Exam DoD is met. Enrollments remain the source of truth for each learner’s journey.
 
 ### Platform phases (enterprise order)
 
@@ -569,6 +570,30 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 
 ---
 
+## Step 13 — Enterprise Examination & Secure Proctoring
+
+**Status:** ✅ Complete  
+**Goal:** Scheduled, proctored examinations — seating, check-in, secure browser policies, live invigilation. **Reuses** Assessment Core `assessmentQuestionEngine` + `examinationEngine` (exam policies only). **No new assessment engine.**
+
+### Shipped
+
+- Models: Exam · ExamSection · ExamSeating · ExamAttempt · ExamAnswer · ExamResult · ExamProctorSession · ExamProctorEvent · Audit
+- **`examinationEngine`** (`@learnova/shared` → question engine + exam policies; backend adapter `services/examination-engine`)
+- Reuses **Question Bank** (`Question`, `QuestionBank` from Quiz module) — questions referenced by ID
+- Reuses **attempt lifecycle**, **auto-evaluation**, **scoring**, **analytics** from `assessmentQuestionEngine`
+- Schedule & publish · seating & check-in · secure browser acknowledgement · proctor sessions/events · flag/clear/terminate
+- Backend routes `/api/v1/examinations` · seeds (`seed:examinations` — 20 exams · 500 attempts) · 50+ tests
+- Frontend: institution/faculty/student examination pages · faculty proctoring console · sidebar + i18n
+- Docs: [ExamManagement](./ExamManagement.md) · [ExamProctoring](./ExamProctoring.md) · [ExamAPI](./ExamAPI.md) · [ExamPermissions](./ExamPermissions.md)
+
+### Definition of done
+
+✓ Reuses assessmentQuestionEngine · ✓ Question Bank (no duplicate) · ✓ Attempt lifecycle · ✓ Auto evaluation · ✓ Scoring · ✓ Analytics · ✓ Scheduling · ✓ Seating · ✓ Check-in · ✓ Secure browser policy · ✓ Proctoring · ✓ Dashboards · ✓ Permissions · ✓ Validation · ✓ Audit/Events · ✓ Seed scale · ✓ Tests · ✓ Docs
+
+**Hard rule:** Stop after Exam Management. Do **not** start Gradebook (14) from this step.
+
+---
+
 ## Later Academic Assessment & platform steps
 
 | Step | Scope | State |
@@ -582,7 +607,7 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 | **10** | Practice Labs / Coding | ✅ Complete |
 | **11** | **Enterprise Project Management** | ✅ Complete |
 | **12** | **Enterprise Quiz Management** | ✅ Complete |
-| **13** | Examinations | Planned |
+| **13** | **Enterprise Examination & Secure Proctoring** | ✅ Complete |
 | **14** | Gradebook | Planned |
 | **15** | Certificates (platform-wide) | Planned |
 | **16** | Analytics & Notifications | Planned |
@@ -590,7 +615,7 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
-**Boundary:** Practice Labs (10) DoD met — consume Assessment Core. Projects (11) DoD met — consume Assessment Core. Quiz Management (12) DoD met — consume Assessment Core + `assessmentQuestionEngine`. **Next is Examinations (13).** Do not start gradebook from this step.
+**Boundary:** Practice Labs (10) DoD met — consume Assessment Core. Projects (11) DoD met — consume Assessment Core. Quiz Management (12) DoD met — consume Assessment Core + `assessmentQuestionEngine`. Examinations (13) DoD met — reuse Assessment Core question engine + `examinationEngine` for policies only. **Next is Gradebook (14).**
 
 ---
 
@@ -609,5 +634,6 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 - [PracticeSubmission](./PracticeSubmission.md) · [Leaderboard](./Leaderboard.md)
 - [ProjectManagement](./ProjectManagement.md) · [ProjectAPI](./ProjectAPI.md) · [ProjectPermissions](./ProjectPermissions.md) · [ProjectTeams](./ProjectTeams.md) · [ProjectMilestones](./ProjectMilestones.md) · [ProjectReviews](./ProjectReviews.md)
 - [QuizManagement](./QuizManagement.md) · [QuizBuilder](./QuizBuilder.md) · [QuestionBank](./QuestionBank.md) · [QuizAPI](./QuizAPI.md) · [QuizPermissions](./QuizPermissions.md) · [QuizAnalytics](./QuizAnalytics.md)
+- [ExamManagement](./ExamManagement.md) · [ExamProctoring](./ExamProctoring.md) · [ExamAPI](./ExamAPI.md) · [ExamPermissions](./ExamPermissions.md)
 - [AccessModel](./AccessModel.md) · [Auth](./Auth.md) · [Architecture](./Architecture.md)
 - [Deploy](./Deploy.md) — Vercel (frontend) + Render (backend)

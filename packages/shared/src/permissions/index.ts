@@ -9,6 +9,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   student: [
     'lms:read',
     'examination:read',
+    'examination:write',
     'coding:read',
     'coding:submit',
     'ide:access',

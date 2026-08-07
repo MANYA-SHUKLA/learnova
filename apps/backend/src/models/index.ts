@@ -287,3 +287,48 @@ export {
   type QuizAuditEvent,
   QUIZ_AUDIT_EVENTS,
 } from './quiz-audit-log.model.js';
+export {
+  ExamModel,
+  type ExamDocument,
+  EXAM_TYPES,
+  EXAM_STATUSES,
+  EXAM_VISIBILITIES,
+  PROCTORING_MODES,
+  SECURE_BROWSER_POLICIES,
+} from './exam.model.js';
+export {
+  ExamSectionModel,
+  type ExamSectionDocument,
+} from './exam-section.model.js';
+export {
+  ExamSeatingModel,
+  type ExamSeatingDocument,
+} from './exam-seating.model.js';
+export {
+  ExamAttemptModel,
+  type ExamAttemptDocument,
+  EXAM_ATTEMPT_STATUSES,
+} from './exam-attempt.model.js';
+export {
+  ExamAnswerModel,
+  type ExamAnswerDocument,
+} from './exam-answer.model.js';
+export {
+  ExamResultModel,
+  type ExamResultDocument,
+} from './exam-result.model.js';
+export {
+  ExamProctorSessionModel,
+  type ExamProctorSessionDocument,
+} from './exam-proctor-session.model.js';
+export {
+  ExamProctorEventModel,
+  type ExamProctorEventDocument,
+  PROCTOR_EVENT_TYPES,
+} from './exam-proctor-event.model.js';
+export {
+  ExamAuditLogModel,
+  type ExamAuditLogDocument,
+  type ExamAuditEvent,
+  EXAM_AUDIT_EVENTS,
+} from './exam-audit-log.model.js';

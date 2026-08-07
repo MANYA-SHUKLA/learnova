@@ -32,6 +32,7 @@ import {
   FolderKanban,
   ListChecks,
   Library,
+  ShieldCheck,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -69,6 +70,8 @@ type SidebarItemId =
   | 'quizzes'
   | 'questionBank'
   | 'quizResults'
+  | 'examinations'
+  | 'proctoring'
   | 'myTeam'
   | 'bookmarks'
   | 'notes'
@@ -126,6 +129,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'projects', href: APP_ROUTES.INSTITUTION_PROJECTS, icon: FolderKanban },
       { id: 'quizzes', href: APP_ROUTES.INSTITUTION_QUIZZES, icon: ListChecks },
       { id: 'questionBank', href: APP_ROUTES.INSTITUTION_QUESTION_BANK, icon: Library },
+      { id: 'examinations', href: APP_ROUTES.INSTITUTION_EXAMINATIONS, icon: ShieldCheck },
     ],
   },
   {
@@ -147,6 +151,8 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'projects', href: APP_ROUTES.FACULTY_PROJECTS, icon: FolderKanban },
       { id: 'quizzes', href: APP_ROUTES.FACULTY_QUIZZES, icon: ListChecks },
       { id: 'questionBank', href: APP_ROUTES.FACULTY_QUESTION_BANK, icon: Library },
+      { id: 'examinations', href: APP_ROUTES.FACULTY_EXAMINATIONS, icon: ShieldCheck },
+      { id: 'proctoring', href: APP_ROUTES.FACULTY_PROCTORING, icon: Shield },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
@@ -167,6 +173,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'projects', href: APP_ROUTES.STUDENT_PROJECTS, icon: FolderKanban },
       { id: 'quizzes', href: APP_ROUTES.STUDENT_QUIZZES, icon: ListChecks },
       { id: 'quizResults', href: APP_ROUTES.STUDENT_QUIZ_RESULTS, icon: ClipboardCheck },
+      { id: 'examinations', href: APP_ROUTES.STUDENT_EXAMINATIONS, icon: ShieldCheck },
       { id: 'myTeam', href: STUDENT_MY_TEAM, icon: UsersRound },
       { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },
       { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },

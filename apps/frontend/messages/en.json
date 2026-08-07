@@ -599,6 +599,8 @@
         "quizzes": "Quizzes",
         "questionBank": "Question bank",
         "quizResults": "Quiz results",
+        "examinations": "Examinations",
+        "proctoring": "Proctoring",
         "myTeam": "My team",
         "bookmarks": "Bookmarks",
         "notes": "Notes",
@@ -1341,6 +1343,26 @@
         "emptyQuestionsDescription": "Add questions to your banks.",
         "error": "Unable to load question bank."
       },
+      "examinations": {
+        "eyebrow": "Enterprise",
+        "title": "Examinations",
+        "description": "Scheduled proctored exams, seating, and secure browser policies.",
+        "stats": {
+          "total": "Total exams",
+          "scheduled": "Scheduled",
+          "attempts": "Attempts",
+          "avgScore": "Average score",
+          "passRate": "Pass rate"
+        },
+        "listTitle": "Exam directory",
+        "listDescription": "Manage exam schedules, proctoring, and seating.",
+        "searchPlaceholder": "Search exams…",
+        "search": "Search",
+        "publish": "Publish",
+        "error": "Unable to load examinations.",
+        "emptyTitle": "No examinations yet",
+        "emptyDescription": "Schedule proctored exams for enrolled courses."
+      },
       "courseBuilder": {
         "title": "Course Builder",
         "openBuilder": "Open Builder",
@@ -1700,8 +1722,33 @@
         "marks": "marks",
         "emptyTitle": "No questions yet",
         "emptyDescription": "Add questions to your bank to use them in quizzes."
+      },
+      "examinations": {
+        "eyebrow": "Enterprise",
+        "title": "Examinations",
+        "description": "Schedule and monitor proctored exams.",
+        "proctoring": "Proctoring console",
+        "stats": {
+          "scheduled": "Scheduled",
+          "inProgress": "In progress",
+          "attempts": "Attempts",
+          "violations": "Violation rate"
+        },
+        "emptyTitle": "No examinations",
+        "emptyDescription": "Published exams will appear here."
+      },
+      "proctoring": {
+        "eyebrow": "Proctoring",
+        "title": "Live proctoring",
+        "description": "Monitor active exam sessions and integrity events.",
+        "activeTitle": "Active exams",
+        "activeDescription": "Exams currently in progress.",
+        "noActive": "No exams in progress.",
+        "secureBrowser": "Secure browser",
+        "monitor": "Monitor"
       }
     },
+    "studentHome": {
       "roleLabel": "Student",
       "title": "Student Dashboard",
       "preparingLine": "Your learning workspace is being prepared.",
@@ -2003,6 +2050,33 @@
         "points": "points",
         "emptyTitle": "No results yet",
         "emptyDescription": "Complete a quiz to see your results here."
+      },
+      "examinations": {
+        "eyebrow": "Learning",
+        "title": "Examinations",
+        "description": "Scheduled proctored exams for your enrolled courses.",
+        "stats": {
+          "upcoming": "Upcoming",
+          "checkedIn": "Checked in",
+          "completed": "Completed",
+          "avgScore": "Average score"
+        },
+        "open": "Open exam",
+        "emptyTitle": "No examinations scheduled",
+        "emptyDescription": "Published exams will appear here before the start time."
+      },
+      "examDetail": {
+        "eyebrow": "Exam",
+        "minutes": "min",
+        "instructions": "Instructions",
+        "secureBrowser": "Secure browser required",
+        "secureBrowserDescription": "This exam requires secure browser mode. Copy/paste, new tabs, and right-click may be blocked.",
+        "checkIn": "Check in",
+        "startExam": "Start exam",
+        "submitExam": "Submit exam",
+        "submittedTitle": "Exam submitted",
+        "submittedDescription": "Your answers have been recorded. Results may be released after the exam window closes.",
+        "error": "Unable to load exam."
       }
     }
   },
