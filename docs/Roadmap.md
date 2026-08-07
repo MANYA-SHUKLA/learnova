@@ -171,6 +171,7 @@ These are **next steps**, not open Step 7 work:
 | --- | --- |
 | **7.5** | Course builder UI · modules/lessons CRUD · content import/export |
 | **8** | Enrollments (approve / auto / waitlist / deadline) |
+| **8.25** | Enrollment integration checkpoint |
 | **8.5** | Progress tracking UI (per lesson) |
 | **14** | Richer analytics (completion, enrollments, faculty load) |
 
@@ -275,12 +276,79 @@ CRUD · Permissions · Publishing · Archive · Duplicate · Search · Filters �
 
 ---
 
+## Step 8.25 — Enrollment Integration Checkpoint
+
+**Status:** 🔄 Required before Progress Tracking  
+**Goal:** Prove enrollment rules, roles, dashboards, and audit/events are stable. Enrollments become the source of truth for Step **8.5** learner journeys.
+
+**Hard rule:** Do not start Progress Tracking until this checklist passes.
+
+### Course enrollment rules
+
+Verify each course `enrollmentMode` + capacity settings:
+
+| Mode / rule | Expected behavior |
+| --- | --- |
+| **Open** | Self-enroll creates an active enrollment |
+| **Approval** | Self-enroll creates pending → faculty/admin approve or reject |
+| **Invite only** | Self-enroll blocked unless invite path |
+| **Closed** | Self-enroll rejected |
+| **Waitlist** | At `maxStudents` with `waitlistEnabled` → join waitlist; withdraw frees a seat → auto-promote |
+| **Deadline** | Past `enrollmentDeadline` → enroll rejected |
+
+### Role-based flows
+
+| Role | Verify |
+| --- | --- |
+| **Institution Admin** | Full directory · manual enroll · bulk · import/export · approve/reject · withdraw/complete |
+| **Faculty** | Only assigned/coordinated courses · pending queue · approve/reject |
+| **Student** | Own enrollments only · self-enroll · withdraw before deadline · waitlist join/leave |
+
+### Dashboards & counts
+
+After enrollments, approvals, withdrawals, and completions:
+
+- [ ] Institution enrollment stats match list totals (pending / active / completed / withdrawn / waitlisted)
+- [ ] Faculty pending count matches actionable requests
+- [ ] Student “my enrollments” reflects status changes immediately
+- [ ] Course capacity / waitlist position stays consistent after promote
+
+### Audit & domain events
+
+For every lifecycle action, confirm audit log + domain event:
+
+| Action | Expect |
+| --- | --- |
+| Create / self-enroll | `enrollment.created` (+ `course.enrolled` when active) |
+| Approve | `enrollment.approved` (+ `course.enrolled`) |
+| Reject | `enrollment.rejected` |
+| Withdraw | `enrollment.withdrawn` (+ waitlist promote if applicable) |
+| Complete | `enrollment.completed` |
+| Import / export | `enrollment.imported` / `enrollment.exported` |
+
+### Demo checklist (manual)
+
+1. Seed auth + enrollments (`seed:auth`, `seed:enrollments`)
+2. Log in as admin · faculty · student demo users
+3. Walk open / approval / closed / waitlist courses end-to-end
+4. Spot-check audit timeline on enrollment detail
+5. Confirm no progress/gradebook UI was introduced (out of scope)
+
+### Exit criteria
+
+✓ Rules behave correctly · ✓ Roles scoped correctly · ✓ Dashboards consistent · ✓ Audit + events present  
+
+Then proceed to **Step 8.5 — Progress Tracking**.
+
+---
+
 ## Later LMS & platform steps
 
 | Step | Scope | State |
 | --- | --- | --- |
 | **7.5** | Course Content Builder (modules / lessons / resources) | ✅ Complete |
 | **8** | Enrollments | ✅ Complete |
+| **8.25** | Enrollment Integration Checkpoint | 🔄 Required before 8.5 |
 | **8.5** | Progress tracking | Planned |
 | 9 | Practice Labs / Coding | Planned |
 | 10 | Projects / Ideation | Planned |
@@ -291,6 +359,8 @@ CRUD · Permissions · Publishing · Archive · Duplicate · Search · Filters �
 | 15 | AI content generation | Planned |
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
+
+**Boundary:** Enrollments (Step 8) + checkpoint (8.25) before Progress Tracking (8.5).
 
 ---
 
