@@ -5,7 +5,7 @@
  * Tailwind is imported by the app entry (`apps/frontend/src/styles/globals.css`).
  */
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   /* Brand — #2563EB primary, #0F172A secondary, #7C3AED accent */
@@ -228,6 +228,28 @@
 
   ::selection {
     background: hsl(var(--primary) / 0.18);
+  }
+
+  /* Themed scrollbars where supported */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.35);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 

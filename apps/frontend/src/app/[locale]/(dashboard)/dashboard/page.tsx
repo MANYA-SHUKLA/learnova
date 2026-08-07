@@ -502,8 +502,11 @@ export default function DashboardPage() {
                         borderRadius: 12,
                         border: '1px solid hsl(var(--border))',
                         background: 'hsl(var(--popover))',
+                        color: 'hsl(var(--popover-foreground))',
                         boxShadow: 'var(--shadow-md)',
                       }}
+                      labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
                     />
                     <Bar dataKey="count" radius={[8, 8, 0, 0]}>
                       {chartData.map((_, i) => (
