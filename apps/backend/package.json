@@ -13,6 +13,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "clean": "rimraf dist",
     "seed:auth": "tsx --env-file=.env src/seeds/run-auth-seed.ts",
+    "seed:students": "tsx --env-file=.env src/seeds/run-student-seed.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
