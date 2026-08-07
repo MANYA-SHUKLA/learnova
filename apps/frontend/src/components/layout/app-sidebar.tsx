@@ -26,6 +26,7 @@ import {
   Users,
   UserRound,
   ClipboardList,
+  ClipboardCheck,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -57,6 +58,7 @@ type SidebarItemId =
   | 'courses'
   | 'enrollments'
   | 'progress'
+  | 'assignments'
   | 'bookmarks'
   | 'notes'
   | 'activity'
@@ -108,6 +110,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'courses', href: APP_ROUTES.INSTITUTION_COURSES, icon: BookOpen },
       { id: 'enrollments', href: APP_ROUTES.INSTITUTION_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.INSTITUTION_PROGRESS, icon: BarChart3 },
+      { id: 'assignments', href: APP_ROUTES.INSTITUTION_ASSIGNMENTS, icon: ClipboardCheck },
     ],
   },
   {
@@ -124,6 +127,7 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'dashboard', href: APP_ROUTES.FACULTY_DASHBOARD, icon: LayoutDashboard, exact: true },
       { id: 'enrollments', href: APP_ROUTES.FACULTY_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.FACULTY_PROGRESS, icon: BarChart3 },
+      { id: 'assignments', href: APP_ROUTES.FACULTY_ASSIGNMENTS, icon: ClipboardCheck },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
@@ -139,6 +143,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'dashboard', href: APP_ROUTES.STUDENT_DASHBOARD, icon: LayoutDashboard, exact: true },
       { id: 'enrollments', href: APP_ROUTES.STUDENT_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.STUDENT_PROGRESS, icon: BarChart3 },
+      { id: 'assignments', href: APP_ROUTES.STUDENT_ASSIGNMENTS, icon: ClipboardCheck },
       { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },
       { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },
       { id: 'activity', href: APP_ROUTES.STUDENT_ACTIVITY, icon: Activity },

@@ -84,6 +84,7 @@
     "courses": "Courses",
     "enrollments": "Enrollments",
     "progress": "Progress",
+    "assignments": "Assignments",
     "bookmarks": "Bookmarks",
     "notes": "Notes",
     "activity": "Activity",
@@ -1105,6 +1106,34 @@
         "studentsCount": "{count} learners",
         "noData": "No analytics data yet."
       },
+      "assignments": {
+        "eyebrow": "Assessment",
+        "title": "Assignments",
+        "description": "Institution assignment statistics, submission rates, and department comparison.",
+        "stats": {
+          "total": "Assignments",
+          "published": "Published",
+          "submissionRate": "Submission rate",
+          "avgGrade": "Average grade"
+        },
+        "listTitle": "Assignment directory",
+        "listDescription": "Search, filter, publish, close, or archive assignments.",
+        "searchPlaceholder": "Search assignments…",
+        "search": "Search",
+        "filters": { "all": "All" },
+        "due": "Due",
+        "marks": "marks",
+        "publish": "Publish",
+        "close": "Close",
+        "archive": "Archive",
+        "previous": "Previous",
+        "next": "Next",
+        "error": "Unable to load assignments.",
+        "emptyTitle": "No assignments yet",
+        "emptyDescription": "Faculty can create assignments for enrolled courses.",
+        "departmentComparison": "Department comparison",
+        "facultyLink": "Open faculty assignments workspace"
+      },
       "courseBuilder": {
         "title": "Course Builder",
         "openBuilder": "Open Builder",
@@ -1330,6 +1359,35 @@
         "leastActiveDescription": "Students who may need a nudge.",
         "noLearners": "No learner data yet.",
         "neverAccessed": "Never accessed"
+      },
+      "assignments": {
+        "eyebrow": "Assessment",
+        "title": "Assignments",
+        "description": "Create, publish, and grade course assignments.",
+        "stats": {
+          "created": "Created",
+          "pending": "Pending reviews",
+          "late": "Late submissions",
+          "avgGrade": "Average grade",
+          "submissionRate": "Submission rate"
+        },
+        "listTitle": "Your assignments",
+        "listDescription": "Assignments you created or manage.",
+        "searchPlaceholder": "Search assignments…",
+        "search": "Search",
+        "due": "Due",
+        "publish": "Publish",
+        "error": "Unable to load assignments.",
+        "emptyTitle": "No assignments yet",
+        "emptyDescription": "Create an assignment for one of your courses.",
+        "pendingTitle": "Pending reviews",
+        "pendingDescription": "Grade submitted work.",
+        "noPending": "No pending submissions.",
+        "marksPlaceholder": "Marks",
+        "grade": "Grade",
+        "lateTitle": "Late submissions",
+        "noLate": "No late submissions.",
+        "late": "Late"
       }
     },
     "studentHome": {
