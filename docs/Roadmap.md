@@ -15,7 +15,7 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | 5 | Faculty Management | ✅ Complete |
 | 6 | Student Management | ✅ Complete |
 | **6.5** | **System Integration & Demo** | 🔄 In progress |
-| 7 | Course Management (LMS) | 🔒 After 6.5 |
+| 7 | Course Management (LMS) | 🔄 Foundation started |
 
 **Hard rule:** ERP core (1–6) + Integration Demo (6.5) before LMS Course Management.
 

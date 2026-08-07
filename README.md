@@ -17,7 +17,7 @@ LMS · University ERP · Online Examination · Coding Platform · Cloud IDE · A
 | 5 | Faculty Management | ✅ Complete |
 | 6 | Student Management | ✅ Complete |
 | **6.5** | **System Integration & Demo** | 🔄 In progress |
-| 7 | Course Management (LMS) | 🔒 After 6.5 |
+| 7 | Course Management (LMS) | 🔄 Foundation started |
 
 **Now:** Verify the connected ERP core — auth roles, permissions, search, import/export, dashboards, responsive + dark mode, audit logs.  
 **Next (after 6.5):** Enterprise Course Management (modules → lessons → content → progress → certificates).

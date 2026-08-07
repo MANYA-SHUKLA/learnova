@@ -1,121 +1,117 @@
-/**
- * Course Controller - HTTP handlers for course endpoints
- */
-
-import type { Request, Response } from 'express';
-import { courseService } from '../../services/course/course.service.js';
-import {
-  createCourseSchema,
-  updateCourseSchema,
-  listCoursesSchema,
+import type { NextFunction, Request, Response } from 'express';
+import type {
+  CreateCourseBody,
+  ListCoursesQuery,
+  UpdateCourseBody,
 } from '@learnova/validation';
-import { sendSuccess, sendError } from '../../utils/response/index.js';
-import { ValidationError } from '../../utils/errors/index.js';
+import { UnauthorizedError } from '../../utils/errors/index.js';
+import { sendCreated, sendSuccess } from '../../utils/response/index.js';
+import { courseService } from '../../services/course/course.service.js';
 
-export async function getCourse(req: Request, res: Response): Promise<void> {
+function requireUser(req: Request) {
+  if (!req.user) throw new UnauthorizedError();
+  if (!req.user.institutionId) throw new UnauthorizedError('Institution context required');
+  return {
+    userId: req.user.sub,
+    institutionId: req.user.institutionId,
+  };
+}
+
+function paramId(req: Request): string {
+  const id = req.params.id;
+  if (typeof id !== 'string' || !id) {
+    throw new UnauthorizedError('Invalid course id');
+  }
+  return id;
+}
+
+export async function getCourse(req: Request, res: Response, next: NextFunction) {
   try {
-    const course = await courseService.getCourse(req.params.id);
+    requireUser(req);
+    const course = await courseService.getCourse(paramId(req));
     sendSuccess(res, course, { requestId: req.requestId });
   } catch (err) {
-    sendError(res, err, { requestId: req.requestId });
+    next(err);
   }
 }
 
-export async function listCourses(req: Request, res: Response): Promise<void> {
+export async function listCourses(req: Request, res: Response, next: NextFunction) {
   try {
-    const validated = listCoursesSchema.parse(req.query);
-    const institutionId = req.user?.institutionId;
-    if (!institutionId) {
-      throw new ValidationError('Institution ID is required');
-    }
-    
-    const result = await courseService.listCourses(validated, institutionId);
-    sendSuccess(res, result.items, { requestId: req.requestId, meta: result.meta });
+    const { institutionId } = requireUser(req);
+    const result = await courseService.listCourses(
+      req.query as unknown as ListCoursesQuery,
+      institutionId,
+    );
+    sendSuccess(res, { items: result.items }, { meta: result.meta, requestId: req.requestId });
   } catch (err) {
-    sendError(res, err, { requestId: req.requestId });
+    next(err);
   }
 }
 
-export async function createCourse(req: Request, res: Response): Promise<void> {
+export async function createCourse(req: Request, res: Response, next: NextFunction) {
   try {
-    const validated = createCourseSchema.parse(req.body);
-    const institutionId = req.user?.institutionId;
-    const userId = req.user?.sub;
-    
-    if (!institutionId || !userId) {
-      throw new ValidationError('Institution ID and User ID are required');
-    }
-    
-    const course = await courseService.createCourse(validated, institutionId, userId);
-    sendSuccess(res, course, { status: 201, requestId: req.requestId });
+    const { institutionId, userId } = requireUser(req);
+    const course = await courseService.createCourse(
+      req.body as CreateCourseBody,
+      institutionId,
+      userId,
+    );
+    sendCreated(res, course, { requestId: req.requestId });
   } catch (err) {
-    sendError(res, err, { requestId: req.requestId });
+    next(err);
   }
 }
 
-export async function updateCourse(req: Request, res: Response): Promise<void> {
+export async function updateCourse(req: Request, res: Response, next: NextFunction) {
   try {
-    const validated = updateCourseSchema.parse(req.body);
-    const userId = req.user?.sub;
-    
-    if (!userId) {
-      throw new ValidationError('User ID is required');
-    }
-    
-    const course = await courseService.updateCourse(req.params.id, validated, userId);
+    const { userId } = requireUser(req);
+    const course = await courseService.updateCourse(
+      paramId(req),
+      req.body as UpdateCourseBody,
+      userId,
+    );
     sendSuccess(res, course, { requestId: req.requestId });
   } catch (err) {
-    sendError(res, err, { requestId: req.requestId });
+    next(err);
   }
 }
 
-export async function deleteCourse(req: Request, res: Response): Promise<void> {
+export async function deleteCourse(req: Request, res: Response, next: NextFunction) {
   try {
-    await courseService.deleteCourse(req.params.id);
-    sendSuccess(res, { message: 'Course deleted successfully' }, { requestId: req.requestId });
+    requireUser(req);
+    await courseService.deleteCourse(paramId(req));
+    sendSuccess(res, { deleted: true }, { requestId: req.requestId });
   } catch (err) {
-    sendError(res, err, { requestId: req.requestId });
+    next(err);
   }
 }
 
-export async function publishCourse(req: Request, res: Response): Promise<void> {
+export async function publishCourse(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.sub;
-    if (!userId) {
-      throw new ValidationError('User ID is required');
-    }
-    
-    const course = await courseService.publishCourse(req.params.id, userId);
+    const { userId } = requireUser(req);
+    const course = await courseService.publishCourse(paramId(req), userId);
     sendSuccess(res, course, { requestId: req.requestId });
   } catch (err) {
-    sendError(res, err, { requestId: req.requestId });
+    next(err);
   }
 }
 
-export async function archiveCourse(req: Request, res: Response): Promise<void> {
+export async function archiveCourse(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.sub;
-    if (!userId) {
-      throw new ValidationError('User ID is required');
-    }
-    
-    const course = await courseService.archiveCourse(req.params.id, userId);
+    const { userId } = requireUser(req);
+    const course = await courseService.archiveCourse(paramId(req), userId);
     sendSuccess(res, course, { requestId: req.requestId });
   } catch (err) {
-    sendError(res, err, { requestId: req.requestId });
+    next(err);
   }
 }
 
-export async function getCourseStats(req: Request, res: Response): Promise<void> {
+export async function getCourseStats(req: Request, res: Response, next: NextFunction) {
   try {
-    const institutionId = req.user?.institutionId;
-    if (!institutionId) {
-      throw new ValidationError('Institution ID is required');
-    }
-    
+    const { institutionId } = requireUser(req);
     const stats = await courseService.getCourseStats(institutionId);
     sendSuccess(res, stats, { requestId: req.requestId });
   } catch (err) {
-    sendError(res, err, { requestId: req.requestId });
+    next(err);
   }
 }

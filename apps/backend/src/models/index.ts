@@ -46,3 +46,11 @@ export {
   type StudentAuditLogDocument,
   type StudentAuditEvent,
 } from './student-audit-log.model.js';
+export { CourseModel, type CourseDocument } from './course.model.js';
+export { CourseModuleModel, type CourseModuleDocument } from './course-module.model.js';
+export { CourseLessonModel, type CourseLessonDocument } from './course-lesson.model.js';
+export { CourseProgressModel, type CourseProgressDocument } from './course-progress.model.js';
+export {
+  CourseAuditLogModel,
+  type CourseAuditLogDocument,
+} from './course-audit-log.model.js';

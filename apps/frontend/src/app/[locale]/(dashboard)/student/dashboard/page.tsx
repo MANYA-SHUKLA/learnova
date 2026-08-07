@@ -5,12 +5,10 @@ import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } fro
 import { UserRound, BookOpen, GraduationCap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/lib/i18n/routing';
-import { useAuth } from '@/providers/auth-provider';
 import { RoleWelcome } from '@/components/shared/role-welcome';
 
 export default function StudentDashboardPage() {
   const t = useTranslations('dashboard.studentHome');
-  const { user } = useAuth();
 
   return (
     <div className="space-y-6">
