@@ -105,22 +105,22 @@ export const projectApi = {
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
 
-  get: (id: string) => apiClient.get<ProjectExtended>(`${base}/${id}`),
+  get: (id: string) => apiClient.get<Project>(`${base}/${id}`),
 
-  create: (body: ProjectCreateBody) => apiClient.post<ProjectExtended>(base, body),
+  create: (body: ProjectCreateBody) => apiClient.post<Project>(base, body),
 
   update: (id: string, body: ProjectUpdateBody) =>
-    apiClient.patch<ProjectExtended>(`${base}/${id}`, body),
+    apiClient.patch<Project>(`${base}/${id}`, body),
 
   remove: (id: string) => apiClient.delete<{ id: string }>(`${base}/${id}`),
 
-  publish: (id: string) => apiClient.post<ProjectExtended>(`${base}/${id}/publish`, {}),
+  publish: (id: string) => apiClient.post<Project>(`${base}/${id}/publish`, {}),
 
-  archive: (id: string) => apiClient.post<ProjectExtended>(`${base}/${id}/archive`, {}),
+  archive: (id: string) => apiClient.post<Project>(`${base}/${id}/archive`, {}),
 
-  close: (id: string) => apiClient.post<ProjectExtended>(`${base}/${id}/close`, {}),
+  close: (id: string) => apiClient.post<Project>(`${base}/${id}/close`, {}),
 
-  duplicate: (id: string) => apiClient.post<ProjectExtended>(`${base}/${id}/duplicate`, {}),
+  duplicate: (id: string) => apiClient.post<Project>(`${base}/${id}/duplicate`, {}),
 
   bulkPublish: (body: BulkIdsBody) =>
     apiClient.post<BulkResult>(`${base}/bulk/publish`, body),
@@ -255,7 +255,7 @@ export const projectApi = {
     apiClient.post<ProjectComment>(`${base}/comments/${id}/resolve`, {}),
 
   facultyDashboard: () =>
-    apiClient.get<ProjectFacultyDashboardExtended>(`${base}/dashboard/faculty`),
+    apiClient.get<ProjectFacultyDashboard>(`${base}/dashboard/faculty`),
 
   studentDashboard: () =>
     apiClient.get<ProjectStudentDashboardExtended>(`${base}/dashboard/student`),

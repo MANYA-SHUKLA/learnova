@@ -578,13 +578,18 @@ export class ProjectService {
 
     const updates: Record<string, unknown> = { updatedBy: oid(actor.userId) };
 
-    for (const key of [
+    const scalarFields = [
       'title',
       'description',
       'instructions',
+      'objective',
+      'problemStatement',
       'projectType',
-      'teamSizeMin',
-      'teamSizeMax',
+      'difficulty',
+      'allowIndividual',
+      'allowTeams',
+      'minimumTeamSize',
+      'maximumTeamSize',
       'allowSelfTeamFormation',
       'allowPeerReview',
       'peerReviewsRequired',
@@ -594,12 +599,14 @@ export class ProjectService {
       'totalMarks',
       'passingMarks',
       'weightage',
-      'allowLateSubmission',
-      'latePenaltyPercent',
+      'lateSubmissionAllowed',
+      'latePenalty',
       'allowResubmission',
       'maxAttempts',
-      'estimatedMinutes',
-    ] as const) {
+      'estimatedHours',
+    ] as const;
+
+    for (const key of scalarFields) {
       if (input[key] !== undefined) updates[key] = input[key];
     }
 
@@ -608,6 +615,25 @@ export class ProjectService {
     }
     if (input.lessonId !== undefined) {
       updates.lessonId = input.lessonId ? oid(input.lessonId) : null;
+    }
+    if (input.categoryId !== undefined) {
+      updates.categoryId = input.categoryId ? oid(input.categoryId) : null;
+    }
+    if (input.tags !== undefined) {
+      updates.tags = input.tags.map((tagId) => oid(tagId));
+    }
+    if (input.learningOutcomes !== undefined) {
+      updates.learningOutcomes = input.learningOutcomes;
+    }
+    if (input.resources !== undefined) {
+      updates.resources = input.resources;
+    }
+    if (input.assignedFacultyIds !== undefined) {
+      updates.assignedFacultyIds = input.assignedFacultyIds.map((facultyId) => oid(facultyId));
+    }
+    if (input.startDate !== undefined) updates.startDate = parseDate(input.startDate);
+    if (input.submissionDeadline !== undefined) {
+      updates.submissionDeadline = parseDate(input.submissionDeadline);
     }
     if (input.publishDate !== undefined) updates.publishDate = parseDate(input.publishDate);
     if (input.dueDate !== undefined) updates.dueDate = parseDate(input.dueDate);
@@ -1400,7 +1426,7 @@ export class ProjectService {
       status: project.status as ProjectStatus,
       dueDate: project.dueDate ?? null,
       closeDate: project.closeDate ?? null,
-      allowLateSubmission: project.lateSubmissionAllowed ?? project.allowLateSubmission ?? true,
+      allowLateSubmission: project.lateSubmissionAllowed,
     });
     if (!window.allowed) {
       throw new ForbiddenError(window.reason ?? 'Submission not allowed');
@@ -1426,7 +1452,6 @@ export class ProjectService {
       status: resolveSubmissionStatus(window.late),
       submittedAt: new Date(),
       attemptNumber: attempt.nextAttempt,
-      submittedBy: oid(actor.userId),
       updatedBy: oid(actor.userId),
     };
 
@@ -1438,7 +1463,10 @@ export class ProjectService {
     );
 
     const doc = draft
-      ? await projectRepository.updateSubmissionById(institutionId, String(draft._id), payload)
+      ? await projectRepository.updateSubmissionById(institutionId, String(draft._id), {
+          ...payload,
+          submittedBy: oid(actor.userId),
+        })
       : await projectRepository.createSubmission({
           institutionId: oid(institutionId),
           projectId: project._id,
@@ -1705,13 +1733,6 @@ export class ProjectService {
     });
 
     eventBus.emit(EVENTS.PROJECT_REVIEW_SUBMITTED, {
-      reviewId: id,
-      projectId: String(doc.projectId),
-      submissionId: String(doc.submissionId),
-      institutionId,
-    });
-
-    eventBus.emit('review.completed', {
       reviewId: id,
       projectId: String(doc.projectId),
       submissionId: String(doc.submissionId),
