@@ -78,6 +78,7 @@
     "faculty": "Faculty",
     "students": "Students",
     "courses": "Courses",
+    "enrollments": "Enrollments",
     "overview": "Overview",
     "profile": "Profile",
     "settings": "Settings",
@@ -560,6 +561,7 @@
         "faculty": "Faculty",
         "students": "Students",
         "courses": "Courses",
+        "enrollments": "Enrollments",
         "sessions": "Sessions"
       },
       "comingSoon": "Soon"
@@ -1030,6 +1032,43 @@
         "emptyDescription": "Add your first course or import a CSV to populate the catalog.",
         "loadError": "Unable to load courses."
       },
+      "enrollments": {
+        "eyebrow": "Learning",
+        "title": "Enrollments",
+        "description": "Manage course enrollments, approvals, and student participation tracking.",
+        "addEnrollment": "Add enrollment",
+        "directory": "Directory",
+        "directoryDescription": "Search, filter, and run bulk actions on enrollments.",
+        "searchPlaceholder": "Search enrollment number, student ID, course ID…",
+        "stats": {
+          "total": "Total",
+          "active": "Active",
+          "pending": "Pending",
+          "completed": "Completed",
+          "withdrawn": "Withdrawn",
+          "waitlisted": "Waitlisted"
+        },
+        "import": {
+          "eyebrow": "Enrollments",
+          "title": "Import CSV",
+          "description": "Upload, preview, validate, and import enrollments. Failed imports are rolled back.",
+          "uploadTitle": "CSV upload",
+          "uploadDescription": "Required columns: studentId, courseId.",
+          "confirmImport": "Confirm import",
+          "importing": "Importing…",
+          "previewFailed": "Preview failed",
+          "importFailed": "Import failed and was rolled back"
+        },
+        "export": {
+          "eyebrow": "Enrollments",
+          "title": "Export",
+          "description": "Download enrollment records as CSV, Excel-compatible, or PDF.",
+          "formatTitle": "Export formats",
+          "formatDescription": "Exports are audited as enrollment.export."
+        },
+        "emptyTitle": "No enrollments yet",
+        "emptyDescription": "Add your first enrollment or import a CSV to populate the directory."
+      },
       "courseBuilder": {
         "title": "Course Builder",
         "openBuilder": "Open Builder",
@@ -1221,6 +1260,18 @@
         "projects": "Projects"
       }
     },
+    "faculty": {
+      "enrollments": {
+        "eyebrow": "Learning",
+        "title": "Enrollments",
+        "description": "View and manage course enrollments for your assigned courses.",
+        "directory": "Enrollment requests",
+        "directoryDescription": "Approve or reject pending enrollment requests.",
+        "searchPlaceholder": "Search student, course, enrollment number…",
+        "emptyTitle": "No enrollments yet",
+        "emptyDescription": "Course enrollments will appear here once students enroll."
+      }
+    },
     "studentHome": {
       "roleLabel": "Student",
       "title": "Student Dashboard",
@@ -1235,6 +1286,21 @@
         "exams": "Exams",
         "practiceLabs": "Practice Labs",
         "projects": "Projects"
+      }
+    },
+    "student": {
+      "enrollments": {
+        "eyebrow": "Learning",
+        "title": "My Enrollments",
+        "description": "View your course enrollments and request new courses.",
+        "selfEnrollTitle": "Enroll in a course",
+        "selfEnrollDescription": "Enter a course ID to request enrollment. Approval may be required.",
+        "myEnrollments": "My enrollments",
+        "myEnrollmentsDescription": "Your active and past course enrollments.",
+        "waitlist": "Waitlist",
+        "waitlistDescription": "Courses you are waiting to enroll in.",
+        "emptyTitle": "No enrollments yet",
+        "emptyDescription": "Use the form above to enroll in your first course."
       }
     }
   },

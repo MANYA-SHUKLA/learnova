@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { href: APP_ROUTES.INSTITUTION_FACULTY, labelKey: 'faculty' },
   { href: APP_ROUTES.INSTITUTION_STUDENTS, labelKey: 'students' },
   { href: APP_ROUTES.INSTITUTION_COURSES, labelKey: 'courses' },
+  { href: APP_ROUTES.INSTITUTION_ENROLLMENTS, labelKey: 'enrollments' },
   { href: APP_ROUTES.INSTITUTION_SETTINGS, labelKey: 'settings' },
 ] as const;
 

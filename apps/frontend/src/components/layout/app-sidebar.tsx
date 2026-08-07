@@ -21,6 +21,7 @@ import {
   Grid3X3,
   Users,
   UserRound,
+  ClipboardList,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -50,6 +51,7 @@ type SidebarItemId =
   | 'faculty'
   | 'students'
   | 'courses'
+  | 'enrollments'
   | 'sessions'
   | 'profile';
 
@@ -96,6 +98,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'faculty', href: APP_ROUTES.INSTITUTION_FACULTY, icon: UserRound },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'courses', href: APP_ROUTES.INSTITUTION_COURSES, icon: BookOpen },
+      { id: 'enrollments', href: APP_ROUTES.INSTITUTION_ENROLLMENTS, icon: ClipboardList },
     ],
   },
   {
@@ -110,6 +113,7 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
     id: 'facultyHome',
     items: [
       { id: 'dashboard', href: APP_ROUTES.FACULTY_DASHBOARD, icon: LayoutDashboard, exact: true },
+      { id: 'enrollments', href: APP_ROUTES.FACULTY_ENROLLMENTS, icon: ClipboardList },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
@@ -123,6 +127,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
     id: 'studentHome',
     items: [
       { id: 'dashboard', href: APP_ROUTES.STUDENT_DASHBOARD, icon: LayoutDashboard, exact: true },
+      { id: 'enrollments', href: APP_ROUTES.STUDENT_ENROLLMENTS, icon: ClipboardList },
       { id: 'profile', href: APP_ROUTES.STUDENT_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
     ],

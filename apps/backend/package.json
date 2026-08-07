@@ -16,6 +16,7 @@
     "seed:students": "tsx --env-file=.env src/seeds/run-student-seed.ts",
     "seed:courses": "tsx --env-file=.env src/seeds/run-course-seed.ts",
     "seed:course-builder": "tsx --env-file=.env src/seeds/run-course-builder-seed.ts",
+    "seed:enrollments": "tsx --env-file=.env src/seeds/run-enrollment-seed.ts",
     "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",
     "test": "vitest run",
     "test:watch": "vitest"

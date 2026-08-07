@@ -78,6 +78,7 @@
     "faculty": "संकाय",
     "students": "छात्र",
     "courses": "पाठ्यक्रम",
+    "enrollments": "नामांकन",
     "overview": "अवलोकन",
     "profile": "प्रोफ़ाइल",
     "settings": "सेटिंग्स",
@@ -560,6 +561,7 @@
         "faculty": "संकाय",
         "students": "छात्र",
         "courses": "पाठ्यक्रम",
+        "enrollments": "नामांकन",
         "sessions": "सत्र"
       },
       "comingSoon": "जल्द"
@@ -1030,6 +1032,43 @@
         "emptyDescription": "अपना पहला पाठ्यक्रम जोड़ें या कैटलॉग को पॉप्युलेट करने के लिए CSV आयात करें।",
         "loadError": "पाठ्यक्रम लोड करने में असमर्थ।"
       },
+      "enrollments": {
+        "eyebrow": "शिक्षण",
+        "title": "नामांकन",
+        "description": "पाठ्यक्रम नामांकन, अनुमोदन और छात्र भागीदारी ट्रैकिंग प्रबंधित करें।",
+        "addEnrollment": "नामांकन जोड़ें",
+        "directory": "निर्देशिका",
+        "directoryDescription": "नामांकन पर खोजें, फ़िल्टर करें और बल्क क्रियाएं चलाएं।",
+        "searchPlaceholder": "नामांकन संख्या, छात्र आईडी, पाठ्यक्रम आईडी खोजें…",
+        "stats": {
+          "total": "कुल",
+          "active": "सक्रिय",
+          "pending": "लंबित",
+          "completed": "पूर्ण",
+          "withdrawn": "वापस लिया गया",
+          "waitlisted": "प्रतीक्षा सूची में"
+        },
+        "import": {
+          "eyebrow": "नामांकन",
+          "title": "CSV आयात करें",
+          "description": "नामांकन अपलोड, पूर्वावलोकन, मान्य और आयात करें। असफल आयात को वापस रोल किया जाता है।",
+          "uploadTitle": "CSV अपलोड",
+          "uploadDescription": "आवश्यक कॉलम: studentId, courseId।",
+          "confirmImport": "आयात की पुष्टि करें",
+          "importing": "आयात कर रहे हैं…",
+          "previewFailed": "पूर्वावलोकन विफल",
+          "importFailed": "आयात विफल और वापस रोल किया गया"
+        },
+        "export": {
+          "eyebrow": "नामांकन",
+          "title": "निर्यात",
+          "description": "नामांकन रिकॉर्ड को CSV, Excel-संगत, या PDF के रूप में डाउनलोड करें।",
+          "formatTitle": "निर्यात प्रारूप",
+          "formatDescription": "निर्यात को enrollment.export के रूप में ऑडिट किया जाता है।"
+        },
+        "emptyTitle": "अभी कोई नामांकन नहीं",
+        "emptyDescription": "अपना पहला नामांकन जोड़ें या निर्देशिका भरने के लिए CSV आयात करें।"
+      },
       "courseBuilder": {
         "title": "पाठ्यक्रम बिल्डर",
         "openBuilder": "बिल्डर खोलें",
@@ -1221,6 +1260,18 @@
         "projects": "परियोजनाएँ"
       }
     },
+    "faculty": {
+      "enrollments": {
+        "eyebrow": "शिक्षण",
+        "title": "नामांकन",
+        "description": "अपने असाइन किए गए पाठ्यक्रमों के लिए पाठ्यक्रम नामांकन देखें और प्रबंधित करें।",
+        "directory": "नामांकन अनुरोध",
+        "directoryDescription": "लंबित नामांकन अनुरोधों को अनुमोदित या अस्वीकार करें।",
+        "searchPlaceholder": "छात्र, पाठ्यक्रम, नामांकन संख्या खोजें…",
+        "emptyTitle": "अभी कोई नामांकन नहीं",
+        "emptyDescription": "छात्रों के नामांकन के बाद पाठ्यक्रम नामांकन यहां दिखाई देंगे।"
+      }
+    },
     "studentHome": {
       "roleLabel": "छात्र",
       "title": "छात्र डैशबोर्ड",
@@ -1235,6 +1286,21 @@
         "exams": "परीक्षाएँ",
         "practiceLabs": "प्रैक्टिस लैब्स",
         "projects": "परियोजनाएँ"
+      }
+    },
+    "student": {
+      "enrollments": {
+        "eyebrow": "शिक्षण",
+        "title": "मेरे नामांकन",
+        "description": "अपने पाठ्यक्रम नामांकन देखें और नए पाठ्यक्रमों का अनुरोध करें।",
+        "selfEnrollTitle": "पाठ्यक्रम में नामांकन करें",
+        "selfEnrollDescription": "नामांकन का अनुरोध करने के लिए पाठ्यक्रम आईडी दर्ज करें। अनुमोदन की आवश्यकता हो सकती है।",
+        "myEnrollments": "मेरे नामांकन",
+        "myEnrollmentsDescription": "आपके सक्रिय और पिछले पाठ्यक्रम नामांकन।",
+        "waitlist": "प्रतीक्षा सूची",
+        "waitlistDescription": "पाठ्यक्रम जिनमें आप नामांकन के लिए प्रतीक्षा कर रहे हैं।",
+        "emptyTitle": "अभी कोई नामांकन नहीं",
+        "emptyDescription": "अपने पहले पाठ्यक्रम में नामांकन के लिए ऊपर दिए गए फॉर्म का उपयोग करें।"
       }
     }
   },
