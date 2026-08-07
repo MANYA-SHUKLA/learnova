@@ -79,6 +79,8 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
     allowPreview: String(initial?.allowPreview ?? true),
     maxStudents: String(initial?.maxStudents ?? 0),
     enrollmentMode: initial?.enrollmentMode ?? 'open',
+    enrollmentDeadline: initial?.enrollmentDeadline?.slice(0, 10) ?? '',
+    waitlistEnabled: String(initial?.waitlistEnabled ?? false),
     publishDate: initial?.publishDate?.slice(0, 10) ?? '',
     archiveDate: initial?.archiveDate?.slice(0, 10) ?? '',
     seoTitle: initial?.seoTitle ?? '',

@@ -91,6 +91,8 @@ const courseSchema = new Schema(
       enum: ['open', 'approval', 'invite', 'closed'],
       default: 'open',
     },
+    enrollmentDeadline: { type: Date, default: null },
+    waitlistEnabled: { type: Boolean, default: false },
     publishDate: { type: Date, default: null, index: true },
     archiveDate: { type: Date, default: null },
     seoTitle: { type: String, default: null },
