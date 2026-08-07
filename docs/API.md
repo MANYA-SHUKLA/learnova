@@ -1,78 +1,28 @@
-# Institution API
+# API Documentation (Swagger)
 
-Base: `/api/v1`  
-Auth: Bearer access token  
-Permissions: `institution:read` (GET), `institution:manage` (mutations)
+Interactive OpenAPI docs are served by the backend:
 
-All successful responses use the standard envelope `{ success, data, meta?, requestId, timestamp }`.
-
-## Institutions
-
-| Method | Path | Notes |
-| --- | --- | --- |
-| GET | `/institutions/me` | Current tenant institution |
-| GET | `/institutions` | List (tenant sees self; super_admin sees all) |
-| POST | `/institutions` | Create using JWT `institutionId` as `_id` |
-| GET | `/institutions/:id` | Get by id |
-| PUT/PATCH | `/institutions/:id` | Update |
-| PATCH | `/institutions/:id/branding` | `{ logo?, favicon? }` URLs |
-| DELETE | `/institutions/:id` | Soft archive |
-| POST | `/institutions/:id/restore` | Restore |
-
-## Tenant resources
-
-Resources share the same CRUD pattern:
-
-`GET|POST /{resource}`  
-`GET|PUT|PATCH|DELETE /{resource}/:id`  
-`POST /{resource}/:id/restore`
-
-| Resource path | Create body highlights |
+| URL | Purpose |
 | --- | --- |
-| `/campuses` | name, code, address… |
-| `/schools` | name, code, description |
-| `/departments` | schoolId, name, code |
-| `/programs` | departmentId, name, code, durationYears, credits, level |
-| `/academic-years` | name, startDate, endDate, isActive |
-| `/semesters` | academicYearId, name, number, term |
-| `/sections` | programId, semesterId, name, capacity |
-| `/batches` | programId, name, year |
-| `/academic-calendars` | academicYearId, name, events[] |
+| [http://localhost:4000/docs](http://localhost:4000/docs) | Swagger UI |
+| [http://localhost:4000/api/docs](http://localhost:4000/api/docs) | Alias |
+| [http://localhost:4000/openapi.json](http://localhost:4000/openapi.json) | Raw OpenAPI 3.0 JSON |
+| [http://localhost:4000/api/openapi.json](http://localhost:4000/api/openapi.json) | Alias |
 
-## List query parameters
+## Auth in Swagger
 
-| Param | Description |
-| --- | --- |
-| `q` | Search (name/code where applicable) |
-| `status` | `active` \| `inactive` \| `archived` |
-| `includeDeleted` | Include soft-deleted |
-| `schoolId`, `departmentId`, `programId`, `academicYearId`, `semesterId` | Relation filters |
-| `page`, `limit` | Pagination |
-| `sortBy`, `sortOrder` | Sorting (`asc` \| `desc`) |
+1. `POST /api/v1/auth/login` with email/password (Try it out).
+2. Copy `data.accessToken` from the response.
+3. Click **Authorize** → paste the token (Bearer).
+4. Call protected endpoints.
 
-`meta`: `{ page, limit, total, totalPages, hasNextPage, hasPrevPage }`
+Demo users (after `seed:demo`):
 
-## Settings
+- `faculty.demo@learnova.test` / `Demo@12345`
+- `student.demo@learnova.test` / `Demo@12345`
 
-| Method | Path |
-| --- | --- |
-| GET | `/institution-settings` |
-| PUT/PATCH | `/institution-settings` |
+## Coverage
 
-## Validation
+Tags: Health · Auth · Institution · Faculty · Students · Courses · Course Builder · Enrollments · Progress.
 
-Shared Zod schemas in `@learnova/validation` (`institution.ts`). Controllers do not re-validate — `validate()` middleware only.
-
-## Errors
-
-| Code | When |
-| --- | --- |
-| 401 | Missing/invalid token |
-| 403 | Missing permission or cross-tenant |
-| 404 | Not found / wrong tenant |
-| 409 | Unique constraint (slug/code/email) |
-| 400 | Validation failure |
-
-## Audit collection
-
-`institution_audit_logs` — events such as `institution.created`, `department.updated`, `calendar.updated`, `settings.updated`.
+Spec source: `apps/backend/src/docs/openapi.ts`.
