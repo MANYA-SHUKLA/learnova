@@ -37,7 +37,8 @@ export class SmtpMailer implements IMailer {
       secure,
       auth: {
         user: env.SMTP_USER,
-        pass: env.SMTP_PASS,
+        // Gmail App Passwords are often pasted with spaces; strip them.
+        pass: env.SMTP_PASS.replace(/\s+/g, ''),
       },
       requireTLS: !secure && port === 587,
       tls: {
