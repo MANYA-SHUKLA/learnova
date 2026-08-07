@@ -845,7 +845,7 @@ export class StudentService {
 
   async exportStudents(query: StudentExportQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
-    const list = await studentRepository.list(institutionId, {
+    let filter = studentRepository.buildFilter(institutionId, {
       q: query.q,
       status: query.status,
       campusId: query.campusId,
@@ -862,6 +862,9 @@ export class StudentService {
       page: 1,
       limit: 5000,
     });
+    filter = await scopeByFacultyAccess(filter, actor, institutionId);
+
+    const list = await studentRepository.listByFilter(filter, 1, 5000);
 
     const rows: Array<Record<string, unknown>> = list.items.map((doc) => toDto(doc));
 

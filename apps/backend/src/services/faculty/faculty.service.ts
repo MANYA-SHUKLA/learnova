@@ -194,6 +194,19 @@ export class FacultyService {
       institutionId,
     }, { actorId: actor.userId });
 
+    try {
+      const { provisionLoginUser } = await import('../users/provision-login-user.js');
+      await provisionLoginUser({
+        email: input.email,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        institutionId,
+        role: 'faculty',
+      });
+    } catch (err) {
+      logger.warn({ err, email: input.email }, 'Faculty login user provisioning skipped/failed');
+    }
+
     return toDto(doc);
   }
 
