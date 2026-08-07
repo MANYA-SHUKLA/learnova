@@ -104,3 +104,40 @@ export {
   type EnrollmentAuditEvent,
   ENROLLMENT_AUDIT_EVENTS,
 } from './enrollment-audit-log.model.js';
+export {
+  AssignmentModel,
+  type AssignmentDocument,
+  assignmentFileRefSchema,
+  ASSIGNMENT_TYPES,
+  ASSIGNMENT_STATUSES,
+  ASSIGNMENT_VISIBILITIES,
+} from './assignment.model.js';
+export {
+  AssignmentSubmissionModel,
+  type AssignmentSubmissionDocument,
+  ASSIGNMENT_SUBMISSION_STATUSES,
+  ASSIGNMENT_SUBMISSION_TYPES,
+} from './assignment-submission.model.js';
+export {
+  AssignmentAttachmentModel,
+  type AssignmentAttachmentDocument,
+} from './assignment-attachment.model.js';
+export {
+  AssignmentCommentModel,
+  type AssignmentCommentDocument,
+} from './assignment-comment.model.js';
+export {
+  AssignmentRubricModel,
+  type AssignmentRubricDocument,
+} from './assignment-rubric.model.js';
+export {
+  AssignmentGradeModel,
+  type AssignmentGradeDocument,
+  ASSIGNMENT_GRADING_METHODS,
+} from './assignment-grade.model.js';
+export {
+  AssignmentAuditLogModel,
+  type AssignmentAuditLogDocument,
+  type AssignmentAuditEvent,
+  ASSIGNMENT_AUDIT_EVENTS,
+} from './assignment-audit-log.model.js';
