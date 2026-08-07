@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { LogoMark } from '@/components/marketing/logo-mark';
+import { LanguageToggle } from '@/components/shared/language-toggle';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { siteGutter } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
@@ -19,7 +20,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <LogoMark className="size-8 shrink-0" />
           <span className="font-display text-xl font-bold tracking-tight">Learnova</span>
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
       </header>
       <main
         className={cn(

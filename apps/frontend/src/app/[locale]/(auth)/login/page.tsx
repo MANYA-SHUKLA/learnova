@@ -12,6 +12,7 @@ import {
   Input,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
@@ -26,6 +27,7 @@ import { resolvePostLoginPath } from '@/lib/auth/redirects';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
 function LoginForm() {
+  const t = useTranslations('auth.login');
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next');
@@ -53,7 +55,7 @@ function LoginForm() {
         router.replace(destination);
       } catch (err) {
         const message =
-          err instanceof ApiClientError ? err.message : 'Unable to sign in. Try again.';
+          err instanceof ApiClientError ? err.message : t('errorMessage');
         setError('root', { message });
       }
     })(event);
@@ -62,10 +64,8 @@ function LoginForm() {
   return (
     <Card className="w-full border-border/80 shadow-soft-lg">
       <CardHeader className="space-y-1 pb-4">
-        <CardTitle className="text-lg">Institution login</CardTitle>
-        <CardDescription>
-          Sign in with the credentials issued by your institution.
-        </CardDescription>
+        <CardTitle className="text-lg">{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className="space-y-4">
@@ -74,7 +74,7 @@ function LoginForm() {
               role="status"
               className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success"
             >
-              Institution registered. Verify your email, then sign in to finish institution setup.
+              {t('registeredMessage')}
             </p>
           ) : null}
           {errors.root?.message ? (
@@ -88,13 +88,13 @@ function LoginForm() {
 
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t('email')}
             </label>
             <Input
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="shuklamanya99@gmail.com"
+              placeholder={t('emailPlaceholder')}
               disabled={loginMutation.isPending}
               {...register('email')}
             />
@@ -106,13 +106,13 @@ function LoginForm() {
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                {t('password')}
               </label>
               <Link
                 href="/forgot-password"
                 className="text-xs font-medium text-primary hover:underline"
               >
-                Forgot password?
+                {t('forgotPassword')}
               </Link>
             </div>
             <PasswordInput
@@ -133,7 +133,7 @@ function LoginForm() {
               disabled={loginMutation.isPending}
               {...register('rememberMe')}
             />
-            Remember me
+            {t('rememberMe')}
           </label>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
@@ -141,19 +141,17 @@ function LoginForm() {
             {loginMutation.isPending ? (
               <>
                 <Spinner size="sm" />
-                Signing in…
+                {t('signingIn')}
               </>
             ) : (
-              'Login'
+              t('loginButton')
             )}
           </Button>
 
           <div className="w-full space-y-3 border-t border-border pt-4 text-center text-sm text-muted-foreground">
             <p>
-              Need an account?{' '}
-              <span className="font-medium text-foreground">
-                Contact your Institution Administrator
-              </span>
+              {t('needAccountLabel')}{' '}
+              <span className="font-medium text-foreground">{t('needAccountText')}</span>
             </p>
           </div>
         </CardFooter>
@@ -173,18 +171,18 @@ function LoginFallback() {
 }
 
 export default function LoginPage() {
+  const t = useTranslations('auth.login');
+
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-6 text-center">
         <p className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-          Learnova
+          {t('brand')}
         </p>
         <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-          Welcome back
+          {t('welcomeBack')}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Learn. Build. Excel. — Institution workspace access.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t('tagline')}</p>
       </div>
       <Suspense fallback={<LoginFallback />}>
         <LoginForm />

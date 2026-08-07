@@ -23,6 +23,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { Link, usePathname } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
@@ -32,53 +33,72 @@ import { Logo } from './logo';
 
 const SESSIONS_ROUTE = '/sessions';
 
+type SidebarGroupId = 'institution' | 'academics' | 'peopleAndLearning' | 'system';
+type SidebarItemId =
+  | 'dashboard'
+  | 'institution'
+  | 'departments'
+  | 'programs'
+  | 'academicYears'
+  | 'semesters'
+  | 'settings'
+  | 'campuses'
+  | 'schools'
+  | 'sections'
+  | 'batches'
+  | 'calendar'
+  | 'faculty'
+  | 'students'
+  | 'courses'
+  | 'sessions';
+
 interface NavItem {
+  id: SidebarItemId;
   href: string;
-  label: string;
   icon: LucideIcon;
   exact?: boolean;
   comingSoon?: boolean;
 }
 
 interface NavGroup {
-  label: string;
+  id: SidebarGroupId;
   items: NavItem[];
 }
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Institution',
+    id: 'institution',
     items: [
-      { href: APP_ROUTES.INSTITUTION_DASHBOARD, label: 'Dashboard', icon: LayoutDashboard, exact: true },
-      { href: APP_ROUTES.INSTITUTION, label: 'Institution', icon: Building2, exact: true },
-      { href: APP_ROUTES.INSTITUTION_DEPARTMENTS, label: 'Departments', icon: Network },
-      { href: APP_ROUTES.INSTITUTION_PROGRAMS, label: 'Programs', icon: BookOpen },
-      { href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, label: 'Academic Years', icon: CalendarRange },
-      { href: APP_ROUTES.INSTITUTION_SEMESTERS, label: 'Semesters', icon: Layers3 },
-      { href: APP_ROUTES.INSTITUTION_SETTINGS, label: 'Settings', icon: Settings },
+      { id: 'dashboard', href: APP_ROUTES.INSTITUTION_DASHBOARD, icon: LayoutDashboard, exact: true },
+      { id: 'institution', href: APP_ROUTES.INSTITUTION, icon: Building2, exact: true },
+      { id: 'departments', href: APP_ROUTES.INSTITUTION_DEPARTMENTS, icon: Network },
+      { id: 'programs', href: APP_ROUTES.INSTITUTION_PROGRAMS, icon: BookOpen },
+      { id: 'academicYears', href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, icon: CalendarRange },
+      { id: 'semesters', href: APP_ROUTES.INSTITUTION_SEMESTERS, icon: Layers3 },
+      { id: 'settings', href: APP_ROUTES.INSTITUTION_SETTINGS, icon: Settings },
     ],
   },
   {
-    label: 'Academics',
+    id: 'academics',
     items: [
-      { href: APP_ROUTES.INSTITUTION_CAMPUSES, label: 'Campuses', icon: School },
-      { href: APP_ROUTES.INSTITUTION_SCHOOLS, label: 'Schools', icon: GraduationCap },
-      { href: APP_ROUTES.INSTITUTION_SECTIONS, label: 'Sections', icon: Grid3X3 },
-      { href: APP_ROUTES.INSTITUTION_BATCHES, label: 'Batches', icon: UsersRound },
-      { href: APP_ROUTES.INSTITUTION_CALENDAR, label: 'Calendar', icon: CalendarDays },
+      { id: 'campuses', href: APP_ROUTES.INSTITUTION_CAMPUSES, icon: School },
+      { id: 'schools', href: APP_ROUTES.INSTITUTION_SCHOOLS, icon: GraduationCap },
+      { id: 'sections', href: APP_ROUTES.INSTITUTION_SECTIONS, icon: Grid3X3 },
+      { id: 'batches', href: APP_ROUTES.INSTITUTION_BATCHES, icon: UsersRound },
+      { id: 'calendar', href: APP_ROUTES.INSTITUTION_CALENDAR, icon: CalendarDays },
     ],
   },
   {
-    label: 'People & learning',
+    id: 'peopleAndLearning',
     items: [
-      { href: APP_ROUTES.INSTITUTION_FACULTY, label: 'Faculty', icon: UserRound },
-      { href: APP_ROUTES.STUDENT_DASHBOARD, label: 'Students', icon: Users },
-      { href: APP_ROUTES.COURSES, label: 'Courses', icon: BookOpen },
+      { id: 'faculty', href: APP_ROUTES.INSTITUTION_FACULTY, icon: UserRound },
+      { id: 'students', href: APP_ROUTES.STUDENT_DASHBOARD, icon: Users },
+      { id: 'courses', href: APP_ROUTES.COURSES, icon: BookOpen },
     ],
   },
   {
-    label: 'System',
-    items: [{ href: SESSIONS_ROUTE, label: 'Sessions', icon: Shield }],
+    id: 'system',
+    items: [{ id: 'sessions', href: SESSIONS_ROUTE, icon: Shield }],
   },
 ];
 
@@ -89,14 +109,6 @@ function isNavActive(pathname: string, href: string, exact?: boolean) {
   return pathname === href || pathname.startsWith(`${href}/`) || pathname.endsWith(href);
 }
 
-function formatRole(role?: string | null) {
-  if (!role) return 'Member';
-  return role
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
 function SidebarNav({
   collapsed,
   onNavigate,
@@ -105,81 +117,97 @@ function SidebarNav({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const t = useTranslations('dashboard.sidebar');
 
   return (
     <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-4">
-      {NAV_GROUPS.map((group) => (
-        <div key={group.label} className="space-y-1.5">
-          {!collapsed ? (
-            <p className="px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {group.label}
-            </p>
-          ) : (
-            <Separator className="mx-1 my-1 opacity-60" />
-          )}
-          <ul className="space-y-1">
-            {group.items.map((item) => {
-              const active = !item.comingSoon && isNavActive(pathname, item.href, item.exact);
-              const Icon = item.icon;
-              if (item.comingSoon) {
+      {NAV_GROUPS.map((group) => {
+        const groupLabel = t(`groups.${group.id}`);
+        return (
+          <div key={group.id} className="space-y-1.5">
+            {!collapsed ? (
+              <p className="px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {groupLabel}
+              </p>
+            ) : (
+              <Separator className="mx-1 my-1 opacity-60" />
+            )}
+            <ul className="space-y-1">
+              {group.items.map((item) => {
+                const label = t(`items.${item.id}`);
+                const active = !item.comingSoon && isNavActive(pathname, item.href, item.exact);
+                const Icon = item.icon;
+                if (item.comingSoon) {
+                  return (
+                    <li key={item.id}>
+                      <span
+                        title={collapsed ? `${label} (${t('comingSoon')})` : undefined}
+                        className={cn(
+                          'flex cursor-not-allowed items-center gap-3 rounded-xl px-2.5 py-2 text-sm text-muted-foreground/70',
+                          collapsed && 'justify-center px-2',
+                        )}
+                      >
+                        <Icon className="size-4 shrink-0 opacity-60" />
+                        {!collapsed ? (
+                          <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                            <span className="truncate">{label}</span>
+                            <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                              {t('comingSoon')}
+                            </span>
+                          </span>
+                        ) : null}
+                      </span>
+                    </li>
+                  );
+                }
                 return (
-                  <li key={item.label}>
-                    <span
-                      title={collapsed ? `${item.label} (coming soon)` : undefined}
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={onNavigate}
+                      title={collapsed ? label : undefined}
                       className={cn(
-                        'flex cursor-not-allowed items-center gap-3 rounded-xl px-2.5 py-2 text-sm text-muted-foreground/70',
+                        'group flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-colors',
+                        active
+                          ? 'bg-sidebar-accent font-medium text-sidebar-primary shadow-soft-sm'
+                          : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground',
                         collapsed && 'justify-center px-2',
                       )}
                     >
-                      <Icon className="size-4 shrink-0 opacity-60" />
-                      {!collapsed ? (
-                        <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                          <span className="truncate">{item.label}</span>
-                          <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                            Soon
-                          </span>
-                        </span>
-                      ) : null}
-                    </span>
+                      <Icon
+                        className={cn(
+                          'size-4 shrink-0',
+                          active ? 'text-sidebar-primary' : 'text-muted-foreground group-hover:text-foreground',
+                        )}
+                      />
+                      {!collapsed ? <span className="truncate">{label}</span> : null}
+                    </Link>
                   </li>
                 );
-              }
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={onNavigate}
-                    title={collapsed ? item.label : undefined}
-                    className={cn(
-                      'group flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-colors',
-                      active
-                        ? 'bg-sidebar-accent font-medium text-sidebar-primary shadow-soft-sm'
-                        : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground',
-                      collapsed && 'justify-center px-2',
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        'size-4 shrink-0',
-                        active ? 'text-sidebar-primary' : 'text-muted-foreground group-hover:text-foreground',
-                      )}
-                    />
-                    {!collapsed ? <span className="truncate">{item.label}</span> : null}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+              })}
+            </ul>
+          </div>
+        );
+      })}
     </nav>
   );
 }
 
 function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   const { user } = useAuth();
-  const email = user?.email ?? 'Signed out';
-  const role = formatRole(user?.role);
+  const tRoles = useTranslations('roles');
+  const tCommon = useTranslations('common');
+  const email = user?.email ?? tCommon('account');
+  const roleKey = user?.role;
+  const role =
+    roleKey && tRoles.has(roleKey)
+      ? tRoles(roleKey as 'student' | 'faculty' | 'institution_admin')
+      : roleKey
+        ? roleKey
+            .split('_')
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(' ')
+        : tCommon('account');
 
   return (
     <div className="border-t border-sidebar-border p-3">
@@ -206,6 +234,7 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
 function DesktopSidebar() {
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const tCommon = useTranslations('common');
 
   return (
     <motion.aside
@@ -228,7 +257,7 @@ function DesktopSidebar() {
             'inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
             collapsed && 'absolute right-[-12px] top-5 z-10 border border-border bg-background shadow-soft-sm',
           )}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? tCommon('openNav') : tCommon('closeNav')}
         >
           {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
         </button>
@@ -242,6 +271,7 @@ function DesktopSidebar() {
 function MobileDrawer() {
   const open = useUIStore((s) => s.mobileNavOpen);
   const setMobileNavOpen = useUIStore((s) => s.setMobileNavOpen);
+  const tCommon = useTranslations('common');
 
   useEffect(() => {
     if (!open) return;
@@ -288,7 +318,7 @@ function MobileDrawer() {
                   setMobileNavOpen(false);
                 }}
                 className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
-                aria-label="Close navigation"
+                aria-label={tCommon('closeNav')}
               >
                 <ChevronLeft className="size-4" />
               </button>

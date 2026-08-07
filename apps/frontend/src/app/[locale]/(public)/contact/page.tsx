@@ -1,6 +1,6 @@
 import { APP_ROUTES } from '@learnova/constants';
 import { Button } from '@learnova/ui';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Mail, MessageSquare, Phone } from 'lucide-react';
 import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
@@ -15,6 +15,31 @@ interface PageProps {
 export default async function ContactPage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations('marketing.contact');
+
+  const cards = [
+    {
+      icon: Mail,
+      title: t('emailTitle'),
+      body: t('emailBody'),
+      href: 'mailto:shuklamanya99@gmail.com',
+      external: true,
+    },
+    {
+      icon: Phone,
+      title: t('whatsappTitle'),
+      body: t('whatsappBody'),
+      href: 'https://wa.me/918005586588',
+      external: true,
+    },
+    {
+      icon: MessageSquare,
+      title: t('onboardingTitle'),
+      body: t('onboardingBody'),
+      href: APP_ROUTES.LOGIN,
+      external: false,
+    },
+  ] as const;
 
   return (
     <>
@@ -27,17 +52,17 @@ export default async function ContactPage({ params }: PageProps) {
           />
           <div className={siteContainer('relative pb-16 pt-20 text-center sm:pb-20 sm:pt-24')}>
             <p className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-              Contact
+              {t('eyebrow')}
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-5xl">
-              Talk to Learnova
+              {t('title')}
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-              Ask about institutional rollout, or reach the team behind this project.
+              {t('subtitle')}
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href={APP_ROUTES.LOGIN}>Institution Login</Link>
+                <Link href={APP_ROUTES.LOGIN}>{t('cta')}</Link>
               </Button>
             </div>
           </div>
@@ -46,29 +71,7 @@ export default async function ContactPage({ params }: PageProps) {
         <section className="py-16 sm:py-20">
           <div className={siteContainer()}>
             <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-3">
-              {[
-                {
-                  icon: Mail,
-                  title: 'Email',
-                  body: 'shuklamanya99@gmail.com',
-                  href: 'mailto:shuklamanya99@gmail.com',
-                  external: true,
-                },
-                {
-                  icon: Phone,
-                  title: 'WhatsApp',
-                  body: 'Chat with Manya Shukla',
-                  href: 'https://wa.me/918005586588',
-                  external: true,
-                },
-                {
-                  icon: MessageSquare,
-                  title: 'Onboarding',
-                  body: 'Sign in to your institution workspace',
-                  href: APP_ROUTES.LOGIN,
-                  external: false,
-                },
-              ].map(({ icon: Icon, title, body, href, external }) =>
+              {cards.map(({ icon: Icon, title, body, href, external }) =>
                 external ? (
                   <a
                     key={title}

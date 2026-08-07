@@ -1,6 +1,6 @@
 import { APP_ROUTES } from '@learnova/constants';
 import { Button } from '@learnova/ui';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import {
   BookOpen,
   ClipboardCheck,
@@ -22,39 +22,40 @@ interface PageProps {
 const FEATURES = [
   {
     icon: BookOpen,
-    title: 'LMS & curriculum',
-    body: 'Courses, cohorts, and content delivery aligned to your academic structure.',
+    titleKey: 'lmsTitle',
+    bodyKey: 'lmsBody',
   },
   {
     icon: ClipboardCheck,
-    title: 'Exams',
-    body: 'Secure assessment workflows with scheduling hooks and results integrity.',
+    titleKey: 'examsTitle',
+    bodyKey: 'examsBody',
   },
   {
     icon: Code2,
-    title: 'Coding labs',
-    body: 'Hands-on practice with feedback loops designed for institutional scale.',
+    titleKey: 'codingLabsTitle',
+    bodyKey: 'codingLabsBody',
   },
   {
     icon: Terminal,
-    title: 'Cloud IDE',
-    body: 'Browser workspaces ready for assignments and projects.',
+    titleKey: 'cloudIDETitle',
+    bodyKey: 'cloudIDEBody',
   },
   {
     icon: LineChart,
-    title: 'Analytics',
-    body: 'See where cohorts stall and intervene with clarity.',
+    titleKey: 'analyticsTitle',
+    bodyKey: 'analyticsBody',
   },
   {
     icon: ShieldCheck,
-    title: 'Governance',
-    body: 'Roles, sessions, and audit trails for enterprise trust.',
+    titleKey: 'governanceTitle',
+    bodyKey: 'governanceBody',
   },
 ] as const;
 
 export default async function FeaturesPage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations('marketing.features');
 
   return (
     <>
@@ -67,18 +68,17 @@ export default async function FeaturesPage({ params }: PageProps) {
           />
           <div className={siteContainer('relative pb-16 pt-20 text-center sm:pb-20 sm:pt-24')}>
             <p className="font-display text-5xl font-bold tracking-tight text-primary sm:text-6xl">
-              Learnova
+              {t('brand')}
             </p>
             <h1 className="mt-5 font-display text-3xl font-bold tracking-tight sm:text-5xl">
-              Explore the platform
+              {t('title')}
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-              An enterprise AI learning stack — LMS, exams, coding, and analytics — under one
-              institutional identity.
+              {t('subtitle')}
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href={APP_ROUTES.LOGIN}>Institution Login</Link>
+                <Link href={APP_ROUTES.LOGIN}>{t('cta')}</Link>
               </Button>
             </div>
           </div>
@@ -87,17 +87,19 @@ export default async function FeaturesPage({ params }: PageProps) {
         <section className="py-16 sm:py-20">
           <div className={siteContainer()}>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map(({ icon: Icon, title, body }) => (
+              {FEATURES.map(({ icon: Icon, titleKey, bodyKey }) => (
                 <div
-                  key={title}
+                  key={titleKey}
                   className="card-interactive rounded-2xl border border-border bg-card p-6 shadow-soft-sm sm:p-7"
                 >
                   <span className="inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="size-5" />
                   </span>
-                  <h2 className="mt-5 font-display text-lg font-semibold text-foreground">{title}</h2>
+                  <h2 className="mt-5 font-display text-lg font-semibold text-foreground">
+                    {t(titleKey)}
+                  </h2>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                    {body}
+                    {t(bodyKey)}
                   </p>
                 </div>
               ))}

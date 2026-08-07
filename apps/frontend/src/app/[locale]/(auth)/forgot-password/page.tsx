@@ -12,6 +12,7 @@ import {
   Input,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { ApiClientError } from '@/lib/api/client';
@@ -23,6 +24,7 @@ import {
 } from '@/features/auth';
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('auth.forgotPassword');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const mutation = useForgotPasswordMutation();
 
@@ -44,9 +46,7 @@ export default function ForgotPasswordPage() {
         setSuccessMessage(result.message);
       } catch (err) {
         const message =
-          err instanceof ApiClientError
-            ? err.message
-            : 'Unable to send reset link. Try again.';
+          err instanceof ApiClientError ? err.message : t('errorMessage');
         setError('root', { message });
       }
     })(event);
@@ -56,10 +56,8 @@ export default function ForgotPasswordPage() {
     <div className="w-full min-w-0">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Forgot password</CardTitle>
-          <CardDescription>
-            Enter your email and we&apos;ll send a reset link if an account exists.
-          </CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <form onSubmit={onSubmit} noValidate>
           <CardContent className="space-y-4">
@@ -82,13 +80,13 @@ export default function ForgotPasswordPage() {
 
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                {t('email')}
               </label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="shuklamanya99@gmail.com"
+                placeholder={t('emailPlaceholder')}
                 disabled={mutation.isPending}
                 {...register('email')}
               />
@@ -102,17 +100,17 @@ export default function ForgotPasswordPage() {
               {mutation.isPending ? (
                 <>
                   <Spinner size="sm" />
-                  Sending…
+                  {t('sending')}
                 </>
               ) : (
-                'Send reset link'
+                t('sendButton')
               )}
             </Button>
             <Link
               href="/login"
               className="text-center text-sm text-muted-foreground hover:text-foreground"
             >
-              Back to sign in
+              {t('backToSignIn')}
             </Link>
           </CardFooter>
         </form>

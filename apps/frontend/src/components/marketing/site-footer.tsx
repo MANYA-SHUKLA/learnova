@@ -1,26 +1,27 @@
+import { getTranslations } from 'next-intl/server';
 import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
 import { LogoMark } from './logo-mark';
 
 const PRODUCT_LINKS = [
-  { href: '/#features', label: 'Features' },
-  { href: '/#coding-labs', label: 'Coding Labs' },
-  { href: '/#ai', label: 'AI Ideation' },
-  { href: '/#exams', label: 'Exams' },
-  { href: '/#analytics', label: 'Analytics' },
+  { href: '/#features', labelKey: 'productLinks.features' },
+  { href: '/#coding-labs', labelKey: 'productLinks.codingLabs' },
+  { href: '/#ai', labelKey: 'productLinks.aiIdeation' },
+  { href: '/#exams', labelKey: 'productLinks.exams' },
+  { href: '/#analytics', labelKey: 'productLinks.analytics' },
 ] as const;
 
 const COMPANY_LINKS = [
-  { href: '/about', label: 'About' },
-  { href: '/features', label: 'Features' },
-  { href: '/contact', label: 'Contact' },
-  { href: '/login', label: 'Institution Login' },
+  { href: '/about', labelKey: 'companyLinks.about' },
+  { href: '/features', labelKey: 'companyLinks.features' },
+  { href: '/contact', labelKey: 'companyLinks.contact' },
+  { href: '/login', labelKey: 'companyLinks.institutionLogin' },
 ] as const;
 
 const LEGAL_LINKS = [
-  { href: '/privacy', label: 'Privacy' },
-  { href: '/terms', label: 'Terms' },
-  { href: '/security', label: 'Security' },
+  { href: '/privacy', labelKey: 'legalLinks.privacy' },
+  { href: '/terms', labelKey: 'legalLinks.terms' },
+  { href: '/security', labelKey: 'legalLinks.security' },
 ] as const;
 
 function FooterColumn({
@@ -49,7 +50,9 @@ function FooterColumn({
   );
 }
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations('marketing.footer');
+  const tCommon = await getTranslations('common');
   const year = new Date().getFullYear();
 
   return (
@@ -62,14 +65,13 @@ export function SiteFooter() {
               className="inline-flex items-center gap-2.5 font-display text-xl font-bold tracking-tight text-foreground"
             >
               <LogoMark />
-              Learnova
+              {tCommon('appName')}
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground sm:text-base">
-              The enterprise AI learning platform for institutions that teach, assess, and innovate at
-              scale.
+              {t('tagline')}
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
-              Contact:{' '}
+              {t('contactLabel')}{' '}
               <a
                 href="mailto:shuklamanya99@gmail.com"
                 className="font-medium text-foreground underline-offset-2 hover:underline"
@@ -78,14 +80,23 @@ export function SiteFooter() {
               </a>
             </p>
           </div>
-          <FooterColumn title="Product" links={PRODUCT_LINKS} />
-          <FooterColumn title="Company" links={COMPANY_LINKS} />
-          <FooterColumn title="Legal" links={LEGAL_LINKS} />
+          <FooterColumn
+            title={t('product')}
+            links={PRODUCT_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
+          />
+          <FooterColumn
+            title={t('company')}
+            links={COMPANY_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
+          />
+          <FooterColumn
+            title={t('legal')}
+            links={LEGAL_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
+          />
         </div>
 
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-sm text-muted-foreground">
-            © {year} Learnova. All rights reserved.
+            © {year} {tCommon('appName')}. {t('copyright')}
           </p>
         </div>
       </div>

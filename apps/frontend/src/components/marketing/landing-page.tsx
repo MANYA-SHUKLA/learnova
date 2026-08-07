@@ -19,6 +19,7 @@ import {
   Terminal,
   type LucideIcon,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass } from '@/lib/cta';
@@ -88,6 +89,16 @@ function SectionHeading({
 /* ─── Hero ─── */
 
 function HeroVisual() {
+  const tNav = useTranslations('nav');
+  const navItems = [
+    tNav('overview'),
+    tNav('courses'),
+    tNav('labs'),
+    tNav('exams'),
+    tNav('analytics'),
+  ] as const;
+  const mobileItems = navItems.slice(0, 4);
+
   return (
     <div
       className="relative mx-auto w-full"
@@ -103,7 +114,7 @@ function HeroVisual() {
         </div>
         <div className="grid min-h-[220px] grid-cols-1 sm:min-h-[320px] sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] lg:min-h-[380px]">
           <aside className="hidden space-y-2 border-b border-border bg-muted/40 p-3 sm:block sm:border-b-0 sm:border-r sm:p-4">
-            {['Overview', 'Courses', 'Labs', 'Exams', 'Analytics'].map((item, i) => (
+            {navItems.map((item, i) => (
               <div
                 key={item}
                 className={cn(
@@ -117,7 +128,7 @@ function HeroVisual() {
           </aside>
           <div className="min-w-0 space-y-3 p-3 sm:space-y-4 sm:p-5">
             <div className="flex gap-1.5 overflow-x-auto pb-1 sm:hidden">
-              {['Overview', 'Courses', 'Labs', 'Exams'].map((item, i) => (
+              {mobileItems.map((item, i) => (
                 <div
                   key={item}
                   className={cn(
@@ -158,6 +169,8 @@ function HeroVisual() {
 }
 
 function Hero() {
+  const t = useTranslations('marketing.landing.hero');
+
   return (
     <section className="relative overflow-hidden">
       <div
@@ -177,22 +190,20 @@ function Hero() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="font-display text-5xl font-bold tracking-tight text-primary sm:text-6xl md:text-7xl lg:text-8xl">
-            Learnova
+            {t('brand')}
           </p>
           <h1 className="mt-6 font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl xl:text-7xl">
-            Learn. Build. Excel.
+            {t('title')}
           </h1>
           <p className="mx-auto mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
-            The enterprise AI learning platform for institutions — LMS, exams, coding labs, and
-            analytics under one admin-controlled identity. Students and faculty are invited by your
-            campus, not by public signup.
+            {t('subtitle')}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Button asChild size="lg" className={ctaButtonClass}>
-              <Link href="/login">Institution Login</Link>
+              <Link href="/login">{t('loginCta')}</Link>
             </Button>
             <Button asChild variant="ghost" size="lg">
-              <Link href="/features">Explore Platform</Link>
+              <Link href="/features">{t('exploreCta')}</Link>
             </Button>
           </div>
         </motion.div>
@@ -212,69 +223,43 @@ function Hero() {
 
 /* ─── Feature grid ─── */
 
-const FEATURES: { icon: LucideIcon; title: string; description: string }[] = [
-  {
-    icon: BookOpen,
-    title: 'LMS',
-    description: 'Courses, cohorts, and content delivery built for institutional scale.',
-  },
-  {
-    icon: GraduationCap,
-    title: 'ERP',
-    description: 'Programs, campuses, batches, and academic structure in one place.',
-  },
-  {
-    icon: ClipboardCheck,
-    title: 'Exams',
-    description: 'Secure assessment workflows with scheduling, proctoring hooks, and results.',
-  },
-  {
-    icon: Code2,
-    title: 'Coding Labs',
-    description: 'Hands-on practice environments with real-time feedback for every learner.',
-  },
-  {
-    icon: Terminal,
-    title: 'Cloud IDE',
-    description: 'Browser-native development workspaces ready for assignments and projects.',
-  },
-  {
-    icon: Lightbulb,
-    title: 'AI Ideation',
-    description: 'Guided brainstorming and concept exploration powered by institutional AI.',
-  },
-  {
-    icon: LineChart,
-    title: 'Analytics',
-    description: 'Live insights across engagement, mastery, and institutional outcomes.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Audit',
-    description: 'Complete activity trails for compliance, governance, and peace of mind.',
-  },
-];
+const FEATURE_KEYS = [
+  { icon: BookOpen, key: 'lms' },
+  { icon: GraduationCap, key: 'erp' },
+  { icon: ClipboardCheck, key: 'exams' },
+  { icon: Code2, key: 'codingLabs' },
+  { icon: Terminal, key: 'cloudIDE' },
+  { icon: Lightbulb, key: 'aiIdeation' },
+  { icon: LineChart, key: 'analytics' },
+  { icon: ShieldCheck, key: 'audit' },
+] as const;
 
 function FeatureGrid() {
+  const t = useTranslations('marketing.landing.features');
+
   return (
     <MotionSection id="features" className="scroll-mt-24 py-20 sm:py-24">
       <div className={siteContainer()}>
         <SectionHeading
-          eyebrow="Platform"
-          title="Everything your institution needs"
-          description="Eight modules that work together — from curriculum delivery to secure exams and AI-assisted learning."
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
         />
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-5">
-          {FEATURES.map(({ icon: Icon, title, description }) => (
+          {FEATURE_KEYS.map(({ icon: Icon, key }) => (
             <div
-              key={title}
+              key={key}
               className="card-interactive rounded-2xl border border-border bg-card p-6 shadow-soft-sm sm:p-7"
             >
               <span className="inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="size-5" />
               </span>
-              <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p>
+              <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
+                {t(`${key}.title`)}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                {t(`${key}.description`)}
+              </p>
             </div>
           ))}
         </div>
@@ -286,20 +271,43 @@ function FeatureGrid() {
 /* ─── Dashboard preview ─── */
 
 function DashboardPreview() {
+  const t = useTranslations('marketing.landing.dashboard');
+  const tCommon = useTranslations('common');
+  const tNav = useTranslations('nav');
+
+  const sidebarItems = [
+    tCommon('home'),
+    tNav('courses'),
+    tNav('calendar'),
+    tNav('people'),
+    tNav('reports'),
+    tCommon('settings'),
+  ] as const;
+
+  const stats = [
+    { label: t('activeCourses'), value: '128' },
+    { label: t('openLabs'), value: '46' },
+    { label: t('upcomingExams'), value: '12' },
+  ] as const;
+
+  const activities = [t('activity1'), t('activity2'), t('activity3')] as const;
+
   return (
     <MotionSection id="product" className="scroll-mt-24 py-20 sm:py-24">
       <div className={siteContainer()}>
         <SectionHeading
-          eyebrow="Dashboard"
-          title="A command center for learning ops"
-          description="Faculty, admins, and learners share one coherent workspace — without the clutter."
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
         />
         <div className="mt-12 overflow-hidden rounded-2xl border border-border bg-card shadow-soft-lg">
           <div className="grid lg:grid-cols-[minmax(0,13.75rem)_minmax(0,1fr)]">
             <aside className="hidden min-w-0 border-r border-border bg-muted/30 p-5 lg:block">
-              <p className="font-display text-sm font-semibold text-foreground">Learnova</p>
+              <p className="font-display text-sm font-semibold text-foreground">
+                {tCommon('appName')}
+              </p>
               <nav className="mt-6 space-y-1">
-                {['Home', 'Courses', 'Calendar', 'People', 'Reports', 'Settings'].map((item, i) => (
+                {sidebarItems.map((item, i) => (
                   <div
                     key={item}
                     className={cn(
@@ -315,19 +323,17 @@ function DashboardPreview() {
             <div className="min-w-0 space-y-4 p-4 sm:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-display text-xl font-semibold text-foreground">Welcome back</h3>
-                  <p className="text-sm text-muted-foreground">Institution overview · this week</p>
+                  <h3 className="font-display text-xl font-semibold text-foreground">
+                    {t('welcomeBack')}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{t('institutionOverview')}</p>
                 </div>
                 <span className="rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
-                  Live sync
+                  {tCommon('liveSync')}
                 </span>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  { label: 'Active courses', value: '128' },
-                  { label: 'Open labs', value: '46' },
-                  { label: 'Upcoming exams', value: '12' },
-                ].map((stat) => (
+                {stats.map((stat) => (
                   <div key={stat.label} className="card-interactive rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
                     <p className="text-xs text-muted-foreground">{stat.label}</p>
                     <p className="mt-1 font-display text-2xl font-semibold text-foreground">{stat.value}</p>
@@ -336,7 +342,7 @@ function DashboardPreview() {
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="card-interactive rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
-                  <p className="text-sm font-medium text-foreground">Engagement trend</p>
+                  <p className="text-sm font-medium text-foreground">{t('engagementTrend')}</p>
                   <div className="mt-4 flex h-28 items-end gap-2">
                     {[35, 48, 42, 70, 58, 82, 76].map((h, i) => (
                       <div
@@ -348,16 +354,14 @@ function DashboardPreview() {
                   </div>
                 </div>
                 <div className="card-interactive rounded-2xl border border-border bg-background p-4 shadow-soft-sm">
-                  <p className="text-sm font-medium text-foreground">Recent activity</p>
+                  <p className="text-sm font-medium text-foreground">{t('recentActivity')}</p>
                   <ul className="mt-4 space-y-3">
-                    {['Batch A submitted Lab 04', 'Exam window opened', 'New course published'].map(
-                      (item) => (
-                        <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span className="size-1.5 rounded-full bg-primary" />
-                          {item}
-                        </li>
-                      ),
-                    )}
+                    {activities.map((item) => (
+                      <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className="size-1.5 rounded-full bg-primary" />
+                        {item}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -440,24 +444,22 @@ function MockPanel({ children, className }: { children: ReactNode; className?: s
 }
 
 function CodingLabsPreview() {
+  const t = useTranslations('marketing.landing.codingLabs');
+
   return (
     <ProductSection
       id="coding-labs"
-      eyebrow="Coding Labs"
-      title="Practice that feels like production"
-      description="Scaffolded challenges, auto-graded submissions, and a cloud IDE your students can open in one click."
+      eyebrow={t('eyebrow')}
+      title={t('title')}
+      description={t('description')}
       icon={Code2}
-      bullets={[
-        'Language packs for popular stacks',
-        'Instant feedback on test suites',
-        'Faculty templates and rubrics',
-      ]}
+      bullets={[t('bullet1'), t('bullet2'), t('bullet3')]}
       visual={
         <MockPanel>
           <div className="flex items-center justify-between gap-2">
             <p className="font-display text-sm font-semibold text-foreground">lab-04 · sorting</p>
             <span className="rounded-md bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
-              Passing
+              {t('passingStatus')}
             </span>
           </div>
           <pre className="mt-4 overflow-x-auto rounded-xl bg-muted/60 p-4 font-mono text-xs leading-relaxed text-foreground">
@@ -474,38 +476,34 @@ function CodingLabsPreview() {
 }
 
 function AiFeatures() {
+  const t = useTranslations('marketing.landing.aiFeatures');
+
   return (
     <ProductSection
       id="ai"
-      eyebrow="AI Features"
-      title="Ideation that accelerates learning"
-      description="Help students explore concepts, outline projects, and get structured guidance — with faculty-controlled guardrails."
+      eyebrow={t('eyebrow')}
+      title={t('title')}
+      description={t('description')}
       icon={Brain}
       reverse
-      bullets={[
-        'Prompted brainstorming sessions',
-        'Institution-scoped knowledge',
-        'Transparent, auditable AI usage',
-      ]}
+      bullets={[t('bullet1'), t('bullet2'), t('bullet3')]}
       visual={
         <MockPanel>
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
-            <p className="font-display text-sm font-semibold">AI Ideation</p>
+            <p className="font-display text-sm font-semibold">{t('ideationTitle')}</p>
           </div>
           <div className="mt-4 space-y-3">
             <div className="rounded-xl bg-muted/60 p-3 text-sm text-muted-foreground">
-              Suggest three project ideas for distributed systems…
+              {t('prompt')}
             </div>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-sm text-foreground">
-              <p className="font-medium">1. Consensus simulator</p>
-              <p className="mt-1 text-muted-foreground">
-                Model Raft under network partitions with live visuals.
-              </p>
+              <p className="font-medium">{t('response1Title')}</p>
+              <p className="mt-1 text-muted-foreground">{t('response1Body')}</p>
             </div>
             <div className="card-interactive rounded-xl border border-border bg-background p-3 text-sm text-foreground">
-              <p className="font-medium">2. Edge cache playground</p>
-              <p className="mt-1 text-muted-foreground">Compare TTL strategies across regions.</p>
+              <p className="font-medium">{t('response2Title')}</p>
+              <p className="mt-1 text-muted-foreground">{t('response2Body')}</p>
             </div>
           </div>
         </MockPanel>
@@ -515,29 +513,27 @@ function AiFeatures() {
 }
 
 function PracticeLabs() {
+  const t = useTranslations('marketing.landing.practiceLabs');
+
+  const tracks = [
+    { name: t('track1'), pct: 72 },
+    { name: t('track2'), pct: 41 },
+    { name: t('track3'), pct: 18 },
+  ] as const;
+
   return (
     <ProductSection
       id="practice"
-      eyebrow="Practice Labs"
-      title="Repetition that builds mastery"
-      description="Guided drills and progressive difficulty keep learners in flow — from first concept to interview-ready skill."
+      eyebrow={t('eyebrow')}
+      title={t('title')}
+      description={t('description')}
       icon={Terminal}
-      bullets={[
-        'Skill tracks mapped to curricula',
-        'Streaks and progress milestones',
-        'Peer comparison without pressure',
-      ]}
+      bullets={[t('bullet1'), t('bullet2'), t('bullet3')]}
       visual={
         <MockPanel>
-          <p className="font-display text-sm font-semibold text-foreground">Practice track</p>
+          <p className="font-display text-sm font-semibold text-foreground">{t('trackTitle')}</p>
           <div className="mt-4 space-y-3">
-            {(
-              [
-                { name: 'Arrays & hashing', pct: 72 },
-                { name: 'Graphs', pct: 41 },
-                { name: 'System design basics', pct: 18 },
-              ] as const
-            ).map((track) => (
+            {tracks.map((track) => (
               <div key={track.name} className="card-interactive rounded-xl border border-border bg-background p-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-foreground">{track.name}</span>
@@ -559,34 +555,34 @@ function PracticeLabs() {
 }
 
 function ExamsSection() {
+  const t = useTranslations('marketing.landing.exams');
+
+  const meta = [
+    { label: t('duration'), value: t('durationValue') },
+    { label: t('questions'), value: t('questionsValue') },
+    { label: t('candidates'), value: t('candidatesValue') },
+    { label: t('integrity'), value: t('integrityValue') },
+  ] as const;
+
   return (
     <ProductSection
       id="exams"
-      eyebrow="Exams"
-      title="Assessment you can trust"
-      description="Schedule windows, question banks, and result pipelines designed for high-stakes institutional exams."
+      eyebrow={t('eyebrow')}
+      title={t('title')}
+      description={t('description')}
       icon={ClipboardCheck}
       reverse
-      bullets={[
-        'Timed sections and question pools',
-        'Role-based exam administration',
-        'Exportable results and audit trails',
-      ]}
+      bullets={[t('bullet1'), t('bullet2'), t('bullet3')]}
       visual={
         <MockPanel>
           <div className="flex items-center justify-between">
             <p className="font-display text-sm font-semibold text-foreground">Midterm · CS301</p>
             <span className="rounded-md bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
-              Window open
+              {t('windowOpen')}
             </span>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-3">
-            {[
-              { label: 'Duration', value: '90 min' },
-              { label: 'Questions', value: '40' },
-              { label: 'Candidates', value: '312' },
-              { label: 'Integrity', value: 'On' },
-            ].map((item) => (
+            {meta.map((item) => (
               <div key={item.label} className="card-interactive rounded-xl border border-border bg-background p-3">
                 <p className="text-xs text-muted-foreground">{item.label}</p>
                 <p className="mt-1 font-display text-lg font-semibold text-foreground">{item.value}</p>
@@ -600,28 +596,32 @@ function ExamsSection() {
 }
 
 function ProjectsSection() {
+  const t = useTranslations('marketing.landing.projects');
+  const columns = [
+    { key: 'backlog', label: t('backlog'), cards: 2 },
+    { key: 'inProgress', label: t('inProgress'), cards: 2 },
+    { key: 'done', label: t('done'), cards: 1 },
+  ] as const;
+
   return (
     <ProductSection
       id="projects"
-      eyebrow="Projects"
-      title="From assignment to portfolio"
-      description="Team projects with milestones, reviews, and submission workflows that mirror real product work."
+      eyebrow={t('eyebrow')}
+      title={t('title')}
+      description={t('description')}
       icon={FolderKanban}
-      bullets={[
-        'Milestones and peer reviews',
-        'Repo-linked submissions',
-        'Faculty feedback loops',
-      ]}
+      bullets={[t('bullet1'), t('bullet2'), t('bullet3')]}
       visual={
         <MockPanel>
-          <p className="font-display text-sm font-semibold text-foreground">Capstone board</p>
+          <p className="font-display text-sm font-semibold text-foreground">{t('boardTitle')}</p>
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-            {['Backlog', 'In progress', 'Done'].map((col) => (
-              <div key={col} className="rounded-xl bg-muted/50 p-2">
-                <p className="mb-2 font-medium text-muted-foreground">{col}</p>
+            {columns.map((col) => (
+              <div key={col.key} className="rounded-xl bg-muted/50 p-2">
+                <p className="mb-2 font-medium text-muted-foreground">{col.label}</p>
                 <div className="space-y-2">
-                  <div className="h-12 rounded-lg border border-border bg-card" />
-                  {col !== 'Done' ? <div className="h-12 rounded-lg border border-border bg-card" /> : null}
+                  {Array.from({ length: col.cards }, (_, i) => (
+                    <div key={i} className="h-12 rounded-lg border border-border bg-card" />
+                  ))}
                 </div>
               </div>
             ))}
@@ -633,28 +633,28 @@ function ProjectsSection() {
 }
 
 function AnalyticsSection() {
+  const t = useTranslations('marketing.landing.analytics');
+
+  const modules = [
+    { name: t('module1'), pct: 86 },
+    { name: t('module2'), pct: 74 },
+    { name: t('module3'), pct: 61 },
+  ] as const;
+
   return (
     <ProductSection
       id="analytics"
-      eyebrow="Analytics"
-      title="Outcomes you can act on"
-      description="See where cohorts struggle, which labs drive mastery, and how interventions move the needle."
+      eyebrow={t('eyebrow')}
+      title={t('title')}
+      description={t('description')}
       icon={BarChart3}
       reverse
-      bullets={[
-        'Cohort and course heatmaps',
-        'At-risk learner signals',
-        'Export-ready institutional reports',
-      ]}
+      bullets={[t('bullet1'), t('bullet2'), t('bullet3')]}
       visual={
         <MockPanel>
-          <p className="font-display text-sm font-semibold text-foreground">Mastery by module</p>
+          <p className="font-display text-sm font-semibold text-foreground">{t('masteryTitle')}</p>
           <div className="mt-5 space-y-3">
-            {[
-              { name: 'Algorithms', pct: 86 },
-              { name: 'Databases', pct: 74 },
-              { name: 'Networks', pct: 61 },
-            ].map((row) => (
+            {modules.map((row) => (
               <div key={row.name}>
                 <div className="flex justify-between text-sm">
                   <span className="text-foreground">{row.name}</span>
@@ -674,49 +674,36 @@ function AnalyticsSection() {
 
 /* ─── Testimonials ─── */
 
-const TESTIMONIALS = [
-  {
-    quote:
-      'Learnova replaced three tools for us. Faculty actually use the dashboard — that alone was worth it.',
-    name: 'Manya Shukla',
-    role: 'Dean of Engineering, Northbridge University',
-  },
-  {
-    quote:
-      'Coding labs and exams in one place cut our ops overhead dramatically. Students feel the polish.',
-    name: 'Rajkumar Yogi',
-    role: 'Director of Digital Learning, Helix Institute',
-  },
-  {
-    quote:
-      'The analytics finally show us where cohorts stall — interventions are faster and more targeted.',
-    name: 'Mahi Raj',
-    role: 'VP Academic Affairs, Summit College',
-  },
-] as const;
-
 function Testimonials() {
+  const t = useTranslations('marketing.landing.testimonials');
+
+  const items = [
+    { quote: t('quote1'), name: t('name1'), role: t('role1') },
+    { quote: t('quote2'), name: t('name2'), role: t('role2') },
+    { quote: t('quote3'), name: t('name3'), role: t('role3') },
+  ] as const;
+
   return (
     <MotionSection className="py-20 sm:py-24">
       <div className={siteContainer()}>
         <SectionHeading
-          eyebrow="Testimonials"
-          title="Trusted by academic leaders"
-          description="Placeholder voices from institutions evaluating Learnova for their next learning stack."
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
         />
         <div className="mt-12 grid gap-4 md:grid-cols-3">
-          {TESTIMONIALS.map((t) => (
+          {items.map((item) => (
             <blockquote
-              key={t.name}
+              key={item.name}
               className="card-interactive flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft-sm"
             >
-              <p className="flex-1 text-sm leading-relaxed text-foreground">&ldquo;{t.quote}&rdquo;</p>
+              <p className="flex-1 text-sm leading-relaxed text-foreground">&ldquo;{item.quote}&rdquo;</p>
               <footer className="mt-6 border-t border-border pt-4">
                 <cite className="not-italic">
                   <span className="block font-display text-sm font-semibold text-foreground">
-                    {t.name}
+                    {item.name}
                   </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">{t.role}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">{item.role}</span>
                 </cite>
               </footer>
             </blockquote>
@@ -729,40 +716,27 @@ function Testimonials() {
 
 /* ─── FAQ ─── */
 
-const FAQS = [
-  {
-    q: 'Who is Learnova for?',
-    a: 'Universities, colleges, and training institutes that need LMS, exams, coding practice, and analytics in a single enterprise platform.',
-  },
-  {
-    q: 'Can we roll out module by module?',
-    a: 'Yes. Start with LMS or Coding Labs and expand into exams, IDE, and analytics as your teams are ready.',
-  },
-  {
-    q: 'Does Learnova support institutional SSO?',
-    a: 'Enterprise plans are designed for SSO and role-based access across campuses, departments, and programs.',
-  },
-  {
-    q: 'Is there a sandbox for evaluation?',
-    a: 'Contact us at shuklamanya99@gmail.com for a guided demo environment. Starter accounts can explore core flows without a payment commitment.',
-  },
-  {
-    q: 'How is AI usage governed?',
-    a: 'AI features respect institution policies, with audit trails and faculty-configurable guardrails for student-facing tools.',
-  },
-] as const;
-
 function Faq() {
+  const t = useTranslations('marketing.landing.faq');
+
+  const items = [
+    { q: t('q1'), a: t('a1') },
+    { q: t('q2'), a: t('a2') },
+    { q: t('q3'), a: t('a3') },
+    { q: t('q4'), a: t('a4') },
+    { q: t('q5'), a: t('a5') },
+  ] as const;
+
   return (
     <MotionSection id="faq" className="scroll-mt-24 py-20 sm:py-24">
       <div className={siteContainer()}>
         <SectionHeading
-          eyebrow="FAQ"
-          title="Answers before you dive in"
-          description="A short list of the questions institutions ask most often."
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
         />
         <div className="mx-auto mt-10 w-full max-w-5xl space-y-3">
-          {FAQS.map((item) => (
+          {items.map((item) => (
             <details
               key={item.q}
               className="card-interactive group rounded-2xl border border-border bg-card px-5 py-1 shadow-soft-sm open:shadow-soft-md"
@@ -782,49 +756,64 @@ function Faq() {
 
 /* ─── Pricing ─── */
 
-const TIERS = [
-  {
-    name: 'Starter',
-    price: 'Free to explore',
-    description: 'Evaluate core LMS and lab flows with a small cohort.',
-    features: ['Up to 50 learners', 'LMS + Coding Labs', 'Community support'],
-    cta: 'Institution Login',
-    href: '/login',
-    highlighted: false,
-  },
-  {
-    name: 'Institution',
-    price: 'Custom',
-    description: 'Full academic stack for campuses and departments.',
-    features: ['Unlimited programs', 'Exams + Analytics', 'SSO-ready roles', 'Priority support'],
-    cta: 'Institution Login',
-    href: '/login',
-    highlighted: true,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    description: 'Multi-campus governance, audit, and dedicated success.',
-    features: ['Multi-tenant control', 'Advanced audit', 'SLA & onboarding', 'Custom integrations'],
-    cta: 'Request Demo',
-    href: '/contact',
-    highlighted: false,
-  },
-] as const;
-
 function Pricing() {
+  const t = useTranslations('marketing.landing.pricing');
+
+  const tiers = [
+    {
+      key: 'starter',
+      name: t('starter.name'),
+      price: t('starter.price'),
+      description: t('starter.description'),
+      features: [t('starter.feature1'), t('starter.feature2'), t('starter.feature3')],
+      cta: t('starter.cta'),
+      href: '/login' as const,
+      highlighted: false,
+    },
+    {
+      key: 'institution',
+      name: t('institution.name'),
+      price: t('institution.price'),
+      description: t('institution.description'),
+      features: [
+        t('institution.feature1'),
+        t('institution.feature2'),
+        t('institution.feature3'),
+        t('institution.feature4'),
+      ],
+      cta: t('institution.cta'),
+      href: '/login' as const,
+      highlighted: true,
+    },
+    {
+      key: 'enterprise',
+      name: t('enterprise.name'),
+      price: t('enterprise.price'),
+      description: t('enterprise.description'),
+      features: [
+        t('enterprise.feature1'),
+        t('enterprise.feature2'),
+        t('enterprise.feature3'),
+        t('enterprise.feature4'),
+      ],
+      cta: t('enterprise.cta'),
+      href: '/contact' as const,
+      highlighted: false,
+    },
+  ] as const;
+
   return (
     <MotionSection id="pricing" className="scroll-mt-24 py-20 sm:py-24">
       <div className={siteContainer()}>
         <SectionHeading
-          eyebrow="Pricing"
-          title="Plans that scale with you"
-          description="Placeholder tiers for planning — no payment required. Choose the shape that fits your institution."
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
         />
         <div className="mt-12 grid gap-4 lg:grid-cols-3 xl:gap-6">
-          {TIERS.map((tier) => (
+          {tiers.map((tier) => (
             <div
-              key={tier.name}
+              key={tier.key}
               className={cn(
                 'card-interactive flex flex-col rounded-2xl border bg-card p-6 shadow-soft-sm sm:p-8',
                 tier.highlighted
@@ -861,6 +850,8 @@ function Pricing() {
 /* ─── Final CTA ─── */
 
 function FinalCta() {
+  const t = useTranslations('marketing.landing.finalCta');
+
   return (
     <MotionSection className="w-full pb-0 pt-8 sm:pb-28 sm:pt-10">
       <div className="w-full sm:px-[clamp(1rem,2.5vw,2.5rem)] xl:px-[clamp(1.5rem,3vw,3.5rem)]">
@@ -871,15 +862,14 @@ function FinalCta() {
           />
           <div className="relative mx-auto w-full max-w-4xl">
             <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Ready to modernize learning?
+              {t('title')}
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl">
-              Sign in to your institution workspace, invite faculty and students, and run academics
-              from one premium platform.
+              {t('description')}
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href="/login">Institution Login</Link>
+                <Link href="/login">{t('cta')}</Link>
               </Button>
             </div>
           </div>

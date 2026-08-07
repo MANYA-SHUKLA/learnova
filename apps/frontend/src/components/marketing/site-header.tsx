@@ -2,21 +2,25 @@
 
 import { Button } from '@learnova/ui';
 import { Menu, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { LanguageToggle } from '@/components/shared/language-toggle';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
 import { LogoMark } from './logo-mark';
 
 const NAV_LINKS = [
-  { href: '/features', label: 'Features' },
-  { href: '/#pricing', label: 'Pricing' },
-  { href: '/#faq', label: 'FAQ' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/features', labelKey: 'features' },
+  { href: '/#pricing', labelKey: 'pricing' },
+  { href: '/#faq', labelKey: 'faq' },
+  { href: '/contact', labelKey: 'contact' },
 ] as const;
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('marketing.header');
+  const tCommon = useTranslations('common');
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-[var(--glass-bg)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--glass-bg)]">
@@ -26,7 +30,7 @@ export function SiteHeader() {
           className="flex min-w-0 items-center gap-2.5 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl"
         >
           <LogoMark />
-          Learnova
+          {tCommon('appName')}
         </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
@@ -36,21 +40,22 @@ export function SiteHeader() {
               href={link.href}
               className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              {link.label}
+              {t(link.labelKey)}
             </Link>
           ))}
         </nav>
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <LanguageToggle />
           <ThemeToggle />
           <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link href="/login">Institution Login</Link>
+            <Link href="/login">{t('institutionLogin')}</Link>
           </Button>
           <Button
             variant="ghost"
             size="icon"
             className="lg:hidden"
-            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-label={open ? tCommon('closeNav') : tCommon('openNav')}
             aria-expanded={open}
             onClick={() => {
               setOpen((v) => !v);
@@ -74,11 +79,12 @@ export function SiteHeader() {
                     setOpen(false);
                   }}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </nav>
-            <div className="mt-4">
+            <div className="mt-4 flex items-center gap-2">
+              <LanguageToggle className="shrink-0" />
               <Button asChild className="w-full">
                 <Link
                   href="/login"
@@ -86,7 +92,7 @@ export function SiteHeader() {
                     setOpen(false);
                   }}
                 >
-                  Institution Login
+                  {t('institutionLogin')}
                 </Link>
               </Button>
             </div>

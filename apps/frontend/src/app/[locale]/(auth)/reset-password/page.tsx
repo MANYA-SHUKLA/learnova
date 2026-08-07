@@ -11,6 +11,7 @@ import {
   CardTitle,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
@@ -24,6 +25,9 @@ import {
 } from '@/features/auth';
 
 function ResetPasswordForm() {
+  const t = useTranslations('auth.resetPassword');
+  const tForgot = useTranslations('auth.forgotPassword');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const searchParams = useSearchParams();
   const tokenFromUrl = searchParams.get('token') ?? '';
@@ -58,9 +62,7 @@ function ResetPasswordForm() {
         }, 1500);
       } catch (err) {
         const message =
-          err instanceof ApiClientError
-            ? err.message
-            : 'Unable to reset password. Try again.';
+          err instanceof ApiClientError ? err.message : tCommon('error');
         setError('root', { message });
       }
     })(event);
@@ -70,14 +72,12 @@ function ResetPasswordForm() {
     return (
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Invalid reset link</CardTitle>
-          <CardDescription>
-            This password reset link is missing a token. Request a new one.
-          </CardDescription>
+          <CardTitle>{tCommon('error')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardFooter>
           <Button asChild className="w-full">
-            <Link href="/forgot-password">Request reset link</Link>
+            <Link href="/forgot-password">{tForgot('sendButton')}</Link>
           </Button>
         </CardFooter>
       </Card>
@@ -87,8 +87,8 @@ function ResetPasswordForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Reset password</CardTitle>
-        <CardDescription>Choose a new password for your account.</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className="space-y-4">
@@ -113,7 +113,7 @@ function ResetPasswordForm() {
 
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              New password
+              {t('newPassword')}
             </label>
             <PasswordInput
               id="password"
@@ -128,7 +128,7 @@ function ResetPasswordForm() {
 
           <div className="space-y-2">
             <label htmlFor="confirmPassword" className="text-sm font-medium">
-              Confirm password
+              {t('confirmPassword')}
             </label>
             <PasswordInput
               id="confirmPassword"
@@ -146,17 +146,17 @@ function ResetPasswordForm() {
             {mutation.isPending ? (
               <>
                 <Spinner size="sm" />
-                Updating…
+                {t('resetting')}
               </>
             ) : (
-              'Reset password'
+              t('resetButton')
             )}
           </Button>
           <Link
             href="/login"
             className="text-center text-sm text-muted-foreground hover:text-foreground"
           >
-            Back to sign in
+            {tForgot('backToSignIn')}
           </Link>
         </CardFooter>
       </form>

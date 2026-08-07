@@ -4,18 +4,17 @@ import { Badge, Button, Input } from '@learnova/ui';
 import {
   Bell,
   ChevronRight,
-  Languages,
   LogOut,
   Menu,
   Search,
   Shield,
   UserRound,
 } from 'lucide-react';
-import { useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { LanguageToggle } from '@/components/shared/language-toggle';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { useLogoutMutation } from '@/features/auth';
-import { locales, type AppLocale } from '@/lib/i18n/config';
 import { Link, usePathname, useRouter } from '@/lib/i18n/routing';
 import { siteGutter } from '@/lib/layout';
 import { useAuth } from '@/providers/auth-provider';
@@ -24,67 +23,70 @@ import { cn } from '@/lib/utils';
 
 const SESSIONS_ROUTE = '/sessions';
 
-const LOCALE_LABELS: Record<AppLocale, string> = {
-  en: 'EN',
-  hi: 'HI',
-  te: 'TE',
+const SEGMENT_KEYS: Record<string, string> = {
+  dashboard: 'dashboard',
+  institution: 'institution',
+  campuses: 'campuses',
+  schools: 'schools',
+  departments: 'departments',
+  programs: 'programs',
+  'academic-years': 'academicYears',
+  semesters: 'semesters',
+  sections: 'sections',
+  batches: 'batches',
+  calendar: 'calendar',
+  settings: 'settings',
+  sessions: 'sessions',
+  faculty: 'faculty',
+  students: 'students',
+  courses: 'courses',
 };
-
-const SEGMENT_LABELS: Record<string, string> = {
-  dashboard: 'Dashboard',
-  institution: 'Institution',
-  profile: 'Profile',
-  campuses: 'Campuses',
-  schools: 'Schools',
-  departments: 'Departments',
-  programs: 'Programs',
-  'academic-years': 'Academic Years',
-  semesters: 'Semesters',
-  sections: 'Sections',
-  batches: 'Batches',
-  calendar: 'Calendar',
-  settings: 'Settings',
-  sessions: 'Sessions',
-};
-
-function breadcrumbLabel(segment: string) {
-  return SEGMENT_LABELS[segment] ?? segment.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 function useBreadcrumbs(pathname: string) {
+  const tItems = useTranslations('dashboard.sidebar.items');
+  const tCommon = useTranslations('common');
+  const tNav = useTranslations('nav');
+
   return useMemo(() => {
     const parts = pathname.split('/').filter(Boolean);
     const crumbs: { href: string; label: string }[] = [];
     let acc = '';
     for (const part of parts) {
       acc += `/${part}`;
-      crumbs.push({ href: acc, label: breadcrumbLabel(part) });
+      let label: string;
+      if (part === 'profile') {
+        label = tCommon('profile');
+      } else if (SEGMENT_KEYS[part]) {
+        label = tItems(SEGMENT_KEYS[part] as 'dashboard');
+      } else if (tNav.has(part)) {
+        label = tNav(part as 'dashboard');
+      } else {
+        label = part.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      }
+      crumbs.push({ href: acc, label });
     }
     return crumbs;
-  }, [pathname]);
+  }, [pathname, tItems, tCommon, tNav]);
 }
 
 export function AppTopbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const locale = useLocale() as AppLocale;
+  const t = useTranslations('dashboard.topbar');
+  const tCommon = useTranslations('common');
+  const tItems = useTranslations('dashboard.sidebar.items');
   const { user, signOut } = useAuth();
   const logoutMutation = useLogoutMutation();
   const setMobileNavOpen = useUIStore((s) => s.setMobileNavOpen);
   const breadcrumbs = useBreadcrumbs(pathname);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
       const target = event.target as Node;
       if (profileRef.current && !profileRef.current.contains(target)) {
         setProfileOpen(false);
-      }
-      if (langRef.current && !langRef.current.contains(target)) {
-        setLangOpen(false);
       }
     };
     document.addEventListener('mousedown', onPointerDown);
@@ -103,12 +105,6 @@ export function AppTopbar() {
     router.replace('/login');
   }
 
-  function switchLocale(next: AppLocale) {
-    setLangOpen(false);
-    if (next === locale) return;
-    router.replace(pathname, { locale: next });
-  }
-
   return (
     <header className="sticky top-0 z-20 w-full min-w-0 border-b border-border/80 bg-background/85 backdrop-blur-md">
       <div className={cn('flex h-14 min-w-0 items-center gap-2 sm:h-16 sm:gap-3', siteGutter)}>
@@ -117,7 +113,7 @@ export function AppTopbar() {
           variant="ghost"
           size="icon"
           className="shrink-0 lg:hidden"
-          aria-label="Open navigation"
+          aria-label={tCommon('openNav')}
           onClick={() => {
             setMobileNavOpen(true);
           }}
@@ -156,9 +152,9 @@ export function AppTopbar() {
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               readOnly
-              placeholder="Search…"
+              placeholder={`${tCommon('search')}…`}
               className="h-9 w-full min-w-0 cursor-default rounded-xl border-border/80 bg-muted/40 pl-9 text-sm shadow-none"
-              aria-label="Search (coming soon)"
+              aria-label={`${tCommon('search')} (${tCommon('comingSoon')})`}
             />
           </div>
 
@@ -167,7 +163,7 @@ export function AppTopbar() {
             variant="ghost"
             size="icon"
             className="relative"
-            aria-label="Notifications"
+            aria-label={t('notifications')}
           >
             <Bell />
             <Badge
@@ -177,41 +173,7 @@ export function AppTopbar() {
             />
           </Button>
 
-          <div className="relative" ref={langRef}>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 rounded-xl px-2.5"
-              aria-label="Switch language"
-              aria-expanded={langOpen}
-              onClick={() => {
-                setLangOpen((v) => !v);
-              }}
-            >
-              <Languages className="size-4" />
-              <span className="text-xs font-semibold">{LOCALE_LABELS[locale]}</span>
-            </Button>
-            {langOpen ? (
-              <div className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[120px] overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-soft-md">
-                {locales.map((code) => (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => {
-                      switchLocale(code);
-                    }}
-                    className={cn(
-                      'flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted',
-                      code === locale && 'bg-muted font-medium text-primary',
-                    )}
-                  >
-                    {LOCALE_LABELS[code]}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
+          <LanguageToggle />
 
           <ThemeToggle />
 
@@ -221,7 +183,7 @@ export function AppTopbar() {
               variant="ghost"
               size="icon"
               className="rounded-full"
-              aria-label="Profile menu"
+              aria-label={t('profile')}
               aria-expanded={profileOpen}
               onClick={() => {
                 setProfileOpen((v) => !v);
@@ -234,9 +196,10 @@ export function AppTopbar() {
             {profileOpen ? (
               <div className="absolute right-0 top-[calc(100%+6px)] z-50 w-[min(100vw-1.5rem,14rem)] overflow-hidden rounded-xl border border-border bg-popover shadow-soft-md">
                 <div className="border-b border-border px-3 py-2.5">
-                  <p className="truncate text-sm font-medium">{user?.email ?? 'Account'}</p>
+                  <p className="truncate text-sm font-medium">{user?.email ?? tCommon('account')}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'Signed in'}
+                    {[user?.firstName, user?.lastName].filter(Boolean).join(' ') ||
+                      tCommon('signedIn')}
                   </p>
                 </div>
                 <div className="p-1">
@@ -248,7 +211,7 @@ export function AppTopbar() {
                     className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted"
                   >
                     <Shield className="size-4 text-muted-foreground" />
-                    Sessions
+                    {tItems('sessions')}
                   </Link>
                   <button
                     type="button"
@@ -257,7 +220,7 @@ export function AppTopbar() {
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-danger transition-colors hover:bg-danger/10 disabled:opacity-60"
                   >
                     <LogOut className="size-4" />
-                    {logoutMutation.isPending ? 'Signing out…' : 'Log out'}
+                    {logoutMutation.isPending ? tCommon('signingOut') : t('logout')}
                   </button>
                 </div>
               </div>
@@ -269,7 +232,7 @@ export function AppTopbar() {
       <div className={cn('flex min-w-0 items-center gap-2 border-t border-border/60 py-2 md:hidden', siteGutter)}>
         <UserRound className="size-3.5 shrink-0 text-muted-foreground" />
         <p className="min-w-0 truncate text-xs text-muted-foreground">
-          {breadcrumbs.map((c) => c.label).join(' / ') || 'Dashboard'}
+          {breadcrumbs.map((c) => c.label).join(' / ') || tItems('dashboard')}
         </p>
       </div>
     </header>

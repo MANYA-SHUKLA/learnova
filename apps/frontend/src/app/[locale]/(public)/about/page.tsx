@@ -1,5 +1,5 @@
 import { Button } from '@learnova/ui';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import {
   BookOpen,
   Brain,
@@ -21,39 +21,40 @@ interface AboutPageProps {
 const PILLARS = [
   {
     icon: BookOpen,
-    title: 'Unified learning stack',
-    body: 'LMS, ERP, exams, and coding labs share one identity, one academic structure, and one source of truth.',
+    titleKey: 'pillar1Title',
+    bodyKey: 'pillar1Body',
   },
   {
     icon: Code2,
-    title: 'Build by doing',
-    body: 'Cloud IDE and practice labs turn coursework into production-shaped skills with measurable mastery.',
+    titleKey: 'pillar2Title',
+    bodyKey: 'pillar2Body',
   },
   {
     icon: Brain,
-    title: 'AI with guardrails',
-    body: 'Ideation and assistance stay institution-scoped, auditable, and aligned to faculty policy.',
+    titleKey: 'pillar3Title',
+    bodyKey: 'pillar3Body',
   },
   {
     icon: LineChart,
-    title: 'Outcomes over activity',
-    body: 'Analytics surface where cohorts stall so leaders can intervene with clarity, not guesswork.',
+    titleKey: 'pillar4Title',
+    bodyKey: 'pillar4Body',
   },
   {
     icon: ShieldCheck,
-    title: 'Enterprise trust',
-    body: 'Roles, audit trails, and campus-aware governance come standard — not bolted on later.',
+    titleKey: 'pillar5Title',
+    bodyKey: 'pillar5Body',
   },
   {
     icon: Sparkles,
-    title: 'Designed for polish',
-    body: 'A premium experience for students and operators alike, across light and dark themes.',
+    titleKey: 'pillar6Title',
+    bodyKey: 'pillar6Body',
   },
 ] as const;
 
 export default async function AboutPage({ params }: AboutPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations('marketing.about');
 
   return (
     <>
@@ -66,21 +67,20 @@ export default async function AboutPage({ params }: AboutPageProps) {
           />
           <div className={siteContainer('relative pb-20 pt-20 text-center sm:pb-24 sm:pt-28')}>
             <p className="font-display text-5xl font-bold tracking-tight text-primary sm:text-6xl lg:text-7xl">
-              Learnova
+              {t('brand')}
             </p>
             <h1 className="mt-6 font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              About the platform
+              {t('title')}
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
-              Learnova is an enterprise AI learning platform for modern institutions — LMS, ERP,
-              examinations, coding, cloud IDE, ideation, analytics, and audit in one coherent product.
+              {t('subtitle')}
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href="/login">Institution Login</Link>
+                <Link href="/login">{t('loginCta')}</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className={ctaOutlineClass}>
-                <Link href="/features">Explore Platform</Link>
+                <Link href="/features">{t('exploreCta')}</Link>
               </Button>
             </div>
           </div>
@@ -90,23 +90,27 @@ export default async function AboutPage({ params }: AboutPageProps) {
           <div className={siteContainer()}>
             <div className="mx-auto w-full max-w-3xl text-center">
               <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                What we believe
+                {t('believeTitle')}
               </h2>
               <p className="mt-4 text-base text-muted-foreground sm:text-lg lg:text-xl">
-                Learning infrastructure should feel as refined as the products students aspire to build.
+                {t('believeSubtitle')}
               </p>
             </div>
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:gap-5">
-              {PILLARS.map(({ icon: Icon, title, body }) => (
+              {PILLARS.map(({ icon: Icon, titleKey, bodyKey }) => (
                 <div
-                  key={title}
+                  key={titleKey}
                   className="card-interactive rounded-2xl border border-border bg-card p-6 shadow-soft-sm sm:p-7"
                 >
                   <span className="inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="size-5" />
                   </span>
-                  <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">{body}</p>
+                  <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
+                    {t(titleKey)}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                    {t(bodyKey)}
+                  </p>
                 </div>
               ))}
             </div>
@@ -116,15 +120,14 @@ export default async function AboutPage({ params }: AboutPageProps) {
         <section className="w-full py-20 sm:py-24">
           <div className={siteContainer('text-center')}>
             <h2 className="mx-auto max-w-4xl font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              Built for institutions that teach at scale
+              {t('finalTitle')}
             </h2>
             <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
-              From program structure to exam integrity and coding mastery, Learnova gives campuses a
-              single operating system for academic delivery — without sacrificing polish or control.
+              {t('finalDescription')}
             </p>
             <div className="mt-10">
               <Button asChild size="lg" className={ctaButtonClass}>
-                <Link href="/login">Institution Login</Link>
+                <Link href="/login">{t('finalCta')}</Link>
               </Button>
             </div>
           </div>

@@ -10,6 +10,7 @@ import {
   CardTitle,
   Spinner,
 } from '@learnova/ui';
+import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { ApiClientError } from '@/lib/api/client';
@@ -17,6 +18,8 @@ import { Link } from '@/lib/i18n/routing';
 import { useVerifyEmailMutation } from '@/features/auth';
 
 function VerifyEmailContent() {
+  const t = useTranslations('auth.verifyEmail');
+  const tCommon = useTranslations('common');
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const mutation = useVerifyEmailMutation();
@@ -25,7 +28,7 @@ function VerifyEmailContent() {
     token ? 'loading' : 'error',
   );
   const [message, setMessage] = useState(
-    token ? 'Verifying your email…' : 'Verification token is missing.',
+    token ? tCommon('loading') : tCommon('error'),
   );
 
   const mutateAsync = mutation.mutateAsync;
@@ -38,28 +41,22 @@ function VerifyEmailContent() {
       try {
         const result = await mutateAsync({ token });
         setStatus('success');
-        setMessage(result.message || 'Email verified successfully.');
+        setMessage(result.message || t('description'));
       } catch (err) {
         setStatus('error');
         setMessage(
-          err instanceof ApiClientError
-            ? err.message
-            : 'Unable to verify email. The link may be expired.',
+          err instanceof ApiClientError ? err.message : tCommon('error'),
         );
       }
     })();
-  }, [token, mutateAsync]);
+  }, [token, mutateAsync, t, tCommon]);
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Verify email</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          {status === 'loading'
-            ? 'Confirming your email address.'
-            : status === 'success'
-              ? 'Your account is ready.'
-              : 'We could not verify this link.'}
+          {status === 'loading' ? tCommon('loading') : t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -83,7 +80,7 @@ function VerifyEmailContent() {
       </CardContent>
       <CardFooter>
         <Button asChild className="w-full" disabled={status === 'loading'}>
-          <Link href="/login">Go to sign in</Link>
+          <Link href="/login">{t('backToLogin')}</Link>
         </Button>
       </CardFooter>
     </Card>

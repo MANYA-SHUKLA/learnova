@@ -13,6 +13,7 @@ import {
   Spinner,
 } from '@learnova/ui';
 import { Building2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { PasswordInput } from '@/components/shared/password-input';
@@ -25,6 +26,7 @@ import { ApiClientError } from '@/lib/api/client';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
 export default function RegisterInstitutionPage() {
+  const t = useTranslations('auth.registerInstitution');
   const router = useRouter();
   const registerMutation = useRegisterInstitutionMutation();
 
@@ -59,9 +61,7 @@ export default function RegisterInstitutionPage() {
         router.replace('/login?registered=1');
       } catch (err) {
         const message =
-          err instanceof ApiClientError
-            ? err.message
-            : 'Unable to register institution. Try again.';
+          err instanceof ApiClientError ? err.message : t('errorMessage');
         setError('root', { message });
       }
     })(event);
@@ -97,20 +97,15 @@ export default function RegisterInstitutionPage() {
           <Building2 className="size-6" />
         </span>
         <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-          Register your institution
+          {t('title')}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-          Create the Institution Admin account. After email verification, sign in to finish setup —
-          logo, contact details, and branding.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground sm:text-base">{t('subtitle')}</p>
       </div>
 
       <Card className="border-border/80 shadow-soft-lg">
         <CardHeader>
-          <CardTitle className="text-lg">Create admin account</CardTitle>
-          <CardDescription>
-            Students and faculty are invited by your administrators — there is no public signup.
-          </CardDescription>
+          <CardTitle className="text-lg">{t('cardTitle')}</CardTitle>
+          <CardDescription>{t('cardDescription')}</CardDescription>
         </CardHeader>
         <form onSubmit={onSubmit} noValidate>
           <CardContent className="space-y-4">
@@ -123,21 +118,21 @@ export default function RegisterInstitutionPage() {
               </p>
             ) : null}
 
-            {field('institutionName', 'Institution name', {
-              placeholder: 'SOE JNU',
+            {field('institutionName', t('institutionName'), {
+              placeholder: t('institutionNamePlaceholder'),
             })}
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('adminFirstName', 'Admin first name', { autoComplete: 'given-name' })}
-              {field('adminLastName', 'Admin last name', { autoComplete: 'family-name' })}
+              {field('adminFirstName', t('adminFirstName'), { autoComplete: 'given-name' })}
+              {field('adminLastName', t('adminLastName'), { autoComplete: 'family-name' })}
             </div>
-            {field('adminEmail', 'Admin email', {
+            {field('adminEmail', t('adminEmail'), {
               type: 'email',
               autoComplete: 'email',
-              placeholder: 'shuklamanya99@gmail.com',
+              placeholder: t('adminEmailPlaceholder'),
             })}
             <div className="space-y-1.5">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                {t('password')}
               </label>
               <PasswordInput
                 id="password"
@@ -151,7 +146,7 @@ export default function RegisterInstitutionPage() {
             </div>
             <div className="space-y-1.5">
               <label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm password
+                {t('confirmPassword')}
               </label>
               <PasswordInput
                 id="confirmPassword"
@@ -163,9 +158,7 @@ export default function RegisterInstitutionPage() {
                 <p className="text-xs text-danger">{errors.confirmPassword.message}</p>
               ) : null}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Password must be 12+ characters with upper, lower, number, and special character.
-            </p>
+            <p className="text-xs text-muted-foreground">{t('passwordRequirement')}</p>
 
             <label className="flex items-start gap-2 text-sm text-muted-foreground">
               <input
@@ -175,13 +168,13 @@ export default function RegisterInstitutionPage() {
                 {...register('acceptTerms')}
               />
               <span>
-                I accept the{' '}
+                {t('acceptTermsLabel')}{' '}
                 <Link href="/terms" className="font-medium text-foreground underline-offset-2 hover:underline">
-                  Terms
+                  {t('terms')}
                 </Link>{' '}
-                and{' '}
+                {t('and')}{' '}
                 <Link href="/privacy" className="font-medium text-foreground underline-offset-2 hover:underline">
-                  Privacy Policy
+                  {t('privacyPolicy')}
                 </Link>
                 .
               </span>
@@ -195,16 +188,16 @@ export default function RegisterInstitutionPage() {
               {registerMutation.isPending ? (
                 <>
                   <Spinner size="sm" />
-                  Creating account…
+                  {t('creatingAccount')}
                 </>
               ) : (
-                'Continue'
+                t('continueButton')
               )}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Already registered?{' '}
+              {t('alreadyRegistered')}{' '}
               <Link href="/login" className="font-semibold text-primary hover:underline">
-                Institution Login
+                {t('institutionLogin')}
               </Link>
             </p>
           </CardFooter>
