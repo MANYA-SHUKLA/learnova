@@ -83,6 +83,10 @@
     "students": "छात्र",
     "courses": "पाठ्यक्रम",
     "enrollments": "नामांकन",
+    "progress": "प्रगति",
+    "bookmarks": "बुकमार्क",
+    "notes": "नोट्स",
+    "activity": "गतिविधि",
     "overview": "अवलोकन",
     "profile": "प्रोफ़ाइल",
     "settings": "सेटिंग्स",
@@ -547,7 +551,9 @@
         "institution": "संस्थान",
         "academics": "शिक्षाविद",
         "peopleAndLearning": "लोग और शिक्षा",
-        "system": "प्रणाली"
+        "system": "प्रणाली",
+        "facultyHome": "संकाय",
+        "studentHome": "अधिगम"
       },
       "items": {
         "dashboard": "डैशबोर्ड",
@@ -566,7 +572,12 @@
         "students": "छात्र",
         "courses": "पाठ्यक्रम",
         "enrollments": "नामांकन",
-        "sessions": "सत्र"
+        "progress": "प्रगति",
+        "bookmarks": "बुकमार्क",
+        "notes": "नोट्स",
+        "activity": "गतिविधि",
+        "sessions": "सत्र",
+        "profile": "प्रोफ़ाइल"
       },
       "comingSoon": "जल्द"
     },
@@ -1073,6 +1084,26 @@
         "emptyTitle": "अभी कोई नामांकन नहीं",
         "emptyDescription": "अपना पहला नामांकन जोड़ें या निर्देशिका भरने के लिए CSV आयात करें।"
       },
+      "progress": {
+        "eyebrow": "लोग और शिक्षा",
+        "title": "अधिगम प्रगति",
+        "description": "संस्थान-व्यापी प्रगति, भागीदारी और पाठ्यक्रम गतिविधि।",
+        "loadError": "प्रगति विश्लेषण लोड नहीं हो सका।",
+        "stats": {
+          "totalHours": "अधिगम घंटे",
+          "completionRate": "पूर्णता दर",
+          "engagement": "भागीदारी",
+          "activeCourses": "सक्रिय पाठ्यक्रम"
+        },
+        "byDepartment": "विभाग के अनुसार",
+        "byDepartmentDescription": "विभागों में औसत प्रगति।",
+        "byProgram": "कार्यक्रम के अनुसार",
+        "byProgramDescription": "कार्यक्रमों में औसत प्रगति।",
+        "mostActive": "सबसे सक्रिय पाठ्यक्रम",
+        "mostActiveDescription": "सर्वाधिक अधिगम गतिविधि वाले पाठ्यक्रम।",
+        "studentsCount": "{count} शिक्षार्थी",
+        "noData": "अभी कोई विश्लेषण डेटा नहीं।"
+      },
       "courseBuilder": {
         "title": "पाठ्यक्रम बिल्डर",
         "openBuilder": "बिल्डर खोलें",
@@ -1274,6 +1305,30 @@
         "searchPlaceholder": "छात्र, पाठ्यक्रम, नामांकन संख्या खोजें…",
         "emptyTitle": "अभी कोई नामांकन नहीं",
         "emptyDescription": "छात्रों के नामांकन के बाद पाठ्यक्रम नामांकन यहां दिखाई देंगे।"
+      },
+      "progress": {
+        "eyebrow": "शिक्षण",
+        "title": "पाठ्यक्रम प्रगति",
+        "description": "आपके द्वारा पढ़ाए जाने वाले पाठ्यक्रम के लिए शिक्षार्थी प्रगति का विश्लेषण करें।",
+        "selectTitle": "पाठ्यक्रम चुनें",
+        "selectDescription": "प्रति-पाठ्यक्रम विश्लेषण लोड करने के लिए पाठ्यक्रम आईडी दर्ज करें।",
+        "courseIdPlaceholder": "पाठ्यक्रम आईडी",
+        "load": "विश्लेषण लोड करें",
+        "emptyTitle": "पाठ्यक्रम चुनें",
+        "emptyDescription": "प्रगति विश्लेषण देखने के लिए ऊपर पाठ्यक्रम आईडी दर्ज करें।",
+        "loadError": "संकाय प्रगति विश्लेषण लोड नहीं हो सका।",
+        "stats": {
+          "averageProgress": "औसत प्रगति",
+          "started": "शुरू किया",
+          "inProgress": "प्रगति में",
+          "completed": "पूर्ण"
+        },
+        "topLearners": "शीर्ष शिक्षार्थी",
+        "topLearnersDescription": "सर्वाधिक प्रगति वाले छात्र।",
+        "leastActive": "न्यूनतम सक्रिय",
+        "leastActiveDescription": "वे छात्र जिन्हें प्रोत्साहन की आवश्यकता हो सकती है।",
+        "noLearners": "अभी कोई शिक्षार्थी डेटा नहीं।",
+        "neverAccessed": "कभी एक्सेस नहीं"
       }
     },
     "studentHome": {
@@ -1305,9 +1360,93 @@
         "waitlistDescription": "पाठ्यक्रम जिनमें आप नामांकन के लिए प्रतीक्षा कर रहे हैं।",
         "emptyTitle": "अभी कोई नामांकन नहीं",
         "emptyDescription": "अपने पहले पाठ्यक्रम में नामांकन के लिए ऊपर दिए गए फॉर्म का उपयोग करें।"
+      },
+      "progress": {
+        "eyebrow": "शिक्षण",
+        "title": "मेरी प्रगति",
+        "description": "पाठ्यक्रम ट्रैक करें, अधिगम फिर से शुरू करें और अपनी गतिविधि देखें।",
+        "loadError": "प्रगति लोड नहीं हो सकी।",
+        "searchPlaceholder": "पाठ्यक्रम खोजें…",
+        "continueTitle": "अधिगम जारी रखें",
+        "continueDescription": "जहाँ छोड़ा था वहीं से शुरू करें।",
+        "continueEmpty": "अभी कोई पाठ्यक्रम प्रगति में नहीं।",
+        "resume": "फिर से शुरू करें",
+        "coursesTitle": "पाठ्यक्रम",
+        "coursesDescription": "अपनी अधिगम प्रगति फ़िल्टर और ब्राउज़ करें।",
+        "viewCourse": "पाठ्यक्रम देखें",
+        "activityTitle": "हाल की गतिविधि",
+        "activityDescription": "आपकी नवीनतम अधिगम घटनाएँ।",
+        "activityEmpty": "अभी कोई गतिविधि नहीं।",
+        "emptyTitle": "अभी कोई प्रगति नहीं",
+        "emptyDescription": "प्रगति देखने के लिए पाठ्यक्रम में नामांकन करें और सीखना शुरू करें।",
+        "stats": {
+          "inProgress": "प्रगति में",
+          "completed": "पूर्ण",
+          "hoursLearned": "सीखे गए घंटे",
+          "streak": "स्ट्रीक",
+          "streakHint": "सक्रिय दिन"
+        },
+        "course": {
+          "eyebrow": "पाठ्यक्रम प्रगति",
+          "title": "पाठ्यक्रम विवरण",
+          "description": "इस पाठ्यक्रम के मॉड्यूल, पाठ और पुनः आरंभ नियंत्रण।",
+          "back": "प्रगति पर वापस",
+          "resume": "अधिगम फिर से शुरू करें",
+          "modulesTitle": "मॉड्यूल और पाठ",
+          "modulesDescription": "जारी रखने के लिए पाठ खोलें या पूर्ण चिह्नित करें।",
+          "open": "खोलें",
+          "complete": "पूर्ण करें",
+          "completed": "पूर्ण",
+          "emptyTitle": "अभी कोई मॉड्यूल नहीं",
+          "emptyDescription": "इस पाठ्यक्रम में कोई प्रकाशित मॉड्यूल नहीं है।",
+          "loadError": "पाठ्यक्रम प्रगति लोड नहीं हो सकी।"
+        },
+        "bookmarks": {
+          "eyebrow": "शिक्षण",
+          "title": "बुकमार्क",
+          "description": "सहेजे गए मॉड्यूल, पाठ और संसाधन।",
+          "directory": "सहेजे गए आइटम",
+          "directoryDescription": "अपने बुकमार्क खोजें और प्रबंधित करें।",
+          "searchPlaceholder": "बुकमार्क खोजें…",
+          "emptyTitle": "अभी कोई बुकमार्क नहीं",
+          "emptyDescription": "सीखते समय पाठ और संसाधन बुकमार्क करें।",
+          "open": "पाठ्यक्रम खोलें",
+          "remove": "हटाएँ",
+          "loadError": "बुकमार्क लोड नहीं हो सके।"
+        },
+        "notes": {
+          "eyebrow": "शिक्षण",
+          "title": "नोट्स",
+          "description": "पाठ्यक्रमों में आपके व्यक्तिगत अधिगम नोट्स।",
+          "directory": "सभी नोट्स",
+          "directoryDescription": "नोट्स खोजें, संपादित करें या हटाएँ।",
+          "searchPlaceholder": "नोट्स खोजें…",
+          "emptyTitle": "अभी कोई नोट्स नहीं",
+          "emptyDescription": "सीखते समय बनाए गए नोट्स यहाँ दिखाई देंगे।",
+          "open": "पाठ्यक्रम खोलें",
+          "edit": "संपादित करें",
+          "save": "सहेजें",
+          "cancel": "रद्द करें",
+          "remove": "हटाएँ",
+          "loadError": "नोट्स लोड नहीं हो सके।"
+        },
+        "activity": {
+          "eyebrow": "शिक्षण",
+          "title": "गतिविधि",
+          "description": "आपकी अधिगम घटनाओं की समयरेखा।",
+          "timelineTitle": "गतिविधि समयरेखा",
+          "timelineDescription": "हाल के खोलना, पूर्णता और सत्र।",
+          "empty": "अभी कोई गतिविधि नहीं।",
+          "pagination": "पृष्ठ",
+          "pageOf": "पृष्ठ {page} / {total}",
+          "prev": "पिछला",
+          "next": "अगला",
+          "loadError": "गतिविधि लोड नहीं हो सकी।"
+        }
       }
     }
   },
+
   "errors": {
     "unauthorized": {
       "title": "अनधिकृत",

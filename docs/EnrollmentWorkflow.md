@@ -45,4 +45,4 @@ Join → position assigned · Leave → remove · Promote → create enrollment 
 
 ## Integration checkpoint
 
-Do not start Progress Tracking until Step **8.25** passes: enrollment rules, role flows, dashboard consistency, and audit/events. See [Roadmap.md](./Roadmap.md#step-825--enrollment-integration-checkpoint).
+✅ Step **8.25** passed (seed stack / APIs): enrollment rules, role flows, dashboard consistency, and audit/events. Progress Tracking (8.5) shipped — see [Progress.md](./Progress.md) and [Roadmap.md](./Roadmap.md#step-825--enrollment-integration-checkpoint).

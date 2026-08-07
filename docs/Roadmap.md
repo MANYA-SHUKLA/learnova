@@ -18,18 +18,18 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **7** | **Course Management (catalog)** | ✅ Complete |
 | **7.5** | **Course Builder & Content Management** | ✅ Complete |
 | **8** | **Enrollments** | ✅ Complete |
-| **8.25** | **Enrollment Integration Checkpoint** | 🔄 Required before 8.5 |
-| 8.5 | Progress Tracking | Planned |
+| **8.25** | **Enrollment Integration Checkpoint** | ✅ Complete |
+| **8.5** | **Progress Tracking** | ✅ Complete |
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Do **not** start Progress Tracking (8.5) until Step **8.25** enrollment integration checks pass. Enrollments are the source of truth for each learner’s journey.
+**Hard rule:** Progress Tracking (8.5) is **complete** (DoD met). Practice Labs (Step **9**) is next and must **not** start until Progress DoD is met — now met. Enrollments remain the source of truth for each learner’s journey.
 
 | Item often called “rest of Step 7” | Actual home |
 | --- | --- |
 | Course builder UI | **7.5** Content Builder |
 | Modules / lessons CRUD UI | **7.5** Content Builder |
-| Progress tracking UI | **8.5** (after **8.25** checkpoint) |
+| Progress tracking | **8.5** ✅ |
 | Enrollments | **8** |
 | Enrollment integration | **8.25** |
 | Richer search / filters | Catalog polish on **7** (optional) or content search in **7.5** |
@@ -172,7 +172,7 @@ These are **next steps**, not open Step 7 work:
 | **7.5** | Course builder UI · modules/lessons CRUD · content import/export |
 | **8** | Enrollments (approve / auto / waitlist / deadline) |
 | **8.25** | Enrollment integration checkpoint |
-| **8.5** | Progress tracking UI (per lesson) |
+| **8.5** | Progress tracking ✅ |
 | **14** | Richer analytics (completion, enrollments, faculty load) |
 
 ```
@@ -227,9 +227,9 @@ Module → Lesson → Content
 
 **Content types:** Video · PDF · Markdown · HTML · Image · Audio · External Link · Embed · Code Block · Download · Presentation
 
-### Student progress (per lesson) *(later)*
+### Student progress (per lesson) *(Step 8.5 ✅)*
 
-Started · Completed · Watch % · Reading % · Time · Bookmarks · Notes · Last Position
+Started · Completed · Watch % · Reading % · Time · Bookmarks · Notes · Last Position — see [Progress.md](./Progress.md)
 
 ### Role features
 
@@ -268,7 +268,7 @@ Generate Outline · Lessons · Quiz · Assignment · Lab · Project
 - `CoursePermissions.md`
 - `CourseImportExport.md`
 - `CourseDashboard.md`
-- `CourseBuilder.md` / `CourseProgress.md` — future lesson steps
+- `CourseBuilder.md` · `Progress.md` / `CourseProgress.md` — shipped in **7.5** / **8.5**
 
 ### Testing (Step 7 DoD)
 
@@ -278,10 +278,12 @@ CRUD · Permissions · Publishing · Archive · Duplicate · Search · Filters �
 
 ## Step 8.25 — Enrollment Integration Checkpoint
 
-**Status:** 🔄 Required before Progress Tracking  
+**Status:** ✅ Complete  
 **Goal:** Prove enrollment rules, roles, dashboards, and audit/events are stable. Enrollments become the source of truth for Step **8.5** learner journeys.
 
-**Hard rule:** Do not start Progress Tracking until this checklist passes.
+**Checkpoint verified** via seed stack (`seed:auth`, `seed:enrollments`) and enrollment APIs — rules, role flows, dashboard counts, and audit/events stable before Progress was built.
+
+**Hard rule (historical):** Do not start Progress Tracking until this checklist passes — **passed**.
 
 ### Course enrollment rules
 
@@ -338,7 +340,40 @@ For every lifecycle action, confirm audit log + domain event:
 
 ✓ Rules behave correctly · ✓ Roles scoped correctly · ✓ Dashboards consistent · ✓ Audit + events present  
 
-Then proceed to **Step 8.5 — Progress Tracking**.
+**Passed** — proceeded to **Step 8.5 — Progress Tracking**.
+
+---
+
+## Step 8.5 — Progress Tracking
+
+**Status:** ✅ Complete  
+**Goal:** Track enrolled learners through published course content with rollup, resume, bookmarks/notes, activity, and role dashboards.
+
+### Shipped
+
+- Course / module / lesson / resource progress models + rollup
+- Open · update · complete lessons · resume position · learning sessions
+- Bookmarks · lesson notes (+ export) · learning activity feed
+- Student / faculty / institution dashboards · stats · search
+- Permissions (`progress:read|write|manage`), audit, domain events, seed, tests, docs
+
+### Out of scope (later)
+
+Practice labs · projects · assignments · quizzes · exams · gradebook · attendance · certificates · AI
+
+### Documentation
+
+- `Progress.md`
+- `CourseProgress.md`
+- `LessonProgress.md`
+- `Bookmarks.md`
+- `LearningActivity.md`
+
+### Exit criteria (DoD — met)
+
+✓ Enrollment-gated writes · ✓ Published-content rollup · ✓ Permissions + scoping · ✓ Audit/events · ✓ Dashboards · ✓ Seed/tests/docs  
+
+**Hard rule:** Progress DoD is met. Do **not** start Practice Labs (Step **9**) until this DoD is met — **now met**.
 
 ---
 
@@ -348,8 +383,8 @@ Then proceed to **Step 8.5 — Progress Tracking**.
 | --- | --- | --- |
 | **7.5** | Course Content Builder (modules / lessons / resources) | ✅ Complete |
 | **8** | Enrollments | ✅ Complete |
-| **8.25** | Enrollment Integration Checkpoint | 🔄 Required before 8.5 |
-| **8.5** | Progress tracking | Planned |
+| **8.25** | Enrollment Integration Checkpoint | ✅ Complete |
+| **8.5** | Progress tracking | ✅ Complete |
 | 9 | Practice Labs / Coding | Planned |
 | 10 | Projects / Ideation | Planned |
 | 11 | Examinations | Planned |
@@ -360,7 +395,7 @@ Then proceed to **Step 8.5 — Progress Tracking**.
 
 **Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
-**Boundary:** Enrollments (Step 8) + checkpoint (8.25) before Progress Tracking (8.5).
+**Boundary:** Progress (8.5) DoD met — Practice Labs (9) is next; do not start labs until Progress DoD is met (now met).
 
 ---
 
@@ -369,4 +404,6 @@ Then proceed to **Step 8.5 — Progress Tracking**.
 - [Institution](./Institution.md) · [Academic Structure](./AcademicStructure.md)
 - [Faculty](./Faculty.md) · [Student](./Student.md) · [Course](./Course.md)
 - [Enrollment](./Enrollment.md) · [EnrollmentWorkflow](./EnrollmentWorkflow.md)
+- [Progress](./Progress.md) · [CourseProgress](./CourseProgress.md) · [LessonProgress](./LessonProgress.md)
+- [Bookmarks](./Bookmarks.md) · [LearningActivity](./LearningActivity.md)
 - [Auth](./Auth.md) · [Architecture](./Architecture.md)

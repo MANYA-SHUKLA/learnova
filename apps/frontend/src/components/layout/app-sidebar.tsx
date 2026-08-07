@@ -4,8 +4,11 @@ import { APP_ROUTES } from '@learnova/constants';
 import { Separator } from '@learnova/ui';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+  Activity,
+  Bookmark,
   Building2,
   CalendarDays,
+  BarChart3,
   ChevronLeft,
   ChevronRight,
   GraduationCap,
@@ -19,6 +22,7 @@ import {
   Network,
   CalendarRange,
   Grid3X3,
+  NotebookPen,
   Users,
   UserRound,
   ClipboardList,
@@ -52,6 +56,10 @@ type SidebarItemId =
   | 'students'
   | 'courses'
   | 'enrollments'
+  | 'progress'
+  | 'bookmarks'
+  | 'notes'
+  | 'activity'
   | 'sessions'
   | 'profile';
 
@@ -99,6 +107,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'courses', href: APP_ROUTES.INSTITUTION_COURSES, icon: BookOpen },
       { id: 'enrollments', href: APP_ROUTES.INSTITUTION_ENROLLMENTS, icon: ClipboardList },
+      { id: 'progress', href: APP_ROUTES.INSTITUTION_PROGRESS, icon: BarChart3 },
     ],
   },
   {
@@ -114,6 +123,7 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
     items: [
       { id: 'dashboard', href: APP_ROUTES.FACULTY_DASHBOARD, icon: LayoutDashboard, exact: true },
       { id: 'enrollments', href: APP_ROUTES.FACULTY_ENROLLMENTS, icon: ClipboardList },
+      { id: 'progress', href: APP_ROUTES.FACULTY_PROGRESS, icon: BarChart3 },
       { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
@@ -128,6 +138,10 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
     items: [
       { id: 'dashboard', href: APP_ROUTES.STUDENT_DASHBOARD, icon: LayoutDashboard, exact: true },
       { id: 'enrollments', href: APP_ROUTES.STUDENT_ENROLLMENTS, icon: ClipboardList },
+      { id: 'progress', href: APP_ROUTES.STUDENT_PROGRESS, icon: BarChart3 },
+      { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },
+      { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },
+      { id: 'activity', href: APP_ROUTES.STUDENT_ACTIVITY, icon: Activity },
       { id: 'profile', href: APP_ROUTES.STUDENT_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
     ],
