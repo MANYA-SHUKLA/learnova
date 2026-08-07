@@ -45,7 +45,10 @@ export const authApi = {
   },
 
   changePassword(body: { currentPassword: string; newPassword: string }) {
-    return apiClient.post<MessageResponse>(`${BASE}/change-password`, body);
+    return apiClient.post<AuthSessionResponse & { message: string }>(
+      `${BASE}/change-password`,
+      body,
+    );
   },
 
   verifyEmail(body: { token: string }) {

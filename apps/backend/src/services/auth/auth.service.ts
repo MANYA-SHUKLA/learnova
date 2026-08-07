@@ -64,6 +64,7 @@ function toAuthUser(user: UserEntity, role: Role, permissions: Permission[]): Au
     locale: user.locale as AuthUser['locale'],
     avatarUrl: user.avatarUrl ?? null,
     isEmailVerified: user.isEmailVerified,
+    mustChangePassword: Boolean(user.mustChangePassword),
   };
 }
 
@@ -261,6 +262,7 @@ export class AuthService {
       passwordHistory: [],
       lastPasswordChangedAt: new Date(),
       lastLoginAt: new Date(),
+      mustChangePassword: false,
     });
 
     await auditAuthLogRepository.create({
@@ -594,6 +596,7 @@ export class AuthService {
       lastPasswordChangedAt: new Date(),
       failedLoginAttempts: 0,
       lockedUntil: null,
+      mustChangePassword: false,
     });
     await passwordResetTokenRepository.markUsed(token._id);
     await sessionRepository.revokeAllForUser(String(user._id));
@@ -633,25 +636,41 @@ export class AuthService {
       AUTH.PASSWORD_HISTORY_SIZE,
     );
 
-    await userRepository.updateById(userId, {
+    const updated = await userRepository.updateById(userId, {
       passwordHash,
       passwordHistory: history,
       lastPasswordChangedAt: new Date(),
+      mustChangePassword: false,
     });
+    if (!updated) throw new NotFoundError('User not found');
+
     await sessionRepository.revokeAllForUser(userId);
     await refreshTokenRepository.revokeAllForUser(userId);
     await userRepository.bumpTokenVersion(userId);
 
+    const { role, permissions } = await resolveRolePermissions(updated.roleId);
+    // Re-read after tokenVersion bump
+    const fresh = await userRepository.findById(userId);
+    if (!fresh) throw new NotFoundError('User not found');
+
+    const issued = await issueSessionTokens(fresh, role, permissions, ctx);
+
     await auditAuthLogRepository.create({
       event: 'password.changed',
-      userId: user._id,
-      email: user.email,
+      userId: fresh._id,
+      email: fresh.email,
       ipAddress: ctx.ipAddress,
       userAgent: ctx.userAgent,
       correlationId: ctx.correlationId,
+      metadata: { sessionId: issued.session.id, clearedMustChangePassword: true },
     });
 
-    return { message: 'Password changed. Please sign in again.' };
+    return {
+      message: 'Password changed successfully.',
+      user: toAuthUser(fresh, role, permissions),
+      session: issued.session,
+      tokens: issued.tokens,
+    };
   }
 
   async verifyEmail(input: VerifyEmailInput, ctx: ClientContext) {

@@ -14,6 +14,8 @@ const userSchema = new Schema(
     lockedUntil: { type: Date, default: null },
     lastLoginAt: { type: Date, default: null },
     lastPasswordChangedAt: { type: Date, default: null },
+    /** When true, user must change password before accessing dashboards */
+    mustChangePassword: { type: Boolean, default: false, index: true },
     passwordHistory: { type: [String], default: [] },
     tokenVersion: { type: Number, default: 0 },
     locale: { type: String, default: 'en' },

@@ -111,6 +111,25 @@ export function useResetPasswordMutation() {
   });
 }
 
+export function useChangePasswordMutation() {
+  const queryClient = useQueryClient();
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+  return useMutation({
+    mutationFn: (body: { currentPassword: string; newPassword: string }) =>
+      authApi.changePassword(body),
+    onSuccess: (data) => {
+      storeAccessToken(data.accessToken);
+      setAuth({
+        user: data.user,
+        accessToken: data.accessToken,
+        session: data.session,
+      });
+      void queryClient.invalidateQueries({ queryKey: authKeys.all });
+    },
+  });
+}
+
 export function useVerifyEmailMutation() {
   return useMutation({
     mutationFn: (body: { token: string }) => authApi.verifyEmail(body),

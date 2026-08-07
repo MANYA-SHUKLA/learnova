@@ -163,8 +163,18 @@ export async function changePassword(
       body,
       getClientContext(req),
     );
-    clearRefreshCookie(res);
-    sendSuccess(res, result, { requestId: req.requestId });
+    setRefreshCookie(res, result.tokens.refreshToken);
+    sendSuccess(
+      res,
+      {
+        message: result.message,
+        user: result.user,
+        session: result.session,
+        accessToken: result.tokens.accessToken,
+        expiresIn: result.tokens.expiresIn,
+      },
+      { requestId: req.requestId },
+    );
   } catch (err) {
     next(err);
   }

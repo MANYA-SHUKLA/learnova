@@ -14,6 +14,7 @@ export {
   useLogoutAllMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useChangePasswordMutation,
   useVerifyEmailMutation,
   useRevokeSessionMutation,
   useRefreshMutation,

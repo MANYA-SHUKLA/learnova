@@ -104,6 +104,7 @@ export const APP_ROUTES = {
   FACULTY_ASSIGNMENTS: '/faculty/assignments',
   STUDENT_ASSIGNMENTS: '/student/assignments',
   STUDENT_ASSIGNMENT_DETAIL: '/student/assignments/:id',
+  CHANGE_PASSWORD: '/account/change-password',
 } as const;
 
 export const SOCKET_NAMESPACES = {

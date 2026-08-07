@@ -36,10 +36,16 @@ export const resetPasswordSchema = z.object({
   path: ['confirmPassword'],
 });
 
-export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required').max(128),
-  newPassword: passwordStrong,
-});
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required').max(128),
+    newPassword: passwordStrong,
+    confirmPassword: z.string().min(1, 'Confirm your password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export const verifyEmailSchema = z.object({
   token: z.string().min(20, 'Invalid verification token'),

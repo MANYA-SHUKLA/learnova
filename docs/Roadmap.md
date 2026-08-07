@@ -494,4 +494,4 @@ Practice Labs (10), Quizzes, and Exams **must** import Assessment Core helpers �
 - [Assignment](./Assignment.md) · [AssignmentAPI](./AssignmentAPI.md) · [Submission](./Submission.md)
 - [Rubrics](./Rubrics.md) · [AssignmentPermissions](./AssignmentPermissions.md)
 - [AssessmentCore](./AssessmentCore.md) · [ADR 0006](./adr/0006-assessment-core.md)
-- [Auth](./Auth.md) · [Architecture](./Architecture.md)
+- [AccessModel](./AccessModel.md) · [Auth](./Auth.md) · [Architecture](./Architecture.md)

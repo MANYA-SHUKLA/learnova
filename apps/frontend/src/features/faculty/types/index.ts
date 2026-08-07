@@ -41,6 +41,17 @@ export interface FacultyListResult {
   meta: PaginatedMeta;
 }
 
+export type FacultyCredentials = {
+  email: string;
+  temporaryPassword: string;
+  employeeId: string;
+  facultyCode: string;
+};
+
+export type FacultyCreateResult = Faculty & {
+  credentials: FacultyCredentials | null;
+};
+
 export type FacultyCreateBody = {
   employeeId: string;
   facultyCode: string;

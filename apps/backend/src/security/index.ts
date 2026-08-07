@@ -45,6 +45,8 @@ export function generateRandomToken(bytes = 32): string {
   return randomBytes(bytes).toString('hex');
 }
 
+export { generateTemporaryPassword } from './temp-password.js';
+
 export function generateUuid(): string {
   return createId();
 }

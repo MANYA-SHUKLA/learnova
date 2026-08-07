@@ -15,6 +15,7 @@ export class UserRepository {
     passwordHistory?: string[];
     lastPasswordChangedAt?: Date;
     lastLoginAt?: Date;
+    mustChangePassword?: boolean;
   }): Promise<UserEntity> {
     return UserModel.create(data);
   }
@@ -38,6 +39,7 @@ export class UserRepository {
       lockedUntil: Date | null;
       lastLoginAt: Date;
       lastPasswordChangedAt: Date;
+      mustChangePassword: boolean;
       tokenVersion: number;
       firstName: string;
       lastName: string;

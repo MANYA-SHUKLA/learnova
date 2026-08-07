@@ -86,7 +86,8 @@ export const studentApi = {
 
   getMe: () => apiClient.get<Student>(`${API_ROUTES.STUDENTS}/me`),
 
-  create: (body: StudentCreateBody) => apiClient.post<Student>(API_ROUTES.STUDENTS, body),
+  create: (body: StudentCreateBody) =>
+    apiClient.post<import('../types').StudentCreateResult>(API_ROUTES.STUDENTS, body),
 
   update: (id: string, body: StudentUpdateBody) =>
     apiClient.patch<Student>(`${API_ROUTES.STUDENTS}/${id}`, body),

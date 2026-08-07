@@ -44,6 +44,17 @@ export interface StudentListResult {
   meta: PaginatedMeta;
 }
 
+export type StudentCredentials = {
+  email: string;
+  temporaryPassword: string;
+  studentId: string;
+  admissionNumber: string;
+};
+
+export type StudentCreateResult = Student & {
+  credentials: StudentCredentials | null;
+};
+
 export type StudentCreateBody = {
   studentId: string;
   admissionNumber: string;

@@ -84,6 +84,8 @@ export interface AuthUser {
   locale: Locale;
   avatarUrl: string | null;
   isEmailVerified: boolean;
+  /** Faculty/student first login must set a personal password */
+  mustChangePassword: boolean;
 }
 
 export interface Session {

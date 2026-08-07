@@ -1,16 +1,18 @@
 /**
  * Provision a login User for faculty/student ERP records.
- * Idempotent: if email already has a user, returns existing.
+ * Idempotent: if email already has a user, returns existing (no new temp password).
+ *
+ * New users get a cryptographically random temporary password (bcrypt-hashed)
+ * and mustChangePassword=true until they set a personal password.
  */
 
 import { Types } from 'mongoose';
 import type { Role } from '@learnova/types';
+import { generateTemporaryPassword } from '../../security/temp-password.js';
 import { hashPassword } from '../../security/index.js';
 import { roleRepository, userRepository } from '../../repositories/auth/index.js';
 import { ConflictError, NotFoundError } from '../../utils/errors/index.js';
 import { logger } from '../../utils/logger/index.js';
-
-const DEFAULT_TEMP_PASSWORD = 'Learnova@ChangeMe1';
 
 export interface ProvisionLoginUserInput {
   email: string;
@@ -18,8 +20,10 @@ export interface ProvisionLoginUserInput {
   lastName: string;
   institutionId: string;
   role: Extract<Role, 'faculty' | 'student'>;
-  /** Plain password; defaults to a known demo temp password */
+  /** Explicit password (e.g. demo seed). If omitted, a random temp password is generated. */
   password?: string;
+  /** Override mustChangePassword (demo accounts may set false). Default: true when creating. */
+  mustChangePassword?: boolean;
 }
 
 export async function provisionLoginUser(input: ProvisionLoginUserInput): Promise<{
@@ -38,8 +42,9 @@ export async function provisionLoginUser(input: ProvisionLoginUserInput): Promis
     throw new NotFoundError(`${input.role} role is not seeded — run seed:auth`);
   }
 
-  const password = input.password ?? DEFAULT_TEMP_PASSWORD;
-  const passwordHash = await hashPassword(password);
+  const temporaryPassword = input.password ?? generateTemporaryPassword(12);
+  const mustChangePassword = input.mustChangePassword ?? true;
+  const passwordHash = await hashPassword(temporaryPassword);
 
   try {
     const user = await userRepository.create({
@@ -52,13 +57,17 @@ export async function provisionLoginUser(input: ProvisionLoginUserInput): Promis
       isEmailVerified: true,
       passwordHistory: [],
       lastPasswordChangedAt: new Date(),
+      mustChangePassword,
     });
 
-    logger.info({ email, role: input.role, userId: String(user._id) }, 'Login user provisioned');
+    logger.info(
+      { email, role: input.role, userId: String(user._id), mustChangePassword },
+      'Login user provisioned with temporary password',
+    );
     return {
       userId: String(user._id),
       created: true,
-      temporaryPassword: input.password ? null : DEFAULT_TEMP_PASSWORD,
+      temporaryPassword,
     };
   } catch (err) {
     const again = await userRepository.findByEmail(email);
@@ -69,5 +78,3 @@ export async function provisionLoginUser(input: ProvisionLoginUserInput): Promis
     throw err;
   }
 }
-
-export { DEFAULT_TEMP_PASSWORD };

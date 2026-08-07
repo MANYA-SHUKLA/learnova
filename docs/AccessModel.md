@@ -6,6 +6,23 @@ Fixed user provisioning and login workflow for the ERP + LMS core.
 
 ---
 
+## Faculty / Student credential handoff
+
+When Institution Admin creates Faculty or Student:
+
+1. System generates a **random 12-character temporary password** (never typed by admin)
+2. Password is stored as **bcrypt hash** only (`passwordHash`); plain text is returned **once** in the create API response
+3. User record has `mustChangePassword: true`
+4. Admin UI shows Copy / Print / Save PDF credentials for offline delivery (email, WhatsApp, HR letter)
+5. On first login, user is forced to `/account/change-password` (cannot skip)
+6. After change → `mustChangePassword: false` → role dashboard
+
+Institution Admin from registration chooses their own password → `mustChangePassword: false` → direct dashboard.
+
+Demo seed accounts use a fixed password with `mustChangePassword: false` for local testing.
+
+---
+
 ## Roles present in Learnova
 
 | Role | Who | Login | Dashboard |
@@ -99,8 +116,8 @@ Admin **create** flows inside the authenticated Faculty/Student modules are inte
 | Role | Created by | Can sign up | Login | Dashboard |
 | --- | --- | --- | --- | --- |
 | Institution Admin | Institution Registration | Yes (institution onboarding only) | Email + Password | Institution |
-| Faculty | Institution Admin | No | Email + Password | Faculty |
-| Student | Institution Admin | No | Email + Password | Student |
+| Faculty | Institution Admin | No | Email + Password (system temp) | Faculty (after mandatory password change) |
+| Student | Institution Admin | No | Email + Password (system temp) | Student (after mandatory password change) |
 
 ---
 
@@ -113,8 +130,8 @@ Admin **create** flows inside the authenticated Faculty/Student modules are inte
 | Role redirect | `apps/frontend/src/lib/auth/redirects.ts` |
 | Faculty login user | `provisionLoginUser({ role: 'faculty' })` on faculty create |
 | Student login user | `provisionLoginUser({ role: 'student' })` on student create |
-| Temp password default | `Learnova@ChangeMe1` (unless admin sets one) |
-| Demo accounts | `seed:demo` → `faculty.demo@learnova.test` / `student.demo@learnova.test` |
+| Temp password | Random 12-char via `generateTemporaryPassword()` · bcrypt hashed · `mustChangePassword` |
+| Demo accounts | `seed:demo` → fixed `Demo@12345` with `mustChangePassword: false` |
 
 ---
 

@@ -230,20 +230,38 @@ export class StudentService {
       { actorId: actor.userId },
     );
 
+    let credentials: {
+      email: string;
+      temporaryPassword: string;
+      studentId: string;
+      admissionNumber: string;
+    } | null = null;
+
     try {
       const { provisionLoginUser } = await import('../users/provision-login-user.js');
-      await provisionLoginUser({
+      const provisioned = await provisionLoginUser({
         email: input.email,
         firstName: input.firstName,
         lastName: input.lastName,
         institutionId,
         role: 'student',
       });
+      if (provisioned.created && provisioned.temporaryPassword) {
+        credentials = {
+          email: input.email.toLowerCase(),
+          temporaryPassword: provisioned.temporaryPassword,
+          studentId: input.studentId,
+          admissionNumber: input.admissionNumber,
+        };
+      }
     } catch (err) {
       logger.warn({ err, email: input.email }, 'Student login user provisioning skipped/failed');
     }
 
-    return toDto(doc);
+    return {
+      ...toDto(doc),
+      credentials,
+    };
   }
 
   async list(query: StudentListQuery, actor: ActorContext) {
@@ -821,7 +839,7 @@ export class StudentService {
         }
 
         const created = await this.create(parsed, actor);
-        createdIds.push(String(created.id));
+        createdIds.push(String((created as { id: string }).id));
       }
     } catch (err) {
       for (const id of createdIds) {

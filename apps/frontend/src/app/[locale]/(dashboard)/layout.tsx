@@ -1,12 +1,28 @@
 'use client';
 
+import { APP_ROUTES } from '@learnova/constants';
 import { Spinner } from '@learnova/ui';
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { usePathname, useRouter } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function DashboardGroupLayout({ children }: { children: ReactNode }) {
-  const { isLoading } = useAuth();
+  const { isLoading, user, isAuthenticated } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const onChangePasswordPage =
+    pathname === APP_ROUTES.CHANGE_PASSWORD ||
+    pathname.endsWith('/account/change-password');
+
+  useEffect(() => {
+    if (isLoading || !isAuthenticated || !user) return;
+    if (user.mustChangePassword && !onChangePasswordPage) {
+      router.replace(APP_ROUTES.CHANGE_PASSWORD);
+    }
+  }, [isLoading, isAuthenticated, user, onChangePasswordPage, router]);
 
   if (isLoading) {
     return (
@@ -14,6 +30,18 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
         <Spinner size="lg" />
       </div>
     );
+  }
+
+  if (user?.mustChangePassword && !onChangePasswordPage) {
+    return (
+      <div className="flex flex-1 items-center justify-center bg-background">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (user?.mustChangePassword && onChangePasswordPage) {
+    return <div className="min-h-screen bg-background">{children}</div>;
   }
 
   return <AppShell>{children}</AppShell>;

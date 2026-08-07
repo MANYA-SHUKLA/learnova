@@ -36,6 +36,7 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
     institutionId,
     role: 'faculty',
     password: DEMO_PASSWORD,
+    mustChangePassword: false,
   });
   
   // Create or update faculty ERP record
@@ -69,6 +70,7 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
     institutionId,
     role: 'student',
     password: DEMO_PASSWORD,
+    mustChangePassword: false,
   });
   
   // Create or update student ERP record

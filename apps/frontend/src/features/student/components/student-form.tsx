@@ -14,6 +14,7 @@ import {
 } from '@learnova/ui';
 import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { CredentialsHandoff } from '@/components/shared/credentials-handoff';
 import {
   STUDENT_STATUS_LABELS,
   STUDENT_GENDER_LABELS,
@@ -21,6 +22,7 @@ import {
   useUpdateStudentMutation,
   type Student,
   type StudentCreateBody,
+  type StudentCredentials,
 } from '@/features/student';
 import { ApiClientError } from '@/lib/api/client';
 import { useRouter } from '@/lib/i18n/routing';
@@ -90,6 +92,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
     status: initial?.status ?? 'active',
   });
   const [error, setError] = useState<string | null>(null);
+  const [credentials, setCredentials] = useState<StudentCredentials | null>(null);
 
   const set = (key: keyof typeof form, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -151,6 +154,10 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
     try {
       if (mode === 'create') {
         const created = await createMutation.mutateAsync(body);
+        if (created.credentials) {
+          setCredentials(created.credentials);
+          return;
+        }
         router.push(`${APP_ROUTES.INSTITUTION_STUDENTS}/${created.id}`);
       } else if (initial) {
         await updateMutation.mutateAsync({ id: initial.id, body });
@@ -160,6 +167,23 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
       setError(err instanceof ApiClientError ? err.message : 'Unable to save student.');
     }
   };
+
+  if (credentials) {
+    return (
+      <PermissionGate permission={PERMISSIONS.STUDENT_MANAGE} enforce>
+        <CredentialsHandoff
+          credentials={{
+            title: 'Student created successfully',
+            displayIdLabel: 'Student ID',
+            displayId: credentials.studentId,
+            email: credentials.email,
+            temporaryPassword: credentials.temporaryPassword,
+          }}
+          onDone={() => router.push(APP_ROUTES.INSTITUTION_STUDENTS)}
+        />
+      </PermissionGate>
+    );
+  }
 
   const field = (key: keyof typeof form, label: string, opts?: { type?: string }) => (
     <div className="space-y-1.5">

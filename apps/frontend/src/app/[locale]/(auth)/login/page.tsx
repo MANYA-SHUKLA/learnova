@@ -25,6 +25,7 @@ import {
 import { ApiClientError } from '@/lib/api/client';
 import { resolvePostLoginPath } from '@/lib/auth/redirects';
 import { Link, useRouter } from '@/lib/i18n/routing';
+import { APP_ROUTES } from '@learnova/constants';
 
 function LoginForm() {
   const t = useTranslations('auth.login');
@@ -51,6 +52,10 @@ function LoginForm() {
           email: values.email,
           password: values.password,
         });
+        if (session.user.mustChangePassword) {
+          router.replace(APP_ROUTES.CHANGE_PASSWORD);
+          return;
+        }
         const destination = await resolvePostLoginPath(session.user.role, nextPath);
         router.replace(destination);
       } catch (err) {

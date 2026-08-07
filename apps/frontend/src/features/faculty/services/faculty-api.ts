@@ -76,7 +76,8 @@ export const facultyApi = {
 
   getMe: () => apiClient.get<Faculty>(`${API_ROUTES.FACULTY}/me`),
 
-  create: (body: FacultyCreateBody) => apiClient.post<Faculty>(API_ROUTES.FACULTY, body),
+  create: (body: FacultyCreateBody) =>
+    apiClient.post<import('../types').FacultyCreateResult>(API_ROUTES.FACULTY, body),
 
   update: (id: string, body: FacultyUpdateBody) =>
     apiClient.patch<Faculty>(`${API_ROUTES.FACULTY}/${id}`, body),
