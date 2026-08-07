@@ -413,6 +413,8 @@ export class CourseService {
       allowPreview: existing.allowPreview,
       maxStudents: existing.maxStudents,
       enrollmentMode: existing.enrollmentMode,
+      enrollmentDeadline: existing.enrollmentDeadline,
+      waitlistEnabled: existing.waitlistEnabled,
       publishDate: null,
       archiveDate: null,
       seoTitle: existing.seoTitle,

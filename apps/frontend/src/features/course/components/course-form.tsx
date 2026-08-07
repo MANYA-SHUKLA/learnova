@@ -320,6 +320,22 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
             <div className="grid gap-4 sm:grid-cols-2">
               {selectField('enrollmentMode', 'Enrollment mode', ENROLLMENT_MODES, COURSE_ENROLLMENT_MODE_LABELS)}
               {field('maxStudents', 'Max students', { type: 'number' })}
+              {field('enrollmentDeadline', 'Enrollment deadline', { type: 'date' })}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" htmlFor="waitlistEnabled">
+                  Waitlist enabled
+                </label>
+                <select
+                  id="waitlistEnabled"
+                  value={form.waitlistEnabled}
+                  disabled={pending}
+                  onChange={(e) => set('waitlistEnabled', e.target.value)}
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium" htmlFor="certificateEnabled">
                   Certificate enabled

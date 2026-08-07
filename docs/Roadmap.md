@@ -16,8 +16,21 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | 6 | Student Management | ✅ Complete |
 | **6.5** | **System Integration & Demo** | ✅ Complete |
 | **7** | **Course Management (catalog)** | ✅ Complete |
+| 7.5 | Course Content Builder (modules / lessons) | Planned |
+| 8 | Enrollments | Planned |
+| 8.5 | Progress Tracking | Planned |
 
-**Hard rule:** ERP core (1–6) + Integration Demo (6.5) before LMS Course Management. Step 7 (catalog) is complete; lesson builder is a later step.
+**Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
+
+| Item often called “rest of Step 7” | Actual home |
+| --- | --- |
+| Course builder UI | **7.5** Content Builder |
+| Modules / lessons CRUD UI | **7.5** Content Builder |
+| Progress tracking UI | **8.5** (after content + enrollments) |
+| Enrollments | **8** |
+| Richer search / filters | Catalog polish on **7** (optional) or content search in **7.5** |
+| Import / export | **7** catalog ✅ shipped; content import/export in **7.5** |
+| Analytics | **14** (platform) + course widgets deepen after enrollments |
 
 ---
 
@@ -132,10 +145,37 @@ Step 6.5 is done when the checklist above is signed off and a short demo runs wi
 
 ## Step 7 — Course Management
 
-**Status:** 🔒 Blocked on Step 6.5  
-**Scale:** Largest module after Exams. Enterprise LMS course system — not just title + description.
+**Status:** ✅ Complete (catalog / metadata — no lessons yet)  
+**Scale:** Enterprise LMS course catalog — CRUD, lifecycle, assignments, import/export, dashboard. Lesson builder is a later step.
 
-### Course hierarchy
+### Shipped in Step 7
+
+- Course model + repository + service + controller + APIs
+- Search, filters, sorting, pagination, bulk ops
+- Publish / unpublish / archive / restore / duplicate
+- Faculty / program / semester assignment
+- CSV import + CSV/Excel/PDF export
+- Thumbnail upload
+- Dashboard + list + detail + create/edit + import/export UI
+- Permissions, audit, domain events, validation, seed (≥30), tests, docs
+
+### Deferred (do not start yet — not incomplete Step 7)
+
+These are **next steps**, not open Step 7 work:
+
+| Next | Scope |
+| --- | --- |
+| **7.5** | Course builder UI · modules/lessons CRUD · content import/export |
+| **8** | Enrollments (approve / auto / waitlist / deadline) |
+| **8.5** | Progress tracking UI (per lesson) |
+| **14** | Richer analytics (completion, enrollments, faculty load) |
+
+```
+Modules → Lessons → Topics → Resources → Assignments → Labs → Projects → Quizzes → Exams → Certificates
+```
+
+Optional catalog polish (still container-only): richer multi-filter UI, saved views, enrollment-count sort once enrollments exist.
+### Course hierarchy (future)
 
 ```
 Course
@@ -166,15 +206,15 @@ Certificates
 | Area | Fields |
 | --- | --- |
 | Identity | `id`, `courseCode`, `title`, `slug`, `description`, `thumbnail`, `banner` |
-| Classification | `category`, `level`, `language`, `tags`, `difficulty` |
-| Academic links | `department`, `program`, `semester`, `credits`, `estimatedHours` |
+| Classification | `category`, `language`, `tags`, `difficulty` |
+| Academic links | `department`, `programIds`, `semesterIds`, `credits`, `estimatedHours` |
 | People | `facultyIds`, `coordinatorId` |
-| Pedagogy | `prerequisites`, `outcomes`, `requirements` |
-| Access | `visibility`, `status`, `enrollmentMode`, `maxStudents` |
+| Pedagogy | `prerequisites`, `outcomes`, `requirements`, `learningObjectives`, `skills` |
+| Access | `visibility`, `status`, `enrollmentMode`, `maxStudents`, `enrollmentDeadline`, `waitlistEnabled` |
 | Features | `certificateEnabled`, `discussionEnabled` |
-| Lifecycle | `version`, `publishedAt`, `archivedAt`, `createdBy`, `updatedBy`, timestamps |
+| Lifecycle | `version`, `publishDate`, `archiveDate`, `createdBy`, `updatedBy`, timestamps |
 
-### Course builder
+### Course builder *(later)*
 
 ```
 Module → Lesson → Content
@@ -182,7 +222,7 @@ Module → Lesson → Content
 
 **Content types:** Video · PDF · Markdown · HTML · Image · Audio · External Link · Embed · Code Block · Download · Presentation
 
-### Student progress (per lesson)
+### Student progress (per lesson) *(later)*
 
 Started · Completed · Watch % · Reading % · Time · Bookmarks · Notes · Last Position
 
@@ -190,17 +230,17 @@ Started · Completed · Watch % · Reading % · Time · Bookmarks · Notes · La
 
 | Role | Capabilities |
 | --- | --- |
-| **Faculty** | Create · Edit · Duplicate · Archive · Publish · Preview · Assign Faculty · Assign Students · Manage Modules · Upload Files · Generate AI Content (later) · View Analytics |
-| **Student** | Enroll · Continue Learning · Bookmarks · Notes · Downloads · Progress · Discussion · Certificate |
-| **Institution Admin** | Approve · Assign Faculty · Archive · Restore · Duplicate · Publish · Analytics · Export |
+| **Faculty** | Create · Edit · Duplicate · Archive · Publish · Assign Faculty · View Analytics (catalog) |
+| **Student** | Read enrolled courses (enrollment module later) |
+| **Institution Admin** | Full catalog management · Import · Export · Analytics |
 
 ### Permissions
 
 | Role | Access |
 | --- | --- |
 | Institution | Everything |
-| Faculty | Own courses |
-| Student | Enrolled courses |
+| Faculty | Own / assigned courses |
+| Student | Enrolled courses (read) |
 
 ### Search & filters
 
@@ -210,23 +250,24 @@ Started · Completed · Watch % · Reading % · Time · Bookmarks · Notes · La
 
 ### Course dashboard
 
-Total Courses · Published · Draft · Enrollments · Completion · Faculty · Recent Updates
+Total Courses · Published · Draft · Archived · Scheduled · Faculty · Programs · Departments · Average Duration · Credits · Recent Activity
 
-### AI *(later — not in initial Step 7 ship)*
+### AI *(later — not in Step 7)*
 
 Generate Outline · Lessons · Quiz · Assignment · Lab · Project
 
-### Documentation (generate with Step 7)
+### Documentation
 
 - `Course.md`
 - `CourseAPI.md`
 - `CoursePermissions.md`
-- `CourseBuilder.md`
-- `CourseProgress.md`
+- `CourseImportExport.md`
+- `CourseDashboard.md`
+- `CourseBuilder.md` / `CourseProgress.md` — future lesson steps
 
 ### Testing (Step 7 DoD)
 
-CRUD · Permissions · Builder · Publishing · Search · Filters · Progress · Analytics · Import · Export
+CRUD · Permissions · Publishing · Archive · Duplicate · Search · Filters · Assignments · Import · Export
 
 ---
 
@@ -234,7 +275,9 @@ CRUD · Permissions · Builder · Publishing · Search · Filters · Progress ·
 
 | Step | Scope | State |
 | --- | --- | --- |
-| 8 | Enrollments (if not folded into Course) | Planned |
+| **7.5** | Course Content Builder (modules / lessons / resources) | Planned |
+| **8** | Enrollments | Planned |
+| **8.5** | Progress tracking | Planned |
 | 9 | Practice Labs / Coding | Planned |
 | 10 | Projects / Ideation | Planned |
 | 11 | Examinations | Planned |
@@ -243,12 +286,12 @@ CRUD · Permissions · Builder · Publishing · Search · Filters · Progress ·
 | 14 | Analytics & Notifications | Planned |
 | 15 | AI content generation | Planned |
 
-Ordering of Steps 8+ may shift as Course Management lands; exams remain a peer-scale module.
+**Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
 
 ---
 
 ## Related docs
 
 - [Institution](./Institution.md) · [Academic Structure](./AcademicStructure.md)
-- [Faculty](./Faculty.md) · [Student](./Student.md)
+- [Faculty](./Faculty.md) · [Student](./Student.md) · [Course](./Course.md)
 - [Auth](./Auth.md) · [Architecture](./Architecture.md)
