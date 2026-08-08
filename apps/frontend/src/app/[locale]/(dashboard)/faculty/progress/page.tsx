@@ -83,25 +83,16 @@ export default function FacultyProgressPage() {
             <CardTitle className="text-base">{t('selectTitle')}</CardTitle>
             <CardDescription>{t('selectDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <select
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm sm:max-w-md"
+          <CardContent className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <CourseSelect
+              className="sm:max-w-md sm:flex-1"
               value={courseId}
-              onChange={(e) => setCourseId(e.target.value)}
               disabled={coursesQuery.isLoading || courses.length === 0}
-            >
-              {courses.length === 0 ? (
-                <option value="">{t('emptyTitle')}</option>
-              ) : (
-                courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.courseCode} — {c.title}
-                  </option>
-                ))
-              )}
-            </select>
+              onChange={setCourseId}
+            />
             <Button
               variant="outline"
+              className="sm:mb-0.5"
               disabled={!courseId || dashboardQuery.isFetching}
               onClick={() => void dashboardQuery.refetch()}
             >
