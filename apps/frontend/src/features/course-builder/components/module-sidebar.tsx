@@ -62,6 +62,11 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
   const [editModuleTitle, setEditModuleTitle] = useState('');
   const [actionsMenuId, setActionsMenuId] = useState<string | null>(null);
+  const [creatingLessonModuleId, setCreatingLessonModuleId] = useState<string | null>(null);
+  const [newLessonTitle, setNewLessonTitle] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<{ type: 'module' | 'lesson'; id: string } | null>(
+    null,
+  );
 
   const selectedLessonId = useBuilderStore((s) => s.selectedLessonId);
   const setSelectedLesson = useBuilderStore((s) => s.setSelectedLesson);
@@ -121,35 +126,54 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
   };
 
   const handleDeleteModule = (moduleId: string) => {
-    if (confirm('Delete this module and all its lessons?')) {
-      void deleteModuleMutation.mutateAsync(moduleId);
-    }
+    setPendingDelete({ type: 'module', id: moduleId });
+    setActionsMenuId(null);
+  };
+
+  const confirmDeleteModule = (moduleId: string) => {
+    void deleteModuleMutation.mutateAsync(moduleId);
+    setPendingDelete(null);
   };
 
   const handleDuplicateModule = (moduleId: string) => {
     void duplicateModuleMutation.mutateAsync(moduleId);
   };
 
-  const handleCreateLesson = (moduleId: string) => {
-    const title = prompt('Lesson title:');
-    if (title?.trim()) {
-      void createLessonMutation.mutateAsync({
+  const startCreateLesson = (moduleId: string) => {
+    setCreatingLessonModuleId(moduleId);
+    setNewLessonTitle('');
+    setExpandedModules((prev) => new Set(prev).add(moduleId));
+    setActionsMenuId(null);
+  };
+
+  const handleCreateLesson = async (moduleId: string) => {
+    if (!newLessonTitle.trim()) return;
+    try {
+      await createLessonMutation.mutateAsync({
         moduleId,
-        title: title.trim(),
+        title: newLessonTitle.trim(),
         lessonType: 'rich_text',
         status: 'draft',
         visibility: 'enrolled',
       });
+      setCreatingLessonModuleId(null);
+      setNewLessonTitle('');
+    } catch {
+      // handled
     }
   };
 
   const handleDeleteLesson = (lessonId: string) => {
-    if (confirm('Delete this lesson?')) {
-      void deleteLessonMutation.mutateAsync(lessonId);
-      if (selectedLessonId === lessonId) {
-        setSelectedLesson(null);
-      }
+    setPendingDelete({ type: 'lesson', id: lessonId });
+    setActionsMenuId(null);
+  };
+
+  const confirmDeleteLesson = (lessonId: string) => {
+    void deleteLessonMutation.mutateAsync(lessonId);
+    if (selectedLessonId === lessonId) {
+      setSelectedLesson(null);
     }
+    setPendingDelete(null);
   };
 
   const handleDuplicateLesson = (lessonId: string) => {
@@ -272,10 +296,26 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
                 onCancelEdit={() => setEditingModuleId(null)}
                 onDelete={() => handleDeleteModule(mod.id)}
                 onDuplicate={() => handleDuplicateModule(mod.id)}
-                onAddLesson={() => handleCreateLesson(mod.id)}
+                onAddLesson={() => startCreateLesson(mod.id)}
+                creatingLesson={creatingLessonModuleId === mod.id}
+                newLessonTitle={newLessonTitle}
+                onNewLessonTitleChange={setNewLessonTitle}
+                onSubmitCreateLesson={() => void handleCreateLesson(mod.id)}
+                onCancelCreateLesson={() => {
+                  setCreatingLessonModuleId(null);
+                  setNewLessonTitle('');
+                }}
+                pendingDelete={pendingDelete}
+                onConfirmDelete={() => {
+                  if (pendingDelete?.type === 'module' && pendingDelete.id === mod.id) {
+                    confirmDeleteModule(mod.id);
+                  }
+                }}
+                onCancelDelete={() => setPendingDelete(null)}
                 selectedLessonId={selectedLessonId}
                 onSelectLesson={setSelectedLesson}
                 onDeleteLesson={handleDeleteLesson}
+                onConfirmDeleteLesson={confirmDeleteLesson}
                 onDuplicateLesson={handleDuplicateLesson}
                 actionsMenuId={actionsMenuId}
                 setActionsMenuId={setActionsMenuId}
@@ -301,9 +341,18 @@ interface ModuleItemProps {
   onDelete: () => void;
   onDuplicate: () => void;
   onAddLesson: () => void;
+  creatingLesson: boolean;
+  newLessonTitle: string;
+  onNewLessonTitleChange: (title: string) => void;
+  onSubmitCreateLesson: () => void;
+  onCancelCreateLesson: () => void;
+  pendingDelete: { type: 'module' | 'lesson'; id: string } | null;
+  onConfirmDelete: () => void;
+  onCancelDelete: () => void;
   selectedLessonId: string | null;
   onSelectLesson: (id: string) => void;
   onDeleteLesson: (id: string) => void;
+  onConfirmDeleteLesson: (id: string) => void;
   onDuplicateLesson: (id: string) => void;
   actionsMenuId: string | null;
   setActionsMenuId: (id: string | null) => void;
@@ -322,9 +371,18 @@ function ModuleItem({
   onDelete,
   onDuplicate,
   onAddLesson,
+  creatingLesson,
+  newLessonTitle,
+  onNewLessonTitleChange,
+  onSubmitCreateLesson,
+  onCancelCreateLesson,
+  pendingDelete,
+  onConfirmDelete,
+  onCancelDelete,
   selectedLessonId,
   onSelectLesson,
   onDeleteLesson,
+  onConfirmDeleteLesson,
   onDuplicateLesson,
   actionsMenuId,
   setActionsMenuId,
@@ -354,7 +412,8 @@ function ModuleItem({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing"
+          aria-label={`Reorder module ${module.title}`}
+          className="cursor-grab rounded-sm active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <GripVertical className="size-4 text-muted-foreground" />
         </button>
@@ -397,6 +456,20 @@ function ModuleItem({
       </div>
       {showActions ? (
         <div className="mb-1 ml-8 rounded-lg border border-border bg-background p-1 shadow-lg">
+          {pendingDelete?.type === 'module' && pendingDelete.id === module.id ? (
+            <div className="space-y-2 p-2">
+              <p className="text-xs text-muted-foreground">Delete this module and all its lessons?</p>
+              <div className="flex gap-2">
+                <Button type="button" size="sm" variant="danger" className="flex-1" onClick={onConfirmDelete}>
+                  Delete
+                </Button>
+                <Button type="button" size="sm" variant="outline" className="flex-1" onClick={onCancelDelete}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
           <Button
             type="button"
             variant="ghost"
@@ -449,6 +522,8 @@ function ModuleItem({
             <Trash2 className="size-4" />
             Delete
           </Button>
+            </>
+          )}
         </div>
       ) : null}
       {isExpanded ? (
@@ -465,10 +540,47 @@ function ModuleItem({
                 onSelect={() => onSelectLesson(lesson.id)}
                 onDelete={() => onDeleteLesson(lesson.id)}
                 onDuplicate={() => onDuplicateLesson(lesson.id)}
+                pendingDelete={pendingDelete}
+                onConfirmDelete={() => onConfirmDeleteLesson(lesson.id)}
+                onCancelDelete={onCancelDelete}
                 actionsMenuId={actionsMenuId}
                 setActionsMenuId={setActionsMenuId}
               />
             ))}
+            {creatingLesson ? (
+              <div className="space-y-2 rounded-lg border border-border/80 bg-muted/20 p-2">
+                <Input
+                  autoFocus
+                  placeholder="Lesson title"
+                  value={newLessonTitle}
+                  onChange={(e) => onNewLessonTitleChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') onSubmitCreateLesson();
+                    if (e.key === 'Escape') onCancelCreateLesson();
+                  }}
+                  className="h-8 text-sm"
+                />
+                <div className="flex gap-2">
+                  <Button type="button" size="sm" onClick={onSubmitCreateLesson}>
+                    Add lesson
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={onCancelCreateLesson}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="ml-2 w-[calc(100%-0.5rem)] justify-start text-muted-foreground"
+                onClick={onAddLesson}
+              >
+                <Plus className="size-4" />
+                Add lesson
+              </Button>
+            )}
           </div>
         </SortableContext>
       ) : null}
@@ -482,6 +594,9 @@ interface LessonItemProps {
   onSelect: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  pendingDelete: { type: 'module' | 'lesson'; id: string } | null;
+  onConfirmDelete: () => void;
+  onCancelDelete: () => void;
   actionsMenuId: string | null;
   setActionsMenuId: (id: string | null) => void;
 }
@@ -492,6 +607,9 @@ function LessonItem({
   onSelect,
   onDelete,
   onDuplicate,
+  pendingDelete,
+  onConfirmDelete,
+  onCancelDelete,
   actionsMenuId,
   setActionsMenuId,
 }: LessonItemProps) {
@@ -522,12 +640,18 @@ function LessonItem({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing"
+          aria-label={`Reorder lesson ${lesson.title}`}
+          className="cursor-grab rounded-sm active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <GripVertical className="size-4 text-muted-foreground" />
         </button>
         <FileText className="size-4 text-muted-foreground" />
-        <button type="button" onClick={onSelect} className="flex-1 truncate text-left text-sm">
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-current={isSelected ? 'true' : undefined}
+          className="flex-1 truncate text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+        >
           {lesson.title}
         </button>
         <Badge variant={lesson.status === 'published' ? 'default' : 'secondary'} className="text-xs">
@@ -544,6 +668,20 @@ function LessonItem({
       </div>
       {showActions ? (
         <div className="mb-1 ml-6 rounded-lg border border-border bg-background p-1 shadow-lg">
+          {pendingDelete?.type === 'lesson' && pendingDelete.id === lesson.id ? (
+            <div className="space-y-2 p-2">
+              <p className="text-xs text-muted-foreground">Delete this lesson?</p>
+              <div className="flex gap-2">
+                <Button type="button" size="sm" variant="danger" className="flex-1" onClick={onConfirmDelete}>
+                  Delete
+                </Button>
+                <Button type="button" size="sm" variant="outline" className="flex-1" onClick={onCancelDelete}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
           <Button
             type="button"
             variant="ghost"
@@ -570,6 +708,8 @@ function LessonItem({
             <Trash2 className="size-4" />
             Delete
           </Button>
+            </>
+          )}
         </div>
       ) : null}
     </div>

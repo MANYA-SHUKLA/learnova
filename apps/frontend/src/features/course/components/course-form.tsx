@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
   Input,
-  Spinner,
 } from '@learnova/ui';
 import { useState, type ChangeEvent } from 'react';
 import {
@@ -285,18 +284,30 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
     <PermissionGate permission={PERMISSIONS.COURSE_MANAGE} enforce>
       <Card className="mx-auto w-full max-w-4xl rounded-2xl border-border/80 shadow-soft-md">
         <CardHeader>
-          <CardTitle>{mode === 'create' ? 'Create course' : 'Edit course'}</CardTitle>
-          <CardDescription>
-            Define course metadata, academic mappings, learning objectives, and SEO settings.
-          </CardDescription>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle>{mode === 'create' ? 'Create course' : 'Edit course'}</CardTitle>
+              <CardDescription>
+                Define course metadata, academic mappings, learning objectives, and SEO settings.
+              </CardDescription>
+            </div>
+            <FormDraftStatus lastSavedAt={lastSavedAt} visible={mode === 'create' && hasDraft} />
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          <FormStepper
+            steps={[...COURSE_FORM_STEPS]}
+            currentStep={currentStep}
+            onStepChange={setCurrentStep}
+          />
+
           {error ? (
             <p className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
               {error}
             </p>
           ) : null}
 
+          {currentStep === 0 ? (
           <div className="space-y-3">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Basic information
@@ -310,7 +321,10 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
             {field('shortDescription', 'Short description', { rows: 2 })}
             {field('description', 'Description', { rows: 4 })}
           </div>
+          ) : null}
 
+          {currentStep === 1 ? (
+          <>
           <div className="space-y-3">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Academic mapping
@@ -371,7 +385,11 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
               />
             </div>
           </div>
+          </>
+          ) : null}
 
+          {currentStep === 2 ? (
+          <>
           <div className="space-y-3">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Course settings
@@ -398,7 +416,11 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
             {field('outcomes', 'Outcomes (comma-separated)', { rows: 2 })}
             {field('skills', 'Skills (comma-separated)', { rows: 2 })}
           </div>
+          </>
+          ) : null}
 
+          {currentStep === 3 ? (
+          <>
           <div className="space-y-3">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Enrollment & flags
@@ -504,26 +526,31 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
             {field('seoDescription', 'SEO description', { rows: 3 })}
             {field('seoKeywords', 'SEO keywords (comma-separated)', { rows: 2 })}
           </div>
+          </>
+          ) : null}
         </CardContent>
-        <CardFooter className="flex gap-3">
-          <Button type="button" disabled={pending} onClick={() => void onSubmit()}>
-            {pending ? (
-              <>
-                <Spinner size="sm" />
-                Saving…
-              </>
-            ) : (
-              mode === 'create' ? 'Create course' : 'Update course'
-            )}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={pending}
-            onClick={() => router.push(APP_ROUTES.INSTITUTION_COURSES)}
-          >
-            Cancel
-          </Button>
+        <CardFooter className="flex flex-wrap gap-3">
+          <FormStepperNav
+            currentStep={currentStep}
+            totalSteps={COURSE_FORM_STEPS.length}
+            onPrevious={() => setCurrentStep((s) => Math.max(0, s - 1))}
+            onNext={() => setCurrentStep((s) => Math.min(COURSE_FORM_STEPS.length - 1, s + 1))}
+            onSubmit={() => void onSubmit()}
+            isSubmitting={pending}
+            canProceed={canProceed}
+            submitLabel={mode === 'create' ? 'Create course' : 'Update course'}
+            extra={
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                disabled={pending}
+                onClick={() => router.push(APP_ROUTES.INSTITUTION_COURSES)}
+              >
+                Cancel
+              </Button>
+            }
+          />
         </CardFooter>
       </Card>
     </PermissionGate>

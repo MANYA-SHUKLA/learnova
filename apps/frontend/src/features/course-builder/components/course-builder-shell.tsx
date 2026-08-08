@@ -5,8 +5,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import { APP_ROUTES } from '@learnova/constants';
 import { Button } from '@learnova/ui';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { ChevronRight, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { useCourse } from '@/features/course';
+import { Link } from '@/lib/i18n/routing';
 import { useBuilderStore } from '../store/builder-store';
 import { useBuilderTree } from '../hooks/use-builder-queries';
 import { ModuleSidebar } from './module-sidebar';
@@ -25,6 +28,7 @@ interface CourseBuilderShellProps {
 
 export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
   const query = useBuilderTree(courseId);
+  const courseQuery = useCourse(courseId);
   const selectedLessonId = useBuilderStore((s) => s.selectedLessonId);
   const sidebarCollapsed = useBuilderStore((s) => s.sidebarCollapsed);
   const propertiesCollapsed = useBuilderStore((s) => s.propertiesCollapsed);
@@ -69,6 +73,7 @@ export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
   }
 
   const tree = query.data;
+  const courseTitle = courseQuery.data?.title ?? 'Course';
   const selectedLesson = selectedLessonId
     ? tree.modules.flatMap((m) => m.lessons).find((l) => l.id === selectedLessonId)
     : null;
@@ -83,17 +88,30 @@ export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center justify-between gap-3 border-b border-border/80 bg-background/90 px-4 py-2.5 backdrop-blur-md">
-          <Button type="button" variant="ghost" size="sm" className="rounded-xl" onClick={toggleSidebar}>
+          <Button type="button" variant="ghost" size="sm" className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring" onClick={toggleSidebar}>
             {sidebarCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
             {sidebarCollapsed ? 'Outline' : 'Hide outline'}
           </Button>
-          <div className="min-w-0 text-center">
-            <p className="truncate text-label text-foreground">Course builder</p>
+          <div className="min-w-0 flex-1 text-center">
+            <nav aria-label="Breadcrumb" className="mb-1 flex items-center justify-center gap-1 text-caption text-muted-foreground">
+              <Link href={APP_ROUTES.INSTITUTION_COURSES} className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+                Courses
+              </Link>
+              <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+              <Link
+                href={`${APP_ROUTES.INSTITUTION_COURSES}/${courseId}`}
+                className="max-w-[10rem] truncate hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm sm:max-w-xs"
+              >
+                {courseTitle}
+              </Link>
+              <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+              <span className="truncate font-medium text-foreground">Builder</span>
+            </nav>
             <p className="text-caption text-muted-foreground">
               {tree.meta.moduleCount} modules · {tree.meta.lessonCount} lessons
             </p>
           </div>
-          <Button type="button" variant="ghost" size="sm" className="rounded-xl" onClick={toggleProperties}>
+          <Button type="button" variant="ghost" size="sm" className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring" onClick={toggleProperties}>
             {propertiesCollapsed ? 'Properties' : 'Hide properties'}
             {propertiesCollapsed ? <PanelRightOpen className="size-4" /> : <PanelRightClose className="size-4" />}
           </Button>
