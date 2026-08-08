@@ -112,13 +112,13 @@ export function CommandPalette() {
       <button
         type="button"
         className="absolute inset-0 bg-background/70 backdrop-blur-sm"
-        aria-label={t('close')}
+        aria-label={closeLabel}
         onClick={() => setOpen(false)}
       />
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={t('search')}
+        aria-label={searchLabel}
         className="absolute left-1/2 top-[12vh] w-[min(100vw-2rem,32rem)] -translate-x-1/2 overflow-hidden rounded-2xl border border-border/80 bg-popover shadow-soft-lg"
       >
         <div className="flex items-center gap-2 border-b border-border/80 px-4">
@@ -134,7 +134,7 @@ export function CommandPalette() {
             type="button"
             onClick={() => setOpen(false)}
             className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            aria-label={t('close')}
+            aria-label={closeLabel}
           >
             <X className="size-4" />
           </button>
