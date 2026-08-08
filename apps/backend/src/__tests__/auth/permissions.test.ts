@@ -13,10 +13,17 @@ describe('RBAC permission matrix', () => {
     expect(hasPermission(perms, 'users:manage')).toBe(true);
   });
 
-  it('restricts student from users:manage', () => {
+  it('restricts faculty from institution permissions', () => {
+    const perms = getPermissionsForRole('faculty');
+    expect(hasPermission(perms, 'institution:read')).toBe(false);
+    expect(hasPermission(perms, 'institution:manage')).toBe(false);
+    expect(hasAllPermissions(perms, ['lms:read', 'lms:write'])).toBe(true);
+  });
+
+  it('restricts student from institution and faculty permissions', () => {
     const perms = getPermissionsForRole('student');
-    expect(hasPermission(perms, 'users:manage')).toBe(false);
-    expect(hasPermission(perms, 'coding:submit')).toBe(true);
+    expect(hasPermission(perms, 'institution:read')).toBe(false);
+    expect(hasPermission(perms, 'faculty:read')).toBe(false);
   });
 
   it('supports hasAll / hasAny helpers', () => {

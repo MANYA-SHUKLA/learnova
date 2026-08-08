@@ -413,8 +413,7 @@ async function main(): Promise<void> {
     ]);
     const adminTotal = adminCourses.json.data?.meta?.total ?? 0;
     const facultyTotal = facultyCourses.json.data?.meta?.total ?? 0;
-    const scoped =
-      facultyTotal > 0 && (adminTotal === 0 || facultyTotal <= adminTotal) && facultyTotal < 500;
+    const scoped = facultyTotal > 0 && adminTotal >= facultyTotal;
     console.log(
       `  Faculty course count scoped vs admin (${facultyTotal}/${adminTotal}): ${track(failures, 'Faculty course count scoped vs admin', scoped)}`,
     );
