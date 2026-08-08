@@ -16,7 +16,7 @@ Use a **pnpm workspaces + Turborepo** monorepo:
 | --- | --- |
 | **pnpm** | Strict deps, fast installs, native workspaces |
 | **Turborepo** | Cached `build` / `lint` / `typecheck` with `^build` graph |
-| **apps/** | Deployable units (`frontend`, `backend`, `worker`) |
+| **frontend/**, **backend/**, **worker/** | Deployable units at repo root (easy Vercel/Render Root Directory) |
 | **packages/** | Shared libraries (`types`, `shared`, `ui`, `config`, …) |
 
 ## Consequences

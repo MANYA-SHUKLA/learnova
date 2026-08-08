@@ -48,35 +48,35 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
-  apps/backend:
+  backend:
     dependencies:
       '@learnova/config':
         specifier: workspace:*
-        version: link:../../packages/config
+        version: link:../packages/config
       '@learnova/constants':
         specifier: workspace:*
-        version: link:../../packages/constants
+        version: link:../packages/constants
       '@learnova/events':
         specifier: workspace:*
-        version: link:../../packages/events
+        version: link:../packages/events
       '@learnova/feature-flags':
         specifier: workspace:*
-        version: link:../../packages/feature-flags
+        version: link:../packages/feature-flags
       '@learnova/logger':
         specifier: workspace:*
-        version: link:../../packages/logger
+        version: link:../packages/logger
       '@learnova/shared':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../packages/shared
       '@learnova/types':
         specifier: workspace:*
-        version: link:../../packages/types
+        version: link:../packages/types
       '@learnova/utils':
         specifier: workspace:*
-        version: link:../../packages/utils
+        version: link:../packages/utils
       '@learnova/validation':
         specifier: workspace:*
-        version: link:../../packages/validation
+        version: link:../packages/validation
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -143,10 +143,10 @@ importers:
     devDependencies:
       '@learnova/eslint-config':
         specifier: workspace:*
-        version: link:../../packages/eslint-config
+        version: link:../packages/eslint-config
       '@learnova/tsconfig':
         specifier: workspace:*
-        version: link:../../packages/tsconfig
+        version: link:../packages/tsconfig
       '@types/bcrypt':
         specifier: ^5.0.2
         version: 5.0.2
@@ -199,7 +199,7 @@ importers:
         specifier: ^3.2.7
         version: 3.2.7(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.9)(yaml@2.9.0)
 
-  apps/frontend:
+  frontend:
     dependencies:
       '@dnd-kit/core':
         specifier: ^6.3.1
@@ -215,22 +215,22 @@ importers:
         version: 5.7.1(ajv@8.20.0)(react-hook-form@7.84.0(react@19.2.8))(zod@3.25.76)
       '@learnova/config':
         specifier: workspace:*
-        version: link:../../packages/config
+        version: link:../packages/config
       '@learnova/constants':
         specifier: workspace:*
-        version: link:../../packages/constants
+        version: link:../packages/constants
       '@learnova/shared':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../packages/shared
       '@learnova/types':
         specifier: workspace:*
-        version: link:../../packages/types
+        version: link:../packages/types
       '@learnova/ui':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../packages/ui
       '@learnova/validation':
         specifier: workspace:*
-        version: link:../../packages/validation
+        version: link:../packages/validation
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.56.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -315,10 +315,10 @@ importers:
     devDependencies:
       '@learnova/eslint-config':
         specifier: workspace:*
-        version: link:../../packages/eslint-config
+        version: link:../packages/eslint-config
       '@learnova/tsconfig':
         specifier: workspace:*
-        version: link:../../packages/tsconfig
+        version: link:../packages/tsconfig
       '@tailwindcss/postcss':
         specifier: ^4.1.8
         version: 4.3.3
@@ -340,76 +340,6 @@ importers:
       tailwindcss:
         specifier: ^4.1.8
         version: 4.3.3
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
-
-  apps/worker:
-    dependencies:
-      '@learnova/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@learnova/constants':
-        specifier: workspace:*
-        version: link:../../packages/constants
-      '@learnova/events':
-        specifier: workspace:*
-        version: link:../../packages/events
-      '@learnova/feature-flags':
-        specifier: workspace:*
-        version: link:../../packages/feature-flags
-      '@learnova/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
-      '@learnova/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@learnova/types':
-        specifier: workspace:*
-        version: link:../../packages/types
-      '@learnova/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
-      bullmq:
-        specifier: ^5.34.8
-        version: 5.81.3
-      ioredis:
-        specifier: ^5.6.1
-        version: 5.11.1
-      nodemailer:
-        specifier: ^7.0.3
-        version: 7.0.13
-      pino:
-        specifier: ^9.7.0
-        version: 9.14.0
-      zod:
-        specifier: ^3.25.56
-        version: 3.25.76
-    devDependencies:
-      '@learnova/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/eslint-config
-      '@learnova/tsconfig':
-        specifier: workspace:*
-        version: link:../../packages/tsconfig
-      '@types/node':
-        specifier: ^22.15.29
-        version: 22.20.1
-      '@types/nodemailer':
-        specifier: ^6.4.17
-        version: 6.4.24
-      eslint:
-        specifier: ^9.28.0
-        version: 9.39.5(jiti@2.7.0)
-      pino-pretty:
-        specifier: ^13.0.0
-        version: 13.1.3
-      rimraf:
-        specifier: ^6.0.1
-        version: 6.1.3
-      tsx:
-        specifier: ^4.19.4
-        version: 4.23.9
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -737,6 +667,76 @@ importers:
       rimraf:
         specifier: ^6.0.1
         version: 6.1.3
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  worker:
+    dependencies:
+      '@learnova/config':
+        specifier: workspace:*
+        version: link:../packages/config
+      '@learnova/constants':
+        specifier: workspace:*
+        version: link:../packages/constants
+      '@learnova/events':
+        specifier: workspace:*
+        version: link:../packages/events
+      '@learnova/feature-flags':
+        specifier: workspace:*
+        version: link:../packages/feature-flags
+      '@learnova/logger':
+        specifier: workspace:*
+        version: link:../packages/logger
+      '@learnova/shared':
+        specifier: workspace:*
+        version: link:../packages/shared
+      '@learnova/types':
+        specifier: workspace:*
+        version: link:../packages/types
+      '@learnova/utils':
+        specifier: workspace:*
+        version: link:../packages/utils
+      bullmq:
+        specifier: ^5.34.8
+        version: 5.81.3
+      ioredis:
+        specifier: ^5.6.1
+        version: 5.11.1
+      nodemailer:
+        specifier: ^7.0.3
+        version: 7.0.13
+      pino:
+        specifier: ^9.7.0
+        version: 9.14.0
+      zod:
+        specifier: ^3.25.56
+        version: 3.25.76
+    devDependencies:
+      '@learnova/eslint-config':
+        specifier: workspace:*
+        version: link:../packages/eslint-config
+      '@learnova/tsconfig':
+        specifier: workspace:*
+        version: link:../packages/tsconfig
+      '@types/node':
+        specifier: ^22.15.29
+        version: 22.20.1
+      '@types/nodemailer':
+        specifier: ^6.4.17
+        version: 6.4.24
+      eslint:
+        specifier: ^9.28.0
+        version: 9.39.5(jiti@2.7.0)
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.1.3
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.3
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.9
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
