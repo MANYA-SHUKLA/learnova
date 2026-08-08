@@ -44,26 +44,12 @@ LMS domains (courses, enrollments, exams, labs, analytics) start **only after St
 ## Monorepo layout
 
 ```
-apps/
-  frontend/     Next.js App Router (feature-driven)
-  backend/      Express API (/api/v1, /api/internal, /api/webhooks)
-  worker/       Background job processors
-packages/
-  ui/             Design system + shared components
-  types/          Shared TypeScript contracts
-  shared/         Roles, permissions, error code helpers
-  constants/      Roles, routes, status, regex, error codes
-  events/         Domain event name catalog
-  validation/     Shared Zod schemas
-  logger/         Structured logger (info/warn/error/debug/audit)
-  feature-flags/  ENABLE_AI, ENABLE_CHAT, …
-  utils/          Date, pagination, UUID, file, encryption helpers
-  config/         Env + app/database/redis/jwt/socket/…
-  eslint-config/
-  tsconfig/
+frontend/       Next.js App Router (Vercel Root Directory)
+backend/        Express API (Render Root Directory)
+worker/         Background job processors (optional separate deploy)
+packages/       Shared libraries (@learnova/* workspace packages)
 docker/
 docs/
-  adr/          Architecture Decision Records
 scripts/
 .github/
 ```

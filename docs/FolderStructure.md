@@ -4,8 +4,10 @@
 
 | Path | Purpose |
 | --- | --- |
-| `apps/` | Deployable applications (frontend, API, worker) |
-| `packages/` | Shared libraries consumed by apps — types, UI, config, lint, tsconfig |
+| `frontend/` | Next.js web app — **Vercel Root Directory** |
+| `backend/` | Express API — **Render Root Directory** (or use root `render.yaml`) |
+| `worker/` | Optional BullMQ worker (same monorepo install pattern) |
+| `packages/` | Shared `@learnova/*` libraries consumed by frontend/backend/worker |
 | `docker/` | Compose files + Dockerfiles per environment |
 | `docs/` | Engineering documentation |
 | `scripts/` | Repo maintenance (env checks, codegen hooks) |

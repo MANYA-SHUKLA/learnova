@@ -21,8 +21,8 @@ Node **22** (see `.nvmrc`). Package manager **pnpm@10.32.1** (`packageManager` i
 | --- | --- |
 | Framework | Next.js |
 | Root Directory | `frontend` |
-| Install Command | *(from `vercel.json`)* `cd ../.. && corepack enable && pnpm install --frozen-lockfile` |
-| Build Command | *(from `vercel.json`)* `cd ../.. && pnpm exec turbo run build --filter=@learnova/frontend` |
+| Install Command | *(from `vercel.json`)* `cd .. && corepack enable && pnpm install --frozen-lockfile` |
+| Build Command | *(from `vercel.json`)* `cd .. && pnpm exec turbo run build --filter=@learnova/frontend` |
 | Output | `.next` (default) |
 
 Config file: [`frontend/vercel.json`](../frontend/vercel.json)

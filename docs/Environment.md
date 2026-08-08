@@ -90,7 +90,7 @@ Read by `@learnova/feature-flags`. Defaults are safe (most capabilities off).
 
 ## Staging / Production
 
-Use `apps/*/.env.staging` and `apps/*/.env.production` (gitignored). Inject secrets via your cloud secret manager — never bake them into images.
+Use `frontend/.env.staging`, `backend/.env.staging`, etc. (gitignored). Inject secrets via your cloud secret manager — never bake them into images.
 
 Validate examples anytime:
 
