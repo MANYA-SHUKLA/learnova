@@ -83,3 +83,4 @@ export * from './examination.js';
 export * from './gradebook.js';
 export * from './certificate.js';
 export * from './reports.js';
+export * from './notification.js';

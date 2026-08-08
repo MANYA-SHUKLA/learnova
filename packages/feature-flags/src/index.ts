@@ -28,7 +28,7 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   ENABLE_ANALYTICS: true,
   ENABLE_AUDIT_LOGS: true,
   ENABLE_WEBHOOKS: false,
-  ENABLE_NOTIFICATIONS: false,
+  ENABLE_NOTIFICATIONS: true,
   ENABLE_PROJECTS: false,
 };
 
