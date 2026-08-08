@@ -289,7 +289,13 @@ async function main(): Promise<void> {
     course_modules: ['course_modules', 'coursemodules'],
     course_lessons: ['course_lessons', 'courselessons'],
     enrollments: ['enrollments'],
-    progress: ['progress_records', 'learning_progress', 'progress'],
+    progress: [
+      'course_progress',
+      'module_progress',
+      'lesson_progress',
+      'resource_progress',
+      'progress_records',
+    ],
     assignments: ['assignments'],
     assignment_submissions: ['assignment_submissions'],
     practice_labs: ['practice_labs'],
@@ -317,7 +323,7 @@ async function main(): Promise<void> {
   console.log('\n=== Seed Data Counts ===');
   const counts: { label: string; collection: string; min: number }[] = [
     { label: 'Institution', collection: 'institutions', min: 1 },
-    { label: 'Faculty', collection: 'faculties', min: 30 },
+    { label: 'Faculty', collection: 'faculty', min: 30 },
     { label: 'Students', collection: 'students', min: 200 },
     { label: 'Courses', collection: 'courses', min: 30 },
     { label: 'Projects', collection: 'projects', min: 50 },
