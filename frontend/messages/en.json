@@ -503,7 +503,6 @@
       "welcomeBack": "Welcome back",
       "tagline": "Learn. Build. Excel. — Institution workspace access.",
       "title": "Sign in",
-      "description": "Use the email and password issued for your role — Institution Admin, Faculty, or Student.",
       "email": "Email",
       "emailPlaceholder": "shuklamanya99@gmail.com",
       "password": "Password",
@@ -511,8 +510,6 @@
       "rememberMe": "Remember me",
       "loginButton": "Login",
       "signingIn": "Signing in…",
-      "needAccountLabel": "Faculty or student?",
-      "needAccountText": "Ask your Institution Administrator for credentials — there is no public signup.",
       "registeredMessage": "Institution registered. Sign in as Institution Admin to finish setup.",
       "errorMessage": "Unable to sign in. Try again."
     },

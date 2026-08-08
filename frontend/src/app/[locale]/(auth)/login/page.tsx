@@ -79,7 +79,7 @@ function LoginForm() {
   };
 
   return (
-    <AuthCardShell icon={LogIn} title={t('title')} description={t('description')}>
+    <AuthCardShell icon={LogIn} title={t('title')}>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className={authContentClassName}>
           {registered ? (
@@ -179,11 +179,6 @@ function LoginForm() {
               )}
             </Button>
           </AuthButtonMotion>
-
-          <p className="text-center text-sm text-muted-foreground">
-            {t('needAccountLabel')}{' '}
-            <span className="font-medium text-foreground">{t('needAccountText')}</span>
-          </p>
         </CardFooter>
       </form>
     </AuthCardShell>
