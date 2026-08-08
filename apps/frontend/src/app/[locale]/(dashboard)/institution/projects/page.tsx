@@ -9,16 +9,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DataTable,
   Input,
-  Skeleton,
+  PageHeader,
+  StatCard,
+  StatGrid,
 } from '@learnova/ui';
-import { FolderKanban, Search } from 'lucide-react';
+import { ArrowRight, FolderKanban, Plus, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
-import { SuccessPopup } from '@/components/shared/success-popup';
+import { DashboardPage, DashboardSection } from '@/components/dashboard';
 import { CourseSelect, FacultySelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { SuccessPopup } from '@/components/shared/success-popup';
+import { ErrorState } from '@/features/institution';
 import {
   formatDueDate,
   formatProjectDifficulty,
@@ -38,6 +42,7 @@ import {
 import type { ProjectDifficulty, ProjectSortOption, ProjectStatus, ProjectTypeSpec } from '@/features/project';
 import { useSuccessPopup } from '@/hooks/use-success-popup';
 import { Link } from '@/lib/i18n/routing';
+import { cn } from '@/lib/utils';
 
 const STATUS_FILTERS: Array<ProjectStatus | 'open' | 'all'> = [
   'all',
@@ -107,397 +112,421 @@ export default function InstitutionProjectsPage() {
   const rows = listQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
   const dash = dashQuery.data;
-  const allSelected = rows.length > 0 && selected.length === rows.length;
-
-  const toggleAll = () => {
-    setSelected(allSelected ? [] : rows.map((r) => r.id));
-  };
-
-  const toggleOne = (id: string) => {
-    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  };
 
   return (
     <PermissionGate permission={PERMISSIONS.PROJECT_READ} enforce>
-      <div className="space-y-8">
+      <DashboardPage>
         <SuccessPopup open={open} message={message} onClose={closeSuccess} />
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
-            <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-              {t('title')}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
-          </div>
-          <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
-            <Button asChild>
-              <Link href={APP_ROUTES.INSTITUTION_PROJECTS_CREATE}>{t('create')}</Link>
-            </Button>
-          </PermissionGate>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
-          {[
-            { label: t('stats.total'), value: dash?.totalProjects },
-            { label: t('stats.published'), value: dash?.published },
-            { label: t('stats.active'), value: dash?.active },
-            { label: t('stats.completed'), value: dash?.completed },
-            { label: t('stats.departments'), value: dash?.departments?.length },
-            {
-              label: t('stats.submissionRate'),
-              value: dash ? `${Math.round((dash.submissionRate ?? 0) * 100)}%` : undefined,
-            },
-            {
-              label: t('stats.facultyParticipation'),
-              value: dash?.facultyParticipation != null
-                ? `${Math.round(dash.facultyParticipation * 100)}%`
-                : '—',
-            },
-          ].map((stat) => (
-            <Card key={stat.label} className="rounded-2xl border-border/80">
-              <CardHeader className="pb-2">
-                <CardDescription>{stat.label}</CardDescription>
-                <CardTitle className="text-2xl">
-                  {dashQuery.isLoading ? <Skeleton className="h-8 w-16" /> : (stat.value ?? '—')}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-
-        <Card className="rounded-2xl border-border/80">
-          <CardHeader className="gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <CardTitle className="text-base">{t('listTitle')}</CardTitle>
-              <CardDescription>{t('listDescription')}</CardDescription>
-            </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  className="pl-9 sm:w-64"
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setSearch(q.trim());
-                      setPage(1);
-                    }
-                  }}
-                  placeholder={t('searchPlaceholder')}
-                />
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearch(q.trim());
-                  setPage(1);
-                }}
-              >
-                {t('search')}
+        <PageHeader
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
+          actions={
+            <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
+              <Button asChild className="rounded-xl">
+                <Link href={APP_ROUTES.INSTITUTION_PROJECTS_CREATE}>
+                  <Plus className="size-4" />
+                  {t('create')}
+                </Link>
               </Button>
-            </div>
+            </PermissionGate>
+          }
+        />
+
+        <StatGrid className="sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+          {dashQuery.isLoading
+            ? Array.from({ length: 7 }).map((_, i) => (
+                <StatCard key={i} label="…" value="—" loading />
+              ))
+            : [
+                { label: t('stats.total'), value: dash?.totalProjects ?? 0 },
+                { label: t('stats.published'), value: dash?.published ?? 0 },
+                { label: t('stats.active'), value: dash?.active ?? 0 },
+                { label: t('stats.completed'), value: dash?.completed ?? 0 },
+                { label: t('stats.departments'), value: dash?.departments?.length ?? 0 },
+                {
+                  label: t('stats.submissionRate'),
+                  value: dash ? `${Math.round((dash.submissionRate ?? 0) * 100)}%` : '—',
+                },
+                {
+                  label: t('stats.facultyParticipation'),
+                  value:
+                    dash?.facultyParticipation != null
+                      ? `${Math.round(dash.facultyParticipation * 100)}%`
+                      : '—',
+                },
+              ].map((card) => (
+                <StatCard
+                  key={card.label}
+                  label={card.label}
+                  value={typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
+                  accent="primary"
+                />
+              ))}
+        </StatGrid>
+
+        <Card className="directory-shell overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-card-title">{t('listTitle')}</CardTitle>
+            <CardDescription>{t('listDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <CourseSelect
-                allowEmpty
-                emptyLabel="All courses"
-                value={courseId}
-                visibleRows={4}
-                onChange={(value) => {
-                  setCourseId(value);
-                  setPage(1);
-                }}
-              />
-              <FacultySelect
-                allowEmpty
-                emptyLabel="All faculty"
-                value={facultyId}
-                visibleRows={4}
-                onChange={(value) => {
-                  setFacultyId(value);
-                  setPage(1);
-                }}
-              />
-              <select
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={sort}
-                onChange={(e) => {
-                  setSort(e.target.value as ProjectSortOption);
-                  setPage(1);
-                }}
-              >
-                {SORT_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {formatSortOption(s)}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={publishedFilter}
-                onChange={(e) => {
-                  setPublishedFilter(e.target.value as 'all' | 'yes' | 'no');
-                  setPage(1);
-                }}
-              >
-                <option value="all">{t('filters.publishedAll')}</option>
-                <option value="yes">{t('filters.publishedYes')}</option>
-                <option value="no">{t('filters.publishedNo')}</option>
-              </select>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {STATUS_FILTERS.map((s) => (
-                <Button
-                  key={s}
-                  size="sm"
-                  variant={status === s ? 'default' : 'outline'}
-                  onClick={() => {
-                    setStatus(s);
-                    setPage(1);
-                  }}
-                >
-                  {s === 'all' ? t('filters.all') : formatProjectStatus(s)}
-                </Button>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {DIFFICULTIES.map((d) => (
-                <Button
-                  key={d}
-                  size="sm"
-                  variant={difficulty === d ? 'default' : 'outline'}
-                  onClick={() => {
-                    setDifficulty(d);
-                    setPage(1);
-                  }}
-                >
-                  {d === 'all' ? t('filters.allDifficulties') : formatProjectDifficulty(d)}
-                </Button>
-              ))}
-              <Button
-                size="sm"
-                variant={archivedFilter === 'yes' ? 'default' : 'outline'}
-                onClick={() => {
-                  setArchivedFilter(archivedFilter === 'yes' ? 'all' : 'yes');
-                  setPage(1);
-                }}
-              >
-                {t('filters.archived')}
-              </Button>
-            </div>
-
-            {selected.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/30 p-3">
-                <p className="text-sm font-medium">{t('bulkSelected', { count: selected.length })}</p>
-                <PermissionGate permission={PERMISSIONS.PROJECT_MANAGE}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkPublish.isPending}
-                    onClick={async () => {
-                      await bulkPublish.mutateAsync({ ids: selected });
-                      setSelected([]);
-                      showSuccess(t('bulkSuccess'));
-                    }}
-                  >
-                    {t('bulkPublish')}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkArchive.isPending}
-                    onClick={async () => {
-                      await bulkArchive.mutateAsync({ ids: selected });
-                      setSelected([]);
-                      showSuccess(t('bulkSuccess'));
-                    }}
-                  >
-                    {t('bulkArchive')}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkDuplicate.isPending}
-                    onClick={async () => {
-                      await bulkDuplicate.mutateAsync({ ids: selected });
-                      setSelected([]);
-                      showSuccess(t('bulkSuccess'));
-                    }}
-                  >
-                    {t('bulkDuplicate')}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkDelete.isPending}
-                    onClick={async () => {
-                      await bulkDelete.mutateAsync({ ids: selected });
-                      setSelected([]);
-                      showSuccess(t('bulkSuccess'));
-                    }}
-                  >
-                    {t('bulkDelete')}
-                  </Button>
-                  <FacultySelect
-                    className="w-56"
-                    label={t('assignFacultyId')}
-                    value={assignFacultyId}
-                    visibleRows={4}
-                    onChange={setAssignFacultyId}
-                  />
-                  <Button
-                    size="sm"
-                    disabled={bulkAssignFaculty.isPending || !assignFacultyId.trim()}
-                    onClick={async () => {
-                      await bulkAssignFaculty.mutateAsync({
-                        ids: selected,
-                        facultyId: assignFacultyId.trim(),
-                      });
-                      setSelected([]);
-                      setAssignFacultyId('');
-                      showSuccess(t('bulkSuccess'));
-                    }}
-                  >
-                    {t('bulkAssignFaculty')}
-                  </Button>
-                </PermissionGate>
-              </div>
-            ) : null}
-
             {listQuery.isError ? (
-              <ErrorState message={t('error')} />
-            ) : listQuery.isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-full rounded-xl" />
-                ))}
-              </div>
-            ) : rows.length === 0 ? (
-              <EmptyState
-                illustration="inbox"
-                title={t('emptyTitle')}
-                description={t('emptyDescription')}
-              />
+              <ErrorState message={t('error')} onRetry={() => void listQuery.refetch()} />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="p-2 text-left">
-                        <input type="checkbox" checked={allSelected} onChange={toggleAll} />
-                      </th>
-                      <th className="p-2 text-left">{t('projectTitle')}</th>
-                      <th className="p-2 text-left">{t('filters.status')}</th>
-                      <th className="p-2 text-left">{t('projectType')}</th>
-                      <th className="p-2 text-left">{t('difficulty')}</th>
-                      <th className="p-2 text-left">{t('due')}</th>
-                      <th className="p-2 text-right">{t('actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row) => (
-                      <tr key={row.id} className="border-b border-border/60">
-                        <td className="p-2">
-                          <input
-                            type="checkbox"
-                            checked={selected.includes(row.id)}
-                            onChange={() => toggleOne(row.id)}
-                          />
-                        </td>
-                        <td className="p-2">
-                          <Link
-                            href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}
-                            className="font-medium hover:underline"
-                          >
-                            {row.title}
-                          </Link>
-                          {row.slug ? (
-                            <p className="text-xs text-muted-foreground">{row.slug}</p>
-                          ) : null}
-                        </td>
-                        <td className="p-2">
-                          <Badge variant="secondary">{formatProjectStatus(row.status)}</Badge>
-                        </td>
-                        <td className="p-2">
-                          <Badge variant="outline">{formatProjectType(row.projectType)}</Badge>
-                        </td>
-                        <td className="p-2">{formatProjectDifficulty(row.difficulty)}</td>
-                        <td className="p-2 text-muted-foreground">{formatDueDate(row.dueDate)}</td>
-                        <td className="p-2 text-right">
-                          <div className="flex flex-wrap justify-end gap-2">
-                            <Button asChild size="sm" variant="outline">
-                              <Link href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}>
-                                {t('view')}
-                              </Link>
-                            </Button>
-                            {row.status === 'draft' ? (
-                              <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
-                                <Button
-                                  size="sm"
-                                  disabled={publishMutation.isPending}
-                                  onClick={() => void publishMutation.mutateAsync(row.id)}
-                                >
-                                  {t('publish')}
-                                </Button>
-                              </PermissionGate>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                caption={t('listTitle')}
+                loading={listQuery.isLoading}
+                data={rows}
+                rowKey={(row) => row.id}
+                selectable
+                selectedIds={selected}
+                onSelectionChange={setSelected}
+                bulkActions={
+                  <PermissionGate permission={PERMISSIONS.PROJECT_MANAGE}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl"
+                      disabled={bulkPublish.isPending}
+                      onClick={async () => {
+                        await bulkPublish.mutateAsync({ ids: selected });
+                        setSelected([]);
+                        showSuccess(t('bulkSuccess'));
+                      }}
+                    >
+                      {t('bulkPublish')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl"
+                      disabled={bulkArchive.isPending}
+                      onClick={async () => {
+                        await bulkArchive.mutateAsync({ ids: selected });
+                        setSelected([]);
+                        showSuccess(t('bulkSuccess'));
+                      }}
+                    >
+                      {t('bulkArchive')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl"
+                      disabled={bulkDuplicate.isPending}
+                      onClick={async () => {
+                        await bulkDuplicate.mutateAsync({ ids: selected });
+                        setSelected([]);
+                        showSuccess(t('bulkSuccess'));
+                      }}
+                    >
+                      {t('bulkDuplicate')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      className="rounded-xl"
+                      disabled={bulkDelete.isPending}
+                      onClick={async () => {
+                        await bulkDelete.mutateAsync({ ids: selected });
+                        setSelected([]);
+                        showSuccess(t('bulkSuccess'));
+                      }}
+                    >
+                      {t('bulkDelete')}
+                    </Button>
+                    <FacultySelect
+                      className="w-56"
+                      label={t('assignFacultyId')}
+                      value={assignFacultyId}
+                      visibleRows={4}
+                      onChange={setAssignFacultyId}
+                    />
+                    <Button
+                      size="sm"
+                      className="rounded-xl"
+                      disabled={bulkAssignFaculty.isPending || !assignFacultyId.trim()}
+                      onClick={async () => {
+                        await bulkAssignFaculty.mutateAsync({
+                          ids: selected,
+                          facultyId: assignFacultyId.trim(),
+                        });
+                        setSelected([]);
+                        setAssignFacultyId('');
+                        showSuccess(t('bulkSuccess'));
+                      }}
+                    >
+                      {t('bulkAssignFaculty')}
+                    </Button>
+                  </PermissionGate>
+                }
+                filters={
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <CourseSelect
+                        allowEmpty
+                        emptyLabel="All courses"
+                        value={courseId}
+                        visibleRows={4}
+                        onChange={(value) => {
+                          setCourseId(value);
+                          setPage(1);
+                        }}
+                      />
+                      <FacultySelect
+                        allowEmpty
+                        emptyLabel="All faculty"
+                        value={facultyId}
+                        visibleRows={4}
+                        onChange={(value) => {
+                          setFacultyId(value);
+                          setPage(1);
+                        }}
+                      />
+                      <select
+                        className="rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        value={sort}
+                        onChange={(e) => {
+                          setSort(e.target.value as ProjectSortOption);
+                          setPage(1);
+                        }}
+                      >
+                        {SORT_OPTIONS.map((s) => (
+                          <option key={s} value={s}>
+                            {formatSortOption(s)}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        className="rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        value={publishedFilter}
+                        onChange={(e) => {
+                          setPublishedFilter(e.target.value as 'all' | 'yes' | 'no');
+                          setPage(1);
+                        }}
+                      >
+                        <option value="all">{t('filters.publishedAll')}</option>
+                        <option value="yes">{t('filters.publishedYes')}</option>
+                        <option value="no">{t('filters.publishedNo')}</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {STATUS_FILTERS.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => {
+                            setStatus(s);
+                            setPage(1);
+                          }}
+                          className={cn(
+                            'rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            status === s
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-border text-muted-foreground hover:bg-muted/60',
+                          )}
+                        >
+                          {s === 'all' ? t('filters.all') : formatProjectStatus(s)}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {DIFFICULTIES.map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => {
+                            setDifficulty(d);
+                            setPage(1);
+                          }}
+                          className={cn(
+                            'rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            difficulty === d
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-border text-muted-foreground hover:bg-muted/60',
+                          )}
+                        >
+                          {d === 'all' ? t('filters.allDifficulties') : formatProjectDifficulty(d)}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setArchivedFilter(archivedFilter === 'yes' ? 'all' : 'yes');
+                          setPage(1);
+                        }}
+                        className={cn(
+                          'rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                          archivedFilter === 'yes'
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-border text-muted-foreground hover:bg-muted/60',
+                        )}
+                      >
+                        {t('filters.archived')}
+                      </button>
+                    </div>
+                  </>
+                }
+                toolbar={
+                  <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+                    <div className="relative min-w-0 flex-1 sm:w-64">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        className="rounded-xl pl-9"
+                        placeholder={t('searchPlaceholder')}
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setSearch(q.trim());
+                            setPage(1);
+                          }
+                        }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="rounded-xl"
+                      onClick={() => {
+                        setSearch(q.trim());
+                        setPage(1);
+                      }}
+                    >
+                      {t('search')}
+                    </Button>
+                  </div>
+                }
+                emptyTitle={t('emptyTitle')}
+                emptyDescription={t('emptyDescription')}
+                emptyAction={
+                  <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
+                    <Button asChild className="rounded-xl">
+                      <Link href={APP_ROUTES.INSTITUTION_PROJECTS_CREATE}>{t('create')}</Link>
+                    </Button>
+                  </PermissionGate>
+                }
+                pagination={
+                  meta
+                    ? {
+                        page: meta.page,
+                        totalPages: meta.totalPages,
+                        total: meta.total,
+                        hasNextPage: meta.hasNextPage,
+                        hasPrevPage: meta.hasPrevPage,
+                        onPageChange: setPage,
+                      }
+                    : undefined
+                }
+                columns={[
+                  {
+                    id: 'title',
+                    header: t('projectTitle'),
+                    sortable: true,
+                    sortValue: (row) => row.title,
+                    cell: (row) => (
+                      <Link
+                        href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}
+                        className="font-medium hover:text-primary"
+                      >
+                        <span className="block">{row.title}</span>
+                        {row.slug ? (
+                          <span className="block text-xs font-normal text-muted-foreground">{row.slug}</span>
+                        ) : null}
+                      </Link>
+                    ),
+                  },
+                  {
+                    id: 'status',
+                    header: t('filters.status'),
+                    cell: (row) => <Badge variant="secondary">{formatProjectStatus(row.status)}</Badge>,
+                  },
+                  {
+                    id: 'type',
+                    header: t('projectType'),
+                    cell: (row) => <Badge variant="outline">{formatProjectType(row.projectType)}</Badge>,
+                  },
+                  {
+                    id: 'difficulty',
+                    header: t('difficulty'),
+                    cell: (row) => formatProjectDifficulty(row.difficulty),
+                  },
+                  {
+                    id: 'due',
+                    header: t('due'),
+                    cell: (row) => (
+                      <span className="text-muted-foreground">{formatDueDate(row.dueDate)}</span>
+                    ),
+                  },
+                ]}
+                rowActions={(row) => (
+                  <>
+                    <Button asChild size="sm" variant="ghost" className="rounded-lg">
+                      <Link href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}>{t('view')}</Link>
+                    </Button>
+                    {row.status === 'draft' ? (
+                      <PermissionGate permission={PERMISSIONS.PROJECT_WRITE}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-lg"
+                          disabled={publishMutation.isPending}
+                          onClick={() => void publishMutation.mutateAsync(row.id)}
+                        >
+                          {t('publish')}
+                        </Button>
+                      </PermissionGate>
+                    ) : null}
+                  </>
+                )}
+                mobileRow={(row) => (
+                  <Card className="rounded-xl">
+                    <CardContent className="space-y-3 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-medium">{row.title}</p>
+                          {row.slug ? <p className="text-xs text-muted-foreground">{row.slug}</p> : null}
+                        </div>
+                        <Badge variant="secondary">{formatProjectStatus(row.status)}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {formatProjectType(row.projectType)} · {formatProjectDifficulty(row.difficulty)}
+                      </p>
+                      <Button asChild size="sm" variant="outline" className="w-full rounded-xl">
+                        <Link href={`${APP_ROUTES.INSTITUTION_PROJECTS}/${row.id}`}>
+                          {t('view')}
+                          <ArrowRight className="size-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              />
             )}
-
-            {meta && meta.totalPages > 1 ? (
-              <div className="flex items-center justify-between gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!meta.hasPrevPage}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  {t('previous')}
-                </Button>
-                <p className="text-sm text-muted-foreground">
-                  {meta.page} / {meta.totalPages}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!meta.hasNextPage}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  {t('next')}
-                </Button>
-              </div>
-            ) : null}
           </CardContent>
         </Card>
 
         {dash?.departments?.length ? (
-          <Card className="rounded-2xl border-border/80">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <FolderKanban className="size-4" />
-                {t('departmentComparison')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {dash.departments.slice(0, 8).map((d: { departmentId: string | null; label: string; count: number }) => (
-                <div key={d.departmentId ?? d.label} className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{d.label}</span>
-                  <span className="font-medium">{d.count}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <DashboardSection title={t('departmentComparison')}>
+            <Card className="rounded-2xl border-border/80">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FolderKanban className="size-4" />
+                  {t('departmentComparison')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {dash.departments.slice(0, 8).map((d: { departmentId: string | null; label: string; count: number }) => (
+                  <div key={d.departmentId ?? d.label} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{d.label}</span>
+                    <span className="font-medium tabular-nums">{d.count}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </DashboardSection>
         ) : null}
 
         {categoriesQuery.data?.items?.length ? (
@@ -511,7 +540,7 @@ export default function InstitutionProjectsPage() {
             {t('facultyLink')}
           </Link>
         </p>
-      </div>
+      </DashboardPage>
     </PermissionGate>
   );
 }
