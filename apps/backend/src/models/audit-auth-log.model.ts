@@ -19,6 +19,7 @@ const auditAuthLogSchema = new Schema(
         'email.verified',
         'session.created',
         'session.revoked',
+        'access.denied',
       ],
     },
     userId: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },

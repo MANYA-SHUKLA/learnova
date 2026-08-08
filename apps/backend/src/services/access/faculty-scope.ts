@@ -10,6 +10,15 @@ function oid(id: string): Types.ObjectId {
   return new Types.ObjectId(id);
 }
 
+/** Guaranteed zero-match Mongo filter (safer than `_id: null`). */
+function emptyScopeFilter(
+  filter: Record<string, unknown>,
+  field: string,
+): Record<string, unknown> {
+  filter[field] = { $in: [] };
+  return filter;
+}
+
 export async function findFacultyRecord(institutionId: string, email: string) {
   return FacultyModel.findOne({
     institutionId: oid(institutionId),
@@ -111,8 +120,7 @@ export async function scopeStudentSelfFilter(
 
   const selfId = await resolveStudentSelfObjectId(institutionId, actor.email);
   if (!selfId) {
-    filter._id = null;
-    return filter;
+    return emptyScopeFilter(filter, '_id');
   }
 
   filter._id = selfId;
@@ -129,8 +137,7 @@ export async function scopeStudentEnrollmentFilter(
 
   const selfId = await resolveStudentSelfObjectId(institutionId, actor.email);
   if (!selfId) {
-    filter._id = null;
-    return filter;
+    return emptyScopeFilter(filter, 'studentId');
   }
 
   filter.studentId = selfId;
@@ -160,8 +167,7 @@ export async function buildFacultyCourseFilter(
 
   const courseIds = await resolveFacultySupervisedCourseObjectIds(institutionId, actor.email);
   if (courseIds.length === 0) {
-    filter._id = null;
-    return filter;
+    return emptyScopeFilter(filter, '_id');
   }
 
   filter._id = { $in: courseIds };
@@ -178,8 +184,7 @@ export async function buildFacultyStudentFilter(
 
   const studentIds = await resolveFacultyEnrolledStudentIds(institutionId, actor.email);
   if (studentIds.length === 0) {
-    filter._id = null;
-    return filter;
+    return emptyScopeFilter(filter, '_id');
   }
 
   filter._id = { $in: studentIds };
@@ -195,8 +200,7 @@ export async function buildFacultyEnrollmentCourseFilter(
 
   const courseIds = await resolveFacultySupervisedCourseObjectIds(institutionId, actor.email);
   if (courseIds.length === 0) {
-    filter._id = null;
-    return filter;
+    return emptyScopeFilter(filter, 'courseId');
   }
 
   filter.courseId = { $in: courseIds };
@@ -213,8 +217,7 @@ export async function buildFacultySelfFilter(
 
   const faculty = await findFacultyRecord(institutionId, actor.email);
   if (!faculty) {
-    filter._id = null;
-    return filter;
+    return emptyScopeFilter(filter, '_id');
   }
 
   filter._id = faculty._id;

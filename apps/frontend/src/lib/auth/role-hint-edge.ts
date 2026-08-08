@@ -58,7 +58,9 @@ export async function parseRoleCookie(value: string | null | undefined): Promise
     return role;
   }
 
-  // Legacy unsigned cookie — allowed only when no signing secret is configured (local dev).
-  if (secret()) return null;
+  // Legacy unsigned cookie — dev only when no signing secret is configured.
+  const allowLegacy =
+    process.env.NODE_ENV !== 'production' && !secret();
+  if (!allowLegacy) return null;
   return isActiveRoleValue(value) ? value : null;
 }

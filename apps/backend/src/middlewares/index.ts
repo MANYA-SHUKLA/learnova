@@ -16,3 +16,9 @@ export {
   requireOwnership,
   type AuthMiddlewareOptions,
 } from './auth.middleware.js';
+export {
+  tenantGuard,
+  facultyCourseGuard,
+  studentOwnershipGuard,
+  facultyStudentGuard,
+} from './scope.middleware.js';

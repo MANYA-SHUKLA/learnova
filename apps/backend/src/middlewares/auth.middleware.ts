@@ -8,6 +8,7 @@ import { ForbiddenError, UnauthorizedError } from '../utils/errors/index.js';
 import { verifyAccessToken } from '../utils/jwt/index.js';
 import { userRepository } from '../repositories/auth/user.repository.js';
 import { sessionRepository } from '../repositories/auth/session.repository.js';
+import { logAccessDenial } from '../services/audit/access-denial.js';
 
 declare global {
   namespace Express {
@@ -84,6 +85,7 @@ export function requireRoles(...roles: Role[]) {
       return;
     }
     if (!roles.includes(req.user.role)) {
+      void logAccessDenial(req, 'Insufficient role', { requiredRoles: roles });
       next(new ForbiddenError('Insufficient role'));
       return;
     }
@@ -103,6 +105,7 @@ export function requirePermissions(...permissions: Permission[]) {
     }
     const ok = permissions.every((p) => req.user?.permissions.includes(p));
     if (!ok) {
+      void logAccessDenial(req, 'Insufficient permissions', { requiredPermissions: permissions });
       next(new ForbiddenError('Insufficient permissions'));
       return;
     }
@@ -129,6 +132,10 @@ export function requireOwnership(paramKey = 'userId') {
       next();
       return;
     }
+    void logAccessDenial(req, 'Resource ownership required', {
+      paramKey,
+      resourceUserId,
+    });
     next(new ForbiddenError('Resource ownership required'));
   };
 }

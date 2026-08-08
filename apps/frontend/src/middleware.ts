@@ -92,11 +92,14 @@ export default async function middleware(request: NextRequest) {
   const requiredRole = requiredRoleForPath(pathWithoutLocale);
   if (isAuthenticated && requiredRole) {
     if (!activeRole) {
-      return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+      const loginUrl = new URL(`/${locale}/login`, request.url);
+      loginUrl.searchParams.set('next', pathWithoutLocale);
+      return NextResponse.redirect(loginUrl);
     }
     if (!isPathAllowedForRole(pathWithoutLocale, activeRole)) {
-      const home = dashboardPathForRoleCookie(activeRole);
-      return NextResponse.redirect(new URL(`/${locale}${home}`, request.url));
+      const forbiddenUrl = new URL(`/${locale}/forbidden`, request.url);
+      forbiddenUrl.searchParams.set('from', pathWithoutLocale);
+      return NextResponse.rewrite(forbiddenUrl, { status: 403 });
     }
   }
 

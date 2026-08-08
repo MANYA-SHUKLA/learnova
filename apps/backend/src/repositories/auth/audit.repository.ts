@@ -17,7 +17,8 @@ export type AuthAuditEvent =
   | 'email.verification_sent'
   | 'email.verified'
   | 'session.created'
-  | 'session.revoked';
+  | 'session.revoked'
+  | 'access.denied';
 
 export class LoginAttemptRepository {
   async create(data: {
