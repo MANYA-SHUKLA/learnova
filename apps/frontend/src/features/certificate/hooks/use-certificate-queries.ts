@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { certificateApi } from './services/certificate-api';
+import { certificateApi } from '../services/certificate-api';
 
 export const certificateKeys = {
   all: ['certificates'] as const,
@@ -58,7 +58,7 @@ export function useIssueTranscriptMutation() {
 export function useVerifyCertificateQuery(code: string, enabled: boolean) {
   return useQuery({
     queryKey: [...certificateKeys.all, 'verify', code],
-    queryFn: () => certificateApi.verify(code),
+    queryFn: () => certificateApi.verifyPublic(code),
     enabled: enabled && code.length >= 8,
   });
 }

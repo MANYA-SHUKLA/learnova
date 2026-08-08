@@ -2,8 +2,11 @@ import type { NextFunction, Request, Response } from 'express';
 import type {
   BulkIssueCertificatesInput,
   CertificateListQuery,
+  GenerateAcademicRecordInput,
   IssueCertificateInput,
   IssueTranscriptInput,
+  PublishCertificateInput,
+  RegistryExportQuery,
   RevokeCertificateInput,
   UpsertCertificateTemplateInput,
   VerifyCertificateQuery,
@@ -22,6 +25,13 @@ function actorFrom(req: Request): ActorContext {
     email: req.user.email,
     institutionId: req.user.institutionId,
     role: req.user.role,
+  };
+}
+
+function verifyMeta(req: Request) {
+  return {
+    ipAddress: req.ip ?? null,
+    userAgent: req.get('user-agent') ?? null,
   };
 }
 
@@ -101,10 +111,11 @@ export async function issueCertificate(req: Request, res: Response, next: NextFu
 
 export async function bulkIssueCertificates(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await certificateService.bulkIssueCourseCertificates(
-      req.body as BulkIssueCertificatesInput,
-      actorFrom(req),
-    );
+    const body = req.body as BulkIssueCertificatesInput;
+    const data =
+      body.action && body.action !== 'issue'
+        ? await certificateService.bulkAction(body, actorFrom(req))
+        : await certificateService.bulkIssueCourseCertificates(body, actorFrom(req));
     sendSuccess(res, data, { requestId: req.requestId });
   } catch (err) {
     next(err);
@@ -123,9 +134,111 @@ export async function revokeCertificate(req: Request, res: Response, next: NextF
   }
 }
 
+export async function publishCertificate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.publishCertificate(
+      req.body as PublishCertificateInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function archiveCertificate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.archiveCertificate(
+      req.params.certificateId as string,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function regenerateCertificate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.regenerateCertificate(
+      req.params.certificateId as string,
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function exportRegistry(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.exportRegistry(
+      req.query as unknown as RegistryExportQuery,
+      actorFrom(req),
+    );
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="certificate-registry.csv"');
+    res.send(data.content);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function downloadCertificate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.downloadCertificateHtml(
+      req.params.certificateId as string,
+      actorFrom(req),
+    );
+    res.setHeader('Content-Type', data.contentType);
+    res.send(data.html);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listEligibleStudents(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.listEligibleStudents(
+      actorFrom(req),
+      req.query.courseId as string | undefined,
+      (req.query.documentType as string | undefined) ?? 'course_completion',
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function verifyCertificate(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await certificateService.verify(req.query as unknown as VerifyCertificateQuery);
+    const data = await certificateService.verify(
+      req.query as unknown as VerifyCertificateQuery,
+      verifyMeta(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function verifyCertificateByCode(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.verifyByCode(
+      req.params.verificationCode as string,
+      verifyMeta(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getPublicCertificateByNumber(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.getPublicCertificate(
+      req.params.certificateNumber as string,
+    );
     sendSuccess(res, data, { requestId: req.requestId });
   } catch (err) {
     next(err);
@@ -152,6 +265,31 @@ export async function listTranscripts(req: Request, res: Response, next: NextFun
       req.query.semesterId as string | undefined,
     );
     sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function generateAcademicRecord(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.generateAcademicRecord(
+      req.body as GenerateAcademicRecordInput,
+      actorFrom(req),
+    );
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getAcademicRecord(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await certificateService.getAcademicRecord(
+      actorFrom(req),
+      req.query.studentId as string | undefined,
+      req.query.programId as string | undefined,
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
   } catch (err) {
     next(err);
   }

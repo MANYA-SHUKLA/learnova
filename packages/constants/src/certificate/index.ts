@@ -57,6 +57,13 @@ export const CERTIFICATE_BULK_ACTIONS = [
 
 export const CERTIFICATE_REGISTRY_EXPORT_FORMATS = ['csv', 'zip'] as const;
 
+/** Standings allowed for graduation certificates — values come from gradebook `AcademicStanding`, never computed here */
+export const CERTIFICATE_GRADUATION_STANDINGS = [
+  'good_standing',
+  'honors',
+  'distinction',
+] as const;
+
 export const CERTIFICATE_AUDIT_EVENTS = [
   'template.created',
   'template.updated',
@@ -92,6 +99,19 @@ export const CERTIFICATE_DEFAULTS = {
   TITLE_MERIT: 'Merit Certificate',
   TITLE_PARTICIPATION: 'Certificate of Participation',
   TITLE_TRANSCRIPT: 'Official Academic Transcript',
+} as const;
+
+/** Print/PDF styling aligned with Learnova design tokens (`packages/ui` globals) */
+export const CERTIFICATE_PDF_THEME = {
+  primary: '#2563EB',
+  secondary: '#0F172A',
+  accent: '#7C3AED',
+  border: '#E2E8F0',
+  muted: '#64748B',
+  background: '#F8FAFC',
+  card: '#FFFFFF',
+  fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, sans-serif',
+  gradient: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
 } as const;
 
 /** Maps activity-based certificate types to gradebook entry kinds (read-only) */

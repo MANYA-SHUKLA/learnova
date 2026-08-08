@@ -108,6 +108,21 @@
       "institutionLogin": "Institution Login",
       "goToDashboard": "Go to dashboard"
     },
+    "verify": {
+      "eyebrow": "Learnova verification",
+      "title": "Certificate verification",
+      "description": "Official read-only validation from published academic records.",
+      "resultTitle": "Verification result",
+      "valid": "Valid",
+      "invalid": "Invalid",
+      "institution": "Institution",
+      "student": "Student",
+      "document": "Document",
+      "certificateNumber": "Certificate No.",
+      "status": "Status",
+      "issued": "Issued",
+      "empty": "—"
+    },
     "footer": {
       "tagline": "The enterprise AI learning platform for institutions that teach, assess, and innovate at scale.",
       "copyright": "All rights reserved.",
@@ -602,6 +617,7 @@
         "examinations": "Examinations",
         "gradebook": "Gradebook",
         "certificates": "Certificates",
+        "transcript": "Transcript",
         "semesterGrades": "Semester results",
         "proctoring": "Proctoring",
         "myTeam": "My team",
@@ -1809,6 +1825,21 @@
         "emptyDescription": "Sync the course to import grades from source modules.",
         "error": "Unable to load gradebook."
       },
+      "certificates": {
+        "eyebrow": "Official documents",
+        "title": "Certificates",
+        "description": "View eligible students and issue certificates from published gradebook results only.",
+        "eligibleTitle": "Eligible students",
+        "eligibleDescription": "Students with published passing grades and no active certificate for the course.",
+        "courseIdPlaceholder": "Course ID",
+        "eligibleHint": "Enter a course ID to load eligible students.",
+        "eligibleCount": "{count} eligible students",
+        "listTitle": "Issued certificates",
+        "listDescription": "Official documents with verification codes linked to gradebook snapshots.",
+        "emptyTitle": "No certificates yet",
+        "emptyDescription": "Issue certificates after gradebook publication.",
+        "error": "Unable to load certificates."
+      },
       "proctoring": {
         "eyebrow": "Proctoring",
         "title": "Live proctoring",
@@ -2167,6 +2198,21 @@
         "emptyTitle": "No certificates yet",
         "emptyDescription": "Certificates appear after your institution issues them from published grades.",
         "error": "Unable to load certificates."
+      },
+      "transcript": {
+        "eyebrow": "Academic credentials",
+        "title": "Academic transcript",
+        "description": "Official transcript and academic record derived from published gradebook entries.",
+        "recordTitle": "Academic record",
+        "recordEmpty": "No academic record generated yet.",
+        "semesterGpa": "Semester GPA",
+        "cgpa": "CGPA",
+        "standing": "Standing",
+        "listTitle": "Transcripts",
+        "listDescription": "Official transcript documents issued by your institution.",
+        "emptyTitle": "No transcripts yet",
+        "emptyDescription": "Transcripts appear after your institution issues them.",
+        "error": "Unable to load transcripts."
       },
       "examDetail": {
         "eyebrow": "Exam",

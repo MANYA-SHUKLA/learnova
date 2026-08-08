@@ -636,6 +636,6 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 - [QuizManagement](./QuizManagement.md) · [QuizBuilder](./QuizBuilder.md) · [QuestionBank](./QuestionBank.md) · [QuizAPI](./QuizAPI.md) · [QuizPermissions](./QuizPermissions.md) · [QuizAnalytics](./QuizAnalytics.md)
 - [ExamManagement](./ExamManagement.md) · [ExamProctoring](./ExamProctoring.md) · [ExamAPI](./ExamAPI.md) · [ExamPermissions](./ExamPermissions.md)
 - [Gradebook](./Gradebook.md) · [GradebookAPI](./GradebookAPI.md) · [GradeCalculation](./GradeCalculation.md) · [GradeScales](./GradeScales.md) · [GradeAppeals](./GradeAppeals.md) · [Reports](./Reports.md) · [GradebookPermissions](./GradebookPermissions.md)
-- [Certificates](./Certificates.md) · [CertificateAPI](./CertificateAPI.md) · [CertificatePermissions](./CertificatePermissions.md) · [AcademicRecords](./AcademicRecords.md)
+- [Certificates](./Certificates.md) · [CertificateEligibility](./CertificateEligibility.md) · [CertificateAPI](./CertificateAPI.md) · [CertificateTemplates](./CertificateTemplates.md) · [Transcript](./Transcript.md) · [Verification](./Verification.md) · [CertificatePermissions](./CertificatePermissions.md) · [AcademicRecords](./AcademicRecords.md)
 - [AccessModel](./AccessModel.md) · [Auth](./Auth.md) · [Architecture](./Architecture.md)
 - [Deploy](./Deploy.md) — Vercel (frontend) + Render (backend)

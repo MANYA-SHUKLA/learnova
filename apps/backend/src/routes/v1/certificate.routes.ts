@@ -4,11 +4,17 @@ import {
   bulkIssueCertificatesSchema,
   certificateIdParamsSchema,
   certificateListQuerySchema,
+  certificateNumberParamsSchema,
+  eligibleStudentsQuerySchema,
+  generateAcademicRecordSchema,
   issueCertificateSchema,
   issueTranscriptSchema,
+  publishCertificateSchema,
+  registryExportQuerySchema,
   revokeCertificateSchema,
   templateIdParamsSchema,
   upsertCertificateTemplateSchema,
+  verificationCodeParamsSchema,
   verifyCertificateQuerySchema,
 } from '@learnova/validation';
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
@@ -31,6 +37,18 @@ const manageAuth = [
   authenticate({ required: true }),
   requirePermission(PERMISSIONS.CERTIFICATE_MANAGE),
 ] as RequestHandler[];
+
+certificateRoutes.get(
+  '/verify/:verificationCode',
+  validate(verificationCodeParamsSchema, 'params'),
+  ctrl.verifyCertificateByCode,
+);
+
+certificateRoutes.get(
+  '/certificate/:certificateNumber',
+  validate(certificateNumberParamsSchema, 'params'),
+  ctrl.getPublicCertificateByNumber,
+);
 
 certificateRoutes.get(
   '/certificates/verify',
@@ -64,9 +82,33 @@ certificateRoutes.get(
   ...readAuth,
   ctrl.listTranscripts,
 );
+certificateRoutes.get(
+  '/certificates/eligible-students',
+  ...writeAuth,
+  validate(eligibleStudentsQuerySchema, 'query'),
+  ctrl.listEligibleStudents,
+);
+certificateRoutes.get(
+  '/certificates/registry/export',
+  ...manageAuth,
+  validate(registryExportQuerySchema, 'query'),
+  ctrl.exportRegistry,
+);
 
 certificateRoutes.get('/certificates/dashboard/institution', ...manageAuth, ctrl.institutionDashboard);
 certificateRoutes.get('/certificates/dashboard/student', ...readAuth, ctrl.studentDashboard);
+
+certificateRoutes.get(
+  '/certificates/academic-record',
+  ...readAuth,
+  ctrl.getAcademicRecord,
+);
+certificateRoutes.post(
+  '/certificates/academic-record',
+  ...writeAuth,
+  validate(generateAcademicRecordSchema),
+  ctrl.generateAcademicRecord,
+);
 
 certificateRoutes.post(
   '/certificates/issue',
@@ -81,6 +123,12 @@ certificateRoutes.post(
   ctrl.bulkIssueCertificates,
 );
 certificateRoutes.post(
+  '/certificates/publish',
+  ...manageAuth,
+  validate(publishCertificateSchema),
+  ctrl.publishCertificate,
+);
+certificateRoutes.post(
   '/certificates/revoke',
   ...manageAuth,
   validate(revokeCertificateSchema),
@@ -93,6 +141,24 @@ certificateRoutes.post(
   ctrl.issueTranscript,
 );
 
+certificateRoutes.get(
+  '/certificates/:certificateId/download',
+  ...readAuth,
+  validate(certificateIdParamsSchema, 'params'),
+  ctrl.downloadCertificate,
+);
+certificateRoutes.post(
+  '/certificates/:certificateId/regenerate',
+  ...manageAuth,
+  validate(certificateIdParamsSchema, 'params'),
+  ctrl.regenerateCertificate,
+);
+certificateRoutes.post(
+  '/certificates/:certificateId/archive',
+  ...manageAuth,
+  validate(certificateIdParamsSchema, 'params'),
+  ctrl.archiveCertificate,
+);
 certificateRoutes.get(
   '/certificates/:certificateId',
   ...readAuth,

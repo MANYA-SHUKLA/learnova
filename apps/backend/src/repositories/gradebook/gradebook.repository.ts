@@ -14,7 +14,7 @@ import { GradeModerationRecordModel } from '../../models/grade-moderation-record
 import { GradebookSnapshotModel } from '../../models/gradebook-snapshot.model.js';
 import { AcademicStandingModel } from '../../models/academic-standing.model.js';
 import type { IngestDraft } from '../../services/gradebook/gradebook-ingestion.js';
-import { oid } from './gradebook.helpers.js';
+import { oid } from '../../services/gradebook/gradebook.helpers.js';
 
 function buildEntryFilter(
   institutionId: string,

@@ -155,7 +155,8 @@ export const APP_ROUTES = {
   INSTITUTION_CERTIFICATES: '/institution/certificates',
   FACULTY_CERTIFICATES: '/faculty/certificates',
   STUDENT_CERTIFICATES: '/student/certificates',
-  VERIFY_CERTIFICATE: '/verify/certificate',
+  STUDENT_TRANSCRIPT: '/student/transcript',
+  VERIFY_CERTIFICATE: '/verify',
   CHANGE_PASSWORD: '/account/change-password',
 } as const;
 

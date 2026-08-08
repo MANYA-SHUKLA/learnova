@@ -1,30 +1,66 @@
 # Certificates & Academic Records
 
-Step **15** — official academic documents generated from **published gradebook records only**. This module does **not** calculate grades, run assessments, or modify gradebook data.
+Step **15** — enterprise certificate and academic record management. Documents are generated **only** from published gradebook records.
 
 ```
-Published Gradebook → Eligibility Check → Academic Certificate / Transcript → Verification
+Published Gradebook → Eligibility → Certificate / Transcript → Verification → Registry
 ```
 
 ## Document types
 
-| Type | Source data |
-|------|-------------|
-| Course completion | Published `CourseGradeSummary` with `result: pass` |
-| Semester record | All published semester grades + `SemesterGrade` GPA |
-| Transcript | Published summaries + `SemesterGrade` / `CGPARecord` / `AcademicStanding` |
-| Honors / Distinction | `AcademicStanding` record (must match standing type) |
+| Type | Gradebook source |
+|------|------------------|
+| Course completion | Published `CourseGradeSummary` (`result: pass`) |
+| Lab / project / quiz / exam completion | Published summary + matching `GradebookEntry` activity |
+| Semester / program / graduation | Published summaries + enrollment completeness |
+| Merit / honors / distiction | `AcademicStanding` |
+| Participation / custom | Published grade reference |
+| Transcript | Published summaries + GPA / CGPA / standing |
+
+## Certificate lifecycle
+
+`draft` → `generated` → `issued` → `published` → (`revoked` | `archived`)
+
+- **Regeneration** archives the prior version and issues a new immutable version with a new number.
+- **Revocation** sets `revoked: true`; verification returns invalid.
+
+## Numbering
+
+- Certificates: `{prefix}-{year}-CERT-{7-digit-seq}` (default `LNV-2026-CERT-0000001`)
+- Transcripts: `{prefix}-{year}-TRN-{7-digit-seq}`
+
+## Features
+
+- Template design with signatures, watermark, branding
+- HTML/PDF export (print-ready HTML)
+- QR verification codes and public portal
+- Registry CSV export
+- Bulk issue / publish / revoke / archive
+- Academic record versioning
+- Certificate-module analytics (issued, revoked, downloads, verifications, top programs/courses)
 
 ## Hard rules
 
-1. **No grade calculation** — percentages, letter grades, GPA, and CGPA are read from gradebook models.
-2. **Published only** — unpublished or draft grades cannot produce documents.
-3. **Immutable issuance** — revocation marks status; history is retained.
-4. **Verification** — each certificate/transcript has a unique `LN-` verification code.
+1. **No grade calculation** in the certificate module — marks, GPA, CGPA, and standing are read from gradebook models only.
+2. **Published gradebook only** for eligibility.
+3. **Eligibility engine** — [CertificateEligibility](./CertificateEligibility.md) checks published records, policy outcomes (via gradebook), standing, and completion requirements. It never recomputes grades.
+4. **Do not modify** assessment or gradebook modules from certificates.
+
+## Seed
+
+```bash
+pnpm --filter @learnova/backend seed:gradebook
+pnpm --filter @learnova/backend seed:certificates
+```
+
+Targets ~1000 certificates, ~500 transcripts, multiple templates.
 
 ## Related docs
 
+- [CertificateEligibility](./CertificateEligibility.md)
 - [CertificateAPI](./CertificateAPI.md)
+- [CertificateTemplates](./CertificateTemplates.md)
+- [Transcript](./Transcript.md)
+- [Verification](./Verification.md)
 - [CertificatePermissions](./CertificatePermissions.md)
 - [AcademicRecords](./AcademicRecords.md)
-- [Gradebook](./Gradebook.md)

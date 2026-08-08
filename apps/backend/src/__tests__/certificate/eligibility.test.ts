@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   isCourseCompletionEligible,
+  isGraduationCertificateEligible,
   isSemesterRecordEligible,
   isStandingCertificateEligible,
   isTranscriptEligible,
@@ -27,5 +28,11 @@ describe('certificate eligibility', () => {
   it('requires matching standing for honors/distinction certificates', () => {
     expect(isStandingCertificateEligible('honors', { standing: 'honors' }).eligible).toBe(true);
     expect(isStandingCertificateEligible('distinction', { standing: 'honors' }).eligible).toBe(false);
+  });
+
+  it('graduation eligibility reads standing from gradebook without computing GPA', () => {
+    expect(isGraduationCertificateEligible({ standing: 'good_standing' }).eligible).toBe(true);
+    expect(isGraduationCertificateEligible({ standing: 'probation' }).eligible).toBe(false);
+    expect(isGraduationCertificateEligible(null).eligible).toBe(false);
   });
 });

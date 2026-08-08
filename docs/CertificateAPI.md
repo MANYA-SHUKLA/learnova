@@ -1,41 +1,71 @@
 # Certificate API
 
-Base path: `/api/v1/certificates`
+Base path: `/api/v1`
 
 ## Public
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/verify?code=` | Verify certificate or transcript by code |
+| GET | `/verify/:verificationCode` | Verify certificate or transcript |
+| GET | `/certificate/:certificateNumber` | Public certificate summary |
+| GET | `/certificates/verify?code=` | Verify (query alias) |
 
-## Authenticated
+## Templates (manage)
 
-| Method | Path | Permission | Description |
-|--------|------|------------|-------------|
-| GET | `/templates` | read | List institution templates |
-| POST | `/templates` | manage | Create template |
-| PUT | `/templates/:templateId` | manage | Update template |
-| GET | `/` | read | List certificates |
-| GET | `/:certificateId` | read | Certificate detail |
-| POST | `/issue` | write | Issue single certificate |
-| POST | `/bulk-issue` | write | Bulk course completion issue |
-| POST | `/revoke` | manage | Revoke certificate |
-| POST | `/transcripts` | write | Issue transcript |
-| GET | `/transcripts` | read | List transcripts |
-| GET | `/dashboard/institution` | manage | Issuance stats |
-| GET | `/dashboard/student` | read | Student wallet |
+| Method | Path | Permission |
+|--------|------|------------|
+| GET | `/certificates/templates` | `certificate:read` |
+| POST | `/certificates/templates` | `certificate:manage` |
+| PUT | `/certificates/templates/:templateId` | `certificate:manage` |
 
-## Issue body example
+## Certificates
 
-```json
-{
-  "studentId": "...",
-  "documentType": "course_completion",
-  "courseId": "..."
-}
+| Method | Path | Permission |
+|--------|------|------------|
+| GET | `/certificates` | `certificate:read` |
+| GET | `/certificates/:certificateId` | `certificate:read` |
+| GET | `/certificates/:certificateId/download` | `certificate:read` |
+| POST | `/certificates/issue` | `certificate:write` |
+| POST | `/certificates/bulk-issue` | `certificate:write` / manage actions |
+| POST | `/certificates/publish` | `certificate:manage` |
+| POST | `/certificates/revoke` | `certificate:manage` |
+| POST | `/certificates/:certificateId/archive` | `certificate:manage` |
+| POST | `/certificates/:certificateId/regenerate` | `certificate:manage` |
+| GET | `/certificates/eligible-students?courseId=` | `certificate:write` |
+| GET | `/certificates/registry/export` | `certificate:manage` |
+
+## Transcripts & academic records
+
+| Method | Path | Permission |
+|--------|------|------------|
+| POST | `/certificates/transcripts` | `certificate:write` |
+| GET | `/certificates/transcripts` | `certificate:read` |
+| GET | `/certificates/academic-record` | `certificate:read` |
+| POST | `/certificates/academic-record` | `certificate:write` |
+
+## Dashboards
+
+| Method | Path | Permission |
+|--------|------|------------|
+| GET | `/certificates/dashboard/institution` | `certificate:manage` |
+| GET | `/certificates/dashboard/student` | `certificate:read` |
+
+## Bulk actions
+
+`POST /certificates/bulk-issue` accepts `action`: `generate`, `issue`, `publish`, `revoke`, `archive`.
+
+## Seed
+
+```bash
+pnpm --filter @learnova/backend seed:certificates
 ```
 
-## Events
+Requires `SEED_INSTITUTION_ID` and published gradebook data (`seed:gradebook` first).
 
-- `certificate.generated`
-- `certificate.revoked`
+## Related docs
+
+- [Certificates](./Certificates.md)
+- [CertificateTemplates](./CertificateTemplates.md)
+- [Transcript](./Transcript.md)
+- [Verification](./Verification.md)
+- [CertificatePermissions](./CertificatePermissions.md)

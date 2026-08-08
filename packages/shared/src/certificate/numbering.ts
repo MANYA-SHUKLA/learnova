@@ -4,7 +4,7 @@ export function formatCertificateNumber(
   prefix: string,
   year: number,
   sequence: number,
-  segment = CERTIFICATE_DEFAULTS.NUMBER_SEGMENT,
+  segment: string = CERTIFICATE_DEFAULTS.NUMBER_SEGMENT,
 ): string {
   const padded = String(sequence).padStart(7, '0');
   return `${prefix}-${year}-${segment}-${padded}`;

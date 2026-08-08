@@ -84,8 +84,17 @@ export const certificateRepository = {
     const filter: Record<string, unknown> = { institutionId: oid(institutionId) };
     if (query.studentId) filter.studentId = oid(query.studentId);
     if (query.courseId) filter.courseId = oid(query.courseId);
+    if (query.programId) filter.programId = oid(query.programId);
+    if (query.semesterId) filter.semesterId = oid(query.semesterId);
     if (query.documentType) filter.documentType = query.documentType;
     if (query.status) filter.status = query.status;
+    if (query.q) {
+      filter.$or = [
+        { certificateNumber: new RegExp(query.q, 'i') },
+        { title: new RegExp(query.q, 'i') },
+        { verificationCode: query.q.toUpperCase() },
+      ];
+    }
 
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
@@ -106,6 +115,12 @@ export const certificateRepository = {
     }).exec();
   },
 
+  async findCertificateByNumber(certificateNumber: string) {
+    return AcademicCertificateModel.findOne({
+      certificateNumber: certificateNumber.trim(),
+    }).exec();
+  },
+
   async findCertificateByVerificationCode(code: string) {
     return AcademicCertificateModel.findOne({ verificationCode: code.toUpperCase() }).exec();
   },
@@ -122,10 +137,15 @@ export const certificateRepository = {
   ) {
     const now = new Date();
     return AcademicCertificateModel.findOneAndUpdate(
-      { _id: oid(certificateId), institutionId: oid(institutionId), status: 'issued' },
+      {
+        _id: oid(certificateId),
+        institutionId: oid(institutionId),
+        status: { $in: ['issued', 'published'] },
+      },
       {
         $set: {
           status: 'revoked',
+          revoked: true,
           revokedAt: now,
           revokedBy: oid(actorId),
           revocationReason: reason,
@@ -133,6 +153,40 @@ export const certificateRepository = {
       },
       { new: true },
     ).exec();
+  },
+
+  async publishCertificate(institutionId: string, certificateId: string, _actorId: string) {
+    const now = new Date();
+    return AcademicCertificateModel.findOneAndUpdate(
+      {
+        _id: oid(certificateId),
+        institutionId: oid(institutionId),
+        status: { $in: ['issued', 'generated'] },
+      },
+      { $set: { status: 'published', publishedAt: now } },
+      { new: true },
+    ).exec();
+  },
+
+  async archiveCertificate(institutionId: string, certificateId: string) {
+    return AcademicCertificateModel.findOneAndUpdate(
+      { _id: oid(certificateId), institutionId: oid(institutionId) },
+      { $set: { status: 'archived', archivedAt: new Date() } },
+      { new: true },
+    ).exec();
+  },
+
+  async incrementCertificateDownload(certificateId: string) {
+    return AcademicCertificateModel.findByIdAndUpdate(certificateId, {
+      $inc: { downloadCount: 1 },
+    }).exec();
+  },
+
+  async logVerification(payload: Record<string, unknown>) {
+    const { CertificateVerificationLogModel } = await import(
+      '../../models/certificate-verification-log.model.js'
+    );
+    return CertificateVerificationLogModel.create(payload);
   },
 
   async listTranscripts(institutionId: string, studentId?: string, semesterId?: string) {
@@ -198,11 +252,104 @@ export const certificateRepository = {
     });
   },
 
+  async listRegistryRows(
+    institutionId: string,
+    status?: string,
+    limit = 5000,
+  ) {
+    const filter: Record<string, unknown> = { institutionId: oid(institutionId) };
+    if (status) filter.status = status;
+    return AcademicCertificateModel.find(filter)
+      .sort({ issuedAt: -1 })
+      .limit(limit)
+      .select(
+        'certificateNumber studentId documentType status issueDate verificationCode courseId programId',
+      )
+      .lean()
+      .exec();
+  },
+
+  async findActiveCertificate(filter: Record<string, unknown>) {
+    return AcademicCertificateModel.findOne({
+      ...filter,
+      status: { $in: ['issued', 'published'] },
+    }).exec();
+  },
+
+  async createSignatures(rows: Array<Record<string, unknown>>) {
+    if (rows.length === 0) return [];
+    const { CertificateSignatureModel } = await import(
+      '../../models/certificate-signature.model.js'
+    );
+    return CertificateSignatureModel.insertMany(rows);
+  },
+
+  async listSignatures(certificateId: string) {
+    const { CertificateSignatureModel } = await import(
+      '../../models/certificate-signature.model.js'
+    );
+    return CertificateSignatureModel.find({ certificateId: oid(certificateId) }).exec();
+  },
+
+  async createShare(payload: Record<string, unknown>) {
+    const { CertificateShareModel } = await import('../../models/certificate-share.model.js');
+    return CertificateShareModel.create(payload);
+  },
+
+  async upsertAcademicRecord(filter: Record<string, unknown>, payload: Record<string, unknown>) {
+    const { AcademicRecordModel } = await import('../../models/academic-record.model.js');
+    return AcademicRecordModel.findOneAndUpdate(filter, { $set: payload }, { upsert: true, new: true }).exec();
+  },
+
+  async getAcademicRecord(institutionId: string, studentId: string, programId?: string) {
+    const { AcademicRecordModel } = await import('../../models/academic-record.model.js');
+    const filter: Record<string, unknown> = {
+      institutionId: oid(institutionId),
+      studentId: oid(studentId),
+    };
+    if (programId) filter.programId = oid(programId);
+    return AcademicRecordModel.findOne(filter).exec();
+  },
+
+  async createAcademicRecordVersion(payload: Record<string, unknown>) {
+    const { AcademicRecordVersionModel } = await import(
+      '../../models/academic-record-version.model.js'
+    );
+    return AcademicRecordVersionModel.create(payload);
+  },
+
+  async analyticsBreakdown(institutionId: string) {
+    const instOid = oid(institutionId);
+    const [topPrograms, topCourses] = await Promise.all([
+      AcademicCertificateModel.aggregate<{ _id: Types.ObjectId; count: number }>([
+        { $match: { institutionId: instOid, programId: { $ne: null }, status: { $in: ['issued', 'published'] } } },
+        { $group: { _id: '$programId', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+      ]).exec(),
+      AcademicCertificateModel.aggregate<{ _id: Types.ObjectId; count: number }>([
+        { $match: { institutionId: instOid, courseId: { $ne: null }, status: { $in: ['issued', 'published'] } } },
+        { $group: { _id: '$courseId', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+      ]).exec(),
+    ]);
+    return {
+      topPrograms: topPrograms.map((row) => ({ programId: String(row._id), count: row.count })),
+      topCourses: topCourses.map((row) => ({ courseId: String(row._id), count: row.count })),
+    };
+  },
+
   async countIssued(institutionId: string) {
-    const [issued, revoked, transcripts] = await Promise.all([
+    const [issued, published, revoked, transcripts, downloads, verifications] =
+      await Promise.all([
       AcademicCertificateModel.countDocuments({
         institutionId: oid(institutionId),
-        status: 'issued',
+        status: { $in: ['issued', 'published'] },
+      }).exec(),
+      AcademicCertificateModel.countDocuments({
+        institutionId: oid(institutionId),
+        status: 'published',
       }).exec(),
       AcademicCertificateModel.countDocuments({
         institutionId: oid(institutionId),
@@ -210,9 +357,28 @@ export const certificateRepository = {
       }).exec(),
       AcademicTranscriptModel.countDocuments({
         institutionId: oid(institutionId),
-        status: 'issued',
+        status: { $in: ['issued', 'published'] },
       }).exec(),
+      AcademicCertificateModel.aggregate<{ total: number }>([
+        { $match: { institutionId: oid(institutionId) } },
+        { $group: { _id: null, total: { $sum: '$downloadCount' } } },
+      ]).exec(),
+      (async () => {
+        const { CertificateVerificationLogModel } = await import(
+          '../../models/certificate-verification-log.model.js'
+        );
+        return CertificateVerificationLogModel.countDocuments({
+          institutionId: oid(institutionId),
+        }).exec();
+      })(),
     ]);
-    return { issued, revoked, transcripts };
+    return {
+      issued,
+      published,
+      revoked,
+      transcripts,
+      downloads: downloads[0]?.total ?? 0,
+      verifications,
+    };
   },
 };

@@ -137,6 +137,10 @@ export const EVENTS = {
   GRADE_MODERATION_PUBLISHED: 'grade.moderation.published',
   GRADE_SNAPSHOT_CREATED: 'grade.snapshot.created',
   GRADE_STANDING_COMPUTED: 'grade.standing.computed',
+
+  CERTIFICATE_READY: 'certificate.ready',
+  CERTIFICATE_ISSUED: 'certificate.issued',
+  CERTIFICATE_PUBLISHED: 'certificate.published',
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
@@ -583,6 +587,9 @@ export const EVENT_REGISTRY: readonly EventDefinition[] = [
   { name: EVENTS.VIOLATION_RECORDED, description: 'Exam violation recorded', version: 1 },
   { name: EVENTS.VIOLATION_DETECTED, description: 'Exam violation detected', version: 1 },
   { name: EVENTS.CERTIFICATE_GENERATED, description: 'Certificate generated', version: 1 },
+  { name: EVENTS.CERTIFICATE_READY, description: 'Certificate ready for issue', version: 1 },
+  { name: EVENTS.CERTIFICATE_ISSUED, description: 'Certificate issued to student', version: 1 },
+  { name: EVENTS.CERTIFICATE_PUBLISHED, description: 'Certificate published to student portal', version: 1 },
   { name: EVENTS.PROJECT_SUBMITTED, description: 'Project submitted', version: 1 },
   { name: EVENTS.PROJECT_CREATED, description: 'Project created', version: 1 },
   { name: EVENTS.PROJECT_UPDATED, description: 'Project updated', version: 1 },

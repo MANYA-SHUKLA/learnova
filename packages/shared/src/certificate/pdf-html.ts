@@ -1,3 +1,5 @@
+import { CERTIFICATE_PDF_THEME } from '@learnova/constants';
+
 export interface CertificatePdfInput {
   title: string;
   institutionName: string;
@@ -9,10 +11,24 @@ export interface CertificatePdfInput {
   issuedAt: string;
   logoUrl?: string | null;
   watermark?: string | null;
+  primaryColor?: string | null;
+  accentColor?: string | null;
   signatures?: Array<{ name: string; title: string; role: string }>;
 }
 
 export function renderCertificateHtml(input: CertificatePdfInput): string {
+  const theme = {
+    primary: input.primaryColor ?? CERTIFICATE_PDF_THEME.primary,
+    accent: input.accentColor ?? CERTIFICATE_PDF_THEME.accent,
+    secondary: CERTIFICATE_PDF_THEME.secondary,
+    border: CERTIFICATE_PDF_THEME.border,
+    muted: CERTIFICATE_PDF_THEME.muted,
+    background: CERTIFICATE_PDF_THEME.background,
+    card: CERTIFICATE_PDF_THEME.card,
+    fontFamily: CERTIFICATE_PDF_THEME.fontFamily,
+    gradient: CERTIFICATE_PDF_THEME.gradient,
+  };
+
   const signatures = (input.signatures ?? [])
     .map(
       (sig) =>
@@ -26,24 +42,111 @@ export function renderCertificateHtml(input: CertificatePdfInput): string {
   <meta charset="utf-8" />
   <title>${input.title}</title>
   <style>
-    @page { size: A4 landscape; margin: 24mm; }
-    body { font-family: Georgia, 'Times New Roman', serif; color: #1a1a1a; margin: 0; }
-    .page { border: 6px double #b8860b; padding: 32px; min-height: 520px; position: relative; }
-    .watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-      font-size: 72px; color: rgba(0,0,0,.04); transform: rotate(-24deg); pointer-events: none; }
-    .header { text-align: center; }
-    .logo { max-height: 64px; margin-bottom: 12px; }
-    h1 { font-size: 28px; letter-spacing: .08em; margin: 8px 0; text-transform: uppercase; }
-    .institution { font-size: 18px; color: #444; }
-    .student { font-size: 32px; margin: 28px 0 12px; font-weight: bold; }
-    .body { text-align: center; font-size: 16px; line-height: 1.6; max-width: 720px; margin: 0 auto; }
-    .meta { margin-top: 36px; display: flex; justify-content: space-between; gap: 24px; font-size: 12px; }
-    .qr { border: 1px solid #ccc; padding: 8px; text-align: center; min-width: 160px; }
-    .qr-code { font-family: monospace; font-size: 11px; word-break: break-all; }
-    .sigs { display: flex; gap: 32px; justify-content: center; margin-top: 32px; }
-    .sig { text-align: center; min-width: 160px; }
-    .sig-line { border-top: 1px solid #333; margin-bottom: 8px; }
-    .muted { color: #666; font-size: 11px; }
+    @page { size: A4 landscape; margin: 20mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: ${theme.fontFamily};
+      color: ${theme.secondary};
+      margin: 0;
+      background: ${theme.background};
+    }
+    .page {
+      background: ${theme.card};
+      border: 1px solid ${theme.border};
+      border-radius: 16px;
+      box-shadow: 0 16px 40px -8px rgb(15 23 42 / 0.12);
+      padding: 40px 48px;
+      min-height: 520px;
+      position: relative;
+      overflow: hidden;
+    }
+    .page::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 6px;
+      background: ${theme.gradient};
+    }
+    .watermark {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: 700;
+      color: ${theme.primary};
+      opacity: 0.04;
+      transform: rotate(-18deg);
+      pointer-events: none;
+    }
+    .header { text-align: center; position: relative; z-index: 1; }
+    .logo { max-height: 56px; margin-bottom: 16px; }
+    h1 {
+      font-size: 26px;
+      letter-spacing: 0.06em;
+      margin: 8px 0;
+      text-transform: uppercase;
+      color: ${theme.secondary};
+    }
+    .institution { font-size: 16px; color: ${theme.muted}; font-weight: 500; }
+    .student {
+      font-size: 30px;
+      margin: 28px 0 12px;
+      font-weight: 700;
+      color: ${theme.primary};
+    }
+    .body {
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.65;
+      max-width: 720px;
+      margin: 0 auto;
+      color: ${theme.secondary};
+    }
+    .meta {
+      margin-top: 36px;
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      font-size: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .qr {
+      border: 1px solid ${theme.border};
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      min-width: 168px;
+      background: ${theme.background};
+    }
+    .qr-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: ${theme.accent};
+    }
+    .qr-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      word-break: break-all;
+      margin-top: 6px;
+      color: ${theme.secondary};
+    }
+    .sigs {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      margin-top: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .sig { text-align: center; min-width: 160px; font-size: 12px; }
+    .sig-line { border-top: 1px solid ${theme.border}; margin-bottom: 8px; }
+    .muted { color: ${theme.muted}; font-size: 11px; }
+    strong { color: ${theme.secondary}; }
   </style>
 </head>
 <body>
@@ -66,7 +169,7 @@ export function renderCertificateHtml(input: CertificatePdfInput): string {
         <div><strong>Issued</strong> ${input.issuedAt}</div>
       </div>
       <div class="qr">
-        <div><strong>Verify</strong></div>
+        <div class="qr-label">Verify on Learnova</div>
         <div class="qr-code">${input.verificationCode}</div>
         <div class="muted">${input.verificationUrl}</div>
       </div>

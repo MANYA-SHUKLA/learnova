@@ -22,20 +22,41 @@ export interface PublishedGradeFacts {
 }
 
 export function defaultTitleForDocumentType(type: CertificateDocumentType): string {
-  switch (type) {
+  switch (normalizeDocumentType(type)) {
     case 'course_completion':
       return CERTIFICATE_DEFAULTS.TITLE_COURSE;
+    case 'lab_completion':
+      return CERTIFICATE_DEFAULTS.TITLE_LAB;
+    case 'project_completion':
+      return CERTIFICATE_DEFAULTS.TITLE_PROJECT;
+    case 'quiz_completion':
+      return CERTIFICATE_DEFAULTS.TITLE_QUIZ;
+    case 'exam_completion':
+      return CERTIFICATE_DEFAULTS.TITLE_EXAM;
+    case 'semester_completion':
     case 'semester_record':
       return CERTIFICATE_DEFAULTS.TITLE_SEMESTER;
+    case 'program_completion':
+      return CERTIFICATE_DEFAULTS.TITLE_PROGRAM;
+    case 'graduation':
+      return CERTIFICATE_DEFAULTS.TITLE_GRADUATION;
+    case 'merit':
+    case 'honors':
+    case 'distinction':
+      return CERTIFICATE_DEFAULTS.TITLE_MERIT;
+    case 'participation':
+      return CERTIFICATE_DEFAULTS.TITLE_PARTICIPATION;
     case 'transcript':
       return CERTIFICATE_DEFAULTS.TITLE_TRANSCRIPT;
-    case 'honors':
-      return CERTIFICATE_DEFAULTS.TITLE_HONORS;
-    case 'distinction':
-      return CERTIFICATE_DEFAULTS.TITLE_DISTINCTION;
     default:
       return 'Academic Certificate';
   }
+}
+
+function normalizeDocumentType(type: CertificateDocumentType): CertificateDocumentType {
+  if (type === 'honors' || type === 'distinction') return 'merit';
+  if (type === 'semester_record') return 'semester_completion';
+  return type;
 }
 
 export function buildCourseCompletionPayload(
