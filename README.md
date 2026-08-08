@@ -10,17 +10,16 @@ LMS · University ERP · Online Examination · Coding Platform · Cloud IDE · A
 
 | Step | Scope | State |
 | --- | --- | --- |
-| 1 | Foundation | ✅ Complete |
-| 2 | Infrastructure | ✅ Complete |
-| 3 | Authentication | ✅ Complete |
-| 4 | Institution & Academic Structure | ✅ Complete |
-| 5 | Faculty Management | ✅ Complete |
-| 6 | Student Management | ✅ Complete |
-| **6.5** | **System Integration & Demo** | 🔄 In progress |
-| 7 | Course Management (LMS) | 🔄 Foundation started |
+| 1–6.5 | ERP core + integration | ✅ Complete |
+| 7–8.25 | LMS catalog, builder, enrollments | ✅ Complete |
+| 8.5–15 | Progress → Certificates (full academic stack) | ✅ Complete |
+| **—** | **Production baseline** (build · deploy · verify · demo) | 🔄 In progress |
+| 16 | Analytics & Notifications | ⏸ Deferred |
+| 17 | AI content generation | ⏸ Deferred |
+| — | Placements | ⏸ Deferred |
 
-**Now:** Verify the connected ERP core — auth roles, permissions, search, import/export, dashboards, responsive + dark mode, audit logs.  
-**Next (after 6.5):** Enterprise Course Management (modules → lessons → content → progress → certificates).
+**Now:** Pass `pnpm build`, deploy staging (Vercel + Render), run `pnpm verify:platform`, E2E all 3 roles, capture demo assets.  
+**Not in scope:** Steps 16–17, Placements — see [docs/Roadmap.md](./docs/Roadmap.md).
 
 Full plan + checklists: [docs/Roadmap.md](./docs/Roadmap.md).
 
@@ -30,7 +29,7 @@ Institution → Campus → School → Department → Program
   → Faculty → Students
 ```
 
-LMS domains (courses, enrollments, exams, labs, analytics) start **only after Step 6.5**.
+LMS domains (courses, enrollments, exams, labs, gradebook, certificates) are **shipped** (Steps 7–15). Platform analytics (16), AI generation (17), and Placements are **deferred**.
 
 ## Stack
 
