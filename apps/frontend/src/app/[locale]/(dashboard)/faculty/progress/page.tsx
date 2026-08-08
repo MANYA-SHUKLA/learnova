@@ -15,6 +15,7 @@ import { BarChart3, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { CourseSelect } from '@/components/shared/entity-selects';
 import { EmptyState, ErrorState } from '@/features/institution';
 import { useCourseList } from '@/features/course';
 import {

@@ -16,6 +16,7 @@ import { FolderKanban, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { SuccessPopup } from '@/components/shared/success-popup';
+import { CourseSelect, FacultySelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
 import {
@@ -200,19 +201,23 @@ export default function InstitutionProjectsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Input
-                placeholder={t('filters.courseId')}
+              <CourseSelect
+                allowEmpty
+                emptyLabel={t('filters.allCourses')}
                 value={courseId}
-                onChange={(e) => {
-                  setCourseId(e.target.value);
+                visibleRows={4}
+                onChange={(value) => {
+                  setCourseId(value);
                   setPage(1);
                 }}
               />
-              <Input
-                placeholder={t('filters.facultyId')}
+              <FacultySelect
+                allowEmpty
+                emptyLabel={t('filters.allFaculty')}
                 value={facultyId}
-                onChange={(e) => {
-                  setFacultyId(e.target.value);
+                visibleRows={4}
+                onChange={(value) => {
+                  setFacultyId(value);
                   setPage(1);
                 }}
               />
@@ -338,11 +343,12 @@ export default function InstitutionProjectsPage() {
                   >
                     {t('bulkDelete')}
                   </Button>
-                  <Input
-                    className="h-8 w-40"
-                    placeholder={t('assignFacultyId')}
+                  <FacultySelect
+                    className="w-56"
+                    label={t('assignFacultyId')}
                     value={assignFacultyId}
-                    onChange={(e) => setAssignFacultyId(e.target.value)}
+                    visibleRows={4}
+                    onChange={setAssignFacultyId}
                   />
                   <Button
                     size="sm"
