@@ -9,15 +9,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DataTable,
   Input,
-  Skeleton,
+  PageHeader,
   Spinner,
 } from '@learnova/ui';
 import { BookOpen, XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { ErrorState } from '@/features/institution';
 import {
   formatEnrollmentStatus,
   useLeaveWaitlistMutation,
@@ -58,19 +60,13 @@ export default function StudentEnrollmentsPage() {
 
   return (
     <PermissionGate permission={PERMISSIONS.ENROLLMENT_READ} enforce>
-      <div className="space-y-8">
-        <div>
-          <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-            {t('title')}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
-        </div>
+      <DashboardPage>
+        <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
 
         <PermissionGate permission={PERMISSIONS.ENROLLMENT_WRITE}>
-          <Card className="rounded-2xl border-border/80">
+          <Card className="rounded-xl border-border/80 shadow-soft-md">
             <CardHeader>
-              <CardTitle className="text-base">{t('selfEnrollTitle')}</CardTitle>
+              <CardTitle className="text-card-title">{t('selfEnrollTitle')}</CardTitle>
               <CardDescription>{t('selfEnrollDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -81,6 +77,7 @@ export default function StudentEnrollmentsPage() {
               ) : null}
               <div className="flex gap-2">
                 <Input
+                  className="rounded-xl"
                   placeholder="Enter course ID"
                   value={courseId}
                   onChange={(e) => setCourseId(e.target.value)}
@@ -90,6 +87,7 @@ export default function StudentEnrollmentsPage() {
                   disabled={selfEnrollMutation.isPending}
                 />
                 <Button
+                  className="rounded-xl"
                   onClick={() => void onSelfEnroll()}
                   disabled={selfEnrollMutation.isPending || !courseId.trim()}
                 >
@@ -107,12 +105,12 @@ export default function StudentEnrollmentsPage() {
           </Card>
         </PermissionGate>
 
-        <Card className="rounded-2xl border-border/80">
+        <Card className="directory-shell overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t('myEnrollments')}</CardTitle>
+            <CardTitle className="text-card-title">{t('myEnrollments')}</CardTitle>
             <CardDescription>{t('myEnrollmentsDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             {myQuery.isError ? (
               <ErrorState
                 message={
@@ -122,27 +120,69 @@ export default function StudentEnrollmentsPage() {
                 }
                 onRetry={() => void myQuery.refetch()}
               />
-            ) : null}
-
-            {myQuery.isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20 w-full rounded-xl" />
-                ))}
-              </div>
-            ) : enrollments.length === 0 ? (
-              <EmptyState
-                illustration="inbox"
-                title={t('emptyTitle')}
-                description={t('emptyDescription')}
-              />
             ) : (
-              <div className="space-y-3">
-                {enrollments.map((row) => (
-                  <Card key={row.id} className="rounded-2xl">
+              <DataTable
+                caption={t('myEnrollments')}
+                loading={myQuery.isLoading}
+                data={enrollments}
+                rowKey={(row) => row.id}
+                emptyTitle={t('emptyTitle')}
+                emptyDescription={t('emptyDescription')}
+                columns={[
+                  {
+                    id: 'number',
+                    header: 'Enrollment #',
+                    cell: (row) => <span className="font-medium">{row.enrollmentNumber}</span>,
+                  },
+                  {
+                    id: 'course',
+                    header: 'Course',
+                    cell: (row) => (
+                      <span className="flex items-center gap-2 text-sm">
+                        <BookOpen className="size-4 text-muted-foreground" aria-hidden />
+                        {row.courseId}
+                      </span>
+                    ),
+                  },
+                  {
+                    id: 'date',
+                    header: 'Date',
+                    cell: (row) => (
+                      <span className="tabular-nums text-sm">{row.enrollmentDate.slice(0, 10)}</span>
+                    ),
+                  },
+                  {
+                    id: 'status',
+                    header: 'Status',
+                    cell: (row) => (
+                      <Badge variant="secondary">{formatEnrollmentStatus(row.status)}</Badge>
+                    ),
+                  },
+                ]}
+                rowActions={(row) =>
+                  row.status === 'active' || row.status === 'approved' ? (
+                    <PermissionGate permission={PERMISSIONS.ENROLLMENT_WRITE}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-lg"
+                        disabled={withdrawMutation.isPending}
+                        onClick={() => {
+                          const reason = prompt('Withdrawal reason (optional):') ?? '';
+                          void withdrawMutation.mutateAsync({ id: row.id, reason });
+                        }}
+                      >
+                        <XCircle className="size-4" />
+                        Withdraw
+                      </Button>
+                    </PermissionGate>
+                  ) : null
+                }
+                mobileRow={(row) => (
+                  <Card className="rounded-xl">
                     <CardContent className="space-y-3 p-4">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
+                        <div>
                           <p className="font-medium">{row.enrollmentNumber}</p>
                           <p className="text-xs text-muted-foreground">
                             {row.enrollmentDate.slice(0, 10)}
@@ -150,65 +190,97 @@ export default function StudentEnrollmentsPage() {
                         </div>
                         <Badge variant="secondary">{formatEnrollmentStatus(row.status)}</Badge>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <BookOpen className="size-4" />
-                        <span>Course ID: {row.courseId}</span>
-                      </div>
+                      <p className="text-sm text-muted-foreground">Course: {row.courseId}</p>
                       {row.status === 'active' || row.status === 'approved' ? (
                         <PermissionGate permission={PERMISSIONS.ENROLLMENT_WRITE}>
                           <Button
                             size="sm"
                             variant="outline"
+                            className="w-full rounded-xl"
                             disabled={withdrawMutation.isPending}
                             onClick={() => {
                               const reason = prompt('Withdrawal reason (optional):') ?? '';
                               void withdrawMutation.mutateAsync({ id: row.id, reason });
                             }}
                           >
-                            <XCircle className="size-4" />
                             Withdraw
                           </Button>
                         </PermissionGate>
                       ) : null}
                     </CardContent>
                   </Card>
-                ))}
-              </div>
+                )}
+              />
             )}
           </CardContent>
         </Card>
 
         {waitlist.length > 0 ? (
-          <Card className="rounded-2xl border-border/80">
+          <Card className="rounded-xl border-border/80 shadow-soft-md">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">{t('waitlist')}</CardTitle>
+              <CardTitle className="text-card-title">{t('waitlist')}</CardTitle>
               <CardDescription>{t('waitlistDescription')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {waitlist.map((entry) => (
-                <Card key={entry.id} className="rounded-2xl">
-                  <CardContent className="flex items-center justify-between gap-4 p-4">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">Course: {entry.courseId}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Position {entry.position} · Requested {entry.requestedAt.slice(0, 10)}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={leaveWaitlistMutation.isPending}
-                      onClick={() => void leaveWaitlistMutation.mutateAsync(entry.courseId)}
-                    >
-                      Leave
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+            <CardContent>
+              <DataTable
+                caption={t('waitlist')}
+                data={waitlist}
+                rowKey={(row) => row.id}
+                columns={[
+                  {
+                    id: 'course',
+                    header: 'Course',
+                    cell: (row) => <span className="font-medium">{row.courseId}</span>,
+                  },
+                  {
+                    id: 'position',
+                    header: 'Position',
+                    cell: (row) => <span className="tabular-nums">{row.position}</span>,
+                  },
+                  {
+                    id: 'requested',
+                    header: 'Requested',
+                    cell: (row) => (
+                      <span className="tabular-nums text-sm">{row.requestedAt.slice(0, 10)}</span>
+                    ),
+                  },
+                ]}
+                rowActions={(row) => (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="rounded-lg"
+                    disabled={leaveWaitlistMutation.isPending}
+                    onClick={() => void leaveWaitlistMutation.mutateAsync(row.courseId)}
+                  >
+                    Leave
+                  </Button>
+                )}
+                mobileRow={(row) => (
+                  <Card className="rounded-xl">
+                    <CardContent className="flex items-center justify-between gap-4 p-4">
+                      <div>
+                        <p className="font-medium">Course: {row.courseId}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Position {row.position} · {row.requestedAt.slice(0, 10)}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={leaveWaitlistMutation.isPending}
+                        onClick={() => void leaveWaitlistMutation.mutateAsync(row.courseId)}
+                      >
+                        Leave
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              />
             </CardContent>
           </Card>
         ) : null}
-      </div>
+      </DashboardPage>
     </PermissionGate>
   );
 }
