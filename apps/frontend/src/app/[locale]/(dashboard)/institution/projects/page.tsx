@@ -203,7 +203,7 @@ export default function InstitutionProjectsPage() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <CourseSelect
                 allowEmpty
-                emptyLabel={t('filters.allCourses')}
+                emptyLabel="All courses"
                 value={courseId}
                 visibleRows={4}
                 onChange={(value) => {
@@ -213,7 +213,7 @@ export default function InstitutionProjectsPage() {
               />
               <FacultySelect
                 allowEmpty
-                emptyLabel={t('filters.allFaculty')}
+                emptyLabel="All faculty"
                 value={facultyId}
                 visibleRows={4}
                 onChange={(value) => {
