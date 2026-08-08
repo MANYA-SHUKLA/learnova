@@ -15,6 +15,15 @@ import {
 import { useState, type ChangeEvent } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
+  CampusSelect,
+  DepartmentSelect,
+  FacultyMultiSelect,
+  FacultySelect,
+  ProgramMultiSelect,
+  SchoolSelect,
+  SemesterMultiSelect,
+} from '@/components/shared/entity-selects';
+import {
   COURSE_CATEGORY_LABELS,
   COURSE_DIFFICULTY_LABELS,
   COURSE_ENROLLMENT_MODE_LABELS,
@@ -55,9 +64,6 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
     campusId: initial?.campusId ?? '',
     schoolId: initial?.schoolId ?? '',
     departmentId: initial?.departmentId ?? '',
-    programIds: (initial?.programIds ?? []).join(', '),
-    semesterIds: (initial?.semesterIds ?? []).join(', '),
-    facultyIds: (initial?.facultyIds ?? []).join(', '),
     coordinatorId: initial?.coordinatorId ?? '',
     category: initial?.category ?? 'programming',
     difficulty: initial?.difficulty ?? 'beginner',
@@ -88,6 +94,9 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
     seoKeywords: (initial?.seoKeywords ?? []).join(', '),
   });
   const [error, setError] = useState<string | null>(null);
+  const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>(initial?.programIds ?? []);
+  const [selectedSemesterIds, setSelectedSemesterIds] = useState<string[]>(initial?.semesterIds ?? []);
+  const [selectedFacultyIds, setSelectedFacultyIds] = useState<string[]>(initial?.facultyIds ?? []);
 
   const set = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -105,18 +114,9 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
       campusId: form.campusId.trim() || null,
       schoolId: form.schoolId.trim() || null,
       departmentId: form.departmentId.trim() || null,
-      programIds: form.programIds
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      semesterIds: form.semesterIds
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      facultyIds: form.facultyIds
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
+      programIds: selectedProgramIds,
+      semesterIds: selectedSemesterIds,
+      facultyIds: selectedFacultyIds,
       coordinatorId: form.coordinatorId.trim() || null,
       category: form.category as CourseCreateBody['category'],
       difficulty: form.difficulty as CourseCreateBody['difficulty'],
@@ -268,11 +268,36 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
               Academic mapping
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('campusId', 'Campus ID (ObjectId)')}
-              {field('schoolId', 'School ID (ObjectId)')}
-              {field('departmentId', 'Department ID (ObjectId)')}
-              {field('programIds', 'Program IDs (comma-separated)')}
-              {field('semesterIds', 'Semester IDs (comma-separated)')}
+              <CampusSelect
+                id="campusId"
+                value={form.campusId}
+                disabled={pending}
+                onChange={(value) => set('campusId', value)}
+              />
+              <SchoolSelect
+                id="schoolId"
+                value={form.schoolId}
+                disabled={pending}
+                onChange={(value) => set('schoolId', value)}
+              />
+              <DepartmentSelect
+                id="departmentId"
+                value={form.departmentId}
+                disabled={pending}
+                onChange={(value) => set('departmentId', value)}
+              />
+              <ProgramMultiSelect
+                label="Programs"
+                values={selectedProgramIds}
+                disabled={pending}
+                onChange={setSelectedProgramIds}
+              />
+              <SemesterMultiSelect
+                label="Semesters"
+                values={selectedSemesterIds}
+                disabled={pending}
+                onChange={setSelectedSemesterIds}
+              />
             </div>
           </div>
 
@@ -281,8 +306,21 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
               Faculty
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('facultyIds', 'Faculty IDs (comma-separated)')}
-              {field('coordinatorId', 'Coordinator ID (ObjectId)')}
+              <FacultyMultiSelect
+                label="Assigned faculty"
+                values={selectedFacultyIds}
+                disabled={pending}
+                onChange={setSelectedFacultyIds}
+              />
+              <FacultySelect
+                id="coordinatorId"
+                label="Coordinator"
+                value={form.coordinatorId}
+                disabled={pending}
+                allowEmpty
+                emptyLabel="No coordinator"
+                onChange={(value) => set('coordinatorId', value)}
+              />
             </div>
           </div>
 
