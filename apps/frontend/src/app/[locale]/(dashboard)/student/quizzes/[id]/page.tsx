@@ -122,7 +122,7 @@ export default function StudentQuizAttemptPage() {
               <CardDescription>
                 {t('score')}: {result.score.toFixed(1)} ({result.percentage.toFixed(1)}%)
               </CardDescription>
-              <Badge className="w-fit" variant={result.passed ? 'default' : 'destructive'}>
+              <Badge className="w-fit" variant={result.passed ? 'default' : 'danger'}>
                 {result.passed ? t('passed') : t('failed')}
               </Badge>
               <Button asChild className="mt-4 w-fit" variant="outline">

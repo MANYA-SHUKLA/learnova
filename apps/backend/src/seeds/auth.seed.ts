@@ -218,6 +218,36 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage institution-wide practice labs and analytics',
   },
+  'gradebook:read': {
+    resource: 'gradebook',
+    action: 'read',
+    description: 'View gradebook entries, dashboards, and transcripts',
+  },
+  'gradebook:write': {
+    resource: 'gradebook',
+    action: 'write',
+    description: 'Create and update grades for assigned courses',
+  },
+  'gradebook:manage': {
+    resource: 'gradebook',
+    action: 'manage',
+    description: 'Manage institution-wide gradebooks and grading policies',
+  },
+  'certificate:read': {
+    resource: 'certificate',
+    action: 'read',
+    description: 'View certificates and verification status',
+  },
+  'certificate:write': {
+    resource: 'certificate',
+    action: 'write',
+    description: 'Issue and manage certificates for assigned courses',
+  },
+  'certificate:manage': {
+    resource: 'certificate',
+    action: 'manage',
+    description: 'Manage certificate templates, registry, and institution dashboard',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {

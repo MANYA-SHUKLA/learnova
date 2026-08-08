@@ -112,6 +112,26 @@ async function pageRedirect(path: string, cookies: string, role: string): Promis
   return { status: res.status, location: res.headers.get('location') };
 }
 
+/** True when the user cannot access the requested path (403, /forbidden, or redirect away). */
+async function pageAccessBlocked(
+  path: string,
+  cookies: string,
+  role: string,
+  blockedSegment: string,
+): Promise<boolean> {
+  const hint = signRoleHint(role) ?? role;
+  const res = await fetch(`${WEB}${path}`, {
+    redirect: 'follow',
+    headers: {
+      Cookie: `${cookies}; learnova_session=1; learnova_role=${encodeURIComponent(hint)}`,
+    },
+  });
+  if (res.status === 403) return true;
+  const finalUrl = res.url.toLowerCase();
+  if (finalUrl.includes('/forbidden')) return true;
+  return !finalUrl.includes(blockedSegment.toLowerCase());
+}
+
 interface ApiListResponse {
   success: boolean;
   data?: { items?: unknown[] };
@@ -281,66 +301,64 @@ async function main(): Promise<void> {
 
   console.log('\n=== RBAC (Pages) ===');
   if (faculty) {
-    const blockedInstitution = await pageRedirect('/en/institution/dashboard', faculty.cookies, faculty.role);
-    const blockedStudent = await pageRedirect('/en/student/dashboard', faculty.cookies, faculty.role);
-    const institutionRedirect =
-      blockedInstitution.status >= 300 &&
-      blockedInstitution.status < 400 &&
-      blockedInstitution.location?.includes('/faculty/dashboard');
-    const studentRedirect =
-      blockedStudent.status >= 300 &&
-      blockedStudent.status < 400 &&
-      blockedStudent.location?.includes('/faculty/dashboard');
-    console.log(
-      `  Faculty blocked from institution dashboard: ${track(failures, 'Faculty blocked from institution dashboard', institutionRedirect)}`,
+    const institutionBlocked = await pageAccessBlocked(
+      '/en/institution/dashboard',
+      faculty.cookies,
+      faculty.role,
+      '/institution/',
+    );
+    const studentBlocked = await pageAccessBlocked(
+      '/en/student/dashboard',
+      faculty.cookies,
+      faculty.role,
+      '/student/dashboard',
     );
     console.log(
-      `  Faculty blocked from student dashboard: ${track(failures, 'Faculty blocked from student dashboard', studentRedirect)}`,
+      `  Faculty blocked from institution dashboard: ${track(failures, 'Faculty blocked from institution dashboard', institutionBlocked)}`,
+    );
+    console.log(
+      `  Faculty blocked from student dashboard: ${track(failures, 'Faculty blocked from student dashboard', studentBlocked)}`,
     );
   }
   if (student) {
-    const blockedFaculty = await pageRedirect('/en/faculty/dashboard', student.cookies, student.role);
-    const blockedInstitution = await pageRedirect(
+    const facultyBlocked = await pageAccessBlocked(
+      '/en/faculty/dashboard',
+      student.cookies,
+      student.role,
+      '/faculty/',
+    );
+    const institutionBlocked = await pageAccessBlocked(
       '/en/institution/dashboard',
       student.cookies,
       student.role,
+      '/institution/',
     );
-    const blockedInstitutionStudents = await pageRedirect(
+    const institutionStudentsBlocked = await pageAccessBlocked(
       '/en/institution/students',
       student.cookies,
       student.role,
+      '/institution/students',
     );
-    const facultyRedirect =
-      blockedFaculty.status >= 300 &&
-      blockedFaculty.status < 400 &&
-      blockedFaculty.location?.includes('/student/dashboard');
-    const institutionRedirect =
-      blockedInstitution.status >= 300 &&
-      blockedInstitution.status < 400 &&
-      blockedInstitution.location?.includes('/student/dashboard');
-    const institutionStudentsRedirect =
-      blockedInstitutionStudents.status >= 300 &&
-      blockedInstitutionStudents.status < 400 &&
-      blockedInstitutionStudents.location?.includes('/student/dashboard');
 
     console.log(
-      `  Student blocked from faculty dashboard: ${track(failures, 'Student blocked from faculty dashboard', facultyRedirect)}`,
+      `  Student blocked from faculty dashboard: ${track(failures, 'Student blocked from faculty dashboard', facultyBlocked)}`,
     );
     console.log(
-      `  Student blocked from institution dashboard: ${track(failures, 'Student blocked from institution dashboard', institutionRedirect)}`,
+      `  Student blocked from institution dashboard: ${track(failures, 'Student blocked from institution dashboard', institutionBlocked)}`,
     );
     console.log(
-      `  Student blocked from institution students: ${track(failures, 'Student blocked from institution students', institutionStudentsRedirect)}`,
+      `  Student blocked from institution students: ${track(failures, 'Student blocked from institution students', institutionStudentsBlocked)}`,
     );
   }
   if (admin) {
-    const blocked = await pageRedirect('/en/student/dashboard', admin.cookies, admin.role);
-    const redirected =
-      blocked.status >= 300 &&
-      blocked.status < 400 &&
-      blocked.location?.includes('/institution/dashboard');
+    const studentBlocked = await pageAccessBlocked(
+      '/en/student/dashboard',
+      admin.cookies,
+      admin.role,
+      '/student/dashboard',
+    );
     console.log(
-      `  Admin blocked from student dashboard: ${track(failures, 'Admin blocked from student dashboard', redirected)}`,
+      `  Admin blocked from student dashboard: ${track(failures, 'Admin blocked from student dashboard', studentBlocked)}`,
     );
   }
 
@@ -475,7 +493,7 @@ async function main(): Promise<void> {
 
   if (admin) {
     const inst = await api<{ success: boolean }>('/campuses?page=1&limit=1', { token: admin.token });
-    console.log(`  Admin campuses: ${pass(inst.json.success)}`);
+    console.log(`  Admin campuses: ${track(failures, 'Admin campuses', inst.json.success)}`);
   }
 
   console.log('\n=== Permissions (role bundles) ===');
@@ -494,7 +512,9 @@ async function main(): Promise<void> {
       );
       const perms = me.json.data?.user?.permissions ?? [];
       const has = perms.includes(c.perm);
-      console.log(`  ${c.label} has ${c.perm}: ${pass(has === c.expect)} (${has})`);
+      console.log(
+        `  ${c.label} has ${c.perm}: ${track(failures, `${c.label} has ${c.perm}`, has === c.expect)} (${has})`,
+      );
     }
   } else {
     console.log('  Skipped — need all three role logins (avoid rate limit: wait ~1 min)');

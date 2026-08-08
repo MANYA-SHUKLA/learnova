@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
-  formatExamStatus,
+  formatExamAttemptStatus,
   useExamList,
   useLiveMonitoringQuery,
 } from '@/features/examination';
@@ -88,7 +88,7 @@ export default function FacultyExamsLivePage() {
                     className="flex items-center justify-between py-3 text-sm"
                   >
                     <span>{attempt.id.slice(-8)}</span>
-                    <Badge variant="outline">{formatExamStatus(attempt.status)}</Badge>
+                    <Badge variant="outline">{formatExamAttemptStatus(attempt.status)}</Badge>
                   </div>
                 ))}
               </div>

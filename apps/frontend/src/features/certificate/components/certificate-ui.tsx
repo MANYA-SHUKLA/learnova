@@ -31,9 +31,9 @@ export function CertificatePageHeader({
 
 export function certificateStatusVariant(
   status: string,
-): 'default' | 'secondary' | 'destructive' | 'outline' {
+): 'default' | 'secondary' | 'danger' | 'outline' {
   if (status === 'published' || status === 'issued') return 'default';
-  if (status === 'revoked') return 'destructive';
+  if (status === 'revoked') return 'danger';
   if (status === 'draft' || status === 'generated') return 'secondary';
   return 'outline';
 }

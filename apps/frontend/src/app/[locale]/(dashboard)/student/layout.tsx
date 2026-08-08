@@ -2,7 +2,6 @@
 
 import { Card, CardContent, Spinner } from '@learnova/ui';
 import { useEffect, type ReactNode } from 'react';
-import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { isPathAllowedForRole } from '@/lib/auth/role-routes';
 import { usePathname, useRouter } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';

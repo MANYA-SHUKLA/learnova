@@ -47,6 +47,8 @@ export default function ForgotPasswordPage() {
   });
 
   const emailRegister = register('email');
+  const { ref: emailRef, onChange: onEmailChange, onBlur: onEmailBlur, name: emailName } =
+    emailRegister;
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     void handleSubmit(async (values) => {
@@ -96,14 +98,13 @@ export default function ForgotPasswordPage() {
                 placeholder={t('emailPlaceholder')}
                 disabled={mutation.isPending}
                 className={cn(authInputClassName, 'pl-10')}
-                {...emailRegister}
-                onFocus={(e) => {
-                  setFocused(true);
-                  emailRegister.onFocus?.(e);
-                }}
+                name={emailName}
+                ref={emailRef}
+                onChange={onEmailChange}
+                onFocus={() => setFocused(true)}
                 onBlur={(e) => {
                   setFocused(false);
-                  emailRegister.onBlur?.(e);
+                  void onEmailBlur(e);
                 }}
               />
             </div>

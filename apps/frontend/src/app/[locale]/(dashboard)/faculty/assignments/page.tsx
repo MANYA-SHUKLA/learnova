@@ -15,7 +15,6 @@ import {
   StatCard,
   StatGrid,
 } from '@learnova/ui';
-import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';

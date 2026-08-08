@@ -54,6 +54,8 @@ function LoginForm() {
   });
 
   const emailRegister = register('email');
+  const { ref: emailRef, onChange: onEmailChange, onBlur: onEmailBlur, name: emailName } =
+    emailRegister;
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     void handleSubmit(async (values) => {
@@ -110,14 +112,13 @@ function LoginForm() {
                 placeholder={t('emailPlaceholder')}
                 disabled={loginMutation.isPending}
                 className={cn(authInputClassName, 'pl-10')}
-                {...emailRegister}
-                onFocus={(e) => {
-                  setEmailFocused(true);
-                  emailRegister.onFocus?.(e);
-                }}
+                name={emailName}
+                ref={emailRef}
+                onChange={onEmailChange}
+                onFocus={() => setEmailFocused(true)}
                 onBlur={(e) => {
                   setEmailFocused(false);
-                  emailRegister.onBlur?.(e);
+                  void onEmailBlur(e);
                 }}
               />
             </div>

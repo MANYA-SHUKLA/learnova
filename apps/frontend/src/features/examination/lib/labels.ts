@@ -1,4 +1,4 @@
-import type { ExamStatus, ExamType, ProctoringMode } from '@learnova/types';
+import type { ExamAttemptStatus, ExamStatus, ExamType, ProctoringMode } from '@learnova/types';
 
 const EXAM_STATUS_LABELS: Record<ExamStatus, string> = {
   draft: 'Draft',
@@ -28,6 +28,19 @@ const PROCTORING_LABELS: Record<ProctoringMode, string> = {
 
 export function formatExamStatus(status: ExamStatus): string {
   return EXAM_STATUS_LABELS[status] ?? status;
+}
+
+const EXAM_ATTEMPT_STATUS_LABELS: Record<ExamAttemptStatus, string> = {
+  not_started: 'Not started',
+  in_progress: 'In progress',
+  submitted: 'Submitted',
+  graded: 'Graded',
+  expired: 'Expired',
+  cancelled: 'Cancelled',
+};
+
+export function formatExamAttemptStatus(status: ExamAttemptStatus): string {
+  return EXAM_ATTEMPT_STATUS_LABELS[status] ?? status;
 }
 
 export function formatExamType(type: ExamType): string {

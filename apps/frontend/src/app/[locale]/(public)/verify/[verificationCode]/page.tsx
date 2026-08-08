@@ -47,7 +47,7 @@ export default function VerifyCertificatePage() {
                 <CardHeader className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
                     <CardTitle className="text-lg">{t('resultTitle')}</CardTitle>
-                    <Badge variant={result?.valid ? 'default' : 'destructive'}>
+                    <Badge variant={result?.valid ? 'default' : 'danger'}>
                       {result?.valid ? t('valid') : t('invalid')}
                     </Badge>
                   </div>

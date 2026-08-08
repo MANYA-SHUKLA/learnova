@@ -75,6 +75,7 @@ type SidebarItemId =
   | 'examinations'
   | 'gradebook'
   | 'certificates'
+  | 'transcript'
   | 'semesterGrades'
   | 'proctoring'
   | 'myTeam'
