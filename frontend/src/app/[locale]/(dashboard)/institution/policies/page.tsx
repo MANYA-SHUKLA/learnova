@@ -21,16 +21,36 @@ export default function InstitutionGradebookPoliciesPage() {
 
   const handleSave = () => {
     void saveMutation.mutateAsync({
-      passingPercentage: Number(passingPercentage) || 60,
-      passingCriteria: 'both',
-      gradingScheme: policy?.gradingScheme ?? 'absolute',
       creditBasedGrading: policy?.creditBasedGrading ?? true,
+      passingCriteria: policy?.passingCriteria ?? 'both',
+      passingPercentage: Number(passingPercentage) || 60,
+      passingGradeLetters: policy?.passingGradeLetters ?? [
+        'A+',
+        'A',
+        'A-',
+        'B+',
+        'B',
+        'B-',
+        'C+',
+        'C',
+        'C-',
+        'D+',
+        'D',
+        'D-',
+      ],
+      gradingScheme: policy?.gradingScheme ?? 'absolute',
+      gpaFormula: policy?.gpaFormula ?? 'credit_weighted',
+      cgpaFormula: policy?.cgpaFormula ?? 'credit_weighted',
+      gradeReplacementPolicy: policy?.gradeReplacementPolicy ?? 'replace_if_higher',
+      makeupAttemptPolicy: policy?.makeupAttemptPolicy ?? 'best',
+      improvementAttemptPolicy: policy?.improvementAttemptPolicy ?? 'best',
+      improvementExamTypes: policy?.improvementExamTypes ?? [],
       standingThresholds: {
         warningGpa: Number(minimumGpa) || 2,
-        probationGpa: 1.5,
-        honorsGpa: 3.5,
-        distinctionGpa: 3.8,
-        failedCourseLimit: 2,
+        probationGpa: policy?.standingThresholds?.probationGpa ?? 1.5,
+        honorsGpa: policy?.standingThresholds?.honorsGpa ?? 3.5,
+        distinctionGpa: policy?.standingThresholds?.distinctionGpa ?? 3.8,
+        failedCourseLimit: policy?.standingThresholds?.failedCourseLimit ?? 2,
       },
     });
   };

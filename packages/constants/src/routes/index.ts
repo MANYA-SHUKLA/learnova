@@ -154,6 +154,7 @@ export const APP_ROUTES = {
   INSTITUTION_GRADEBOOK_POLICIES: '/institution/policies',
   INSTITUTION_GRADEBOOK_MODERATION: '/institution/moderation',
   INSTITUTION_ACADEMIC_STANDING: '/institution/standing',
+  INSTITUTION_TRANSCRIPTS: '/institution/transcripts',
   FACULTY_GRADEBOOK: '/faculty/gradebook',
   FACULTY_TRANSCRIPTS: '/faculty/transcripts',
   STUDENT_GRADEBOOK: '/student/gradebook',

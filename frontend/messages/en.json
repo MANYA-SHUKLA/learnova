@@ -623,6 +623,10 @@
         "quizResults": "Quiz results",
         "examinations": "Examinations",
         "gradebook": "Gradebook",
+        "gradebookPolicies": "Academic policies",
+        "gradebookModeration": "Grade moderation",
+        "academicStanding": "Academic standing",
+        "transcriptRequests": "Transcript requests",
         "certificates": "Certificates",
         "transcript": "Transcript",
         "semesterGrades": "Semester results",
@@ -1416,6 +1420,21 @@
         "title": "Academic standing",
         "description": "Probation, honors, distinction, and warning computed from published grades.",
         "recompute": "Recompute standing"
+      },
+      "transcripts": {
+        "eyebrow": "Official records",
+        "title": "Transcript requests",
+        "description": "Review, approve, and track official transcript requests from students.",
+        "empty": "No transcript requests match this filter.",
+        "approve": "Approve",
+        "reject": "Reject",
+        "filters": {
+          "all": "All",
+          "pending": "Pending",
+          "approved": "Approved",
+          "completed": "Completed",
+          "rejected": "Rejected"
+        }
       },
       "gradebook": {
         "eyebrow": "Academic results",

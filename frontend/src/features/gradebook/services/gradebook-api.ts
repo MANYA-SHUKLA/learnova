@@ -55,7 +55,14 @@ export interface AcademicPolicy {
   creditBasedGrading?: boolean;
   passingCriteria?: 'marks' | 'grade' | 'both';
   passingPercentage?: number;
+  passingGradeLetters?: string[];
   gradingScheme?: 'absolute' | 'relative';
+  gpaFormula?: 'credit_weighted' | 'arithmetic_mean' | 'cumulative_credits';
+  cgpaFormula?: 'credit_weighted' | 'arithmetic_mean' | 'cumulative_credits';
+  gradeReplacementPolicy?: 'best' | 'latest' | 'replace_if_higher' | 'keep_original';
+  makeupAttemptPolicy?: 'best' | 'latest' | 'average';
+  improvementAttemptPolicy?: 'best' | 'latest' | 'average';
+  improvementExamTypes?: string[];
   standingThresholds?: {
     probationGpa?: number;
     warningGpa?: number;

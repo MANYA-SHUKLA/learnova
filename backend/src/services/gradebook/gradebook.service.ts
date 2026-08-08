@@ -549,6 +549,11 @@ export class GradebookService {
 
     for (const studentId of studentIds) {
       await recomputeStudentSummary(institutionId, input.courseId, studentId);
+      await eventBus.emit(
+        EVENTS.GRADE_UPDATED,
+        { courseId: input.courseId, studentId, institutionId },
+        { actorId: actor.userId },
+      );
     }
     await applyRelativeGradesForCourse(institutionId, input.courseId);
 
