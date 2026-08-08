@@ -45,8 +45,8 @@ export interface CourseListResult {
 }
 
 export interface CourseCreateBody {
-  courseCode: string;
-  slug: string;
+  courseCode?: string;
+  slug?: string;
   title: string;
   subtitle?: string | null;
   description?: string | null;

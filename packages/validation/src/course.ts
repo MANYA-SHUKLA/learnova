@@ -94,14 +94,18 @@ export const courseIdParamsSchema = z.object({
   id: objectIdField,
 });
 
+const optionalIdField = z.string().trim().min(1).max(64).optional();
+const optionalSlugField = z
+  .string()
+  .trim()
+  .min(1)
+  .max(120)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid slug')
+  .optional();
+
 const courseBaseFields = {
-  courseCode: z.string().trim().min(1).max(64),
-  slug: z
-    .string()
-    .trim()
-    .min(1)
-    .max(120)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid slug'),
+  courseCode: optionalIdField,
+  slug: optionalSlugField,
   title: z.string().trim().min(1).max(200),
   subtitle: optionalString(200),
   description: optionalString(10000),

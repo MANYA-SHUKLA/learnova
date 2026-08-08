@@ -30,6 +30,7 @@ import {
   findFacultyRecord,
 } from '../access/faculty-scope.js';
 import { facultyRepository } from '../../repositories/faculty/index.js';
+import { resolveFacultyCreateIds } from '../id/entity-id.helpers.js';
 
 export interface ActorContext {
   userId: string;
@@ -173,9 +174,10 @@ export class FacultyService {
 
   async create(input: CreateFacultyInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    const { employeeId, facultyCode } = await resolveFacultyCreateIds(institutionId, input);
     const duplicates = await facultyRepository.findDuplicates(institutionId, {
-      employeeId: input.employeeId,
-      facultyCode: input.facultyCode,
+      employeeId,
+      facultyCode,
       email: input.email,
     });
     if (duplicates.length > 0) {
@@ -185,7 +187,8 @@ export class FacultyService {
     const fullName = buildFullName(input.firstName, input.middleName, input.lastName);
     const doc = await facultyRepository.create({
       ...input,
-      facultyCode: input.facultyCode.toUpperCase(),
+      employeeId,
+      facultyCode,
       email: input.email.toLowerCase(),
       fullName,
       programIds: (input.programIds ?? []).map((id) => new Types.ObjectId(id)),
@@ -228,8 +231,8 @@ export class FacultyService {
         credentials = {
           email: input.email.toLowerCase(),
           temporaryPassword: provisioned.temporaryPassword,
-          employeeId: input.employeeId,
-          facultyCode: input.facultyCode.toUpperCase(),
+          employeeId,
+          facultyCode,
         };
         const { sendCredentialsEmail } = await import('../../mail/credentials-email.js');
         void sendCredentialsEmail({
@@ -620,8 +623,8 @@ export class FacultyService {
 
     rows.forEach((row, index) => {
       const parsed = createFacultySchema.safeParse({
-        employeeId: row.employeeId,
-        facultyCode: row.facultyCode,
+        employeeId: row.employeeId?.trim() || undefined,
+        facultyCode: row.facultyCode?.trim() || undefined,
         firstName: row.firstName,
         middleName: row.middleName || null,
         lastName: row.lastName,
@@ -652,7 +655,7 @@ export class FacultyService {
         return;
       }
 
-      const key = `${parsed.data.email}|${parsed.data.employeeId}|${parsed.data.facultyCode}`;
+      const key = `${parsed.data.email}|${parsed.data.employeeId ?? ''}|${parsed.data.facultyCode ?? ''}`;
       if (seen.has(key)) {
         duplicates += 1;
         errors.push({ row: index + 1, message: 'Duplicate row in import file' });
@@ -702,8 +705,8 @@ export class FacultyService {
       for (let i = 0; i < input.rows.length; i += 1) {
         const row = input.rows[i]!;
         const parsed = createFacultySchema.parse({
-          employeeId: row.employeeId,
-          facultyCode: row.facultyCode,
+          employeeId: row.employeeId?.trim() || undefined,
+          facultyCode: row.facultyCode?.trim() || undefined,
           firstName: row.firstName,
           middleName: row.middleName || null,
           lastName: row.lastName,
@@ -724,11 +727,11 @@ export class FacultyService {
         });
 
         const existing = await facultyRepository.findDuplicates(institutionId, {
-          employeeId: parsed.employeeId,
-          facultyCode: parsed.facultyCode,
+          employeeId: parsed.employeeId ?? '',
+          facultyCode: parsed.facultyCode ?? '',
           email: parsed.email,
         });
-        if (existing.length > 0) {
+        if (existing.length > 0 && (parsed.employeeId || parsed.facultyCode)) {
           throw new ConflictError(`Duplicate faculty at row ${i + 1}`);
         }
 

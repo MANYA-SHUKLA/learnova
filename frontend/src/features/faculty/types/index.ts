@@ -53,8 +53,8 @@ export type FacultyCreateResult = Faculty & {
 };
 
 export interface FacultyCreateBody {
-  employeeId: string;
-  facultyCode: string;
+  employeeId?: string;
+  facultyCode?: string;
   firstName: string;
   lastName: string;
   email: string;

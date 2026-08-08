@@ -145,13 +145,15 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
   };
 
   const canProceed =
-    currentStep !== 0 || (form.courseCode.trim().length > 0 && form.title.trim().length > 0);
+    currentStep !== 0 || form.title.trim().length > 0;
 
   const onSubmit = async () => {
     setError(null);
     const body: CourseCreateBody = {
-      courseCode: form.courseCode.trim(),
-      slug: form.slug.trim(),
+      ...(mode === 'edit' && {
+        courseCode: form.courseCode.trim(),
+        slug: form.slug.trim(),
+      }),
       title: form.title.trim(),
       subtitle: form.subtitle.trim() || null,
       description: form.description.trim() || null,
@@ -231,7 +233,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
   const field = (
     key: keyof typeof form,
     label: string,
-    opts?: { type?: string; rows?: number; autoComplete?: string },
+    opts?: { type?: string; rows?: number; autoComplete?: string; readOnly?: boolean },
   ) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
@@ -251,7 +253,8 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
           id={key}
           type={opts?.type ?? 'text'}
           value={form[key]}
-          disabled={pending}
+          disabled={pending || opts?.readOnly}
+          readOnly={opts?.readOnly}
           autoComplete={opts?.autoComplete}
           onChange={(e) => { set(key, e.target.value); }}
         />
@@ -318,8 +321,16 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
               Basic information
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('courseCode', 'Course code', { autoComplete: 'off' })}
-              {field('slug', 'Slug', { autoComplete: 'off' })}
+              {mode === 'edit' ? (
+                <>
+                  {field('courseCode', 'Course code', { autoComplete: 'off', readOnly: true })}
+                  {field('slug', 'Slug', { autoComplete: 'off', readOnly: true })}
+                </>
+              ) : (
+                <p className="col-span-full text-sm text-muted-foreground">
+                  Course code and URL slug will be assigned automatically from the title when you save.
+                </p>
+              )}
               {field('title', 'Title')}
               {field('subtitle', 'Subtitle')}
             </div>

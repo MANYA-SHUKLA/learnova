@@ -83,9 +83,11 @@ export const facultyIdParamsSchema = z.object({
   id: objectIdField,
 });
 
+const optionalIdField = z.string().trim().min(1).max(64).optional();
+
 const facultyBaseFields = {
-  employeeId: z.string().trim().min(1).max(64),
-  facultyCode: z.string().trim().min(1).max(64),
+  employeeId: optionalIdField,
+  facultyCode: optionalIdField,
   campusId: objectIdField.optional().nullable(),
   schoolId: objectIdField.optional().nullable(),
   departmentId: objectIdField.optional().nullable(),

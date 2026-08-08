@@ -101,8 +101,10 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
   const onSubmit = async () => {
     setError(null);
     const body: StudentCreateBody = {
-      studentId: form.studentId.trim(),
-      admissionNumber: form.admissionNumber.trim(),
+      ...(mode === 'edit' && {
+        studentId: form.studentId.trim(),
+        admissionNumber: form.admissionNumber.trim(),
+      }),
       rollNumber: form.rollNumber.trim() || null,
       registrationNumber: form.registrationNumber.trim() || null,
       firstName: form.firstName.trim(),
@@ -188,7 +190,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
   const field = (
     key: keyof typeof form,
     label: string,
-    opts?: { type?: string; placeholder?: string; autoComplete?: string },
+    opts?: { type?: string; placeholder?: string; autoComplete?: string; readOnly?: boolean },
   ) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
@@ -198,7 +200,8 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
         id={key}
         type={opts?.type ?? 'text'}
         value={String(form[key])}
-        disabled={pending}
+        disabled={pending || opts?.readOnly}
+        readOnly={opts?.readOnly}
         placeholder={opts?.placeholder}
         autoComplete={opts?.autoComplete}
         onChange={(e) => { set(key, e.target.value); }}
@@ -239,8 +242,16 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {field('studentId', 'Student ID', { autoComplete: 'off' })}
-            {field('admissionNumber', 'Admission number', { autoComplete: 'off' })}
+            {mode === 'edit' ? (
+              <>
+                {field('studentId', 'Student ID', { autoComplete: 'off', readOnly: true })}
+                {field('admissionNumber', 'Admission number', { autoComplete: 'off', readOnly: true })}
+              </>
+            ) : (
+              <p className="col-span-full text-sm text-muted-foreground">
+                Student ID and admission number will be assigned automatically when you save.
+              </p>
+            )}
             {field('rollNumber', 'Roll number')}
             {field('registrationNumber', 'Registration number')}
             {field('firstName', 'First name', { placeholder: 'Manya' })}

@@ -96,8 +96,10 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
   const onSubmit = async () => {
     setError(null);
     const body: FacultyCreateBody = {
-      employeeId: form.employeeId.trim(),
-      facultyCode: form.facultyCode.trim(),
+      ...(mode === 'edit' && {
+        employeeId: form.employeeId.trim(),
+        facultyCode: form.facultyCode.trim(),
+      }),
       firstName: form.firstName.trim(),
       middleName: form.middleName.trim() || null,
       lastName: form.lastName.trim(),
@@ -172,7 +174,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
   const field = (
     key: keyof typeof form,
     label: string,
-    opts?: { type?: string; placeholder?: string; autoComplete?: string },
+    opts?: { type?: string; placeholder?: string; autoComplete?: string; readOnly?: boolean },
   ) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
@@ -182,7 +184,8 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
         id={key}
         type={opts?.type ?? 'text'}
         value={form[key]}
-        disabled={pending}
+        disabled={pending || opts?.readOnly}
+        readOnly={opts?.readOnly}
         placeholder={opts?.placeholder}
         autoComplete={opts?.autoComplete}
         onChange={(e) => { set(key, e.target.value); }}
@@ -207,8 +210,16 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {field('employeeId', 'Employee ID', { autoComplete: 'off' })}
-            {field('facultyCode', 'Faculty code', { autoComplete: 'off' })}
+            {mode === 'edit' ? (
+              <>
+                {field('employeeId', 'Employee ID', { autoComplete: 'off', readOnly: true })}
+                {field('facultyCode', 'Faculty code', { autoComplete: 'off', readOnly: true })}
+              </>
+            ) : (
+              <p className="col-span-full text-sm text-muted-foreground">
+                Employee ID and faculty code will be assigned automatically when you save.
+              </p>
+            )}
             {field('firstName', 'First name', { placeholder: 'Manya' })}
             {field('middleName', 'Middle name')}
             {field('lastName', 'Last name', { placeholder: 'Shukla' })}

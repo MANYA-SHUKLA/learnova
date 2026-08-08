@@ -36,6 +36,7 @@ import {
   facultyCanAccessStudent,
   scopeStudentSelfFilter,
 } from '../access/faculty-scope.js';
+import { resolveStudentCreateIds } from '../id/entity-id.helpers.js';
 
 export interface ActorContext {
   userId: string;
@@ -178,9 +179,10 @@ export class StudentService {
 
   async create(input: CreateStudentInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    const { studentId, admissionNumber } = await resolveStudentCreateIds(institutionId, input);
     const duplicates = await studentRepository.findDuplicates(institutionId, {
-      studentId: input.studentId,
-      admissionNumber: input.admissionNumber,
+      studentId,
+      admissionNumber,
       email: input.email,
     });
     if (duplicates.length > 0) {
@@ -192,6 +194,8 @@ export class StudentService {
     const fullName = buildFullName(input.firstName, input.middleName, input.lastName);
     const doc = await studentRepository.create({
       ...input,
+      studentId,
+      admissionNumber,
       email: input.email.toLowerCase(),
       fullName,
       campusId: input.campusId ? new Types.ObjectId(input.campusId) : null,
@@ -239,8 +243,8 @@ export class StudentService {
         credentials = {
           email: input.email.toLowerCase(),
           temporaryPassword: provisioned.temporaryPassword,
-          studentId: input.studentId,
-          admissionNumber: input.admissionNumber,
+          studentId,
+          admissionNumber,
         };
         const { sendCredentialsEmail } = await import('../../mail/credentials-email.js');
         void sendCredentialsEmail({
@@ -706,8 +710,8 @@ export class StudentService {
 
     rows.forEach((row, index) => {
       const parsed = createStudentSchema.safeParse({
-        studentId: row.studentId,
-        admissionNumber: row.admissionNumber,
+        studentId: row.studentId?.trim() || undefined,
+        admissionNumber: row.admissionNumber?.trim() || undefined,
         rollNumber: row.rollNumber || null,
         registrationNumber: row.registrationNumber || null,
         firstName: row.firstName,
@@ -745,7 +749,7 @@ export class StudentService {
         return;
       }
 
-      const key = `${parsed.data.email}|${parsed.data.studentId}|${parsed.data.admissionNumber}`;
+      const key = `${parsed.data.email}|${parsed.data.studentId ?? ''}|${parsed.data.admissionNumber ?? ''}`;
       if (seen.has(key)) {
         duplicates += 1;
         errors.push({ row: index + 1, message: 'Duplicate row in import file' });
@@ -796,8 +800,8 @@ export class StudentService {
       for (let i = 0; i < input.rows.length; i += 1) {
         const row = input.rows[i]!;
         const parsed = createStudentSchema.parse({
-          studentId: row.studentId,
-          admissionNumber: row.admissionNumber,
+          studentId: row.studentId?.trim() || undefined,
+          admissionNumber: row.admissionNumber?.trim() || undefined,
           rollNumber: row.rollNumber || null,
           registrationNumber: row.registrationNumber || null,
           firstName: row.firstName,
@@ -825,11 +829,11 @@ export class StudentService {
         });
 
         const existing = await studentRepository.findDuplicates(institutionId, {
-          studentId: parsed.studentId,
-          admissionNumber: parsed.admissionNumber,
+          studentId: parsed.studentId ?? '',
+          admissionNumber: parsed.admissionNumber ?? '',
           email: parsed.email,
         });
-        if (existing.length > 0) {
+        if (existing.length > 0 && (parsed.studentId || parsed.admissionNumber)) {
           throw new ConflictError(`Duplicate student at row ${i + 1}`);
         }
 

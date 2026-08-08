@@ -56,8 +56,8 @@ export type StudentCreateResult = Student & {
 };
 
 export interface StudentCreateBody {
-  studentId: string;
-  admissionNumber: string;
+  studentId?: string;
+  admissionNumber?: string;
   rollNumber?: string | null;
   registrationNumber?: string | null;
   firstName: string;

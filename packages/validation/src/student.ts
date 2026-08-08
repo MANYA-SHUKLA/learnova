@@ -64,9 +64,11 @@ export const studentIdParamsSchema = z.object({
   id: objectIdField,
 });
 
+const optionalIdField = z.string().trim().min(1).max(64).optional();
+
 const studentBaseFields = {
-  studentId: z.string().trim().min(1).max(64),
-  admissionNumber: z.string().trim().min(1).max(64),
+  studentId: optionalIdField,
+  admissionNumber: optionalIdField,
   rollNumber: optionalString(64),
   registrationNumber: optionalString(64),
   campusId: objectIdField.optional().nullable(),

@@ -25,6 +25,7 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { courseRepository } from '../../repositories/course/course.repository.js';
+import { resolveCourseCreateIds } from '../id/entity-id.helpers.js';
 import {
   buildFacultyCourseFilter,
   facultyCanAccessCourse,
@@ -161,9 +162,14 @@ export class CourseService {
 
   async create(input: CreateCourseInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    const slugExists = async (slug: string) => {
+      const matches = await courseRepository.findDuplicates(institutionId, { slug });
+      return matches.length > 0;
+    };
+    const { courseCode, slug } = await resolveCourseCreateIds(institutionId, input, slugExists);
     const duplicates = await courseRepository.findDuplicates(institutionId, {
-      courseCode: input.courseCode,
-      slug: input.slug,
+      courseCode,
+      slug,
     });
     if (duplicates.length > 0) {
       throw new ConflictError('Course with same course code or slug already exists');
@@ -171,8 +177,8 @@ export class CourseService {
 
     const doc = await courseRepository.create({
       ...input,
-      courseCode: input.courseCode.toUpperCase(),
-      slug: input.slug.toLowerCase(),
+      courseCode,
+      slug,
       programIds: (input.programIds ?? []).map((id) => new Types.ObjectId(id)),
       semesterIds: (input.semesterIds ?? []).map((id) => new Types.ObjectId(id)),
       facultyIds: (input.facultyIds ?? []).map((id) => new Types.ObjectId(id)),
@@ -607,8 +613,8 @@ export class CourseService {
 
     rows.forEach((row, index) => {
       const parsed = createCourseSchema.safeParse({
-        courseCode: row.courseCode,
-        slug: row.slug,
+        courseCode: row.courseCode?.trim() || undefined,
+        slug: row.slug?.trim() || undefined,
         title: row.title,
         subtitle: row.subtitle || null,
         description: row.description || null,
@@ -644,7 +650,7 @@ export class CourseService {
         return;
       }
 
-      const key = `${parsed.data.courseCode}|${parsed.data.slug}`;
+      const key = `${parsed.data.title}|${parsed.data.courseCode ?? ''}|${parsed.data.slug ?? ''}`;
       if (seen.has(key)) {
         duplicates += 1;
         errors.push({ row: index + 1, message: 'Duplicate row in import file' });
@@ -694,8 +700,8 @@ export class CourseService {
       for (let i = 0; i < input.rows.length; i += 1) {
         const row = input.rows[i]!;
         const parsed = createCourseSchema.parse({
-          courseCode: row.courseCode,
-          slug: row.slug,
+          courseCode: row.courseCode?.trim() || undefined,
+          slug: row.slug?.trim() || undefined,
           title: row.title,
           subtitle: row.subtitle || null,
           description: row.description || null,
@@ -721,10 +727,10 @@ export class CourseService {
         });
 
         const existing = await courseRepository.findDuplicates(institutionId, {
-          courseCode: parsed.courseCode,
-          slug: parsed.slug,
+          courseCode: parsed.courseCode ?? '',
+          slug: parsed.slug ?? '',
         });
-        if (existing.length > 0) {
+        if (existing.length > 0 && (parsed.courseCode || parsed.slug)) {
           throw new ConflictError(`Duplicate course at row ${i + 1}`);
         }
 
