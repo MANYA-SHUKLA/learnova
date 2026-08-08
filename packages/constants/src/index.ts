@@ -14,3 +14,4 @@ export * from './quiz/index.js';
 export * from './examination/index.js';
 export * from './gradebook/index.js';
 export * from './certificate/index.js';
+export * from './reports/index.js';

@@ -588,6 +588,13 @@
       "attempted": "Requested path",
       "backHome": "Go to my dashboard"
     },
+    "reports": {
+      "export": {
+        "csv": "Export CSV",
+        "excel": "Export Excel",
+        "pdf": "Export PDF"
+      }
+    },
     "sidebar": {
       "groups": {
         "institution": "Institution",
@@ -627,6 +634,7 @@
         "gradebookModeration": "Grade moderation",
         "academicStanding": "Academic standing",
         "transcriptRequests": "Transcript requests",
+        "reports": "Reports",
         "certificates": "Certificates",
         "transcript": "Transcript",
         "semesterGrades": "Semester results",
@@ -1436,6 +1444,26 @@
           "rejected": "Rejected"
         }
       },
+      "reports": {
+        "eyebrow": "Analytics",
+        "title": "Institution reports",
+        "description": "Enrollment, completion, exam outcomes, and departmental rollups from published data.",
+        "error": "Unable to load reports.",
+        "stats": {
+          "students": "Total students",
+          "faculty": "Total faculty",
+          "activeCourses": "Active courses",
+          "courseCompletion": "Course completion",
+          "examPass": "Exam pass rate",
+          "enrollments": "Active enrollments"
+        },
+        "departmentsTitle": "Department reports",
+        "departmentsDescription": "Students and progress by academic department.",
+        "semestersTitle": "Semester reports",
+        "semestersDescription": "GPA and credit rollups by semester.",
+        "studentsShort": "students",
+        "progressShort": "avg progress"
+      },
       "gradebook": {
         "eyebrow": "Academic results",
         "title": "Gradebook",
@@ -1952,6 +1980,22 @@
         "eligibleEmpty": "No eligible students for this course.",
         "issue": "Issue certificate"
       },
+      "reports": {
+        "eyebrow": "Course analytics",
+        "title": "Reports",
+        "description": "Course progress, assignment completion, exam statistics, and student performance.",
+        "courseScope": "Course",
+        "selectCourse": "Select a course to load the report.",
+        "error": "Unable to load report.",
+        "stats": {
+          "courseProgress": "Average progress",
+          "assignmentCompletion": "Assignment completion",
+          "examPass": "Exam pass rate",
+          "completed": "Students completed"
+        },
+        "performanceTitle": "Student performance",
+        "performanceDescription": "Published grade summaries for enrolled students."
+      },
       "proctoring": {
         "eyebrow": "Proctoring",
         "title": "Live proctoring",
@@ -2324,6 +2368,21 @@
         "semesterGpa": "Semester GPA",
         "cgpa": "CGPA",
         "failedCourses": "Failed courses"
+      },
+      "reports": {
+        "eyebrow": "My learning",
+        "title": "Reports",
+        "description": "Your progress, grades, and completed courses in one place.",
+        "error": "Unable to load report.",
+        "stats": {
+          "completedCourses": "Completed courses",
+          "inProgress": "In progress",
+          "hoursLearned": "Hours learned",
+          "averageProgress": "Average progress"
+        },
+        "gradesTitle": "Grades",
+        "gradesDescription": "Published course results from the gradebook.",
+        "attendanceNote": "Attendance"
       },
       "certificates": {
         "eyebrow": "Academic credentials",

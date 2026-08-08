@@ -33,6 +33,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'quiz:write',
     'gradebook:read',
     'certificate:read',
+    'analytics:export',
   ],
   faculty: [
     'lms:read',

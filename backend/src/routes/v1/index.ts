@@ -13,6 +13,7 @@ import quizRoutes from './quiz.routes.js';
 import examinationRoutes from './examination.routes.js';
 import gradebookRoutes from './gradebook.routes.js';
 import certificateRoutes from './certificate.routes.js';
+import reportsRoutes from './reports.routes.js';
 import projectRoutes from './project.routes.js';
 import practiceLabRoutes from './practice-lab.routes.js';
 import {
@@ -42,6 +43,7 @@ v1Router.use(quizRoutes);
 v1Router.use(examinationRoutes);
 v1Router.use(gradebookRoutes);
 v1Router.use(certificateRoutes);
+v1Router.use(reportsRoutes);
 v1Router.use(projectRoutes);
 v1Router.use(practiceLabRoutes);
 v1Router.get('/live', livenessCheck);

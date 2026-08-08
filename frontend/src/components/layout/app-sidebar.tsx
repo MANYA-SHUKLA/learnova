@@ -78,6 +78,7 @@ type SidebarItemId =
   | 'gradebookModeration'
   | 'academicStanding'
   | 'transcriptRequests'
+  | 'reports'
   | 'certificates'
   | 'transcript'
   | 'semesterGrades'
@@ -145,6 +146,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'gradebookModeration', href: APP_ROUTES.INSTITUTION_GRADEBOOK_MODERATION, icon: ShieldCheck },
       { id: 'academicStanding', href: APP_ROUTES.INSTITUTION_ACADEMIC_STANDING, icon: BarChart3 },
       { id: 'transcriptRequests', href: APP_ROUTES.INSTITUTION_TRANSCRIPTS, icon: FileText },
+      { id: 'reports', href: APP_ROUTES.INSTITUTION_REPORTS, icon: BarChart3 },
       { id: 'certificates', href: APP_ROUTES.INSTITUTION_CERTIFICATES, icon: Award },
     ],
   },
@@ -170,6 +172,7 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'examinations', href: APP_ROUTES.FACULTY_EXAMS, icon: ShieldCheck },
       { id: 'gradebook', href: APP_ROUTES.FACULTY_GRADEBOOK, icon: GraduationCap },
       { id: 'transcriptRequests', href: APP_ROUTES.FACULTY_TRANSCRIPTS, icon: FileText },
+      { id: 'reports', href: APP_ROUTES.FACULTY_REPORTS, icon: BarChart3 },
       { id: 'certificates', href: APP_ROUTES.FACULTY_CERTIFICATES, icon: Award },
       { id: 'proctoring', href: APP_ROUTES.FACULTY_EXAMS_LIVE, icon: Shield },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
@@ -194,6 +197,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'examinations', href: APP_ROUTES.STUDENT_EXAMS, icon: ShieldCheck },
       { id: 'gradebook', href: APP_ROUTES.STUDENT_GRADEBOOK, icon: GraduationCap },
       { id: 'academicStanding', href: APP_ROUTES.STUDENT_ACADEMIC_STANDING, icon: BarChart3 },
+      { id: 'reports', href: APP_ROUTES.STUDENT_REPORTS, icon: BarChart3 },
       { id: 'certificates', href: APP_ROUTES.STUDENT_CERTIFICATES, icon: Award },
       { id: 'transcript', href: APP_ROUTES.STUDENT_TRANSCRIPT, icon: FileText },
       { id: 'semesterGrades', href: APP_ROUTES.STUDENT_SEMESTER, icon: BarChart3 },
