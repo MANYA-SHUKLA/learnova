@@ -1,6 +1,6 @@
 # Storage
 
-Port: `IStorage` in `apps/backend/src/storage`.
+Port: `IStorage` in `backend/src/storage`.
 
 ## Drivers
 

@@ -16,7 +16,7 @@ Gradebook (13) — consumes evaluation-ready submissions
 Certificates (14) — consumes gradebook outcomes
 ```
 
-Canonical implementation: `apps/backend/src/services/collaboration-engine/`
+Canonical implementation: `backend/src/services/collaboration-engine/`
 
 ## Responsibilities (Step 11)
 

@@ -1,6 +1,6 @@
 # Monitoring
 
-`apps/backend/src/monitoring`
+`backend/src/monitoring`
 
 ## Collector
 

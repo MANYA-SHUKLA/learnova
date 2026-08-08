@@ -14,7 +14,7 @@ Client-side secure exam mode for Step **13**. Server policy is validated by `exa
 
 ## Client hook
 
-`apps/frontend/src/features/examination/hooks/use-secure-exam-mode.ts`
+`frontend/src/features/examination/hooks/use-secure-exam-mode.ts`
 
 - Requests fullscreen when `requireFullscreen`
 - Blocks copy/cut/paste and context menu

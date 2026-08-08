@@ -104,7 +104,7 @@ async function main(): Promise<void> {
 
   const institutionId = process.env.SEED_INSTITUTION_ID;
   if (!institutionId) {
-    throw new Error('SEED_INSTITUTION_ID is required in apps/backend/.env');
+    throw new Error('SEED_INSTITUTION_ID is required in backend/.env');
   }
 
   const force = process.env.SEED_FORCE === '1' || process.env.SEED_FORCE === 'true';

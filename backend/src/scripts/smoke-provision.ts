@@ -55,7 +55,7 @@ async function main(): Promise<void> {
   const db = mongoose.connection.db!;
   const institutionId = process.env.SEED_INSTITUTION_ID?.trim();
   if (!institutionId) {
-    throw new Error('SEED_INSTITUTION_ID is required in apps/backend/.env');
+    throw new Error('SEED_INSTITUTION_ID is required in backend/.env');
   }
   const iid = new mongoose.Types.ObjectId(institutionId);
   const adminRole = await roleRepository.findByName('institution_admin');

@@ -1,6 +1,6 @@
 /**
  * Course Builder API client — endpoints under /courses/:courseId/...
- * Aligned with apps/backend/src/routes/v1/course-builder.routes.ts
+ * Aligned with backend/src/routes/v1/course-builder.routes.ts
  */
 
 import { API_ROUTES } from '@learnova/constants';

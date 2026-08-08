@@ -4,7 +4,7 @@
  * Usage (from repo root):
  *   pnpm seed:complete
  *
- * From apps/backend:
+ * From backend:
  *   pnpm seed:complete
  *
  * Options (env):

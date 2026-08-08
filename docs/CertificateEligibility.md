@@ -38,7 +38,7 @@ GPA and standing on transcripts are **copied** from `SemesterGrade`, `CGPARecord
 | Layer | Location | Role |
 |-------|----------|------|
 | Pure rules | `packages/shared/src/certificate/eligibility.ts` | Stateless eligibility predicates |
-| Data loading | `apps/backend/src/services/certificate/certificate-eligibility.service.ts` | Loads gradebook/enrollment rows, calls pure rules |
+| Data loading | `backend/src/services/certificate/certificate-eligibility.service.ts` | Loads gradebook/enrollment rows, calls pure rules |
 | Issuance | `certificate.service.ts` | Builds documents from eligible facts only |
 
 ## Eligibility by document type

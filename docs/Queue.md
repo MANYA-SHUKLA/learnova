@@ -18,7 +18,7 @@ BullMQ on Redis. Producers in API; consumers in worker.
 
 ## Per-queue capabilities
 
-- Worker registration (`apps/worker`)
+- Worker registration (`worker`)
 - `QueueEvents` (completed / failed)
 - Retry + exponential backoff (config: `BULLMQ_*`)
 - Priority on enqueue (`EnqueueOptions.priority`)

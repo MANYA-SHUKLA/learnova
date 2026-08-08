@@ -1,6 +1,6 @@
 # Redis
 
-Client: `ioredis` in `apps/backend/src/database/redis`.
+Client: `ioredis` in `backend/src/database/redis`.
 
 ## Features
 
@@ -8,7 +8,7 @@ Client: `ioredis` in `apps/backend/src/database/redis`.
 - Reconnect + retry strategy
 - Metrics (`getRedisMetrics`)
 - TTL helpers (`setWithTtl`, `getTtl`, `expire`)
-- Cache service (`apps/backend/src/cache`)
+- Cache service (`backend/src/cache`)
 - Distributed lock prep (`acquireLock`)
 - Session store prep (`sessionStore`)
 - Rate-limit key helper + Redis-backed rate limiter

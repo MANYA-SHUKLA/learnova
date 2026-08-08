@@ -39,14 +39,14 @@ See [README](../README.md) Quick start and [Environment](./Environment.md).
 ## Adding a new locale
 
 1. Add locale code to `SUPPORTED_LOCALES` in `@learnova/shared`.
-2. Create `apps/frontend/messages/<locale>.json`.
+2. Create `frontend/messages/<locale>.json`.
 3. Update middleware matcher and `locales` config.
 4. Document in Environment/README if needed.
 
 ## Adding a new module feature
 
-1. Create `apps/frontend/src/features/<module>/…`.
+1. Create `frontend/src/features/<module>/…`.
 2. Add route group pages under `app/[locale]/(dashboard)/…`.
-3. Mount API routes under `apps/backend/src/routes/v1/`.
+3. Mount API routes under `backend/src/routes/v1/`.
 4. Extend permissions in `@learnova/shared` if new capabilities are required.
 5. Add queue/processor only if work is async.

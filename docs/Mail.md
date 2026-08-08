@@ -1,6 +1,6 @@
 # Mail
 
-Port: `IMailer` in `apps/backend/src/mail`.
+Port: `IMailer` in `backend/src/mail`.
 
 ## Drivers
 
@@ -14,7 +14,7 @@ Port: `IMailer` in `apps/backend/src/mail`.
 
 ## Gmail SMTP (local / institution admin mailbox)
 
-In `apps/backend/.env`:
+In `backend/.env`:
 
 ```env
 MAIL_DRIVER=smtp
@@ -55,7 +55,7 @@ Success prints `SMTP OK` and delivers a test message. Failure with `535 BadCrede
 
 ## Email layout
 
-All transactional HTML mail goes through `mailHtml()` in `apps/backend/src/mail/mail-copy.ts`:
+All transactional HTML mail goes through `mailHtml()` in `backend/src/mail/mail-copy.ts`:
 
 - Brand header (Learnova)
 - Content body + CTA buttons

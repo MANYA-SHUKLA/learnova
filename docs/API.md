@@ -25,4 +25,4 @@ Demo users (after `seed:demo`):
 
 Tags: Health · Auth · Institution · Faculty · Students · Courses · Course Builder · Enrollments · Progress.
 
-Spec source: `apps/backend/src/docs/openapi.ts`.
+Spec source: `backend/src/docs/openapi.ts`.

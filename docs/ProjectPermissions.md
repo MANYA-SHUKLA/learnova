@@ -39,7 +39,7 @@ Pages use `PermissionGate` with `PERMISSIONS.PROJECT_READ`, `PROJECT_WRITE`, or 
 
 ## API enforcement
 
-Routes in `apps/backend/src/routes/v1/project.routes.ts` apply:
+Routes in `backend/src/routes/v1/project.routes.ts` apply:
 
 - `PROJECT_READ` — list, get, dashboards, comments read
 - `PROJECT_WRITE` — create, submit, team ops, grade, comment write

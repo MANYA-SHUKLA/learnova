@@ -81,9 +81,9 @@ scripts/
 pnpm install
 
 # 2. Configure local env files (gitignored)
-#    apps/frontend/.env.local
-#    apps/backend/.env
-#    apps/worker/.env
+#    frontend/.env.local
+#    backend/.env
+#    worker/.env
 
 # 3. Start infrastructure
 pnpm docker:dev

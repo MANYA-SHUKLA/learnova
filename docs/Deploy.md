@@ -4,8 +4,8 @@ Learnova is a **pnpm monorepo**. Workspace packages live under `packages/`, so i
 
 ```
 learnova/                 ← lockfile + pnpm-workspace.yaml (install here)
-├── apps/frontend/        ← Vercel Root Directory
-├── apps/backend/         ← Render Root Directory (manual) or use root render.yaml
+├── frontend/        ← Vercel Root Directory
+├── backend/         ← Render Root Directory (manual) or use root render.yaml
 └── packages/*
 ```
 
@@ -20,12 +20,12 @@ Node **22** (see `.nvmrc`). Package manager **pnpm@10.32.1** (`packageManager` i
 | Setting | Value |
 | --- | --- |
 | Framework | Next.js |
-| Root Directory | `apps/frontend` |
+| Root Directory | `frontend` |
 | Install Command | *(from `vercel.json`)* `cd ../.. && corepack enable && pnpm install --frozen-lockfile` |
 | Build Command | *(from `vercel.json`)* `cd ../.. && pnpm exec turbo run build --filter=@learnova/frontend` |
 | Output | `.next` (default) |
 
-Config file: [`apps/frontend/vercel.json`](../apps/frontend/vercel.json)
+Config file: [`frontend/vercel.json`](../frontend/vercel.json)
 
 In Project Settings → General, enable **Include source files outside of the Root Directory in the Build Step** if Vercel prompts for it (needed so `packages/` are visible).
 
@@ -46,17 +46,17 @@ In Project Settings → General, enable **Include source files outside of the Ro
 
 Connect the repo and use root [`render.yaml`](../render.yaml). Service build/start run from the monorepo root automatically.
 
-### Option B — Root Directory = `apps/backend`
+### Option B — Root Directory = `backend`
 
 | Setting | Value |
 | --- | --- |
-| Root Directory | `apps/backend` |
+| Root Directory | `backend` |
 | Runtime | Node |
 | Build Command | `bash scripts/render-build.sh` |
 | Start Command | `bash scripts/render-start.sh` |
 | Health Check Path | `/api/v1/live` |
 
-Those scripts `cd` to the monorepo root, then `pnpm install` + turbo build / start. See [`apps/backend/render.yaml`](../apps/backend/render.yaml) notes.
+Those scripts `cd` to the monorepo root, then `pnpm install` + turbo build / start. See [`backend/render.yaml`](../backend/render.yaml) notes.
 
 ### Environment variables (required)
 
@@ -79,7 +79,7 @@ Optional: `MAIL_*`, `JUDGE0_*`, `STORAGE_*` — see [Environment.md](./Environme
 
 ## Why not “only the app folder”?
 
-`@learnova/backend` / `@learnova/frontend` depend on `workspace:*` packages. A bare `pnpm install` inside `apps/backend` alone cannot resolve them. The deploy configs always install from the repo root while keeping each platform’s Root Directory pointed at the app you care about.
+`@learnova/backend` / `@learnova/frontend` depend on `workspace:*` packages. A bare `pnpm install` inside `backend` alone cannot resolve them. The deploy configs always install from the repo root while keeping each platform’s Root Directory pointed at the app you care about.
 
 ---
 

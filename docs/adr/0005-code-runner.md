@@ -12,7 +12,7 @@ Coding labs and exams need sandboxed multi-language execution with time/memory l
 ## Decision
 
 1. Use **Judge0** as the sandboxed code execution backend (Docker-isolated).
-2. Expose Judge0 behind a single **Coding Assessment Engine** (`apps/backend/src/services/coding-engine/`) that owns:
+2. Expose Judge0 behind a single **Coding Assessment Engine** (`backend/src/services/coding-engine/`) that owns:
    - code execution
    - language management
    - test-case evaluation

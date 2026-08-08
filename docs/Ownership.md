@@ -11,7 +11,7 @@ Ownership complements permissions — a user may hold `student:read` but still o
 | `facultyStudentGuard('id')` | Faculty → students enrolled in supervised courses |
 | `facultyCourseGuard('courseId')` | Faculty → assigned/coordinator courses |
 
-Location: `apps/backend/src/middlewares/scope.middleware.ts`.
+Location: `backend/src/middlewares/scope.middleware.ts`.
 
 ## Service helpers
 

@@ -2,7 +2,7 @@
  * Platform verification — health, auth, RBAC, pages, DB collections, seed counts.
  * Usage (from repo root):
  *   pnpm verify:platform
- * Or from apps/backend:
+ * Or from backend:
  *   pnpm verify:platform
  */
 

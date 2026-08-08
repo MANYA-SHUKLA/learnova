@@ -24,4 +24,4 @@ Permissions are embedded in the JWT at login from the role matrix (and DB role s
 
 ## Tests
 
-`apps/backend/src/__tests__/security/rbac.test.ts` and per-module `permissions.test.ts` files validate matrix constants.
+`backend/src/__tests__/security/rbac.test.ts` and per-module `permissions.test.ts` files validate matrix constants.

@@ -5,7 +5,7 @@ services:
     image: learnova/api:${IMAGE_TAG:-latest}
     restart: always
     env_file:
-      - ../../apps/backend/.env.production
+      - ../../backend/.env.production
     deploy:
       replicas: 2
       resources:
@@ -17,7 +17,7 @@ services:
     image: learnova/worker:${IMAGE_TAG:-latest}
     restart: always
     env_file:
-      - ../../apps/worker/.env.production
+      - ../../worker/.env.production
     deploy:
       replicas: 2
 
@@ -25,6 +25,6 @@ services:
     image: learnova/frontend:${IMAGE_TAG:-latest}
     restart: always
     env_file:
-      - ../../apps/frontend/.env.production
+      - ../../frontend/.env.production
     deploy:
       replicas: 2

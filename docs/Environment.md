@@ -4,9 +4,9 @@ All environments are validated with Zod (`@learnova/config`). Apps **fail fast**
 
 Use local env files only (gitignored — never commit secrets):
 
-- `apps/frontend/.env.local`
-- `apps/backend/.env`
-- `apps/worker/.env`
+- `frontend/.env.local`
+- `backend/.env`
+- `worker/.env`
 
 Generate strong JWT secrets (≥ 32 chars) for anything beyond local toy usage.
 
@@ -14,7 +14,7 @@ Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
 
 ---
 
-## Frontend (`apps/frontend`)
+## Frontend (`frontend`)
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
@@ -27,7 +27,7 @@ Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
 
 ---
 
-## Backend (`apps/backend`)
+## Backend (`backend`)
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
@@ -73,7 +73,7 @@ Read by `@learnova/feature-flags`. Defaults are safe (most capabilities off).
 
 ---
 
-## Worker (`apps/worker`)
+## Worker (`worker`)
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |

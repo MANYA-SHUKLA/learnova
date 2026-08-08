@@ -26,7 +26,7 @@ Source of truth: `packages/shared/src/permissions/index.ts`.
 | Student | Own ERP record, enrollments, grades, submissions |
 | Institution admin | Full tenant |
 
-Implemented in `apps/backend/src/services/access/faculty-scope.ts` and applied in services.
+Implemented in `backend/src/services/access/faculty-scope.ts` and applied in services.
 
 ## Verification
 

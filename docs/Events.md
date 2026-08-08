@@ -1,7 +1,7 @@
 # Events
 
 Package catalog: `@learnova/events`  
-Runtime bus: `apps/backend/src/events`
+Runtime bus: `backend/src/events`
 
 ## Capabilities
 

@@ -14,7 +14,7 @@
 
 ---
 
-## `apps/frontend/src`
+## `frontend/src`
 
 | Folder | Why it exists |
 | --- | --- |
@@ -47,7 +47,7 @@
 
 ---
 
-## `apps/backend/src`
+## `backend/src`
 
 | Folder | Why it exists |
 | --- | --- |
@@ -76,7 +76,7 @@
 
 ---
 
-## `apps/worker/src`
+## `worker/src`
 
 | Folder | Why |
 | --- | --- |

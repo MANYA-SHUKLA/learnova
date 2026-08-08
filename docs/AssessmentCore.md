@@ -95,11 +95,11 @@ Assessment Core (question engine)
   └── Analytics helpers       computeQuestionAccuracy · computePassRate · rankMostIncorrectQuestions
 ```
 
-Backend adapter: `apps/backend/src/services/quiz-engine/` re-exports `@learnova/shared` — **do not add logic there**.
+Backend adapter: `backend/src/services/quiz-engine/` re-exports `@learnova/shared` — **do not add logic there**.
 
 Types: `EvaluableQuestion`, `QuestionAnswerInput`, `RenderedAssessmentQuestion`, `QuestionStatRow` in `@learnova/types` (`packages/types/src/assessment`).
 
-Tests: `apps/backend/src/__tests__/assessment/question-evaluation.test.ts`
+Tests: `backend/src/__tests__/assessment/question-evaluation.test.ts`
 
 ## Examination policy engine
 
@@ -111,7 +111,7 @@ examinationEngine
   └── Exam-only policies           schedule windows · check-in · secure browser · proctor violations · seating
 ```
 
-Backend adapter: `apps/backend/src/services/examination-engine/` re-exports `@learnova/shared` — **do not add logic there**.
+Backend adapter: `backend/src/services/examination-engine/` re-exports `@learnova/shared` — **do not add logic there**.
 
 Question storage remains in the Quiz module (`Question`, `QuestionBank`). Exams reference question IDs.
 
@@ -143,7 +143,7 @@ Project Management **must** import the [Collaboration Engine](./CollaborationEng
 
 ## Tests
 
-`apps/backend/src/__tests__/assessment/core.test.ts`
+`backend/src/__tests__/assessment/core.test.ts`
 
 ## Related
 

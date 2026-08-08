@@ -49,7 +49,7 @@ Pages use `PermissionGate` with `PERMISSIONS.QUIZ_READ`, `QUIZ_WRITE`, or `QUIZ_
 
 ## API enforcement
 
-Routes in `apps/backend/src/routes/v1/quiz.routes.ts` apply:
+Routes in `backend/src/routes/v1/quiz.routes.ts` apply:
 
 - `QUIZ_READ` — list, get, dashboards (faculty/student), analytics, export
 - `QUIZ_WRITE` — create, update, publish, attempts, bulk (non-manage actions)

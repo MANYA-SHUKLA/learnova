@@ -27,7 +27,7 @@ Exam-specific code should only add:
 
 | Layer | Path |
 | --- | --- |
-| Engine orchestration | `apps/backend/src/services/coding-engine/` |
+| Engine orchestration | `backend/src/services/coding-engine/` |
 | Pure scoring | `@learnova/shared` → `coding/*` (also `@learnova/shared/coding`) |
 | Language constants | `@learnova/constants` → `practice-lab` language catalog |
 | Judge0 client | `coding-engine/judge0.client.ts` |

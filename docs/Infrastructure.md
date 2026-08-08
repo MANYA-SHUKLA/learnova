@@ -6,19 +6,19 @@ Learnova backend infrastructure (Step 2+) — no business domains.
 
 | Layer | Location |
 | --- | --- |
-| Config | `packages/config` + `apps/backend/src/config` |
+| Config | `packages/config` + `backend/src/config` |
 | Logger | `packages/logger` |
-| Mongo / Redis | `apps/backend/src/database` |
-| Cache | `apps/backend/src/cache` |
-| Queues | `apps/backend/src/queues` |
-| Storage | `apps/backend/src/storage` |
-| Mail | `apps/backend/src/mail` |
-| Events | `apps/backend/src/events` + `packages/events` |
-| Errors | `apps/backend/src/utils/errors` |
+| Mongo / Redis | `backend/src/database` |
+| Cache | `backend/src/cache` |
+| Queues | `backend/src/queues` |
+| Storage | `backend/src/storage` |
+| Mail | `backend/src/mail` |
+| Events | `backend/src/events` + `packages/events` |
+| Errors | `backend/src/utils/errors` |
 | Health | `/api/v1/health`, `/live`, `/ready`, `/version` |
-| Monitoring | `apps/backend/src/monitoring` |
-| Security prep | `apps/backend/src/security` |
-| Worker | `apps/worker` |
+| Monitoring | `backend/src/monitoring` |
+| Security prep | `backend/src/security` |
+| Worker | `worker` |
 
 ## Startup sequence
 

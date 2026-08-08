@@ -15,7 +15,7 @@ Compose service is commented in `docker/development/docker-compose.yml` until en
 
 ## Client
 
-Canonical location: `apps/backend/src/services/coding-engine/judge0.client.ts`
+Canonical location: `backend/src/services/coding-engine/judge0.client.ts`
 
 Practice Lab re-exports for compatibility only — new code (including exams) must import from the coding engine.
 

@@ -10,7 +10,7 @@ Institution creates Project → Publish → Teams form & approve → Milestones 
 
 ## Architecture
 
-Project Management is an **independent collaboration system** implemented via the **[Collaboration Engine](./CollaborationEngine.md)** (`apps/backend/src/services/collaboration-engine/`).
+Project Management is an **independent collaboration system** implemented via the **[Collaboration Engine](./CollaborationEngine.md)** (`backend/src/services/collaboration-engine/`).
 
 It integrates with:
 

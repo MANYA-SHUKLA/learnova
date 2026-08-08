@@ -13,7 +13,7 @@ Permission: `examination:proctor`
 
 ## Socket.IO
 
-Namespace: `/exam` (see `apps/backend/src/socket/exam.namespace.ts`)
+Namespace: `/exam` (see `backend/src/socket/exam.namespace.ts`)
 
 | Client emit | Purpose |
 | --- | --- |

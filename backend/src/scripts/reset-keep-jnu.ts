@@ -26,7 +26,7 @@ const WIPE_ENTIRELY = new Set([
 async function main(): Promise<void> {
   const institutionId = process.env.SEED_INSTITUTION_ID?.trim();
   if (!institutionId) {
-    throw new Error('SEED_INSTITUTION_ID is required in apps/backend/.env');
+    throw new Error('SEED_INSTITUTION_ID is required in backend/.env');
   }
 
   await connectMongo();

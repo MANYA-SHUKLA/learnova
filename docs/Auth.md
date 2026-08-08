@@ -8,15 +8,15 @@ Learnova auth is production-ready for institution bootstrap, session lifecycle, 
 
 | Layer | Location |
 | --- | --- |
-| Models | `apps/backend/src/models/` |
-| Repositories | `apps/backend/src/repositories/auth/` |
-| Services | `apps/backend/src/services/auth/` |
-| Controllers | `apps/backend/src/controllers/auth/` |
-| Routes | `apps/backend/src/routes/v1/auth.routes.ts` |
-| Middleware | `apps/backend/src/middlewares/auth.middleware.ts` |
+| Models | `backend/src/models/` |
+| Repositories | `backend/src/repositories/auth/` |
+| Services | `backend/src/services/auth/` |
+| Controllers | `backend/src/controllers/auth/` |
+| Routes | `backend/src/routes/v1/auth.routes.ts` |
+| Middleware | `backend/src/middlewares/auth.middleware.ts` |
 | Validation | `packages/validation/src/auth.ts` |
-| Seeds | `apps/backend/src/seeds/auth.seed.ts` |
-| Frontend | `apps/frontend/src/features/auth/` |
+| Seeds | `backend/src/seeds/auth.seed.ts` |
+| Frontend | `frontend/src/features/auth/` |
 
 ## Collections
 

@@ -36,7 +36,7 @@ Production performance guidelines for Learnova — indexes, caching, pagination,
 | `faculty` | `{ institutionId, deletedAt, status, createdAt }` |
 | `faculty` | `{ courseIds, deletedAt }` |
 
-Domain models (gradebook, enrollments, quizzes, exams, etc.) already ship query-aligned compounds — see individual model files under `apps/backend/src/models/`.
+Domain models (gradebook, enrollments, quizzes, exams, etc.) already ship query-aligned compounds — see individual model files under `backend/src/models/`.
 
 ### Sync script
 
@@ -68,7 +68,7 @@ Runs `Model.syncIndexes()` for all registered Mongoose models.
 
 ## Redis caching
 
-`CacheService` (`apps/backend/src/cache/cache.service.ts`) wraps hot reads:
+`CacheService` (`backend/src/cache/cache.service.ts`) wraps hot reads:
 
 | Key pattern | TTL | Invalidated on |
 | --- | --- | --- |
@@ -94,7 +94,7 @@ Namespace: `cache:institution:*` (see `REDIS_KEYS.CACHE` in `@learnova/constants
 
 - Search debounces 300ms → API `q` parameter
 - Scrollable native `<select size={6}>` — no manual ObjectId entry
-- Components: `apps/frontend/src/components/shared/entity-selects.tsx`
+- Components: `frontend/src/components/shared/entity-selects.tsx`
 
 ### React Query
 

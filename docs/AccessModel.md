@@ -129,7 +129,7 @@ Admin **create** flows inside the authenticated Faculty/Student modules are inte
 | --- | --- |
 | Institution register | `auth.service.registerInstitution`, `/register-institution` |
 | Shared login | `auth.service.login`, `/login` |
-| Role redirect | `apps/frontend/src/lib/auth/redirects.ts` |
+| Role redirect | `frontend/src/lib/auth/redirects.ts` |
 | Faculty login user | `provisionLoginUser({ role: 'faculty' })` on faculty create |
 | Student login user | `provisionLoginUser({ role: 'student' })` on student create |
 | Temp password | Random 12-char via `generateTemporaryPassword()` · bcrypt hashed · `mustChangePassword` |
