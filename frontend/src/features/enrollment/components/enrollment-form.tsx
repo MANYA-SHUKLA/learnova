@@ -96,7 +96,7 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
       semesterId: form.semesterId.trim() || null,
       sectionId: form.sectionId.trim() || null,
       facultyId: form.facultyId.trim() || null,
-      enrollmentMethod: form.enrollmentMethod,
+      enrollmentMethod: form.enrollmentMethod as EnrollmentMethod,
       notes: form.notes.trim() || null,
     };
 
