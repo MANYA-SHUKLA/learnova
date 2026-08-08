@@ -1,10 +1,11 @@
 'use client';
 
-import { PERMISSIONS } from '@learnova/constants';
+import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import { Button, Card, CardDescription, CardHeader, CardTitle } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { useExamList } from '@/features/examination';
+import { Link } from '@/lib/i18n/routing';
 
 export default function FacultyProctoringPage() {
   const t = useTranslations('dashboard.faculty.proctoring');
@@ -42,8 +43,10 @@ export default function FacultyProctoringPage() {
                       {t('secureBrowser')}: {exam.proctoring.secureBrowser}
                     </p>
                   </div>
-                  <Button variant="danger" size="sm" disabled>
-                    {t('monitor')}
+                  <Button variant="default" size="sm" asChild>
+                    <Link href={`${APP_ROUTES.FACULTY_EXAMS_LIVE}?examId=${exam.id}`}>
+                      {t('monitor')}
+                    </Link>
                   </Button>
                 </div>
               ))

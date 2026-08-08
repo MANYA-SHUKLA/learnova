@@ -42,6 +42,23 @@ export function useExamSocket(options: {
     );
 
     socket.on(
+      'live.announcement',
+      (payload: { title?: string; message?: string; isEmergency?: boolean }) => {
+        if (payload.title) {
+          addWarning(`${payload.title}: ${payload.message ?? ''}`);
+        }
+      },
+    );
+
+    socket.on('live.attempt.disconnected', () => {
+      addWarning('connection_lost');
+    });
+
+    socket.on('live.student.reconnected', () => {
+      addWarning('connection_restored');
+    });
+
+    socket.on(
       'live.attempt.updated',
       (payload: { stats?: { online: number; started: number; submitted: number } }) => {
         if (payload.stats) {

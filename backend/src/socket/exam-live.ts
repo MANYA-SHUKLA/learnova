@@ -5,7 +5,11 @@ export type ExamLiveEvent =
   | 'live.violation.recorded'
   | 'live.attempt.submitted'
   | 'live.attempt.disconnected'
-  | 'live.countdown';
+  | 'live.countdown'
+  | 'live.announcement'
+  | 'live.attendance.updated'
+  | 'live.attempt.started'
+  | 'live.student.reconnected';
 
 export function examRoomId(examId: string): string {
   return `exam:${examId}`;

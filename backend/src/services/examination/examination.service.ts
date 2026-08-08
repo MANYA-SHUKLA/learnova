@@ -23,7 +23,7 @@ import type {
   ProctorEventType,
   SecureBrowserPolicy,
 } from '@learnova/types';
-import { EXAM_VIOLATION_TYPES } from '@learnova/constants';
+import { EXAM_VIOLATION_TYPES, EXAM_ANNOUNCEMENT_TYPES } from '@learnova/constants';
 import { eventBus } from '../../events/index.js';
 import { emitAttemptLive, emitExamLive } from '../../socket/exam-live.js';
 import { CourseModel } from '../../models/course.model.js';
@@ -1912,6 +1912,101 @@ export class ExaminationService {
       requireMicrophone: input.requireMicrophone ?? false,
       createdBy: oid(actor.userId),
       deletedAt: null,
+    });
+    return toDto(doc);
+  }
+
+  async listExamRooms(examId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const exam = await examinationRepository.findExamById(institutionId, examId);
+    if (!exam) throw new NotFoundError('Exam not found');
+    await this.assertExamReadAccess(exam, actor, institutionId);
+    const rows = await examinationRepository.listRooms(institutionId, examId);
+    return rows.map((r) => toDto(r));
+  }
+
+  async createExamRoom(
+    input: {
+      examId: string;
+      roomCode: string;
+      name: string;
+      capacity?: number;
+      isVirtual?: boolean;
+      invigilatorIds?: string[];
+    },
+    actor: ActorContext,
+  ) {
+    const institutionId = requireTenant(actor);
+    if (!canManage(actor) && actor.role !== 'faculty') {
+      throw new ForbiddenError('Cannot create exam rooms');
+    }
+    const exam = await examinationRepository.findExamById(institutionId, input.examId);
+    if (!exam) throw new NotFoundError('Exam not found');
+    await this.assertExamWriteAccess(exam, actor, institutionId);
+    const doc = await examinationRepository.createRoom({
+      institutionId: oid(institutionId),
+      examId: oid(input.examId),
+      roomCode: input.roomCode.toUpperCase(),
+      name: input.name,
+      capacity: input.capacity ?? 50,
+      isVirtual: input.isVirtual ?? true,
+      invigilatorIds: (input.invigilatorIds ?? []).map((id) => oid(id)),
+    });
+    return toDto(doc);
+  }
+
+  async listExamAnnouncements(examId: string, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    const exam = await examinationRepository.findExamById(institutionId, examId);
+    if (!exam) throw new NotFoundError('Exam not found');
+    await this.assertExamReadAccess(exam, actor, institutionId);
+    const rows = await examinationRepository.listAnnouncements(institutionId, examId);
+    return rows.map((r) => toDto(r));
+  }
+
+  async broadcastExamAnnouncement(
+    input: {
+      examId: string;
+      roomId?: string | null;
+      title: string;
+      message: string;
+      announcementType?: string;
+      isEmergency?: boolean;
+      expiresAt?: Date | null;
+    },
+    actor: ActorContext,
+  ) {
+    const institutionId = requireTenant(actor);
+    if (!canManage(actor) && actor.role !== 'faculty') {
+      throw new ForbiddenError('Cannot broadcast exam announcements');
+    }
+    const exam = await examinationRepository.findExamById(institutionId, input.examId);
+    if (!exam) throw new NotFoundError('Exam not found');
+    await this.assertExamWriteAccess(exam, actor, institutionId);
+    const doc = await examinationRepository.createAnnouncement({
+      institutionId: oid(institutionId),
+      examId: oid(input.examId),
+      roomId: input.roomId ? oid(input.roomId) : null,
+      title: input.title,
+      message: input.message,
+      announcementType: (EXAM_ANNOUNCEMENT_TYPES.includes(
+        input.announcementType as (typeof EXAM_ANNOUNCEMENT_TYPES)[number],
+      )
+        ? input.announcementType
+        : 'general') as (typeof EXAM_ANNOUNCEMENT_TYPES)[number],
+      isEmergency: input.isEmergency ?? false,
+      broadcastAt: new Date(),
+      expiresAt: input.expiresAt ?? null,
+      createdBy: oid(actor.userId),
+    });
+    emitExamLive(input.examId, 'live.announcement', toDto(doc));
+    await examinationRepository.logAudit({
+      institutionId,
+      examId: input.examId,
+      userId: actor.userId,
+      email: actor.email ?? null,
+      event: 'exam.updated',
+      metadata: { action: 'announcement.broadcast', announcementId: String(doc._id) },
     });
     return toDto(doc);
   }

@@ -1,49 +1,34 @@
-# Live Exam Monitoring
+# Live exam monitoring (Step 13)
 
-Real-time faculty dashboard for proctored exams using **Socket.IO** (`/exam` namespace) and REST snapshot polling.
+Faculty live monitor: **`/faculty/exams/live`** (alias under `/faculty/examinations`).
 
-## Routes
+## Data sources
 
-| Surface | Path |
+- **REST:** `GET /api/v1/examinations/:id/live` — stats (online, started, submitted, disconnected, warnings, violations), recent attempts, recent violations. Polled every 10s from the frontend.
+- **Socket.IO:** namespace `/exam`, room `exam:{examId}`
+
+## Socket events (server → client)
+
+| Event | When |
 | --- | --- |
-| UI | `/faculty/exams/live` |
-| API | `GET /api/v1/examinations/:id/live` |
+| `live.attempt.updated` | Check-in, attempt state change |
+| `live.attempt.started` | Attempt started |
+| `live.attempt.submitted` | Submit |
+| `live.attempt.disconnected` | Heartbeat reports offline |
+| `live.student.reconnected` | Heartbeat after disconnect |
+| `live.violation.recorded` | Student or proctor violation |
+| `live.announcement` | Faculty broadcast |
+| `live.countdown` | Remaining seconds on start |
 
-Permission: `examination:proctor`
+## Client join events
 
-## Socket.IO
+Both legacy and spec names are supported:
 
-Namespace: `/exam` (see `backend/src/socket/exam.namespace.ts`)
+- `join.exam` / `exam.join`
+- `join.attempt` / `attempt.started`
 
-| Client emit | Purpose |
-| --- | --- |
-| `join.exam` | Faculty joins exam monitoring room |
-| `join.attempt` | Student joins attempt room (countdown) |
-| `leave.exam` / `leave.attempt` | Cleanup |
+## Proctoring console
 
-| Server emit | Payload |
-| --- | --- |
-| `live.attempt.updated` | attempt status, studentId |
-| `live.violation.recorded` | violationType, violationCount |
-| `live.attempt.submitted` | score, passed |
-| `live.countdown` | remainingSeconds |
+`/faculty/proctoring` lists in-progress exams and links to the live monitor per exam.
 
-## Live snapshot
-
-`GET /examinations/:id/live` returns:
-
-- `stats`: online, started, submitted, disconnected, warnings, violations
-- `attempts`: recent attempt rows
-- `recentViolations`: latest `ExamViolation` records
-
-Frontend: `useLiveMonitoringQuery` (10s poll) + `useExamSocket` (push updates).
-
-## Faculty dashboard widgets
-
-- Students online / started / submitted
-- Disconnected count
-- Warning & violation totals
-- Recent violation feed
-- Per-attempt status list
-
-See [ExamAPI.md](./ExamAPI.md) · [ExamProctoring.md](./ExamProctoring.md)
+See [ExamSocketEvents.md](./ExamSocketEvents.md) for the full event catalog.

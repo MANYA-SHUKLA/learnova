@@ -364,6 +364,10 @@ export {
 } from './exam-accessibility.model.js';
 export { ExamVersionModel, type ExamVersionDocument } from './exam-version.model.js';
 export {
+  ExamAnnouncementModel,
+  type ExamAnnouncementDocument,
+} from './exam-announcement.model.js';
+export {
   ExamAuditLogModel,
   type ExamAuditLogDocument,
   type ExamAuditEvent,

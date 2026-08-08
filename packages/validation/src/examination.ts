@@ -297,6 +297,30 @@ export const heartbeatExamAttemptSchema = z.object({
   connected: z.boolean().default(true),
 });
 
+export const createExamAnnouncementSchema = z.object({
+  examId: objectIdField,
+  roomId: objectIdField.optional().nullable(),
+  title: z.string().trim().min(1).max(200),
+  message: z.string().trim().min(1).max(5000),
+  announcementType: z
+    .enum(['time_extension', 'instructions', 'correction', 'emergency_stop', 'general'])
+    .default('general'),
+  isEmergency: z.boolean().default(false),
+  expiresAt: z.coerce.date().optional().nullable(),
+});
+
+export const createExamRoomSchema = z.object({
+  examId: objectIdField,
+  roomCode: z.string().trim().min(1).max(32),
+  name: z.string().trim().min(1).max(120),
+  capacity: z.number().int().min(1).max(5000).default(50),
+  isVirtual: z.boolean().default(true),
+  invigilatorIds: z.array(objectIdField).max(50).optional().default([]),
+});
+
+export type CreateExamAnnouncementInput = z.infer<typeof createExamAnnouncementSchema>;
+export type CreateExamRoomInput = z.infer<typeof createExamRoomSchema>;
+
 export type CreateExamBlueprintInput = z.infer<typeof createExamBlueprintSchema>;
 export type ApplyExamBlueprintInput = z.infer<typeof applyExamBlueprintSchema>;
 export type CreateExamTemplateInput = z.infer<typeof createExamTemplateSchema>;

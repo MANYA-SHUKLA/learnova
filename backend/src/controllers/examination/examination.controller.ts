@@ -519,3 +519,41 @@ export async function listExamVersions(req: Request, res: Response, next: NextFu
   }
 }
 
+export async function listExamRooms(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listExamRooms(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createExamRoom(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.createExamRoom(req.body, actorFrom(req));
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listExamAnnouncements(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.listExamAnnouncements(
+      req.params.id as string,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function broadcastExamAnnouncement(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await examinationService.broadcastExamAnnouncement(req.body, actorFrom(req));
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}

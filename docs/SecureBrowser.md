@@ -1,35 +1,23 @@
-# Secure Browser Mode
+# Secure browser (Step 13)
 
-Client-side secure exam mode for Step **13**. Server policy is validated by `examinationEngine.validateSecureBrowser`; the frontend hook `useSecureExamMode` enforces browser restrictions during an active attempt.
+Exam secure mode is enforced on the **frontend** via `useSecureExamMode()` in `frontend/src/features/examination/hooks/use-secure-exam-mode.ts`.
 
-## Server policy (`Exam.proctoring`)
+## What the hook blocks
 
-| Flag | Default | Effect |
-| --- | --- | --- |
-| `secureBrowser` | `recommended` | `off` · `recommended` · `required` |
-| `requireFullscreen` | `true` | Block start without acknowledgement when required |
-| `blockCopyPaste` | `true` | Clipboard events blocked client-side |
-| `blockRightClick` | `true` | Context menu blocked |
-| `blockNewTabs` | `true` | Tab/window blur reported as violation |
+- Copy, cut, paste
+- Right-click / context menu
+- Tab blur and Page Visibility changes (reported as violations)
+- Fullscreen exit when `requireFullscreen` is enabled
 
-## Client hook
+Violations are reported to `POST /api/v1/examinations/attempts/:id/violations` and broadcast on Socket.IO `/exam` as `live.violation.recorded`.
 
-`frontend/src/features/examination/hooks/use-secure-exam-mode.ts`
+## Policy source
 
-- Requests fullscreen when `requireFullscreen`
-- Blocks copy/cut/paste and context menu
-- Reports `tab_switch`, `fullscreen_exit`, `clipboard_attempt` via `POST /examinations/attempts/:id/violations`
+Secure browser settings come from the exam's `proctoring` object (or reusable `ExamPolicy` templates). Question evaluation and scoring are **not** implemented here — they remain in Assessment Core (`examinationEngine`).
 
-## Violation flow
+## Student flow
 
-```
-Browser event → useSecureExamMode → reportViolation API
-  → examinationEngine.evaluateProctorViolation
-  → ExamViolation record + Socket.IO live.violation.recorded
-```
+1. `/student/examinations/:id/check-in` — system check (network, camera, mic, fullscreen)
+2. `/student/examinations/:id` — check-in → start → take exam with hook active
 
-## Limitations
-
-Full OS-level lockdown requires a dedicated secure browser client (out of scope). This implementation provides enterprise-grade deterrents and audit trail suitable for web delivery.
-
-See [Proctoring.md](./ExamProctoring.md) (alias: ExamProctoring.md).
+See also [ExamProctoring.md](./ExamProctoring.md) and [ExamManagement.md](./ExamManagement.md).

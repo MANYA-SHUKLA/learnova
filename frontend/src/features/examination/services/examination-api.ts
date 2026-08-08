@@ -171,4 +171,37 @@ export const examinationApi = {
     attemptId: string,
     body: { violationType: string; message?: string | null },
   ) => apiClient.post(`${base}/attempts/${attemptId}/violations`, body),
+
+  listRooms: (examId: string) =>
+    apiClient.get<{ id: string; roomCode: string; name: string; capacity: number }[]>(
+      `${base}/${examId}/rooms`,
+    ),
+
+  createRoom: (body: {
+    examId: string;
+    roomCode: string;
+    name: string;
+    capacity?: number;
+    isVirtual?: boolean;
+  }) => apiClient.post(`${base}/rooms`, body),
+
+  listAnnouncements: (examId: string) =>
+    apiClient.get<
+      {
+        id: string;
+        title: string;
+        message: string;
+        announcementType: string;
+        isEmergency: boolean;
+        broadcastAt: string;
+      }[]
+    >(`${base}/${examId}/announcements`),
+
+  broadcastAnnouncement: (body: {
+    examId: string;
+    title: string;
+    message: string;
+    announcementType?: string;
+    isEmergency?: boolean;
+  }) => apiClient.post(`${base}/announcements`, body),
 };

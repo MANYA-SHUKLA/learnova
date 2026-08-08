@@ -21,6 +21,10 @@ import { ExamAttendanceModel, type ExamAttendanceDocument } from '../../models/e
 import { ExamPolicyModel, type ExamPolicyDocument } from '../../models/exam-policy.model.js';
 import { ExamDeviceModel, type ExamDeviceDocument } from '../../models/exam-device.model.js';
 import { ExamRoomModel, type ExamRoomDocument } from '../../models/exam-room.model.js';
+import {
+  ExamAnnouncementModel,
+  type ExamAnnouncementDocument,
+} from '../../models/exam-announcement.model.js';
 import { ExamBlueprintModel, type ExamBlueprintDocument } from '../../models/exam-blueprint.model.js';
 import { ExamTemplateModel, type ExamTemplateDocument } from '../../models/exam-template.model.js';
 import {
@@ -670,6 +674,31 @@ export class ExaminationRepository {
     })
       .sort({ roomCode: 1 })
       .exec();
+  }
+
+  async createRoom(
+    data: Omit<ExamRoomDocument, '_id' | 'createdAt' | 'updatedAt' | 'studentCount'>,
+  ): Promise<ExamRoomDocument> {
+    return ExamRoomModel.create({ ...data, studentCount: 0 });
+  }
+
+  async listAnnouncements(
+    institutionId: string,
+    examId: string,
+  ): Promise<ExamAnnouncementDocument[]> {
+    return ExamAnnouncementModel.find({
+      institutionId: toObjectId(institutionId),
+      examId: toObjectId(examId),
+    })
+      .sort({ broadcastAt: -1 })
+      .limit(100)
+      .exec();
+  }
+
+  async createAnnouncement(
+    data: Omit<ExamAnnouncementDocument, '_id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ExamAnnouncementDocument> {
+    return ExamAnnouncementModel.create(data);
   }
 
   async getLiveSnapshot(institutionId: string, examId: string) {

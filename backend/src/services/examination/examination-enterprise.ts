@@ -13,6 +13,7 @@ import type {
 import { EXAM_DEFAULTS } from '@learnova/constants';
 import { examinationEngine } from '../examination-engine/index.js';
 import { examinationRepository } from '../../repositories/examination/index.js';
+import { emitAttemptLive, emitExamLive } from '../../socket/exam-live.js';
 import {
   ConflictError,
   ForbiddenError,
@@ -447,14 +448,33 @@ export async function heartbeatAttempt(input: HeartbeatExamAttemptInput, actor: 
       severity: 'warning',
       message: 'Student disconnected from exam session',
     });
+    emitAttemptLive(String(attempt._id), 'live.attempt.disconnected', {
+      attemptId: String(attempt._id),
+      examId: String(attempt.examId),
+    });
+    emitExamLive(String(attempt.examId), 'live.attempt.disconnected', {
+      attemptId: String(attempt._id),
+      examId: String(attempt.examId),
+    });
     return toDto(updated!);
   }
 
+  const wasDisconnected = attempt.status === 'disconnected';
   const updated = await examinationRepository.updateAttemptById(
     institutionId,
     String(attempt._id),
-    { lastSeenAt: new Date(), status: attempt.status === 'disconnected' ? 'started' : attempt.status },
+    { lastSeenAt: new Date(), status: wasDisconnected ? 'started' : attempt.status },
   );
+  if (wasDisconnected) {
+    emitAttemptLive(String(attempt._id), 'live.student.reconnected', {
+      attemptId: String(attempt._id),
+      examId: String(attempt.examId),
+    });
+    emitExamLive(String(attempt.examId), 'live.student.reconnected', {
+      attemptId: String(attempt._id),
+      examId: String(attempt.examId),
+    });
+  }
   return toDto(updated!);
 }
 

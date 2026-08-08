@@ -14,6 +14,7 @@ import { ExamRoomModel } from '../models/exam-room.model.js';
 import { ExamAttendanceModel } from '../models/exam-attendance.model.js';
 import { ExamPolicyModel } from '../models/exam-policy.model.js';
 import { ExamDeviceModel } from '../models/exam-device.model.js';
+import { ExamAnnouncementModel } from '../models/exam-announcement.model.js';
 import { QuestionModel } from '../models/question.model.js';
 import { generateSlug } from '../services/examination/examination.helpers.js';
 import { logger } from '../utils/logger/index.js';
@@ -74,6 +75,7 @@ export interface ExaminationSeedResult {
   violations: number;
   attendance: number;
   devices: number;
+  announcements: number;
   auditLogs: number;
 }
 
@@ -106,6 +108,7 @@ export async function seedExaminations(
         violations: 0,
         attendance: 0,
         devices: 0,
+        announcements: 0,
         auditLogs: 0,
       };
     }
@@ -128,6 +131,7 @@ export async function seedExaminations(
       ExamAttendanceModel.deleteMany({ institutionId: oid }),
       ExamPolicyModel.deleteMany({ institutionId: oid }),
       ExamDeviceModel.deleteMany({ institutionId: oid }),
+      ExamAnnouncementModel.deleteMany({ institutionId: oid }),
     ]);
   }
 
@@ -214,8 +218,31 @@ export async function seedExaminations(
   const exams = await ExamModel.insertMany(examDocs);
   let sectionsCreated = 0;
 
+  const POLICY_NAMES = [
+    'Online Midterm',
+    'Final Examination',
+    'Coding Assessment',
+    'Lab Practical',
+    'Open Book',
+    'Closed Book',
+    'High Stakes Secure',
+    'Mock Test',
+    'Viva Voce',
+    'Practical Lab',
+    'Internal Assessment',
+    'Supplementary Exam',
+    'Proctored Online',
+    'Low Stakes Quiz',
+    'Department Standard',
+    'Campus Standard',
+    'Remote Exam',
+    'Hybrid Exam',
+    'Accessibility Extended',
+    'Standard Secure',
+  ];
+
   const policies = await ExamPolicyModel.insertMany(
-    ['Standard Secure', 'High Stakes', 'Open Book', 'Lab Practical', 'Mock Test'].map((name, i) => ({
+    POLICY_NAMES.map((name, i) => ({
       institutionId: oid,
       name,
       description: `Seed policy ${name}`,
@@ -223,13 +250,13 @@ export async function seedExaminations(
       negativeMarking: i % 3 === 0,
       secureBrowser: i % 2 === 0 ? 'required' : 'recommended',
       requireWebcam: i % 2 === 0,
-      requireMicrophone: false,
+      requireMicrophone: i % 4 === 0,
       createdBy: userOid,
       deletedAt: null,
     })),
   );
   let roomsCreated = 0;
-  for (const exam of exams.slice(0, 15)) {
+  for (const exam of exams.slice(0, 20)) {
     await ExamRoomModel.create({
       institutionId: oid,
       examId: exam._id,
@@ -269,6 +296,9 @@ export async function seedExaminations(
   let violationsCreated = 0;
   let attendanceCreated = 0;
   let devicesCreated = 0;
+  const violationTarget = 100;
+  const attendanceTarget = 500;
+  const deviceTarget = 100;
 
   while (attemptsCreated < attemptTarget) {
     const exam = randomItem(exams);
@@ -302,20 +332,29 @@ export async function seedExaminations(
     });
     attemptsCreated += 1;
 
-    if (attempt.checkedInAt) {
+    if (attempt.checkedInAt && attendanceCreated < attendanceTarget) {
       await ExamAttendanceModel.create({
         institutionId: oid,
         examId: exam._id,
         studentId,
         attemptId: attempt._id,
-        status: randomBool(0.15) ? 'late' : 'present',
+        status: randomBool(0.1)
+          ? 'late'
+          : randomBool(0.05)
+            ? 'excused'
+            : randomBool(0.03)
+              ? 'absent'
+              : 'present',
         checkedInAt: attempt.checkedInAt,
         autoRecorded: true,
       });
       attendanceCreated += 1;
     }
 
-    if (status === 'started' || status === 'completed') {
+    if (
+      (status === 'started' || status === 'completed') &&
+      devicesCreated < deviceTarget
+    ) {
       await ExamDeviceModel.create({
         institutionId: oid,
         attemptId: attempt._id,
@@ -330,8 +369,12 @@ export async function seedExaminations(
       devicesCreated += 1;
     }
 
-    if ((attempt.violationCount ?? 0) > 0) {
-      for (let v = 0; v < (attempt.violationCount ?? 0); v += 1) {
+    if ((attempt.violationCount ?? 0) > 0 || violationsCreated < violationTarget) {
+      const count =
+        violationsCreated < violationTarget
+          ? Math.max(1, attempt.violationCount ?? 1)
+          : (attempt.violationCount ?? 0);
+      for (let v = 0; v < count && violationsCreated < violationTarget + 20; v += 1) {
         await ExamViolationModel.create({
           institutionId: oid,
           examId: exam._id,
@@ -432,6 +475,36 @@ export async function seedExaminations(
     })),
   );
 
+  const announcements = await ExamAnnouncementModel.insertMany(
+    Array.from({ length: 30 }, (_, i) => {
+      const exam = randomItem(exams);
+      return {
+        institutionId: oid,
+        examId: exam._id,
+        roomId: null,
+        title: randomItem([
+          'Time extension granted',
+          'Additional instructions',
+          'Question correction',
+          'Emergency pause',
+          'General update',
+        ] as const),
+        message: `Seed announcement ${String(i + 1)} for ${exam.title}`,
+        announcementType: randomItem([
+          'time_extension',
+          'instructions',
+          'correction',
+          'emergency_stop',
+          'general',
+        ] as const),
+        isEmergency: i % 10 === 0,
+        broadcastAt: new Date(now - randomInt(0, 72) * 60 * 60 * 1000),
+        expiresAt: null,
+        createdBy: userOid,
+      };
+    }),
+  );
+
   const result: ExaminationSeedResult = {
     exams: exams.length,
     sections: sectionsCreated,
@@ -445,6 +518,7 @@ export async function seedExaminations(
     violations: violationsCreated,
     attendance: attendanceCreated,
     devices: devicesCreated,
+    announcements: announcements.length,
     auditLogs: 20,
   };
 

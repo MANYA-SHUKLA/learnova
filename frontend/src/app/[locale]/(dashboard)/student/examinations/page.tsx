@@ -1,6 +1,6 @@
 'use client';
 
-import { PERMISSIONS } from '@learnova/constants';
+import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,
@@ -84,9 +84,18 @@ export default function StudentExaminationsPage() {
                       {formatExamWindow(exam.schedule.startsAt, exam.schedule.endsAt)}
                     </CardDescription>
                   </div>
-                  <Button asChild>
-                    <Link href={`/student/examinations/${exam.id}`}>{t('open')}</Link>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={APP_ROUTES.STUDENT_EXAM_CHECKIN.replace(':id', exam.id)}>
+                      {t('systemCheck')}
+                    </Link>
                   </Button>
+                  <Button asChild size="sm">
+                    <Link href={APP_ROUTES.STUDENT_EXAM_DETAIL.replace(':id', exam.id)}>
+                      {t('open')}
+                    </Link>
+                  </Button>
+                  </div>
                 </CardHeader>
               </Card>
             ))}

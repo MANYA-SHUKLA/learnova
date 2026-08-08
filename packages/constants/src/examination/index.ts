@@ -100,7 +100,15 @@ export const EXAM_AUTO_ACTIONS = [
   'notify_faculty',
 ] as const;
 
-export const EXAM_ATTENDANCE_STATUSES = ['present', 'absent', 'late'] as const;
+export const EXAM_ATTENDANCE_STATUSES = ['present', 'absent', 'late', 'excused'] as const;
+
+export const EXAM_ANNOUNCEMENT_TYPES = [
+  'time_extension',
+  'instructions',
+  'correction',
+  'emergency_stop',
+  'general',
+] as const;
 
 export const INVIGILATOR_ROLES = ['view_only', 'monitor', 'intervene'] as const;
 

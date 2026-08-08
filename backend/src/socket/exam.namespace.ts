@@ -21,12 +21,21 @@ export function registerExamNamespace(io: Server): void {
     socket.on('join.exam', (examId: string) => {
       if (typeof examId === 'string') joinRoom(socket, examRoomId(examId));
     });
+    socket.on('exam.join', (examId: string) => {
+      if (typeof examId === 'string') joinRoom(socket, examRoomId(examId));
+    });
 
     socket.on('join.attempt', (attemptId: string) => {
       if (typeof attemptId === 'string') joinRoom(socket, attemptRoomId(attemptId));
     });
+    socket.on('attempt.started', (attemptId: string) => {
+      if (typeof attemptId === 'string') joinRoom(socket, attemptRoomId(attemptId));
+    });
 
     socket.on('leave.exam', (examId: string) => {
+      if (typeof examId === 'string') void socket.leave(examRoomId(examId));
+    });
+    socket.on('exam.leave', (examId: string) => {
       if (typeof examId === 'string') void socket.leave(examRoomId(examId));
     });
 

@@ -6,6 +6,8 @@ import {
   applyExamBlueprintSchema,
   attemptIdParamsSchema,
   checkInExamSchema,
+  createExamAnnouncementSchema,
+  createExamRoomSchema,
   createExamBlueprintSchema,
   createExamFromTemplateSchema,
   createExamSchema,
@@ -52,6 +54,20 @@ const proctorAuth = [
 examinationRoutes.get('/examinations/policies', ...readAuth, ctrl.listPolicies);
 
 examinationRoutes.post('/examinations/policies', ...writeAuth, ctrl.createPolicy);
+
+examinationRoutes.post(
+  '/examinations/rooms',
+  ...writeAuth,
+  validate(createExamRoomSchema),
+  ctrl.createExamRoom,
+);
+
+examinationRoutes.post(
+  '/examinations/announcements',
+  ...writeAuth,
+  validate(createExamAnnouncementSchema),
+  ctrl.broadcastExamAnnouncement,
+);
 
 examinationRoutes.get('/examinations/blueprints', ...readAuth, ctrl.listBlueprints);
 examinationRoutes.post(
@@ -348,6 +364,20 @@ examinationRoutes.get(
   ...readAuth,
   validate(examIdParamsSchema, 'params'),
   ctrl.listAttendance,
+);
+
+examinationRoutes.get(
+  '/examinations/:id/rooms',
+  ...readAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.listExamRooms,
+);
+
+examinationRoutes.get(
+  '/examinations/:id/announcements',
+  ...readAuth,
+  validate(examIdParamsSchema, 'params'),
+  ctrl.listExamAnnouncements,
 );
 
 examinationRoutes.get(

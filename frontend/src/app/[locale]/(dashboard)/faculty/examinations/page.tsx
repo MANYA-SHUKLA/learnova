@@ -33,7 +33,7 @@ export default function FacultyExaminationsPage() {
   return (
     <PermissionGate permission={PERMISSIONS.EXAMINATION_READ} enforce>
       <div className="space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
             <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -41,9 +41,14 @@ export default function FacultyExaminationsPage() {
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
           </div>
-          <Button asChild variant="outline">
-            <Link href={APP_ROUTES.FACULTY_PROCTORING}>{t('proctoring')}</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href={APP_ROUTES.FACULTY_EXAM_CREATE}>{t('create')}</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={APP_ROUTES.FACULTY_PROCTORING}>{t('proctoring')}</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -73,15 +78,24 @@ export default function FacultyExaminationsPage() {
           <div className="space-y-3">
             {rows.map((exam) => (
               <Card key={exam.id} className="rounded-2xl border-border/80 p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium">{exam.title}</p>
-                  <Badge variant="outline">{formatExamStatus(exam.status)}</Badge>
-                  <Badge variant="secondary">{formatProctoringMode(exam.proctoring.mode)}</Badge>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={APP_ROUTES.FACULTY_EXAM_DETAIL.replace(':id', exam.id)}
+                        className="font-medium hover:underline"
+                      >
+                        {exam.title}
+                      </Link>
+                      <Badge variant="outline">{formatExamStatus(exam.status)}</Badge>
+                      <Badge variant="secondary">{formatProctoringMode(exam.proctoring.mode)}</Badge>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {formatExamType(exam.examType)} ·{' '}
+                      {formatExamWindow(exam.schedule.startsAt, exam.schedule.endsAt)}
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {formatExamType(exam.examType)} ·{' '}
-                  {formatExamWindow(exam.schedule.startsAt, exam.schedule.endsAt)}
-                </p>
               </Card>
             ))}
           </div>
