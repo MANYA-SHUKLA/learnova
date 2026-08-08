@@ -1,17 +1,19 @@
 'use client';
 
-import { Badge, Button, Skeleton } from '@learnova/ui';
+import { Badge, DataTable, type DataTableColumn, type DataTablePagination } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
 import type { OrgEntityStatus } from '../types';
+
+export type { DataTableColumn, DataTablePagination };
 
 export interface ResourceColumn<T> {
   id: string;
   header: string;
   cell: (row: T) => ReactNode;
   className?: string;
-  /** Value used for CSV export; defaults to stringified cell text when omitted */
+  sortable?: boolean;
+  sortValue?: (row: T) => string | number;
   exportValue?: (row: T) => string | number | boolean | null | undefined;
 }
 
@@ -20,7 +22,19 @@ interface ResourceTableProps<T extends { id: string }> {
   rows: T[];
   isLoading?: boolean;
   rowActions?: (row: T) => ReactNode;
-  emptyMessage?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  emptyAction?: ReactNode;
+  pagination?: DataTablePagination;
+  selectable?: boolean;
+  selectedIds?: string[];
+  onSelectionChange?: (ids: string[]) => void;
+  bulkActions?: ReactNode;
+  filters?: ReactNode;
+  toolbar?: ReactNode;
+  caption?: string;
+  onRowClick?: (row: T) => void;
+  mobileRow?: (row: T) => ReactNode;
 }
 
 export function StatusBadge({ status }: { status: OrgEntityStatus }) {
@@ -39,104 +53,50 @@ export function ResourceTable<T extends { id: string }>({
   rows,
   isLoading,
   rowActions,
-  emptyMessage = 'No records found.',
+  emptyTitle = 'No records found',
+  emptyDescription = 'Try adjusting filters or add a new record.',
+  emptyAction,
+  pagination,
+  selectable,
+  selectedIds,
+  onSelectionChange,
+  bulkActions,
+  filters,
+  toolbar,
+  caption,
+  onRowClick,
+  mobileRow,
 }: ResourceTableProps<T>) {
-  if (isLoading) {
-    return (
-      <div className="space-y-2 rounded-2xl border border-border">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex gap-3 border-b border-border px-4 py-3 last:border-b-0">
-            <Skeleton className="h-4 w-1/4" />
-            <Skeleton className="h-4 w-1/5" />
-            <Skeleton className="h-4 w-1/6" />
-            <Skeleton className="ml-auto h-4 w-20" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-lg border border-dashed border-border px-4 py-12 text-center text-sm text-muted-foreground">
-        {emptyMessage}
-      </div>
-    );
-  }
+  const tableColumns: DataTableColumn<T>[] = columns.map((col) => ({
+    id: col.id,
+    header: col.header,
+    cell: col.cell,
+    className: col.className,
+    sortable: col.sortable,
+    sortValue: col.sortValue,
+  }));
 
   return (
-    <div className="min-w-0">
-      {/* Mobile: stacked cards */}
-      <ul className="space-y-3 md:hidden">
-        {rows.map((row) => (
-          <li
-            key={row.id}
-            className="card-interactive rounded-2xl border border-border bg-card p-4 shadow-soft-sm"
-          >
-            <dl className="space-y-3">
-              {columns.map((col) => (
-                <div key={col.id} className="min-w-0">
-                  <dt className="text-xs font-medium text-muted-foreground">{col.header}</dt>
-                  <dd className={cn('mt-0.5 break-words text-sm text-foreground', col.className)}>
-                    {col.cell(row)}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            {rowActions ? (
-              <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-3 print:hidden">
-                {rowActions(row)}
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-
-      {/* Desktop / tablet: scrollable table */}
-      <div className="hidden min-w-0 overflow-x-auto rounded-2xl border border-border shadow-soft-sm md:block">
-        <table className="w-full min-w-[36rem] text-left text-sm">
-          <thead className="sticky top-0 z-10 border-b border-border bg-muted/60 backdrop-blur-sm">
-            <tr>
-              {columns.map((col) => (
-                <th
-                  key={col.id}
-                  className={cn(
-                    'whitespace-nowrap px-3 py-3 font-medium text-muted-foreground sm:px-4',
-                    col.className,
-                  )}
-                >
-                  {col.header}
-                </th>
-              ))}
-              {rowActions ? (
-                <th className="px-3 py-3 text-right font-medium text-muted-foreground print:hidden sm:px-4">
-                  Actions
-                </th>
-              ) : null}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/30">
-                {columns.map((col) => (
-                  <td
-                    key={col.id}
-                    className={cn('max-w-[16rem] truncate px-3 py-3 align-middle sm:px-4', col.className)}
-                  >
-                    {col.cell(row)}
-                  </td>
-                ))}
-                {rowActions ? (
-                  <td className="px-3 py-3 text-right align-middle print:hidden sm:px-4">
-                    <div className="flex flex-wrap justify-end gap-1">{rowActions(row)}</div>
-                  </td>
-                ) : null}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <DataTable
+      columns={tableColumns}
+      data={rows}
+      rowKey={(row) => row.id}
+      loading={isLoading}
+      emptyTitle={emptyTitle}
+      emptyDescription={emptyDescription}
+      emptyAction={emptyAction}
+      rowActions={rowActions}
+      pagination={pagination}
+      selectable={selectable}
+      selectedIds={selectedIds}
+      onSelectionChange={onSelectionChange}
+      bulkActions={bulkActions}
+      filters={filters}
+      toolbar={toolbar}
+      caption={caption}
+      onRowClick={onRowClick}
+      mobileRow={mobileRow}
+    />
   );
 }
 
@@ -149,6 +109,7 @@ interface PaginationControlsProps {
   onPageChange: (page: number) => void;
 }
 
+/** @deprecated Pass `pagination` to ResourceTable instead */
 export function PaginationControls({
   page,
   totalPages,
@@ -164,27 +125,34 @@ export function PaginationControls({
         {t('pageOf', { page, totalPages: Math.max(totalPages, 1), total })}
       </p>
       <div className="flex w-full gap-2 sm:w-auto">
-        <Button
+        <button
           type="button"
-          variant="outline"
-          size="sm"
-          className="flex-1 sm:flex-none"
+          className="inline-flex flex-1 items-center justify-center rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-50 sm:flex-none"
           disabled={!hasPrevPage}
-          onClick={() => { onPageChange(page - 1); }}
+          onClick={() => onPageChange(page - 1)}
         >
           {t('previous')}
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant="outline"
-          size="sm"
-          className="flex-1 sm:flex-none"
+          className="inline-flex flex-1 items-center justify-center rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-50 sm:flex-none"
           disabled={!hasNextPage}
-          onClick={() => { onPageChange(page + 1); }}
+          onClick={() => onPageChange(page + 1)}
         >
           {t('next')}
-        </Button>
+        </button>
       </div>
     </div>
   );
+}
+
+export function buildPagination({
+  page,
+  totalPages,
+  hasNextPage,
+  hasPrevPage,
+  total,
+  onPageChange,
+}: PaginationControlsProps): DataTablePagination {
+  return { page, totalPages, hasNextPage, hasPrevPage, total, onPageChange };
 }
