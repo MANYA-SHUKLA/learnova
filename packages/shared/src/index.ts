@@ -1,5 +1,6 @@
 export * from './permissions/index.js';
 export * from './roles/index.js';
+export * from './rbac/index.js';
 export * from './constants/index.js';
 export * from './utils/index.js';
 export * from './validators/index.js';
