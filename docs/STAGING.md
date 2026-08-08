@@ -71,9 +71,9 @@ Demo logins (after seed): see README — admin / faculty.demo / student.demo.
 
 | Role | Login | Smoke paths |
 | --- | --- | --- |
-| **Institution Admin** | `shuklamanya99@gmail.com` | Dashboard, courses, faculty, students, gradebook overview |
-| **Faculty** | `faculty.demo@learnova.test` | Assignments, quizzes, grade entry |
-| **Student** | `student.demo@learnova.test` | Enrolled courses, submit assignment, view grades |
+| **Institution Admin** | `shuklamanya99@gmail.com` | Dashboard, courses, gradebook, certificates, reports, notifications |
+| **Faculty** | `faculty.demo@learnova.test` | Assignments, quizzes, gradebook, reports |
+| **Student** | `student.demo@learnova.test` | Courses, grades, certificates, notifications |
 
 **RBAC:** Faculty must **not** open institution-only routes; student must **not** open faculty gradebook write paths → expect `/forbidden` or 403.
 
@@ -94,13 +94,15 @@ pnpm verify:platform
 
 ## Already done (do not redo)
 
-- Steps 1–15 product scope
+- Steps 1–17 product scope (LMS v1.0)
 - RBAC, security docs, scope guards
 - Seed at scale (100 faculty, 1000 students, 100 courses)
-- `verify:platform` passing locally
-- Deploy docs, [`DEPLOY.md`](../DEPLOY.md), CI (`.github/workflows/ci.yml`)
+- `verify:platform` (includes reports, notifications, certificates smoke)
+- Deploy docs, [`Deploy.md`](./Deploy.md), CI (`.github/workflows/ci.yml`)
 - **`pnpm build`** green (packages + backend + frontend + worker)
 
-## Explicitly out of scope
+Full pre-launch list: [v1.0-ReleaseChecklist.md](./v1.0-ReleaseChecklist.md)
 
-Steps **16** (Analytics), **17** (AI generation), **Placements** — deferred per [Roadmap.md](./Roadmap.md).
+## Explicitly out of scope (v1.0)
+
+Placements, alumni, parent portal, fees, HR, payroll, CRM, AI chatbot, social feed, marketplace, multi-tenant SaaS billing — v1.1+ per [Roadmap.md](./Roadmap.md).

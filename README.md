@@ -1,132 +1,100 @@
 # Learnova
 
-Enterprise AI Learning Platform.
-
-LMS · University ERP · Online Examination · Coding Platform · Cloud IDE · AI Project Ideation · Analytics · Audit Logs
+Enterprise learning platform for colleges and universities — LMS, academic structure, assessments, gradebook, certificates, reports, and notifications.
 
 ---
 
-## Status
+## Status — v1.0
 
 | Step | Scope | State |
 | --- | --- | --- |
-| 1–6.5 | ERP core + integration | ✅ Complete |
-| 7–8.25 | LMS catalog, builder, enrollments | ✅ Complete |
-| 8.5–15 | Progress → Certificates (full academic stack) | ✅ Complete |
-| **—** | **Production baseline** (build · deploy · verify · demo) | 🔄 In progress |
-| 16 | Analytics & Notifications | ⏸ Deferred |
-| 17 | AI content generation | ⏸ Deferred |
-| — | Placements | ⏸ Deferred |
+| 1–14 | ERP core + LMS + gradebook | ✅ Complete |
+| 15 | Certificates | ✅ Complete |
+| 16 | Reports & analytics | ✅ Complete |
+| 17 | Notifications (in-app + email) | ✅ Complete |
 
-**Now:** Pass `pnpm build`, deploy staging (Vercel + Render), run `pnpm verify:platform`, E2E all 3 roles, capture demo assets.  
-**Not in scope:** Steps 16–17, Placements — see [docs/Roadmap.md](./docs/Roadmap.md).
+**You deploy yourself.** Before go-live, run through [docs/v1.0-ReleaseChecklist.md](./docs/v1.0-ReleaseChecklist.md) and `pnpm verify:platform`.
 
-Full plan + checklists: [docs/Roadmap.md](./docs/Roadmap.md).
+**Not in v1.0:** Placements, alumni, fees, HR, CRM, AI chatbot, social/messaging products — see [docs/Roadmap.md](./docs/Roadmap.md) for v1.1+.
 
-```
-Institution → Campus → School → Department → Program
-  → Academic Year → Semester → Section → Batch
-  → Faculty → Students
-```
-
-LMS domains (courses, enrollments, exams, labs, gradebook, certificates) are **shipped** (Steps 7–15). Platform analytics (16), AI generation (17), and Placements are **deferred**.
+---
 
 ## Stack
 
 | Layer | Technology |
 | --- | --- |
-| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS 4, Shadcn/Radix, TanStack Query, Zustand, next-intl |
-| Backend | Node.js, Express 5, TypeScript, MongoDB/Mongoose, Redis, Socket.io, BullMQ, JWT |
-| Worker | BullMQ processors (email, notifications, grading, analytics, audit) |
-| Tooling | pnpm workspaces, Turborepo, ESLint 9, Prettier, Husky, Commitlint, Docker |
+| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS 4, TanStack Query, Zustand, next-intl |
+| Backend | Node.js, Express 5, MongoDB, Redis, Socket.io, BullMQ, JWT |
+| Worker | BullMQ (email, notifications, grading, cleanup) |
+| Tooling | pnpm workspaces, Turborepo, Docker |
 
-## Monorepo layout
+---
 
-```
-frontend/       Next.js App Router (Vercel Root Directory)
-backend/        Express API (Render Root Directory)
-worker/         Background job processors (optional separate deploy)
-packages/       Shared libraries (@learnova/* workspace packages)
-docker/
-docs/
-scripts/
-.github/
-```
-
-## Prerequisites
-
-- Node.js ≥ 22
-- pnpm ≥ 10
-- Docker (for local MongoDB + Redis)
-
-## Quick start
+## Quick start (local)
 
 ```bash
-# 1. Install
 pnpm install
-
-# 2. Configure local env files (gitignored)
-#    frontend/.env.local
-#    backend/.env
-#    worker/.env
-
-# 3. Start infrastructure
-pnpm docker:dev
-
-# 4. Build shared packages
-pnpm --filter @learnova/types build
-pnpm --filter @learnova/constants build
-pnpm --filter @learnova/validation build
-pnpm --filter @learnova/utils build
-pnpm --filter @learnova/shared build
-pnpm --filter @learnova/config build
-pnpm --filter @learnova/logger build
-pnpm --filter @learnova/events build
-pnpm --filter @learnova/feature-flags build
-
-# 5. Run apps
-pnpm dev
+pnpm env:check
+pnpm docker:dev          # Mongo + Redis
+pnpm dev                 # frontend + backend + worker (or split terminals)
 ```
 
 | Service | URL |
 | --- | --- |
 | Frontend | http://localhost:3000 |
-| API | http://localhost:4000 |
+| API | http://localhost:4000/api/v1 |
 | Health | http://localhost:4000/api/v1/health |
-| MongoDB | localhost:27017 |
-| Redis | localhost:6379 |
+
+Env files (gitignored): `frontend/.env.local`, `backend/.env`, `worker/.env` — see [docs/Environment.md](./docs/Environment.md).
+
+Demo data (optional):
+
+```bash
+pnpm seed:complete
+pnpm verify:platform
+```
+
+---
 
 ## Scripts
 
 | Command | Description |
 | --- | --- |
-| `pnpm dev` | Start all apps in parallel |
-| `pnpm build` | Build entire monorepo |
-| `pnpm lint` | ESLint across packages |
-| `pnpm typecheck` | TypeScript check |
-| `pnpm format` | Prettier write |
+| `pnpm dev` | Start all apps |
+| `pnpm build` | Full monorepo build |
+| `pnpm verify:platform` | Smoke test API + pages + RBAC |
+| `pnpm env:check` | Validate local env files |
+| `pnpm seed:complete` | Demo institution at scale |
 | `pnpm docker:dev` | Local Mongo + Redis |
-| `pnpm env:check` | Validate local .env / .env.local files |
+
+---
 
 ## Documentation
 
-- [Architecture](docs/Architecture.md)
-- [Infrastructure](docs/Infrastructure.md)
-- [Authentication](docs/Auth.md)
-- [Institution](docs/Institution.md) · [Academic Structure](docs/AcademicStructure.md) · [Settings](docs/Settings.md) · [API](docs/API.md)
-- [ADRs](docs/adr/README.md)
-- [Folder Structure](docs/FolderStructure.md)
-- [Coding Standards](docs/CodingStandards.md)
-- [Contribution Guide](docs/Contribution.md)
-- [Environment Variables](docs/Environment.md)
-- [Logger](docs/Logger.md) · [Queue](docs/Queue.md) · [Redis](docs/Redis.md) · [Monitoring](docs/Monitoring.md) · [Storage](docs/Storage.md) · [Mail](docs/Mail.md) · [Events](docs/Events.md)
+**Launch**
 
-## Roles (v1)
+- [v1.0 Release checklist](./docs/v1.0-ReleaseChecklist.md)
+- [Smoke tests](./docs/SmokeTests.md)
+- [Deploy (Vercel + Render)](./docs/Deploy.md)
+- [Environment variables](./docs/Environment.md)
+- [Staging validation](./docs/STAGING.md)
 
-- Student
-- Faculty
-- Institution Admin
+**Product**
 
-Reserved for future: Super Admin, Teaching Assistant, Placement Officer, Parent.
+- [Architecture](./docs/Architecture.md) · [Auth](./docs/Auth.md) · [RBAC](./docs/RBAC.md)
+- [Gradebook](./docs/Gradebook.md) · [Certificates](./docs/Certificates.md) · [Reports](./docs/Reports.md)
+- [Roadmap](./docs/Roadmap.md)
 
-MANYA SHUKLA 2026
+---
+
+## Roles (v1.0)
+
+- **Institution admin** — full academic operations
+- **Faculty** — teaching, grading, course tools
+- **Student** — learning, submissions, grades, certificates
+
+Reserved for future versions: Super Admin, Teaching Assistant, Placement Officer, Parent.
+
+---
+
+MANYA SHUKLA · 2026

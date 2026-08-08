@@ -202,6 +202,16 @@ async function main(): Promise<void> {
     const me = await api<{ success: boolean }>('/auth/me', { token: admin.token });
     console.log(`  GET /auth/me (admin): ${pass(me.status === 200 && me.json.success)}`);
 
+    const meWithHint = await api<{
+      success: boolean;
+      data?: { roleHint?: string; user?: { role?: string } };
+    }>('/auth/me', { token: admin.token });
+    const roleHint = meWithHint.json.data?.roleHint ?? '';
+    const signedHint = roleHint.split('.').length === 3;
+    console.log(
+      `  GET /auth/me roleHint (signed): ${track(failures, 'Auth me returns signed roleHint', signedHint)}`,
+    );
+
     const sessions = await api<{ success: boolean; data?: { sessions?: unknown[] } }>(
       '/auth/sessions',
       { token: admin.token },
@@ -499,6 +509,93 @@ async function main(): Promise<void> {
   if (admin) {
     const inst = await api<{ success: boolean }>('/campuses?page=1&limit=1', { token: admin.token });
     console.log(`  Admin campuses: ${track(failures, 'Admin campuses', inst.json.success)}`);
+
+    const instReport = await api<{ success: boolean }>('/reports/institution', { token: admin.token });
+    console.log(
+      `  Admin institution report: ${track(failures, 'Admin institution report', instReport.json.success)}`,
+    );
+
+    const adminCerts = await api<{ success: boolean }>('/certificates?page=1&limit=1', {
+      token: admin.token,
+    });
+    console.log(
+      `  Admin certificates list: ${track(failures, 'Admin certificates list', adminCerts.json.success)}`,
+    );
+  }
+
+  if (faculty) {
+    const facultyCourses = await api<ApiListResponse>('/courses?page=1&limit=1', {
+      token: faculty.token,
+    });
+    const firstCourseId = (
+      facultyCourses.json.data?.items?.[0] as { id?: string; _id?: string } | undefined
+    )?.id;
+    const courseParam = firstCourseId ?? '507f1f77bcf86cd799439011';
+    const facultyReport = await api<{ success: boolean }>(
+      `/reports/faculty?courseId=${courseParam}`,
+      { token: faculty.token },
+    );
+    const facultyReportOk = facultyReport.status === 200 && facultyReport.json.success;
+    console.log(
+      `  Faculty report (scoped course): ${track(failures, 'Faculty report (scoped course)', facultyReportOk)}`,
+    );
+  }
+
+  console.log('\n=== Notifications (Step 17) ===');
+  if (student) {
+    const notifList = await api<{
+      success: boolean;
+      data?: { items?: unknown[]; unreadCount?: number };
+    }>('/notifications?page=1&limit=10', { token: student.token });
+    const notifUnread = await api<{ success: boolean; data?: { unreadCount?: number } }>(
+      '/notifications/unread-count',
+      { token: student.token },
+    );
+    console.log(
+      `  Student notification list: ${track(failures, 'Student notification list', notifList.json.success)}`,
+    );
+    console.log(
+      `  Student unread count: ${track(failures, 'Student unread count', notifUnread.json.success)}`,
+    );
+    const notifPage = await pageStatus('/en/notifications', student.cookies, student.role);
+    console.log(
+      `  Notifications page: HTTP ${notifPage} ${track(failures, 'Notifications page HTTP 200', notifPage === 200)}`,
+    );
+  } else {
+    console.log('  Skipped — student login unavailable');
+  }
+
+  if (admin) {
+    const adminNotif = await api<{ success: boolean }>('/notifications/unread-count', {
+      token: admin.token,
+    });
+    console.log(
+      `  Admin unread count: ${track(failures, 'Admin unread count', adminNotif.json.success)}`,
+    );
+    const adminReportsPage = await pageStatus('/en/institution/reports', admin.cookies, admin.role);
+    console.log(
+      `  Institution reports page: HTTP ${adminReportsPage} ${track(failures, 'Institution reports page HTTP 200', adminReportsPage === 200)}`,
+    );
+    const adminCertsPage = await pageStatus(
+      '/en/institution/certificates',
+      admin.cookies,
+      admin.role,
+    );
+    console.log(
+      `  Institution certificates page: HTTP ${adminCertsPage} ${track(failures, 'Institution certificates page HTTP 200', adminCertsPage === 200)}`,
+    );
+  }
+
+  console.log('\n=== Reports (Step 16) ===');
+  if (student) {
+    const studentReport = await api<{ success: boolean }>('/reports/student', {
+      token: student.token,
+    });
+    console.log(
+      `  Student own report: ${track(failures, 'Student own report', studentReport.json.success)}`,
+    );
+  } else {
+    console.log('  Skipped — student login unavailable');
   }
 
   console.log('\n=== Permissions (role bundles) ===');
@@ -574,6 +671,7 @@ async function main(): Promise<void> {
     gradebook_items: ['gradebook_entries'],
     gradebook_snapshots: ['gradebook_snapshots'],
     certificates: ['academic_certificates', 'certificates'],
+    notifications: ['notifications'],
     audit_logs: ['audit_logs', 'gradebook_audit_logs', 'assignment_audit_logs'],
   };
 

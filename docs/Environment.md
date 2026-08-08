@@ -70,6 +70,7 @@ Read by `@learnova/feature-flags`. Defaults are safe (most capabilities off).
 | `ENABLE_ANALYTICS` | `true` | Analytics module |
 | `ENABLE_AUDIT_LOGS` | `true` | Audit logging |
 | `ENABLE_WEBHOOKS` | `false` | Inbound webhooks |
+| `ENABLE_NOTIFICATIONS` | `true` | In-app + email notifications (Step 17) |
 
 ---
 
