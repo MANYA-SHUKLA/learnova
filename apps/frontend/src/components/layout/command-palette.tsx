@@ -63,6 +63,8 @@ export function CommandPalette() {
   const router = useRouter();
   const { user } = useAuth();
   const t = useTranslations('common');
+  const closeLabel = t.has('close') ? t('close') : 'Close';
+  const searchLabel = t.has('search') ? t('search') : 'Search';
 
   const items = useMemo(() => navForRole(user?.role), [user?.role]);
 
@@ -127,7 +129,7 @@ export function CommandPalette() {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={`${t('search')}…`}
+            placeholder={`${searchLabel}…`}
             className="h-12 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
           <button
@@ -170,6 +172,7 @@ export function CommandPaletteTrigger({
   className?: string;
 }) {
   const t = useTranslations('common');
+  const searchLabel = t.has('search') ? t('search') : 'Search';
   const setOpen = useUIStore((s) => s.setCommandPaletteOpen);
 
   return (
@@ -182,7 +185,7 @@ export function CommandPaletteTrigger({
       )}
     >
       <Search className="size-4 shrink-0" />
-      <span className="hidden flex-1 truncate sm:inline">{t('search')}…</span>
+      <span className="hidden flex-1 truncate sm:inline">{searchLabel}…</span>
       <kbd className="ml-auto hidden rounded border border-border bg-background px-1.5 py-0.5 font-mono text-meta lg:inline">
         ⌘K
       </kbd>
