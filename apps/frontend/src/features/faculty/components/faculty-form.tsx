@@ -16,6 +16,13 @@ import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { CredentialsHandoff } from '@/components/shared/credentials-handoff';
 import {
+  CampusSelect,
+  CourseMultiSelect,
+  DepartmentSelect,
+  ProgramMultiSelect,
+  SchoolSelect,
+} from '@/components/shared/entity-selects';
+import {
   DESIGNATION_LABELS,
   EMPLOYMENT_TYPE_LABELS,
   FACULTY_STATUS_LABELS,
@@ -62,8 +69,6 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
     experienceYears: String(initial?.experienceYears ?? 0),
     specialization: initial?.specialization ?? '',
     researchAreas: (initial?.researchAreas ?? []).join(', '),
-    programIds: (initial?.programIds ?? []).join(', '),
-    courseIds: (initial?.courseIds ?? []).join(', '),
     academicYearId: initial?.academicYearId ?? '',
     semesterId: initial?.semesterId ?? '',
     officeRoom: initial?.officeRoom ?? '',
@@ -83,6 +88,8 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
   });
   const [error, setError] = useState<string | null>(null);
   const [credentials, setCredentials] = useState<FacultyCredentials | null>(null);
+  const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>(initial?.programIds ?? []);
+  const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>(initial?.courseIds ?? []);
 
   const set = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -110,14 +117,8 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
-      programIds: form.programIds
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      courseIds: form.courseIds
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
+      programIds: selectedProgramIds,
+      courseIds: selectedCourseIds,
       academicYearId: form.academicYearId.trim() || null,
       semesterId: form.semesterId.trim() || null,
       officeRoom: form.officeRoom.trim() || null,
@@ -214,9 +215,24 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
             {field('dateOfBirth', 'Date of birth', { type: 'date' })}
             {field('joiningDate', 'Joining date', { type: 'date' })}
             {field('experienceYears', 'Experience (years)', { type: 'number' })}
-            {field('departmentId', 'Department ID')}
-            {field('schoolId', 'School ID')}
-            {field('campusId', 'Campus ID')}
+            <DepartmentSelect
+              id="departmentId"
+              value={form.departmentId}
+              disabled={pending}
+              onChange={(value) => set('departmentId', value)}
+            />
+            <SchoolSelect
+              id="schoolId"
+              value={form.schoolId}
+              disabled={pending}
+              onChange={(value) => set('schoolId', value)}
+            />
+            <CampusSelect
+              id="campusId"
+              value={form.campusId}
+              disabled={pending}
+              onChange={(value) => set('campusId', value)}
+            />
             {field('academicYearId', 'Academic year ID')}
             {field('semesterId', 'Semester ID')}
             {field('specialization', 'Specialization')}
@@ -277,8 +293,18 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
           </div>
 
           {form.designation === 'custom' ? field('customDesignation', 'Custom designation') : null}
-          {field('programIds', 'Program IDs (comma separated)')}
-          {field('courseIds', 'Course IDs — placeholder until Courses module')}
+          <ProgramMultiSelect
+            label="Programs"
+            values={selectedProgramIds}
+            disabled={pending}
+            onChange={setSelectedProgramIds}
+          />
+          <CourseMultiSelect
+            label="Courses"
+            values={selectedCourseIds}
+            disabled={pending}
+            onChange={setSelectedCourseIds}
+          />
           {field('researchAreas', 'Research areas (comma separated)')}
           <div className="space-y-1.5">
             <label className="text-sm font-medium" htmlFor="bio">
