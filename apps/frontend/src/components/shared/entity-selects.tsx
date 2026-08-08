@@ -8,8 +8,10 @@ import { useFacultyList } from '@/features/faculty';
 import type { OrgListParams } from '@/features/institution';
 import {
   useAcademicYears,
+  useCampuses,
   useDepartments,
   usePrograms,
+  useSchools,
   useSections,
   useSemesters,
 } from '@/features/institution';
@@ -243,6 +245,68 @@ export function ProgramSelect({
     />
   );
 }
+
+export function CampusSelect({
+  label = 'Campus',
+  listParams,
+  limit = 100,
+  value,
+  onChange,
+  ...props
+}: EntitySelectProps & { value: string; onChange: (value: string) => void }) {
+  const query = useCampuses({ page: 1, limit, ...listParams });
+  const options = useListOptions(query.data?.items, (campus) => ({
+    value: campus.id,
+    label: `${campus.code} — ${campus.name}`,
+  }));
+
+  return (
+    <SearchableSelect
+      {...props}
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={options}
+      loading={query.isLoading}
+      allowEmpty
+      emptyLabel="No campus"
+      placeholder="Select a campus"
+      searchPlaceholder="Search campuses…"
+    />
+  );
+}
+
+export function SchoolSelect({
+  label = 'School',
+  listParams,
+  limit = 100,
+  value,
+  onChange,
+  ...props
+}: EntitySelectProps & { value: string; onChange: (value: string) => void }) {
+  const query = useSchools({ page: 1, limit, ...listParams });
+  const options = useListOptions(query.data?.items, (school) => ({
+    value: school.id,
+    label: `${school.code} — ${school.name}`,
+  }));
+
+  return (
+    <SearchableSelect
+      {...props}
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={options}
+      loading={query.isLoading}
+      allowEmpty
+      emptyLabel="No school"
+      placeholder="Select a school"
+      searchPlaceholder="Search schools…"
+    />
+  );
+}
+
+export function AcademicYearSelect({
 
 export function AcademicYearSelect({
   label = 'Academic year',
