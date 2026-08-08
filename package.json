@@ -31,6 +31,7 @@
     "docker:staging": "docker compose -f docker/staging/docker-compose.yml up --build -d",
     "docker:prod": "docker compose -f docker/production/docker-compose.yml up --build -d",
     "env:check": "tsx scripts/check-env.ts",
+    "verify:platform": "pnpm --filter @learnova/backend verify:platform",
     "generate:types": "turbo run generate:types --filter=@learnova/types"
   },
   "devDependencies": {

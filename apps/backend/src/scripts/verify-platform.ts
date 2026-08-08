@@ -1,6 +1,9 @@
 /**
  * Platform verification — health, auth, RBAC, pages, DB collections, seed counts.
- * Usage: pnpm exec tsx --env-file=.env src/scripts/verify-platform.ts
+ * Usage (from repo root):
+ *   pnpm verify:platform
+ * Or from apps/backend:
+ *   pnpm verify:platform
  */
 
 import '../config/load-env.js';

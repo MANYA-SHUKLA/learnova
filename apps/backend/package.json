@@ -34,6 +34,7 @@
     "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",
     "mail:test": "tsx --env-file=.env src/scripts/test-smtp.ts",
     "db:reset-keep-jnu": "tsx --env-file=.env src/scripts/reset-keep-jnu.ts",
+    "verify:platform": "tsx --env-file=.env src/scripts/verify-platform.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
