@@ -13,7 +13,13 @@ import {
   Spinner,
 } from '@learnova/ui';
 import { useState, type ChangeEvent } from 'react';
+import {
+  FormDraftStatus,
+  FormStepper,
+  FormStepperNav,
+} from '@/components/shared/form-stepper';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { useFormDraft } from '@/hooks/use-form-draft';
 import {
   CampusSelect,
   DepartmentSelect,
@@ -43,6 +49,13 @@ const STATUSES = Object.keys(COURSE_STATUS_LABELS) as Array<keyof typeof COURSE_
 const VISIBILITIES = Object.keys(COURSE_VISIBILITY_LABELS) as Array<keyof typeof COURSE_VISIBILITY_LABELS>;
 const ENROLLMENT_MODES = Object.keys(COURSE_ENROLLMENT_MODE_LABELS) as Array<keyof typeof COURSE_ENROLLMENT_MODE_LABELS>;
 
+const COURSE_FORM_STEPS = [
+  { id: 'basics', label: 'Basics' },
+  { id: 'academic', label: 'Academic' },
+  { id: 'content', label: 'Content' },
+  { id: 'publish', label: 'Publish' },
+] as const;
+
 interface CourseFormProps {
   mode: 'create' | 'edit';
   initial?: Course;
@@ -54,53 +67,86 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
   const updateMutation = useUpdateCourseMutation();
   const pending = createMutation.isPending || updateMutation.isPending;
 
-  const [form, setForm] = useState({
-    courseCode: initial?.courseCode ?? '',
-    slug: initial?.slug ?? '',
-    title: initial?.title ?? '',
-    subtitle: initial?.subtitle ?? '',
-    description: initial?.description ?? '',
-    shortDescription: initial?.shortDescription ?? '',
-    campusId: initial?.campusId ?? '',
-    schoolId: initial?.schoolId ?? '',
-    departmentId: initial?.departmentId ?? '',
-    coordinatorId: initial?.coordinatorId ?? '',
-    category: initial?.category ?? 'programming',
-    difficulty: initial?.difficulty ?? 'beginner',
-    language: initial?.language ?? 'en',
-    credits: String(initial?.credits ?? 3),
-    estimatedHours: String(initial?.estimatedHours ?? 0),
-    duration: initial?.duration ?? '',
-    status: initial?.status ?? 'draft',
-    visibility: initial?.visibility ?? 'institution',
-    tags: (initial?.tags ?? []).join(', '),
-    learningObjectives: (initial?.learningObjectives ?? []).join(', '),
-    prerequisites: (initial?.prerequisites ?? []).join(', '),
-    requirements: (initial?.requirements ?? []).join(', '),
-    outcomes: (initial?.outcomes ?? []).join(', '),
-    skills: (initial?.skills ?? []).join(', '),
-    certificateEnabled: String(initial?.certificateEnabled ?? false),
-    discussionEnabled: String(initial?.discussionEnabled ?? true),
-    allowDownloads: String(initial?.allowDownloads ?? false),
-    allowPreview: String(initial?.allowPreview ?? true),
-    maxStudents: String(initial?.maxStudents ?? 0),
-    enrollmentMode: initial?.enrollmentMode ?? 'open',
-    enrollmentDeadline: initial?.enrollmentDeadline?.slice(0, 10) ?? '',
-    waitlistEnabled: String(initial?.waitlistEnabled ?? false),
-    publishDate: initial?.publishDate?.slice(0, 10) ?? '',
-    archiveDate: initial?.archiveDate?.slice(0, 10) ?? '',
-    seoTitle: initial?.seoTitle ?? '',
-    seoDescription: initial?.seoDescription ?? '',
-    seoKeywords: (initial?.seoKeywords ?? []).join(', '),
-  });
+  const [currentStep, setCurrentStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>(initial?.programIds ?? []);
-  const [selectedSemesterIds, setSelectedSemesterIds] = useState<string[]>(initial?.semesterIds ?? []);
-  const [selectedFacultyIds, setSelectedFacultyIds] = useState<string[]>(initial?.facultyIds ?? []);
+
+  const {
+    data: draft,
+    setData: setDraft,
+    clearDraft,
+    lastSavedAt,
+    hasDraft,
+  } = useFormDraft(
+    {
+      form: {
+        courseCode: initial?.courseCode ?? '',
+        slug: initial?.slug ?? '',
+        title: initial?.title ?? '',
+        subtitle: initial?.subtitle ?? '',
+        description: initial?.description ?? '',
+        shortDescription: initial?.shortDescription ?? '',
+        campusId: initial?.campusId ?? '',
+        schoolId: initial?.schoolId ?? '',
+        departmentId: initial?.departmentId ?? '',
+        coordinatorId: initial?.coordinatorId ?? '',
+        category: initial?.category ?? 'programming',
+        difficulty: initial?.difficulty ?? 'beginner',
+        language: initial?.language ?? 'en',
+        credits: String(initial?.credits ?? 3),
+        estimatedHours: String(initial?.estimatedHours ?? 0),
+        duration: initial?.duration ?? '',
+        status: initial?.status ?? 'draft',
+        visibility: initial?.visibility ?? 'institution',
+        tags: (initial?.tags ?? []).join(', '),
+        learningObjectives: (initial?.learningObjectives ?? []).join(', '),
+        prerequisites: (initial?.prerequisites ?? []).join(', '),
+        requirements: (initial?.requirements ?? []).join(', '),
+        outcomes: (initial?.outcomes ?? []).join(', '),
+        skills: (initial?.skills ?? []).join(', '),
+        certificateEnabled: String(initial?.certificateEnabled ?? false),
+        discussionEnabled: String(initial?.discussionEnabled ?? true),
+        allowDownloads: String(initial?.allowDownloads ?? false),
+        allowPreview: String(initial?.allowPreview ?? true),
+        maxStudents: String(initial?.maxStudents ?? 0),
+        enrollmentMode: initial?.enrollmentMode ?? 'open',
+        enrollmentDeadline: initial?.enrollmentDeadline?.slice(0, 10) ?? '',
+        waitlistEnabled: String(initial?.waitlistEnabled ?? false),
+        publishDate: initial?.publishDate?.slice(0, 10) ?? '',
+        archiveDate: initial?.archiveDate?.slice(0, 10) ?? '',
+        seoTitle: initial?.seoTitle ?? '',
+        seoDescription: initial?.seoDescription ?? '',
+        seoKeywords: (initial?.seoKeywords ?? []).join(', '),
+      },
+      selectedProgramIds: initial?.programIds ?? [],
+      selectedSemesterIds: initial?.semesterIds ?? [],
+      selectedFacultyIds: initial?.facultyIds ?? [],
+    },
+    {
+      key: mode === 'create' ? 'course-create' : `course-edit-${initial?.id ?? 'unknown'}`,
+      enabled: mode === 'create',
+    },
+  );
+
+  const { form, selectedProgramIds, selectedSemesterIds, selectedFacultyIds } = draft;
 
   const set = (key: keyof typeof form, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setDraft((prev) => ({ ...prev, form: { ...prev.form, [key]: value } }));
   };
+
+  const setSelectedProgramIds = (ids: string[]) => {
+    setDraft((prev) => ({ ...prev, selectedProgramIds: ids }));
+  };
+
+  const setSelectedSemesterIds = (ids: string[]) => {
+    setDraft((prev) => ({ ...prev, selectedSemesterIds: ids }));
+  };
+
+  const setSelectedFacultyIds = (ids: string[]) => {
+    setDraft((prev) => ({ ...prev, selectedFacultyIds: ids }));
+  };
+
+  const canProceed =
+    currentStep !== 0 || (form.courseCode.trim().length > 0 && form.title.trim().length > 0);
 
   const onSubmit = async () => {
     setError(null);
@@ -171,9 +217,11 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
     try {
       if (mode === 'create') {
         const created = await createMutation.mutateAsync(body);
+        clearDraft();
         router.push(`${APP_ROUTES.INSTITUTION_COURSES}/${created.id}`);
       } else if (initial) {
         await updateMutation.mutateAsync({ id: initial.id, body });
+        clearDraft();
         router.push(`${APP_ROUTES.INSTITUTION_COURSES}/${initial.id}`);
       }
     } catch (err) {
