@@ -26,10 +26,18 @@ Phased delivery of the enterprise AI learning platform. Each step builds on a st
 | **11** | **Enterprise Project Management** | ✅ Complete |
 | **12** | **Enterprise Quiz Management** | ✅ Complete |
 | **13** | **Enterprise Examination & Secure Proctoring** | ✅ Complete |
+| **14** | **Enterprise Gradebook & Academic Assessment** | ✅ Complete |
+| **15** | **Enterprise Certificates & Academic Records** | ✅ Complete |
+| **16** | Analytics & Notifications | ⏸ Deferred (post–production baseline) |
+| **17** | AI content generation | ⏸ Deferred (post–production baseline) |
+| — | Placements / career module | ⏸ Deferred (not a numbered step) |
+
+**Now:** Production baseline — pass `pnpm build`, deploy staging (Vercel + Render + Atlas + Redis), seed once, verify all 3 roles, demo assets.  
+**Do not start:** Step 16 (Analytics & Notifications), Step 17 (AI generation), or Placements until staging is live and signed off.
 
 **Hard rule:** Course is a **container**. Step 7 ships metadata, ownership, publishing, and academic mapping only. Do **not** fold lessons, files, quizzes, or labs into Step 7.
 
-**Hard rule:** Progress (8.5), Assignments (9), Assessment Core (9.5), Practice Labs (10), Projects (11), **Quiz Management (12)**, **Examinations (13)**, **Gradebook (14)**, and **Certificates (15)** are complete. Do **not** start Analytics (16) until Certificate DoD is met. Enrollments remain the source of truth for each learner’s journey.
+**Hard rule:** Steps **1–15** (Core Platform + Academic System + Enterprise assessment + Gradebook + Certificates) are complete. Enrollments remain the source of truth for each learner’s journey. **Do not** start Analytics (16), AI generation (17), or Placements during the production-baseline phase.
 
 ### Platform phases (enterprise order)
 
@@ -50,11 +58,19 @@ Projects (11) ✅
   ↓
 Quizzes (12) ✅
   ↓
-Exams (13)
+Exams (13) ✅
   ↓
-Gradebook (14)
+Gradebook (14) ✅
   ↓
-Certificates (15)
+Certificates (15) ✅
+  ↓
+── Production baseline (deploy · verify · demo) ──
+  ↓
+Analytics & Notifications (16) ⏸ deferred
+  ↓
+AI content generation (17) ⏸ deferred
+  ↓
+Placements / career ⏸ deferred
 ```
 
 | Item often called “rest of Step 7” | Actual home |
@@ -66,7 +82,7 @@ Certificates (15)
 | Enrollment integration | **8.25** |
 | Richer search / filters | Catalog polish on **7** (optional) or content search in **7.5** |
 | Import / export | **7** catalog ✅ shipped; content import/export in **7.5** |
-| Analytics | **14** (platform) + course widgets deepen after enrollments |
+| Analytics (platform-wide dashboards, alerts) | **16** ⏸ deferred |
 
 ---
 
@@ -610,12 +626,22 @@ Proctored exams · Seating · Integrity monitoring · Gradebook sync · Certific
 | **13** | **Enterprise Examination & Secure Proctoring** | ✅ Complete |
 | **14** | **Enterprise Gradebook & Academic Assessment** | ✅ Complete |
 | **15** | **Enterprise Certificates & Academic Records** | ✅ Complete |
-| **16** | Analytics & Notifications | Planned |
-| **17** | AI content generation | Planned |
+| **16** | Analytics & Notifications | ⏸ Deferred |
+| **17** | AI content generation | ⏸ Deferred |
+| — | Placements / career module | ⏸ Deferred |
 
-**Boundary:** Keep Course Management focused on metadata, ownership, publishing, and academic mapping. Build contents (modules, lessons, assessments, labs, etc.) in subsequent steps so the codebase stays clean as the platform grows.
+### Explicitly out of scope (current phase)
 
-**Boundary:** Practice Labs (10) DoD met — consume Assessment Core. Projects (11) DoD met — consume Assessment Core. Quiz Management (12) DoD met — consume Assessment Core + `assessmentQuestionEngine`. Examinations (13) DoD met — reuse Assessment Core question engine + `examinationEngine` for policies only. Gradebook (14) DoD met — consumes grades from Assignments, Labs, Projects, Quizzes, and Exams; does not re-score. **Certificates (15) DoD met** — consumes published gradebook records only; does not calculate grades. **Next is Analytics & Notifications (16).**
+Do **not** implement or expand these until production staging is live and the production-baseline checklist is signed off:
+
+| Item | Roadmap | Notes |
+| --- | --- | --- |
+| Platform analytics dashboards & reporting | Step **16** | Course-level widgets may exist; full Analytics & Notifications module is deferred |
+| Email/push notification product surface | Step **16** | Worker/queue infra exists; notification UX and analytics pipelines are deferred |
+| AI lesson/quiz/exam generation | Step **17** | Gemini hooks and flags may exist; generation workflows are deferred |
+| Placements, internships, recruiter portal | — | Not a numbered step; aligned with enterprise “later” bucket |
+
+**Boundary:** Steps **1–15** DoD met. **Current focus:** `pnpm build` → Vercel + Render staging → `verify:platform` → role E2E → demo video/screenshots. **Steps 16–17 and Placements remain Planned on the roadmap but are frozen for this release.**
 
 ---
 
