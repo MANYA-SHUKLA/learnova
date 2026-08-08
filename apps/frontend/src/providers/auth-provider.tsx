@@ -114,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               user: resolveUserPermissions(refreshed.user),
               accessToken: refreshed.accessToken,
               session: refreshed.session,
+              roleHint: refreshed.roleHint,
             });
           })(),
           timeout,

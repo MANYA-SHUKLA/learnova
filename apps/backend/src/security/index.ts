@@ -1,5 +1,5 @@
 /**
- * Security infrastructure — prepared only. No authentication flows.
+ * Security infrastructure — password hashing, encryption, CSRF helpers, HMAC signing.
  */
 
 import {

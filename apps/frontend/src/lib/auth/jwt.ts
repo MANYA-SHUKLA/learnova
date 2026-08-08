@@ -25,8 +25,22 @@ function clearAuthPresenceCookie(): void {
   document.cookie = `${AUTH.REFRESH_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
 }
 
-/** Sync role hint for edge middleware — API remains source of truth for authorization. */
-export function setRoleCookie(role: ActiveRole, maxAgeSeconds = cookieMaxAgeSeconds()): void {
+/** Sync signed role hint for edge middleware — API remains source of truth for authorization. */
+export function setRoleCookie(roleHint: string, maxAgeSeconds = cookieMaxAgeSeconds()): void {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${AUTH.ROLE_COOKIE_NAME}=${encodeURIComponent(roleHint)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
+}
+
+export function syncRoleCookieFromHint(roleHint: string | null | undefined): void {
+  if (roleHint) {
+    setRoleCookie(roleHint);
+    return;
+  }
+  clearRoleCookie();
+}
+
+/** @deprecated Prefer syncRoleCookieFromHint from API login/refresh responses. */
+export function setRoleCookieFromRole(role: ActiveRole, maxAgeSeconds = cookieMaxAgeSeconds()): void {
   if (typeof document === 'undefined') return;
   document.cookie = `${AUTH.ROLE_COOKIE_NAME}=${encodeURIComponent(role)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
 }
@@ -43,7 +57,7 @@ export function syncRoleCookieFromToken(token: string | null | undefined): void 
   }
   const payload = decodeJwtPayload(token);
   if (payload?.role && isActiveRole(payload.role)) {
-    setRoleCookie(payload.role);
+    setRoleCookieFromRole(payload.role);
     return;
   }
   clearRoleCookie();
@@ -51,7 +65,7 @@ export function syncRoleCookieFromToken(token: string | null | undefined): void 
 
 export function syncRoleCookieFromUser(role: ActiveRole | string | null | undefined): void {
   if (role && isActiveRole(role)) {
-    setRoleCookie(role);
+    setRoleCookieFromRole(role);
     return;
   }
   clearRoleCookie();

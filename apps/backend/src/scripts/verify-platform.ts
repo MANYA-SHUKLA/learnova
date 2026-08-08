@@ -9,6 +9,7 @@
 import '../config/load-env.js';
 import mongoose from 'mongoose';
 import { connectMongo, disconnectMongo } from '../database/index.js';
+import { signRoleHint } from '../services/auth/role-hint.js';
 
 const API = process.env.SMOKE_API_URL ?? 'http://127.0.0.1:4000/api/v1';
 const WEB = process.env.SMOKE_WEB_URL ?? 'http://127.0.0.1:3000';
@@ -89,7 +90,10 @@ function sleep(ms: number): Promise<void> {
 
 async function pageStatus(path: string, cookies = '', role?: string): Promise<number> {
   const cookieParts = [cookies, 'learnova_session=1'];
-  if (role) cookieParts.push(`learnova_role=${encodeURIComponent(role)}`);
+  if (role) {
+    const hint = signRoleHint(role);
+    if (hint) cookieParts.push(`learnova_role=${encodeURIComponent(hint)}`);
+  }
   const res = await fetch(`${WEB}${path}`, {
     redirect: 'follow',
     headers: cookieParts.filter(Boolean).length > 0 ? { Cookie: cookieParts.filter(Boolean).join('; ') } : {},
@@ -98,10 +102,11 @@ async function pageStatus(path: string, cookies = '', role?: string): Promise<nu
 }
 
 async function pageRedirect(path: string, cookies: string, role: string): Promise<{ status: number; location: string | null }> {
+  const hint = signRoleHint(role) ?? role;
   const res = await fetch(`${WEB}${path}`, {
     redirect: 'manual',
     headers: {
-      Cookie: `${cookies}; learnova_session=1; learnova_role=${encodeURIComponent(role)}`,
+      Cookie: `${cookies}; learnova_session=1; learnova_role=${encodeURIComponent(hint)}`,
     },
   });
   return { status: res.status, location: res.headers.get('location') };
@@ -351,6 +356,21 @@ async function main(): Promise<void> {
       const ok = p.expectOk ? r.json.success : !r.json.success;
       console.log(`  ${p.label}: ${track(failures, p.label ?? p.path, ok)}`);
     }
+
+    const facultyList = await api<ApiListResponse>('/faculty?page=1&limit=5', {
+      token: faculty.token,
+    });
+    const facultyListTotal = listTotal(facultyList.json);
+    console.log(
+      `  Faculty list scoped to self (<=1): ${track(failures, 'Faculty list scoped to self (<=1)', facultyList.json.success && facultyListTotal <= 1)} (${facultyListTotal})`,
+    );
+
+    const facultyStats = await api<{ success: boolean }>('/faculty/stats', {
+      token: faculty.token,
+    });
+    console.log(
+      `  Faculty stats (must deny): ${track(failures, 'Faculty stats (must deny)', !facultyStats.json.success)}`,
+    );
     const patchSettings = await api<{ success: boolean }>('/institution-settings', {
       method: 'PATCH',
       token: faculty.token,

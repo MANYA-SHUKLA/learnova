@@ -3,7 +3,7 @@
 import type { AuthUser, Permission, Session } from '@learnova/types';
 import { getPermissionsForRole } from '@learnova/shared/permissions';
 import { create } from 'zustand';
-import { clearTokens, syncRoleCookieFromUser } from '@/lib/auth/jwt';
+import { clearTokens, syncRoleCookieFromHint, syncRoleCookieFromUser } from '@/lib/auth/jwt';
 
 interface AuthState {
   user: AuthUser | null;
@@ -16,6 +16,7 @@ interface AuthState {
     user: AuthUser;
     accessToken: string;
     session: Session;
+    roleHint?: string | null;
   }) => void;
   setUser: (user: AuthUser | null) => void;
   setSession: (session: Session | null) => void;
@@ -44,9 +45,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   ...empty,
   isLoading: true,
 
-  setAuth: ({ user, accessToken, session }) => {
+  setAuth: ({ user, accessToken, session, roleHint }) => {
     const permissions = permissionsFor(user);
-    syncRoleCookieFromUser(user.role);
+    if (roleHint) {
+      syncRoleCookieFromHint(roleHint);
+    } else {
+      syncRoleCookieFromUser(user.role);
+    }
     set({
       user: { ...user, permissions },
       accessToken,

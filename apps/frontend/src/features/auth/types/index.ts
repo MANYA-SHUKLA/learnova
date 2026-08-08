@@ -5,6 +5,8 @@ export interface AuthSessionResponse {
   session: Session;
   accessToken: string;
   expiresIn: number;
+  /** HMAC-signed role hint for edge middleware (not for API authorization). */
+  roleHint?: string | null;
 }
 
 export interface MessageResponse {

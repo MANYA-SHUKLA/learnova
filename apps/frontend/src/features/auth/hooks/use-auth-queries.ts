@@ -41,6 +41,7 @@ export function useLoginMutation() {
         user: data.user,
         accessToken: data.accessToken,
         session: data.session,
+        roleHint: data.roleHint,
       });
       void queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
@@ -65,6 +66,7 @@ export function useRegisterInstitutionMutation() {
         user: data.user,
         accessToken: data.accessToken,
         session: data.session,
+        roleHint: data.roleHint,
       });
       void queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
@@ -124,6 +126,7 @@ export function useChangePasswordMutation() {
         user: data.user,
         accessToken: data.accessToken,
         session: data.session,
+        roleHint: data.roleHint,
       });
       void queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
@@ -167,6 +170,7 @@ export function useRefreshMutation() {
         user: data.user,
         accessToken: data.accessToken,
         session: data.session,
+        roleHint: data.roleHint,
       });
     },
     onError: () => {

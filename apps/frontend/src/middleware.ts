@@ -3,21 +3,20 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import {
   dashboardPathForRoleCookie,
-  isActiveRole,
   isPathAllowedForRole,
   requiredRoleForPath,
 } from '@/lib/auth/edge-role-routes';
+import { parseRoleCookie } from '@/lib/auth/role-hint-edge';
 import { MIDDLEWARE_AUTH } from '@/lib/auth/middleware-auth';
 import { routing } from '@/lib/i18n/routing.config';
 
 /**
  * Edge middleware — i18n routing + auth gate via learnova_session cookie.
  *
- * RBAC: JWT verification is not available in Edge middleware, so the app syncs a
- * `learnova_role` cookie on the frontend origin at login (see lib/auth/jwt.ts).
- * Middleware uses role + path prefix rules from role-routes.ts to redirect
- * cross-role navigation. Dashboard layout adds a client-side guard as
- * defense-in-depth; API remains the source of truth via scoped services.
+ * RBAC: JWT verification is not available in Edge middleware, so the API returns a
+ * signed `roleHint` at login/refresh; the frontend stores it in `learnova_role`.
+ * Middleware verifies the HMAC before applying path prefix rules. Dashboard layout
+ * adds a client-side guard as defense-in-depth; API remains the source of truth.
  */
 
 const intlMiddleware = createMiddleware(routing);
@@ -66,7 +65,7 @@ function matchesPrefix(path: string, prefixes: readonly string[]): boolean {
   );
 }
 
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const pathWithoutLocale = stripLocale(pathname);
   const locale = pathname.split('/')[1] ?? 'en';
@@ -74,7 +73,7 @@ export default function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get(MIDDLEWARE_AUTH.REFRESH_COOKIE_NAME)?.value;
   const isAuthenticated = Boolean(sessionToken);
   const roleCookie = request.cookies.get(MIDDLEWARE_AUTH.ROLE_COOKIE_NAME)?.value ?? null;
-  const activeRole = roleCookie && isActiveRole(roleCookie) ? roleCookie : null;
+  const activeRole = await parseRoleCookie(roleCookie);
 
   const isProtected = matchesPrefix(pathWithoutLocale, PROTECTED_PATH_PREFIXES);
   const isAuthRoute = matchesPrefix(pathWithoutLocale, AUTH_PATH_PREFIXES);

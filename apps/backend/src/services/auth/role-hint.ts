@@ -4,7 +4,7 @@
 
 import { AUTH } from '@learnova/constants';
 import type { ActiveRole } from '@learnova/types';
-import { isActiveRole } from '@learnova/shared';
+import { isActiveRole } from '@learnova/shared/roles';
 import { jwtConfig } from '../../config/slices.js';
 import { hmacSign } from '../../security/index.js';
 import { timingSafeEqual } from 'node:crypto';

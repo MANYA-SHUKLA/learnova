@@ -168,10 +168,7 @@ export async function changePassword(
       res,
       {
         message: result.message,
-        user: result.user,
-        session: result.session,
-        accessToken: result.tokens.accessToken,
-        expiresIn: result.tokens.expiresIn,
+        ...authSessionPayload(result),
       },
       { requestId: req.requestId },
     );

@@ -176,4 +176,34 @@ describe('faculty teaching context scope helpers', () => {
 
     expect(ids.map(String)).toEqual([studentId]);
   });
+
+  it('buildFacultySelfFilter restricts faculty directory to own record', async () => {
+    const facultyId = '507f1f77bcf86cd799439011';
+
+    vi.doMock('../../models/student.model.js', () => ({ StudentModel: {} }));
+    vi.doMock('../../models/faculty.model.js', () => ({
+      FacultyModel: {
+        findOne: vi.fn().mockReturnValue({
+          exec: vi.fn().mockResolvedValue({ _id: facultyId }),
+        }),
+      },
+    }));
+
+    const { buildFacultySelfFilter } = await import('../../services/access/faculty-scope.js');
+
+    const filter = await buildFacultySelfFilter(
+      {},
+      { role: 'faculty', email: 'f@test.com' },
+      '507f1f77bcf86cd799439013',
+    );
+    expect(String(filter._id)).toBe(facultyId);
+
+    const adminFilter = await buildFacultySelfFilter(
+      { status: 'active' },
+      { role: 'institution_admin', email: 'a@test.com' },
+      '507f1f77bcf86cd799439013',
+    );
+    expect(adminFilter.status).toBe('active');
+    expect(adminFilter._id).toBeUndefined();
+  });
 });
