@@ -45,7 +45,6 @@ const STATUS_FILTERS: Array<AssignmentStatus | 'all'> = [
 
 export default function InstitutionAssignmentsPage() {
   const t = useTranslations('dashboard.institution.assignments');
-  const tCommon = useTranslations('common');
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<AssignmentStatus | 'all'>('all');
