@@ -17,13 +17,12 @@ import {
   updateStudentProfileSchema,
   updateStudentSchema,
 } from '@learnova/validation';
+import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
 import {
-  authenticate,
   facultyStudentGuard,
-  requirePermission,
   studentOwnershipGuard,
   tenantGuard,
-} from '../../middlewares/auth.middleware.js';
+} from '../../middlewares/scope.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/student/student.controller.js';
 
