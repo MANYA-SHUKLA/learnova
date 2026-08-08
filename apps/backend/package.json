@@ -38,6 +38,7 @@
     "mail:test": "tsx --env-file=.env src/scripts/test-smtp.ts",
     "db:reset-keep-jnu": "tsx --env-file=.env src/scripts/reset-keep-jnu.ts",
     "verify:platform": "tsx --env-file=.env src/scripts/verify-platform.ts",
+    "db:indexes": "tsx --env-file=.env src/scripts/sync-indexes.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

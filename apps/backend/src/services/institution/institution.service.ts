@@ -31,6 +31,7 @@ import {
   NotFoundError,
   ValidationError,
 } from '../../utils/errors/index.js';
+import { cache } from '../../cache/cache.service.js';
 import {
   academicCalendarRepository,
   academicYearRepository,
@@ -616,8 +617,14 @@ export class InstitutionService {
   // Settings
   async getSettings(actor: ActorContext) {
     const institutionId = requireTenant(actor);
-    const doc = await institutionSettingsRepository.getOrCreate(institutionId);
-    return toDto(doc);
+    return cache.wrap(
+      `institution-settings:${institutionId}`,
+      async () => {
+        const doc = await institutionSettingsRepository.getOrCreate(institutionId);
+        return toDto(doc);
+      },
+      { namespace: 'institution', ttlSeconds: CACHE_TTL.MEDIUM },
+    );
   }
 
   async updateSettings(input: UpdateInstitutionSettingsInput, actor: ActorContext) {
@@ -626,6 +633,7 @@ export class InstitutionService {
       institutionId,
       input,
     );
+    await cache.invalidate(`institution-settings:${institutionId}`, 'institution');
     await audit('settings.updated', actor, institutionId, { fields: Object.keys(input) });
     return toDto(doc);
   }
