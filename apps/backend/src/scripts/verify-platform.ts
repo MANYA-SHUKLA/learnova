@@ -117,7 +117,13 @@ function pass(ok: boolean): string {
   return ok ? 'PASS' : 'FAIL';
 }
 
+function track(failures: string[], label: string, ok: boolean): string {
+  if (!ok) failures.push(label);
+  return pass(ok);
+}
+
 async function main(): Promise<void> {
+  const failures: string[] = [];
   console.log('\n=== Backend Health ===');
   for (const path of ['/health', '/ready', '/live']) {
     const { status, json } = await api<{ success?: boolean; data?: { status?: string } }>(path);

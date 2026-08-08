@@ -85,9 +85,14 @@ export default function middleware(request: NextRequest) {
   }
 
   const requiredRole = requiredRoleForPath(pathWithoutLocale);
-  if (isAuthenticated && requiredRole && activeRole && !isPathAllowedForRole(pathWithoutLocale, activeRole)) {
-    const home = dashboardPathForRoleCookie(activeRole);
-    return NextResponse.redirect(new URL(`/${locale}${home}`, request.url));
+  if (isAuthenticated && requiredRole) {
+    if (!activeRole) {
+      return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    }
+    if (!isPathAllowedForRole(pathWithoutLocale, activeRole)) {
+      const home = dashboardPathForRoleCookie(activeRole);
+      return NextResponse.redirect(new URL(`/${locale}${home}`, request.url));
+    }
   }
 
   const response = intlMiddleware(request);
