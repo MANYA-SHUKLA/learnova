@@ -60,16 +60,16 @@ studentRoutes.get(
   ctrl.searchStudents,
 );
 
-studentRoutes.get('/students/stats', ...readAuth, ctrl.getStudentStats);
+studentRoutes.get('/students/stats', ...manageAuth, ctrl.getStudentStats);
 
 studentRoutes.get(
   '/students/export',
-  ...readAuth,
+  ...manageAuth,
   validate(studentExportQuerySchema, 'query'),
   ctrl.exportStudents,
 );
 
-studentRoutes.get('/students/audit', ...readAuth, ctrl.listStudentAudit);
+studentRoutes.get('/students/audit', ...manageAuth, ctrl.listStudentAudit);
 
 studentRoutes.get('/students/me', ...writeAuth, ctrl.getOwnStudentProfile);
 
@@ -160,6 +160,8 @@ studentRoutes.post(
 studentRoutes.get(
   '/students/:id',
   ...readAuth,
+  studentOwnershipGuard('id'),
+  facultyStudentGuard('id'),
   validate(studentIdParamsSchema, 'params'),
   ctrl.getStudent,
 );

@@ -4,7 +4,7 @@
  *
  * Creates (if missing) for SEED_INSTITUTION_ID:
  * - Campus, School, 5 Departments, 4 Programs, Academic Year, 6 Semesters, Sections, Batches
- * - 30 Faculty, 200 Students, 30 Courses
+ * - 100 Faculty, 1000 Students, 100 Courses
  * - Then 1200+ Enrollments + waitlist
  */
 
@@ -281,7 +281,7 @@ async function main(): Promise<void> {
       .lean()
   ).map((d) => String(d._id));
 
-  while (facultyCount < 30) {
+  while (facultyCount < 100) {
     const n = facultyCount + 1;
     const firstName = 'Faculty';
     const lastName = `${n}`;
@@ -318,7 +318,7 @@ async function main(): Promise<void> {
       .lean()
   ).map((d) => String(d._id));
 
-  while (studentCount < 200) {
+  while (studentCount < 1000) {
     const n = studentCount + 1;
     const firstName = 'Student';
     const lastName = `${n}`;
@@ -371,7 +371,7 @@ async function main(): Promise<void> {
     'general',
   ] as const;
 
-  while (courseCount < 30) {
+  while (courseCount < 100) {
     const n = courseCount + 1;
     const title = `Seed Course ${n}`;
     const created = await CourseModel.create({
