@@ -26,6 +26,10 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { courseRepository } from '../../repositories/course/course.repository.js';
+import {
+  facultyCanAccessCourse,
+  resolveFacultySupervisedCourseObjectIds,
+} from '../access/faculty-scope.js';
 
 export interface ActorContext {
   userId: string;
@@ -137,25 +141,13 @@ async function scopeByFacultyAccess(
 ): Promise<Record<string, unknown>> {
   if (actor.role !== 'faculty') return filter;
 
-  const facultyRecord = await FacultyModel.findOne({
-    institutionId: new Types.ObjectId(institutionId),
-    email: actor.email.toLowerCase(),
-    deletedAt: null,
-  }).exec();
-
-  if (!facultyRecord) {
+  const courseIds = await resolveFacultySupervisedCourseObjectIds(institutionId, actor.email);
+  if (courseIds.length === 0) {
     filter._id = null;
     return filter;
   }
 
-  const $or: Record<string, unknown>[] = [];
-  $or.push({ facultyIds: facultyRecord._id });
-  if (facultyRecord.departmentId) {
-    $or.push({ departmentId: facultyRecord.departmentId });
-  }
-  $or.push({ coordinatorId: facultyRecord._id });
-
-  filter.$or = $or;
+  filter._id = { $in: courseIds };
   return filter;
 }
 
@@ -242,28 +234,8 @@ export class CourseService {
     if (!doc) throw new NotFoundError('Course not found');
 
     if (actor.role === 'faculty') {
-      const facultyRecord = await FacultyModel.findOne({
-        institutionId: new Types.ObjectId(institutionId),
-        email: actor.email.toLowerCase(),
-        deletedAt: null,
-      }).exec();
-
-      if (!facultyRecord) {
-        throw new ForbiddenError('Not allowed to access this course');
-      }
-
-      const isFacultyAssigned = doc.facultyIds.some(
-        (fid) => String(fid) === String(facultyRecord._id),
-      );
-      const isCoordinator = doc.coordinatorId
-        ? String(doc.coordinatorId) === String(facultyRecord._id)
-        : false;
-      const isDepartmentMatch =
-        facultyRecord.departmentId && doc.departmentId
-          ? String(facultyRecord.departmentId) === String(doc.departmentId)
-          : false;
-
-      if (!isFacultyAssigned && !isCoordinator && !isDepartmentMatch) {
+      const allowed = await facultyCanAccessCourse(institutionId, actor.email, id);
+      if (!allowed) {
         throw new ForbiddenError('Not allowed to access this course');
       }
     }

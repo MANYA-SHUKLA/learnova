@@ -1,7 +1,14 @@
 import createMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { AUTH } from '@learnova/constants';
 import { routing } from '@/lib/i18n/routing';
+import {
+  dashboardPathForRoleCookie,
+  isActiveRole,
+  isPathAllowedForRole,
+  requiredRoleForPath,
+} from '@/lib/auth/role-routes';
 
 /**
  * Edge middleware — i18n routing + auth gate via learnova_session cookie.
@@ -58,8 +65,10 @@ export default function middleware(request: NextRequest) {
   const pathWithoutLocale = stripLocale(pathname);
   const locale = pathname.split('/')[1] ?? 'en';
 
-  const sessionToken = request.cookies.get('learnova_session')?.value;
+  const sessionToken = request.cookies.get(AUTH.REFRESH_COOKIE_NAME)?.value;
   const isAuthenticated = Boolean(sessionToken);
+  const roleCookie = request.cookies.get(AUTH.ROLE_COOKIE_NAME)?.value ?? null;
+  const activeRole = roleCookie && isActiveRole(roleCookie) ? roleCookie : null;
 
   const isProtected = matchesPrefix(pathWithoutLocale, PROTECTED_PATH_PREFIXES);
   const isAuthRoute = matchesPrefix(pathWithoutLocale, AUTH_PATH_PREFIXES);
@@ -71,8 +80,14 @@ export default function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && isAuthenticated) {
-    // Presence cookie has no role — land on /dashboard which client-routes by role.
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    const home = activeRole ? dashboardPathForRoleCookie(activeRole) : '/dashboard';
+    return NextResponse.redirect(new URL(`/${locale}${home}`, request.url));
+  }
+
+  const requiredRole = requiredRoleForPath(pathWithoutLocale);
+  if (isAuthenticated && requiredRole && activeRole && !isPathAllowedForRole(pathWithoutLocale, activeRole)) {
+    const home = dashboardPathForRoleCookie(activeRole);
+    return NextResponse.redirect(new URL(`/${locale}${home}`, request.url));
   }
 
   const response = intlMiddleware(request);

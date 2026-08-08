@@ -1,10 +1,12 @@
 'use client';
 
 import { APP_ROUTES } from '@learnova/constants';
-import { Spinner } from '@learnova/ui';
+import { Card, CardContent, Spinner } from '@learnova/ui';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { dashboardPathForRole } from '@/lib/auth/redirects';
+import { isPathAllowedForRole } from '@/lib/auth/role-routes';
 import { usePathname, useRouter } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -16,6 +18,8 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
   const onChangePasswordPage =
     pathname === APP_ROUTES.CHANGE_PASSWORD ||
     pathname.endsWith('/account/change-password');
+
+  const roleAllowed = user ? isPathAllowedForRole(pathname, user.role) : true;
 
   useEffect(() => {
     if (isLoading) return;
@@ -31,8 +35,13 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
 
     if (user.mustChangePassword && !onChangePasswordPage) {
       router.replace(APP_ROUTES.CHANGE_PASSWORD);
+      return;
     }
-  }, [isLoading, isAuthenticated, user, onChangePasswordPage, pathname, router]);
+
+    if (!roleAllowed) {
+      router.replace(dashboardPathForRole(user.role));
+    }
+  }, [isLoading, isAuthenticated, user, onChangePasswordPage, pathname, router, roleAllowed]);
 
   if (isLoading || !isAuthenticated || !user) {
     return (
@@ -48,6 +57,22 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
       <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-3 bg-background">
         <Spinner size="lg" />
         <p className="text-sm text-muted-foreground">Redirecting…</p>
+      </div>
+    );
+  }
+
+  if (!roleAllowed) {
+    return (
+      <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-3 bg-background px-4">
+        <Card className="max-w-md rounded-2xl shadow-soft-md">
+          <CardContent className="space-y-2 pt-6 text-center">
+            <p className="text-base font-medium text-foreground">Access denied</p>
+            <p className="text-sm text-muted-foreground">
+              Your account does not have access to this area. Redirecting to your dashboard…
+            </p>
+            <Spinner size="md" className="mx-auto mt-2" />
+          </CardContent>
+        </Card>
       </div>
     );
   }

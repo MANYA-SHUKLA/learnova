@@ -9,28 +9,12 @@ import { connectMongo, disconnectMongo } from '../database/index.js';
 import { logger } from '../utils/logger/index.js';
 import { seedDemoUsers } from './demo-users.seed.js';
 
+import { resolveSeedInstitutionId } from './seed-utils.js';
+
 async function main(): Promise<void> {
   await connectMongo();
 
-  let institutionId = process.env.SEED_INSTITUTION_ID?.trim();
-  if (!institutionId) {
-    const { InstitutionModel } = await import('../models/index.js');
-    const first = await InstitutionModel.findOne({ deletedAt: null })
-      .select('_id name')
-      .lean();
-    if (!first) {
-      throw new Error(
-        'SEED_INSTITUTION_ID is required and no institutions exist. Create an institution first, then set SEED_INSTITUTION_ID in apps/backend/.env',
-      );
-    }
-    institutionId = String(first._id);
-    logger.warn(
-      { institutionId, name: first.name },
-      'SEED_INSTITUTION_ID not set — using first institution',
-    );
-  }
-
-  logger.info({ institutionId }, 'Starting demo users seed...');
+  const institutionId = await resolveSeedInstitutionId();
 
   const result = await seedDemoUsers(institutionId);
 

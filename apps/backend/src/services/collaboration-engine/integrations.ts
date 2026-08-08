@@ -3,8 +3,8 @@ import { ASSESSMENT_ENROLLMENT_STATUSES } from '@learnova/constants';
 import type { CollaborationEnrollmentGate } from './types.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { CourseModel } from '../../models/course.model.js';
-import { FacultyModel } from '../../models/faculty.model.js';
 import { ForbiddenError, NotFoundError } from '../../utils/errors/index.js';
+import { resolveFacultySupervisedCourseIds as resolveFacultySupervisedCourseIdsFromScope } from '../access/faculty-scope.js';
 
 function oid(id: string): Types.ObjectId {
   return new Types.ObjectId(id);
@@ -44,23 +44,7 @@ export async function resolveFacultySupervisedCourseIds(
   institutionId: string,
   email: string,
 ): Promise<string[]> {
-  const faculty = await FacultyModel.findOne({
-    institutionId: oid(institutionId),
-    email: email.toLowerCase(),
-    deletedAt: null,
-  }).exec();
-
-  if (!faculty) return [];
-
-  const courses = await CourseModel.find({
-    institutionId: oid(institutionId),
-    deletedAt: null,
-    $or: [{ facultyIds: faculty._id }, { coordinatorId: faculty._id }],
-  })
-    .select('_id')
-    .exec();
-
-  return courses.map((course) => String(course._id));
+  return resolveFacultySupervisedCourseIdsFromScope(institutionId, email);
 }
 
 export async function assertCourseInTenant(

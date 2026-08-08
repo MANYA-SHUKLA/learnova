@@ -17,7 +17,7 @@ import { logger } from '../utils/logger/index.js';
 
 const DEMO_PASSWORD = 'Demo@12345';
 
-interface DemoSeedResult {
+export interface DemoSeedResult {
   facultyUserId: string;
   facultyRecordId: string;
   studentUserId: string;

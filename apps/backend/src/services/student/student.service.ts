@@ -31,6 +31,10 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { studentRepository } from '../../repositories/student/index.js';
+import {
+  facultyCanAccessStudent,
+  resolveFacultyEnrolledStudentIds,
+} from '../access/faculty-scope.js';
 
 export interface ActorContext {
   userId: string;
@@ -144,8 +148,7 @@ function rowsToCsv(rows: Array<Record<string, unknown>>): string {
 }
 
 /**
- * Filter students by faculty department access.
- * If actor is faculty role, only show students in departments that faculty is assigned to.
+ * Filter students to those enrolled in courses supervised by this faculty member.
  */
 async function scopeByFacultyAccess(
   filter: Record<string, unknown>,
@@ -154,18 +157,13 @@ async function scopeByFacultyAccess(
 ): Promise<Record<string, unknown>> {
   if (actor.role !== 'faculty') return filter;
 
-  const facultyRecord = await FacultyModel.findOne({
-    institutionId: new Types.ObjectId(institutionId),
-    email: actor.email.toLowerCase(),
-    deletedAt: null,
-  }).exec();
-
-  if (!facultyRecord || !facultyRecord.departmentId) {
-    filter.departmentId = null;
+  const studentIds = await resolveFacultyEnrolledStudentIds(institutionId, actor.email);
+  if (studentIds.length === 0) {
+    filter._id = null;
     return filter;
   }
 
-  filter.departmentId = facultyRecord.departmentId;
+  filter._id = { $in: studentIds };
   return filter;
 }
 
@@ -303,18 +301,8 @@ export class StudentService {
     if (!doc) throw new NotFoundError('Student not found');
 
     if (actor.role === 'faculty') {
-      const facultyRecord = await FacultyModel.findOne({
-        institutionId: new Types.ObjectId(institutionId),
-        email: actor.email.toLowerCase(),
-        deletedAt: null,
-      }).exec();
-
-      if (
-        !facultyRecord ||
-        !facultyRecord.departmentId ||
-        !doc.departmentId ||
-        String(facultyRecord.departmentId) !== String(doc.departmentId)
-      ) {
+      const allowed = await facultyCanAccessStudent(institutionId, actor.email, id);
+      if (!allowed) {
         throw new ForbiddenError('Not allowed to access this student');
       }
     }

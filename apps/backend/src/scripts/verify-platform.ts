@@ -87,12 +87,24 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function pageStatus(path: string, cookies = ''): Promise<number> {
+async function pageStatus(path: string, cookies = '', role?: string): Promise<number> {
+  const cookieParts = [cookies, 'learnova_session=1'];
+  if (role) cookieParts.push(`learnova_role=${encodeURIComponent(role)}`);
   const res = await fetch(`${WEB}${path}`, {
     redirect: 'follow',
-    headers: cookies ? { Cookie: `${cookies}; learnova_session=1` } : {},
+    headers: cookieParts.filter(Boolean).length > 0 ? { Cookie: cookieParts.filter(Boolean).join('; ') } : {},
   });
   return res.status;
+}
+
+async function pageRedirect(path: string, cookies: string, role: string): Promise<{ status: number; location: string | null }> {
+  const res = await fetch(`${WEB}${path}`, {
+    redirect: 'manual',
+    headers: {
+      Cookie: `${cookies}; learnova_session=1; learnova_role=${encodeURIComponent(role)}`,
+    },
+  });
+  return { status: res.status, location: res.headers.get('location') };
 }
 
 interface ApiProbe {
@@ -174,7 +186,9 @@ async function main(): Promise<void> {
     ['Verify Email page', '/en/verify-email'],
     ['Sessions page', '/en/sessions'],
   ] as const) {
-    const code = admin ? await pageStatus(path, admin.cookies) : await pageStatus(path);
+    const code = admin
+      ? await pageStatus(path, admin.cookies, admin.role)
+      : await pageStatus(path);
     console.log(`  ${name}: HTTP ${code} ${pass(code === 200)}`);
   }
 
@@ -182,7 +196,6 @@ async function main(): Promise<void> {
   const facultyPages: [string, string][] = [
     ['Dashboard', '/en/faculty/dashboard'],
     ['My Courses', '/en/faculty/enrollments'],
-    ['Students (nav link)', '/en/institution/students'],
     ['Assignments', '/en/faculty/assignments'],
     ['Labs', '/en/faculty/practice-labs'],
     ['Projects', '/en/faculty/projects'],
@@ -193,7 +206,7 @@ async function main(): Promise<void> {
   ];
   if (faculty) {
     for (const [name, path] of facultyPages) {
-      const code = await pageStatus(path, faculty.cookies);
+      const code = await pageStatus(path, faculty.cookies, faculty.role);
       console.log(`  ${name}: HTTP ${code} ${pass(code === 200)}`);
     }
   } else {
@@ -216,19 +229,45 @@ async function main(): Promise<void> {
   ];
   if (student) {
     for (const [name, path] of studentPages) {
-      const code = await pageStatus(path, student.cookies);
+      const code = await pageStatus(path, student.cookies, student.role);
       console.log(`  ${name}: HTTP ${code} ${pass(code === 200)}`);
     }
   } else {
     console.log('  Skipped — student login unavailable');
   }
 
+  console.log('\n=== RBAC (Pages) ===');
+  if (faculty) {
+    const blocked = await pageRedirect('/en/institution/dashboard', faculty.cookies, faculty.role);
+    const redirected =
+      blocked.status >= 300 &&
+      blocked.status < 400 &&
+      blocked.location?.includes('/faculty/dashboard');
+    console.log(`  Faculty blocked from institution dashboard: ${pass(redirected)}`);
+  }
+  if (student) {
+    const blocked = await pageRedirect('/en/faculty/dashboard', student.cookies, student.role);
+    const redirected =
+      blocked.status >= 300 &&
+      blocked.status < 400 &&
+      blocked.location?.includes('/student/dashboard');
+    console.log(`  Student blocked from faculty dashboard: ${pass(redirected)}`);
+  }
+  if (admin) {
+    const blocked = await pageRedirect('/en/student/dashboard', admin.cookies, admin.role);
+    const redirected =
+      blocked.status >= 300 &&
+      blocked.status < 400 &&
+      blocked.location?.includes('/institution/dashboard');
+    console.log(`  Admin blocked from student dashboard: ${pass(redirected)}`);
+  }
+
   console.log('\n=== RBAC (API) ===');
   if (faculty) {
     const readProbes: ApiProbe[] = [
       { path: '/courses?page=1&limit=5', expectOk: true, label: 'Faculty read courses' },
-      { path: '/students?page=1&limit=5', expectOk: true, label: 'Faculty read students (student:read)' },
-      { path: '/institution-settings', expectOk: true, label: 'Faculty read settings (institution:read)' },
+      { path: '/students?page=1&limit=5', expectOk: true, label: 'Faculty read enrolled students (student:read)' },
+      { path: '/institution-settings', expectOk: false, label: 'Faculty read settings (must deny)' },
     ];
     for (const p of readProbes) {
       const r = await api<{ success: boolean }>(p.path, { token: faculty.token });
@@ -267,15 +306,49 @@ async function main(): Promise<void> {
     });
     console.log(`  Student POST faculty (must deny): ${pass(!createFaculty.json.success)}`);
 
+    const readFaculty = await api<{ success: boolean }>('/faculty?page=1&limit=5', {
+      token: student.token,
+    });
+    console.log(`  Student read faculty list (must deny): ${pass(!readFaculty.json.success)}`);
+
+    const readInstitution = await api<{ success: boolean }>('/institution-settings', {
+      token: student.token,
+    });
+    console.log(`  Student read institution settings (must deny): ${pass(!readInstitution.json.success)}`);
+
     const ownGrades = await api<{ success: boolean }>('/gradebook/dashboard/student', {
       token: student.token,
     });
     console.log(`  Student own gradebook dash: ${pass(ownGrades.json.success)}`);
+
+    const ownCertificates = await api<{ success: boolean; data?: { certificates?: unknown[] } }>(
+      '/certificates/dashboard/student',
+      { token: student.token },
+    );
+    const certItems = ownCertificates.json.data?.certificates ?? [];
+    console.log(
+      `  Student own certificates: ${pass(ownCertificates.json.success && certItems.length > 0)} (${certItems.length})`,
+    );
   }
 
   if (admin) {
     const inst = await api<{ success: boolean }>('/campuses?page=1&limit=1', { token: admin.token });
     console.log(`  Admin campuses: ${pass(inst.json.success)}`);
+  }
+
+  if (faculty && student) {
+    const facultyCourses = await api<{ success: boolean; data?: { items?: unknown[]; meta?: { total?: number } } }>(
+      '/courses?page=1&limit=5',
+      { token: faculty.token },
+    );
+    const facultyStudents = await api<{ success: boolean; data?: { items?: unknown[]; meta?: { total?: number } } }>(
+      '/students?page=1&limit=5',
+      { token: faculty.token },
+    );
+    const courseTotal = facultyCourses.json.data?.meta?.total ?? facultyCourses.json.data?.items?.length ?? 0;
+    const studentTotal = facultyStudents.json.data?.meta?.total ?? facultyStudents.json.data?.items?.length ?? 0;
+    console.log(`  Faculty scoped courses (>0): ${pass(courseTotal > 0)} (${courseTotal})`);
+    console.log(`  Faculty scoped students (>0): ${pass(studentTotal > 0)} (${studentTotal})`);
   }
 
   console.log('\n=== Permissions (role bundles) ===');
@@ -385,7 +458,7 @@ async function main(): Promise<void> {
   if (existing.has('academic_certificates')) {
     const certMin = 1;
     console.log(
-      `  Certificates: ${certCount} ${certCount >= certMin ? pass(true) : 'WARN (run pnpm seed:certificates after gradebook)'}`,
+      `  Certificates: ${certCount} ${certCount >= certMin ? pass(true) : 'WARN (run pnpm seed:certificates or pnpm seed:complete)'}`,
     );
   }
 
@@ -394,7 +467,7 @@ async function main(): Promise<void> {
     : 0;
   if (gradeCount > 0 && gradeCount < 5000) {
     console.log(
-      `  Note: gradebook seed may still be running (${gradeCount}/5000). Wait, then re-run verify.`,
+      `  Note: gradebook seed may still be running (${gradeCount}/5000). Wait, then re-run verify — or run pnpm seed:complete`,
     );
   }
 

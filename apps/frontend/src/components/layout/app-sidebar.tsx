@@ -162,7 +162,6 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'gradebook', href: APP_ROUTES.FACULTY_GRADEBOOK, icon: GraduationCap },
       { id: 'certificates', href: APP_ROUTES.FACULTY_CERTIFICATES, icon: Award },
       { id: 'proctoring', href: APP_ROUTES.FACULTY_EXAMS_LIVE, icon: Shield },
-      { id: 'students', href: APP_ROUTES.INSTITUTION_STUDENTS, icon: Users },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
       { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
     ],

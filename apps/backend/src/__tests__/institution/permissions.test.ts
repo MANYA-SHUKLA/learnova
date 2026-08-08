@@ -11,9 +11,9 @@ describe('institution permissions', () => {
     expect(hasPermission(perms, 'institution:manage')).toBe(true);
   });
 
-  it('allows faculty read-only institution access', () => {
+  it('denies faculty institution management access', () => {
     const perms = getPermissionsForRole('faculty');
-    expect(hasPermission(perms, 'institution:read')).toBe(true);
+    expect(hasPermission(perms, 'institution:read')).toBe(false);
     expect(hasPermission(perms, 'institution:manage')).toBe(false);
   });
 
@@ -21,5 +21,6 @@ describe('institution permissions', () => {
     const perms = getPermissionsForRole('student');
     expect(hasPermission(perms, 'institution:read')).toBe(false);
     expect(hasPermission(perms, 'institution:manage')).toBe(false);
+    expect(hasPermission(perms, 'faculty:read')).toBe(false);
   });
 });

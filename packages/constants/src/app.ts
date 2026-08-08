@@ -31,6 +31,8 @@ export const JWT = {
 /** Auth cookie & lockout policy */
 export const AUTH = {
   REFRESH_COOKIE_NAME: 'learnova_session',
+  /** Non-HttpOnly role hint for Next.js edge middleware (not for authorization). */
+  ROLE_COOKIE_NAME: 'learnova_role',
   ACCESS_COOKIE_NAME: 'learnova_access',
   MAX_FAILED_ATTEMPTS: 5,
   LOCK_BASE_MS: 60_000,
