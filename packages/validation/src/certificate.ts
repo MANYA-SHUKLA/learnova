@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { CERTIFICATE_DOCUMENT_TYPES } from '@learnova/constants';
-import { objectIdSchema as objectIdField, paginationSchema } from './index.js';
+import { CERTIFICATE_DOCUMENT_TYPES, PAGINATION, REGEX } from '@learnova/constants';
+
+const objectIdField = z.string().regex(REGEX.OBJECT_ID, 'Invalid ObjectId');
 
 export const certificateDocumentTypeSchema = z.enum(CERTIFICATE_DOCUMENT_TYPES);
 
@@ -9,7 +10,13 @@ export const certificateListQuerySchema = z.object({
   courseId: objectIdField.optional(),
   documentType: certificateDocumentTypeSchema.optional(),
   status: z.enum(['draft', 'issued', 'revoked', 'expired']).optional(),
-  ...paginationSchema.shape,
+  page: z.coerce.number().int().min(1).default(PAGINATION.DEFAULT_PAGE),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(PAGINATION.MAX_LIMIT)
+    .default(PAGINATION.DEFAULT_LIMIT),
 });
 
 export const upsertCertificateTemplateSchema = z.object({
