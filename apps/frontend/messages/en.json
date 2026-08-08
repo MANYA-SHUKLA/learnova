@@ -581,8 +581,7 @@
       "backToLogin": "Back to login"
     }
   },
-  "dashboard": {
-    "sidebar": {
+    "institution": {
       "groups": {
         "institution": "Institution",
         "academics": "Academics",

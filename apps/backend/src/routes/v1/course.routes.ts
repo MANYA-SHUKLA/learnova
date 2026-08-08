@@ -16,6 +16,7 @@ import {
   updateCourseSchema,
 } from '@learnova/validation';
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
+import { tenantGuard } from '../../middlewares/scope.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/course/course.controller.js';
 
@@ -23,16 +24,19 @@ const courseRoutes = Router();
 
 const readAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.COURSE_READ),
 ] as RequestHandler[];
 
 const writeAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.COURSE_WRITE),
 ] as RequestHandler[];
 
 const manageAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.COURSE_MANAGE),
 ] as RequestHandler[];
 

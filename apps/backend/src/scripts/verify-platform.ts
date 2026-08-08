@@ -560,9 +560,9 @@ async function main(): Promise<void> {
   console.log('\n=== Seed Data Counts ===');
   const counts: { label: string; collection: string; min: number }[] = [
     { label: 'Institution', collection: 'institutions', min: 1 },
-    { label: 'Faculty', collection: 'faculty', min: 30 },
-    { label: 'Students', collection: 'students', min: 200 },
-    { label: 'Courses', collection: 'courses', min: 30 },
+    { label: 'Faculty', collection: 'faculty', min: 100 },
+    { label: 'Students', collection: 'students', min: 1000 },
+    { label: 'Courses', collection: 'courses', min: 100 },
     { label: 'Projects', collection: 'projects', min: 50 },
     { label: 'Teams', collection: 'project_teams', min: 80 },
     { label: 'Quizzes', collection: 'quizzes', min: 50 },
@@ -583,9 +583,9 @@ async function main(): Promise<void> {
     ? await db.collection('academic_certificates').countDocuments({})
     : 0;
   if (existing.has('academic_certificates')) {
-    const certMin = 1;
+    const certMin = 1000;
     console.log(
-      `  Certificates: ${certCount} ${certCount >= certMin ? pass(true) : 'WARN (run pnpm seed:certificates or pnpm seed:complete)'}`,
+      `  Certificates: ${certCount} ${track(failures, 'Certificates (>=1000)', certCount >= certMin)} (min ${certMin})`,
     );
   }
 
