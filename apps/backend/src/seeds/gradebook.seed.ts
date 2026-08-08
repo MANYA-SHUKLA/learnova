@@ -246,7 +246,8 @@ export async function seedGradebook(
         .select('_id semesterId facultyId programId')
         .lean();
 
-      const published = summaryCount % 3 === 0;
+      const gradeResult = resultFromPercentage(weightedPercentage);
+      const published = gradeResult === 'pass';
       const locked = published && summaryCount % 2 === 0;
 
       await CourseGradeSummaryModel.findOneAndUpdate(
@@ -261,7 +262,7 @@ export async function seedGradebook(
             percentage: weightedPercentage,
             letterGrade: letterGradeFromPercentage(weightedPercentage),
             gradePoints: gradePointsFromPercentage(weightedPercentage),
-            result: resultFromPercentage(weightedPercentage),
+            result: gradeResult,
             totalMarksEarned: marks.earned,
             totalMarksPossible: marks.possible,
             entryCount: entries.length,

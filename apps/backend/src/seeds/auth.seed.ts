@@ -254,6 +254,9 @@ export async function seedPermissions(): Promise<Map<string, string>> {
   const idByName = new Map<string, string>();
   for (const name of Object.values(PERMISSIONS) as Permission[]) {
     const meta = PERMISSION_META[name];
+    if (!meta) {
+      throw new Error(`Missing PERMISSION_META for permission: ${name}`);
+    }
     const doc = await permissionRepository.upsert({
       name,
       resource: meta.resource,

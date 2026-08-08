@@ -120,11 +120,17 @@ async function pageAccessBlocked(
   blockedSegment: string,
 ): Promise<boolean> {
   const hint = signRoleHint(role) ?? role;
+  const cookieHeader = `${cookies}; learnova_session=1; learnova_role=${encodeURIComponent(hint)}`;
+
+  const manual = await fetch(`${WEB}${path}`, {
+    redirect: 'manual',
+    headers: { Cookie: cookieHeader },
+  });
+  if (manual.status === 403) return true;
+
   const res = await fetch(`${WEB}${path}`, {
     redirect: 'follow',
-    headers: {
-      Cookie: `${cookies}; learnova_session=1; learnova_role=${encodeURIComponent(hint)}`,
-    },
+    headers: { Cookie: cookieHeader },
   });
   if (res.status === 403) return true;
   const finalUrl = res.url.toLowerCase();
@@ -231,6 +237,11 @@ async function main(): Promise<void> {
       cookies: admin.cookies,
     });
     console.log(`  POST /auth/logout: ${pass(logout.json.success)}`);
+    // Re-authenticate — later API checks need a valid admin token after logout probe.
+    const adminRelogin = await login('admin');
+    if (adminRelogin) {
+      Object.assign(admin, adminRelogin);
+    }
   }
 
   await sleep(500);
