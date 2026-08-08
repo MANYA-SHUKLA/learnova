@@ -82,7 +82,7 @@ pnpm verify:platform
 **Product**
 
 - [Architecture](./docs/Architecture.md) · [Auth](./docs/Auth.md) · [RBAC](./docs/RBAC.md)
-- [Gradebook](./docs/Gradebook.md) · [Certificates](./docs/Certificates.md) · [Reports](./docs/Reports.md)
+- [Gradebook](./docs/Gradebook.md) · [Certificates](./docs/Certificates.md) · [Analytics & reports](./docs/AnalyticsReports.md) · [Notifications](./docs/Notifications.md)
 - [Roadmap](./docs/Roadmap.md)
 
 ---
