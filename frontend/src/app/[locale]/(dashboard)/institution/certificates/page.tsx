@@ -43,7 +43,7 @@ function readAutoIssue(settings: { certificateSettings?: Record<string, unknown>
   if (!raw || typeof raw !== 'object') {
     return { courseCompletion: false, publishOnIssue: true };
   }
-  const cert = raw as Record<string, unknown>;
+  const cert = raw;
   const autoIssue = cert['autoIssue'];
   if (autoIssue && typeof autoIssue === 'object') {
     const nested = autoIssue as Record<string, unknown>;
