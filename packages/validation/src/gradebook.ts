@@ -212,6 +212,21 @@ export const computeStandingSchema = z.object({
   semesterId: objectIdField.optional(),
 });
 
+export const createTranscriptRequestSchema = z.object({
+  requestType: z.enum(['official', 'semester', 'complete']).default('official'),
+  semesterId: objectIdField.optional().nullable(),
+  reason: z.string().trim().max(2000).optional().nullable(),
+});
+
+export const reviewTranscriptRequestSchema = z.object({
+  requestId: objectIdField,
+  status: z.enum(['approved', 'rejected', 'completed']),
+  reviewNotes: z.string().trim().max(2000).optional().nullable(),
+});
+
+export type CreateTranscriptRequestInput = z.infer<typeof createTranscriptRequestSchema>;
+export type ReviewTranscriptRequestInput = z.infer<typeof reviewTranscriptRequestSchema>;
+
 export type UpsertAcademicPolicyInput = z.infer<typeof upsertAcademicPolicySchema>;
 export type ModerationActionInput = z.infer<typeof moderationActionSchema>;
 export type CompareSnapshotsQuery = z.infer<typeof compareSnapshotsQuerySchema>;

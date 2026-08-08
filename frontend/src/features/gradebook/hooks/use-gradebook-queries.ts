@@ -89,3 +89,84 @@ export function useFinalizeCourseGradesMutation() {
     onSuccess: () => void qc.invalidateQueries({ queryKey: gradebookKeys.all }),
   });
 }
+
+export function useAcademicPolicyQuery(enabled = true) {
+  return useQuery({
+    queryKey: [...gradebookKeys.all, 'policy'] as const,
+    queryFn: () => gradebookApi.academicPolicy(),
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useUpsertAcademicPolicyMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => gradebookApi.upsertAcademicPolicy(body),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: gradebookKeys.all }),
+  });
+}
+
+export function useSubmitModerationMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, notes }: { courseId: string; notes?: string }) =>
+      gradebookApi.submitModeration(courseId, notes),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: gradebookKeys.all }),
+  });
+}
+
+export function useApproveModerationMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, notes }: { courseId: string; notes?: string }) =>
+      gradebookApi.approveModeration(courseId, notes),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: gradebookKeys.all }),
+  });
+}
+
+export function usePublishModerationMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, notes }: { courseId: string; notes?: string }) =>
+      gradebookApi.publishModeration(courseId, notes),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: gradebookKeys.all }),
+  });
+}
+
+export function useAcademicStandingQuery(params?: { studentId?: string; semesterId?: string }) {
+  return useQuery({
+    queryKey: [...gradebookKeys.all, 'standing', params] as const,
+    queryFn: () => gradebookApi.listStanding(params),
+    staleTime: 30_000,
+  });
+}
+
+export function useComputeStandingMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body?: { studentId?: string; semesterId?: string }) =>
+      gradebookApi.computeStanding(body),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: gradebookKeys.all }),
+  });
+}
+
+export function useTranscriptRequestsQuery(params?: { status?: string }) {
+  return useQuery({
+    queryKey: [...gradebookKeys.all, 'transcript-requests', params] as const,
+    queryFn: () => gradebookApi.listTranscriptRequests(params),
+    staleTime: 30_000,
+  });
+}
+
+export function useReviewTranscriptRequestMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: {
+      requestId: string;
+      status: 'approved' | 'rejected' | 'completed';
+      reviewNotes?: string | null;
+    }) => gradebookApi.reviewTranscriptRequest(body),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: gradebookKeys.all }),
+  });
+}

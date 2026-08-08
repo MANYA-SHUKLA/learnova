@@ -20,6 +20,9 @@ import { GradeCommentModel } from '../models/grade-comment.model.js';
 import { GradeHistoryModel } from '../models/grade-history.model.js';
 import { SemesterGradeModel } from '../models/semester-grade.model.js';
 import { CGPARecordModel } from '../models/cgpa-record.model.js';
+import { GradeModerationRecordModel } from '../models/grade-moderation-record.model.js';
+import { AcademicStandingModel } from '../models/academic-standing.model.js';
+import { TranscriptRequestModel } from '../models/transcript-request.model.js';
 import { listCourseIngestDrafts } from '../services/gradebook/gradebook-ingestion.js';
 import { gradebookRepository } from '../repositories/gradebook/gradebook.repository.js';
 import { distributeWeightage, oid } from '../services/gradebook/gradebook.helpers.js';
@@ -313,8 +316,12 @@ export async function seedGradebook(
     });
   }
 
-  // Semester + CGPA for subset of students
-  for (const studentId of refs.studentIds.slice(0, Math.min(500, refs.studentIds.length))) {
+  // Semester + CGPA — target up to 2000 semester grade rows
+  const semesterTarget = 2000;
+  let semesterCount = 0;
+  const studentPool = refs.studentIds.slice(0, Math.min(refs.studentIds.length, 800));
+
+  for (const studentId of studentPool) {
     const studentSummaries = await CourseGradeSummaryModel.find({
       institutionId: instOid,
       studentId: oid(studentId),
@@ -332,6 +339,7 @@ export async function seedGradebook(
 
     const semesterRows: Array<{ semesterGpa: number | null; totalCredits: number }> = [];
     for (const [semesterId, rows] of bySemester.entries()) {
+      if (semesterCount >= semesterTarget) break;
       const courseIds = rows.map((r) => r.courseId);
       const courses = await CourseModel.find({ _id: { $in: courseIds } })
         .select('credits')
@@ -362,6 +370,7 @@ export async function seedGradebook(
         { upsert: true },
       );
       semesterRows.push({ semesterGpa, totalCredits });
+      semesterCount += 1;
     }
 
     const cgpa = computeCgpa(semesterRows);
@@ -376,6 +385,75 @@ export async function seedGradebook(
       },
       { upsert: true },
     );
+  }
+
+  // Academic standing (~500 records)
+  const standingTypes = [
+    'good_standing',
+    'academic_warning',
+    'probation',
+    'honors',
+    'distinction',
+  ] as const;
+  for (let i = 0; i < Math.min(500, studentPool.length); i += 1) {
+    const studentId = studentPool[i]!;
+    const summary = await CourseGradeSummaryModel.findOne({
+      institutionId: instOid,
+      studentId: oid(studentId),
+      published: true,
+    }).lean();
+    await AcademicStandingModel.findOneAndUpdate(
+      {
+        institutionId: instOid,
+        studentId: oid(studentId),
+        semesterId: summary?.semesterId ?? null,
+      },
+      {
+        $set: {
+          standing: standingTypes[i % standingTypes.length],
+          semesterGpa: summary?.gradePoints ?? 2.5,
+          cgpa: summary?.gradePoints ?? 2.5,
+          failedCourseCount: i % 17 === 0 ? 2 : 0,
+          publishedCourseCount: summary ? 1 : 0,
+          computedAt: new Date(),
+        },
+      },
+      { upsert: true },
+    );
+  }
+
+  // Moderation records (~100)
+  const publishedCourses = await CourseGradeSummaryModel.distinct('courseId', {
+    institutionId: instOid,
+    published: true,
+  });
+  for (let i = 0; i < Math.min(100, publishedCourses.length); i += 1) {
+    await GradeModerationRecordModel.create({
+      institutionId: instOid,
+      courseId: publishedCourses[i],
+      stage: i % 3 === 0 ? 'faculty_submitted' : i % 3 === 1 ? 'department_approved' : 'institution_published',
+      actorId: oid(refs.userId),
+      actorRole: 'faculty',
+      notes: `Seed moderation record ${String(i + 1)}`,
+    });
+  }
+
+  // Transcript requests (~1000)
+  for (let i = 0; i < Math.min(1000, studentPool.length * 2); i += 1) {
+    const studentId = studentPool[i % studentPool.length]!;
+    const status = i % 4 === 0 ? 'pending' : i % 4 === 1 ? 'approved' : i % 4 === 2 ? 'completed' : 'rejected';
+    await TranscriptRequestModel.create({
+      institutionId: instOid,
+      studentId: oid(studentId),
+      semesterId: null,
+      requestType: i % 2 === 0 ? 'official' : 'complete',
+      status,
+      reason: 'Seed transcript request',
+      requestedAt: new Date(Date.now() - i * 3600_000),
+      reviewedBy: status !== 'pending' ? oid(refs.userId) : null,
+      reviewedAt: status !== 'pending' ? new Date() : null,
+      completedAt: status === 'completed' ? new Date() : null,
+    });
   }
 
   const syntheticEntries = await backfillSyntheticEntries(institutionId, refs, entryTarget);

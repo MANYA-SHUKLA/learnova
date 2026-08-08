@@ -142,6 +142,15 @@ export const ACADEMIC_STANDING_TYPES = [
   'distinction',
 ] as const;
 
+export const TRANSCRIPT_REQUEST_STATUSES = [
+  'pending',
+  'approved',
+  'rejected',
+  'completed',
+] as const;
+
+export const TRANSCRIPT_REQUEST_TYPES = ['official', 'semester', 'complete'] as const;
+
 export const DEFAULT_STANDING_THRESHOLDS = {
   PROBATION_GPA: 1.5,
   WARNING_GPA: 2.0,

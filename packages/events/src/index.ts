@@ -127,6 +127,10 @@ export const EVENTS = {
   QUESTION_ANSWERED: 'question.answered',
 
   GRADE_READY: 'grade.ready',
+  GRADE_CREATED: 'grade.created',
+  GRADE_UPDATED: 'grade.updated',
+  GRADE_APPROVED: 'grade.approved',
+  GRADE_FROZEN: 'grade.frozen',
   GRADE_PUBLISHED: 'grade.published',
   GRADE_LOCKED: 'grade.locked',
   GRADE_CALCULATED: 'grade.calculated',
@@ -137,6 +141,8 @@ export const EVENTS = {
   GRADE_MODERATION_PUBLISHED: 'grade.moderation.published',
   GRADE_SNAPSHOT_CREATED: 'grade.snapshot.created',
   GRADE_STANDING_COMPUTED: 'grade.standing.computed',
+  TRANSCRIPT_GENERATED: 'transcript.generated',
+  STANDING_UPDATED: 'standing.updated',
 
   CERTIFICATE_READY: 'certificate.ready',
   CERTIFICATE_ISSUED: 'certificate.issued',
@@ -516,11 +522,23 @@ export interface EventPayloadMap {
     isCorrect: boolean | null;
   };
   'grade.ready': { courseId: string; studentId: string; institutionId: string };
+  'grade.created': {
+    entryId: string;
+    courseId: string;
+    studentId: string;
+    institutionId: string;
+    activityKind: string;
+  };
+  'grade.updated': { courseId: string; studentId: string; institutionId: string };
+  'grade.approved': { courseId: string; institutionId: string; count: number };
+  'grade.frozen': { courseId: string; institutionId: string; count: number };
   'grade.published': { courseId: string; institutionId: string; count: number };
   'grade.locked': { courseId: string; institutionId: string; count: number };
   'grade.calculated': { courseId: string; studentId: string; institutionId: string };
   'grade.appeal.created': { appealId: string; courseGradeId: string; studentId: string };
   'grade.appeal.resolved': { appealId: string; status: string; studentId: string };
+  'transcript.generated': { requestId: string; studentId: string; institutionId: string };
+  'standing.updated': { studentId: string; institutionId: string; standing: string };
 }
 
 export type TypedEventName = keyof EventPayloadMap;

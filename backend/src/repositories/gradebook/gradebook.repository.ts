@@ -13,6 +13,7 @@ import { GradebookAcademicPolicyModel } from '../../models/gradebook-academic-po
 import { GradeModerationRecordModel } from '../../models/grade-moderation-record.model.js';
 import { GradebookSnapshotModel } from '../../models/gradebook-snapshot.model.js';
 import { AcademicStandingModel } from '../../models/academic-standing.model.js';
+import { TranscriptRequestModel } from '../../models/transcript-request.model.js';
 import { CourseModel } from '../../models/course.model.js';
 import { ProjectSubmissionModel } from '../../models/project-submission.model.js';
 import type { IngestDraft } from '../../services/gradebook/gradebook-ingestion.js';
@@ -708,5 +709,60 @@ export const gradebookRepository = {
     };
     if (studentIds?.length) filter.studentId = { $in: studentIds.map(oid) };
     return CourseGradeSummaryModel.find(filter).exec();
+  },
+
+  async createTranscriptRequest(payload: {
+    institutionId: string;
+    studentId: string;
+    semesterId?: string | null;
+    requestType: string;
+    reason?: string | null;
+  }) {
+    return TranscriptRequestModel.create({
+      institutionId: oid(payload.institutionId),
+      studentId: oid(payload.studentId),
+      semesterId: payload.semesterId ? oid(payload.semesterId) : null,
+      requestType: payload.requestType,
+      reason: payload.reason ?? null,
+      status: 'pending',
+      requestedAt: new Date(),
+    });
+  },
+
+  async listTranscriptRequests(
+    institutionId: string,
+    filters: { studentId?: string; status?: string } = {},
+  ) {
+    const query: Record<string, unknown> = { institutionId: oid(institutionId) };
+    if (filters.studentId) query.studentId = oid(filters.studentId);
+    if (filters.status) query.status = filters.status;
+    return TranscriptRequestModel.find(query).sort({ requestedAt: -1 }).limit(200).exec();
+  },
+
+  async reviewTranscriptRequest(
+    institutionId: string,
+    requestId: string,
+    payload: {
+      status: 'approved' | 'rejected' | 'completed';
+      reviewedBy: string;
+      reviewNotes?: string | null;
+      transcriptId?: string | null;
+    },
+  ) {
+    const updates: Record<string, unknown> = {
+      status: payload.status,
+      reviewedBy: oid(payload.reviewedBy),
+      reviewedAt: new Date(),
+      reviewNotes: payload.reviewNotes ?? null,
+    };
+    if (payload.status === 'completed') {
+      updates.completedAt = new Date();
+      if (payload.transcriptId) updates.transcriptId = oid(payload.transcriptId);
+    }
+    return TranscriptRequestModel.findOneAndUpdate(
+      { _id: oid(requestId), institutionId: oid(institutionId) },
+      { $set: updates },
+      { new: true },
+    ).exec();
   },
 };

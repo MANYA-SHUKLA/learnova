@@ -498,3 +498,33 @@ export async function listStanding(req: Request, res: Response, next: NextFuncti
     next(err);
   }
 }
+
+export async function createTranscriptRequest(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.createTranscriptRequest(req.body, actorFrom(req));
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listTranscriptRequests(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await gradebookEnterpriseService.listTranscriptRequests(actorFrom(req), {
+      status: req.query.status as string | undefined,
+      studentId: req.query.studentId as string | undefined,
+    });
+    sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function reviewTranscriptRequest(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await gradebookEnterpriseService.reviewTranscriptRequest(req.body, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}

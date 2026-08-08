@@ -50,6 +50,22 @@ export interface TranscriptSummary {
   academicStanding?: string;
 }
 
+export interface TranscriptRequestRow {
+  id: string;
+  requestType?: string;
+  reason?: string | null;
+  status?: string;
+  studentId?: string;
+}
+
+export interface AcademicStandingRow {
+  id: string;
+  standing?: string;
+  semesterGpa?: number | null;
+  cgpa?: number | null;
+  failedCourseCount?: number;
+}
+
 export interface GradebookListParams {
   courseId?: string;
   studentId?: string;
@@ -164,7 +180,24 @@ export const gradebookApi = {
     apiClient.post<{ computed: number }>(`${base}/standing/compute`, body ?? {}),
 
   listStanding: (params?: { studentId?: string; semesterId?: string }) =>
-    apiClient.get<{ items: Record<string, unknown>[] }>(
+    apiClient.get<{ items: AcademicStandingRow[] }>(
       `${base}/standing${toQuery(params ?? {})}`,
     ),
+
+  createTranscriptRequest: (body: {
+    requestType?: string;
+    semesterId?: string | null;
+    reason?: string | null;
+  }) => apiClient.post(`${base}/transcript-requests`, body),
+
+  listTranscriptRequests: (params?: { status?: string; studentId?: string }) =>
+    apiClient.get<{ items: TranscriptRequestRow[] }>(
+      `${base}/transcript-requests${toQuery(params ?? {})}`,
+    ),
+
+  reviewTranscriptRequest: (body: {
+    requestId: string;
+    status: 'approved' | 'rejected' | 'completed';
+    reviewNotes?: string | null;
+  }) => apiClient.post(`${base}/transcript-requests/review`, body),
 };

@@ -1,25 +1,35 @@
-# Academic Standing
+# Academic standing (Step 14)
 
-Academic standing is derived from published course grades, semester GPA, CGPA, and institutional thresholds configured in the academic policy.
+Standing is computed from **published** gradebook summaries only — never from raw assessment attempts.
 
 ## Standing types
 
-- `good_standing`
-- `academic_warning`
-- `probation`
-- `failed_semester`
-- `honors`
-- `distinction`
+| Value | Meaning |
+| --- | --- |
+| `good_standing` | Meets minimum GPA thresholds |
+| `academic_warning` | Below warning GPA |
+| `probation` | Below probation GPA or repeated failures |
+| `failed_semester` | Too many failed courses |
+| `honors` | High semester/CGPA |
+| `distinction` | Top tier GPA |
 
-Thresholds (`probationGpa`, `warningGpa`, `honorsGpa`, `distinctionGpa`, `failedCourseLimit`) are configurable per institution.
+Thresholds are configurable via **Academic Policy** (`GET/PUT /api/v1/gradebook/policy`).
 
 ## API
 
-- `POST /api/v1/gradebook/standing/compute` — recompute standing for published grades (`gradebook:write`)
-- `GET /api/v1/gradebook/standing?studentId=&semesterId=` — list standing records (`gradebook:read`)
+| Method | Path |
+| --- | --- |
+| `POST` | `/api/v1/gradebook/standing/compute` |
+| `GET` | `/api/v1/gradebook/standing` |
 
-Students automatically receive only their own standing records.
+## Events
 
-## Event
+- `grade.standing.computed` — batch recompute finished
+- `standing.updated` — per-student standing saved
 
-- `grade.standing.computed`
+## Frontend
+
+- Institution: `/institution/standing`
+- Student: `/student/academic-standing`
+
+See [GradebookPolicies.md](./GradebookPolicies.md) for threshold configuration.

@@ -1389,6 +1389,34 @@
         "emptyTitle": "No examinations yet",
         "emptyDescription": "Schedule proctored exams for enrolled courses."
       },
+      "gradebookPolicies": {
+        "eyebrow": "Academic regulations",
+        "title": "Gradebook policies",
+        "description": "Configure passing criteria, GPA rules, and grading scheme for the institution.",
+        "formTitle": "Policy settings",
+        "formDescription": "Changes apply to future grade computations and standing rules.",
+        "passingPercentage": "Passing percentage",
+        "minimumGpa": "Minimum GPA",
+        "save": "Save policy",
+        "saving": "Saving…"
+      },
+      "gradebookModeration": {
+        "eyebrow": "Approval workflow",
+        "title": "Grade moderation",
+        "description": "Faculty submit → department approve → institution publish with immutable snapshots.",
+        "workflowTitle": "Course workflow",
+        "workflowDescription": "Select a course and advance moderation stages.",
+        "course": "Course",
+        "submit": "Faculty submit",
+        "approve": "Department approve",
+        "publish": "Institution publish"
+      },
+      "academicStanding": {
+        "eyebrow": "Regulations",
+        "title": "Academic standing",
+        "description": "Probation, honors, distinction, and warning computed from published grades.",
+        "recompute": "Recompute standing"
+      },
       "gradebook": {
         "eyebrow": "Academic results",
         "title": "Gradebook",
@@ -1860,6 +1888,14 @@
         "emptyDescription": "Sync the course to import grades from source modules.",
         "error": "Unable to load gradebook."
       },
+      "transcripts": {
+        "eyebrow": "Official records",
+        "title": "Transcript requests",
+        "description": "Review and approve student transcript requests.",
+        "empty": "No pending transcript requests.",
+        "approve": "Approve",
+        "complete": "Mark completed"
+      },
       "certificates": {
         "eyebrow": "Official documents",
         "title": "Certificates",
@@ -2238,6 +2274,15 @@
         "error": "Unable to load grades.",
         "passed": "Passed",
         "notPassed": "Not passed"
+      },
+      "academicStanding": {
+        "eyebrow": "Academic status",
+        "title": "Academic standing",
+        "description": "Your current standing based on published semester and cumulative GPA.",
+        "empty": "Standing will appear after grades are published.",
+        "semesterGpa": "Semester GPA",
+        "cgpa": "CGPA",
+        "failedCourses": "Failed courses"
       },
       "certificates": {
         "eyebrow": "Academic credentials",

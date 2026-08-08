@@ -1,36 +1,38 @@
-# Transcripts
+# Transcript requests (Step 14)
 
-Official transcripts are generated from **published gradebook records** only.
+Gradebook owns the **transcript request workflow**. Official PDF generation and certificate-style verification are Step 15 — gradebook only tracks requests and completion status.
 
-## Transcript types
+## Flow
 
-| Type | Scope |
-|------|--------|
-| `semester` | Single semester published grades |
-| `complete` | Full academic history |
-| `course_wise` | Course-filtered extract |
-| `official` | Institution-stamped official document |
-
-## Fields
-
-Each transcript includes:
-
-- `transcriptNumber` — unique registry identifier (`LNV-2026-TRN-0000001`)
-- `verificationCode` / `verificationURL` — public validation
-- `semesterGpa`, `cgpa`, `academicStanding` — read from gradebook models
-- `courses[]` — published course rows (letter grade, credits, result)
-- `version` — incremented on regeneration; prior versions remain immutable
+```
+Student submits request (pending)
+        ↓
+Faculty / institution reviews (approved | rejected)
+        ↓
+Institution marks completed → transcript.generated event
+        ↓
+Step 15 may attach AcademicTranscript document
+```
 
 ## API
 
-- `POST /api/v1/certificates/transcripts` — issue transcript
-- `GET /api/v1/certificates/transcripts` — list (scoped by role)
-- `GET /api/v1/certificates/academic-record` — consolidated academic record
-- `POST /api/v1/certificates/academic-record` — snapshot academic record + version
+| Method | Path | Role |
+| --- | --- | --- |
+| `POST` | `/api/v1/gradebook/transcript-requests` | Student |
+| `GET` | `/api/v1/gradebook/transcript-requests` | All (scoped) |
+| `POST` | `/api/v1/gradebook/transcript-requests/review` | Faculty / admin |
 
-## Audit
+## Model
 
-- `transcript.generated` — transcript document created
-- `academic_record.generated` — academic record version frozen
+`TranscriptRequest` (`transcript_requests` collection):
 
-See [AcademicRecords](./AcademicRecords.md) and [CertificateAPI](./CertificateAPI.md).
+- `requestType`: `official` | `semester` | `complete`
+- `status`: `pending` | `approved` | `rejected` | `completed`
+- Optional link to `AcademicTranscript` when Step 15 issues the document
+
+## Frontend
+
+- Faculty: `/faculty/transcripts`
+- Student transcript view: `/student/transcript` (Step 15 certificate module)
+
+See also [Gradebook.md](./Gradebook.md) and [GradebookAPI.md](./GradebookAPI.md).

@@ -254,6 +254,11 @@ export class GradebookPoliciesService {
       { courseId: input.courseId, count: summaries.length },
       { actorId: actor.userId },
     );
+    await eventBus.emit(
+      EVENTS.GRADE_APPROVED,
+      { courseId: input.courseId, institutionId, count: summaries.length },
+      { actorId: actor.userId },
+    );
 
     return { approved: summaries.length };
   }
@@ -515,6 +520,15 @@ export class GradebookPoliciesService {
         computedAt: new Date(),
       });
       saved.push(record);
+      await eventBus.emit(
+        EVENTS.STANDING_UPDATED,
+        {
+          studentId: studentId!,
+          institutionId,
+          standing,
+        },
+        { actorId: actor.userId },
+      );
     }
 
     await gradebookRepository.appendAudit({

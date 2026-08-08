@@ -4,6 +4,8 @@ import {
   assignProjectGradeSchema,
   createGradeAppealSchema,
   createGradeCommentSchema,
+  createTranscriptRequestSchema,
+  reviewTranscriptRequestSchema,
   finalizeCourseGradesSchema,
   gradeReportQuerySchema,
   gradebookBulkActionSchema,
@@ -227,5 +229,19 @@ gradebookRoutes.post(
   ctrl.computeStanding,
 );
 gradebookRoutes.get('/gradebook/standing', ...readAuth, ctrl.listStanding);
+
+gradebookRoutes.post(
+  '/gradebook/transcript-requests',
+  ...readAuth,
+  validate(createTranscriptRequestSchema),
+  ctrl.createTranscriptRequest,
+);
+gradebookRoutes.get('/gradebook/transcript-requests', ...readAuth, ctrl.listTranscriptRequests);
+gradebookRoutes.post(
+  '/gradebook/transcript-requests/review',
+  ...writeAuth,
+  validate(reviewTranscriptRequestSchema),
+  ctrl.reviewTranscriptRequest,
+);
 
 export default gradebookRoutes;

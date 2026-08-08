@@ -9,11 +9,13 @@ import {
 import type {
   CreateGradeAppealInput,
   CreateGradeCommentInput,
+  CreateTranscriptRequestInput,
   GradeReportQuery,
   GradebookBulkActionInput,
   LockCourseGradesInput,
   PublishCourseGradesInput,
   ResolveGradeAppealInput,
+  ReviewTranscriptRequestInput,
   SemesterGradeQuery,
   UnlockCourseGradesInput,
 } from '@learnova/validation';
@@ -157,6 +159,7 @@ export class GradebookEnterpriseService {
       details: { count: summaries.length },
     });
     await emitGradeEvent(EVENTS.GRADE_LOCKED, { courseId: input.courseId, count: summaries.length }, actor.userId);
+    await emitGradeEvent(EVENTS.GRADE_FROZEN, { courseId: input.courseId, count: summaries.length }, actor.userId);
 
     return { locked: summaries.length };
   }
@@ -254,6 +257,16 @@ export class GradebookEnterpriseService {
       details: { appealId: String(appeal._id) },
     });
 
+    await emitGradeEvent(
+      EVENTS.GRADE_APPEAL_CREATED,
+      {
+        appealId: String(appeal._id),
+        courseGradeId: input.courseGradeId,
+        studentId: String(summary.studentId),
+      },
+      actor.userId,
+    );
+
     return toDto(appeal);
   }
 
@@ -277,6 +290,16 @@ export class GradebookEnterpriseService {
       actorId: actor.userId,
       details: { appealId: input.appealId, status: input.status },
     });
+
+    await emitGradeEvent(
+      EVENTS.GRADE_APPEAL_RESOLVED,
+      {
+        appealId: input.appealId,
+        status: input.status,
+        studentId: String(appeal.studentId),
+      },
+      actor.userId,
+    );
 
     return toDto(appeal);
   }
@@ -601,6 +624,96 @@ export class GradebookEnterpriseService {
     }
 
     return report;
+  }
+
+  async createTranscriptRequest(input: CreateTranscriptRequestInput, actor: ActorContext) {
+    const institutionId = requireTenant(actor);
+    if (actor.role !== 'student') throw new ForbiddenError('Students only');
+
+    const student = await StudentModel.findOne({
+      institutionId: oid(institutionId),
+      email: actor.email.toLowerCase(),
+      deletedAt: null,
+    }).exec();
+    if (!student) throw new NotFoundError('Student record not found');
+
+    const doc = await gradebookRepository.createTranscriptRequest({
+      institutionId,
+      studentId: String(student._id),
+      semesterId: input.semesterId ?? null,
+      requestType: input.requestType,
+      reason: input.reason ?? null,
+    });
+
+    await gradebookRepository.appendAudit({
+      institutionId,
+      studentId: String(student._id),
+      event: 'transcript.requested',
+      actorId: actor.userId,
+      details: { requestId: String(doc._id), requestType: input.requestType },
+    });
+
+    return toDto(doc);
+  }
+
+  async listTranscriptRequests(
+    actor: ActorContext,
+    filters: { status?: string; studentId?: string } = {},
+  ) {
+    const institutionId = requireTenant(actor);
+    let studentId = filters.studentId;
+    if (actor.role === 'student') {
+      const student = await StudentModel.findOne({
+        institutionId: oid(institutionId),
+        email: actor.email.toLowerCase(),
+        deletedAt: null,
+      }).exec();
+      if (!student) throw new NotFoundError('Student record not found');
+      studentId = String(student._id);
+    }
+    const rows = await gradebookRepository.listTranscriptRequests(institutionId, {
+      studentId,
+      status: filters.status,
+    });
+    return rows.map(toDto);
+  }
+
+  async reviewTranscriptRequest(input: ReviewTranscriptRequestInput, actor: ActorContext) {
+    if (!canWrite(actor)) throw new ForbiddenError('Gradebook write access required');
+    const institutionId = requireTenant(actor);
+
+    const updated = await gradebookRepository.reviewTranscriptRequest(
+      institutionId,
+      input.requestId,
+      {
+        status: input.status,
+        reviewedBy: actor.userId,
+        reviewNotes: input.reviewNotes ?? null,
+      },
+    );
+    if (!updated) throw new NotFoundError('Transcript request not found');
+
+    await gradebookRepository.appendAudit({
+      institutionId,
+      studentId: String(updated.studentId),
+      event: 'transcript.reviewed',
+      actorId: actor.userId,
+      details: { requestId: input.requestId, status: input.status },
+    });
+
+    if (input.status === 'completed') {
+      await emitGradeEvent(
+        EVENTS.TRANSCRIPT_GENERATED,
+        {
+          requestId: input.requestId,
+          studentId: String(updated.studentId),
+          institutionId,
+        },
+        actor.userId,
+      );
+    }
+
+    return toDto(updated);
   }
 
   async enhancedInstitutionDashboard(courseId: string | undefined, actor: ActorContext) {

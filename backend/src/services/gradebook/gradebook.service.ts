@@ -497,6 +497,18 @@ export class GradebookService {
       String(refinedDraft.studentId),
     );
 
+    await eventBus.emit(
+      EVENTS.GRADE_CREATED,
+      {
+        entryId: String(entry._id),
+        courseId: String(refinedDraft.courseId),
+        studentId: String(refinedDraft.studentId),
+        institutionId,
+        activityKind: input.activityKind,
+      },
+      { actorId: actor.userId },
+    );
+
     await gradebookRepository.appendAudit({
       institutionId,
       courseId: String(refinedDraft.courseId),
