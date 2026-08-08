@@ -127,6 +127,8 @@ async function pageAccessBlocked(
   if (res.status === 403 || body.includes('Access denied') || body.includes('>403<')) return true;
   const finalUrl = res.url.toLowerCase();
   if (finalUrl.includes('/forbidden')) return true;
+  if (finalUrl.includes('/login')) return true;
+  if (res.status < 200 || res.status >= 400) return true;
   return !finalUrl.includes(blockedSegment.toLowerCase());
 }
 
