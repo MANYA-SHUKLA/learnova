@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CourseListParams } from '@/features/course';
 import { useCourseList } from '@/features/course';
 import type { FacultyListParams } from '@/features/faculty';
@@ -48,6 +48,18 @@ interface PersonSelectProps extends OmitSelectProps {
   limit?: number;
 }
 
+const DEFAULT_LIST_LIMIT = 25;
+
+function useDebouncedSearch(delay = 300) {
+  const [search, setSearch] = useState('');
+  const [debounced, setDebounced] = useState('');
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(search.trim()), delay);
+    return () => clearTimeout(id);
+  }, [search, delay]);
+  return { search, setSearch, debouncedQuery: debounced || undefined };
+}
+
 function useListOptions<T extends { id: string }>(
   items: T[] | undefined,
   toOption: (item: T) => SearchableSelectOption,
@@ -65,11 +77,12 @@ export function CourseSelect({
   label = 'Course',
   listParams,
   excludeIds,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
 }: CourseSelectProps & { value: string; onChange: (value: string) => void }) {
+  const { search, setSearch, debouncedQuery } = useDebouncedSearch();
   const query = useCourseList(
     {
       page: 1,
@@ -77,6 +90,7 @@ export function CourseSelect({
       sortBy: 'title',
       sortOrder: 'asc',
       includeDeleted: false,
+      q: debouncedQuery,
       ...listParams,
     },
     true,
@@ -102,6 +116,9 @@ export function CourseSelect({
       placeholder="Select a course"
       emptyMessage="No courses found."
       searchPlaceholder="Search courses…"
+      searchQuery={search}
+      onSearchQueryChange={setSearch}
+      serverSideSearch
     />
   );
 }
@@ -109,11 +126,12 @@ export function CourseSelect({
 export function StudentSelect({
   label = 'Student',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
 }: PersonSelectProps & { value: string; onChange: (value: string) => void }) {
+  const { search, setSearch, debouncedQuery } = useDebouncedSearch();
   const query = useStudentList(
     {
       page: 1,
@@ -121,6 +139,7 @@ export function StudentSelect({
       sortBy: 'fullName',
       sortOrder: 'asc',
       includeDeleted: false,
+      q: debouncedQuery,
       ...listParams,
     },
     true,
@@ -142,6 +161,9 @@ export function StudentSelect({
       placeholder="Select a student"
       emptyMessage="No students found."
       searchPlaceholder="Search students…"
+      searchQuery={search}
+      onSearchQueryChange={setSearch}
+      serverSideSearch
     />
   );
 }
@@ -149,11 +171,12 @@ export function StudentSelect({
 export function FacultySelect({
   label = 'Faculty',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
 }: PersonSelectProps & { value: string; onChange: (value: string) => void }) {
+  const { search, setSearch, debouncedQuery } = useDebouncedSearch();
   const query = useFacultyList(
     {
       page: 1,
@@ -161,6 +184,7 @@ export function FacultySelect({
       sortBy: 'fullName',
       sortOrder: 'asc',
       includeDeleted: false,
+      q: debouncedQuery,
       ...listParams,
     },
     true,
@@ -182,6 +206,9 @@ export function FacultySelect({
       placeholder="Select faculty"
       emptyMessage="No faculty found."
       searchPlaceholder="Search faculty…"
+      searchQuery={search}
+      onSearchQueryChange={setSearch}
+      serverSideSearch
     />
   );
 }
@@ -189,7 +216,7 @@ export function FacultySelect({
 export function DepartmentSelect({
   label = 'Department',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
@@ -219,7 +246,7 @@ export function DepartmentSelect({
 export function ProgramSelect({
   label = 'Program',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
@@ -249,7 +276,7 @@ export function ProgramSelect({
 export function CampusSelect({
   label = 'Campus',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
@@ -279,7 +306,7 @@ export function CampusSelect({
 export function SchoolSelect({
   label = 'School',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
@@ -309,7 +336,7 @@ export function SchoolSelect({
 export function AcademicYearSelect({
   label = 'Academic year',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
@@ -339,7 +366,7 @@ export function AcademicYearSelect({
 export function SemesterSelect({
   label = 'Semester',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
@@ -369,7 +396,7 @@ export function SemesterSelect({
 export function SectionSelect({
   label = 'Section',
   listParams,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
@@ -409,7 +436,7 @@ export function CourseMultiSelect({
   listParams,
   values,
   onChange,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   ...props
 }: CourseMultiSelectProps) {
   const query = useCourseList(
@@ -456,7 +483,7 @@ export function FacultyMultiSelect({
   listParams,
   values,
   onChange,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   ...props
 }: FacultyMultiSelectProps) {
   const query = useFacultyList(
@@ -503,7 +530,7 @@ export function ProgramMultiSelect({
   listParams,
   values,
   onChange,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   ...props
 }: OrgMultiSelectProps) {
   const query = usePrograms({ page: 1, limit, ...listParams });
@@ -531,7 +558,7 @@ export function SemesterMultiSelect({
   listParams,
   values,
   onChange,
-  limit = 100,
+  limit = DEFAULT_LIST_LIMIT,
   ...props
 }: OrgMultiSelectProps) {
   const query = useSemesters({ page: 1, limit, ...listParams });

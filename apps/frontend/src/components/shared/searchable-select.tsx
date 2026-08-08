@@ -26,6 +26,9 @@ export interface SearchableSelectProps {
   visibleRows?: number;
   className?: string;
   searchPlaceholder?: string;
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
+  serverSideSearch?: boolean;
 }
 
 const selectClassName =
@@ -47,14 +50,20 @@ export function SearchableSelect({
   visibleRows = 6,
   className,
   searchPlaceholder = 'Search…',
+  searchQuery,
+  onSearchQueryChange,
+  serverSideSearch = false,
 }: SearchableSelectProps) {
-  const [query, setQuery] = useState('');
+  const [localQuery, setLocalQuery] = useState('');
+  const query = searchQuery ?? localQuery;
+  const setQuery = onSearchQueryChange ?? setLocalQuery;
 
   const filtered = useMemo(() => {
+    if (serverSideSearch) return options;
     const normalized = query.trim().toLowerCase();
     if (!normalized) return options;
     return options.filter((option) => option.label.toLowerCase().includes(normalized));
-  }, [options, query]);
+  }, [options, query, serverSideSearch]);
 
   const isDisabled = disabled || loading;
 
@@ -124,9 +133,10 @@ export interface SearchableMultiSelectProps {
   visibleRows?: number;
   className?: string;
   searchPlaceholder?: string;
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
+  serverSideSearch?: boolean;
 }
-
-export function SearchableMultiSelect({
   id,
   label,
   hint,
@@ -139,14 +149,20 @@ export function SearchableMultiSelect({
   visibleRows = 8,
   className,
   searchPlaceholder = 'Search…',
+  searchQuery,
+  onSearchQueryChange,
+  serverSideSearch = false,
 }: SearchableMultiSelectProps) {
-  const [query, setQuery] = useState('');
+  const [localQuery, setLocalQuery] = useState('');
+  const query = searchQuery ?? localQuery;
+  const setQuery = onSearchQueryChange ?? setLocalQuery;
 
   const filtered = useMemo(() => {
+    if (serverSideSearch) return options;
     const normalized = query.trim().toLowerCase();
     if (!normalized) return options;
     return options.filter((option) => option.label.toLowerCase().includes(normalized));
-  }, [options, query]);
+  }, [options, query, serverSideSearch]);
 
   const toggle = (optionValue: string) => {
     onChange(
