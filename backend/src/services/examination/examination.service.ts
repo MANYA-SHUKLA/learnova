@@ -20,7 +20,10 @@ import type {
   ExamStatus,
   ExamStudentDashboard,
   AssessmentQuestionType,
+  ProctorEventType,
+  SecureBrowserPolicy,
 } from '@learnova/types';
+import { EXAM_VIOLATION_TYPES } from '@learnova/constants';
 import { eventBus } from '../../events/index.js';
 import { emitAttemptLive, emitExamLive } from '../../socket/exam-live.js';
 import { CourseModel } from '../../models/course.model.js';
@@ -59,7 +62,9 @@ export interface ActorContext {
 
 const MANAGE_ROLES = new Set(['institution_admin', 'super_admin']);
 
-const PROCTOR_TO_VIOLATION: Record<string, string> = {
+type ExamViolationType = (typeof EXAM_VIOLATION_TYPES)[number];
+
+const PROCTOR_TO_VIOLATION: Record<string, ExamViolationType> = {
   tab_switch: 'tab_switch',
   fullscreen_exit: 'fullscreen_exit',
   camera_off: 'camera_blocked',
@@ -67,7 +72,7 @@ const PROCTOR_TO_VIOLATION: Record<string, string> = {
   suspicious_activity: 'shortcut_attempt',
 };
 
-function mapViolationType(eventType: string): string | null {
+function mapViolationType(eventType: string): ExamViolationType | null {
   return PROCTOR_TO_VIOLATION[eventType] ?? null;
 }
 
@@ -179,6 +184,32 @@ function scheduleFromDoc(exam: {
   };
 }): ExamSchedule {
   return toExamScheduleDto(exam.schedule) as ExamSchedule;
+}
+
+function scheduleFromExamContext(exam: { schedule: Record<string, unknown> }): ExamSchedule {
+  return scheduleFromDoc({
+    schedule: exam.schedule as Parameters<typeof scheduleFromDoc>[0]['schedule'],
+  });
+}
+
+function rulesFromExamContext(rules: Record<string, unknown>) {
+  return {
+    attemptLimit: Number(rules.attemptLimit ?? 1),
+    durationMinutes: Number(rules.durationMinutes ?? 0),
+    shuffleQuestions: Boolean(rules.shuffleQuestions ?? false),
+    shuffleOptions: Boolean(rules.shuffleOptions ?? false),
+  };
+}
+
+function secureBrowserFromProctoring(proctoring: Record<string, unknown>): SecureBrowserPolicy {
+  const value = proctoring.secureBrowser;
+  if (value === 'off' || value === 'recommended' || value === 'required') return value;
+  return 'off';
+}
+
+function parseSecureBrowserPolicy(value?: string): SecureBrowserPolicy | undefined {
+  if (value === 'off' || value === 'recommended' || value === 'required') return value;
+  return undefined;
 }
 
 export class ExaminationService {
@@ -900,14 +931,16 @@ export class ExaminationService {
       throw new ConflictError('Exam is not available for attempts');
     }
 
-    const schedule = scheduleFromDoc(examContext);
+    const schedule = scheduleFromExamContext(examContext);
     const window = examinationEngine.canStartExamAttempt(schedule);
     if (!window.allowed) {
       throw new ConflictError(window.reason ?? 'Exam window is not open');
     }
 
+    const examRules = rulesFromExamContext(examContext.rules);
+
     const browserCheck = examinationEngine.validateSecureBrowser(
-      examContext.proctoring.secureBrowser,
+      secureBrowserFromProctoring(examContext.proctoring),
       input.secureBrowserAcknowledged ?? false,
     );
     if (!browserCheck.allowed) {
@@ -922,7 +955,7 @@ export class ExaminationService {
       String(student._id),
     );
     if (
-      !examinationEngine.canStartQuestionAttempt(existingCount, examContext.rules.attemptLimit)
+      !examinationEngine.canStartQuestionAttempt(existingCount, examRules.attemptLimit)
     ) {
       throw new ConflictError('Maximum attempt limit reached');
     }
@@ -935,7 +968,7 @@ export class ExaminationService {
       String(student._id),
     );
     const extendedDurationMinutes = enterprise.computeExtendedDurationMinutes(
-      examContext.rules.durationMinutes,
+      examRules.durationMinutes,
       accommodation,
     );
     const token = enterprise.sessionToken();
@@ -957,7 +990,7 @@ export class ExaminationService {
         randomizeQuestions: s.randomizeQuestions,
         randomQuestionCount: s.randomQuestionCount ?? null,
       })),
-      examContext.rules.shuffleQuestions,
+      examRules.shuffleQuestions,
     );
 
     const attempt = await examinationRepository.createAttempt({
@@ -993,7 +1026,7 @@ export class ExaminationService {
     );
     const rendered = questions.map((q) =>
       examinationEngine.renderQuestionForAttempt(q, {
-        shuffleOptions: examContext.rules.shuffleOptions,
+        shuffleOptions: examRules.shuffleOptions,
         hideCorrectAnswers: true,
       }),
     );
@@ -1052,7 +1085,7 @@ export class ExaminationService {
           attemptId: String(attempt._id),
           studentId: String(student._id),
           startedAt,
-          durationMinutes: examContext.rules.durationMinutes + extendedDurationMinutes,
+          durationMinutes: examRules.durationMinutes + extendedDurationMinutes,
         },
         startedAt,
       ),
@@ -1069,7 +1102,7 @@ export class ExaminationService {
           attemptId: String(attempt._id),
           studentId: String(student._id),
           startedAt,
-          durationMinutes: examContext.rules.durationMinutes + extendedDurationMinutes,
+          durationMinutes: examRules.durationMinutes + extendedDurationMinutes,
         },
         startedAt,
       ),
@@ -1796,7 +1829,7 @@ export class ExaminationService {
     return this.logProctorEvent(
       {
         attemptId,
-        eventType: eventMap[input.violationType] ?? 'suspicious_activity',
+        eventType: (eventMap[input.violationType] ?? 'suspicious_activity') as ProctorEventType,
         severity: 'warning',
         message: input.message ?? input.violationType,
         metadata: { ...input.metadata, violationType: input.violationType, reportedBy: 'student' },
@@ -1862,11 +1895,23 @@ export class ExaminationService {
       description: input.description ?? null,
       attemptLimit: input.attemptLimit ?? 1,
       negativeMarking: input.negativeMarking ?? false,
+      negativeMarkValue: 0.25,
+      shuffleQuestions: true,
+      shuffleOptions: true,
+      allowBacktracking: true,
+      calculatorAllowed: false,
+      proctoringMode: 'none',
+      secureBrowser: parseSecureBrowserPolicy(input.secureBrowser) ?? 'recommended',
+      requireFullscreen: true,
+      blockCopyPaste: true,
+      blockRightClick: true,
+      blockNewTabs: true,
+      maxTabSwitches: 3,
+      autoTerminateOnViolation: false,
+      requireWebcam: input.requireWebcam ?? false,
+      requireMicrophone: input.requireMicrophone ?? false,
       createdBy: oid(actor.userId),
       deletedAt: null,
-      ...(input.secureBrowser ? { secureBrowser: input.secureBrowser } : {}),
-      ...(input.requireWebcam !== undefined ? { requireWebcam: input.requireWebcam } : {}),
-      ...(input.requireMicrophone !== undefined ? { requireMicrophone: input.requireMicrophone } : {}),
     });
     return toDto(doc);
   }

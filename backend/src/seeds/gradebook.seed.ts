@@ -231,10 +231,10 @@ export async function seedGradebook(
       const rows = entries
         .filter((e) => e.status !== 'pending')
         .map((e) => ({
-          percentage: e.percentage,
+          percentage: e.percentage ?? null,
           weightage: e.weightage,
-          marksObtained: e.marksObtained,
-          totalMarks: e.totalMarks,
+          marksObtained: e.marksObtained ?? null,
+          totalMarks: e.totalMarks ?? null,
         }));
       const weightedPercentage = aggregateWeightedPercentage(rows);
       const marks = sumMarks(rows);
@@ -339,7 +339,7 @@ export async function seedGradebook(
       const creditMap = new Map(courses.map((c) => [String(c._id), c.credits ?? 3]));
       const semesterGpa = computeSemesterGpa(
         rows.map((r) => ({
-          gradePoints: r.gradePoints,
+          gradePoints: r.gradePoints ?? null,
           credits: creditMap.get(String(r.courseId)) ?? 3,
         })),
       );

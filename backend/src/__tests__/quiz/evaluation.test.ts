@@ -102,7 +102,7 @@ describe('quiz engine attempt rules', () => {
   it('detects expired timed attempts', () => {
     const startedAt = new Date(Date.now() - 31 * 60 * 1000);
     const ctx = {
-      quizId: 'quiz1',
+      activityId: 'quiz1',
       attemptId: 'attempt1',
       studentId: 'student1',
       startedAt,

@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType, type Types } from 'mongoose';
-import { CERTIFICATE_DOCUMENT_TYPES, CERTIFICATE_STATUSES } from '@learnova/constants';
+import { CERTIFICATE_DOCUMENT_TYPES } from '@learnova/constants';
 
 const templateSignatureSchema = new Schema(
   {

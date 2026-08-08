@@ -21,7 +21,6 @@ import { DepartmentModel } from '../../models/department.model.js';
 import { ProgramModel } from '../../models/program.model.js';
 import { BatchModel } from '../../models/batch.model.js';
 import { SectionModel } from '../../models/section.model.js';
-import { FacultyModel } from '../../models/faculty.model.js';
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
 import {
@@ -33,7 +32,6 @@ import {
 import { studentRepository } from '../../repositories/student/index.js';
 import {
   assertStudentSelfAccess,
-  buildFacultyCourseFilter,
   buildFacultyStudentFilter,
   facultyCanAccessStudent,
   scopeStudentSelfFilter,

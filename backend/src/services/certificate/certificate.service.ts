@@ -421,10 +421,14 @@ export class CertificateService {
   async bulkIssueCourseCertificates(input: BulkIssueCertificatesInput, actor: ActorContext) {
     if (!canWrite(actor)) throw new ForbiddenError('Certificate write access required');
     const institutionId = requireTenant(actor);
+    if (!input.courseId) {
+      throw new ValidationError('courseId is required for bulk course certificate issue');
+    }
+    const courseId = input.courseId;
 
     const summaries = await CourseGradeSummaryModel.find({
       institutionId: oid(institutionId),
-      courseId: oid(input.courseId),
+      courseId: oid(courseId),
       published: true,
       result: 'pass',
       ...(input.studentIds?.length
@@ -439,7 +443,8 @@ export class CertificateService {
           {
             studentId: String(summary.studentId),
             documentType: 'course_completion',
-            courseId: input.courseId!,
+            courseId,
+            publish: input.publish ?? false,
           },
           actor,
         );

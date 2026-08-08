@@ -205,7 +205,7 @@ export class PracticeLabRepository {
   }
 
   async createTestCases(data: Record<string, unknown>[]): Promise<ProblemTestCaseDocument[]> {
-    return ProblemTestCaseModel.insertMany(data);
+    return ProblemTestCaseModel.insertMany(data) as unknown as ProblemTestCaseDocument[];
   }
 
   async updateTestCase(

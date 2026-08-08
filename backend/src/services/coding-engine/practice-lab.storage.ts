@@ -77,7 +77,7 @@ export function createPracticeLabCodingStorage(): CodingEngineStorage {
         results: data.results,
       });
       if (!updated) return null;
-      return toSubmissionRecord(updated);
+      return toSubmissionRecord(updated as unknown as Parameters<typeof toSubmissionRecord>[0]);
     },
   };
 }

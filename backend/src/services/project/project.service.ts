@@ -63,7 +63,6 @@ import {
   generateSlug,
   pageMeta,
   parseDate,
-  resolveGradeOutcome,
   resolveSubmissionStatus,
   rowsToCsv,
 } from './project.helpers.js';
@@ -1623,7 +1622,7 @@ export class ProjectService {
 
   /** @deprecated Step 11 — use markEvaluationReady. Gradebook (Step 13) assigns marks. */
   async prepareGrade(
-    submissionId: string,
+    _submissionId: string,
     _input: GradeProjectSubmissionInput,
     _actor: ActorContext,
   ) {

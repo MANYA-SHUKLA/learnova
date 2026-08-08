@@ -34,7 +34,6 @@ import { eventBus } from '../../events/index.js';
 import { CourseModel } from '../../models/course.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { StudentModel } from '../../models/student.model.js';
-import { UserModel } from '../../models/user.model.js';
 import { LabProblemModel } from '../../models/lab-problem.model.js';
 import { ProblemTestCaseModel } from '../../models/problem-test-case.model.js';
 import { StudentCodeSubmissionModel } from '../../models/student-code-submission.model.js';
@@ -302,6 +301,8 @@ function toSubmissionDto(doc: {
     updatedAt: toIso(doc.updatedAt) ?? new Date().toISOString(),
   };
 }
+
+type SubmissionDocInput = Parameters<typeof toSubmissionDto>[0];
 
 function toExecutionDto(doc: {
   _id: { toString(): string };
@@ -1201,7 +1202,7 @@ class PracticeLabService {
 
     const updated = await practiceLabRepository.findSubmissionById(institutionId, created.id);
     if (!updated) throw new NotFoundError('Submission not found');
-    return toSubmissionDto(updated);
+    return toSubmissionDto(updated as unknown as SubmissionDocInput);
   }
 
   private async updateProgressAfterSubmission(input: {
@@ -1296,7 +1297,7 @@ class PracticeLabService {
     }
     const result = await practiceLabRepository.listSubmissions(filter, query);
     return {
-      items: result.items.map(toSubmissionDto),
+      items: result.items.map((doc) => toSubmissionDto(doc as unknown as SubmissionDocInput)),
       meta: pageMeta(result.total, result.page, result.limit),
     };
   }
@@ -1311,7 +1312,7 @@ class PracticeLabService {
         throw new ForbiddenError('Not your submission');
       }
     }
-    return toSubmissionDto(submission);
+    return toSubmissionDto(submission as unknown as SubmissionDocInput);
   }
 
   async listExecutions(query: Record<string, unknown>, actor: ActorContext) {
@@ -1453,11 +1454,13 @@ class PracticeLabService {
     const entries: LeaderboardEntry[] = [];
     let rank = (page - 1) * limit + 1;
     for (const row of slice) {
-      const student = await StudentModel.findById(row.studentId).select('userId').lean();
+      const student = await StudentModel.findById(row.studentId)
+        .select('firstName lastName email')
+        .lean();
       let displayName = String(row.studentId);
-      if (student?.userId) {
-        const user = await UserModel.findById(student.userId).select('firstName lastName').lean();
-        if (user) displayName = `${user.firstName} ${user.lastName}`.trim();
+      if (student) {
+        displayName =
+          `${student.firstName ?? ''} ${student.lastName ?? ''}`.trim() || student.email;
       }
       entries.push({
         rank: rank++,

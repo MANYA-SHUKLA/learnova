@@ -1307,7 +1307,7 @@ export class QuizService {
       questions: rendered,
       remainingSeconds: quizEngine.remainingSeconds(
         {
-          quizId: input.quizId,
+          activityId: input.quizId,
           attemptId: String(attempt._id),
           studentId: String(student._id),
           startedAt,
@@ -1341,7 +1341,7 @@ export class QuizService {
 
     const expired = quizEngine.isAttemptExpired(
       {
-        quizId: String(quiz._id),
+        activityId: String(quiz._id),
         attemptId,
         studentId: String(student._id),
         startedAt: attempt.startedAt,

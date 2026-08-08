@@ -1,16 +1,10 @@
 import { Types } from 'mongoose';
 import { EVENTS } from '@learnova/events';
-import { GRADEBOOK_DEFAULTS } from '@learnova/constants';
 import {
-  aggregateWeightedPercentage,
   computeCgpa,
   computeGpaWithFormula,
   computeSemesterGpa,
   gradeDistribution,
-  gradePointsFromPercentage,
-  letterGradeFromPercentage,
-  resultFromPercentage,
-  sumMarks,
 } from '@learnova/shared';
 import type {
   CreateGradeAppealInput,
@@ -31,7 +25,6 @@ import { CourseGradeSummaryModel } from '../../models/course-grade-summary.model
 import { GradebookEntryModel } from '../../models/gradebook-entry.model.js';
 import { eventBus } from '../../events/index.js';
 import {
-  ConflictError,
   ForbiddenError,
   NotFoundError,
   ValidationError,
@@ -39,7 +32,6 @@ import {
 import { gradebookRepository } from '../../repositories/gradebook/gradebook.repository.js';
 import {
   ACTIVE_ENROLLMENT_STATUSES,
-  distributeWeightage,
   oid,
   rowsToCsv,
   toDto,
@@ -395,7 +387,7 @@ export class GradebookEnterpriseService {
       summary: summaryMap.get(studentId) ? (toDto(summaryMap.get(studentId)!) as never) : null,
       entries: entries
         .filter((e) => String(e.studentId) === studentId)
-        .map(toDto) as CourseGradebookMatrix['students'][0]['entries'],
+        .map(toDto) as unknown as CourseGradebookMatrix['students'][0]['entries'],
     }));
 
     return {
@@ -441,13 +433,13 @@ export class GradebookEnterpriseService {
 
       const semesterGpa = computeGpaWithFormula(
         rows.map((row) => ({
-          gradePoints: row.gradePoints,
+          gradePoints: row.gradePoints ?? null,
           credits: creditMap.get(String(row.courseId)) ?? 0,
         })),
         policy.gpaFormula,
       ) ?? computeSemesterGpa(
         rows.map((row) => ({
-          gradePoints: row.gradePoints,
+          gradePoints: row.gradePoints ?? null,
           credits: creditMap.get(String(row.courseId)) ?? 0,
         })),
       );
@@ -499,14 +491,14 @@ export class GradebookEnterpriseService {
     const cgpa =
       computeGpaWithFormula(
         semesters.map((s) => ({
-          gradePoints: s.semesterGpa,
+          gradePoints: s.semesterGpa ?? null,
           credits: s.totalCredits,
         })),
         policy.cgpaFormula,
       ) ??
       computeCgpa(
         semesters.map((s) => ({
-          semesterGpa: s.semesterGpa,
+          semesterGpa: s.semesterGpa ?? null,
           totalCredits: s.totalCredits,
         })),
       );

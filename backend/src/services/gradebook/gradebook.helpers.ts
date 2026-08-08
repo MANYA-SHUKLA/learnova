@@ -74,6 +74,7 @@ export function pickAttemptByPolicy(
       rows.reduce((sum, row) => sum + row.percentage, 0) / Math.max(rows.length, 1);
     const avgScore = rows.reduce((sum, row) => sum + row.score, 0) / Math.max(rows.length, 1);
     const latest = [...rows].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    if (!latest) return null;
     return {
       sourceRefId: latest.sourceRefId,
       percentage: Math.round(avgPct * 100) / 100,

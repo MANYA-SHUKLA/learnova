@@ -187,9 +187,9 @@ async function recomputeStudentSummary(
       activityId: entry.activityId as Types.ObjectId,
       activityTitle: entry.activityTitle,
       sourceRefId: entry.sourceRefId as Types.ObjectId,
-      percentage: entry.percentage,
-      marksObtained: entry.marksObtained,
-      totalMarks: entry.totalMarks,
+      percentage: entry.percentage ?? null,
+      marksObtained: entry.marksObtained ?? null,
+      totalMarks: entry.totalMarks ?? null,
       weightage: entry.weightage,
       status: entry.status,
       consumedAt: entry.consumedAt as Date,
@@ -296,19 +296,19 @@ async function applyRelativeGradesForCourse(institutionId: string, courseId: str
   const letterMap = applyRelativeLetterGrades(
     summaries.map((row) => ({
       studentId: String(row.studentId),
-      weightedPercentage: row.weightedPercentage,
-      letterGrade: row.letterGrade,
+      weightedPercentage: row.weightedPercentage ?? null,
+      letterGrade: row.letterGrade ?? null,
     })),
   );
 
   for (const summary of summaries) {
     const studentId = String(summary.studentId);
     const letterGrade = letterMap.get(studentId) ?? summary.letterGrade;
-    const gradePoints = gradePointsFromPercentage(summary.weightedPercentage);
+    const gradePoints = gradePointsFromPercentage(summary.weightedPercentage ?? null);
     const result = evaluatePassFail(
       {
-        percentage: summary.weightedPercentage,
-        letterGrade,
+        percentage: summary.weightedPercentage ?? null,
+        letterGrade: letterGrade ?? null,
         marksObtained: summary.totalMarksEarned,
         totalMarks: summary.totalMarksPossible,
         passingMarks:
@@ -355,6 +355,8 @@ export class GradebookService {
       studentId: scopedStudent,
       page: 1,
       limit: 100,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
     };
     return this.listEntries(query, actor);
   }
@@ -786,7 +788,7 @@ export class GradebookService {
       semesterGpa: semesterRows[0]?.semesterGpa ?? null,
       cgpa: cgpaRecord?.cgpa ?? null,
       pendingAppeals,
-      recentEntries: recentEntries.map(toDto) as GradebookStudentDashboard['recentEntries'],
+      recentEntries: recentEntries.map(toDto) as unknown as GradebookStudentDashboard['recentEntries'],
     };
   }
 

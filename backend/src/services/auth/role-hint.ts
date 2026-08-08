@@ -3,14 +3,14 @@
  */
 
 import { AUTH } from '@learnova/constants';
-import type { ActiveRole } from '@learnova/types';
+import type { ActiveRole, Role } from '@learnova/types';
 import { isActiveRole } from '@learnova/shared/roles';
 import { jwtConfig } from '../../config/slices.js';
 import { hmacSign } from '../../security/index.js';
 import { timingSafeEqual } from 'node:crypto';
 
 export function signRoleHint(role: string): string | null {
-  if (!isActiveRole(role)) return null;
+  if (!isActiveRole(role as Role)) return null;
   const exp = Date.now() + AUTH.REFRESH_TTL_MS;
   const payload = `${role}.${exp}`;
   const sig = hmacSign(payload, jwtConfig.accessSecret);
@@ -22,7 +22,7 @@ export function verifyRoleHint(hint: string): ActiveRole | null {
   if (parts.length !== 3) return null;
 
   const [role, expStr, sig] = parts;
-  if (!role || !expStr || !sig || !isActiveRole(role)) return null;
+  if (!role || !expStr || !sig || !isActiveRole(role as Role)) return null;
 
   const exp = Number(expStr);
   if (!Number.isFinite(exp) || exp < Date.now()) return null;
@@ -33,5 +33,5 @@ export function verifyRoleHint(hint: string): ActiveRole | null {
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
 
-  return role;
+  return role as ActiveRole;
 }

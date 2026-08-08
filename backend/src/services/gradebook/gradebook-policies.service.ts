@@ -42,7 +42,7 @@ function canWrite(actor: ActorContext): boolean {
   return WRITE_ROLES.has(actor.role);
 }
 
-async function assertCourseAccess(actor: ActorContext, institutionId: string, courseId: string) {
+async function assertCourseAccess(actor: ActorContext, _institutionId: string, courseId: string) {
   await gradebookService.getCourseSummaries(courseId, actor);
 }
 
@@ -293,7 +293,28 @@ export class GradebookPoliciesService {
       const entries = entriesByStudent.get(String(summary.studentId)) ?? [];
 
       const nextVersion = (summary.snapshotVersion ?? 0) + 1;
-      const snapshotData = snapshotFromSummary(summary, entries, nextVersion, now);
+      const snapshotData = snapshotFromSummary(
+        {
+          percentage: summary.percentage ?? null,
+          letterGrade: summary.letterGrade ?? null,
+          gradePoints: summary.gradePoints ?? null,
+          result: summary.result ?? null,
+          finalMarks: summary.finalMarks ?? null,
+          totalMarksEarned: summary.totalMarksEarned,
+          totalMarksPossible: summary.totalMarksPossible,
+        },
+        entries.map((entry) => ({
+          activityKind: entry.activityKind,
+          activityTitle: entry.activityTitle,
+          percentage: entry.percentage ?? null,
+          marksObtained: entry.marksObtained ?? null,
+          totalMarks: entry.totalMarks ?? null,
+          weightage: entry.weightage,
+          metadata: (entry.metadata ?? undefined) as Record<string, unknown> | undefined,
+        })),
+        nextVersion,
+        now,
+      );
 
       const snapshot = await gradebookRepository.createSnapshot({
         institutionId,

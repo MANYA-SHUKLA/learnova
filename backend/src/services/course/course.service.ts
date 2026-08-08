@@ -16,7 +16,6 @@ import type {
 import { createCourseSchema } from '@learnova/validation';
 import { eventBus } from '../../events/index.js';
 import { DepartmentModel } from '../../models/department.model.js';
-import { FacultyModel } from '../../models/faculty.model.js';
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
 import {

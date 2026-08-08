@@ -131,7 +131,6 @@ export function policyConfigFromDoc(
   doc: Record<string, unknown> | null | undefined,
 ): AcademicPolicyConfig {
   if (!doc) return DEFAULT_ACADEMIC_POLICY;
-  const thresholds = doc.standingThresholds as Record<string, unknown> | undefined;
   return {
     creditBasedGrading: Boolean(doc.creditBasedGrading ?? DEFAULT_ACADEMIC_POLICY.creditBasedGrading),
     passingCriteria:

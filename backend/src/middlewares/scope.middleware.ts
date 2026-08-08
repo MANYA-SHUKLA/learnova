@@ -23,6 +23,10 @@ async function deny(
   next(new ForbiddenError(reason));
 }
 
+function paramString(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 /** Requires JWT institutionId — blocks cross-tenant API access at the edge. */
 export function tenantGuard() {
   return (req: Request, _res: Response, next: NextFunction): void => {
@@ -86,7 +90,7 @@ export function studentOwnershipGuard(paramKey = 'id') {
 
       const actor = actorFromRequest(req);
       const institutionId = requireActorTenant(actor);
-      const studentId = req.params[paramKey];
+      const studentId = paramString(req.params[paramKey]);
       if (!studentId) {
         next();
         return;
@@ -117,7 +121,7 @@ export function facultyStudentGuard(paramKey = 'id') {
 
       const actor = actorFromRequest(req);
       const institutionId = requireActorTenant(actor);
-      const studentId = req.params[paramKey];
+      const studentId = paramString(req.params[paramKey]);
       if (!studentId) {
         next();
         return;

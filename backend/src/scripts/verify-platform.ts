@@ -101,17 +101,6 @@ async function pageStatus(path: string, cookies = '', role?: string): Promise<nu
   return res.status;
 }
 
-async function pageRedirect(path: string, cookies: string, role: string): Promise<{ status: number; location: string | null }> {
-  const hint = signRoleHint(role) ?? role;
-  const res = await fetch(`${WEB}${path}`, {
-    redirect: 'manual',
-    headers: {
-      Cookie: `${cookies}; learnova_session=1; learnova_role=${encodeURIComponent(hint)}`,
-    },
-  });
-  return { status: res.status, location: res.headers.get('location') };
-}
-
 /** True when the user cannot access the requested path (403, /forbidden, or redirect away). */
 async function pageAccessBlocked(
   path: string,

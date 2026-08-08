@@ -96,7 +96,7 @@ class Judge0Client {
     return Boolean(this.baseUrl);
   }
 
-  private headers(): HeadersInit {
+  private headers(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -155,7 +155,7 @@ class Judge0Client {
 
     if (!res.ok) {
       const text = await res.text();
-      logger.domain('judge0', 'error', 'Create submission failed', {
+      logger.domain('system', 'error', 'Create submission failed', {
         status: res.status,
         body: text.slice(0, 500),
       });
