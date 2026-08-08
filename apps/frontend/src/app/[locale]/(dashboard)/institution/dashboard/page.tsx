@@ -9,7 +9,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  PageHeader,
   Skeleton,
+  StatCard,
+  StatGrid,
 } from '@learnova/ui';
 import { motion } from 'framer-motion';
 import {
@@ -283,26 +286,24 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            {t('title')}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t('description')}</p>
-        </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <Button asChild variant="outline" className="w-full rounded-xl sm:w-auto">
-            <Link href={APP_ROUTES.INSTITUTION_PROFILE}>{t('editBranding')}</Link>
-          </Button>
-          <Button asChild className="w-full rounded-xl sm:w-auto">
-            <Link href={APP_ROUTES.INSTITUTION}>
-              {t('openInstitution')}
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow={t('eyebrow')}
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <>
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link href={APP_ROUTES.INSTITUTION_PROFILE}>{t('editBranding')}</Link>
+            </Button>
+            <Button asChild className="rounded-xl">
+              <Link href={APP_ROUTES.INSTITUTION}>
+                {t('openInstitution')}
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </>
+        }
+      />
 
       <motion.div {...cardMotion} transition={{ duration: 0.35 }}>
         {institutionQuery.isLoading ? (
@@ -420,38 +421,22 @@ export default function DashboardPage() {
         )}
       </motion.div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {stats.map((stat, index) => {
+      <StatGrid className="sm:grid-cols-2 xl:grid-cols-3">
+        {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div
-              key={stat.key}
-              {...cardMotion}
-              transition={{ duration: 0.3, delay: index * 0.04 }}
-            >
-              <Link href={stat.href} className="block h-full">
-                <Card className="card-interactive h-full rounded-2xl border-border/80">
-                  <CardContent className="flex items-start justify-between gap-4 p-5">
-                    <div>
-                      <p className="text-sm text-muted-foreground">{stat.label}</p>
-                      {stat.loading ? (
-                        <Skeleton className="mt-2 h-8 w-16" />
-                      ) : (
-                        <p className="mt-2 font-display text-3xl font-semibold tabular-nums tracking-tight">
-                          {stat.value}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="size-5" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
+            <Link key={stat.key} href={stat.href} className="block h-full">
+              <StatCard
+                label={stat.label}
+                value={stat.value}
+                icon={Icon}
+                loading={stat.loading}
+                accent="primary"
+              />
+            </Link>
           );
         })}
-      </div>
+      </StatGrid>
 
       {hasNoStructure ? (
         <EmptyState
