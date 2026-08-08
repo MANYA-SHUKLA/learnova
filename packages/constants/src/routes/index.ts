@@ -29,6 +29,7 @@ export const API_ROUTES = {
   QUESTION_BANK: '/question-bank',
   EXAMINATIONS: '/examinations',
   GRADEBOOK: '/gradebook',
+  CERTIFICATES: '/certificates',
   LMS: '/lms',
   ERP: '/erp',
   EXAMINATION: '/examination',
@@ -151,6 +152,10 @@ export const APP_ROUTES = {
   STUDENT_GRADEBOOK: '/student/gradebook',
   STUDENT_GRADES: '/student/grades',
   STUDENT_SEMESTER: '/student/semester',
+  INSTITUTION_CERTIFICATES: '/institution/certificates',
+  FACULTY_CERTIFICATES: '/faculty/certificates',
+  STUDENT_CERTIFICATES: '/student/certificates',
+  VERIFY_CERTIFICATE: '/verify/certificate',
   CHANGE_PASSWORD: '/account/change-password',
 } as const;
 

@@ -59,7 +59,10 @@ export type Permission =
   | 'quiz:manage'
   | 'gradebook:read'
   | 'gradebook:write'
-  | 'gradebook:manage';
+  | 'gradebook:manage'
+  | 'certificate:read'
+  | 'certificate:write'
+  | 'certificate:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
 

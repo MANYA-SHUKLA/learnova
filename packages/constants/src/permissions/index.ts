@@ -55,6 +55,9 @@ export const PERMISSIONS = {
   GRADEBOOK_READ: 'gradebook:read',
   GRADEBOOK_WRITE: 'gradebook:write',
   GRADEBOOK_MANAGE: 'gradebook:manage',
+  CERTIFICATE_READ: 'certificate:read',
+  CERTIFICATE_WRITE: 'certificate:write',
+  CERTIFICATE_MANAGE: 'certificate:manage',
 } as const;
 
 export type PermissionConstant = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

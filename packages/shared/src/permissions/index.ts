@@ -33,6 +33,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'quiz:read',
     'quiz:write',
     'gradebook:read',
+    'certificate:read',
   ],
   faculty: [
     'lms:read',
@@ -68,6 +69,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'quiz:write',
     'gradebook:read',
     'gradebook:write',
+    'certificate:read',
+    'certificate:write',
   ],
   institution_admin: [
     'lms:read',
@@ -122,6 +125,9 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'gradebook:read',
     'gradebook:write',
     'gradebook:manage',
+    'certificate:read',
+    'certificate:write',
+    'certificate:manage',
   ],
   // Future roles — empty until activated
   super_admin: [],
