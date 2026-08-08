@@ -9,7 +9,9 @@
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.tsserver.maxTsServerMemory": 4096,
   "eslint.workingDirectories": [
-    { "pattern": "apps/*" },
+    { "pattern": "frontend" },
+    { "pattern": "backend" },
+    { "pattern": "worker" },
     { "pattern": "packages/*" }
   ],
   "tailwindCSS.experimental.classRegex": [

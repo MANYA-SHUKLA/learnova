@@ -4,7 +4,7 @@
 # Option A (recommended): connect the GitHub repo and use this blueprint
 #   Root of service stays the monorepo; build/start run from repo root.
 #
-# Option B: create a Web Service manually with Root Directory = apps/backend
+# Option B: create a Web Service manually with Root Directory = backend
 #   Build:  bash scripts/render-build.sh
 #   Start:  bash scripts/render-start.sh
 #   (those scripts cd to the monorepo root for pnpm workspaces)
