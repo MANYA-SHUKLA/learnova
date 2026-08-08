@@ -107,10 +107,20 @@ async function pageRedirect(path: string, cookies: string, role: string): Promis
   return { status: res.status, location: res.headers.get('location') };
 }
 
+interface ApiListResponse {
+  success: boolean;
+  data?: { items?: unknown[] };
+  meta?: { total?: number };
+}
+
 interface ApiProbe {
   path: string;
   expectOk: boolean;
   label?: string;
+}
+
+function listTotal(json: ApiListResponse): number {
+  return json.meta?.total ?? json.data?.items?.length ?? 0;
 }
 
 function pass(ok: boolean): string {
@@ -368,32 +378,28 @@ async function main(): Promise<void> {
     });
     console.log(`  Student own gradebook dash: ${pass(ownGrades.json.success)}`);
 
-    const ownCertificates = await api<{ success: boolean; data?: { certificates?: unknown[] } }>(
-      '/certificates/dashboard/student',
-      { token: student.token },
-    );
-    const certItems = ownCertificates.json.data?.certificates ?? [];
+    const ownCertificates = await api<{
+      success: boolean;
+      data?: { certificateCount?: number; recentCertificates?: unknown[] };
+    }>('/certificates/dashboard/student', { token: student.token });
+    const certCount =
+      ownCertificates.json.data?.certificateCount ??
+      ownCertificates.json.data?.recentCertificates?.length ??
+      0;
     console.log(
-      `  Student own certificates: ${pass(ownCertificates.json.success && certItems.length > 0)} (${certItems.length})`,
+      `  Student own certificates: ${track(failures, 'Student own certificates', ownCertificates.json.success && certCount > 0)} (${certCount})`,
     );
-  }
-
-  if (admin) {
-    const inst = await api<{ success: boolean }>('/campuses?page=1&limit=1', { token: admin.token });
-    console.log(`  Admin campuses: ${pass(inst.json.success)}`);
   }
 
   if (faculty && student) {
-    const facultyCourses = await api<{ success: boolean; data?: { items?: unknown[]; meta?: { total?: number } } }>(
-      '/courses?page=1&limit=5',
-      { token: faculty.token },
-    );
-    const facultyStudents = await api<{ success: boolean; data?: { items?: unknown[]; meta?: { total?: number } } }>(
-      '/students?page=1&limit=5',
-      { token: faculty.token },
-    );
-    const courseTotal = facultyCourses.json.data?.meta?.total ?? facultyCourses.json.data?.items?.length ?? 0;
-    const studentTotal = facultyStudents.json.data?.meta?.total ?? facultyStudents.json.data?.items?.length ?? 0;
+    const facultyCourses = await api<ApiListResponse>('/courses?page=1&limit=5', {
+      token: faculty.token,
+    });
+    const facultyStudents = await api<ApiListResponse>('/students?page=1&limit=5', {
+      token: faculty.token,
+    });
+    const courseTotal = listTotal(facultyCourses.json);
+    const studentTotal = listTotal(facultyStudents.json);
     console.log(
       `  Faculty scoped courses (>0): ${track(failures, 'Faculty scoped courses (>0)', courseTotal > 0)} (${courseTotal})`,
     );
@@ -402,18 +408,19 @@ async function main(): Promise<void> {
     );
   }
 
+  if (admin) {
+    const inst = await api<{ success: boolean }>('/campuses?page=1&limit=1', { token: admin.token });
+    console.log(`  Admin campuses: ${pass(inst.json.success)}`);
+  }
+
   if (admin && faculty) {
     const [adminCourses, facultyCourses] = await Promise.all([
-      api<{ success: boolean; data?: { meta?: { total?: number } } }>('/courses?page=1&limit=1', {
-        token: admin.token,
-      }),
-      api<{ success: boolean; data?: { meta?: { total?: number } } }>('/courses?page=1&limit=1', {
-        token: faculty.token,
-      }),
+      api<ApiListResponse>('/courses?page=1&limit=1', { token: admin.token }),
+      api<ApiListResponse>('/courses?page=1&limit=1', { token: faculty.token }),
     ]);
-    const adminTotal = adminCourses.json.data?.meta?.total ?? 0;
-    const facultyTotal = facultyCourses.json.data?.meta?.total ?? 0;
-    const scoped = facultyTotal > 0 && adminTotal >= facultyTotal;
+    const adminTotal = listTotal(adminCourses.json);
+    const facultyTotal = listTotal(facultyCourses.json);
+    const scoped = facultyTotal > 0 && adminTotal > facultyTotal;
     console.log(
       `  Faculty course count scoped vs admin (${facultyTotal}/${adminTotal}): ${track(failures, 'Faculty course count scoped vs admin', scoped)}`,
     );

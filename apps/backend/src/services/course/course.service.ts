@@ -214,9 +214,13 @@ export class CourseService {
     let filter = courseRepository.buildFilter(institutionId, query);
     filter = await scopeByFacultyAccess(filter, actor, institutionId);
 
-    const result = await courseRepository.list(institutionId, {
-      ...query,
-    });
+    const result = await courseRepository.listByFilter(
+      filter,
+      query.page,
+      query.limit,
+      query.sortBy,
+      query.sortOrder,
+    );
 
     return {
       items: result.items.map((d) => toDto(d)),
