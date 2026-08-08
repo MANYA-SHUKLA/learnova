@@ -17,9 +17,9 @@ describe('faculty permissions', () => {
     expect(hasPermission(perms, PERMISSIONS.FACULTY_MANAGE)).toBe(false);
   });
 
-  it('gives students optional directory read only', () => {
+  it('denies students faculty directory permissions', () => {
     const perms = getPermissionsForRole('student');
-    expect(hasPermission(perms, PERMISSIONS.FACULTY_READ)).toBe(true);
+    expect(hasPermission(perms, PERMISSIONS.FACULTY_READ)).toBe(false);
     expect(hasPermission(perms, PERMISSIONS.FACULTY_MANAGE)).toBe(false);
   });
 });

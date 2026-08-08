@@ -151,6 +151,28 @@ async function main(): Promise<void> {
   console.log(`  Login faculty: ${faculty ? pass(true) : 'FAIL (run pnpm seed:demo)'}`);
   console.log(`  Login student: ${student ? pass(true) : 'FAIL (run pnpm seed:demo or wait for rate limit)'}`);
 
+  let adminCourseTotal = 0;
+  let adminStudentTotal = 0;
+  if (admin) {
+    const [adminCourses, adminStudents] = await Promise.all([
+      api<ApiListResponse>('/courses?page=1&limit=1', { token: admin.token }),
+      api<ApiListResponse>('/students?page=1&limit=1', { token: admin.token }),
+    ]);
+    adminCourseTotal = listTotal(adminCourses.json);
+    adminStudentTotal = listTotal(adminStudents.json);
+  }
+
+  if (admin && faculty) {
+    const facultyCourses = await api<ApiListResponse>('/courses?page=1&limit=1', {
+      token: faculty.token,
+    });
+    const facultyTotal = listTotal(facultyCourses.json);
+    const scoped = facultyTotal > 0 && adminCourseTotal > facultyTotal;
+    console.log(
+      `\n=== RBAC (Faculty scope smoke) ===\n  Faculty course count scoped vs admin (${facultyTotal}/${adminCourseTotal}): ${track(failures, 'Faculty course count scoped vs admin', scoped)}`,
+    );
+  }
+
   if (admin) {
     const me = await api<{ success: boolean }>('/auth/me', { token: admin.token });
     console.log(`  GET /auth/me (admin): ${pass(me.status === 200 && me.json.success)}`);
@@ -254,13 +276,21 @@ async function main(): Promise<void> {
 
   console.log('\n=== RBAC (Pages) ===');
   if (faculty) {
-    const blocked = await pageRedirect('/en/institution/dashboard', faculty.cookies, faculty.role);
-    const redirected =
-      blocked.status >= 300 &&
-      blocked.status < 400 &&
-      blocked.location?.includes('/faculty/dashboard');
+    const blockedInstitution = await pageRedirect('/en/institution/dashboard', faculty.cookies, faculty.role);
+    const blockedStudent = await pageRedirect('/en/student/dashboard', faculty.cookies, faculty.role);
+    const institutionRedirect =
+      blockedInstitution.status >= 300 &&
+      blockedInstitution.status < 400 &&
+      blockedInstitution.location?.includes('/faculty/dashboard');
+    const studentRedirect =
+      blockedStudent.status >= 300 &&
+      blockedStudent.status < 400 &&
+      blockedStudent.location?.includes('/faculty/dashboard');
     console.log(
-      `  Faculty blocked from institution dashboard: ${track(failures, 'Faculty blocked from institution dashboard', redirected)}`,
+      `  Faculty blocked from institution dashboard: ${track(failures, 'Faculty blocked from institution dashboard', institutionRedirect)}`,
+    );
+    console.log(
+      `  Faculty blocked from student dashboard: ${track(failures, 'Faculty blocked from student dashboard', studentRedirect)}`,
     );
   }
   if (student) {
@@ -373,6 +403,14 @@ async function main(): Promise<void> {
       `  Student read institution settings (must deny): ${track(failures, 'Student read institution settings (must deny)', !readInstitution.json.success)}`,
     );
 
+    const readStudents = await api<ApiListResponse>('/students?page=1&limit=5', {
+      token: student.token,
+    });
+    const studentListTotal = listTotal(readStudents.json);
+    console.log(
+      `  Student list scoped to self (<=1): ${track(failures, 'Student list scoped to self (<=1)', readStudents.json.success && studentListTotal <= 1)} (${studentListTotal})`,
+    );
+
     const ownGrades = await api<{ success: boolean }>('/gradebook/dashboard/student', {
       token: student.token,
     });
@@ -406,24 +444,18 @@ async function main(): Promise<void> {
     console.log(
       `  Faculty scoped students (>0): ${track(failures, 'Faculty scoped students (>0)', studentTotal > 0)} (${studentTotal})`,
     );
+
+    if (adminCourseTotal > 0) {
+      const studentsScoped = studentTotal < adminStudentTotal;
+      console.log(
+        `  Faculty student count scoped vs admin (${studentTotal}/${adminStudentTotal}): ${track(failures, 'Faculty student count scoped vs admin', studentsScoped)}`,
+      );
+    }
   }
 
   if (admin) {
     const inst = await api<{ success: boolean }>('/campuses?page=1&limit=1', { token: admin.token });
     console.log(`  Admin campuses: ${pass(inst.json.success)}`);
-  }
-
-  if (admin && faculty) {
-    const [adminCourses, facultyCourses] = await Promise.all([
-      api<ApiListResponse>('/courses?page=1&limit=1', { token: admin.token }),
-      api<ApiListResponse>('/courses?page=1&limit=1', { token: faculty.token }),
-    ]);
-    const adminTotal = listTotal(adminCourses.json);
-    const facultyTotal = listTotal(facultyCourses.json);
-    const scoped = facultyTotal > 0 && adminTotal > facultyTotal;
-    console.log(
-      `  Faculty course count scoped vs admin (${facultyTotal}/${adminTotal}): ${track(failures, 'Faculty course count scoped vs admin', scoped)}`,
-    );
   }
 
   console.log('\n=== Permissions (role bundles) ===');

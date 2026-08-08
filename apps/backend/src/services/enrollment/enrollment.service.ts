@@ -23,6 +23,10 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { enrollmentRepository } from '../../repositories/enrollment/index.js';
+import {
+  buildFacultyEnrollmentCourseFilter,
+  scopeStudentEnrollmentFilter,
+} from '../access/faculty-scope.js';
 
 export interface ActorContext {
   userId: string;
@@ -120,64 +124,13 @@ function rowsToCsv(rows: Array<Record<string, unknown>>): string {
   return `${lines.join('\n')}\n`;
 }
 
-async function scopeByFacultyAccess(
+async function applyEnrollmentListScope(
   filter: Record<string, unknown>,
   actor: ActorContext,
   institutionId: string,
 ): Promise<Record<string, unknown>> {
-  if (actor.role !== 'faculty') return filter;
-
-  const facultyRecord = await FacultyModel.findOne({
-    institutionId: new Types.ObjectId(institutionId),
-    email: actor.email.toLowerCase(),
-    deletedAt: null,
-  }).exec();
-
-  if (!facultyRecord) {
-    filter._id = null;
-    return filter;
-  }
-
-  const courses = await CourseModel.find({
-    institutionId: new Types.ObjectId(institutionId),
-    deletedAt: null,
-    $or: [
-      { facultyIds: facultyRecord._id },
-      { coordinatorId: facultyRecord._id },
-    ],
-  })
-    .select('_id')
-    .exec();
-
-  const courseIds = courses.map((c) => c._id);
-  if (courseIds.length === 0) {
-    filter._id = null;
-    return filter;
-  }
-
-  filter.courseId = { $in: courseIds };
-  return filter;
-}
-
-async function scopeByStudentAccess(
-  filter: Record<string, unknown>,
-  actor: ActorContext,
-  institutionId: string,
-): Promise<Record<string, unknown>> {
-  if (actor.role !== 'student') return filter;
-
-  const studentRecord = await StudentModel.findOne({
-    institutionId: new Types.ObjectId(institutionId),
-    email: actor.email.toLowerCase(),
-    deletedAt: null,
-  }).exec();
-
-  if (!studentRecord) {
-    filter._id = null;
-    return filter;
-  }
-
-  filter.studentId = studentRecord._id;
+  filter = await buildFacultyEnrollmentCourseFilter(filter, actor, institutionId);
+  filter = await scopeStudentEnrollmentFilter(filter, actor, institutionId);
   return filter;
 }
 
@@ -281,10 +234,15 @@ export class EnrollmentService {
     const institutionId = requireTenant(actor);
     let filter = enrollmentRepository.buildFilter(institutionId, query);
 
-    filter = await scopeByFacultyAccess(filter, actor, institutionId);
-    filter = await scopeByStudentAccess(filter, actor, institutionId);
+    filter = await applyEnrollmentListScope(filter, actor, institutionId);
 
-    const result = await enrollmentRepository.list(institutionId, query);
+    const result = await enrollmentRepository.listByFilter(
+      filter,
+      query.page,
+      query.limit,
+      query.sortBy,
+      query.sortOrder,
+    );
     return {
       items: result.items.map(toDto),
       meta: pageMeta(result.total, result.page, result.limit),

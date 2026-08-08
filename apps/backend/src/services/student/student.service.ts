@@ -32,8 +32,11 @@ import {
 } from '../../utils/errors/index.js';
 import { studentRepository } from '../../repositories/student/index.js';
 import {
+  assertStudentSelfAccess,
+  buildFacultyCourseFilter,
+  buildFacultyStudentFilter,
   facultyCanAccessStudent,
-  resolveFacultyEnrolledStudentIds,
+  scopeStudentSelfFilter,
 } from '../access/faculty-scope.js';
 
 export interface ActorContext {
@@ -147,23 +150,13 @@ function rowsToCsv(rows: Array<Record<string, unknown>>): string {
   return `${lines.join('\n')}\n`;
 }
 
-/**
- * Filter students to those enrolled in courses supervised by this faculty member.
- */
-async function scopeByFacultyAccess(
+async function applyStudentListScope(
   filter: Record<string, unknown>,
   actor: ActorContext,
   institutionId: string,
 ): Promise<Record<string, unknown>> {
-  if (actor.role !== 'faculty') return filter;
-
-  const studentIds = await resolveFacultyEnrolledStudentIds(institutionId, actor.email);
-  if (studentIds.length === 0) {
-    filter._id = null;
-    return filter;
-  }
-
-  filter._id = { $in: studentIds };
+  filter = await buildFacultyStudentFilter(filter, actor, institutionId);
+  filter = await scopeStudentSelfFilter(filter, actor, institutionId);
   return filter;
 }
 
@@ -275,7 +268,7 @@ export class StudentService {
   async list(query: StudentListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     let filter = studentRepository.buildFilter(institutionId, query);
-    filter = await scopeByFacultyAccess(filter, actor, institutionId);
+    filter = await applyStudentListScope(filter, actor, institutionId);
 
     const result = await studentRepository.listByFilter(
       filter,
@@ -306,6 +299,8 @@ export class StudentService {
         throw new ForbiddenError('Not allowed to access this student');
       }
     }
+
+    await assertStudentSelfAccess(institutionId, actor, id);
 
     return toDto(doc);
   }
@@ -470,6 +465,9 @@ export class StudentService {
 
   async getStats(actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (actor.role === 'student' || actor.role === 'faculty') {
+      throw new ForbiddenError('Institution-wide student stats require admin access');
+    }
     const raw = await studentRepository.stats(institutionId);
 
     const departmentIds = raw.byDepartment
@@ -909,7 +907,7 @@ export class StudentService {
       page: 1,
       limit: 5000,
     });
-    filter = await scopeByFacultyAccess(filter, actor, institutionId);
+    filter = await applyStudentListScope(filter, actor, institutionId);
 
     const list = await studentRepository.listByFilter(filter, 1, 5000);
 

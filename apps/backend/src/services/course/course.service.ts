@@ -27,8 +27,8 @@ import {
 } from '../../utils/errors/index.js';
 import { courseRepository } from '../../repositories/course/course.repository.js';
 import {
+  buildFacultyCourseFilter,
   facultyCanAccessCourse,
-  resolveFacultySupervisedCourseObjectIds,
 } from '../access/faculty-scope.js';
 
 export interface ActorContext {
@@ -139,16 +139,7 @@ async function scopeByFacultyAccess(
   actor: ActorContext,
   institutionId: string,
 ): Promise<Record<string, unknown>> {
-  if (actor.role !== 'faculty') return filter;
-
-  const courseIds = await resolveFacultySupervisedCourseObjectIds(institutionId, actor.email);
-  if (courseIds.length === 0) {
-    filter._id = null;
-    return filter;
-  }
-
-  filter._id = { $in: courseIds };
-  return filter;
+  return buildFacultyCourseFilter(filter, actor, institutionId);
 }
 
 export class CourseService {

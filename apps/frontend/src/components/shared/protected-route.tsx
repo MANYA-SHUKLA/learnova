@@ -32,7 +32,7 @@ export function ProtectedRoute({
   permissions,
   permissionMode = 'all',
   fallback = null,
-  enforce = false,
+  enforce = true,
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, permissions: userPermissions } = useAuth();
   const { isRole } = useRole();
@@ -72,7 +72,7 @@ export function PermissionGate({
   permission,
   children,
   fallback = null,
-  enforce = false,
+  enforce = true,
 }: {
   permission: Permission;
   children: ReactNode;

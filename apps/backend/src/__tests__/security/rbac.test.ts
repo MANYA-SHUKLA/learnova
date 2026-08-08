@@ -79,10 +79,23 @@ describe('faculty teaching context scope helpers', () => {
     vi.resetModules();
   });
 
+  function mockStudentModel() {
+    vi.doMock('../../models/student.model.js', () => ({
+      StudentModel: {
+        findOne: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            exec: vi.fn().mockResolvedValue(null),
+          }),
+        }),
+      },
+    }));
+  }
+
   it('resolves supervised courses from faculty assignment only', async () => {
     const facultyId = '507f1f77bcf86cd799439011';
     const courseId = '507f1f77bcf86cd799439012';
 
+    mockStudentModel();
     vi.doMock('../../models/faculty.model.js', () => ({
       FacultyModel: {
         findOne: vi.fn().mockReturnValue({
@@ -118,6 +131,7 @@ describe('faculty teaching context scope helpers', () => {
     const courseId = '507f1f77bcf86cd799439012';
     const studentId = '507f1f77bcf86cd799439014';
 
+    mockStudentModel();
     vi.doMock('../../models/faculty.model.js', () => ({
       FacultyModel: {
         findOne: vi.fn().mockReturnValue({

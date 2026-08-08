@@ -12,6 +12,12 @@ import {
 
 /**
  * Edge middleware — i18n routing + auth gate via learnova_session cookie.
+ *
+ * RBAC: JWT verification is not available in Edge middleware, so we set an
+ * httpOnly `learnova_role` cookie at login (see lib/auth/jwt.ts) alongside
+ * the refresh token. Middleware uses role + path prefix rules from role-routes.ts
+ * to redirect cross-role navigation. Dashboard layout adds a client-side guard
+ * as defense-in-depth; API remains the source of truth via scoped services.
  */
 
 const intlMiddleware = createMiddleware(routing);
