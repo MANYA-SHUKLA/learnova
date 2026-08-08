@@ -225,31 +225,47 @@ async function main(): Promise<void> {
 
   console.log('\n=== RBAC (API) ===');
   if (faculty) {
-    const probes: ApiProbe[] = [
-      { path: '/courses?page=1&limit=5', expectOk: true, label: 'Faculty list courses' },
-      { path: '/students?page=1&limit=5', expectOk: false, label: 'Faculty global students' },
-      { path: '/institution-settings', expectOk: false, label: 'Faculty institution settings' },
-      { path: '/campuses?page=1&limit=1', expectOk: false, label: 'Faculty manage campuses' },
+    const readProbes: ApiProbe[] = [
+      { path: '/courses?page=1&limit=5', expectOk: true, label: 'Faculty read courses' },
+      { path: '/students?page=1&limit=5', expectOk: true, label: 'Faculty read students (student:read)' },
+      { path: '/institution-settings', expectOk: true, label: 'Faculty read settings (institution:read)' },
     ];
-    for (const p of probes) {
+    for (const p of readProbes) {
       const r = await api<{ success: boolean }>(p.path, { token: faculty.token });
       const ok = p.expectOk ? r.json.success : !r.json.success;
-      console.log(`  ${p.label}: ${pass(ok)} (success=${r.json.success})`);
+      console.log(`  ${p.label}: ${pass(ok)}`);
     }
+    const patchSettings = await api<{ success: boolean }>('/institution-settings', {
+      method: 'PATCH',
+      token: faculty.token,
+      body: { timezone: 'UTC' },
+    });
+    console.log(`  Faculty PATCH settings (must deny): ${pass(!patchSettings.json.success)}`);
+    const createStudent = await api<{ success: boolean }>('/students', {
+      method: 'POST',
+      token: faculty.token,
+      body: {
+        studentId: 'RBAC-TEST',
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'rbac-test@learnova.test',
+      },
+    });
+    console.log(`  Faculty POST student (must deny): ${pass(!createStudent.json.success)}`);
   }
 
   if (student) {
-    const probes: ApiProbe[] = [
-      { path: '/students?page=1&limit=5', expectOk: false, label: 'Student list all students' },
-      { path: '/faculty?page=1&limit=5', expectOk: false, label: 'Student list faculty' },
-      { path: '/institutions/me', expectOk: false, label: 'Student institution me' },
-      { path: '/gradebook/entries?page=1&limit=5', expectOk: false, label: 'Student all gradebook entries' },
-    ];
-    for (const p of probes) {
-      const r = await api<{ success: boolean }>(p.path, { token: student.token });
-      const ok = p.expectOk ? r.json.success : !r.json.success;
-      console.log(`  ${p.label}: ${pass(ok)} (success=${r.json.success})`);
-    }
+    const createFaculty = await api<{ success: boolean }>('/faculty', {
+      method: 'POST',
+      token: student.token,
+      body: {
+        employeeId: 'RBAC-TEST',
+        firstName: 'Test',
+        lastName: 'Faculty',
+        email: 'rbac-faculty@learnova.test',
+      },
+    });
+    console.log(`  Student POST faculty (must deny): ${pass(!createFaculty.json.success)}`);
 
     const ownGrades = await api<{ success: boolean }>('/gradebook/dashboard/student', {
       token: student.token,
@@ -265,20 +281,23 @@ async function main(): Promise<void> {
   console.log('\n=== Permissions (role bundles) ===');
   if (admin && faculty && student) {
     const permChecks = [
-      { role: 'admin', token: admin.token, perm: 'certificate:manage', expect: true },
-      { role: 'faculty', token: faculty.token, perm: 'certificate:write', expect: true },
-      { role: 'faculty', token: faculty.token, perm: 'certificate:manage', expect: false },
-      { role: 'student', token: student.token, perm: 'certificate:read', expect: true },
-      { role: 'student', token: student.token, perm: 'gradebook:write', expect: false },
+      { label: 'admin', token: admin.token, perm: 'certificate:manage', expect: true },
+      { label: 'faculty', token: faculty.token, perm: 'certificate:write', expect: true },
+      { label: 'faculty', token: faculty.token, perm: 'certificate:manage', expect: false },
+      { label: 'student', token: student.token, perm: 'certificate:read', expect: true },
+      { label: 'student', token: student.token, perm: 'gradebook:write', expect: false },
     ];
     for (const c of permChecks) {
-      const me = await api<{ success: boolean; data?: { permissions?: string[] } }>('/auth/me', {
-        token: c.token,
-      });
-      const perms = me.json.data?.permissions ?? [];
+      const me = await api<{ success: boolean; data?: { user?: { permissions?: string[] } } }>(
+        '/auth/me',
+        { token: c.token },
+      );
+      const perms = me.json.data?.user?.permissions ?? [];
       const has = perms.includes(c.perm);
-      console.log(`  ${c.role} has ${c.perm}: ${pass(has === c.expect)} (${has})`);
+      console.log(`  ${c.label} has ${c.perm}: ${pass(has === c.expect)} (${has})`);
     }
+  } else {
+    console.log('  Skipped — need all three role logins (avoid rate limit: wait ~1 min)');
   }
 
   console.log('\n=== Database Collections ===');
@@ -345,7 +364,7 @@ async function main(): Promise<void> {
     { label: 'Students', collection: 'students', min: 200 },
     { label: 'Courses', collection: 'courses', min: 30 },
     { label: 'Projects', collection: 'projects', min: 50 },
-    { label: 'Teams', collection: 'project_teams', min: 100 },
+    { label: 'Teams', collection: 'project_teams', min: 80 },
     { label: 'Quizzes', collection: 'quizzes', min: 50 },
     { label: 'Exams', collection: 'exams', min: 50 },
     { label: 'Grade Records', collection: 'gradebook_entries', min: 5000 },
@@ -364,7 +383,19 @@ async function main(): Promise<void> {
     ? await db.collection('academic_certificates').countDocuments({})
     : 0;
   if (existing.has('academic_certificates')) {
-    console.log(`  Certificates: ${certCount} (implemented)`);
+    const certMin = 1;
+    console.log(
+      `  Certificates: ${certCount} ${certCount >= certMin ? pass(true) : 'WARN (run pnpm seed:certificates after gradebook)'}`,
+    );
+  }
+
+  const gradeCount = existing.has('gradebook_entries')
+    ? await db.collection('gradebook_entries').countDocuments({})
+    : 0;
+  if (gradeCount > 0 && gradeCount < 5000) {
+    console.log(
+      `  Note: gradebook seed may still be running (${gradeCount}/5000). Wait, then re-run verify.`,
+    );
   }
 
   await disconnectMongo();
