@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
+import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
   ErrorState,
@@ -110,7 +111,7 @@ export default function FacultyListPage() {
 
   return (
     <PermissionGate permission={PERMISSIONS.FACULTY_READ} enforce>
-      <div className="space-y-8">
+      <DashboardPage>
         <PageHeader
           eyebrow={t('eyebrow')}
           title={t('title')}
@@ -472,7 +473,7 @@ export default function FacultyListPage() {
             </CardContent>
           </Card>
         ) : null}
-      </div>
+      </DashboardPage>
     </PermissionGate>
   );
 }
