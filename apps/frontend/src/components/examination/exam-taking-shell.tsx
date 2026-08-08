@@ -190,8 +190,3 @@ export function ExamTakingShell({
     </div>
   );
 }
-
-function useStateSafe(initial: number) {
-  const { useState } = require('react') as typeof import('react');
-  return useState(initial);
-}
