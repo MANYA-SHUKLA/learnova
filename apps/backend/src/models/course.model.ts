@@ -114,6 +114,11 @@ courseSchema.index({
   tags: 'text',
   category: 'text',
 });
+courseSchema.index({ institutionId: 1, deletedAt: 1, status: 1, createdAt: -1 });
+courseSchema.index({ institutionId: 1, deletedAt: 1, status: 1, title: 1 });
+courseSchema.index({ facultyIds: 1, deletedAt: 1 });
+courseSchema.index({ programIds: 1, deletedAt: 1 });
+courseSchema.index({ semesterIds: 1, deletedAt: 1 });
 
 export type CourseDocument = InferSchemaType<typeof courseSchema> & {
   _id: Types.ObjectId;

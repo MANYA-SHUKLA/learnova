@@ -309,6 +309,16 @@ export class ProgressService {
     let modulesJustCompleted: string[] = [];
     let courseJustCompleted = false;
 
+    const existingModuleProgressList = await progressRepository.listModuleProgress(
+      institutionId,
+      studentId,
+      courseId,
+    );
+    const moduleProgressById = new Map(
+      existingModuleProgressList.map((doc) => [String(doc.moduleId), doc]),
+    );
+    let completedModules = existingModuleProgressList.filter((m) => m.status === 'completed').length;
+
     for (const mod of publishedModules) {
       const moduleId = String(mod._id);
       const moduleLessons = publishedLessons.filter((l) => String(l.moduleId) === moduleId);
@@ -325,11 +335,7 @@ export class ProgressService {
         ),
       });
 
-      const existing = await progressRepository.findModuleProgress(
-        institutionId,
-        studentId,
-        moduleId,
-      );
+      const existing = moduleProgressById.get(moduleId);
       const wasCompleted = existing?.status === 'completed';
 
       const moduleDoc = await progressRepository.upsertModuleProgress(
@@ -347,7 +353,10 @@ export class ProgressService {
         },
       );
 
+      moduleProgressById.set(moduleId, moduleDoc);
+
       if (status === 'completed' && !wasCompleted) {
+        completedModules += 1;
         modulesJustCompleted.push(moduleId);
         await progressRepository.createActivity({
           institutionId,
@@ -378,9 +387,6 @@ export class ProgressService {
       completedLessonIds.has(String(l._id)),
     ).length;
     const totalModules = publishedModules.length;
-    const completedModules = (
-      await progressRepository.listModuleProgress(institutionId, studentId, courseId)
-    ).filter((m) => m.status === 'completed').length;
 
     // Prefer lesson-based % when lessons exist; else module-based
     const progressPercentage =

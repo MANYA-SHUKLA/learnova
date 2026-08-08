@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { CACHE_TTL } from '@learnova/constants';
 import { createId } from '@learnova/utils';
 import type {
   CreateAcademicCalendarInput,

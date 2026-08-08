@@ -276,14 +276,22 @@ export class GradebookPoliciesService {
 
     const now = new Date();
     const snapshotsCreated: string[] = [];
+    const studentIds = summaries.map((summary) => String(summary.studentId));
+    const allEntries = await gradebookRepository.listEntriesForStudents(
+      institutionId,
+      input.courseId,
+      studentIds,
+    );
+    const entriesByStudent = new Map<string, typeof allEntries>();
+    for (const entry of allEntries) {
+      const sid = String(entry.studentId);
+      const bucket = entriesByStudent.get(sid) ?? [];
+      bucket.push(entry);
+      entriesByStudent.set(sid, bucket);
+    }
 
     for (const summary of summaries) {
-      const entries = await GradebookEntryModel.find({
-        institutionId: oid(institutionId),
-        courseId: oid(input.courseId),
-        studentId: summary.studentId,
-        status: { $ne: 'superseded' },
-      }).exec();
+      const entries = entriesByStudent.get(String(summary.studentId)) ?? [];
 
       const nextVersion = (summary.snapshotVersion ?? 0) + 1;
       const snapshotData = snapshotFromSummary(summary, entries, nextVersion, now);

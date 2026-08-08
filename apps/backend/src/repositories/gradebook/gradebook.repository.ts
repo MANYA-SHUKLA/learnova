@@ -13,6 +13,8 @@ import { GradebookAcademicPolicyModel } from '../../models/gradebook-academic-po
 import { GradeModerationRecordModel } from '../../models/grade-moderation-record.model.js';
 import { GradebookSnapshotModel } from '../../models/gradebook-snapshot.model.js';
 import { AcademicStandingModel } from '../../models/academic-standing.model.js';
+import { CourseModel } from '../../models/course.model.js';
+import { ProjectSubmissionModel } from '../../models/project-submission.model.js';
 import type { IngestDraft } from '../../services/gradebook/gradebook-ingestion.js';
 import { oid } from '../../services/gradebook/gradebook.helpers.js';
 
@@ -481,6 +483,64 @@ export const gradebookRepository = {
       lockedSummaries,
       averageWeightedPercentage: avgResult[0]?.avg ?? 0,
     };
+  },
+
+  async aggregateInstitutionStats(institutionId: string) {
+    const instOid = oid(institutionId);
+    const [entryCount, summaryAgg, courseCount, pendingProjectGrades] = await Promise.all([
+      GradebookEntryModel.countDocuments({
+        institutionId: instOid,
+        status: { $ne: 'superseded' },
+      }).exec(),
+      CourseGradeSummaryModel.aggregate<{
+        finalizedSummaries: number;
+        avgWeighted: number | null;
+      }>([
+        { $match: { institutionId: instOid } },
+        {
+          $group: {
+            _id: null,
+            finalizedSummaries: {
+              $sum: {
+                $cond: [{ $in: ['$status', ['finalized', 'published']] }, 1, 0],
+              },
+            },
+            avgWeighted: { $avg: '$weightedPercentage' },
+          },
+        },
+      ]).exec(),
+      CourseModel.countDocuments({ institutionId: instOid, deletedAt: null }).exec(),
+      ProjectSubmissionModel.countDocuments({
+        institutionId: instOid,
+        evaluationStatus: 'ready',
+        deletedAt: null,
+      }).exec(),
+    ]);
+
+    const agg = summaryAgg[0];
+    return {
+      courseCount,
+      entryCount,
+      finalizedSummaries: agg?.finalizedSummaries ?? 0,
+      pendingProjectGrades,
+      averageWeightedPercentage: agg?.avgWeighted ?? 0,
+    };
+  },
+
+  async listEntriesForStudents(
+    institutionId: string,
+    courseId: string,
+    studentIds: string[],
+  ) {
+    if (studentIds.length === 0) return [];
+    return GradebookEntryModel.find({
+      institutionId: oid(institutionId),
+      courseId: oid(courseId),
+      studentId: { $in: studentIds.map((id) => oid(id)) },
+      status: { $ne: 'superseded' },
+    })
+      .lean()
+      .exec();
   },
 
   async getAcademicPolicy(institutionId: string) {

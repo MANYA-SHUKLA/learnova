@@ -123,6 +123,10 @@ facultySchema.index({
   facultyCode: 'text',
   designation: 'text',
 });
+facultySchema.index({ institutionId: 1, deletedAt: 1, status: 1, createdAt: -1 });
+facultySchema.index({ institutionId: 1, deletedAt: 1, departmentId: 1, status: 1 });
+facultySchema.index({ institutionId: 1, email: 1, deletedAt: 1 });
+facultySchema.index({ courseIds: 1, deletedAt: 1 });
 
 export type FacultyDocument = InferSchemaType<typeof facultySchema> & {
   _id: Types.ObjectId;

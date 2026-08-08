@@ -109,6 +109,10 @@ studentSchema.index({
   admissionNumber: 'text',
   rollNumber: 'text',
 });
+studentSchema.index({ institutionId: 1, deletedAt: 1, status: 1, createdAt: -1 });
+studentSchema.index({ institutionId: 1, deletedAt: 1, departmentId: 1, status: 1 });
+studentSchema.index({ institutionId: 1, deletedAt: 1, programId: 1, status: 1 });
+studentSchema.index({ institutionId: 1, email: 1, deletedAt: 1 });
 
 export type StudentDocument = InferSchemaType<typeof studentSchema> & {
   _id: Types.ObjectId;

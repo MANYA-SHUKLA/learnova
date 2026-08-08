@@ -701,36 +701,15 @@ export class GradebookService {
       return dashboard;
     }
 
-    const courses = await CourseModel.find({ institutionId: oid(institutionId), deletedAt: null })
-      .select('_id')
-      .lean()
-      .exec();
-
-    let entryCount = 0;
-    let finalizedSummaries = 0;
-    let pendingProjectGrades = 0;
-    let weightedSum = 0;
-    let weightedCourses = 0;
-
-    for (const course of courses) {
-      const cid = String(course._id);
-      const stats = await gradebookRepository.aggregateCourseStats(institutionId, cid);
-      entryCount += stats.entryCount;
-      finalizedSummaries += stats.finalizedSummaries;
-      pendingProjectGrades += await countPendingProjectSubmissions(institutionId, cid);
-      if (stats.averageWeightedPercentage != null) {
-        weightedSum += stats.averageWeightedPercentage;
-        weightedCourses += 1;
-      }
-    }
+    const stats = await gradebookRepository.aggregateInstitutionStats(institutionId);
 
     return {
-      courseCount: courses.length,
-      entryCount,
-      finalizedSummaries,
-      pendingProjectGrades,
+      courseCount: stats.courseCount,
+      entryCount: stats.entryCount,
+      finalizedSummaries: stats.finalizedSummaries,
+      pendingProjectGrades: stats.pendingProjectGrades,
       averageWeightedPercentage:
-        weightedCourses > 0 ? Math.round((weightedSum / weightedCourses) * 100) / 100 : 0,
+        Math.round((stats.averageWeightedPercentage ?? 0) * 100) / 100,
     };
   }
 
