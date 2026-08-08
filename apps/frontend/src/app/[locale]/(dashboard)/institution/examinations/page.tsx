@@ -31,7 +31,7 @@ export default function InstitutionExaminationsPage() {
   const [page, setPage] = useState(1);
 
   const params = useMemo(
-    () => ({ q: search || undefined, page, limit: 20, sortBy: 'startsAt', sortOrder: 'desc' as const }),
+    () => ({ q: search || undefined, page, limit: 20, sortBy: 'startsAt' as const, sortOrder: 'desc' as const }),
     [search, page],
   );
 

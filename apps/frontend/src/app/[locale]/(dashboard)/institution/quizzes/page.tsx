@@ -34,7 +34,7 @@ export default function InstitutionQuizzesPage() {
   const [page, setPage] = useState(1);
 
   const params = useMemo(
-    () => ({ q: search || undefined, page, limit: 20, sortBy: 'createdAt', sortOrder: 'desc' as const }),
+    () => ({ q: search || undefined, page, limit: 20, sortBy: 'createdAt' as const, sortOrder: 'desc' as const }),
     [search, page],
   );
 
