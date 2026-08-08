@@ -50,7 +50,7 @@ function MotionSection({
     <motion.section
       id={id}
       className={className}
-      initial="hidden"
+      initial={false}
       whileInView="visible"
       viewport={{ once: true, margin: '-80px' }}
       variants={fadeUp}
@@ -191,7 +191,7 @@ function Hero() {
       <div className={siteContainer('relative pb-20 pt-20 sm:pb-28 sm:pt-28 lg:pb-32 lg:pt-32')}>
         <motion.div
           className="mx-auto w-full max-w-5xl text-center"
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
@@ -216,7 +216,7 @@ function Hero() {
 
         <motion.div
           className="mt-16 w-full sm:mt-20"
-          initial={{ opacity: 0, y: 32 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
         >

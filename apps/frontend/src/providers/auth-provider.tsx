@@ -77,37 +77,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function hydrate() {
       setLoading(true);
+      const timeoutMs = 12_000;
+      const timeout = new Promise<never>((_, reject) => {
+        window.setTimeout(() => reject(new Error('AUTH_HYDRATE_TIMEOUT')), timeoutMs);
+      });
+
       try {
-        const token = getAccessToken();
-        const payload = token ? decodeJwtPayload(token) : null;
-        const tokenUsable = Boolean(token && payload && !isTokenExpired(payload));
+        await Promise.race([
+          (async () => {
+            const token = getAccessToken();
+            const payload = token ? decodeJwtPayload(token) : null;
+            const tokenUsable = Boolean(token && payload && !isTokenExpired(payload));
 
-        if (token && payload && tokenUsable) {
-          try {
-            const [meUser, currentSession] = await Promise.all([
-              authApi.me(),
-              authApi.getCurrentSession().catch(() => null),
-            ]);
+            if (token && payload && tokenUsable) {
+              try {
+                const [meUser, currentSession] = await Promise.all([
+                  authApi.me(),
+                  authApi.getCurrentSession().catch(() => null),
+                ]);
+                if (cancelled) return;
+                setAuth({
+                  user: resolveUserPermissions(meUser),
+                  accessToken: token,
+                  session: currentSession ?? sessionFromPayload(payload),
+                });
+                return;
+              } catch {
+                // Fall through to refresh
+              }
+            }
+
+            const refreshed = await authApi.refresh();
             if (cancelled) return;
+            storeAccessToken(refreshed.accessToken);
             setAuth({
-              user: resolveUserPermissions(meUser),
-              accessToken: token,
-              session: currentSession ?? sessionFromPayload(payload),
+              user: resolveUserPermissions(refreshed.user),
+              accessToken: refreshed.accessToken,
+              session: refreshed.session,
             });
-            return;
-          } catch {
-            // Fall through to refresh
-          }
-        }
-
-        const refreshed = await authApi.refresh();
-        if (cancelled) return;
-        storeAccessToken(refreshed.accessToken);
-        setAuth({
-          user: resolveUserPermissions(refreshed.user),
-          accessToken: refreshed.accessToken,
-          session: refreshed.session,
-        });
+          })(),
+          timeout,
+        ]);
       } catch {
         if (cancelled) return;
         clearTokens();

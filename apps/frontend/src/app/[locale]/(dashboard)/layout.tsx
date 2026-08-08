@@ -36,16 +36,18 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
 
   if (isLoading || !isAuthenticated || !user) {
     return (
-      <div className="flex flex-1 items-center justify-center bg-background">
+      <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-3 bg-background">
         <Spinner size="lg" />
+        <p className="text-sm text-muted-foreground">Loading your session…</p>
       </div>
     );
   }
 
   if (user.mustChangePassword && !onChangePasswordPage) {
     return (
-      <div className="flex flex-1 items-center justify-center bg-background">
+      <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-3 bg-background">
         <Spinner size="lg" />
+        <p className="text-sm text-muted-foreground">Redirecting…</p>
       </div>
     );
   }
