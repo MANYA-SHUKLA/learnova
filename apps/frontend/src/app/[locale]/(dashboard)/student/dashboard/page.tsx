@@ -16,6 +16,10 @@ import {
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import {
+  DashboardPage,
+  dashboardFadeUp,
+} from '@/components/dashboard/dashboard-template';
+import {
   DashboardPanel,
   DashboardQuickActions,
   DashboardTaskList,
@@ -33,10 +37,7 @@ import { useStudentProgressDashboard } from '@/features/progress';
 import { Link } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
-const fadeUp = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-};
+const fadeUp = dashboardFadeUp;
 
 function displayName(firstName?: string | null, lastName?: string | null, email?: string) {
   const full = [firstName, lastName].filter(Boolean).join(' ');
@@ -109,7 +110,7 @@ export default function StudentDashboardPage() {
   const name = displayName(user?.firstName, user?.lastName, user?.email);
 
   return (
-    <div className="space-y-8">
+    <DashboardPage>
       <PageHeader
         eyebrow={t('roleLabel')}
         title={t('welcomeNamed', { name })}
@@ -306,6 +307,6 @@ export default function StudentDashboardPage() {
           </Card>
         </div>
       </motion.div>
-    </div>
+    </DashboardPage>
   );
 }

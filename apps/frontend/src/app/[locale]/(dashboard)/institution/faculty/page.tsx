@@ -163,9 +163,9 @@ export default function FacultyListPage() {
               ))}
         </StatGrid>
 
-        <Card className="rounded-2xl border-border/80">
+        <Card className="directory-shell overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t('directory')}</CardTitle>
+            <CardTitle className="text-card-title">{t('directory')}</CardTitle>
             <CardDescription>{t('directoryDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
