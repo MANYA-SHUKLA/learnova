@@ -6,6 +6,7 @@ import { Separator } from '@learnova/ui';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity,
+  Award,
   Bookmark,
   Building2,
   CalendarDays,
@@ -72,6 +73,7 @@ type SidebarItemId =
   | 'quizResults'
   | 'examinations'
   | 'gradebook'
+  | 'certificates'
   | 'semesterGrades'
   | 'proctoring'
   | 'myTeam'
@@ -133,6 +135,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'questionBank', href: APP_ROUTES.INSTITUTION_QUESTION_BANK, icon: Library },
       { id: 'examinations', href: APP_ROUTES.INSTITUTION_EXAMS, icon: ShieldCheck },
       { id: 'gradebook', href: APP_ROUTES.INSTITUTION_GRADEBOOK, icon: GraduationCap },
+      { id: 'certificates', href: APP_ROUTES.INSTITUTION_CERTIFICATES, icon: Award },
     ],
   },
   {
@@ -179,6 +182,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'quizResults', href: APP_ROUTES.STUDENT_QUIZ_RESULTS, icon: ClipboardCheck },
       { id: 'examinations', href: APP_ROUTES.STUDENT_EXAMS, icon: ShieldCheck },
       { id: 'gradebook', href: APP_ROUTES.STUDENT_GRADEBOOK, icon: GraduationCap },
+      { id: 'certificates', href: APP_ROUTES.STUDENT_CERTIFICATES, icon: Award },
       { id: 'semesterGrades', href: APP_ROUTES.STUDENT_SEMESTER, icon: BarChart3 },
       { id: 'myTeam', href: STUDENT_MY_TEAM, icon: UsersRound },
       { id: 'bookmarks', href: APP_ROUTES.STUDENT_BOOKMARKS, icon: Bookmark },

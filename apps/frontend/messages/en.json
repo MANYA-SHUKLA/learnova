@@ -601,6 +601,7 @@
         "quizResults": "Quiz results",
         "examinations": "Examinations",
         "gradebook": "Gradebook",
+        "certificates": "Certificates",
         "semesterGrades": "Semester results",
         "proctoring": "Proctoring",
         "myTeam": "My team",
@@ -1391,6 +1392,26 @@
         "error": "Unable to load gradebook.",
         "weight": "Weight {value}%"
       },
+      "certificates": {
+        "eyebrow": "Official documents",
+        "title": "Certificates & records",
+        "description": "Issue verifiable certificates and transcripts from published gradebook results only.",
+        "stats": {
+          "issued": "Issued certificates",
+          "transcripts": "Transcripts",
+          "eligible": "Eligible published passes",
+          "revoked": "Revoked"
+        },
+        "bulkTitle": "Bulk course completion",
+        "bulkDescription": "Issue completion certificates for all students with published passing grades in a course.",
+        "courseIdPlaceholder": "Course ID",
+        "bulkIssue": "Bulk issue",
+        "listTitle": "Issued certificates",
+        "listDescription": "Official documents linked to gradebook snapshots and verification codes.",
+        "emptyTitle": "No certificates issued",
+        "emptyDescription": "Publish grades in the gradebook, then issue certificates here.",
+        "error": "Unable to load certificates."
+      },
       "courseBuilder": {
         "title": "Course Builder",
         "openBuilder": "Open Builder",
@@ -2132,6 +2153,20 @@
         "error": "Unable to load grades.",
         "passed": "Passed",
         "notPassed": "Not passed"
+      },
+      "certificates": {
+        "eyebrow": "Academic credentials",
+        "title": "My certificates",
+        "description": "Download and verify official documents issued from your published grades.",
+        "stats": {
+          "certificates": "Certificates",
+          "transcripts": "Transcripts"
+        },
+        "listTitle": "Recent certificates",
+        "listDescription": "Each document includes a verification code for third-party validation.",
+        "emptyTitle": "No certificates yet",
+        "emptyDescription": "Certificates appear after your institution issues them from published grades.",
+        "error": "Unable to load certificates."
       },
       "examDetail": {
         "eyebrow": "Exam",
