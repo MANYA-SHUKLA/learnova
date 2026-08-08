@@ -248,6 +248,8 @@ export function DashboardQuickActionGrid({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-label text-foreground transition-colors duration-300 group-hover:text-primary">
+                    {action.title}
+                  </p>
                   <p className="mt-0.5 text-caption">{action.description}</p>
                 </div>
                 <ArrowRight
