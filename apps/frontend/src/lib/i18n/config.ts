@@ -1,7 +1,5 @@
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@learnova/constants';
-
-export const locales = SUPPORTED_LOCALES;
-export const defaultLocale = DEFAULT_LOCALE;
+export const locales = ['en', 'hi', 'te'] as const;
+export const defaultLocale = 'en' as const;
 
 export type AppLocale = (typeof locales)[number];
 

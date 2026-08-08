@@ -1,14 +1,14 @@
 import createMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { AUTH } from '@learnova/constants';
-import { routing } from '@/lib/i18n/routing';
 import {
   dashboardPathForRoleCookie,
   isActiveRole,
   isPathAllowedForRole,
   requiredRoleForPath,
-} from '@/lib/auth/role-routes';
+} from '@/lib/auth/edge-role-routes';
+import { MIDDLEWARE_AUTH } from '@/lib/auth/middleware-auth';
+import { routing } from '@/lib/i18n/routing.config';
 
 /**
  * Edge middleware — i18n routing + auth gate via learnova_session cookie.
@@ -71,9 +71,9 @@ export default function middleware(request: NextRequest) {
   const pathWithoutLocale = stripLocale(pathname);
   const locale = pathname.split('/')[1] ?? 'en';
 
-  const sessionToken = request.cookies.get(AUTH.REFRESH_COOKIE_NAME)?.value;
+  const sessionToken = request.cookies.get(MIDDLEWARE_AUTH.REFRESH_COOKIE_NAME)?.value;
   const isAuthenticated = Boolean(sessionToken);
-  const roleCookie = request.cookies.get(AUTH.ROLE_COOKIE_NAME)?.value ?? null;
+  const roleCookie = request.cookies.get(MIDDLEWARE_AUTH.ROLE_COOKIE_NAME)?.value ?? null;
   const activeRole = roleCookie && isActiveRole(roleCookie) ? roleCookie : null;
 
   const isProtected = matchesPrefix(pathWithoutLocale, PROTECTED_PATH_PREFIXES);

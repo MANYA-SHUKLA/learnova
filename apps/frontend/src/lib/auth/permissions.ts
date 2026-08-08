@@ -7,7 +7,7 @@ import {
   hasAllPermissions,
   hasAnyPermission,
   hasPermission,
-} from '@learnova/shared';
+} from '@learnova/shared/permissions';
 
 export function can(permissions: readonly Permission[], required: Permission): boolean {
   return hasPermission(permissions, required);

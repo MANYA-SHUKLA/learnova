@@ -38,6 +38,10 @@
     "./coding": {
       "types": "./dist/coding/index.d.ts",
       "import": "./dist/coding/index.js"
+    },
+    "./certificate/crypto": {
+      "types": "./dist/certificate/verification.d.ts",
+      "import": "./dist/certificate/verification.js"
     }
   },
   "scripts": {

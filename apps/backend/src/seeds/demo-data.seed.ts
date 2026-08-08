@@ -10,12 +10,12 @@ import {
   buildCourseCompletionPayload,
   buildVerificationUrl,
   defaultTitleForDocumentType,
-  generateVerificationCode,
   gradePointsFromPercentage,
   letterGradeFromPercentage,
   resultFromPercentage,
   sumMarks,
 } from '@learnova/shared';
+import { generateVerificationCode } from '@learnova/shared/certificate/crypto';
 import {
   AcademicYearModel,
   BatchModel,

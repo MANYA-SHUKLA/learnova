@@ -3,12 +3,14 @@ import {
   buildTranscriptPayload,
   buildVerificationUrl,
   defaultTitleForDocumentType,
-  generateVerificationCode,
   isTranscriptEligible,
   normalizeDocumentType,
-  normalizeVerificationCode,
   renderCertificateHtml,
 } from '@learnova/shared';
+import {
+  generateVerificationCode,
+  normalizeVerificationCode,
+} from '@learnova/shared/certificate/crypto';
 import type {
   BulkIssueCertificatesInput,
   CertificateListQuery,

@@ -6,7 +6,7 @@
  */
 
 import type { AuthContextValue, AuthUser, Session } from '@learnova/types';
-import { getPermissionsForRole } from '@learnova/shared';
+import { getPermissionsForRole } from '@learnova/shared/permissions';
 import {
   createContext,
   useCallback,

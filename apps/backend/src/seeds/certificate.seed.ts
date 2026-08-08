@@ -9,8 +9,8 @@ import {
   buildTranscriptPayload,
   buildVerificationUrl,
   defaultTitleForDocumentType,
-  generateVerificationCode,
 } from '@learnova/shared';
+import { generateVerificationCode } from '@learnova/shared/certificate/crypto';
 import { CourseGradeSummaryModel } from '../models/course-grade-summary.model.js';
 import { CourseModel } from '../models/course.model.js';
 import { StudentModel } from '../models/student.model.js';

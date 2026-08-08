@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { issueCertificateSchema } from '@learnova/validation';
-import { generateVerificationCode, normalizeVerificationCode } from '@learnova/shared';
+import { generateVerificationCode, normalizeVerificationCode } from '@learnova/shared/certificate/crypto';
 
 describe('certificate validation', () => {
   it('validates issue certificate payload', () => {

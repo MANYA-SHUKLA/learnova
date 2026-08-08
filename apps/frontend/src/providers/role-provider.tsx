@@ -6,7 +6,7 @@
  */
 
 import type { ModuleName, Role } from '@learnova/types';
-import { isActiveRole, roleHasModuleAccess } from '@learnova/shared';
+import { isActiveRole, roleHasModuleAccess } from '@learnova/shared/roles';
 import {
   createContext,
   useContext,

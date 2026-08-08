@@ -1,7 +1,7 @@
 'use client';
 
 import type { AuthUser, Permission, Session } from '@learnova/types';
-import { getPermissionsForRole } from '@learnova/shared';
+import { getPermissionsForRole } from '@learnova/shared/permissions';
 import { create } from 'zustand';
 import { clearTokens, syncRoleCookieFromUser } from '@/lib/auth/jwt';
 

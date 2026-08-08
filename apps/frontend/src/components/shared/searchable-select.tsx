@@ -137,6 +137,8 @@ export interface SearchableMultiSelectProps {
   onSearchQueryChange?: (value: string) => void;
   serverSideSearch?: boolean;
 }
+
+export function SearchableMultiSelect({
   id,
   label,
   hint,
