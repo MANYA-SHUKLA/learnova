@@ -25,6 +25,10 @@ import {
   NotFoundError,
   ValidationError,
 } from '../../utils/errors/index.js';
+import {
+  assertFacultySelfAccess,
+  findFacultyRecord,
+} from '../access/faculty-scope.js';
 import { facultyRepository } from '../../repositories/faculty/index.js';
 
 export interface ActorContext {
@@ -39,6 +43,16 @@ function requireTenant(actor: ActorContext): string {
     throw new ForbiddenError('Institution context required');
   }
   return actor.institutionId;
+}
+
+function isFacultyActor(actor: ActorContext): boolean {
+  return actor.role === 'faculty';
+}
+
+function requireFacultyManage(actor: ActorContext): void {
+  if (isFacultyActor(actor)) {
+    throw new ForbiddenError('Institution admin access required');
+  }
 }
 
 function buildFullName(firstName: string, middleName: string | null | undefined, lastName: string) {
@@ -240,6 +254,16 @@ export class FacultyService {
 
   async list(query: FacultyListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (isFacultyActor(actor)) {
+      const faculty = await findFacultyRecord(institutionId, actor.email);
+      if (!faculty) {
+        return { items: [], meta: pageMeta(0, query.page, query.limit) };
+      }
+      return {
+        items: [toDto(faculty)],
+        meta: pageMeta(1, query.page, query.limit),
+      };
+    }
     const result = await facultyRepository.list(institutionId, query);
     return {
       items: result.items.map((d) => toDto(d)),
@@ -253,6 +277,7 @@ export class FacultyService {
 
   async get(id: string, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    await assertFacultySelfAccess(institutionId, actor, id);
     const doc = await facultyRepository.findByIdIncludingDeleted(institutionId, id);
     if (!doc) throw new NotFoundError('Faculty not found');
     return toDto(doc);
@@ -403,6 +428,7 @@ export class FacultyService {
 
   async getStats(actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    requireFacultyManage(actor);
     const raw = await facultyRepository.stats(institutionId);
 
     const departmentIds = raw.byDepartment
@@ -456,6 +482,7 @@ export class FacultyService {
 
   async listAudit(facultyId: string | undefined, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    requireFacultyManage(actor);
     const items = await facultyRepository.listAudit(institutionId, facultyId, 100);
     return items.map((item) => ({
       id: String(item._id),
@@ -743,6 +770,7 @@ export class FacultyService {
 
   async exportFaculty(query: FacultyExportQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    requireFacultyManage(actor);
     const list = await facultyRepository.list(institutionId, {
       q: query.q,
       status: query.status,

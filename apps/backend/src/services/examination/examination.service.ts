@@ -196,22 +196,7 @@ export class ExaminationService {
     actor: ActorContext,
     institutionId: string,
   ): Promise<Types.ObjectId[]> {
-    const faculty = await FacultyModel.findOne({
-      institutionId: oid(institutionId),
-      email: actor.email.toLowerCase(),
-      deletedAt: null,
-    }).exec();
-    if (!faculty) return [];
-
-    const courses = await CourseModel.find({
-      institutionId: oid(institutionId),
-      deletedAt: null,
-      $or: [{ facultyIds: faculty._id }, { coordinatorId: faculty._id }],
-    })
-      .select('_id')
-      .exec();
-
-    return courses.map((c) => c._id);
+    return resolveFacultySupervisedCourseObjectIds(institutionId, actor.email);
   }
 
   private async assertEnrollment(

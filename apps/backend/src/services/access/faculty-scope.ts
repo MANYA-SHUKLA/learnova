@@ -202,3 +202,34 @@ export async function buildFacultyEnrollmentCourseFilter(
   filter.courseId = { $in: courseIds };
   return filter;
 }
+
+/** Faculty directory list — own ERP record only (not institution-wide directory). */
+export async function buildFacultySelfFilter(
+  filter: Record<string, unknown>,
+  actor: { role: string; email: string },
+  institutionId: string,
+): Promise<Record<string, unknown>> {
+  if (actor.role !== 'faculty') return filter;
+
+  const faculty = await findFacultyRecord(institutionId, actor.email);
+  if (!faculty) {
+    filter._id = null;
+    return filter;
+  }
+
+  filter._id = faculty._id;
+  return filter;
+}
+
+export async function assertFacultySelfAccess(
+  institutionId: string,
+  actor: { role: string; email: string },
+  facultyId: string,
+): Promise<void> {
+  if (actor.role !== 'faculty') return;
+
+  const faculty = await findFacultyRecord(institutionId, actor.email);
+  if (!faculty || String(faculty._id) !== facultyId) {
+    throw new ForbiddenError('Not allowed to access this faculty record');
+  }
+}

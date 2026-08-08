@@ -34,7 +34,8 @@ import { ProjectModel } from '../../models/project.model.js';
 import { ProjectSubmissionModel } from '../../models/project-submission.model.js';
 import { CourseModel } from '../../models/course.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
-import { FacultyModel } from '../../models/faculty.model.js';
+import { StudentModel } from '../../models/student.model.js';
+import { resolveFacultySupervisedCourseObjectIds } from '../access/faculty-scope.js';
 import { StudentModel } from '../../models/student.model.js';
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
@@ -166,22 +167,7 @@ export class ProjectService {
     actor: ActorContext,
     institutionId: string,
   ): Promise<Types.ObjectId[]> {
-    const faculty = await FacultyModel.findOne({
-      institutionId: oid(institutionId),
-      email: actor.email.toLowerCase(),
-      deletedAt: null,
-    }).exec();
-    if (!faculty) return [];
-
-    const courses = await CourseModel.find({
-      institutionId: oid(institutionId),
-      deletedAt: null,
-      $or: [{ facultyIds: faculty._id }, { coordinatorId: faculty._id }],
-    })
-      .select('_id')
-      .exec();
-
-    return courses.map((c) => c._id);
+    return resolveFacultySupervisedCourseObjectIds(institutionId, actor.email);
   }
 
   private async enrolledCourseIds(
