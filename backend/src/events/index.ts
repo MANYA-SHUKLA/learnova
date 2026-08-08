@@ -12,3 +12,7 @@ export {
 } from './event-bus.js';
 export { registerInfrastructureListeners } from './listeners/infrastructure.listeners.js';
 export { registerCertificateListeners } from './listeners/certificate.listeners.js';
+export {
+  registerNotificationListeners,
+  startDueReminderScheduler,
+} from './listeners/notification.listeners.js';

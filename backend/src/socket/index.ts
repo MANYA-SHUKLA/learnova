@@ -4,6 +4,7 @@ import { corsConfig, socketConfig } from '../config/slices.js';
 import { logger } from '../utils/logger/index.js';
 import { setSocketServer } from './server-ref.js';
 import { registerExamNamespace } from './exam.namespace.js';
+import { registerNotificationNamespace } from './notifications.namespace.js';
 
 /**
  * Socket.io foundation — namespaces for IDE, exam, notifications, and practice labs.
@@ -38,7 +39,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
 
   io.of('/ide');
   registerExamNamespace(io);
-  io.of('/notifications');
+  registerNotificationNamespace(io);
 
   setSocketServer(io);
   return io;
