@@ -1,10 +1,19 @@
 'use client';
 
-import Editor, { type OnMount, type Monaco } from '@monaco-editor/react';
 import dynamic from 'next/dynamic';
+import type { OnMount } from '@monaco-editor/react';
 import { PRACTICE_LANGUAGE_META } from '@learnova/constants';
 import type { PracticeLanguage } from '@learnova/types';
 import { usePracticeEditorStore } from '../store/editor-store';
+
+const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[420px] items-center justify-center text-sm text-white/60">
+      Loading editor…
+    </div>
+  ),
+});
 
 const MONACO_MAP: Record<PracticeLanguage, string> = {
   c: 'c',
@@ -48,7 +57,7 @@ export function CodeEditor({
         <span>{PRACTICE_LANGUAGE_META[language].name}</span>
         <span>{PRACTICE_LANGUAGE_META[language].version}</span>
       </div>
-      <Editor
+      <MonacoEditor
         height={height}
         language={MONACO_MAP[language]}
         theme={theme}

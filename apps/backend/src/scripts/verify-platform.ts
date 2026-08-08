@@ -578,8 +578,6 @@ async function main(): Promise<void> {
     );
   }
 
-  await disconnectMongo();
-
   console.log('\n=== Performance ===');
   const perfAdmin = admin ?? (await login('admin'));
   if (perfAdmin) {
@@ -605,8 +603,7 @@ async function main(): Promise<void> {
       `  Pagination cap (limit=9999 → ${returned} items, meta.limit=${limitMeta}): ${track(failures, 'Pagination max limit', paginationOk)}`,
     );
 
-    await connectMongo();
-    const courseIndexes = await mongoose.connection.db!.collection('courses').indexes();
+    const courseIndexes = await db.collection('courses').indexes();
     const hasListIndex = courseIndexes.some((idx) => {
       const keys = Object.keys(idx.key ?? {});
       return keys.includes('institutionId') && keys.includes('deletedAt') && keys.includes('status');
@@ -614,10 +611,11 @@ async function main(): Promise<void> {
     console.log(
       `  Course list compound index: ${track(failures, 'Course list compound index', hasListIndex)}`,
     );
-    await disconnectMongo();
   } else {
     console.log('  Skipped — admin login required');
   }
+
+  await disconnectMongo();
 
   if (failures.length > 0) {
     console.log(`\nRBAC / security verification failed (${failures.length}):`);
