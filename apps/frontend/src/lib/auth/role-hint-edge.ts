@@ -12,7 +12,7 @@ function isActiveRoleValue(value: string): value is EdgeActiveRole {
 }
 
 function secret(): string | null {
-  return process.env.ROLE_HINT_SECRET ?? process.env.JWT_ACCESS_SECRET ?? null;
+  return process.env['ROLE_HINT_SECRET'] ?? process.env['JWT_ACCESS_SECRET'] ?? null;
 }
 
 async function hmacSha256Hex(payload: string, key: string): Promise<string> {

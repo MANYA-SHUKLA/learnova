@@ -36,7 +36,6 @@ import { CourseModel } from '../../models/course.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { StudentModel } from '../../models/student.model.js';
 import { resolveFacultySupervisedCourseObjectIds } from '../access/faculty-scope.js';
-import { StudentModel } from '../../models/student.model.js';
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
 import {

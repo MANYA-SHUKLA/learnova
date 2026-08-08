@@ -32,7 +32,6 @@ import { resolveFacultySupervisedCourseObjectIds } from '../access/faculty-scope
 import { QuestionBankModel } from '../../models/question-bank.model.js';
 import { QuizAttemptModel } from '../../models/quiz-attempt.model.js';
 import { QuizModel } from '../../models/quiz.model.js';
-import { StudentModel } from '../../models/student.model.js';
 import { logger } from '../../utils/logger/index.js';
 import {
   ConflictError,
