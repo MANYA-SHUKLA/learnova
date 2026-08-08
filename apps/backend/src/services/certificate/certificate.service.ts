@@ -223,7 +223,7 @@ export class CertificateService {
       throw new ConflictError('An active certificate of this type already exists');
     }
 
-    const { party, course, institution, student } = await loadPartyInfo(
+    const { party, course } = await loadPartyInfo(
       institutionId,
       input.studentId,
       input.courseId,
