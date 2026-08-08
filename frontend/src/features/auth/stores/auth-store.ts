@@ -3,7 +3,7 @@
 import type { AuthUser, Permission, Session } from '@learnova/types';
 import { getPermissionsForRole } from '@learnova/shared/permissions';
 import { create } from 'zustand';
-import { clearTokens, syncRoleCookieFromHint, syncRoleCookieFromUser } from '@/lib/auth/jwt';
+import { clearTokens, syncRoleCookieFromHint } from '@/lib/auth/jwt';
 
 interface AuthState {
   user: AuthUser | null;
@@ -49,9 +49,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     const permissions = permissionsFor(user);
     if (roleHint) {
       syncRoleCookieFromHint(roleHint);
-    } else {
-      syncRoleCookieFromUser(user.role);
     }
+    // Without roleHint, preserve any existing signed cookie — do not overwrite with unsigned role.
     set({
       user: { ...user, permissions },
       accessToken,
@@ -64,7 +63,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setUser: (user) => {
     const permissions = permissionsFor(user);
-    syncRoleCookieFromUser(user?.role);
     set((state) => ({
       user: user ? { ...user, permissions } : null,
       permissions,

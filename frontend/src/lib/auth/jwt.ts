@@ -63,7 +63,20 @@ export function syncRoleCookieFromToken(token: string | null | undefined): void 
   clearRoleCookie();
 }
 
+/** True when the role cookie is a signed hint (`role.exp.sig`), not a legacy plain role. */
+export function hasSignedRoleCookie(): boolean {
+  if (typeof document === 'undefined') return false;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${AUTH.ROLE_COOKIE_NAME}=([^;]*)`),
+  );
+  if (!match?.[1]) return false;
+  const value = decodeURIComponent(match[1]);
+  return value.split('.').length === 3;
+}
+
 export function syncRoleCookieFromUser(role: ActiveRole | string | null | undefined): void {
+  // Never downgrade a signed cookie to an unsigned role — middleware rejects unsigned cookies in production.
+  if (hasSignedRoleCookie()) return;
   if (role && isActiveRole(role)) {
     setRoleCookieFromRole(role);
     return;
@@ -77,7 +90,7 @@ export function storeAccessToken(accessToken: string): void {
   sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
   setAuthPresenceCookie();
-  syncRoleCookieFromToken(accessToken);
+  // Role cookie is set via signed roleHint from login/refresh/me — not from JWT payload.
 }
 
 /**

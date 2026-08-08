@@ -655,6 +655,17 @@
       "settings": "Settings",
       "logout": "Log out"
     },
+    "notifications": {
+      "eyebrow": "Inbox",
+      "title": "Notifications",
+      "description": "Assignment due dates, exam schedules, grades, certificates, and course announcements.",
+      "search": "Search notifications…",
+      "markRead": "Mark read",
+      "markAllRead": "Mark all read",
+      "delete": "Delete",
+      "empty": "No notifications yet.",
+      "viewAll": "View all notifications"
+    },
     "breadcrumb": {
       "home": "Home",
       "dashboard": "Dashboard"

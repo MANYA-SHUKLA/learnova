@@ -15,6 +15,7 @@ export interface MessageResponse {
 
 export interface MeResponse {
   user: AuthUser;
+  roleHint?: string | null;
 }
 
 export interface CurrentSessionResponse {

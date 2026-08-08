@@ -26,6 +26,7 @@ const PROTECTED_PATH_PREFIXES = [
   '/dashboard',
   '/sessions',
   '/account',
+  '/notifications',
   '/institution',
   '/student',
   '/faculty',
@@ -92,11 +93,12 @@ export default async function middleware(request: NextRequest) {
   const requiredRole = requiredRoleForPath(pathWithoutLocale);
   if (isAuthenticated && requiredRole) {
     if (!activeRole) {
-      const loginUrl = new URL(`/${locale}/login`, request.url);
-      loginUrl.searchParams.set('next', pathWithoutLocale);
-      return NextResponse.redirect(loginUrl);
-    }
-    if (!isPathAllowedForRole(pathWithoutLocale, activeRole)) {
+      // Missing/invalid signed role cookie — send to neutral dashboard so client can re-hydrate
+      // without a login ↔ dashboard redirect loop (blank screen on refresh).
+      if (pathWithoutLocale !== '/dashboard') {
+        return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+      }
+    } else if (!isPathAllowedForRole(pathWithoutLocale, activeRole)) {
       const forbiddenUrl = new URL(`/${locale}/forbidden`, request.url);
       forbiddenUrl.searchParams.set('from', pathWithoutLocale);
       return NextResponse.rewrite(forbiddenUrl, { status: 403 });

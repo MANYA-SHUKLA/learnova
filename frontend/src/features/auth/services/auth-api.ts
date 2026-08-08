@@ -62,8 +62,7 @@ export const authApi = {
   },
 
   async me() {
-    const data = await apiClient.get<MeResponse>(`${BASE}/me`);
-    return data.user;
+    return apiClient.get<MeResponse>(`${BASE}/me`);
   },
 
   async getSessions() {

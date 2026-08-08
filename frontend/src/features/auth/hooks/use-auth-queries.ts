@@ -15,7 +15,7 @@ export const authKeys = {
 export function useCurrentUser(enabled = true) {
   return useQuery({
     queryKey: authKeys.me,
-    queryFn: () => authApi.me(),
+    queryFn: async () => (await authApi.me()).user,
     enabled,
     staleTime: 60_000,
   });

@@ -1,13 +1,14 @@
 'use client';
 
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@learnova/ui';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Spinner } from '@learnova/ui';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { Link } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
-export default function ForbiddenPage() {
+function ForbiddenContent() {
   const t = useTranslations('dashboard.forbidden');
   const searchParams = useSearchParams();
   const from = searchParams.get('from');
@@ -34,5 +35,19 @@ export default function ForbiddenPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function ForbiddenPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
+      <ForbiddenContent />
+    </Suspense>
   );
 }

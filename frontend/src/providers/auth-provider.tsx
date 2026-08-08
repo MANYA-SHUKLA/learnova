@@ -102,15 +102,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (token && payload && tokenUsable) {
               try {
-                const [meUser, currentSession] = await Promise.all([
+                const [meData, currentSession] = await Promise.all([
                   authApi.me(),
                   authApi.getCurrentSession().catch(() => null),
                 ]);
                 if (cancelled) return;
+                let roleHint = meData.roleHint;
+                if (!roleHint) {
+                  try {
+                    const refreshed = await authApi.refresh();
+                    if (cancelled) return;
+                    storeAccessToken(refreshed.accessToken);
+                    roleHint = refreshed.roleHint;
+                    setAuth({
+                      user: resolveUserPermissions(refreshed.user),
+                      accessToken: refreshed.accessToken,
+                      session: refreshed.session,
+                      roleHint,
+                    });
+                    return;
+                  } catch {
+                    // Continue with /me payload without role hint refresh
+                  }
+                }
                 setAuth({
-                  user: resolveUserPermissions(meUser),
+                  user: resolveUserPermissions(meData.user),
                   accessToken: token,
                   session: currentSession ?? sessionFromPayload(payload),
+                  roleHint,
                 });
                 return;
               } catch {

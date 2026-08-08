@@ -54,7 +54,7 @@ export default function InstitutionLayout({ children }: { children: ReactNode })
     }
   }, [isLoading, isAuthenticated, user, allowed, router, pathname]);
 
-  if (isLoading || (isAuthenticated && user && !allowed)) {
+  if (isLoading || !isAuthenticated || !user || (user && !allowed)) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <Spinner size="lg" />

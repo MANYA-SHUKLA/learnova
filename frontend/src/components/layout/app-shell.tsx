@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useNotificationSocket } from '@/features/notification';
 import { cn } from '@/lib/utils';
 import { siteGutter } from '@/lib/layout';
 import { AppSidebar } from './app-sidebar';
@@ -13,6 +14,8 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, className }: AppShellProps) {
+  useNotificationSocket();
+
   return (
     <>
       <CommandPalette />

@@ -213,7 +213,11 @@ export async function me(
   try {
     if (!req.user) throw new UnauthorizedError();
     const user = await authService.me(req.user.sub);
-    sendSuccess(res, { user }, { requestId: req.requestId });
+    sendSuccess(
+      res,
+      { user, roleHint: signRoleHint(user.role) },
+      { requestId: req.requestId },
+    );
   } catch (err) {
     next(err);
   }

@@ -8,14 +8,12 @@ import {
   useDeleteNotificationMutation,
   useMarkAllNotificationsReadMutation,
   useMarkNotificationReadMutation,
-  useNotificationSocket,
   useNotificationsQuery,
 } from '@/features/notification';
 
 export default function NotificationsPage() {
   const t = useTranslations('dashboard.notifications');
   const [search, setSearch] = useState('');
-  useNotificationSocket();
   const listQuery = useNotificationsQuery({ q: search || undefined });
   const markReadMutation = useMarkNotificationReadMutation();
   const markAllMutation = useMarkAllNotificationsReadMutation();

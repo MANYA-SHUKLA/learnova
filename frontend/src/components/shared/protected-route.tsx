@@ -2,8 +2,6 @@
 
 /**
  * ProtectedRoute — UI gate for authenticated / permission-scoped views.
- * Soft mode until auth is implemented: renders children always,
- * exposes ready hooks for hard enforcement later.
  */
 
 import type { Permission, Role } from '@learnova/types';
@@ -13,15 +11,24 @@ import { useRole } from '@/providers/role-provider';
 import { can, canAll, canAny } from '@/lib/auth/permissions';
 import { Spinner } from '@learnova/ui';
 
+function DefaultDeniedFallback() {
+  return (
+    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-2 px-4 text-center">
+      <p className="text-base font-medium text-foreground">Access denied</p>
+      <p className="text-sm text-muted-foreground">
+        You do not have permission to view this page.
+      </p>
+    </div>
+  );
+}
+
 interface ProtectedRouteProps {
   children: ReactNode;
-  /** Soft gate: when true and unauthenticated, show fallback (default: soft allow) */
   requireAuth?: boolean;
   roles?: Role[];
   permissions?: Permission[];
   permissionMode?: 'all' | 'any';
   fallback?: ReactNode;
-  /** Set true when auth is live to enforce redirects/gates */
   enforce?: boolean;
 }
 
@@ -31,7 +38,7 @@ export function ProtectedRoute({
   roles,
   permissions,
   permissionMode = 'all',
-  fallback = null,
+  fallback = <DefaultDeniedFallback />,
   enforce = true,
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, permissions: userPermissions } = useAuth();
@@ -71,7 +78,7 @@ export function ProtectedRoute({
 export function PermissionGate({
   permission,
   children,
-  fallback = null,
+  fallback = <DefaultDeniedFallback />,
   enforce = true,
 }: {
   permission: Permission;

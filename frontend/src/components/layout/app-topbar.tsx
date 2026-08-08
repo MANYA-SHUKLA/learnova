@@ -1,8 +1,7 @@
 'use client';
 
-import { Badge, Button } from '@learnova/ui';
+import { Button } from '@learnova/ui';
 import {
-  Bell,
   ChevronRight,
   LogOut,
   Menu,
@@ -15,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { LanguageToggle } from '@/components/shared/language-toggle';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { useLogoutMutation } from '@/features/auth';
+import { NotificationCenter } from '@/features/notification';
 import { Link, usePathname, useRouter } from '@/lib/i18n/routing';
 import { siteGutter } from '@/lib/layout';
 import { useAuth } from '@/providers/auth-provider';
@@ -162,20 +162,7 @@ export function AppTopbar() {
             <Search />
           </Button>
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="relative"
-            aria-label={t('notifications')}
-          >
-            <Bell />
-            <Badge
-              variant="danger"
-              className="absolute right-1.5 top-1.5 size-2 rounded-full border-0 p-0"
-              aria-hidden
-            />
-          </Button>
+          <NotificationCenter />
 
           <LanguageToggle />
 
