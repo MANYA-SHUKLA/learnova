@@ -36,6 +36,11 @@ describe('RBAC route guards', () => {
     expect(isPathAllowedForRole('/faculty/dashboard', 'faculty')).toBe(true);
   });
 
+  it('blocks faculty from student areas', () => {
+    expect(isPathAllowedForRole('/student/dashboard', 'faculty')).toBe(false);
+    expect(isPathAllowedForRole('/faculty/dashboard', 'faculty')).toBe(true);
+  });
+
   it('blocks institution admin from student/faculty dashboards', () => {
     expect(isPathAllowedForRole('/student/dashboard', 'institution_admin')).toBe(false);
     expect(isPathAllowedForRole('/faculty/dashboard', 'institution_admin')).toBe(false);
