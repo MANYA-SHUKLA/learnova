@@ -23,7 +23,6 @@ import type {
 } from '@learnova/types';
 import { CourseModel } from '../../models/course.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
-import { FacultyModel } from '../../models/faculty.model.js';
 import { ProjectGradeModel } from '../../models/project-grade.model.js';
 import { ProjectSubmissionModel } from '../../models/project-submission.model.js';
 import { ProjectModel } from '../../models/project.model.js';
@@ -50,6 +49,7 @@ import {
   pageMeta,
   toDto,
 } from './gradebook.helpers.js';
+import { facultyCanAccessCourse } from '../access/faculty-scope.js';
 import {
   applyRelativeLetterGrades,
   collapseExamEntriesForPolicy,
@@ -98,21 +98,9 @@ async function assertCourseAccess(
   if (canManage(actor)) return;
 
   if (actor.role === 'faculty' || actor.role === 'teaching_assistant') {
-    const faculty = await FacultyModel.findOne({
-      institutionId: oid(institutionId),
-      email: actor.email.toLowerCase(),
-      deletedAt: null,
-    })
-      .select('_id')
-      .lean()
-      .exec();
-    if (!faculty) throw new ForbiddenError('Faculty record not found');
-
-    const facultyId = String(faculty._id);
-    const facultyIds = (course.facultyIds ?? []).map(String);
-    const coordinatorId = course.coordinatorId ? String(course.coordinatorId) : null;
-    if (facultyIds.includes(facultyId) || coordinatorId === facultyId) return;
-    throw new ForbiddenError('Not assigned to this course');
+    const allowed = await facultyCanAccessCourse(institutionId, actor.email, courseId);
+    if (!allowed) throw new ForbiddenError('Not assigned to this course');
+    return;
   }
 
   if (actor.role === 'student') {

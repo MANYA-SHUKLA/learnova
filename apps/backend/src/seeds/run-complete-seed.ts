@@ -29,6 +29,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const backendRoot = path.resolve(__dirname, '../..');
 
 const PIPELINE: readonly string[] = [
+  'seed:auth',
   'seed:enrollment-stack',
   'seed:course-builder',
   'seed:progress',

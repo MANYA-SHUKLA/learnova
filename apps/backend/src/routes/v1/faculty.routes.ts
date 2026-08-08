@@ -51,16 +51,16 @@ facultyRoutes.get(
   ctrl.searchFaculty,
 );
 
-facultyRoutes.get('/faculty/stats', ...readAuth, ctrl.getFacultyStats);
+facultyRoutes.get('/faculty/stats', ...manageAuth, ctrl.getFacultyStats);
 
 facultyRoutes.get(
   '/faculty/export',
-  ...readAuth,
+  ...manageAuth,
   validate(facultyExportQuerySchema, 'query'),
   ctrl.exportFaculty,
 );
 
-facultyRoutes.get('/faculty/audit', ...readAuth, ctrl.listFacultyAudit);
+facultyRoutes.get('/faculty/audit', ...manageAuth, ctrl.listFacultyAudit);
 
 facultyRoutes.get('/faculty/me', ...writeAuth, ctrl.getOwnFacultyProfile);
 

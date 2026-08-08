@@ -28,8 +28,8 @@ import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { ExamAttemptModel } from '../../models/exam-attempt.model.js';
 import { ExamModel } from '../../models/exam.model.js';
 import { ExamProctorSessionModel } from '../../models/exam-proctor-session.model.js';
-import { FacultyModel } from '../../models/faculty.model.js';
 import { StudentModel } from '../../models/student.model.js';
+import { resolveFacultySupervisedCourseObjectIds } from '../access/faculty-scope.js';
 import {
   ConflictError,
   ForbiddenError,
