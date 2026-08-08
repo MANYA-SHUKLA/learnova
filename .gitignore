@@ -1,72 +1,111 @@
-# Dependencies
+# ── Dependencies ──────────────────────────────────────────────────────────────
 node_modules/
 .pnpm-store/
 .yarn/
 .npm/
+.pnp.*
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
 
-# Build outputs
+# ── Build outputs ─────────────────────────────────────────────────────────────
 dist/
 build/
 out/
 .next/
 .turbo/
 *.tsbuildinfo
+next-env.d.ts
+.vercel/
+.output/
+storybook-static/
 
-# Environment
+# ── Environment & secrets (never commit) ──────────────────────────────────────
 .env
 .env.local
-.env.*.local
-.env.example
-.env.*.example
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+.env.production
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!**/.env.example
 
-# Logs
+# ── Logs & debug ───────────────────────────────────────────────────────────────
 logs/
 *.log
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-# OS
+# ── OS ────────────────────────────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 *.swp
 *.swo
 *~
 
-# IDE
+# ── IDE / editors ─────────────────────────────────────────────────────────────
 .idea/
+*.iml
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 !.vscode/launch.json
 *.sublime-project
 *.sublime-workspace
+*.code-workspace
 
-# Testing
+# ── Testing & coverage ────────────────────────────────────────────────────────
 coverage/
 .nyc_output/
 playwright-report/
 test-results/
+playwright/.cache/
+jest-html-reporters-*
+*.lcov
 
-# Docker
+# ── Docker & local infra ──────────────────────────────────────────────────────
 docker-data/
 *.pid
+mongo-data/
+redis-data/
 
-# Misc
-*.pem
-*.key
+# ── Uploads & runtime storage ─────────────────────────────────────────────────
+uploads/
+tmp/
+temp/
+backend/uploads/
+backend/tmp/
+
+# ── Cache & tooling ───────────────────────────────────────────────────────────
 .cache/
 .tmp/
 .temp/
 .eslintcache
 .stylelintcache
 .prettiercache
+*.pem
+*.key
+*.p12
+*.pfx
 
-# Uploads / local storage
-uploads/
-tmp/
-
-# Generated
+# ── Generated ─────────────────────────────────────────────────────────────────
 *.generated.ts
-storybook-static/
+*.generated.js
+
+# ── Platform deploy artifacts (local CLI state) ───────────────────────────────
+.render/
+render-cli/

@@ -1,7 +1,7 @@
-# Render — when Root Directory is set to `apps/backend`
+# Render — when Root Directory is set to `backend`
 #
 # Render UI settings:
-#   Root Directory: apps/backend
+#   Root Directory: backend
 #   Build Command:  bash scripts/render-build.sh
 #   Start Command:  bash scripts/render-start.sh
 #   Health Check:   /api/v1/live
