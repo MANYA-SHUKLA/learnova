@@ -8,7 +8,6 @@ import {
   PageHeader,
   StatCard,
   StatGrid,
-  Skeleton,
 } from '@learnova/ui';
 import { GraduationCap } from 'lucide-react';
 import { useTranslations } from 'next-intl';

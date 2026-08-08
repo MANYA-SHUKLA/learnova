@@ -1,25 +1,13 @@
 'use client';
 
 import { PERMISSIONS } from '@learnova/constants';
-import {
-  Badge,
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-} from '@learnova/ui';
+import { PageHeader, StatCard, StatGrid } from '@learnova/ui';
 import { GraduationCap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { GradebookSpreadsheet } from '@/components/gradebook/gradebook-spreadsheet';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
-import {
-  formatActivityKind,
-  formatMarks,
-  formatPercentage,
-  useGradebookList,
-  useStudentGradebookDashboard,
-} from '@/features/gradebook';
+import { formatPercentage, useGradebookList, useStudentGradebookDashboard } from '@/features/gradebook';
 
 export default function StudentGradebookPage() {
   const t = useTranslations('dashboard.student.gradebook');
@@ -31,75 +19,45 @@ export default function StudentGradebookPage() {
   return (
     <PermissionGate permission={PERMISSIONS.GRADEBOOK_READ} enforce>
       <div className="space-y-8">
+        <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
+
+        <StatGrid className="sm:grid-cols-3">
+          <StatCard
+            label={t('stats.courses')}
+            value={dash?.courseCount ?? '—'}
+            accent="primary"
+            loading={dashQuery.isLoading}
+          />
+          <StatCard
+            label={t('stats.finalized')}
+            value={dash?.finalizedCourses ?? '—'}
+            accent="accent"
+            loading={dashQuery.isLoading}
+          />
+          <StatCard
+            label={t('stats.average')}
+            value={dash ? formatPercentage(dash.averagePercentage) : '—'}
+            accent="success"
+            loading={dashQuery.isLoading}
+          />
+        </StatGrid>
+
         <div>
-          <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-            {t('title')}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            { label: t('stats.courses'), value: dash?.courseCount },
-            { label: t('stats.finalized'), value: dash?.finalizedCourses },
-            {
-              label: t('stats.average'),
-              value: dash ? formatPercentage(dash.averagePercentage) : '—',
-            },
-          ].map((stat) => (
-            <Card key={stat.label} className="rounded-2xl border-border/80">
-              <CardHeader className="pb-2">
-                <CardDescription>{stat.label}</CardDescription>
-                <CardTitle className="text-2xl">
-                  {dashQuery.isLoading ? <Skeleton className="h-8 w-12" /> : (stat.value ?? '—')}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-
-        <Card className="rounded-2xl border-border/80">
-          <CardHeader>
-            <CardTitle className="text-base">{t('listTitle')}</CardTitle>
-            <CardDescription>{t('listDescription')}</CardDescription>
-          </CardHeader>
+          <div className="mb-4">
+            <h2 className="text-section-title">{t('listTitle')}</h2>
+            <p className="mt-1 text-caption">{t('listDescription')}</p>
+          </div>
 
           {listQuery.isError ? (
-            <div className="p-6">
-              <ErrorState message={t('error')} onRetry={() => listQuery.refetch()} />
-            </div>
+            <ErrorState message={t('error')} onRetry={() => listQuery.refetch()} />
           ) : listQuery.isLoading ? (
-            <div className="space-y-3 p-6">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-xl" />
-              ))}
-            </div>
+            <GradebookSpreadsheet rows={[]} loading />
           ) : rows.length === 0 ? (
-            <div className="p-6">
-              <EmptyState icon={GraduationCap} title={t('emptyTitle')} description={t('emptyDescription')} />
-            </div>
+            <EmptyState icon={GraduationCap} title={t('emptyTitle')} description={t('emptyDescription')} />
           ) : (
-            <div className="divide-y divide-border/60">
-              {rows.map((entry) => (
-                <div key={entry.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">{entry.activityTitle}</p>
-                      <Badge variant="outline">{formatActivityKind(entry.activityKind)}</Badge>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {formatMarks(entry.marksObtained, entry.totalMarks)} · {formatPercentage(entry.percentage)}
-                    </p>
-                  </div>
-                  <Badge variant={entry.passed ? 'default' : 'secondary'}>
-                    {entry.passed == null ? entry.status : entry.passed ? t('passed') : t('notPassed')}
-                  </Badge>
-                </div>
-              ))}
-            </div>
+            <GradebookSpreadsheet rows={rows} />
           )}
-        </Card>
+        </div>
       </div>
     </PermissionGate>
   );
