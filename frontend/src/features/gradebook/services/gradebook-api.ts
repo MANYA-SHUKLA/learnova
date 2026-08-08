@@ -1,4 +1,5 @@
 import { API_ROUTES, PAGINATION } from '@learnova/constants';
+import type { UpsertAcademicPolicyInput } from '@learnova/validation';
 import type {
   CourseGradeSummary,
   GradebookCourseDashboard,
@@ -48,6 +49,20 @@ export interface TranscriptSummary {
   semesterGpa?: number | null;
   cgpa?: number | null;
   academicStanding?: string;
+}
+
+export interface AcademicPolicy {
+  creditBasedGrading?: boolean;
+  passingCriteria?: 'marks' | 'grade' | 'both';
+  passingPercentage?: number;
+  gradingScheme?: 'absolute' | 'relative';
+  standingThresholds?: {
+    probationGpa?: number;
+    warningGpa?: number;
+    honorsGpa?: number;
+    distinctionGpa?: number;
+    failedCourseLimit?: number;
+  };
 }
 
 export interface TranscriptRequestRow {
@@ -142,10 +157,10 @@ export const gradebookApi = {
   exportReport: (params: Record<string, string | undefined>) =>
     apiClient.get<string>(`${base}/reports${toQuery({ ...params, format: 'csv' })}`),
 
-  academicPolicy: () => apiClient.get<Record<string, unknown>>(`${base}/policy`),
+  academicPolicy: () => apiClient.get<AcademicPolicy>(`${base}/policy`),
 
-  upsertAcademicPolicy: (body: Record<string, unknown>) =>
-    apiClient.put<Record<string, unknown>>(`${base}/policy`, body),
+  upsertAcademicPolicy: (body: UpsertAcademicPolicyInput) =>
+    apiClient.put<AcademicPolicy>(`${base}/policy`, body),
 
   submitModeration: (courseId: string, notes?: string) =>
     apiClient.post<{ submitted: number }>(`${base}/moderation/submit`, { courseId, notes }),

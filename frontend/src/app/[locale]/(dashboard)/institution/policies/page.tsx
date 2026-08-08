@@ -23,9 +23,8 @@ export default function InstitutionGradebookPoliciesPage() {
     void saveMutation.mutateAsync({
       passingPercentage: Number(passingPercentage) || 60,
       passingCriteria: 'both',
-      gradingScheme: typeof policy?.gradingScheme === 'string' ? policy.gradingScheme : 'absolute',
-      creditBasedGrading:
-        typeof policy?.creditBasedGrading === 'boolean' ? policy.creditBasedGrading : true,
+      gradingScheme: policy?.gradingScheme ?? 'absolute',
+      creditBasedGrading: policy?.creditBasedGrading ?? true,
       standingThresholds: {
         warningGpa: Number(minimumGpa) || 2,
         probationGpa: 1.5,

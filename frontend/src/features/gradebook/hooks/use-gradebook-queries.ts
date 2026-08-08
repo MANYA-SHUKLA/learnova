@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { gradebookApi, type GradebookListParams } from '../services/gradebook-api';
+import type { UpsertAcademicPolicyInput } from '@learnova/validation';
 
 export const gradebookKeys = {
   all: ['gradebook'] as const,
@@ -102,7 +103,7 @@ export function useAcademicPolicyQuery(enabled = true) {
 export function useUpsertAcademicPolicyMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => gradebookApi.upsertAcademicPolicy(body),
+    mutationFn: (body: UpsertAcademicPolicyInput) => gradebookApi.upsertAcademicPolicy(body),
     onSuccess: () => void qc.invalidateQueries({ queryKey: gradebookKeys.all }),
   });
 }
