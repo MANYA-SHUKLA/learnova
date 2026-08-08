@@ -9,8 +9,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DataTable,
   Input,
-  Skeleton,
+  PageHeader,
+  StatCard,
+  StatGrid,
 } from '@learnova/ui';
 import { motion } from 'framer-motion';
 import {
@@ -23,7 +26,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
   EmptyState,
@@ -118,49 +121,40 @@ export default function StudentListPage() {
   return (
     <PermissionGate permission={PERMISSIONS.STUDENT_READ} enforce>
       <div className="space-y-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
-            <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-              {t('title')}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t('description')}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline">
-              <Link href={APP_ROUTES.INSTITUTION_STUDENTS_IMPORT}>
-                <Upload className="size-4" />
-                {tCommon('import')}
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={APP_ROUTES.INSTITUTION_STUDENTS_EXPORT}>
-                <Download className="size-4" />
-                {tCommon('export')}
-              </Link>
-            </Button>
-            <PermissionGate permission={PERMISSIONS.STUDENT_MANAGE}>
-              <Button asChild>
-                <Link href={APP_ROUTES.INSTITUTION_STUDENTS_CREATE}>
-                  <Plus className="size-4" />
-                  {t('addStudent')}
+        <PageHeader
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
+          actions={
+            <>
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link href={APP_ROUTES.INSTITUTION_STUDENTS_IMPORT}>
+                  <Upload className="size-4" />
+                  {tCommon('import')}
                 </Link>
               </Button>
-            </PermissionGate>
-          </div>
-        </div>
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link href={APP_ROUTES.INSTITUTION_STUDENTS_EXPORT}>
+                  <Download className="size-4" />
+                  {tCommon('export')}
+                </Link>
+              </Button>
+              <PermissionGate permission={PERMISSIONS.STUDENT_MANAGE}>
+                <Button asChild className="rounded-xl">
+                  <Link href={APP_ROUTES.INSTITUTION_STUDENTS_CREATE}>
+                    <Plus className="size-4" />
+                    {t('addStudent')}
+                  </Link>
+                </Button>
+              </PermissionGate>
+            </>
+          }
+        />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <StatGrid className="sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
           {statsQuery.isLoading
             ? Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl border-border/80">
-                  <CardContent className="p-4">
-                    <Skeleton className="h-3 w-16" />
-                    <Skeleton className="mt-3 h-8 w-12" />
-                  </CardContent>
-                </Card>
+                <StatCard key={i} label="…" value="—" loading />
               ))
             : [
                 { label: t('stats.total'), value: stats?.total ?? 0 },
@@ -169,26 +163,15 @@ export default function StudentListPage() {
                 { label: t('stats.dropped'), value: stats?.dropped ?? 0 },
                 { label: t('stats.departments'), value: stats?.departments ?? 0 },
                 { label: t('stats.newThisMonth'), value: stats?.newThisMonth ?? 0 },
-              ].map((card, i) => (
-                <motion.div
+              ].map((card) => (
+                <StatCard
                   key={card.label}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                >
-                  <Card className="rounded-2xl border-border/80">
-                    <CardContent className="p-4">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {card.label}
-                      </p>
-                      <p className="mt-2 font-display text-2xl font-semibold tabular-nums">
-                        {card.value.toLocaleString()}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                  label={card.label}
+                  value={card.value.toLocaleString()}
+                  accent="primary"
+                />
               ))}
-        </div>
+        </StatGrid>
 
         <Card className="rounded-2xl border-border/80">
           <CardHeader className="pb-3">

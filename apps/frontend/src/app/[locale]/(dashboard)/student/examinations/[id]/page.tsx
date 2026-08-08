@@ -12,6 +12,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { ExamTakingShell } from '@/components/examination/exam-taking-shell';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { ErrorState } from '@/features/institution';
 import {
@@ -208,55 +209,20 @@ export default function StudentExamDetailPage() {
           </Button>
         ) : null}
 
-        {attemptId && !submitted ? (
-          <div className="space-y-6">
-            {remainingSeconds != null ? (
-              <p className="text-sm text-muted-foreground">
-                {t('minutes')}: {Math.ceil(remainingSeconds / 60)}
-              </p>
-            ) : null}
-            {warnings.length > 0 ? (
-              <Card className="rounded-2xl border-amber-500/30 bg-amber-500/5">
-                <CardHeader>
-                  <CardTitle className="text-base">Warnings</CardTitle>
-                  <CardDescription>{warnings.join(' · ')}</CardDescription>
-                </CardHeader>
-              </Card>
-            ) : null}
-            {questions.map((q, index) => (
-              <Card key={q.id} className="rounded-2xl border-border/80">
-                <CardHeader>
-                  <CardTitle className="text-base">
-                    {index + 1}. {q.question}
-                  </CardTitle>
-                  <div className="mt-4 space-y-2">
-                    {(q.options ?? []).map((opt) => {
-                      const selected = (answers[q.id] ?? []).includes(opt.id);
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          className={`w-full rounded-xl border px-4 py-3 text-left text-sm transition ${
-                            selected
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border/80 hover:border-primary/40'
-                          }`}
-                          onClick={() =>
-                            setAnswers((prev) => ({ ...prev, [q.id]: [opt.id] }))
-                          }
-                        >
-                          {opt.optionText}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
-            <Button disabled={submitMutation.isPending} onClick={() => void handleSubmit()}>
-              {t('submitExam')}
-            </Button>
-          </div>
+        {attemptId && !submitted && exam ? (
+          <ExamTakingShell
+            title={exam.title}
+            subtitle={`${formatExamType(exam.examType)} · ${exam.rules.durationMinutes} ${t('minutes')}`}
+            remainingSeconds={remainingSeconds}
+            warnings={warnings}
+            questions={questions}
+            answers={answers}
+            onSelectOption={(questionId, optionId) =>
+              setAnswers((prev) => ({ ...prev, [questionId]: [optionId] }))
+            }
+            onSubmit={() => void handleSubmit()}
+            submitting={submitMutation.isPending}
+          />
         ) : null}
       </div>
     </PermissionGate>

@@ -74,29 +74,32 @@ export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
     : null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-background">
       {!sidebarCollapsed ? (
-        <div className="w-80 flex-shrink-0">
+        <div className="w-80 shrink-0 border-r border-border/80 bg-sidebar/50 backdrop-blur-sm">
           <ModuleSidebar courseId={courseId} modules={tree.modules} />
         </div>
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center justify-between border-b border-border bg-muted/30 px-4 py-2">
-          <Button type="button" variant="ghost" size="sm" onClick={toggleSidebar}>
+        <div className="flex items-center justify-between gap-3 border-b border-border/80 bg-background/90 px-4 py-2.5 backdrop-blur-md">
+          <Button type="button" variant="ghost" size="sm" className="rounded-xl" onClick={toggleSidebar}>
             {sidebarCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
-            {sidebarCollapsed ? 'Show' : 'Hide'} Sidebar
+            {sidebarCollapsed ? 'Outline' : 'Hide outline'}
           </Button>
-          <div className="text-xs text-muted-foreground">
-            {tree.meta.moduleCount} modules · {tree.meta.lessonCount} lessons
+          <div className="min-w-0 text-center">
+            <p className="truncate text-label text-foreground">Course builder</p>
+            <p className="text-caption text-muted-foreground">
+              {tree.meta.moduleCount} modules · {tree.meta.lessonCount} lessons
+            </p>
           </div>
-          <Button type="button" variant="ghost" size="sm" onClick={toggleProperties}>
-            {propertiesCollapsed ? 'Show' : 'Hide'} Properties
+          <Button type="button" variant="ghost" size="sm" className="rounded-xl" onClick={toggleProperties}>
+            {propertiesCollapsed ? 'Properties' : 'Hide properties'}
             {propertiesCollapsed ? <PanelRightOpen className="size-4" /> : <PanelRightClose className="size-4" />}
           </Button>
         </div>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden bg-muted/10">
           {tree.modules.length === 0 ? (
             <BuilderEmptyState type="no-modules" />
           ) : !selectedLesson ? (
@@ -108,7 +111,7 @@ export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
       </div>
 
       {!propertiesCollapsed && selectedLesson ? (
-        <div className="w-80 flex-shrink-0 overflow-y-auto border-l border-border">
+        <div className="w-80 shrink-0 overflow-y-auto border-l border-border/80 bg-card/80 backdrop-blur-sm">
           <LessonProperties courseId={courseId} lesson={selectedLesson} />
         </div>
       ) : null}
