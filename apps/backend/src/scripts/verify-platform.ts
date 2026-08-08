@@ -580,6 +580,45 @@ async function main(): Promise<void> {
 
   await disconnectMongo();
 
+  console.log('\n=== Performance ===');
+  const perfAdmin = admin ?? (await login('admin'));
+  if (perfAdmin) {
+    const courseListStart = performance.now();
+    const courses = await api<ApiListResponse & { meta?: { limit?: number } }>(
+      '/courses?page=1&limit=20',
+      { token: perfAdmin.token },
+    );
+    const courseListMs = Math.round(performance.now() - courseListStart);
+    const courseListOk = courses.status === 200 && courseListMs < 3000;
+    console.log(
+      `  GET /courses?page=1&limit=20: ${courseListMs}ms ${track(failures, 'Course list latency', courseListOk)}`,
+    );
+
+    const capped = await api<ApiListResponse & { meta?: { limit?: number } }>(
+      '/courses?page=1&limit=9999',
+      { token: perfAdmin.token },
+    );
+    const returned = capped.json.data?.items?.length ?? 0;
+    const limitMeta = capped.json.meta?.limit ?? returned;
+    const paginationOk = returned <= 100 && limitMeta <= 100;
+    console.log(
+      `  Pagination cap (limit=9999 → ${returned} items, meta.limit=${limitMeta}): ${track(failures, 'Pagination max limit', paginationOk)}`,
+    );
+
+    await connectMongo();
+    const courseIndexes = await mongoose.connection.db!.collection('courses').indexes();
+    const hasListIndex = courseIndexes.some((idx) => {
+      const keys = Object.keys(idx.key ?? {});
+      return keys.includes('institutionId') && keys.includes('deletedAt') && keys.includes('status');
+    });
+    console.log(
+      `  Course list compound index: ${track(failures, 'Course list compound index', hasListIndex)}`,
+    );
+    await disconnectMongo();
+  } else {
+    console.log('  Skipped — admin login required');
+  }
+
   if (failures.length > 0) {
     console.log(`\nRBAC / security verification failed (${failures.length}):`);
     for (const label of failures) {

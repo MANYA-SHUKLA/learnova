@@ -1,6 +1,7 @@
 'use client';
 
-import Editor, { type OnMount } from '@monaco-editor/react';
+import Editor, { type OnMount, type Monaco } from '@monaco-editor/react';
+import dynamic from 'next/dynamic';
 import { PRACTICE_LANGUAGE_META } from '@learnova/constants';
 import type { PracticeLanguage } from '@learnova/types';
 import { usePracticeEditorStore } from '../store/editor-store';
