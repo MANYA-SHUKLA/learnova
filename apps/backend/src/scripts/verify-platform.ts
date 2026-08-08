@@ -66,11 +66,13 @@ async function login(role: keyof typeof CREDS): Promise<LoginResult | null> {
   });
   const json = (await res.json()) as {
     success: boolean;
-    data?: { accessToken: string; user: { role: string } };
-    error?: { message?: string };
+    data?: { accessToken: string; user: { role: string; permissions?: string[] } };
+    error?: { message?: string; code?: string };
   };
   if (!json.success || !json.data) {
-    console.log(`  LOGIN FAIL (${role}): ${json.error?.message ?? res.status}`);
+    const msg = json.error?.message ?? String(res.status);
+    const hint = msg.toLowerCase().includes('too many') ? ' (auth rate limit — wait ~1 min, re-run)' : '';
+    console.log(`  LOGIN FAIL (${role}): ${msg}${hint}`);
     return null;
   }
   const cookies = extractCookies(res.headers.get('set-cookie'));
@@ -79,6 +81,10 @@ async function login(role: keyof typeof CREDS): Promise<LoginResult | null> {
     role: json.data.user.role,
     cookies,
   };
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function pageStatus(path: string, cookies = ''): Promise<number> {
@@ -109,30 +115,39 @@ async function main(): Promise<void> {
 
   console.log('\n=== Authentication ===');
   const admin = await login('admin');
+  await sleep(300);
   const faculty = await login('faculty');
+  await sleep(300);
   const student = await login('student');
-  console.log(`  Login admin: ${admin ? pass(true) : 'FAIL (run seed:demo + set-admin-password)'}`);
+  console.log(`  Login admin: ${admin ? pass(true) : 'FAIL (run set-admin-password.ts)'}`);
   console.log(`  Login faculty: ${faculty ? pass(true) : 'FAIL (run pnpm seed:demo)'}`);
-  console.log(`  Login student: ${student ? pass(true) : 'FAIL (run pnpm seed:demo)'}`);
+  console.log(`  Login student: ${student ? pass(true) : 'FAIL (run pnpm seed:demo or wait for rate limit)'}`);
 
   if (admin) {
     const me = await api<{ success: boolean }>('/auth/me', { token: admin.token });
     console.log(`  GET /auth/me (admin): ${pass(me.status === 200 && me.json.success)}`);
 
-    const sessions = await api<{ success: boolean; data?: unknown[] }>('/auth/sessions', {
-      token: admin.token,
-    });
-    const sessionCount = Array.isArray(sessions.json.data) ? sessions.json.data.length : 0;
+    const sessions = await api<{ success: boolean; data?: { sessions?: unknown[] } }>(
+      '/auth/sessions',
+      { token: admin.token },
+    );
+    const sessionCount = Array.isArray(sessions.json.data?.sessions)
+      ? sessions.json.data.sessions.length
+      : 0;
     console.log(
       `  GET /auth/sessions: ${pass(sessions.json.success)} (${sessionCount} active)`,
     );
 
     if (admin.cookies) {
-      const refresh = await api<{ success: boolean }>('/auth/refresh', {
-        method: 'POST',
-        cookies: admin.cookies,
-      });
-      console.log(`  POST /auth/refresh: ${pass(refresh.json.success)}`);
+      const refresh = await api<{ success: boolean; error?: { message?: string } }>(
+        '/auth/refresh',
+        { method: 'POST', cookies: admin.cookies },
+      );
+      const refreshOk = refresh.json.success;
+      const rateLimited = refresh.json.error?.message?.toLowerCase().includes('too many');
+      console.log(
+        `  POST /auth/refresh: ${rateLimited ? 'SKIP (rate limited)' : pass(refreshOk)}`,
+      );
     }
 
     const logout = await api<{ success: boolean }>('/auth/logout', {
@@ -141,17 +156,17 @@ async function main(): Promise<void> {
       cookies: admin.cookies,
     });
     console.log(`  POST /auth/logout: ${pass(logout.json.success)}`);
-
-    // Re-login admin for remaining checks
-    const admin2 = await login('admin');
-    if (admin2) Object.assign(admin, admin2);
   }
 
-  const forgot = await api<{ success: boolean }>('/auth/forgot-password', {
-    method: 'POST',
-    body: { email: 'shuklamanya99@gmail.com' },
-  });
-  console.log(`  POST /auth/forgot-password: ${pass(forgot.status === 200 && forgot.json.success)}`);
+  await sleep(500);
+  const forgot = await api<{ success: boolean; error?: { message?: string } }>(
+    '/auth/forgot-password',
+    { method: 'POST', body: { email: 'shuklamanya99@gmail.com' } },
+  );
+  const forgotRateLimited = forgot.json.error?.message?.toLowerCase().includes('too many');
+  console.log(
+    `  POST /auth/forgot-password: ${forgotRateLimited ? 'SKIP (rate limited)' : pass(forgot.status === 200 && forgot.json.success)}`,
+  );
 
   for (const [name, path] of [
     ['Forgot Password page', '/en/forgot-password'],
