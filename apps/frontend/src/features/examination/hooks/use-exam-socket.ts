@@ -1,7 +1,7 @@
 'use client';
 
 import { SOCKET_NAMESPACES } from '@learnova/constants';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { env } from '@/config/env';
 import { useExamStore } from '../store/exam-store';
@@ -10,7 +10,7 @@ export function useExamSocket(options: {
   examId?: string | null;
   attemptId?: string | null;
   enabled?: boolean;
-}) {
+}): RefObject<Socket | null> {
   const socketRef = useRef<Socket | null>(null);
   const setLiveStats = useExamStore((s) => s.setLiveStats);
   const setRemainingSeconds = useExamStore((s) => s.setRemainingSeconds);
