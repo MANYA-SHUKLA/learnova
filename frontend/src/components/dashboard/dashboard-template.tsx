@@ -171,7 +171,7 @@ export function DashboardProgressMetric({
   icon?: LucideIcon;
 }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-background/60 p-4 backdrop-blur-sm">
+    <div className="rounded-xl border border-border/60 bg-background/60 p-4 backdrop-blur-sm card-metric">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           {Icon ? <Icon className="size-4 text-primary" aria-hidden /> : null}
@@ -206,7 +206,7 @@ export function DashboardCapacityMetric({
   percent?: number;
 }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-background/75 p-4 backdrop-blur-sm">
+    <div className="rounded-xl border border-border/60 bg-background/75 p-4 backdrop-blur-sm card-metric">
       <p className="text-meta">{label}</p>
       <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-tight">
         {value.toLocaleString()}
@@ -243,15 +243,15 @@ export function DashboardQuickActionGrid({
           <Link key={action.href} href={action.href} className="group block h-full">
             <Card interactive className="h-full rounded-xl border-border/80">
               <CardContent className="flex items-start gap-4 p-5">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-                  <Icon className="size-5" aria-hidden />
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110 group-hover:-rotate-3 group-hover:bg-primary/15 group-hover:shadow-glow">
+                  <Icon className="size-5 transition-transform duration-300 group-hover:scale-105" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-label text-foreground">{action.title}</p>
+                  <p className="text-label text-foreground transition-colors duration-300 group-hover:text-primary">
                   <p className="mt-0.5 text-caption">{action.description}</p>
                 </div>
                 <ArrowRight
-                  className="mt-1 size-4 shrink-0 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
+                  className="mt-1 size-4 shrink-0 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary group-hover:opacity-100"
                   aria-hidden
                 />
               </CardContent>
@@ -274,7 +274,7 @@ export function DashboardInsightRow({
   href?: string;
 }) {
   const body = (
-    <div className="rounded-xl border border-border/70 bg-muted/30 px-3 py-2.5 transition-colors hover:bg-muted/50">
+    <div className="card-metric rounded-xl border border-border/70 bg-muted/30 px-3 py-2.5">
       <p className="text-label text-foreground">{title}</p>
       {subtitle ? <p className="mt-0.5 text-caption">{subtitle}</p> : null}
     </div>

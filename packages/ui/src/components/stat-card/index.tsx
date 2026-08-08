@@ -44,7 +44,7 @@ export function StatCard({
             {loading ? (
               <div className="h-8 w-24 animate-pulse rounded-lg bg-muted" />
             ) : (
-              <p className="font-display text-3xl font-semibold tabular-nums tracking-tight text-foreground">
+              <p className="font-display text-3xl font-semibold tabular-nums tracking-tight text-foreground transition-transform duration-300 group-hover:translate-x-0.5">
                 {value}
               </p>
             )}
@@ -65,11 +65,11 @@ export function StatCard({
           {Icon ? (
             <span
               className={cn(
-                'flex size-11 shrink-0 items-center justify-center rounded-xl',
+                'flex size-11 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ease-out group-hover:scale-110 group-hover:-rotate-6 group-hover:shadow-glow',
                 accentRing[accent],
               )}
             >
-              <Icon className="size-5" aria-hidden />
+              <Icon className="size-5 transition-transform duration-300 group-hover:scale-105" aria-hidden />
             </span>
           ) : null}
         </div>

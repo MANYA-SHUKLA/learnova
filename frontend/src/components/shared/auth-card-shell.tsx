@@ -50,6 +50,7 @@ export function AuthCardShell({
 
         <motion.div className="group relative">
           <Card
+            interactive
             className={cn(
               'relative w-full rounded-2xl border-border/80 bg-card/95 shadow-soft-lg backdrop-blur-sm',
               className,
