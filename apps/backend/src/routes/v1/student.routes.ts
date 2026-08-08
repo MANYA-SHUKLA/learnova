@@ -17,7 +17,13 @@ import {
   updateStudentProfileSchema,
   updateStudentSchema,
 } from '@learnova/validation';
-import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
+import {
+  authenticate,
+  facultyStudentGuard,
+  requirePermission,
+  studentOwnershipGuard,
+  tenantGuard,
+} from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/student/student.controller.js';
 
@@ -25,16 +31,19 @@ const studentRoutes = Router();
 
 const readAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.STUDENT_READ),
 ] as RequestHandler[];
 
 const writeAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.STUDENT_WRITE),
 ] as RequestHandler[];
 
 const manageAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.STUDENT_MANAGE),
 ] as RequestHandler[];
 
