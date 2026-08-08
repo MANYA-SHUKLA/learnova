@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  generateVerificationCode,
-  issueCertificateSchema,
-  normalizeVerificationCode,
-} from '@learnova/validation';
-import { generateVerificationCode as sharedCode } from '@learnova/shared';
+import { issueCertificateSchema } from '@learnova/validation';
+import { generateVerificationCode, normalizeVerificationCode } from '@learnova/shared';
 
 describe('certificate validation', () => {
   it('validates issue certificate payload', () => {
@@ -17,7 +13,7 @@ describe('certificate validation', () => {
   });
 
   it('generates normalized verification codes', () => {
-    const code = sharedCode();
+    const code = generateVerificationCode();
     expect(code.startsWith('LN-')).toBe(true);
     expect(normalizeVerificationCode(' ln-abc123 ')).toBe('LN-ABC123');
   });
