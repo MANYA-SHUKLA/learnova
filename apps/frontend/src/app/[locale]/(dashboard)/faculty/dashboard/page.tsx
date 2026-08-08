@@ -116,7 +116,7 @@ export default function FacultyDashboardPage() {
   const name = displayName(user?.firstName, user?.lastName, user?.email);
 
   return (
-    <div className="space-y-8">
+    <DashboardPage>
       <PageHeader
         eyebrow={t('roleLabel')}
         title={t('welcomeNamed', { name })}

@@ -340,6 +340,21 @@
     color: hsl(var(--muted-foreground));
   }
 
+  /** Page vertical rhythm — 32px between major blocks */
+  .page-shell {
+    @apply space-y-8;
+  }
+
+  /** Institution-style analytics split */
+  .dashboard-analytics-grid {
+    @apply xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)];
+  }
+
+  /** List / directory page card shell */
+  .directory-shell {
+    @apply rounded-xl border border-border/80 bg-card shadow-soft-sm;
+  }
+
   .card-static {
     @apply rounded-xl border border-border bg-card text-card-foreground shadow-soft-md;
   }
