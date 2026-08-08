@@ -4,7 +4,7 @@ services:
     image: learnova/api:${IMAGE_TAG:-staging}
     restart: unless-stopped
     env_file:
-      - ../../apps/backend/.env.staging
+      - ../../backend/.env.staging
     ports:
       - '4000:4000'
     depends_on:
@@ -14,13 +14,13 @@ services:
     image: learnova/worker:${IMAGE_TAG:-staging}
     restart: unless-stopped
     env_file:
-      - ../../apps/worker/.env.staging
+      - ../../worker/.env.staging
 
   frontend:
     image: learnova/frontend:${IMAGE_TAG:-staging}
     restart: unless-stopped
     env_file:
-      - ../../apps/frontend/.env.staging
+      - ../../frontend/.env.staging
     ports:
       - '3000:3000'
     depends_on:
