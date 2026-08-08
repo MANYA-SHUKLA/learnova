@@ -307,8 +307,6 @@ export function SchoolSelect({
 }
 
 export function AcademicYearSelect({
-
-export function AcademicYearSelect({
   label = 'Academic year',
   listParams,
   limit = 100,
@@ -488,6 +486,70 @@ export function FacultyMultiSelect({
       loading={query.isLoading}
       emptyMessage="No faculty found."
       searchPlaceholder="Search faculty…"
+    />
+  );
+}
+
+interface OrgMultiSelectProps extends OmitSelectProps {
+  label?: string;
+  listParams?: OrgListParams;
+  values: string[];
+  onChange: (values: string[]) => void;
+  limit?: number;
+}
+
+export function ProgramMultiSelect({
+  label = 'Programs',
+  listParams,
+  values,
+  onChange,
+  limit = 100,
+  ...props
+}: OrgMultiSelectProps) {
+  const query = usePrograms({ page: 1, limit, ...listParams });
+  const options = useListOptions(query.data?.items, (program) => ({
+    value: program.id,
+    label: `${program.code} — ${program.name}`,
+  }));
+
+  return (
+    <SearchableMultiSelect
+      {...props}
+      label={label}
+      values={values}
+      onChange={onChange}
+      options={options}
+      loading={query.isLoading}
+      emptyMessage="No programs found."
+      searchPlaceholder="Search programs…"
+    />
+  );
+}
+
+export function SemesterMultiSelect({
+  label = 'Semesters',
+  listParams,
+  values,
+  onChange,
+  limit = 100,
+  ...props
+}: OrgMultiSelectProps) {
+  const query = useSemesters({ page: 1, limit, ...listParams });
+  const options = useListOptions(query.data?.items, (semester) => ({
+    value: semester.id,
+    label: semester.name,
+  }));
+
+  return (
+    <SearchableMultiSelect
+      {...props}
+      label={label}
+      values={values}
+      onChange={onChange}
+      options={options}
+      loading={query.isLoading}
+      emptyMessage="No semesters found."
+      searchPlaceholder="Search semesters…"
     />
   );
 }
