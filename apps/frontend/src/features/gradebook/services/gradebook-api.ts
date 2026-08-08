@@ -29,6 +29,27 @@ function toQuery(params: Record<string, string | number | boolean | undefined>):
   return qs ? `?${qs}` : '';
 }
 
+export interface SemesterGradeRow {
+  id: string;
+  semesterId: string;
+  semesterGpa?: number | null;
+  earnedCredits?: number;
+  totalCredits?: number;
+}
+
+export interface TranscriptRow {
+  id: string;
+  transcriptNumber?: string;
+  transcriptType?: string;
+  status?: string;
+}
+
+export interface TranscriptSummary {
+  semesterGpa?: number | null;
+  cgpa?: number | null;
+  academicStanding?: string;
+}
+
 export interface GradebookListParams {
   courseId?: string;
   studentId?: string;
@@ -41,7 +62,7 @@ export interface GradebookListParams {
 export const gradebookApi = {
   listEntries: async (params: GradebookListParams = {}) => {
     const { data, meta } = await apiClient.getWithMeta<{ items: GradebookEntry[] }>(
-      `${base}/entries${toQuery(params)}`,
+      `${base}/entries${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
@@ -95,7 +116,7 @@ export const gradebookApi = {
     apiClient.get<GradebookStudentDashboard>(`${base}/dashboard/student`),
 
   semesterGrades: (params?: { studentId?: string; semesterId?: string }) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: SemesterGradeRow[] }>(
       `${base}/semester${toQuery(params ?? {})}`,
     ),
 

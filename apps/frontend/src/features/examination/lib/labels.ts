@@ -31,12 +31,14 @@ export function formatExamStatus(status: ExamStatus): string {
 }
 
 const EXAM_ATTEMPT_STATUS_LABELS: Record<ExamAttemptStatus, string> = {
-  not_started: 'Not started',
-  in_progress: 'In progress',
+  scheduled: 'Scheduled',
+  checked_in: 'Checked in',
+  started: 'In progress',
   submitted: 'Submitted',
-  graded: 'Graded',
+  completed: 'Completed',
   expired: 'Expired',
-  cancelled: 'Cancelled',
+  terminated: 'Terminated',
+  absent: 'Absent',
 };
 
 export function formatExamAttemptStatus(status: ExamAttemptStatus): string {

@@ -140,7 +140,7 @@ export function StudentSelect({
       sortOrder: 'asc',
       includeDeleted: false,
       q: debouncedQuery,
-      ...listParams,
+      ...(listParams as StudentListParams | undefined),
     },
     true,
   );
@@ -185,7 +185,7 @@ export function FacultySelect({
       sortOrder: 'asc',
       includeDeleted: false,
       q: debouncedQuery,
-      ...listParams,
+      ...(listParams as FacultyListParams | undefined),
     },
     true,
   );

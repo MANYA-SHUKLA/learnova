@@ -47,15 +47,15 @@ export default function StudentTranscriptPage() {
               <dl className="grid gap-3 text-sm sm:grid-cols-3">
                 <div>
                   <dt className="text-muted-foreground">{t('semesterGpa')}</dt>
-                  <dd className="font-medium">{String(record?.semesterGpa ?? '—')}</dd>
+                  <dd className="font-medium">{String(record?.['semesterGpa'] ?? '—')}</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">{t('cgpa')}</dt>
-                  <dd className="font-medium">{String(record?.cgpa ?? '—')}</dd>
+                  <dd className="font-medium">{String(record?.['cgpa'] ?? '—')}</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">{t('standing')}</dt>
-                  <dd className="font-medium">{String(record?.academicStanding ?? '—')}</dd>
+                  <dd className="font-medium">{String(record?.['academicStanding'] ?? '—')}</dd>
                 </div>
               </dl>
             )}
@@ -75,10 +75,10 @@ export default function StudentTranscriptPage() {
         >
           {transcripts.map((row) => (
             <CertificateListRow
-              key={String(row.id)}
-              primary={String(row.transcriptNumber ?? row.id)}
-              secondary={String(row.transcriptType ?? 'official')}
-              status={String(row.status)}
+              key={String(row['id'])}
+              primary={String(row['transcriptNumber'] ?? row['id'])}
+              secondary={String(row['transcriptType'] ?? 'official')}
+              status={String(row['status'])}
             />
           ))}
         </CertificateListCard>

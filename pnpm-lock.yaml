@@ -228,6 +228,9 @@ importers:
       '@learnova/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@learnova/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.56.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)

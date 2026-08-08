@@ -6,7 +6,7 @@ import { GraduationCap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
-import { formatPercentage, useStudentGradebookDashboard } from '@/features/gradebook';
+import { useStudentGradebookDashboard } from '@/features/gradebook';
 import { gradebookApi } from '@/features/gradebook/services/gradebook-api';
 import { useQuery } from '@tanstack/react-query';
 

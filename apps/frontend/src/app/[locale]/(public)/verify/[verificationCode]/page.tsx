@@ -47,22 +47,22 @@ export default function VerifyCertificatePage() {
                 <CardHeader className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
                     <CardTitle className="text-lg">{t('resultTitle')}</CardTitle>
-                    <Badge variant={result?.valid ? 'default' : 'danger'}>
-                      {result?.valid ? t('valid') : t('invalid')}
+                    <Badge variant={result?.['valid'] ? 'default' : 'danger'}>
+                      {result?.['valid'] ? t('valid') : t('invalid')}
                     </Badge>
                   </div>
-                  <CardDescription>{String(result?.message ?? '')}</CardDescription>
+                  <CardDescription>{String(result?.['message'] ?? '')}</CardDescription>
                   <dl className="grid gap-4 text-sm sm:grid-cols-2">
                     {[
-                      [t('institution'), result?.institutionName],
-                      [t('student'), result?.studentName],
-                      [t('document'), result?.title],
-                      [t('certificateNumber'), result?.certificateNumber],
-                      [t('status'), result?.status],
-                      [t('issued'), result?.issuedAt],
+                      [t('institution'), result?.['institutionName']],
+                      [t('student'), result?.['studentName']],
+                      [t('document'), result?.['title']],
+                      [t('certificateNumber'), result?.['certificateNumber']],
+                      [t('status'), result?.['status']],
+                      [t('issued'), result?.['issuedAt']],
                     ].map(([label, value]) => (
                       <div key={String(label)}>
-                        <dt className="text-muted-foreground">{label}</dt>
+                        <dt className="text-muted-foreground">{String(label)}</dt>
                         <dd className="font-medium">{String(value ?? empty)}</dd>
                       </div>
                     ))}

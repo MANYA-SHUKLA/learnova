@@ -85,10 +85,10 @@ export default function InstitutionCertificatesPage() {
         >
           {rows.map((row) => (
             <CertificateListRow
-              key={String(row.id)}
-              primary={String(row.title ?? 'Certificate')}
-              secondary={`${String(row.documentType)} · ${String(row.certificateNumber ?? row.verificationCode)}`}
-              status={String(row.status)}
+              key={String(row['id'])}
+              primary={String(row['title'] ?? 'Certificate')}
+              secondary={`${String(row['documentType'])} · ${String(row['certificateNumber'] ?? row['verificationCode'])}`}
+              status={String(row['status'])}
             />
           ))}
         </CertificateListCard>

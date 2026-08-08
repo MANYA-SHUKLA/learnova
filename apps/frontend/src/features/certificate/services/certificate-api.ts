@@ -49,7 +49,7 @@ export const certificateApi = {
 
   downloadHtml: async (certificateId: string) => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/v1${base}/${certificateId}/download`,
+      `${process.env['NEXT_PUBLIC_API_URL'] ?? ''}/api/v1${base}/${certificateId}/download`,
       { credentials: 'include' },
     );
     return response.text();
@@ -72,7 +72,7 @@ export const certificateApi = {
     ),
 
   exportRegistry: () =>
-    `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/v1${base}/registry/export`,
+    `${process.env['NEXT_PUBLIC_API_URL'] ?? ''}/api/v1${base}/registry/export`,
 
   institutionDashboard: () =>
     apiClient.get<{

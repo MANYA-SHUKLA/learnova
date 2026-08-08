@@ -71,10 +71,10 @@ export default function FacultyCertificatesPage() {
         >
           {rows.map((row) => (
             <CertificateListRow
-              key={String(row.id)}
-              primary={String(row.title ?? 'Certificate')}
-              secondary={String(row.certificateNumber ?? row.id)}
-              status={String(row.status)}
+              key={String(row['id'])}
+              primary={String(row['title'] ?? 'Certificate')}
+              secondary={String(row['certificateNumber'] ?? row['id'])}
+              status={String(row['status'])}
             />
           ))}
         </CertificateListCard>
