@@ -8,6 +8,7 @@ import type {
   ResetPasswordInput,
   VerifyEmailInput,
 } from '@learnova/validation';
+import { signRoleHint } from '../../services/auth/role-hint.js';
 import { authService } from '../../services/auth/auth.service.js';
 import { sendCreated, sendSuccess } from '../../utils/response/index.js';
 import {
@@ -17,6 +18,20 @@ import {
   setRefreshCookie,
 } from '../../services/auth/cookie.utils.js';
 import { UnauthorizedError } from '../../utils/errors/index.js';
+
+function authSessionPayload(result: {
+  user: { role: string };
+  session: unknown;
+  tokens: { accessToken: string; expiresIn: number };
+}) {
+  return {
+    user: result.user,
+    session: result.session,
+    accessToken: result.tokens.accessToken,
+    expiresIn: result.tokens.expiresIn,
+    roleHint: signRoleHint(result.user.role),
+  };
+}
 
 export async function register(
   req: Request,
@@ -29,12 +44,7 @@ export async function register(
     setRefreshCookie(res, result.tokens.refreshToken);
     sendCreated(
       res,
-      {
-        user: result.user,
-        session: result.session,
-        accessToken: result.tokens.accessToken,
-        expiresIn: result.tokens.expiresIn,
-      },
+      authSessionPayload(result),
       { requestId: req.requestId },
     );
   } catch (err) {
@@ -53,12 +63,7 @@ export async function login(
     setRefreshCookie(res, result.tokens.refreshToken);
     sendSuccess(
       res,
-      {
-        user: result.user,
-        session: result.session,
-        accessToken: result.tokens.accessToken,
-        expiresIn: result.tokens.expiresIn,
-      },
+      authSessionPayload(result),
       { requestId: req.requestId },
     );
   } catch (err) {
@@ -107,12 +112,7 @@ export async function refresh(
     setRefreshCookie(res, result.tokens.refreshToken);
     sendSuccess(
       res,
-      {
-        user: result.user,
-        session: result.session,
-        accessToken: result.tokens.accessToken,
-        expiresIn: result.tokens.expiresIn,
-      },
+      authSessionPayload(result),
       { requestId: req.requestId },
     );
   } catch (err) {
