@@ -10,6 +10,9 @@ interface UIState {
   mobileNavOpen: boolean;
   setMobileNavOpen: (open: boolean) => void;
   toggleMobileNav: () => void;
+  commandPaletteOpen: boolean;
+  setCommandPaletteOpen: (open: boolean) => void;
+  toggleCommandPalette: () => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -21,6 +24,9 @@ export const useUIStore = create<UIState>()(
       mobileNavOpen: false,
       setMobileNavOpen: (open) => set({ mobileNavOpen: open }),
       toggleMobileNav: () => set((s) => ({ mobileNavOpen: !s.mobileNavOpen })),
+      commandPaletteOpen: false,
+      setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+      toggleCommandPalette: () => set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
     }),
     {
       name: 'learnova-ui',

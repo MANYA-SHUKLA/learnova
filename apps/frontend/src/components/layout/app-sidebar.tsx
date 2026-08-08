@@ -272,13 +272,19 @@ function SidebarNav({
                       onClick={onNavigate}
                       title={collapsed ? label : undefined}
                       className={cn(
-                        'group flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-colors',
+                        'group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-all duration-200',
                         active
                           ? 'bg-sidebar-accent font-medium text-sidebar-primary shadow-soft-sm'
                           : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground',
                         collapsed && 'justify-center px-2',
                       )}
                     >
+                      {active ? (
+                        <span
+                          className="absolute inset-y-1 left-0 w-1 rounded-full bg-sidebar-primary"
+                          aria-hidden
+                        />
+                      ) : null}
                       <Icon
                         className={cn(
                           'size-4 shrink-0',

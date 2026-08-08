@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button, Input } from '@learnova/ui';
+import { Badge, Button } from '@learnova/ui';
 import {
   Bell,
   ChevronRight,
@@ -20,6 +20,7 @@ import { siteGutter } from '@/lib/layout';
 import { useAuth } from '@/providers/auth-provider';
 import { useUIStore } from '@/stores/ui-store';
 import { cn } from '@/lib/utils';
+import { CommandPaletteTrigger } from './command-palette';
 
 const SESSIONS_ROUTE = '/sessions';
 
@@ -78,6 +79,7 @@ export function AppTopbar() {
   const { user, signOut } = useAuth();
   const logoutMutation = useLogoutMutation();
   const setMobileNavOpen = useUIStore((s) => s.setMobileNavOpen);
+  const setCommandPaletteOpen = useUIStore((s) => s.setCommandPaletteOpen);
   const breadcrumbs = useBreadcrumbs(pathname);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -148,15 +150,17 @@ export function AppTopbar() {
         </nav>
 
         <div className="ml-auto flex min-w-0 items-center gap-1 sm:gap-1.5">
-          <div className="relative hidden w-[min(100%,12rem)] shrink lg:block xl:w-[min(100%,16rem)]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              readOnly
-              placeholder={`${tCommon('search')}…`}
-              className="h-9 w-full min-w-0 cursor-default rounded-xl border-border/80 bg-muted/40 pl-9 text-sm shadow-none"
-              aria-label={`${tCommon('search')} (${tCommon('comingSoon')})`}
-            />
-          </div>
+          <CommandPaletteTrigger className="hidden shrink lg:flex" />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="shrink-0 lg:hidden"
+            aria-label={tCommon('search')}
+            onClick={() => setCommandPaletteOpen(true)}
+          >
+            <Search />
+          </Button>
 
           <Button
             type="button"
