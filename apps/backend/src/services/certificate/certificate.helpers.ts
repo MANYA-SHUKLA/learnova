@@ -29,14 +29,14 @@ export async function allocateCertificateNumber(
 
 export async function allocateTranscriptNumber(institutionId: string): Promise<string> {
   const year = new Date().getFullYear();
-  const prefix = CERTIFICATE_DEFAULTS.NUMBER_PREFIX;
+  const prefix = `${CERTIFICATE_DEFAULTS.NUMBER_PREFIX}-TRN`;
   const row = await CertificateNumberSequenceModel.findOneAndUpdate(
-    { institutionId: oid(institutionId), year, prefix, segment: 'TRN' },
+    { institutionId: oid(institutionId), year, prefix },
     { $inc: { sequence: 1 }, $setOnInsert: { segment: 'TRN' } },
     { upsert: true, new: true, setDefaultsOnInsert: true },
   ).exec();
 
-  return formatCertificateNumber(prefix, year, row.sequence, 'TRN');
+  return formatCertificateNumber(CERTIFICATE_DEFAULTS.NUMBER_PREFIX, year, row.sequence, 'TRN');
 }
 
 export function rowsToCsv(headers: string[], rows: Array<Record<string, unknown>>): string {
