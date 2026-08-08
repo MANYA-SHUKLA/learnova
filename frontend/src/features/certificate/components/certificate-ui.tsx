@@ -131,10 +131,12 @@ export function CertificateListRow({
   primary,
   secondary,
   status,
+  actions,
 }: {
   primary: string;
   secondary?: string;
   status: string;
+  actions?: ReactNode;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
@@ -142,7 +144,10 @@ export function CertificateListRow({
         <p className="font-medium">{primary}</p>
         {secondary ? <p className="text-xs text-muted-foreground">{secondary}</p> : null}
       </div>
-      <Badge variant={certificateStatusVariant(status)}>{status}</Badge>
+      <div className="flex flex-wrap items-center gap-2">
+        {actions}
+        <Badge variant={certificateStatusVariant(status)}>{status}</Badge>
+      </div>
     </div>
   );
 }

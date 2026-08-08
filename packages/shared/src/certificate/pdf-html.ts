@@ -135,6 +135,13 @@ export function renderCertificateHtml(input: CertificatePdfInput): string {
       margin-top: 6px;
       color: ${theme.secondary};
     }
+    .qr-img {
+      display: block;
+      width: 120px;
+      height: 120px;
+      margin: 8px auto 0;
+      border-radius: 8px;
+    }
     .sigs {
       display: flex;
       gap: 32px;
@@ -169,7 +176,12 @@ export function renderCertificateHtml(input: CertificatePdfInput): string {
         <div><strong>Issued</strong> ${input.issuedAt}</div>
       </div>
       <div class="qr">
-        <div class="qr-label">Verify on Learnova</div>
+        <div class="qr-label">Scan to verify</div>
+        <img
+          class="qr-img"
+          src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&amp;data=${encodeURIComponent(input.verificationUrl)}"
+          alt="Verification QR code"
+        />
         <div class="qr-code">${input.verificationCode}</div>
         <div class="muted">${input.verificationUrl}</div>
       </div>

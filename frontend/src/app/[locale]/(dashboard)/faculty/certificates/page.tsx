@@ -1,7 +1,7 @@
 'use client';
 
 import { PERMISSIONS } from '@learnova/constants';
-import { Card, CardDescription, CardHeader, CardTitle, Skeleton } from '@learnova/ui';
+import { Button, Card, CardDescription, CardHeader, CardTitle, Skeleton } from '@learnova/ui';
 import { Award } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -12,21 +12,19 @@ import {
   CertificateListRow,
   CertificatePageHeader,
   useCertificateList,
+  useEligibleStudentsQuery,
+  useIssueCertificateMutation,
 } from '@/features/certificate';
-import { certificateApi } from '@/features/certificate/services/certificate-api';
-import { useQuery } from '@tanstack/react-query';
 
 export default function FacultyCertificatesPage() {
   const t = useTranslations('dashboard.faculty.certificates');
   const [courseId, setCourseId] = useState('');
   const listQuery = useCertificateList({ page: '1', limit: '25' });
-  const eligibleQuery = useQuery({
-    queryKey: ['certificates', 'eligible', courseId],
-    queryFn: () => certificateApi.listEligibleStudents(courseId),
-    enabled: Boolean(courseId),
-  });
+  const eligibleQuery = useEligibleStudentsQuery(courseId, Boolean(courseId));
+  const issueMutation = useIssueCertificateMutation();
 
   const rows = listQuery.data?.items ?? [];
+  const eligible = eligibleQuery.data?.items ?? [];
 
   return (
     <PermissionGate permission={PERMISSIONS.CERTIFICATE_WRITE} enforce>
@@ -41,19 +39,43 @@ export default function FacultyCertificatesPage() {
           <CardHeader>
             <CardTitle className="text-base">{t('eligibleTitle')}</CardTitle>
             <CardDescription>{t('eligibleDescription')}</CardDescription>
-            <CourseSelect
-              className="mt-3 max-w-md"
-              value={courseId}
-              onChange={setCourseId}
-            />
+            <CourseSelect className="mt-3 max-w-md" value={courseId} onChange={setCourseId} />
             {eligibleQuery.isLoading ? (
               <Skeleton className="mt-4 h-16 rounded-xl" />
             ) : (
-              <p className="mt-3 text-sm text-muted-foreground">
-                {courseId
-                  ? t('eligibleCount', { count: eligibleQuery.data?.total ?? 0 })
-                  : t('eligibleHint')}
-              </p>
+              <div className="mt-4 space-y-2">
+                {!courseId ? (
+                  <p className="text-sm text-muted-foreground">{t('eligibleHint')}</p>
+                ) : eligible.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t('eligibleEmpty')}</p>
+                ) : (
+                  eligible.map((student) => (
+                    <div
+                      key={student.studentId}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2 text-sm"
+                    >
+                      <span>
+                        {student.fullName ?? student.studentId}
+                        {student.rollNumber ? ` · ${student.rollNumber}` : ''}
+                      </span>
+                      <Button
+                        size="sm"
+                        disabled={issueMutation.isPending}
+                        onClick={() => {
+                          void issueMutation.mutateAsync({
+                            studentId: student.studentId,
+                            courseId,
+                            documentType: 'course_completion',
+                            publish: true,
+                          });
+                        }}
+                      >
+                        {t('issue')}
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
             )}
           </CardHeader>
         </Card>
@@ -71,10 +93,10 @@ export default function FacultyCertificatesPage() {
         >
           {rows.map((row) => (
             <CertificateListRow
-              key={String(row['id'])}
-              primary={String(row['title'] ?? 'Certificate')}
-              secondary={String(row['certificateNumber'] ?? row['id'])}
-              status={String(row['status'])}
+              key={row.id}
+              primary={row.title ?? 'Certificate'}
+              secondary={row.certificateNumber ?? row.id}
+              status={row.status ?? 'issued'}
             />
           ))}
         </CertificateListCard>

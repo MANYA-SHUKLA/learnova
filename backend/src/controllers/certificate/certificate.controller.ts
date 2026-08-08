@@ -295,6 +295,19 @@ export async function getAcademicRecord(req: Request, res: Response, next: NextF
   }
 }
 
+export async function listAuditLogs(req: Request, res: Response, next: NextFunction) {
+  try {
+    const items = await certificateService.listAuditLogs(
+      actorFrom(req),
+      req.query.certificateId as string | undefined,
+      req.query.limit ? Number(req.query.limit) : 50,
+    );
+    sendSuccess(res, { items }, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function institutionDashboard(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await certificateService.institutionDashboard(actorFrom(req));

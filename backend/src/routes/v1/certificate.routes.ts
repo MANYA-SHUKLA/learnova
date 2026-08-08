@@ -97,6 +97,7 @@ certificateRoutes.get(
 
 certificateRoutes.get('/certificates/dashboard/institution', ...manageAuth, ctrl.institutionDashboard);
 certificateRoutes.get('/certificates/dashboard/student', ...readAuth, ctrl.studentDashboard);
+certificateRoutes.get('/certificates/audit', ...manageAuth, ctrl.listAuditLogs);
 
 certificateRoutes.get(
   '/certificates/academic-record',

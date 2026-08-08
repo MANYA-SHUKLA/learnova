@@ -11,3 +11,4 @@ export {
   type TypedEventName,
 } from './event-bus.js';
 export { registerInfrastructureListeners } from './listeners/infrastructure.listeners.js';
+export { registerCertificateListeners } from './listeners/certificate.listeners.js';

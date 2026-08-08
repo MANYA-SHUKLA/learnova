@@ -1,8 +1,10 @@
 'use client';
 
 import { PERMISSIONS } from '@learnova/constants';
+import { Button } from '@learnova/ui';
 import { Award } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/lib/i18n/routing';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { ErrorState } from '@/features/institution';
 import {
@@ -11,6 +13,7 @@ import {
   CertificatePageHeader,
   CertificateStatCard,
   CertificateStatGrid,
+  openCertificateForPrint,
   useStudentCertificateDashboard,
 } from '@/features/certificate';
 
@@ -48,10 +51,32 @@ export default function StudentCertificatesPage() {
         >
           {rows.map((row) => (
             <CertificateListRow
-              key={String(row['id'])}
-              primary={String(row['title'] ?? 'Certificate')}
-              secondary={String(row['certificateNumber'] ?? row['verificationCode'])}
-              status={String(row['status'])}
+              key={row.id}
+              primary={row.title ?? 'Certificate'}
+              secondary={row.certificateNumber ?? row.verificationCode}
+              status={row.status ?? 'issued'}
+              actions={
+                row.status !== 'revoked' ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        void openCertificateForPrint(row.id);
+                      }}
+                    >
+                      {t('download')}
+                    </Button>
+                    {row.verificationCode ? (
+                      <Button size="sm" variant="ghost" asChild>
+                        <Link href={`/verify/${row.verificationCode}`} target="_blank">
+                          {t('verify')}
+                        </Link>
+                      </Button>
+                    ) : null}
+                  </>
+                ) : null
+              }
             />
           ))}
         </CertificateListCard>

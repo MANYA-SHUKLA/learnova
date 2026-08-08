@@ -252,6 +252,19 @@ export const certificateRepository = {
     });
   },
 
+  async listAuditLogs(
+    institutionId: string,
+    options?: { certificateId?: string; limit?: number },
+  ) {
+    const filter: Record<string, unknown> = { institutionId: oid(institutionId) };
+    if (options?.certificateId) filter.certificateId = oid(options.certificateId);
+    return CertificateAuditLogModel.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(options?.limit ?? 50)
+      .lean()
+      .exec();
+  },
+
   async listRegistryRows(
     institutionId: string,
     status?: string,

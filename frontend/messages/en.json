@@ -1480,7 +1480,27 @@
         "listDescription": "Official documents linked to gradebook snapshots and verification codes.",
         "emptyTitle": "No certificates issued",
         "emptyDescription": "Publish grades in the gradebook, then issue certificates here.",
-        "error": "Unable to load certificates."
+        "error": "Unable to load certificates.",
+        "autoIssueTitle": "Auto-issue rules",
+        "autoIssueDescription": "Automatically issue course completion certificates when grades are published.",
+        "autoIssueOn": "Auto-issue enabled",
+        "autoIssueOff": "Enable auto-issue",
+        "manualIssueTitle": "Manual issue",
+        "manualIssueDescription": "Issue a certificate to one eligible student.",
+        "manualIssue": "Issue certificate",
+        "course": "Course",
+        "student": "Student",
+        "templatesTitle": "Certificate templates",
+        "templatesDescription": "Reusable layouts for issued documents.",
+        "templateNamePlaceholder": "Template name",
+        "createTemplate": "Add template",
+        "download": "Download PDF",
+        "verify": "Verify",
+        "revoke": "Revoke",
+        "revokeReason": "Reason for revocation",
+        "auditTitle": "Audit log",
+        "auditDescription": "Recent certificate actions in your institution.",
+        "auditEmpty": "No certificate audit events yet."
       },
       "courseBuilder": {
         "title": "Course Builder",
@@ -1928,7 +1948,9 @@
         "listDescription": "Official documents with verification codes linked to gradebook snapshots.",
         "emptyTitle": "No certificates yet",
         "emptyDescription": "Issue certificates after gradebook publication.",
-        "error": "Unable to load certificates."
+        "error": "Unable to load certificates.",
+        "eligibleEmpty": "No eligible students for this course.",
+        "issue": "Issue certificate"
       },
       "proctoring": {
         "eyebrow": "Proctoring",
@@ -2315,7 +2337,9 @@
         "listDescription": "Each document includes a verification code for third-party validation.",
         "emptyTitle": "No certificates yet",
         "emptyDescription": "Certificates appear after your institution issues them from published grades.",
-        "error": "Unable to load certificates."
+        "error": "Unable to load certificates.",
+        "download": "Download PDF",
+        "verify": "Verify"
       },
       "transcript": {
         "eyebrow": "Academic credentials",

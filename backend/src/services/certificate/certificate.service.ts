@@ -201,6 +201,13 @@ export class CertificateService {
     return toDto(template);
   }
 
+  async listAuditLogs(actor: ActorContext, certificateId?: string, limit = 50) {
+    if (!canManage(actor)) throw new ForbiddenError('Certificate manage access required');
+    const institutionId = requireTenant(actor);
+    const rows = await certificateRepository.listAuditLogs(institutionId, { certificateId, limit });
+    return rows.map(toDto);
+  }
+
   async listCertificates(query: CertificateListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const studentId = await resolveStudentScope(actor, institutionId, query.studentId);
