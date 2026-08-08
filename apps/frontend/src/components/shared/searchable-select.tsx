@@ -1,7 +1,8 @@
 'use client';
 
 import { Input, Spinner } from '@learnova/ui';
-import { useMemo, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface SearchableSelectOption {
@@ -31,9 +32,6 @@ export interface SearchableSelectProps {
   serverSideSearch?: boolean;
 }
 
-const selectClassName =
-  'w-full rounded-lg border border-input bg-background px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50';
-
 export function SearchableSelect({
   id,
   label,
@@ -54,9 +52,18 @@ export function SearchableSelect({
   onSearchQueryChange,
   serverSideSearch = false,
 }: SearchableSelectProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
+
   const [localQuery, setLocalQuery] = useState('');
   const query = searchQuery ?? localQuery;
   const setQuery = onSearchQueryChange ?? setLocalQuery;
+
+  const selectedOption = useMemo(
+    () => options.find((option) => option.value === value),
+    [options, value],
+  );
 
   const filtered = useMemo(() => {
     if (serverSideSearch) return options;
@@ -67,6 +74,50 @@ export function SearchableSelect({
 
   const isDisabled = disabled || loading;
 
+  const closeDropdown = () => {
+    setOpen(false);
+    if (onSearchQueryChange) {
+      onSearchQueryChange('');
+    } else {
+      setLocalQuery('');
+    }
+  };
+
+  const openDropdown = () => {
+    if (isDisabled) return;
+    setOpen(true);
+  };
+
+  const selectOption = (optionValue: string) => {
+    onChange(optionValue);
+    closeDropdown();
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        closeDropdown();
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeDropdown();
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open]);
+
+  const inputValue = open ? query : (selectedOption?.label ?? '');
+
   return (
     <div className={cn('space-y-1.5', className)}>
       {label ? (
@@ -76,46 +127,90 @@ export function SearchableSelect({
       ) : null}
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
 
-      <div className="relative">
+      <div ref={containerRef} className="relative">
         <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={searchPlaceholder}
+          id={id}
+          role="combobox"
+          aria-expanded={open}
+          aria-controls={listboxId}
+          aria-autocomplete="list"
+          autoComplete="off"
+          value={inputValue}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            openDropdown();
+          }}
+          onFocus={openDropdown}
+          placeholder={open ? searchPlaceholder : placeholder}
           disabled={isDisabled}
           className="rounded-lg pr-9"
-          aria-controls={id}
         />
         {loading ? (
           <Spinner size="sm" className="absolute right-3 top-1/2 -translate-y-1/2" />
+        ) : (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Toggle options"
+            disabled={isDisabled}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => (open ? closeDropdown() : openDropdown())}
+          >
+            <ChevronDown
+              className={cn('h-4 w-4 transition-transform', open && 'rotate-180')}
+            />
+          </button>
+        )}
+
+        {open ? (
+          <ul
+            id={listboxId}
+            role="listbox"
+            className="absolute left-0 right-0 top-full z-50 mt-1 overflow-y-auto rounded-lg border border-input bg-background py-1 shadow-md"
+            style={{ maxHeight: `${visibleRows * 2.25}rem` }}
+          >
+            {allowEmpty ? (
+              <li
+                role="option"
+                aria-selected={value === ''}
+                className={cn(
+                  'cursor-pointer px-3 py-2 text-sm hover:bg-muted/40',
+                  value === '' && 'bg-muted/60',
+                )}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => selectOption('')}
+              >
+                {emptyLabel}
+              </li>
+            ) : null}
+            {loading ? (
+              <li className="px-3 py-2 text-sm text-muted-foreground">Loading...</li>
+            ) : filtered.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-muted-foreground">{emptyMessage}</li>
+            ) : (
+              filtered.map((option) => (
+                <li
+                  key={option.value}
+                  role="option"
+                  aria-selected={option.value === value}
+                  aria-disabled={option.disabled}
+                  className={cn(
+                    'cursor-pointer px-3 py-2 text-sm hover:bg-muted/40',
+                    option.value === value && 'bg-muted/60',
+                    option.disabled && 'cursor-not-allowed opacity-50',
+                  )}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (!option.disabled) selectOption(option.value);
+                  }}
+                >
+                  {option.label}
+                </li>
+              ))
+            )}
+          </ul>
         ) : null}
       </div>
-
-      <select
-        id={id}
-        size={visibleRows}
-        className={selectClassName}
-        value={value}
-        disabled={isDisabled}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {allowEmpty ? <option value="">{emptyLabel}</option> : null}
-        {!allowEmpty && !value ? (
-          <option value="" disabled>
-            {loading ? 'Loading...' : placeholder}
-          </option>
-        ) : null}
-        {filtered.length === 0 ? (
-          <option value="" disabled>
-            {loading ? 'Loading...' : emptyMessage}
-          </option>
-        ) : (
-          filtered.map((option) => (
-            <option key={option.value} value={option.value} disabled={option.disabled}>
-              {option.label}
-            </option>
-          ))
-        )}
-      </select>
     </div>
   );
 }

@@ -185,7 +185,11 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
     );
   }
 
-  const field = (key: keyof typeof form, label: string, opts?: { type?: string; placeholder?: string }) => (
+  const field = (
+    key: keyof typeof form,
+    label: string,
+    opts?: { type?: string; placeholder?: string; autoComplete?: string },
+  ) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
         {label}
@@ -196,6 +200,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
         value={String(form[key])}
         disabled={pending}
         placeholder={opts?.placeholder}
+        autoComplete={opts?.autoComplete}
         onChange={(e) => set(key, e.target.value)}
       />
     </div>
@@ -234,8 +239,8 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {field('studentId', 'Student ID')}
-            {field('admissionNumber', 'Admission number')}
+            {field('studentId', 'Student ID', { autoComplete: 'off' })}
+            {field('admissionNumber', 'Admission number', { autoComplete: 'off' })}
             {field('rollNumber', 'Roll number')}
             {field('registrationNumber', 'Registration number')}
             {field('firstName', 'First name', { placeholder: 'Manya' })}

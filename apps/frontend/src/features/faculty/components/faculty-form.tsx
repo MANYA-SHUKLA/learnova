@@ -171,7 +171,11 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
     );
   }
 
-  const field = (key: keyof typeof form, label: string, opts?: { type?: string; placeholder?: string }) => (
+  const field = (
+    key: keyof typeof form,
+    label: string,
+    opts?: { type?: string; placeholder?: string; autoComplete?: string },
+  ) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
         {label}
@@ -182,6 +186,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
         value={form[key]}
         disabled={pending}
         placeholder={opts?.placeholder}
+        autoComplete={opts?.autoComplete}
         onChange={(e) => set(key, e.target.value)}
       />
     </div>
@@ -204,8 +209,8 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {field('employeeId', 'Employee ID')}
-            {field('facultyCode', 'Faculty code')}
+            {field('employeeId', 'Employee ID', { autoComplete: 'off' })}
+            {field('facultyCode', 'Faculty code', { autoComplete: 'off' })}
             {field('firstName', 'First name', { placeholder: 'Manya' })}
             {field('middleName', 'Middle name')}
             {field('lastName', 'Last name', { placeholder: 'Shukla' })}

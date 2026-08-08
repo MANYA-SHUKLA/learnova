@@ -228,7 +228,11 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
     }
   };
 
-  const field = (key: keyof typeof form, label: string, opts?: { type?: string; rows?: number }) => (
+  const field = (
+    key: keyof typeof form,
+    label: string,
+    opts?: { type?: string; rows?: number; autoComplete?: string },
+  ) => (
     <div className="space-y-1.5">
       <label className="text-sm font-medium" htmlFor={key}>
         {label}
@@ -248,6 +252,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
           type={opts?.type ?? 'text'}
           value={form[key]}
           disabled={pending}
+          autoComplete={opts?.autoComplete}
           onChange={(e) => set(key, e.target.value)}
         />
       )}
@@ -313,8 +318,8 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
               Basic information
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
-              {field('courseCode', 'Course code')}
-              {field('slug', 'Slug')}
+              {field('courseCode', 'Course code', { autoComplete: 'off' })}
+              {field('slug', 'Slug', { autoComplete: 'off' })}
               {field('title', 'Title')}
               {field('subtitle', 'Subtitle')}
             </div>
