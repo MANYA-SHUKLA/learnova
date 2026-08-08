@@ -1,1 +1,1 @@
-export { default } from '../../examinations/page';
+export { default } from '../examinations/page';
