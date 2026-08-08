@@ -4,7 +4,7 @@ import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from '@learnova/ui';
 import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { CourseSelect, FacultySelect } from '@/components/shared/entity-selects';
+import { CourseSelect } from '@/components/shared/entity-selects';
 import { useCreatePracticeLabMutation } from '@/features/practice-lab';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
