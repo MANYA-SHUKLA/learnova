@@ -92,7 +92,7 @@ export default function FacultyDashboardPage() {
       upcomingExams.map((exam) => ({
         id: exam.id,
         title: exam.title,
-        subtitle: formatExamWindow(exam.startsAt, exam.endsAt),
+        subtitle: formatExamWindow(exam.schedule.startsAt, exam.schedule.endsAt),
         status: exam.status,
         href: APP_ROUTES.FACULTY_EXAMINATIONS,
         meta: formatExamStatus(exam.status),
