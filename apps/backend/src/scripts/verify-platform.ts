@@ -249,15 +249,44 @@ async function main(): Promise<void> {
       blocked.status >= 300 &&
       blocked.status < 400 &&
       blocked.location?.includes('/faculty/dashboard');
-    console.log(`  Faculty blocked from institution dashboard: ${pass(redirected)}`);
+    console.log(
+      `  Faculty blocked from institution dashboard: ${track(failures, 'Faculty blocked from institution dashboard', redirected)}`,
+    );
   }
   if (student) {
-    const blocked = await pageRedirect('/en/faculty/dashboard', student.cookies, student.role);
-    const redirected =
-      blocked.status >= 300 &&
-      blocked.status < 400 &&
-      blocked.location?.includes('/student/dashboard');
-    console.log(`  Student blocked from faculty dashboard: ${pass(redirected)}`);
+    const blockedFaculty = await pageRedirect('/en/faculty/dashboard', student.cookies, student.role);
+    const blockedInstitution = await pageRedirect(
+      '/en/institution/dashboard',
+      student.cookies,
+      student.role,
+    );
+    const blockedInstitutionStudents = await pageRedirect(
+      '/en/institution/students',
+      student.cookies,
+      student.role,
+    );
+    const facultyRedirect =
+      blockedFaculty.status >= 300 &&
+      blockedFaculty.status < 400 &&
+      blockedFaculty.location?.includes('/student/dashboard');
+    const institutionRedirect =
+      blockedInstitution.status >= 300 &&
+      blockedInstitution.status < 400 &&
+      blockedInstitution.location?.includes('/student/dashboard');
+    const institutionStudentsRedirect =
+      blockedInstitutionStudents.status >= 300 &&
+      blockedInstitutionStudents.status < 400 &&
+      blockedInstitutionStudents.location?.includes('/student/dashboard');
+
+    console.log(
+      `  Student blocked from faculty dashboard: ${track(failures, 'Student blocked from faculty dashboard', facultyRedirect)}`,
+    );
+    console.log(
+      `  Student blocked from institution dashboard: ${track(failures, 'Student blocked from institution dashboard', institutionRedirect)}`,
+    );
+    console.log(
+      `  Student blocked from institution students: ${track(failures, 'Student blocked from institution students', institutionStudentsRedirect)}`,
+    );
   }
   if (admin) {
     const blocked = await pageRedirect('/en/student/dashboard', admin.cookies, admin.role);
@@ -265,7 +294,9 @@ async function main(): Promise<void> {
       blocked.status >= 300 &&
       blocked.status < 400 &&
       blocked.location?.includes('/institution/dashboard');
-    console.log(`  Admin blocked from student dashboard: ${pass(redirected)}`);
+    console.log(
+      `  Admin blocked from student dashboard: ${track(failures, 'Admin blocked from student dashboard', redirected)}`,
+    );
   }
 
   console.log('\n=== RBAC (API) ===');
@@ -278,14 +309,16 @@ async function main(): Promise<void> {
     for (const p of readProbes) {
       const r = await api<{ success: boolean }>(p.path, { token: faculty.token });
       const ok = p.expectOk ? r.json.success : !r.json.success;
-      console.log(`  ${p.label}: ${pass(ok)}`);
+      console.log(`  ${p.label}: ${track(failures, p.label ?? p.path, ok)}`);
     }
     const patchSettings = await api<{ success: boolean }>('/institution-settings', {
       method: 'PATCH',
       token: faculty.token,
       body: { timezone: 'UTC' },
     });
-    console.log(`  Faculty PATCH settings (must deny): ${pass(!patchSettings.json.success)}`);
+    console.log(
+      `  Faculty PATCH settings (must deny): ${track(failures, 'Faculty PATCH settings (must deny)', !patchSettings.json.success)}`,
+    );
     const createStudent = await api<{ success: boolean }>('/students', {
       method: 'POST',
       token: faculty.token,
@@ -296,7 +329,9 @@ async function main(): Promise<void> {
         email: 'rbac-test@learnova.test',
       },
     });
-    console.log(`  Faculty POST student (must deny): ${pass(!createStudent.json.success)}`);
+    console.log(
+      `  Faculty POST student (must deny): ${track(failures, 'Faculty POST student (must deny)', !createStudent.json.success)}`,
+    );
   }
 
   if (student) {
@@ -310,17 +345,23 @@ async function main(): Promise<void> {
         email: 'rbac-faculty@learnova.test',
       },
     });
-    console.log(`  Student POST faculty (must deny): ${pass(!createFaculty.json.success)}`);
+    console.log(
+      `  Student POST faculty (must deny): ${track(failures, 'Student POST faculty (must deny)', !createFaculty.json.success)}`,
+    );
 
     const readFaculty = await api<{ success: boolean }>('/faculty?page=1&limit=5', {
       token: student.token,
     });
-    console.log(`  Student read faculty list (must deny): ${pass(!readFaculty.json.success)}`);
+    console.log(
+      `  Student read faculty list (must deny): ${track(failures, 'Student read faculty list (must deny)', !readFaculty.json.success)}`,
+    );
 
     const readInstitution = await api<{ success: boolean }>('/institution-settings', {
       token: student.token,
     });
-    console.log(`  Student read institution settings (must deny): ${pass(!readInstitution.json.success)}`);
+    console.log(
+      `  Student read institution settings (must deny): ${track(failures, 'Student read institution settings (must deny)', !readInstitution.json.success)}`,
+    );
 
     const ownGrades = await api<{ success: boolean }>('/gradebook/dashboard/student', {
       token: student.token,
@@ -353,8 +394,30 @@ async function main(): Promise<void> {
     );
     const courseTotal = facultyCourses.json.data?.meta?.total ?? facultyCourses.json.data?.items?.length ?? 0;
     const studentTotal = facultyStudents.json.data?.meta?.total ?? facultyStudents.json.data?.items?.length ?? 0;
-    console.log(`  Faculty scoped courses (>0): ${pass(courseTotal > 0)} (${courseTotal})`);
-    console.log(`  Faculty scoped students (>0): ${pass(studentTotal > 0)} (${studentTotal})`);
+    console.log(
+      `  Faculty scoped courses (>0): ${track(failures, 'Faculty scoped courses (>0)', courseTotal > 0)} (${courseTotal})`,
+    );
+    console.log(
+      `  Faculty scoped students (>0): ${track(failures, 'Faculty scoped students (>0)', studentTotal > 0)} (${studentTotal})`,
+    );
+  }
+
+  if (admin && faculty) {
+    const [adminCourses, facultyCourses] = await Promise.all([
+      api<{ success: boolean; data?: { meta?: { total?: number } } }>('/courses?page=1&limit=1', {
+        token: admin.token,
+      }),
+      api<{ success: boolean; data?: { meta?: { total?: number } } }>('/courses?page=1&limit=1', {
+        token: faculty.token,
+      }),
+    ]);
+    const adminTotal = adminCourses.json.data?.meta?.total ?? 0;
+    const facultyTotal = facultyCourses.json.data?.meta?.total ?? 0;
+    const scoped =
+      facultyTotal > 0 && (adminTotal === 0 || facultyTotal <= adminTotal) && facultyTotal < 500;
+    console.log(
+      `  Faculty course count scoped vs admin (${facultyTotal}/${adminTotal}): ${track(failures, 'Faculty course count scoped vs admin', scoped)}`,
+    );
   }
 
   console.log('\n=== Permissions (role bundles) ===');
@@ -478,6 +541,15 @@ async function main(): Promise<void> {
   }
 
   await disconnectMongo();
+
+  if (failures.length > 0) {
+    console.log(`\nRBAC / security verification failed (${failures.length}):`);
+    for (const label of failures) {
+      console.log(`  - ${label}`);
+    }
+    process.exit(1);
+  }
+
   console.log('\nDone.\n');
 }
 
