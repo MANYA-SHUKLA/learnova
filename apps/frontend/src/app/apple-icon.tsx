@@ -1,9 +1,9 @@
 import { ImageResponse } from 'next/og';
 
-export const size = { width: 32, height: 32 };
+export const size = { width: 180, height: 180 };
 export const contentType = 'image/png';
 
-export default function Icon() {
+export default function AppleIcon() {
   return new ImageResponse(
     (
       <div
@@ -14,9 +14,9 @@ export default function Icon() {
           alignItems: 'center',
           justifyContent: 'center',
           background: '#4F46E5',
-          borderRadius: 8,
+          borderRadius: 36,
           color: '#FFFFFF',
-          fontSize: 13,
+          fontSize: 72,
           fontWeight: 700,
           letterSpacing: '-0.06em',
           fontFamily: 'ui-sans-serif, system-ui, sans-serif',

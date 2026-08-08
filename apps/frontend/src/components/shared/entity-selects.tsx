@@ -18,11 +18,11 @@ import {
 import type { StudentListParams } from '@/features/student';
 import { useStudentList } from '@/features/student';
 import {
-  SearchableMultiSelect,
   SearchableSelect,
   type SearchableSelectOption,
   type SearchableSelectProps,
 } from './searchable-select';
+import { SearchableMultiSelect } from './searchable-multi-select';
 
 type OmitSelectProps = Omit<
   SearchableSelectProps,
