@@ -12,7 +12,8 @@ export function Card({ className, interactive = false, glass = false, ...props }
   return (
     <div
       className={cn(
-        interactive ? 'card-interactive rounded-xl' : glass ? 'card-glass' : 'card-static',
+        'group',
+        interactive ? 'card-interactive' : glass ? 'card-glass' : 'card-static',
         className,
       )}
       {...props}

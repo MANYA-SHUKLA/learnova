@@ -60,6 +60,9 @@
   --shadow-md: 0 4px 16px -2px rgb(15 23 42 / 0.08), 0 2px 6px -2px rgb(15 23 42 / 0.04);
   --shadow-lg: 0 16px 40px -8px rgb(15 23 42 / 0.12), 0 6px 12px -4px rgb(15 23 42 / 0.06);
   --shadow-glow: 0 0 0 1px rgb(79 70 229 / 0.1), 0 8px 24px -4px rgb(79 70 229 / 0.2);
+  --shadow-card-hover: 0 20px 48px -12px rgb(15 23 42 / 0.14), 0 8px 16px -6px rgb(79 70 229 / 0.12);
+  --shadow-card-interactive: 0 0 0 1px hsl(var(--primary) / 0.18), 0 24px 56px -16px hsl(var(--primary) / 0.28),
+    0 12px 24px -8px rgb(15 23 42 / 0.12);
 
   --glass-bg: rgb(255 255 255 / 0.78);
   --glass-border: rgb(226 232 240 / 0.8);
@@ -126,6 +129,9 @@
   --shadow-md: 0 4px 16px -2px rgb(0 0 0 / 0.45), 0 2px 6px -2px rgb(0 0 0 / 0.35);
   --shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.55), 0 6px 12px -4px rgb(0 0 0 / 0.4);
   --shadow-glow: 0 0 0 1px rgb(96 165 250 / 0.12), 0 8px 28px -4px rgb(37 99 235 / 0.35);
+  --shadow-card-hover: 0 22px 52px -14px rgb(0 0 0 / 0.55), 0 10px 24px -8px hsl(var(--primary) / 0.22);
+  --shadow-card-interactive: 0 0 0 1px hsl(var(--primary) / 0.28), 0 28px 64px -18px hsl(var(--primary) / 0.38),
+    0 14px 28px -10px rgb(0 0 0 / 0.45);
 
   --glass-bg: rgb(15 23 42 / 0.78);
   --glass-border: rgb(30 41 59 / 0.9);
@@ -352,7 +358,33 @@
 
   /** List / directory page card shell */
   .directory-shell {
-    @apply rounded-xl border border-border/80 bg-card shadow-soft-sm;
+    @apply rounded-xl border border-border/80 bg-card text-card-foreground shadow-soft-sm;
+  }
+
+  /** Shared card motion foundation */
+  .card-static,
+  .card-glass,
+  .card-interactive,
+  .card-metric,
+  .directory-shell {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    will-change: transform, box-shadow;
+    transition:
+      transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 340ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 280ms ease,
+      background-color 280ms ease;
+  }
+
+  .card-static > *,
+  .card-glass > *,
+  .card-interactive > *,
+  .card-metric > *,
+  .directory-shell > * {
+    position: relative;
+    z-index: 1;
   }
 
   .card-static {
@@ -363,25 +395,15 @@
     @apply rounded-xl border border-border/70 bg-card/80 text-card-foreground shadow-soft-md backdrop-blur-md;
   }
 
-  /** Shared interactive card motion — lift, accent, shine, and shadow */
-  .card-interactive {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    will-change: transform, box-shadow;
-    transition:
-      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
-      border-color 280ms ease,
-      background-color 280ms ease;
+  .card-metric {
+    @apply rounded-xl border border-border/60 bg-background/70 text-card-foreground shadow-soft-sm backdrop-blur-sm;
   }
 
-  .card-interactive > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .card-interactive::before {
+  /** Accent rail + shine sweep — static / glass / metric / directory */
+  .card-static::before,
+  .card-glass::before,
+  .card-metric::before,
+  .directory-shell::before {
     content: '';
     position: absolute;
     inset-inline: 0;
@@ -392,11 +414,80 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      hsl(var(--primary) / 0.9) 50%,
+      hsl(var(--primary) / 0.75) 50%,
       transparent 100%
     );
-    transform: scaleX(0.22);
-    opacity: 0.45;
+    transform: scaleX(0.15);
+    opacity: 0.35;
+    transition:
+      transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 320ms ease;
+  }
+
+  .card-static::after,
+  .card-glass::after,
+  .card-metric::after,
+  .directory-shell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+      115deg,
+      transparent 36%,
+      hsl(var(--primary) / 0.07) 50%,
+      transparent 64%
+    );
+    transform: translateX(-140%) skewX(-12deg);
+    transition: transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .card-static:hover,
+  .card-glass:hover,
+  .card-metric:hover,
+  .directory-shell:hover {
+    transform: translateY(-5px) scale(1.01);
+    border-color: hsl(var(--primary) / 0.32);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .card-static:hover::before,
+  .card-glass:hover::before,
+  .card-metric:hover::before,
+  .directory-shell:hover::before {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+
+  .card-static:hover::after,
+  .card-glass:hover::after,
+  .card-metric:hover::after,
+  .directory-shell:hover::after {
+    transform: translateX(140%) skewX(-12deg);
+  }
+
+  /** Clickable / KPI cards — stronger lift, glow, and motion */
+  .card-interactive {
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-soft-md;
+  }
+
+  .card-interactive::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 3;
+    height: 3px;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--accent) / 0.35) 0%,
+      hsl(var(--primary) / 0.95) 50%,
+      hsl(var(--accent) / 0.35) 100%
+    );
+    transform: scaleX(0.12);
+    opacity: 0.5;
     transition:
       transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
       opacity 280ms ease;
@@ -410,18 +501,18 @@
     pointer-events: none;
     background: linear-gradient(
       115deg,
-      transparent 38%,
-      hsl(var(--primary) / 0.08) 50%,
-      transparent 62%
+      transparent 34%,
+      hsl(var(--primary) / 0.12) 50%,
+      transparent 66%
     );
-    transform: translateX(-130%);
-    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateX(-150%) skewX(-14deg);
+    transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .card-interactive:hover {
-    transform: translateY(-6px) scale(1.012);
-    border-color: hsl(var(--primary) / 0.38);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-10px) scale(1.018);
+    border-color: hsl(var(--primary) / 0.45);
+    box-shadow: var(--shadow-card-interactive);
   }
 
   .card-interactive:hover::before {
@@ -430,11 +521,12 @@
   }
 
   .card-interactive:hover::after {
-    transform: translateX(130%);
+    transform: translateX(150%) skewX(-14deg);
   }
 
   .card-interactive:active {
-    transform: translateY(-2px) scale(1.004);
+    transform: translateY(-4px) scale(1.008);
+    transition-duration: 120ms;
   }
 
   .card-interactive:focus-visible {
@@ -443,17 +535,41 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .card-static,
+    .card-glass,
     .card-interactive,
+    .card-metric,
+    .directory-shell,
+    .card-static:hover,
+    .card-glass:hover,
     .card-interactive:hover,
-    .card-interactive:active {
+    .card-interactive:active,
+    .card-metric:hover,
+    .directory-shell:hover {
       transition: border-color 160ms ease, box-shadow 160ms ease;
       transform: none;
     }
 
+    .card-static::before,
+    .card-static::after,
+    .card-glass::before,
+    .card-glass::after,
     .card-interactive::before,
     .card-interactive::after,
+    .card-metric::before,
+    .card-metric::after,
+    .directory-shell::before,
+    .directory-shell::after,
+    .card-static:hover::before,
+    .card-static:hover::after,
+    .card-glass:hover::before,
+    .card-glass:hover::after,
     .card-interactive:hover::before,
-    .card-interactive:hover::after {
+    .card-interactive:hover::after,
+    .card-metric:hover::before,
+    .card-metric:hover::after,
+    .directory-shell:hover::before,
+    .directory-shell:hover::after {
       transition: none;
       transform: none;
       opacity: 0;
