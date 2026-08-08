@@ -94,7 +94,8 @@ export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) 
     if (next === locale || pending) return;
 
     startTransition(() => {
-      router.replace(pathname, { locale: next });
+      const suffix = `${window.location.search}${window.location.hash}`;
+      router.replace(`${pathname}${suffix}`, { locale: next });
     });
   };
 
