@@ -46,9 +46,13 @@ export default function InstitutionLayout({ children }: { children: ReactNode })
   useEffect(() => {
     if (isLoading || !isAuthenticated || !user) return;
     if (!allowed) {
+      if (user.role === 'student' || user.role === 'faculty') {
+        router.replace(`/forbidden?from=${encodeURIComponent(pathname)}`);
+        return;
+      }
       router.replace(dashboardPathForRole(user.role));
     }
-  }, [isLoading, isAuthenticated, user, allowed, router]);
+  }, [isLoading, isAuthenticated, user, allowed, router, pathname]);
 
   if (isLoading || (isAuthenticated && user && !allowed)) {
     return (

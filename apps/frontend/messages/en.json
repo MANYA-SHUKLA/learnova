@@ -581,7 +581,14 @@
       "backToLogin": "Back to login"
     }
   },
-    "institution": {
+  "dashboard": {
+    "forbidden": {
+      "title": "Access denied",
+      "description": "Your account does not have permission to view this area.",
+      "attempted": "Requested path",
+      "backHome": "Go to my dashboard"
+    },
+    "sidebar": {
       "groups": {
         "institution": "Institution",
         "academics": "Academics",
