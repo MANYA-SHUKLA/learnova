@@ -54,7 +54,7 @@ export interface FormSectionProps {
 
 export function FormSection({ title, description, children, className, actions }: FormSectionProps) {
   return (
-    <section className={cn('space-y-6 rounded-xl border border-border/80 bg-card p-6 shadow-soft-sm', className)}>
+    <section className={cn('group card-static space-y-6 p-6', className)}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-section-title text-foreground">{title}</h2>

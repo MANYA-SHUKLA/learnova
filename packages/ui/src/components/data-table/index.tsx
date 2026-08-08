@@ -186,7 +186,7 @@ export function DataTable<T>({
 
           <div
             className={cn(
-              'overflow-hidden rounded-xl border border-border/80 bg-card shadow-soft-sm',
+              'card-static group overflow-hidden',
               mobileRow && 'hidden md:block',
             )}
           >

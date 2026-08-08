@@ -57,7 +57,7 @@ export function DashboardTaskList({
     return (
       <div className="flex flex-col items-center px-6 py-10 text-center">
         {Icon ? (
-          <span className="mb-3 flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+          <span className="mb-3 flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-primary/10 hover:text-primary">
             <Icon className="size-5" />
           </span>
         ) : null}
@@ -73,10 +73,10 @@ export function DashboardTaskList({
         <li key={item.id}>
           <Link
             href={item.href}
-            className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/40 sm:px-6"
+            className="group flex items-center gap-4 px-5 py-4 transition-all duration-300 hover:bg-primary/5 hover:pl-6 sm:px-6"
           >
             <div className="min-w-0 flex-1">
-              <p className="truncate text-label text-foreground group-hover:text-primary">
+              <p className="truncate text-label text-foreground transition-colors duration-300 group-hover:text-primary">
                 {item.title}
               </p>
               {item.subtitle ? (
@@ -86,7 +86,7 @@ export function DashboardTaskList({
             <div className="flex shrink-0 items-center gap-2">
               {item.status ? <StatusBadge status={item.status} /> : null}
               {item.meta ? <span className="hidden text-caption sm:inline">{item.meta}</span> : null}
-              <ArrowRight className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+              <ArrowRight className="size-4 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary group-hover:opacity-100" />
             </div>
           </Link>
         </li>
