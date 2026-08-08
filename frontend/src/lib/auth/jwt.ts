@@ -66,9 +66,8 @@ export function syncRoleCookieFromToken(token: string | null | undefined): void 
 /** True when the role cookie is a signed hint (`role.exp.sig`), not a legacy plain role. */
 export function hasSignedRoleCookie(): boolean {
   if (typeof document === 'undefined') return false;
-  const match = document.cookie.match(
-    new RegExp(`(?:^|; )${AUTH.ROLE_COOKIE_NAME}=([^;]*)`),
-  );
+  const pattern = new RegExp(`(?:^|; )${AUTH.ROLE_COOKIE_NAME}=([^;]*)`);
+  const match = pattern.exec(document.cookie);
   if (!match?.[1]) return false;
   const value = decodeURIComponent(match[1]);
   return value.split('.').length === 3;

@@ -25,10 +25,16 @@ export default function LocaleError({
             The page failed to load. Try refreshing or return to your dashboard.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            <Button type="button" onClick={() => reset()}>
+            <Button type="button" onClick={() => { reset(); }}>
               Try again
             </Button>
-            <Button type="button" variant="outline" onClick={() => window.location.assign('/')}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                window.location.assign('/');
+              }}
+            >
               Go home
             </Button>
           </div>
