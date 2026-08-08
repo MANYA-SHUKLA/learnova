@@ -30,6 +30,10 @@ vi.mock('../../utils/jwt/index.js', () => ({
   verifyAccessToken: (...args: unknown[]) => mockVerifyAccessToken(...args),
 }));
 
+vi.mock('../../services/audit/access-denial.js', () => ({
+  logAccessDenial: vi.fn().mockResolvedValue(undefined),
+}));
+
 function mockReq(overrides: Partial<Request> = {}): Request {
   return {
     headers: {},
