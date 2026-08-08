@@ -52,8 +52,12 @@ export function ExamSystemCheck({
   );
 
   useEffect(() => {
-    const onOnline = () => updateResults({ network: true });
-    const onOffline = () => updateResults({ network: false });
+    const onOnline = () => {
+      updateResults({ network: true });
+    };
+    const onOffline = () => {
+      updateResults({ network: false });
+    };
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
     return () => {

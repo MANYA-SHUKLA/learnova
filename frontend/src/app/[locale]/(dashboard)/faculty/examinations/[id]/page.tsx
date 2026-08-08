@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
   Input,
-  Label,
   Skeleton,
 } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
@@ -105,7 +104,9 @@ export default function FacultyExamDetailPage() {
               </CardHeader>
               <div className="space-y-3 p-4 pt-0">
                 <div className="space-y-2">
-                  <Label htmlFor="ann-title">{t('announcementFieldTitle')}</Label>
+                  <label htmlFor="ann-title" className="text-sm font-medium">
+                    {t('announcementFieldTitle')}
+                  </label>
                   <Input
                     id="ann-title"
                     value={announcementTitle}
@@ -115,7 +116,9 @@ export default function FacultyExamDetailPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="ann-message">{t('announcementFieldMessage')}</Label>
+                  <label htmlFor="ann-message" className="text-sm font-medium">
+                    {t('announcementFieldMessage')}
+                  </label>
                   <textarea
                     id="ann-message"
                     rows={3}

@@ -1,7 +1,7 @@
 'use client';
 
 import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
-import { Button, Card, CardDescription, CardHeader, CardTitle, Input, Label } from '@learnova/ui';
+import { Button, Card, CardDescription, CardHeader, CardTitle, Input } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -77,11 +77,15 @@ export default function FacultyCreateExamPage() {
             }}
           >
             <div className="space-y-2">
-              <Label htmlFor="course">{t('course')}</Label>
+              <label htmlFor="course" className="text-sm font-medium">
+                {t('course')}
+              </label>
               <CourseSelect value={courseId} onChange={setCourseId} label={t('course')} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="title">{t('examTitle')}</Label>
+              <label htmlFor="title" className="text-sm font-medium">
+                {t('examTitle')}
+              </label>
               <Input
                 id="title"
                 value={title}
@@ -93,7 +97,9 @@ export default function FacultyCreateExamPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="startsAt">{t('startsAt')}</Label>
+                <label htmlFor="startsAt" className="text-sm font-medium">
+                  {t('startsAt')}
+                </label>
                 <Input
                   id="startsAt"
                   type="datetime-local"
@@ -105,7 +111,9 @@ export default function FacultyCreateExamPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endsAt">{t('endsAt')}</Label>
+                <label htmlFor="endsAt" className="text-sm font-medium">
+                  {t('endsAt')}
+                </label>
                 <Input
                   id="endsAt"
                   type="datetime-local"
@@ -118,7 +126,9 @@ export default function FacultyCreateExamPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">{t('duration')}</Label>
+              <label htmlFor="duration" className="text-sm font-medium">
+                {t('duration')}
+              </label>
               <Input
                 id="duration"
                 type="number"
