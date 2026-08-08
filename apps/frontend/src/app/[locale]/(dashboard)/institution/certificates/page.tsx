@@ -1,11 +1,12 @@
 'use client';
 
 import { PERMISSIONS } from '@learnova/constants';
-import { Button, Card, CardDescription, CardHeader, CardTitle, Input } from '@learnova/ui';
+import { Button, Card, CardDescription, CardHeader, CardTitle } from '@learnova/ui';
 import { Award } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { CourseSelect } from '@/components/shared/entity-selects';
 import { ErrorState } from '@/features/institution';
 import {
   CertificateListCard,
@@ -54,14 +55,14 @@ export default function InstitutionCertificatesPage() {
               <CardTitle className="text-base">{t('bulkTitle')}</CardTitle>
               <CardDescription>{t('bulkDescription')}</CardDescription>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Input
-                className="sm:w-72"
+            <div className="flex flex-wrap items-end gap-2">
+              <CourseSelect
+                className="sm:w-80"
                 value={courseId}
-                onChange={(e) => setCourseId(e.target.value)}
-                placeholder={t('courseIdPlaceholder')}
+                onChange={setCourseId}
               />
               <Button
+                className="sm:mb-0.5"
                 disabled={!courseId || bulkMutation.isPending}
                 onClick={() => bulkMutation.mutate(courseId)}
               >

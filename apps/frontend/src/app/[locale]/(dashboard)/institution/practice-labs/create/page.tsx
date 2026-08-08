@@ -4,6 +4,7 @@ import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from '@learnova/ui';
 import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { CourseSelect, FacultySelect } from '@/components/shared/entity-selects';
 import { useCreatePracticeLabMutation } from '@/features/practice-lab';
 import { Link, useRouter } from '@/lib/i18n/routing';
 
@@ -32,10 +33,11 @@ export default function CreatePracticeLabPage() {
             <CardDescription>Draft labs stay private until published.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Course ID</label>
-              <Input value={courseId} onChange={(e) => setCourseId(e.target.value)} placeholder="Mongo ObjectId" />
-            </div>
+            <CourseSelect
+              label="Course"
+              value={courseId}
+              onChange={setCourseId}
+            />
             <div className="space-y-2">
               <label className="text-sm font-medium">Title</label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Intro to Python" />

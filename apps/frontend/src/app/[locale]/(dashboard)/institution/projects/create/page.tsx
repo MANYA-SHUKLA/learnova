@@ -13,6 +13,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { SuccessPopup } from '@/components/shared/success-popup';
+import { CourseSelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
   useCreateProjectMutation,
@@ -96,12 +97,11 @@ export default function CreateProjectPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm font-medium">{t('courseId')}</label>
-                <Input
+              <div className="sm:col-span-2">
+                <CourseSelect
+                  label={t('courseId')}
                   value={courseId}
-                  onChange={(e) => setCourseId(e.target.value)}
-                  placeholder={t('courseIdPlaceholder')}
+                  onChange={setCourseId}
                 />
               </div>
               <div className="space-y-2">

@@ -1,11 +1,12 @@
 'use client';
 
 import { PERMISSIONS } from '@learnova/constants';
-import { Card, CardDescription, CardHeader, CardTitle, Input, Skeleton } from '@learnova/ui';
+import { Card, CardDescription, CardHeader, CardTitle, Skeleton } from '@learnova/ui';
 import { Award } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { CourseSelect } from '@/components/shared/entity-selects';
 import {
   CertificateListCard,
   CertificateListRow,
@@ -22,7 +23,7 @@ export default function FacultyCertificatesPage() {
   const eligibleQuery = useQuery({
     queryKey: ['certificates', 'eligible', courseId],
     queryFn: () => certificateApi.listEligibleStudents(courseId),
-    enabled: courseId.length === 24,
+    enabled: Boolean(courseId),
   });
 
   const rows = listQuery.data?.items ?? [];
@@ -40,17 +41,16 @@ export default function FacultyCertificatesPage() {
           <CardHeader>
             <CardTitle className="text-base">{t('eligibleTitle')}</CardTitle>
             <CardDescription>{t('eligibleDescription')}</CardDescription>
-            <Input
+            <CourseSelect
               className="mt-3 max-w-md"
               value={courseId}
-              onChange={(e) => setCourseId(e.target.value)}
-              placeholder={t('courseIdPlaceholder')}
+              onChange={setCourseId}
             />
             {eligibleQuery.isLoading ? (
               <Skeleton className="mt-4 h-16 rounded-xl" />
             ) : (
               <p className="mt-3 text-sm text-muted-foreground">
-                {courseId.length === 24
+                {courseId
                   ? t('eligibleCount', { count: eligibleQuery.data?.total ?? 0 })
                   : t('eligibleHint')}
               </p>

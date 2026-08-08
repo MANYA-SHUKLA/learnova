@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
   DataTable,
-  Input,
   PageHeader,
   Spinner,
 } from '@learnova/ui';
@@ -18,6 +17,7 @@ import { BookOpen, XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
+import { CourseSelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { ErrorState } from '@/features/institution';
 import {
@@ -43,11 +43,12 @@ export default function StudentEnrollmentsPage() {
 
   const enrollments = myQuery.data?.data.items ?? [];
   const waitlist = waitlistQuery.data?.items ?? [];
+  const enrolledCourseIds = enrollments.map((row) => row.courseId);
 
   const onSelfEnroll = async () => {
     setError(null);
     if (!courseId.trim()) {
-      setError('Course ID is required');
+      setError('Please select a course');
       return;
     }
     try {
@@ -75,19 +76,18 @@ export default function StudentEnrollmentsPage() {
                   {error}
                 </p>
               ) : null}
-              <div className="flex gap-2">
-                <Input
-                  className="rounded-xl"
-                  placeholder="Enter course ID"
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <CourseSelect
+                  className="flex-1"
+                  label="Course"
                   value={courseId}
-                  onChange={(e) => setCourseId(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') void onSelfEnroll();
-                  }}
+                  listParams={{ status: 'published' }}
+                  excludeIds={enrolledCourseIds}
                   disabled={selfEnrollMutation.isPending}
+                  onChange={setCourseId}
                 />
                 <Button
-                  className="rounded-xl"
+                  className="rounded-xl sm:mb-0.5"
                   onClick={() => void onSelfEnroll()}
                   disabled={selfEnrollMutation.isPending || !courseId.trim()}
                 >

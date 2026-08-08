@@ -4,7 +4,6 @@ import { PERMISSIONS } from '@learnova/constants';
 import {
   Button,
   FormField,
-  Input,
   PageHeader,
   StatCard,
   StatGrid,
@@ -13,6 +12,7 @@ import { GraduationCap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { GradebookSpreadsheet } from '@/components/gradebook/gradebook-spreadsheet';
+import { CourseSelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
 import {
@@ -24,7 +24,6 @@ import {
 
 export default function FacultyGradebookPage() {
   const t = useTranslations('dashboard.faculty.gradebook');
-  const [courseId, setCourseId] = useState('');
   const [activeCourseId, setActiveCourseId] = useState('');
 
   const entriesQuery = useCourseGradebookEntries(activeCourseId, undefined, Boolean(activeCourseId));
@@ -62,25 +61,16 @@ export default function FacultyGradebookPage() {
 
         <div className="rounded-xl border border-border/80 bg-card p-6 shadow-soft-sm">
           <FormField label={t('courseScope')} hint={t('courseScopeDescription')}>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <CourseSelect
                 className="sm:flex-1"
-                value={courseId}
-                onChange={(e) => setCourseId(e.target.value)}
-                placeholder={t('courseIdPlaceholder')}
+                value={activeCourseId}
+                onChange={setActiveCourseId}
               />
-              <Button
-                variant="secondary"
-                className="rounded-xl"
-                onClick={() => setActiveCourseId(courseId.trim())}
-                disabled={!courseId.trim()}
-              >
-                {t('loadCourse')}
-              </Button>
               {activeCourseId ? (
                 <Button
                   variant="outline"
-                  className="rounded-xl"
+                  className="rounded-xl sm:mb-0.5"
                   disabled={syncMutation.isPending}
                   onClick={() => syncMutation.mutate(activeCourseId)}
                 >

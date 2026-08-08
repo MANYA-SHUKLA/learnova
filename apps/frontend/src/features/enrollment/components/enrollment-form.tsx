@@ -9,10 +9,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Input,
   Spinner,
 } from '@learnova/ui';
 import { useState } from 'react';
+import {
+  AcademicYearSelect,
+  CourseSelect,
+  DepartmentSelect,
+  FacultySelect,
+  ProgramSelect,
+  SectionSelect,
+  SemesterSelect,
+  StudentSelect,
+} from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
   ENROLLMENT_METHOD_LABELS,
@@ -75,21 +84,6 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
     }
   };
 
-  const field = (key: keyof typeof form, label: string, opts?: { type?: string }) => (
-    <div className="space-y-1.5">
-      <label className="text-sm font-medium" htmlFor={key}>
-        {label}
-      </label>
-      <Input
-        id={key}
-        type={opts?.type ?? 'text'}
-        value={String(form[key])}
-        disabled={pending}
-        onChange={(e) => set(key, e.target.value)}
-      />
-    </div>
-  );
-
   return (
     <PermissionGate permission={PERMISSIONS.ENROLLMENT_MANAGE} enforce>
       <Card className="mx-auto w-full max-w-3xl rounded-2xl border-border/80 shadow-soft-md">
@@ -107,14 +101,59 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {field('studentId', 'Student ID (required)')}
-            {field('courseId', 'Course ID (required)')}
-            {field('facultyId', 'Faculty ID (optional)')}
-            {field('departmentId', 'Department ID (optional)')}
-            {field('programId', 'Program ID (optional)')}
-            {field('academicYearId', 'Academic Year ID (optional)')}
-            {field('semesterId', 'Semester ID (optional)')}
-            {field('sectionId', 'Section ID (optional)')}
+            <StudentSelect
+              id="studentId"
+              label="Student (required)"
+              value={form.studentId}
+              disabled={pending}
+              onChange={(value) => set('studentId', value)}
+            />
+            <CourseSelect
+              id="courseId"
+              label="Course (required)"
+              value={form.courseId}
+              disabled={pending}
+              onChange={(value) => set('courseId', value)}
+            />
+            <FacultySelect
+              id="facultyId"
+              label="Faculty (optional)"
+              value={form.facultyId}
+              disabled={pending}
+              allowEmpty
+              emptyLabel="No faculty assigned"
+              onChange={(value) => set('facultyId', value)}
+            />
+            <DepartmentSelect
+              id="departmentId"
+              value={form.departmentId}
+              disabled={pending}
+              onChange={(value) => set('departmentId', value)}
+            />
+            <ProgramSelect
+              id="programId"
+              value={form.programId}
+              disabled={pending}
+              onChange={(value) => set('programId', value)}
+            />
+            <AcademicYearSelect
+              id="academicYearId"
+              value={form.academicYearId}
+              disabled={pending}
+              onChange={(value) => set('academicYearId', value)}
+            />
+            <SemesterSelect
+              id="semesterId"
+              value={form.semesterId}
+              disabled={pending}
+              onChange={(value) => set('semesterId', value)}
+            />
+            <SectionSelect
+              id="sectionId"
+              value={form.sectionId}
+              disabled={pending}
+              onChange={(value) => set('sectionId', value)}
+            />
           </div>
 
           <div className="space-y-1.5">

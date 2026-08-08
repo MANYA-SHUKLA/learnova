@@ -8,13 +8,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
   Skeleton,
 } from '@learnova/ui';
 import { GraduationCap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { CourseSelect } from '@/components/shared/entity-selects';
 import { EmptyState, ErrorState } from '@/features/institution';
 import {
   formatActivityKind,
@@ -28,7 +28,6 @@ import {
 
 export default function InstitutionGradebookPage() {
   const t = useTranslations('dashboard.institution.gradebook');
-  const [courseId, setCourseId] = useState('');
   const [activeCourseId, setActiveCourseId] = useState('');
 
   const listParams = useMemo(
@@ -73,20 +72,12 @@ export default function InstitutionGradebookPage() {
               <CardTitle className="text-base">{t('courseScope')}</CardTitle>
               <CardDescription>{t('courseScopeDescription')}</CardDescription>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Input
-                className="sm:w-72"
-                value={courseId}
-                onChange={(e) => setCourseId(e.target.value)}
-                placeholder={t('courseIdPlaceholder')}
+            <div className="flex flex-wrap items-end gap-2">
+              <CourseSelect
+                className="sm:w-80"
+                value={activeCourseId}
+                onChange={setActiveCourseId}
               />
-              <Button
-                variant="secondary"
-                onClick={() => setActiveCourseId(courseId.trim())}
-                disabled={!courseId.trim()}
-              >
-                {t('loadCourse')}
-              </Button>
               {activeCourseId ? (
                 <>
                   <Button
