@@ -46,6 +46,26 @@ Published Gradebook → Eligibility → Certificate / Transcript → Verificatio
 3. **Eligibility engine** — [CertificateEligibility](./CertificateEligibility.md) checks published records, policy outcomes (via gradebook), standing, and completion requirements. It never recomputes grades.
 4. **Do not modify** assessment or gradebook modules from certificates.
 
+## v1.0 scope (Step 15 — complete)
+
+What ships:
+
+| Capability | Who |
+| --- | --- |
+| **Issue** (manual, bulk, auto on grade publish) | Institution admin, faculty |
+| **Revoke** (with reason, audit logged) | Institution admin only |
+| **Verify** (public portal + QR code on PDF) | Anyone with verification code |
+| **Download** (print-ready HTML → Save as PDF) | Admin, faculty, student (own docs) |
+| Templates, registry export, audit log | Institution admin |
+
+What is **intentionally not built**:
+
+- Faculty “recommend certificate” workflow (no pending recommendations queue)
+- Student nomination or peer endorsements
+- Certificate marketplace or external issuer integrations
+
+Faculty **issue directly** to eligible students (published passing grades). Admins **revoke** when a document must be invalidated. Employers and registrars **verify** via `/verify/{code}`.
+
 ## Seed
 
 ```bash

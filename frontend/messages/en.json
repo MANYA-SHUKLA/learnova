@@ -1989,7 +1989,9 @@
         "emptyDescription": "Issue certificates after gradebook publication.",
         "error": "Unable to load certificates.",
         "eligibleEmpty": "No eligible students for this course.",
-        "issue": "Issue certificate"
+        "issue": "Issue certificate",
+        "download": "Download PDF",
+        "verify": "Verify"
       },
       "reports": {
         "eyebrow": "Course analytics",

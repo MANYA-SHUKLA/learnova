@@ -1,6 +1,7 @@
 import { API_ROUTES } from '@learnova/constants';
 import type { UpsertCertificateTemplateInput } from '@learnova/validation';
 import { apiClient } from '@/lib/api/client';
+import { getAccessToken } from '@/lib/auth/jwt';
 import type {
   CertificateAuditRow,
   CertificateRow,
@@ -85,10 +86,17 @@ export const certificateApi = {
     apiClient.get<Record<string, unknown>>(`/verify/${encodeURIComponent(verificationCode)}`),
 
   downloadHtml: async (certificateId: string) => {
+    const token = getAccessToken();
     const response = await fetch(
       `${process.env['NEXT_PUBLIC_API_URL'] ?? ''}/api/v1${base}/${certificateId}/download`,
-      { credentials: 'include' },
+      {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      },
     );
+    if (!response.ok) {
+      throw new Error(`Certificate download failed (${response.status})`);
+    }
     return response.text();
   },
 

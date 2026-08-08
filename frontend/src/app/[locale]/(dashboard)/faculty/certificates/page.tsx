@@ -7,10 +7,12 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { CourseSelect } from '@/components/shared/entity-selects';
+import { Link } from '@/lib/i18n/routing';
 import {
   CertificateListCard,
   CertificateListRow,
   CertificatePageHeader,
+  openCertificateForPrint,
   useCertificateList,
   useEligibleStudentsQuery,
   useIssueCertificateMutation,
@@ -95,8 +97,30 @@ export default function FacultyCertificatesPage() {
             <CertificateListRow
               key={row.id}
               primary={row.title ?? 'Certificate'}
-              secondary={row.certificateNumber ?? row.id}
+              secondary={row.certificateNumber ?? row.verificationCode ?? row.id}
               status={row.status ?? 'issued'}
+              actions={
+                row.status !== 'revoked' ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        void openCertificateForPrint(row.id);
+                      }}
+                    >
+                      {t('download')}
+                    </Button>
+                    {row.verificationCode ? (
+                      <Button size="sm" variant="ghost" asChild>
+                        <Link href={`/verify/${row.verificationCode}`} target="_blank">
+                          {t('verify')}
+                        </Link>
+                      </Button>
+                    ) : null}
+                  </>
+                ) : null
+              }
             />
           ))}
         </CertificateListCard>

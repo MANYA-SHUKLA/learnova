@@ -471,7 +471,10 @@ async function main(): Promise<void> {
 
     const ownCertificates = await api<{
       success: boolean;
-      data?: { certificateCount?: number; recentCertificates?: unknown[] };
+      data?: {
+        certificateCount?: number;
+        recentCertificates?: { verificationCode?: string }[];
+      };
     }>('/certificates/dashboard/student', { token: student.token });
     const certCount =
       ownCertificates.json.data?.certificateCount ??
@@ -479,6 +482,34 @@ async function main(): Promise<void> {
       0;
     console.log(
       `  Student own certificates: ${track(failures, 'Student own certificates', ownCertificates.json.success && certCount > 0)} (${certCount})`,
+    );
+
+    const verifyCode =
+      ownCertificates.json.data?.recentCertificates?.[0]?.verificationCode;
+    if (verifyCode) {
+      const publicVerify = await api<{ success: boolean; data?: { valid?: boolean } }>(
+        `/verify/${encodeURIComponent(verifyCode)}`,
+      );
+      console.log(
+        `  Public certificate verify: ${track(failures, 'Public certificate verify', publicVerify.status === 200 && publicVerify.json.success)}`,
+      );
+      const verifyPage = await pageStatus(`/en/verify/${encodeURIComponent(verifyCode)}`);
+      console.log(
+        `  Verify page: HTTP ${verifyPage} ${track(failures, 'Verify page HTTP 200', verifyPage === 200)}`,
+      );
+    } else {
+      console.log('  Public certificate verify: SKIP (no seeded verification code)');
+    }
+  }
+
+  if (faculty) {
+    const facultyRevokeDenied = await api<{ success: boolean }>('/certificates/revoke', {
+      method: 'POST',
+      token: faculty.token,
+      body: { certificateId: '507f1f77bcf86cd799439011', reason: 'RBAC test' },
+    });
+    console.log(
+      `  Faculty revoke denied: ${track(failures, 'Faculty revoke denied', !facultyRevokeDenied.json.success)}`,
     );
   }
 
