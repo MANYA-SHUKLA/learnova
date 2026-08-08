@@ -27,8 +27,8 @@ import {
 import { ApiClientError } from '@/lib/api/client';
 import { useRouter } from '@/lib/i18n/routing';
 
-const GENDERS = Object.keys(STUDENT_GENDER_LABELS) as Array<keyof typeof STUDENT_GENDER_LABELS>;
-const STATUSES = Object.keys(STUDENT_STATUS_LABELS) as Array<keyof typeof STUDENT_STATUS_LABELS>;
+const GENDERS = Object.keys(STUDENT_GENDER_LABELS) as (keyof typeof STUDENT_GENDER_LABELS)[];
+const STATUSES = Object.keys(STUDENT_STATUS_LABELS) as (keyof typeof STUDENT_STATUS_LABELS)[];
 
 interface StudentFormProps {
   mode: 'create' | 'edit';
@@ -148,7 +148,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
       bio: form.bio.trim() || null,
       linkedin: form.linkedin.trim() || null,
       website: form.website.trim() || null,
-      status: form.status as StudentCreateBody['status'],
+      status: form.status,
     };
 
     try {
@@ -179,7 +179,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
             email: credentials.email,
             temporaryPassword: credentials.temporaryPassword,
           }}
-          onDone={() => router.push(APP_ROUTES.INSTITUTION_STUDENTS)}
+          onDone={() => { router.push(APP_ROUTES.INSTITUTION_STUDENTS); }}
         />
       </PermissionGate>
     );
@@ -201,7 +201,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
         disabled={pending}
         placeholder={opts?.placeholder}
         autoComplete={opts?.autoComplete}
-        onChange={(e) => set(key, e.target.value)}
+        onChange={(e) => { set(key, e.target.value); }}
       />
     </div>
   );
@@ -213,7 +213,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
         type="checkbox"
         checked={Boolean(form[key])}
         disabled={pending}
-        onChange={(e) => set(key, e.target.checked)}
+        onChange={(e) => { set(key, e.target.checked); }}
         className="h-4 w-4 rounded border-input"
       />
       <label htmlFor={key} className="text-sm font-medium">
@@ -279,7 +279,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
               label="Gender"
               value={form.gender || ''}
               disabled={pending}
-              onChange={(v) => set('gender', v)}
+              onChange={(v) => { set('gender', v); }}
               options={[
                 { value: '', label: 'Not set' },
                 ...GENDERS.map((g) => ({ value: g, label: STUDENT_GENDER_LABELS[g] })),
@@ -290,7 +290,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
               label="Status"
               value={form.status}
               disabled={pending}
-              onChange={(v) => set('status', v)}
+              onChange={(v) => { set('status', v); }}
               options={STATUSES.filter((s) => s !== 'archived').map((s) => ({
                 value: s,
                 label: STUDENT_STATUS_LABELS[s],
@@ -354,7 +354,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
               className="min-h-28 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={form.bio}
               disabled={pending}
-              onChange={(e) => set('bio', e.target.value)}
+              onChange={(e) => { set('bio', e.target.value); }}
             />
           </div>
         </CardContent>
@@ -375,7 +375,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
             type="button"
             variant="outline"
             disabled={pending}
-            onClick={() => router.push(APP_ROUTES.INSTITUTION_STUDENTS)}
+            onClick={() => { router.push(APP_ROUTES.INSTITUTION_STUDENTS); }}
           >
             Cancel
           </Button>
@@ -397,7 +397,7 @@ function SelectField({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
+  options: { value: string; label: string }[];
   disabled?: boolean;
 }) {
   return (
@@ -410,7 +410,7 @@ function SelectField({
         className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
         value={value}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => { onChange(e.target.value); }}
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

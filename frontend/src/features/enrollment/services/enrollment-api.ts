@@ -120,13 +120,13 @@ export const enrollmentApi = {
   leaveWaitlist: (courseId: string) =>
     apiClient.post(`${API_ROUTES.ENROLLMENTS}/waitlist/${courseId}/leave`),
 
-  previewImport: (rows: Array<Record<string, string>>) =>
+  previewImport: (rows: Record<string, string>[]) =>
     apiClient.post<EnrollmentImportPreview>(`${API_ROUTES.ENROLLMENTS}/import/preview`, {
       rows,
       dryRun: true,
     }),
 
-  import: (rows: Array<Record<string, string>>, dryRun = false) =>
+  import: (rows: Record<string, string>[], dryRun = false) =>
     apiClient.post<EnrollmentImportResult & EnrollmentImportPreview>(
       `${API_ROUTES.ENROLLMENTS}/import`,
       {

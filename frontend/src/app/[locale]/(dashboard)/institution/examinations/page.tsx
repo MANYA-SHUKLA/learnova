@@ -87,7 +87,7 @@ export default function InstitutionExaminationsPage() {
               <Input
                 className="sm:w-56"
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => { setQ(e.target.value); }}
                 placeholder={t('searchPlaceholder')}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -141,7 +141,7 @@ export default function InstitutionExaminationsPage() {
                     <Button
                       size="sm"
                       disabled={publishMutation.isPending}
-                      onClick={() => publishMutation.mutate(exam.id)}
+                      onClick={() => { publishMutation.mutate(exam.id); }}
                     >
                       {t('publish')}
                     </Button>

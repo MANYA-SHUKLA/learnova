@@ -236,7 +236,7 @@ export const projectApi = {
   listComments: async (params: CommentListParams): Promise<CommentListResult> => {
     const { projectId, ...rest } = params;
     const { data, meta } = await apiClient.getWithMeta<{ items: ProjectComment[] }>(
-      `${base}/${projectId}/comments${toQuery(rest as Record<string, string | number | boolean | undefined>)}`,
+      `${base}/${projectId}/comments${toQuery(rest)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },

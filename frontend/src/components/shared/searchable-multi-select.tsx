@@ -103,7 +103,7 @@ export function SearchableMultiSelect(props: SearchableMultiSelectProps) {
   const openDropdown = () => {
     if (isDisabled || open) return;
     setOpen(true);
-    window.requestAnimationFrame(() => setPanelVisible(true));
+    window.requestAnimationFrame(() => { setPanelVisible(true); });
   };
 
   const toggleDropdown = () => {
@@ -187,7 +187,7 @@ export function SearchableMultiSelect(props: SearchableMultiSelectProps) {
               <Input
                 ref={searchRef}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { setQuery(e.target.value); }}
                 placeholder={searchPlaceholder}
                 autoComplete="off"
                 className="h-9 rounded-lg border-border/70 bg-background"
@@ -216,14 +216,14 @@ export function SearchableMultiSelect(props: SearchableMultiSelectProps) {
                         'group flex cursor-pointer items-start gap-2.5 px-3 py-2.5 text-sm transition-all duration-150 ease-out hover:bg-primary/10 hover:pl-4',
                         checked && 'bg-primary/10 pl-4',
                       )}
-                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseDown={(e) => { e.preventDefault(); }}
                     >
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 rounded border-input accent-primary transition-transform duration-150 group-hover:scale-110"
                         checked={checked}
                         disabled={isDisabled || option.disabled}
-                        onChange={() => toggle(option.value)}
+                        onChange={() => { toggle(option.value); }}
                       />
                       <span className={cn('truncate', checked && 'font-medium text-primary')}>
                         {option.label}

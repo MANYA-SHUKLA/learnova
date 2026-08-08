@@ -35,9 +35,9 @@ const emptyMeta = (page?: number, limit?: number): PaginatedMeta => ({
   hasPrevPage: false,
 });
 
-function toQuery(params: Record<string, string | number | boolean | undefined>): string {
+function toQuery(params: object = {}): string {
   const search = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
+  for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
     if (value !== undefined && value !== '') search.set(key, String(value));
   }
   const qs = search.toString();
@@ -47,7 +47,7 @@ function toQuery(params: Record<string, string | number | boolean | undefined>):
 export const practiceLabApi = {
   list: async (params: PracticeLabListParams = {}): Promise<PracticeLabListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: PracticeLab[] }>(
-      `${base}${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
@@ -65,7 +65,7 @@ export const practiceLabApi = {
 
   listProblems: async (params: ProblemListParams = {}): Promise<ProblemListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: LabProblem[] }>(
-      `${base}/problems${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}/problems${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
@@ -81,7 +81,7 @@ export const practiceLabApi = {
 
   listSubmissions: async (params: SubmissionListParams = {}) => {
     const { data, meta } = await apiClient.getWithMeta<{ items: StudentSubmission[] }>(
-      `${base}/submissions${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}/submissions${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },

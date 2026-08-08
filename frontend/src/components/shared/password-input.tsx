@@ -21,7 +21,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, InputProps>(
         <button
           type="button"
           className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
-          onClick={() => setVisible((v) => !v)}
+          onClick={() => { setVisible((v) => !v); }}
           disabled={disabled}
           aria-label={visible ? 'Hide password' : 'Show password'}
           tabIndex={-1}

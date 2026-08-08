@@ -27,7 +27,7 @@ import {
 } from '@/features/practice-lab';
 import { Link } from '@/lib/i18n/routing';
 
-const STATUS_FILTERS: Array<PracticeLabStatus | 'all'> = [
+const STATUS_FILTERS: (PracticeLabStatus | 'all')[] = [
   'all',
   'draft',
   'published',
@@ -111,7 +111,7 @@ export default function InstitutionPracticeLabsPage() {
                 <Input
                   className="pl-9"
                   value={q}
-                  onChange={(e) => setQ(e.target.value)}
+                  onChange={(e) => { setQ(e.target.value); }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       setSearch(q);
@@ -179,7 +179,7 @@ export default function InstitutionPracticeLabsPage() {
                       {lab.status === 'draft' ? (
                         <Button
                           size="sm"
-                          onClick={() => publishMutation.mutate(lab.id)}
+                          onClick={() => { publishMutation.mutate(lab.id); }}
                           disabled={publishMutation.isPending}
                         >
                           Publish
@@ -189,7 +189,7 @@ export default function InstitutionPracticeLabsPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => archiveMutation.mutate(lab.id)}
+                          onClick={() => { archiveMutation.mutate(lab.id); }}
                           disabled={archiveMutation.isPending}
                         >
                           Archive
@@ -210,7 +210,7 @@ export default function InstitutionPracticeLabsPage() {
                   variant="outline"
                   size="sm"
                   disabled={!meta.hasPrevPage}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => { setPage((p) => Math.max(1, p - 1)); }}
                 >
                   Previous
                 </Button>
@@ -221,7 +221,7 @@ export default function InstitutionPracticeLabsPage() {
                   variant="outline"
                   size="sm"
                   disabled={!meta.hasNextPage}
-                  onClick={() => setPage((p) => p + 1)}
+                  onClick={() => { setPage((p) => p + 1); }}
                 >
                   Next
                 </Button>

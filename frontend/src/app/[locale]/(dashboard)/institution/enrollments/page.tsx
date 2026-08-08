@@ -37,7 +37,7 @@ import { env } from '@/config/env';
 import { getAccessToken } from '@/lib/auth/jwt';
 import { cn } from '@/lib/utils';
 
-const STATUS_FILTERS: Array<EnrollmentStatus | 'all'> = [
+const STATUS_FILTERS: (EnrollmentStatus | 'all')[] = [
   'all',
   'pending',
   'approved',
@@ -185,7 +185,7 @@ export default function EnrollmentListPage() {
                         className="rounded-xl"
                         disabled={bulkApprove.isPending}
                         onClick={() =>
-                          void bulkApprove.mutateAsync({ ids: selected }).then(() => setSelected([]))
+                          void bulkApprove.mutateAsync({ ids: selected }).then(() => { setSelected([]); })
                         }
                       >
                         Approve
@@ -196,7 +196,7 @@ export default function EnrollmentListPage() {
                         className="rounded-xl"
                         disabled={bulkReject.isPending}
                         onClick={() =>
-                          void bulkReject.mutateAsync({ ids: selected }).then(() => setSelected([]))
+                          void bulkReject.mutateAsync({ ids: selected }).then(() => { setSelected([]); })
                         }
                       >
                         Reject
@@ -206,7 +206,7 @@ export default function EnrollmentListPage() {
                         variant="danger"
                         className="rounded-xl"
                         disabled={bulkArchive.isPending}
-                        onClick={() => void bulkArchive.mutateAsync(selected).then(() => setSelected([]))}
+                        onClick={() => void bulkArchive.mutateAsync(selected).then(() => { setSelected([]); })}
                       >
                         Delete
                       </Button>
@@ -251,7 +251,7 @@ export default function EnrollmentListPage() {
                         className="rounded-xl pl-9"
                         placeholder={t('searchPlaceholder')}
                         value={q}
-                        onChange={(e) => setQ(e.target.value)}
+                        onChange={(e) => { setQ(e.target.value); }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());

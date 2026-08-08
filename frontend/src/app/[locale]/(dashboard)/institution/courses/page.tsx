@@ -36,7 +36,7 @@ import type { CourseStatus } from '@/features/course';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
-const STATUS_FILTERS: Array<CourseStatus | 'all'> = [
+const STATUS_FILTERS: (CourseStatus | 'all')[] = [
   'all',
   'draft',
   'review',
@@ -159,7 +159,7 @@ export default function CourseListPage() {
                       variant="outline"
                       className="rounded-xl"
                       disabled={bulkPublish.isPending}
-                      onClick={() => void bulkPublish.mutateAsync(selected).then(() => setSelected([]))}
+                      onClick={() => void bulkPublish.mutateAsync(selected).then(() => { setSelected([]); })}
                     >
                       {t('bulkPublish')}
                     </Button>
@@ -168,7 +168,7 @@ export default function CourseListPage() {
                       variant="outline"
                       className="rounded-xl"
                       disabled={bulkUnpublish.isPending}
-                      onClick={() => void bulkUnpublish.mutateAsync(selected).then(() => setSelected([]))}
+                      onClick={() => void bulkUnpublish.mutateAsync(selected).then(() => { setSelected([]); })}
                     >
                       {t('bulkUnpublish')}
                     </Button>
@@ -177,7 +177,7 @@ export default function CourseListPage() {
                       variant="danger"
                       className="rounded-xl"
                       disabled={bulkArchive.isPending}
-                      onClick={() => void bulkArchive.mutateAsync(selected).then(() => setSelected([]))}
+                      onClick={() => void bulkArchive.mutateAsync(selected).then(() => { setSelected([]); })}
                     >
                       {t('bulkArchive')}
                     </Button>
@@ -200,7 +200,7 @@ export default function CourseListPage() {
                             : 'border-border text-muted-foreground hover:bg-muted/60',
                         )}
                       >
-                        {st === 'all' ? tCommon('all') : formatCourseStatus(st as CourseStatus)}
+                        {st === 'all' ? tCommon('all') : formatCourseStatus(st)}
                       </button>
                     ))}
                   </div>
@@ -213,7 +213,7 @@ export default function CourseListPage() {
                         className="rounded-xl pl-9"
                         placeholder={t('searchPlaceholder')}
                         value={q}
-                        onChange={(e) => setQ(e.target.value)}
+                        onChange={(e) => { setQ(e.target.value); }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());

@@ -42,11 +42,11 @@ import {
 import { ApiClientError } from '@/lib/api/client';
 import { useRouter } from '@/lib/i18n/routing';
 
-const CATEGORIES = Object.keys(COURSE_CATEGORY_LABELS) as Array<keyof typeof COURSE_CATEGORY_LABELS>;
-const DIFFICULTIES = Object.keys(COURSE_DIFFICULTY_LABELS) as Array<keyof typeof COURSE_DIFFICULTY_LABELS>;
-const STATUSES = Object.keys(COURSE_STATUS_LABELS) as Array<keyof typeof COURSE_STATUS_LABELS>;
-const VISIBILITIES = Object.keys(COURSE_VISIBILITY_LABELS) as Array<keyof typeof COURSE_VISIBILITY_LABELS>;
-const ENROLLMENT_MODES = Object.keys(COURSE_ENROLLMENT_MODE_LABELS) as Array<keyof typeof COURSE_ENROLLMENT_MODE_LABELS>;
+const CATEGORIES = Object.keys(COURSE_CATEGORY_LABELS) as (keyof typeof COURSE_CATEGORY_LABELS)[];
+const DIFFICULTIES = Object.keys(COURSE_DIFFICULTY_LABELS) as (keyof typeof COURSE_DIFFICULTY_LABELS)[];
+const STATUSES = Object.keys(COURSE_STATUS_LABELS) as (keyof typeof COURSE_STATUS_LABELS)[];
+const VISIBILITIES = Object.keys(COURSE_VISIBILITY_LABELS) as (keyof typeof COURSE_VISIBILITY_LABELS)[];
+const ENROLLMENT_MODES = Object.keys(COURSE_ENROLLMENT_MODE_LABELS) as (keyof typeof COURSE_ENROLLMENT_MODE_LABELS)[];
 
 const COURSE_FORM_STEPS = [
   { id: 'basics', label: 'Basics' },
@@ -163,14 +163,14 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
       semesterIds: selectedSemesterIds,
       facultyIds: selectedFacultyIds,
       coordinatorId: form.coordinatorId.trim() || null,
-      category: form.category as CourseCreateBody['category'],
-      difficulty: form.difficulty as CourseCreateBody['difficulty'],
+      category: form.category,
+      difficulty: form.difficulty,
       language: form.language.trim(),
       credits: Number(form.credits) || 0,
       estimatedHours: Number(form.estimatedHours) || null,
       duration: form.duration.trim() || null,
-      status: form.status as CourseCreateBody['status'],
-      visibility: form.visibility as CourseCreateBody['visibility'],
+      status: form.status,
+      visibility: form.visibility,
       tags: form.tags
         .split(',')
         .map((s) => s.trim())
@@ -200,7 +200,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
       allowDownloads: form.allowDownloads === 'true',
       allowPreview: form.allowPreview === 'true',
       maxStudents: Number(form.maxStudents) || null,
-      enrollmentMode: form.enrollmentMode as CourseCreateBody['enrollmentMode'],
+      enrollmentMode: form.enrollmentMode,
       enrollmentDeadline: form.enrollmentDeadline || null,
       waitlistEnabled: form.waitlistEnabled === 'true',
       publishDate: form.publishDate || null,
@@ -244,7 +244,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
           className="min-h-28 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
           value={form[key]}
           disabled={pending}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => set(key, e.target.value)}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => { set(key, e.target.value); }}
         />
       ) : (
         <Input
@@ -253,7 +253,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
           value={form[key]}
           disabled={pending}
           autoComplete={opts?.autoComplete}
-          onChange={(e) => set(key, e.target.value)}
+          onChange={(e) => { set(key, e.target.value); }}
         />
       )}
     </div>
@@ -273,7 +273,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
         id={key}
         value={form[key]}
         disabled={pending}
-        onChange={(e) => set(key, e.target.value)}
+        onChange={(e) => { set(key, e.target.value); }}
         className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       >
         {options.map((opt) => (
@@ -339,19 +339,19 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
                 id="campusId"
                 value={form.campusId}
                 disabled={pending}
-                onChange={(value) => set('campusId', value)}
+                onChange={(value) => { set('campusId', value); }}
               />
               <SchoolSelect
                 id="schoolId"
                 value={form.schoolId}
                 disabled={pending}
-                onChange={(value) => set('schoolId', value)}
+                onChange={(value) => { set('schoolId', value); }}
               />
               <DepartmentSelect
                 id="departmentId"
                 value={form.departmentId}
                 disabled={pending}
-                onChange={(value) => set('departmentId', value)}
+                onChange={(value) => { set('departmentId', value); }}
               />
               <ProgramMultiSelect
                 label="Programs"
@@ -386,7 +386,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
                 disabled={pending}
                 allowEmpty
                 emptyLabel="No coordinator"
-                onChange={(value) => set('coordinatorId', value)}
+                onChange={(value) => { set('coordinatorId', value); }}
               />
             </div>
           </div>
@@ -442,7 +442,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
                   id="waitlistEnabled"
                   value={form.waitlistEnabled}
                   disabled={pending}
-                  onChange={(e) => set('waitlistEnabled', e.target.value)}
+                  onChange={(e) => { set('waitlistEnabled', e.target.value); }}
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="true">Yes</option>
@@ -457,7 +457,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
                   id="certificateEnabled"
                   value={form.certificateEnabled}
                   disabled={pending}
-                  onChange={(e) => set('certificateEnabled', e.target.value)}
+                  onChange={(e) => { set('certificateEnabled', e.target.value); }}
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="true">Yes</option>
@@ -472,7 +472,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
                   id="discussionEnabled"
                   value={form.discussionEnabled}
                   disabled={pending}
-                  onChange={(e) => set('discussionEnabled', e.target.value)}
+                  onChange={(e) => { set('discussionEnabled', e.target.value); }}
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="true">Yes</option>
@@ -487,7 +487,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
                   id="allowDownloads"
                   value={form.allowDownloads}
                   disabled={pending}
-                  onChange={(e) => set('allowDownloads', e.target.value)}
+                  onChange={(e) => { set('allowDownloads', e.target.value); }}
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="true">Yes</option>
@@ -502,7 +502,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
                   id="allowPreview"
                   value={form.allowPreview}
                   disabled={pending}
-                  onChange={(e) => set('allowPreview', e.target.value)}
+                  onChange={(e) => { set('allowPreview', e.target.value); }}
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="true">Yes</option>
@@ -538,8 +538,8 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
           <FormStepperNav
             currentStep={currentStep}
             totalSteps={COURSE_FORM_STEPS.length}
-            onPrevious={() => setCurrentStep((s) => Math.max(0, s - 1))}
-            onNext={() => setCurrentStep((s) => Math.min(COURSE_FORM_STEPS.length - 1, s + 1))}
+            onPrevious={() => { setCurrentStep((s) => Math.max(0, s - 1)); }}
+            onNext={() => { setCurrentStep((s) => Math.min(COURSE_FORM_STEPS.length - 1, s + 1)); }}
             onSubmit={() => void onSubmit()}
             isSubmitting={pending}
             canProceed={canProceed}
@@ -550,7 +550,7 @@ export function CourseForm({ mode, initial }: CourseFormProps) {
                 variant="outline"
                 className="rounded-xl"
                 disabled={pending}
-                onClick={() => router.push(APP_ROUTES.INSTITUTION_COURSES)}
+                onClick={() => { router.push(APP_ROUTES.INSTITUTION_COURSES); }}
               >
                 Cancel
               </Button>

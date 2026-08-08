@@ -157,7 +157,7 @@ export function AppTopbar() {
             size="icon"
             className="shrink-0 lg:hidden"
             aria-label={tCommon('search')}
-            onClick={() => setCommandPaletteOpen(true)}
+            onClick={() => { setCommandPaletteOpen(true); }}
           >
             <Search />
           </Button>

@@ -228,7 +228,7 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
         <Input
           placeholder="Search modules & lessons…"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => { setSearchQuery(e.target.value); }}
           className="mb-2"
         />
         {!isCreatingModule ? (
@@ -237,7 +237,7 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
             variant="outline"
             size="sm"
             className="w-full"
-            onClick={() => setIsCreatingModule(true)}
+            onClick={() => { setIsCreatingModule(true); }}
           >
             <Plus className="size-4" />
             Add Module
@@ -248,7 +248,7 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
               autoFocus
               placeholder="Module title"
               value={newModuleTitle}
-              onChange={(e) => setNewModuleTitle(e.target.value)}
+              onChange={(e) => { setNewModuleTitle(e.target.value); }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') void handleCreateModule();
                 if (e.key === 'Escape') setIsCreatingModule(false);
@@ -267,7 +267,7 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setIsCreatingModule(false)}
+                onClick={() => { setIsCreatingModule(false); }}
               >
                 Cancel
               </Button>
@@ -284,7 +284,7 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
                 key={mod.id}
                 module={mod}
                 isExpanded={expandedModules.has(mod.id)}
-                onToggle={() => toggleModule(mod.id)}
+                onToggle={() => { toggleModule(mod.id); }}
                 isEditing={editingModuleId === mod.id}
                 editTitle={editModuleTitle}
                 onEditTitleChange={setEditModuleTitle}
@@ -293,10 +293,10 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
                   setEditModuleTitle(mod.title);
                 }}
                 onSaveEdit={() => handleRenameModule(mod.id)}
-                onCancelEdit={() => setEditingModuleId(null)}
-                onDelete={() => handleDeleteModule(mod.id)}
-                onDuplicate={() => handleDuplicateModule(mod.id)}
-                onAddLesson={() => startCreateLesson(mod.id)}
+                onCancelEdit={() => { setEditingModuleId(null); }}
+                onDelete={() => { handleDeleteModule(mod.id); }}
+                onDuplicate={() => { handleDuplicateModule(mod.id); }}
+                onAddLesson={() => { startCreateLesson(mod.id); }}
                 creatingLesson={creatingLessonModuleId === mod.id}
                 newLessonTitle={newLessonTitle}
                 onNewLessonTitleChange={setNewLessonTitle}
@@ -311,7 +311,7 @@ export function ModuleSidebar({ courseId, modules }: ModuleSidebarProps) {
                     confirmDeleteModule(mod.id);
                   }
                 }}
-                onCancelDelete={() => setPendingDelete(null)}
+                onCancelDelete={() => { setPendingDelete(null); }}
                 selectedLessonId={selectedLessonId}
                 onSelectLesson={setSelectedLesson}
                 onDeleteLesson={handleDeleteLesson}
@@ -431,7 +431,7 @@ function ModuleItem({
           <Input
             autoFocus
             value={editTitle}
-            onChange={(e) => onEditTitleChange(e.target.value)}
+            onChange={(e) => { onEditTitleChange(e.target.value); }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') onSaveEdit();
               if (e.key === 'Escape') onCancelEdit();
@@ -449,7 +449,7 @@ function ModuleItem({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => setActionsMenuId(showActions ? null : `module-${module.id}`)}
+          onClick={() => { setActionsMenuId(showActions ? null : `module-${module.id}`); }}
         >
           <MoreVertical className="size-4" />
         </Button>
@@ -537,11 +537,11 @@ function ModuleItem({
                 key={lesson.id}
                 lesson={lesson}
                 isSelected={selectedLessonId === lesson.id}
-                onSelect={() => onSelectLesson(lesson.id)}
-                onDelete={() => onDeleteLesson(lesson.id)}
-                onDuplicate={() => onDuplicateLesson(lesson.id)}
+                onSelect={() => { onSelectLesson(lesson.id); }}
+                onDelete={() => { onDeleteLesson(lesson.id); }}
+                onDuplicate={() => { onDuplicateLesson(lesson.id); }}
                 pendingDelete={pendingDelete}
-                onConfirmDelete={() => onConfirmDeleteLesson(lesson.id)}
+                onConfirmDelete={() => { onConfirmDeleteLesson(lesson.id); }}
                 onCancelDelete={onCancelDelete}
                 actionsMenuId={actionsMenuId}
                 setActionsMenuId={setActionsMenuId}
@@ -553,7 +553,7 @@ function ModuleItem({
                   autoFocus
                   placeholder="Lesson title"
                   value={newLessonTitle}
-                  onChange={(e) => onNewLessonTitleChange(e.target.value)}
+                  onChange={(e) => { onNewLessonTitleChange(e.target.value); }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') onSubmitCreateLesson();
                     if (e.key === 'Escape') onCancelCreateLesson();
@@ -661,7 +661,7 @@ function LessonItem({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => setActionsMenuId(showActions ? null : `lesson-${lesson.id}`)}
+          onClick={() => { setActionsMenuId(showActions ? null : `lesson-${lesson.id}`); }}
         >
           <MoreVertical className="size-4" />
         </Button>

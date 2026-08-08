@@ -106,13 +106,13 @@ export default function CreateProjectPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('slug')}</label>
-                <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="capstone-2026" />
+                <Input value={slug} onChange={(e) => { setSlug(e.target.value); }} placeholder="capstone-2026" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('projectTitle')}</label>
                 <Input
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => { setTitle(e.target.value); }}
                   placeholder={t('projectTitlePlaceholder')}
                 />
               </div>
@@ -121,7 +121,7 @@ export default function CreateProjectPage() {
                 <select
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={projectType}
-                  onChange={(e) => setProjectType(e.target.value as ProjectTypeSpec)}
+                  onChange={(e) => { setProjectType(e.target.value as ProjectTypeSpec); }}
                 >
                   {PROJECT_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -135,7 +135,7 @@ export default function CreateProjectPage() {
                 <select
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={difficulty}
-                  onChange={(e) => setDifficulty(e.target.value as ProjectDifficulty)}
+                  onChange={(e) => { setDifficulty(e.target.value as ProjectDifficulty); }}
                 >
                   {DIFFICULTIES.map((d) => (
                     <option key={d} value={d}>
@@ -149,7 +149,7 @@ export default function CreateProjectPage() {
                 <select
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
+                  onChange={(e) => { setCategoryId(e.target.value); }}
                 >
                   <option value="">{t('selectCategory')}</option>
                   {categories.map((c) => (
@@ -166,7 +166,7 @@ export default function CreateProjectPage() {
               <textarea
                 className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={objective}
-                onChange={(e) => setObjective(e.target.value)}
+                onChange={(e) => { setObjective(e.target.value); }}
               />
             </div>
             <div className="space-y-2">
@@ -174,7 +174,7 @@ export default function CreateProjectPage() {
               <textarea
                 className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={problemStatement}
-                onChange={(e) => setProblemStatement(e.target.value)}
+                onChange={(e) => { setProblemStatement(e.target.value); }}
               />
             </div>
             <div className="space-y-2">
@@ -182,7 +182,7 @@ export default function CreateProjectPage() {
               <textarea
                 className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={learningOutcomes}
-                onChange={(e) => setLearningOutcomes(e.target.value)}
+                onChange={(e) => { setLearningOutcomes(e.target.value); }}
                 placeholder={t('learningOutcomesPlaceholder')}
               />
             </div>
@@ -191,7 +191,7 @@ export default function CreateProjectPage() {
               <textarea
                 className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => { setDescription(e.target.value); }}
               />
             </div>
             <div className="space-y-2">
@@ -199,7 +199,7 @@ export default function CreateProjectPage() {
               <textarea
                 className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={instructions}
-                onChange={(e) => setInstructions(e.target.value)}
+                onChange={(e) => { setInstructions(e.target.value); }}
               />
             </div>
 
@@ -213,7 +213,7 @@ export default function CreateProjectPage() {
                       type="button"
                       size="sm"
                       variant={selectedTags.includes(tag.id) ? 'default' : 'outline'}
-                      onClick={() => toggleTag(tag.id)}
+                      onClick={() => { toggleTag(tag.id); }}
                     >
                       {tag.name}
                     </Button>
@@ -225,37 +225,37 @@ export default function CreateProjectPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('teamSizeMin')}</label>
-                <Input type="number" value={minimumTeamSize} onChange={(e) => setMinimumTeamSize(e.target.value)} />
+                <Input type="number" value={minimumTeamSize} onChange={(e) => { setMinimumTeamSize(e.target.value); }} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('teamSizeMax')}</label>
-                <Input type="number" value={maximumTeamSize} onChange={(e) => setMaximumTeamSize(e.target.value)} />
+                <Input type="number" value={maximumTeamSize} onChange={(e) => { setMaximumTeamSize(e.target.value); }} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('totalMarks')}</label>
-                <Input type="number" value={totalMarks} onChange={(e) => setTotalMarks(e.target.value)} />
+                <Input type="number" value={totalMarks} onChange={(e) => { setTotalMarks(e.target.value); }} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('passingMarks')}</label>
-                <Input type="number" value={passingMarks} onChange={(e) => setPassingMarks(e.target.value)} />
+                <Input type="number" value={passingMarks} onChange={(e) => { setPassingMarks(e.target.value); }} />
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('startDate')}</label>
-                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <Input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); }} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('due')}</label>
-                <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                <Input type="date" value={dueDate} onChange={(e) => { setDueDate(e.target.value); }} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('submissionDeadline')}</label>
                 <Input
                   type="date"
                   value={submissionDeadline}
-                  onChange={(e) => setSubmissionDeadline(e.target.value)}
+                  onChange={(e) => { setSubmissionDeadline(e.target.value); }}
                 />
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function CreateProjectPage() {
               <textarea
                 className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={resources}
-                onChange={(e) => setResources(e.target.value)}
+                onChange={(e) => { setResources(e.target.value); }}
                 placeholder={t('resourcesPlaceholder')}
               />
             </div>

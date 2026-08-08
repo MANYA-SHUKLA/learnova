@@ -60,7 +60,7 @@ export function useCreateCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: CourseCreateBody) => courseApi.create(body),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
@@ -80,7 +80,7 @@ export function useArchiveCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => courseApi.archive(id),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
@@ -88,7 +88,7 @@ export function useRestoreCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => courseApi.restore(id),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
@@ -96,7 +96,7 @@ export function usePublishCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => courseApi.publish(id),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
@@ -104,7 +104,7 @@ export function useUnpublishCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => courseApi.unpublish(id),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
@@ -112,7 +112,7 @@ export function useDuplicateCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => courseApi.duplicate(id),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
@@ -120,7 +120,7 @@ export function useBulkArchiveCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => courseApi.bulkArchive({ ids }),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
@@ -128,7 +128,7 @@ export function useBulkPublishCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => courseApi.bulkPublish({ ids }),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
@@ -136,15 +136,15 @@ export function useBulkUnpublishCourseMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => courseApi.bulkUnpublish({ ids }),
-    onSuccess: () => invalidateCourse(queryClient),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 
 export function useCourseImportMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (rows: Array<Record<string, string>>) => courseApi.import(rows, false),
-    onSuccess: () => invalidateCourse(queryClient),
+    mutationFn: (rows: Record<string, string>[]) => courseApi.import(rows, false),
+    onSuccess: () => { invalidateCourse(queryClient); },
   });
 }
 

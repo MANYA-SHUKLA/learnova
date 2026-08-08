@@ -48,7 +48,7 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
     (body: Record<string, unknown>) => {
       void updateMutation
         .mutateAsync({ lessonId: lesson.id, body })
-        .then(() => markSaved())
+        .then(() => { markSaved(); })
         .catch(() => undefined);
     },
     800,
@@ -62,7 +62,7 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
     [setDirty, debouncedUpdate],
   );
 
-  const tabs: Array<{ id: TabId; label: string }> = [
+  const tabs: { id: TabId; label: string }[] = [
     { id: 'general', label: 'General' },
     { id: 'content', label: 'Content' },
     { id: 'resources', label: 'Resources' },
@@ -94,7 +94,7 @@ export function LessonEditor({ courseId, lesson }: LessonEditorProps) {
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => { setActiveTab(tab.id); }}
               className={
                 activeTab === tab.id
                   ? 'relative rounded-b-none border-b-2 border-primary'

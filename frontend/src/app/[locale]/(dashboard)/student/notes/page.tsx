@@ -82,7 +82,7 @@ export default function StudentNotesPage() {
                 className="pl-9"
                 placeholder={t('searchPlaceholder')}
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => { setQ(e.target.value); }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') setSearch(q.trim());
                 }}
@@ -130,7 +130,7 @@ export default function StudentNotesPage() {
                         {editing ? (
                           <textarea
                             value={draft}
-                            onChange={(e) => setDraft(e.target.value)}
+                            onChange={(e) => { setDraft(e.target.value); }}
                             rows={4}
                             className={cn(
                               'flex min-h-[96px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm',
@@ -172,7 +172,7 @@ export default function StudentNotesPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => startEdit(item.id, item.text)}
+                              onClick={() => { startEdit(item.id, item.text); }}
                             >
                               {t('edit')}
                             </Button>

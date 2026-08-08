@@ -44,7 +44,7 @@ export interface CourseListResult {
   meta: PaginatedMeta;
 }
 
-export type CourseCreateBody = {
+export interface CourseCreateBody {
   courseCode: string;
   slug: string;
   title: string;
@@ -85,7 +85,7 @@ export type CourseCreateBody = {
   seoTitle?: string | null;
   seoDescription?: string | null;
   seoKeywords?: string[];
-};
+}
 
 export type CourseUpdateBody = Partial<CourseCreateBody>;
 

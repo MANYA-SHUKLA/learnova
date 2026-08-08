@@ -128,7 +128,7 @@ export default function StudentProjectDetailPage({
               key={key}
               size="sm"
               variant={tab === key ? 'default' : 'ghost'}
-              onClick={() => setTab(key)}
+              onClick={() => { setTab(key); }}
             >
               {t(`tabs.${key}`)}
             </Button>
@@ -237,7 +237,7 @@ export default function StudentProjectDetailPage({
                         <label className="text-sm font-medium">{t('createTeam')}</label>
                         <Input
                           value={teamName}
-                          onChange={(e) => setTeamName(e.target.value)}
+                          onChange={(e) => { setTeamName(e.target.value); }}
                           placeholder={t('teamNamePlaceholder')}
                         />
                         <Button
@@ -261,7 +261,7 @@ export default function StudentProjectDetailPage({
                         <select
                           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                           value={selectedTeamId}
-                          onChange={(e) => setSelectedTeamId(e.target.value)}
+                          onChange={(e) => { setSelectedTeamId(e.target.value); }}
                         >
                           <option value="">{t('selectTeam')}</option>
                           {teams.map((team) => (
@@ -293,7 +293,7 @@ export default function StudentProjectDetailPage({
                           className="max-w-xs"
                           placeholder={t('inviteStudentId')}
                           value={inviteStudentId}
-                          onChange={(e) => setInviteStudentId(e.target.value)}
+                          onChange={(e) => { setInviteStudentId(e.target.value); }}
                         />
                         <Button
                           size="sm"
@@ -316,7 +316,7 @@ export default function StudentProjectDetailPage({
                           className="max-w-xs"
                           placeholder={t('transferStudentId')}
                           value={transferStudentId}
-                          onChange={(e) => setTransferStudentId(e.target.value)}
+                          onChange={(e) => { setTransferStudentId(e.target.value); }}
                         />
                         <Button
                           size="sm"
@@ -362,24 +362,24 @@ export default function StudentProjectDetailPage({
                     className="min-h-[160px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     rows={8}
                     value={text}
-                    onChange={(e) => setText(e.target.value)}
+                    onChange={(e) => { setText(e.target.value); }}
                     placeholder={t('textPlaceholder')}
                   />
                   {project.allowRepoLink ? (
                     <Input
                       value={github}
-                      onChange={(e) => setGithub(e.target.value)}
+                      onChange={(e) => { setGithub(e.target.value); }}
                       placeholder={t('githubPlaceholder')}
                     />
                   ) : null}
                   <Input
                     value={demoVideo}
-                    onChange={(e) => setDemoVideo(e.target.value)}
+                    onChange={(e) => { setDemoVideo(e.target.value); }}
                     placeholder={t('demoVideoPlaceholder')}
                   />
                   <Input
                     value={liveDemoUrl}
-                    onChange={(e) => setLiveDemoUrl(e.target.value)}
+                    onChange={(e) => { setLiveDemoUrl(e.target.value); }}
                     placeholder={t('liveDemoPlaceholder')}
                   />
                   <div className="flex flex-wrap gap-2">
@@ -437,7 +437,7 @@ export default function StudentProjectDetailPage({
                   <div className="flex gap-2">
                     <Input
                       value={commentBody}
-                      onChange={(e) => setCommentBody(e.target.value)}
+                      onChange={(e) => { setCommentBody(e.target.value); }}
                       placeholder={t('commentPlaceholder')}
                     />
                     <Button
@@ -476,13 +476,13 @@ export default function StudentProjectDetailPage({
                 <CardContent className="space-y-3">
                   <Input
                     value={reviewSubmissionId}
-                    onChange={(e) => setReviewSubmissionId(e.target.value)}
+                    onChange={(e) => { setReviewSubmissionId(e.target.value); }}
                     placeholder={t('submissionIdPlaceholder')}
                   />
                   <textarea
                     className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     value={reviewFeedback}
-                    onChange={(e) => setReviewFeedback(e.target.value)}
+                    onChange={(e) => { setReviewFeedback(e.target.value); }}
                     placeholder={t('reviewFeedbackPlaceholder')}
                   />
                   <Input
@@ -490,7 +490,7 @@ export default function StudentProjectDetailPage({
                     min={0}
                     max={10}
                     value={reviewRating}
-                    onChange={(e) => setReviewRating(e.target.value)}
+                    onChange={(e) => { setReviewRating(e.target.value); }}
                     placeholder={t('reviewRatingPlaceholder')}
                   />
                   <div className="flex flex-wrap gap-2">

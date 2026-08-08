@@ -47,7 +47,7 @@ function toQuery(params: Record<string, string | number | boolean | undefined>):
 export const examinationApi = {
   list: async (params: ExamListParams = {}): Promise<ExamListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: Exam[] }>(
-      `${base}${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
@@ -96,7 +96,7 @@ export const examinationApi = {
 
   listAttempts: async (params: { examId?: string; page?: number; limit?: number } = {}) => {
     const { data, meta } = await apiClient.getWithMeta<{ items: ExamAttempt[] }>(
-      `${base}/attempts${toQuery(params as Record<string, string | number | undefined>)}`,
+      `${base}/attempts${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
@@ -135,7 +135,7 @@ export const examinationApi = {
     apiClient.post(`${base}/attempts/heartbeat`, body),
 
   getIncidentTimeline: (examId: string, attemptId?: string) =>
-    apiClient.get<Array<{ id: string; incidentType: string; message: string | null; createdAt: string }>>(
+    apiClient.get<{ id: string; incidentType: string; message: string | null; createdAt: string }[]>(
       `${base}/${examId}/incidents${attemptId ? `?attemptId=${attemptId}` : ''}`,
     ),
 
@@ -154,16 +154,16 @@ export const examinationApi = {
         violations: number;
       };
       attempts: ExamAttempt[];
-      recentViolations: Array<{ id: string; violationType: string; severity: string }>;
+      recentViolations: { id: string; violationType: string; severity: string }[];
     }>(`${base}/${examId}/live`),
 
   listViolations: (examId: string) =>
-    apiClient.get<Array<{ id: string; violationType: string; severity: string }>>(
+    apiClient.get<{ id: string; violationType: string; severity: string }[]>(
       `${base}/${examId}/violations`,
     ),
 
   listAttendance: (examId: string) =>
-    apiClient.get<Array<{ id: string; status: string; checkedInAt: string | null }>>(
+    apiClient.get<{ id: string; status: string; checkedInAt: string | null }[]>(
       `${base}/${examId}/attendance`,
     ),
 

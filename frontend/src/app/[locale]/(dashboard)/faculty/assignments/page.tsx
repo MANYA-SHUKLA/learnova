@@ -117,7 +117,7 @@ export default function FacultyAssignmentsPage() {
                     <Input
                       className="rounded-xl sm:w-56"
                       value={q}
-                      onChange={(e) => setQ(e.target.value)}
+                      onChange={(e) => { setQ(e.target.value); }}
                       placeholder={t('searchPlaceholder')}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
@@ -247,7 +247,7 @@ export default function FacultyAssignmentsPage() {
                       placeholder={t('marksPlaceholder')}
                       value={gradeMarks[sub.id] ?? ''}
                       onChange={(e) =>
-                        setGradeMarks((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                        { setGradeMarks((prev) => ({ ...prev, [sub.id]: e.target.value })); }
                       }
                     />
                     <Button

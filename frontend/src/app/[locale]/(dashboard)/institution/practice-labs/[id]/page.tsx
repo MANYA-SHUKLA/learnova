@@ -54,7 +54,7 @@ export default function InstitutionPracticeLabDetailPage({
               </div>
               <div className="flex gap-2">
                 {lab.status === 'draft' ? (
-                  <Button onClick={() => publish.mutate(lab.id)} disabled={publish.isPending}>
+                  <Button onClick={() => { publish.mutate(lab.id); }} disabled={publish.isPending}>
                     Publish
                   </Button>
                 ) : null}

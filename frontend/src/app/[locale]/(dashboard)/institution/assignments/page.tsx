@@ -35,7 +35,7 @@ import type { AssignmentStatus } from '@/features/assignment';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
-const STATUS_FILTERS: Array<AssignmentStatus | 'all'> = [
+const STATUS_FILTERS: (AssignmentStatus | 'all')[] = [
   'all',
   'draft',
   'published',
@@ -144,7 +144,7 @@ export default function InstitutionAssignmentsPage() {
                       <Input
                         className="rounded-xl pl-9"
                         value={q}
-                        onChange={(e) => setQ(e.target.value)}
+                        onChange={(e) => { setQ(e.target.value); }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());

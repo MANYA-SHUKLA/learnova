@@ -96,7 +96,7 @@ export default function StudentAssignmentDetailPage({
                   className="min-h-[160px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   rows={8}
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={(e) => { setText(e.target.value); }}
                   placeholder={t('textPlaceholder')}
                 />
                 <div className="flex flex-wrap gap-2">
@@ -159,7 +159,7 @@ export default function StudentAssignmentDetailPage({
                   className="min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   rows={3}
                   value={comment}
-                  onChange={(e) => setComment(e.target.value)}
+                  onChange={(e) => { setComment(e.target.value); }}
                   placeholder={t('commentPlaceholder')}
                 />
                 <Button
@@ -168,7 +168,7 @@ export default function StudentAssignmentDetailPage({
                   onClick={() =>
                     void addComment
                       .mutateAsync({ assignmentId: id, body: { body: comment } })
-                      .then(() => setComment(''))
+                      .then(() => { setComment(''); })
                   }
                 >
                   {t('addComment')}

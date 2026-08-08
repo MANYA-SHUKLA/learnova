@@ -82,7 +82,7 @@ export default function InstitutionProjectMilestonesPage({
               <label className="text-sm font-medium">{t('milestoneTitle')}</label>
               <Input
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => { setTitle(e.target.value); }}
                 placeholder={t('milestoneTitlePlaceholder')}
               />
             </div>
@@ -91,7 +91,7 @@ export default function InstitutionProjectMilestonesPage({
               <textarea
                 className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => { setDescription(e.target.value); }}
               />
             </div>
             <div className="space-y-2">
@@ -99,7 +99,7 @@ export default function InstitutionProjectMilestonesPage({
               <Input
                 type="number"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value)}
+                onChange={(e) => { setWeight(e.target.value); }}
               />
             </div>
             <Button

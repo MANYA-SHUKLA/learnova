@@ -312,7 +312,7 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   const roleKey = user?.role;
   const role =
     roleKey && tRoles.has(roleKey)
-      ? tRoles(roleKey as 'student' | 'faculty' | 'institution_admin')
+      ? tRoles(roleKey)
       : roleKey
         ? roleKey
             .split('_')

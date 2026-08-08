@@ -10,7 +10,7 @@ import type {
   PaginatedMeta,
 } from '@learnova/types';
 
-export type AssignmentListParams = {
+export interface AssignmentListParams {
   q?: string;
   courseId?: string;
   moduleId?: string;
@@ -27,14 +27,14 @@ export type AssignmentListParams = {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-};
+}
 
-export type AssignmentListResult = {
+export interface AssignmentListResult {
   items: Assignment[];
   meta: PaginatedMeta;
-};
+}
 
-export type SubmissionListParams = {
+export interface SubmissionListParams {
   q?: string;
   assignmentId?: string;
   courseId?: string;
@@ -46,14 +46,14 @@ export type SubmissionListParams = {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-};
+}
 
-export type SubmissionListResult = {
+export interface SubmissionListResult {
   items: AssignmentSubmission[];
   meta: PaginatedMeta;
-};
+}
 
-export type AssignmentCreateBody = {
+export interface AssignmentCreateBody {
   courseId: string;
   moduleId?: string | null;
   lessonId?: string | null;
@@ -73,28 +73,28 @@ export type AssignmentCreateBody = {
   closeDate?: string | null;
   estimatedMinutes?: number | null;
   rubricId?: string | null;
-};
+}
 
 export type AssignmentUpdateBody = Partial<Omit<AssignmentCreateBody, 'courseId'>>;
 
-export type SubmitBody = {
+export interface SubmitBody {
   assignmentId: string;
   submissionType?: 'text' | 'file' | 'link' | 'mixed';
   textSubmission?: string | null;
   links?: string[];
   timeSpentMinutes?: number | null;
   attemptNumber?: number;
-};
+}
 
-export type GradeBody = {
+export interface GradeBody {
   gradingMethod?: 'manual' | 'rubric' | 'pass_fail' | 'marks' | 'percentage';
   marksObtained?: number | null;
   percentage?: number | null;
   passed?: boolean | null;
   feedback?: string | null;
-  rubricScores?: Array<{ criterionId: string; points: number; comment?: string | null }>;
+  rubricScores?: { criterionId: string; points: number; comment?: string | null }[];
   returnToStudent?: boolean;
-};
+}
 
 export type {
   Assignment,

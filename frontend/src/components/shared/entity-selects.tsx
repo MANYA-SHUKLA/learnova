@@ -54,8 +54,8 @@ function useDebouncedSearch(delay = 300) {
   const [search, setSearch] = useState('');
   const [debounced, setDebounced] = useState('');
   useEffect(() => {
-    const id = setTimeout(() => setDebounced(search.trim()), delay);
-    return () => clearTimeout(id);
+    const id = setTimeout(() => { setDebounced(search.trim()); }, delay);
+    return () => { clearTimeout(id); };
   }, [search, delay]);
   return { search, setSearch, debouncedQuery: debounced || undefined };
 }

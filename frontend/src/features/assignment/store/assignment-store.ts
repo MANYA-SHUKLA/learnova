@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { AssignmentStatus } from '@learnova/types';
 
-type AssignmentFiltersState = {
+interface AssignmentFiltersState {
   status: AssignmentStatus | 'all';
   search: string;
   courseId: string;
@@ -9,7 +9,7 @@ type AssignmentFiltersState = {
   setSearch: (search: string) => void;
   setCourseId: (courseId: string) => void;
   reset: () => void;
-};
+}
 
 const initial = {
   status: 'all' as const,
@@ -19,8 +19,8 @@ const initial = {
 
 export const useAssignmentStore = create<AssignmentFiltersState>((set) => ({
   ...initial,
-  setStatus: (status) => set({ status }),
-  setSearch: (search) => set({ search }),
-  setCourseId: (courseId) => set({ courseId }),
-  reset: () => set(initial),
+  setStatus: (status) => { set({ status }); },
+  setSearch: (search) => { set({ search }); },
+  setCourseId: (courseId) => { set({ courseId }); },
+  reset: () => { set(initial); },
 }));

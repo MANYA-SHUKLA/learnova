@@ -147,7 +147,7 @@ export default function StudentProgressPage() {
                 onStatusChange={setStatus}
                 onRecentChange={setRecent}
                 onBookmarkedChange={setBookmarked}
-                onSubmitSearch={() => setSubmittedSearch(search.trim())}
+                onSubmitSearch={() => { setSubmittedSearch(search.trim()); }}
                 onClear={() => {
                   resetFilters();
                   setSubmittedSearch('');

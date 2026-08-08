@@ -222,7 +222,7 @@ export default function StudentProfilePage() {
               ))}
             </CardContent>
             <CardContent>
-              <Button onClick={() => setEditing(true)}>Edit contact details</Button>
+              <Button onClick={() => { setEditing(true); }}>Edit contact details</Button>
             </CardContent>
           </Card>
         ) : (
@@ -250,7 +250,7 @@ export default function StudentProfilePage() {
                     <label className="text-sm font-medium">{label}</label>
                     <Input
                       value={String(form[key as keyof StudentUpdateProfileBody] ?? student[key as keyof typeof student] ?? '')}
-                      onChange={(e) => set(key as keyof StudentUpdateProfileBody, e.target.value || null)}
+                      onChange={(e) => { set(key as keyof StudentUpdateProfileBody, e.target.value || null); }}
                     />
                   </div>
                 ))}
@@ -260,7 +260,7 @@ export default function StudentProfilePage() {
                 <textarea
                   className="min-h-28 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                   value={String(form.bio ?? student.bio ?? '')}
-                  onChange={(e) => set('bio', e.target.value || null)}
+                  onChange={(e) => { set('bio', e.target.value || null); }}
                 />
               </div>
               <div className="flex gap-2">

@@ -121,7 +121,7 @@ export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) 
                     ? 'bg-primary/10 font-semibold text-primary'
                     : 'text-foreground hover:bg-muted',
                 )}
-                onClick={() => switchLocale(code)}
+                onClick={() => { switchLocale(code); }}
               >
                 <span>{LOCALE_NAMES[code]}</span>
                 <span className="text-xs text-muted-foreground">{LOCALE_LABELS[code]}</span>
@@ -144,7 +144,7 @@ export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) 
         aria-haspopup="listbox"
         aria-busy={pending}
         disabled={pending}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => { setOpen((v) => !v); }}
         className={cn(size === 'sm' && 'gap-1.5 px-2.5')}
       >
         <Languages className="size-4" />

@@ -138,7 +138,7 @@ export function LessonProperties({ courseId, lesson }: LessonPropertiesProps) {
               className="mt-1.5"
               type="number"
               value={localEstimated}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setLocalEstimated(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => { setLocalEstimated(e.target.value); }}
               onBlur={() => {
                 const num = parseInt(localEstimated, 10);
                 void update({ estimatedMinutes: Number.isNaN(num) ? null : num });

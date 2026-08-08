@@ -6,7 +6,7 @@ import type { LearningStatus } from '../types';
 import { LEARNING_STATUS_LABELS } from '../lib/labels';
 import { cn } from '@/lib/utils';
 
-const STATUS_OPTIONS: Array<LearningStatus | 'all'> = [
+const STATUS_OPTIONS: (LearningStatus | 'all')[] = [
   'all',
   'not_started',
   'in_progress',
@@ -56,7 +56,7 @@ export function ProgressFilters({
             className="pl-9"
             placeholder={searchPlaceholder}
             value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(e) => { onSearchChange(e.target.value); }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') onSubmitSearch?.();
             }}
@@ -80,7 +80,7 @@ export function ProgressFilters({
               type="button"
               size="sm"
               variant={active ? 'default' : 'outline'}
-              onClick={() => onStatusChange(option)}
+              onClick={() => { onStatusChange(option); }}
             >
               {label}
             </Button>
@@ -91,7 +91,7 @@ export function ProgressFilters({
             type="button"
             size="sm"
             variant={recent ? 'default' : 'outline'}
-            onClick={() => onRecentChange(!recent)}
+            onClick={() => { onRecentChange(!recent); }}
           >
             <Clock3 className="size-3.5" />
             Recent
@@ -102,7 +102,7 @@ export function ProgressFilters({
             type="button"
             size="sm"
             variant={bookmarked ? 'default' : 'outline'}
-            onClick={() => onBookmarkedChange(!bookmarked)}
+            onClick={() => { onBookmarkedChange(!bookmarked); }}
           >
             <Bookmark className="size-3.5" />
             Bookmarked

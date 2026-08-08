@@ -62,7 +62,7 @@ export function CodeEditor({
         language={MONACO_MAP[language]}
         theme={theme}
         value={value}
-        onChange={(next) => onChange(next ?? '')}
+        onChange={(next) => { onChange(next ?? ''); }}
         onMount={onMount}
         options={{
           fontSize,

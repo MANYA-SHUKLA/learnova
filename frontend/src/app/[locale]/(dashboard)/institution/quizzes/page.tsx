@@ -96,7 +96,7 @@ export default function InstitutionQuizzesPage() {
               <Input
                 className="sm:w-56"
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => { setQ(e.target.value); }}
                 placeholder={t('searchPlaceholder')}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -154,7 +154,7 @@ export default function InstitutionQuizzesPage() {
                       <Button
                         size="sm"
                         disabled={publishMutation.isPending}
-                        onClick={() => publishMutation.mutate(quiz.id)}
+                        onClick={() => { publishMutation.mutate(quiz.id); }}
                       >
                         {t('publish')}
                       </Button>
@@ -174,7 +174,7 @@ export default function InstitutionQuizzesPage() {
                 variant="outline"
                 size="sm"
                 disabled={!meta.hasPrevPage}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => { setPage((p) => Math.max(1, p - 1)); }}
               >
                 {t('previous')}
               </Button>
@@ -185,7 +185,7 @@ export default function InstitutionQuizzesPage() {
                 variant="outline"
                 size="sm"
                 disabled={!meta.hasNextPage}
-                onClick={() => setPage((p) => p + 1)}
+                onClick={() => { setPage((p) => p + 1); }}
               >
                 {t('next')}
               </Button>

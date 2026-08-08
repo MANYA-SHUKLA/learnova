@@ -115,7 +115,7 @@ function LoginForm() {
                 name={emailName}
                 ref={emailRef}
                 onChange={onEmailChange}
-                onFocus={() => setEmailFocused(true)}
+                onFocus={() => { setEmailFocused(true); }}
                 onBlur={(e) => {
                   setEmailFocused(false);
                   void onEmailBlur(e);

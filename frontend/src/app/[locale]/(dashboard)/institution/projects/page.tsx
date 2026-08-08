@@ -44,7 +44,7 @@ import { useSuccessPopup } from '@/hooks/use-success-popup';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
-const STATUS_FILTERS: Array<ProjectStatus | 'open' | 'all'> = [
+const STATUS_FILTERS: (ProjectStatus | 'open' | 'all')[] = [
   'all',
   'draft',
   'published',
@@ -55,7 +55,7 @@ const STATUS_FILTERS: Array<ProjectStatus | 'open' | 'all'> = [
 
 const SORT_OPTIONS: ProjectSortOption[] = ['newest', 'oldest', 'deadline', 'title', 'difficulty'];
 
-const DIFFICULTIES: Array<ProjectDifficulty | 'all'> = [
+const DIFFICULTIES: (ProjectDifficulty | 'all')[] = [
   'all',
   'beginner',
   'intermediate',
@@ -377,7 +377,7 @@ export default function InstitutionProjectsPage() {
                         className="rounded-xl pl-9"
                         placeholder={t('searchPlaceholder')}
                         value={q}
-                        onChange={(e) => setQ(e.target.value)}
+                        onChange={(e) => { setQ(e.target.value); }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());

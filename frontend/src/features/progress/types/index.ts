@@ -125,41 +125,41 @@ export interface ResumePoint {
   status: LearningStatus;
 }
 
-export type CreateBookmarkBody = {
+export interface CreateBookmarkBody {
   courseId: string;
   targetType: BookmarkTargetType;
   moduleId?: string;
   lessonId?: string;
   resourceId?: string;
   note?: string;
-};
+}
 
-export type CreateNoteBody = {
+export interface CreateNoteBody {
   courseId: string;
   lessonId: string;
   text: string;
-};
+}
 
-export type UpdateNoteBody = {
+export interface UpdateNoteBody {
   text: string;
-};
+}
 
-export type OpenLessonBody = {
+export interface OpenLessonBody {
   courseId: string;
   moduleId: string;
   lessonId: string;
   position?: number;
-};
+}
 
-export type CompleteLessonBody = {
+export interface CompleteLessonBody {
   courseId: string;
   moduleId: string;
   lessonId: string;
   watchPercentage?: number;
   readingPercentage?: number;
-};
+}
 
-export type UpdateLessonProgressBody = {
+export interface UpdateLessonProgressBody {
   courseId: string;
   moduleId: string;
   lessonId: string;
@@ -168,4 +168,4 @@ export type UpdateLessonProgressBody = {
   lastPosition?: number;
   timeSpentSeconds?: number;
   resumePosition?: Partial<ResumePosition>;
-};
+}

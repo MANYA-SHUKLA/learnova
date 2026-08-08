@@ -48,7 +48,7 @@ export function useFormDraft<T extends Record<string, unknown>>(
   const setData = useCallback(
     (updater: T | ((prev: T) => T)) => {
       setDataState((prev) => {
-        const next = typeof updater === 'function' ? (updater as (prev: T) => T)(prev) : updater;
+        const next = typeof updater === 'function' ? (updater)(prev) : updater;
         persist(next);
         return next;
       });

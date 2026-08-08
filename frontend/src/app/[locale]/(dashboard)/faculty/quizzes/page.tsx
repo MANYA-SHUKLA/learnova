@@ -93,7 +93,7 @@ export default function FacultyQuizzesPage() {
               <Input
                 className="sm:w-56"
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => { setQ(e.target.value); }}
                 placeholder={t('searchPlaceholder')}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -149,7 +149,7 @@ export default function FacultyQuizzesPage() {
                       <Button
                         size="sm"
                         disabled={publishMutation.isPending}
-                        onClick={() => publishMutation.mutate(quiz.id)}
+                        onClick={() => { publishMutation.mutate(quiz.id); }}
                       >
                         {t('publish')}
                       </Button>

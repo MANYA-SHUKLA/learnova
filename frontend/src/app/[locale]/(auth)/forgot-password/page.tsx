@@ -101,7 +101,7 @@ export default function ForgotPasswordPage() {
                 name={emailName}
                 ref={emailRef}
                 onChange={onEmailChange}
-                onFocus={() => setFocused(true)}
+                onFocus={() => { setFocused(true); }}
                 onBlur={(e) => {
                   setFocused(false);
                   void onEmailBlur(e);

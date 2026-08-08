@@ -98,7 +98,7 @@ export function DashboardTaskList({
 export function DashboardQuickActions({
   actions,
 }: {
-  actions: Array<{ label: string; href: string; icon?: LucideIcon }>;
+  actions: { label: string; href: string; icon?: LucideIcon }[];
 }) {
   return (
     <div className="flex flex-wrap gap-2">

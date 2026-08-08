@@ -98,7 +98,7 @@ export const gradebookApi = {
     ),
 
   pendingProjects: (courseId: string) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: Record<string, unknown>[] }>(
       `${base}/courses/${courseId}/pending-projects`,
     ),
 
@@ -144,12 +144,12 @@ export const gradebookApi = {
     }),
 
   moderationTimeline: (courseId: string, studentId?: string) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: Record<string, unknown>[] }>(
       `${base}/moderation/${courseId}/timeline${toQuery({ studentId })}`,
     ),
 
   listSnapshots: (courseId: string, studentId?: string) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: Record<string, unknown>[] }>(
       `${base}/snapshots${toQuery({ courseId, studentId })}`,
     ),
 
@@ -164,7 +164,7 @@ export const gradebookApi = {
     apiClient.post<{ computed: number }>(`${base}/standing/compute`, body ?? {}),
 
   listStanding: (params?: { studentId?: string; semesterId?: string }) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: Record<string, unknown>[] }>(
       `${base}/standing${toQuery(params ?? {})}`,
     ),
 };

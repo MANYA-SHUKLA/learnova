@@ -61,31 +61,31 @@ export default function InstitutionLabProblemsPage({
             <CardDescription>Create a coding problem with sample I/O.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input placeholder="Title" value={title} onChange={(e) => { setTitle(e.target.value); }} />
             <textarea
               className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               placeholder="Problem statement"
               value={statement}
-              onChange={(e) => setStatement(e.target.value)}
+              onChange={(e) => { setStatement(e.target.value); }}
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <textarea
                 className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 placeholder="Sample input"
                 value={sampleIn}
-                onChange={(e) => setSampleIn(e.target.value)}
+                onChange={(e) => { setSampleIn(e.target.value); }}
               />
               <textarea
                 className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 placeholder="Sample output"
                 value={sampleOut}
-                onChange={(e) => setSampleOut(e.target.value)}
+                onChange={(e) => { setSampleOut(e.target.value); }}
               />
             </div>
             <Button
               disabled={!title || !statement || createProblem.isPending}
               onClick={() =>
-                createProblem.mutate(
+                { createProblem.mutate(
                   {
                     practiceLabId: id,
                     title,
@@ -103,7 +103,7 @@ export default function InstitutionLabProblemsPage({
                       setSampleOut('');
                     },
                   },
-                )
+                ); }
               }
             >
               Add problem

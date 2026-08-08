@@ -41,18 +41,18 @@ export interface FacultyListResult {
   meta: PaginatedMeta;
 }
 
-export type FacultyCredentials = {
+export interface FacultyCredentials {
   email: string;
   temporaryPassword: string;
   employeeId: string;
   facultyCode: string;
-};
+}
 
 export type FacultyCreateResult = Faculty & {
   credentials: FacultyCredentials | null;
 };
 
-export type FacultyCreateBody = {
+export interface FacultyCreateBody {
   employeeId: string;
   facultyCode: string;
   firstName: string;
@@ -97,11 +97,11 @@ export type FacultyCreateBody = {
   emergencyContactRelation?: string | null;
   status?: FacultyStatus;
   isActive?: boolean;
-};
+}
 
 export type FacultyUpdateBody = Partial<FacultyCreateBody>;
 
-export type FacultyUpdateProfileBody = {
+export interface FacultyUpdateProfileBody {
   phone?: string | null;
   alternatePhone?: string | null;
   alternateEmail?: string | null;
@@ -121,7 +121,7 @@ export type FacultyUpdateProfileBody = {
   emergencyContactName?: string | null;
   emergencyContactPhone?: string | null;
   emergencyContactRelation?: string | null;
-};
+}
 
 export interface FacultyBulkIdsBody {
   ids: string[];

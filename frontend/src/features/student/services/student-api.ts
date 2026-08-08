@@ -104,7 +104,7 @@ export const studentApi = {
   deactivate: (id: string) => apiClient.post<Student>(`${API_ROUTES.STUDENTS}/${id}/deactivate`),
 
   audit: (studentId?: string) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: Record<string, unknown>[] }>(
       `${API_ROUTES.STUDENTS}/audit${studentId ? `?studentId=${studentId}` : ''}`,
     ),
 
@@ -129,13 +129,13 @@ export const studentApi = {
   bulkAssignSection: (body: StudentBulkAssignSectionBody) =>
     apiClient.post<{ modified: number }>(`${API_ROUTES.STUDENTS}/bulk/assign-section`, body),
 
-  previewImport: (rows: Array<Record<string, string>>) =>
+  previewImport: (rows: Record<string, string>[]) =>
     apiClient.post<StudentImportPreview>(`${API_ROUTES.STUDENTS}/import/preview`, {
       rows,
       dryRun: true,
     }),
 
-  import: (rows: Array<Record<string, string>>, dryRun = false) =>
+  import: (rows: Record<string, string>[], dryRun = false) =>
     apiClient.post<StudentImportResult & StudentImportPreview>(`${API_ROUTES.STUDENTS}/import`, {
       rows,
       dryRun,

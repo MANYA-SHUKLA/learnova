@@ -56,7 +56,7 @@ export default function StudentExportPage() {
               <Download className="size-4" />
               PDF
             </Button>
-            <Button type="button" variant="secondary" onClick={() => window.print()}>
+            <Button type="button" variant="secondary" onClick={() => { window.print(); }}>
               <Printer className="size-4" />
               {tCrud('printPdf')}
             </Button>

@@ -5,7 +5,7 @@ import { create } from 'zustand';
 interface QuizBuilderDraft {
   quizId: string | null;
   title: string;
-  sections: Array<{ title: string; questionIds: string[] }>;
+  sections: { title: string; questionIds: string[] }[];
   questionIds: string[];
   dirty: boolean;
   lastSavedAt: string | null;
@@ -30,16 +30,16 @@ const initialDraft: QuizBuilderDraft = {
 export const useQuizBuilderStore = create<QuizBuilderState>((set) => ({
   draft: initialDraft,
   setDraft: (partial) =>
-    set((state) => ({
+    { set((state) => ({
       draft: { ...state.draft, ...partial, dirty: true },
-    })),
-  resetDraft: () => set({ draft: initialDraft }),
+    })); },
+  resetDraft: () => { set({ draft: initialDraft }); },
   markSaved: () =>
-    set((state) => ({
+    { set((state) => ({
       draft: {
         ...state.draft,
         dirty: false,
         lastSavedAt: new Date().toISOString(),
       },
-    })),
+    })); },
 }));

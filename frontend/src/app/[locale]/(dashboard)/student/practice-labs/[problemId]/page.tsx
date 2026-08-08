@@ -151,21 +151,21 @@ export default function StudentPracticeProblemPage({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setFontSize(Math.max(12, fontSize - 1))}
+                  onClick={() => { setFontSize(Math.max(12, fontSize - 1)); }}
                 >
                   A-
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setFontSize(Math.min(22, fontSize + 1))}
+                  onClick={() => { setFontSize(Math.min(22, fontSize + 1)); }}
                 >
                   A+
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setTheme(theme === 'vs-dark' ? 'light' : 'vs-dark')}
+                  onClick={() => { setTheme(theme === 'vs-dark' ? 'light' : 'vs-dark'); }}
                 >
                   Theme
                 </Button>
@@ -237,7 +237,7 @@ export default function StudentPracticeProblemPage({
                   <textarea
                     className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-xs"
                     value={stdin}
-                    onChange={(e) => setStdin(e.target.value)}
+                    onChange={(e) => { setStdin(e.target.value); }}
                   />
                 </div>
                 <div>

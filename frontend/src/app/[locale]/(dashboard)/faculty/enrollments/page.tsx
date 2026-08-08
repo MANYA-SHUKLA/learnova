@@ -28,7 +28,7 @@ import {
 import type { EnrollmentStatus } from '@/features/enrollment';
 import { cn } from '@/lib/utils';
 
-const STATUS_FILTERS: Array<EnrollmentStatus | 'all'> = [
+const STATUS_FILTERS: (EnrollmentStatus | 'all')[] = [
   'all',
   'pending',
   'approved',
@@ -130,7 +130,7 @@ export default function FacultyEnrollmentsPage() {
                         className="rounded-xl pl-9"
                         placeholder={t('searchPlaceholder')}
                         value={q}
-                        onChange={(e) => setQ(e.target.value)}
+                        onChange={(e) => { setQ(e.target.value); }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());

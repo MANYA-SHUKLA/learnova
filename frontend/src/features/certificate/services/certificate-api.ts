@@ -14,7 +14,7 @@ function toQuery(params: Record<string, string | number | boolean | undefined>):
 
 export const certificateApi = {
   list: async (params?: Record<string, string | undefined>) => {
-    const { data, meta } = await apiClient.getWithMeta<{ items: Array<Record<string, unknown>> }>(
+    const { data, meta } = await apiClient.getWithMeta<{ items: Record<string, unknown>[] }>(
       `${base}${toQuery({ page: 1, limit: 50, ...params })}`,
     );
     return { items: data.items, meta };
@@ -56,7 +56,7 @@ export const certificateApi = {
   },
 
   listTranscripts: (params?: Record<string, string | undefined>) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: Record<string, unknown>[] }>(
       `${base}/transcripts${toQuery(params ?? {})}`,
     ),
 
@@ -67,7 +67,7 @@ export const certificateApi = {
     apiClient.get<Record<string, unknown>>(`${base}/academic-record${toQuery(params ?? {})}`),
 
   listEligibleStudents: (courseId: string, documentType = 'course_completion') =>
-    apiClient.get<{ items: Array<Record<string, unknown>>; total: number }>(
+    apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
       `${base}/eligible-students${toQuery({ courseId, documentType })}`,
     ),
 
@@ -89,6 +89,6 @@ export const certificateApi = {
     apiClient.get<{
       certificateCount: number;
       transcriptCount: number;
-      recentCertificates: Array<Record<string, unknown>>;
+      recentCertificates: Record<string, unknown>[];
     }>(`${base}/dashboard/student`),
 };

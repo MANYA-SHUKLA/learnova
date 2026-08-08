@@ -72,7 +72,7 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
       semesterId: '',
       sectionId: '',
       facultyId: '',
-      enrollmentMethod: 'manual' as EnrollmentMethod,
+      enrollmentMethod: 'manual',
       notes: '',
     },
     { key: 'enrollment-create' },
@@ -143,14 +143,14 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
                 label="Student (required)"
                 value={form.studentId}
                 disabled={pending}
-                onChange={(value) => set('studentId', value)}
+                onChange={(value) => { set('studentId', value); }}
               />
               <CourseSelect
                 id="courseId"
                 label="Course (required)"
                 value={form.courseId}
                 disabled={pending}
-                onChange={(value) => set('courseId', value)}
+                onChange={(value) => { set('courseId', value); }}
               />
               <FacultySelect
                 id="facultyId"
@@ -159,7 +159,7 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
                 disabled={pending}
                 allowEmpty
                 emptyLabel="No faculty assigned"
-                onChange={(value) => set('facultyId', value)}
+                onChange={(value) => { set('facultyId', value); }}
               />
             </div>
           ) : null}
@@ -170,31 +170,31 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
                 id="departmentId"
                 value={form.departmentId}
                 disabled={pending}
-                onChange={(value) => set('departmentId', value)}
+                onChange={(value) => { set('departmentId', value); }}
               />
               <ProgramSelect
                 id="programId"
                 value={form.programId}
                 disabled={pending}
-                onChange={(value) => set('programId', value)}
+                onChange={(value) => { set('programId', value); }}
               />
               <AcademicYearSelect
                 id="academicYearId"
                 value={form.academicYearId}
                 disabled={pending}
-                onChange={(value) => set('academicYearId', value)}
+                onChange={(value) => { set('academicYearId', value); }}
               />
               <SemesterSelect
                 id="semesterId"
                 value={form.semesterId}
                 disabled={pending}
-                onChange={(value) => set('semesterId', value)}
+                onChange={(value) => { set('semesterId', value); }}
               />
               <SectionSelect
                 id="sectionId"
                 value={form.sectionId}
                 disabled={pending}
-                onChange={(value) => set('sectionId', value)}
+                onChange={(value) => { set('sectionId', value); }}
               />
             </div>
           ) : null}
@@ -210,7 +210,7 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
                   className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   value={form.enrollmentMethod ?? 'manual'}
                   disabled={pending}
-                  onChange={(e) => set('enrollmentMethod', e.target.value)}
+                  onChange={(e) => { set('enrollmentMethod', e.target.value); }}
                 >
                   {METHODS.map((m) => (
                     <option key={m} value={m}>
@@ -229,7 +229,7 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
                   className="min-h-28 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   value={form.notes}
                   disabled={pending}
-                  onChange={(e) => set('notes', e.target.value)}
+                  onChange={(e) => { set('notes', e.target.value); }}
                   placeholder="Add any notes or comments about this enrollment"
                 />
               </div>
@@ -240,8 +240,8 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
           <FormStepperNav
             currentStep={currentStep}
             totalSteps={ENROLLMENT_FORM_STEPS.length}
-            onPrevious={() => setCurrentStep((s) => Math.max(0, s - 1))}
-            onNext={() => setCurrentStep((s) => Math.min(ENROLLMENT_FORM_STEPS.length - 1, s + 1))}
+            onPrevious={() => { setCurrentStep((s) => Math.max(0, s - 1)); }}
+            onNext={() => { setCurrentStep((s) => Math.min(ENROLLMENT_FORM_STEPS.length - 1, s + 1)); }}
             onSubmit={() => void onSubmit()}
             isSubmitting={pending}
             canProceed={canProceed}
@@ -252,7 +252,7 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
                 variant="outline"
                 className="rounded-xl"
                 disabled={pending}
-                onClick={() => router.push(APP_ROUTES.INSTITUTION_ENROLLMENTS)}
+                onClick={() => { router.push(APP_ROUTES.INSTITUTION_ENROLLMENTS); }}
               >
                 Cancel
               </Button>

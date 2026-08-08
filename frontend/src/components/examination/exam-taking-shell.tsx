@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 interface ExamQuestion {
   id: string;
   question: string;
-  options?: Array<{ id: string; optionText: string }>;
+  options?: { id: string; optionText: string }[];
 }
 
 interface ExamTakingShellProps {
@@ -90,7 +90,7 @@ export function ExamTakingShell({
     };
 
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    return () => { window.removeEventListener('keydown', handler); };
   }, [activeIndex, activeQuestion, goToQuestion, onSelectOption]);
 
   const liveMessage = activeQuestion
@@ -185,7 +185,7 @@ export function ExamTakingShell({
                   role="listitem"
                   aria-label={`Question ${index + 1}${answered ? ', answered' : ', unanswered'}`}
                   aria-current={active ? 'true' : undefined}
-                  onClick={() => goToQuestion(index)}
+                  onClick={() => { goToQuestion(index); }}
                   className={cn(
                     'flex size-9 items-center justify-center rounded-lg border text-caption font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
@@ -233,7 +233,7 @@ export function ExamTakingShell({
                             ? 'border-primary bg-primary/5 shadow-soft-sm'
                             : 'border-border/80 hover:border-primary/40 hover:bg-muted/30',
                         )}
-                        onClick={() => onSelectOption(activeQuestion.id, opt.id)}
+                        onClick={() => { onSelectOption(activeQuestion.id, opt.id); }}
                       >
                         <span className="mr-2 tabular-nums text-muted-foreground">{optionIndex + 1}.</span>
                         {opt.optionText}
@@ -248,7 +248,7 @@ export function ExamTakingShell({
                     size="sm"
                     className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring"
                     disabled={activeIndex === 0}
-                    onClick={() => goToQuestion(activeIndex - 1)}
+                    onClick={() => { goToQuestion(activeIndex - 1); }}
                   >
                     Previous
                   </Button>
@@ -258,7 +258,7 @@ export function ExamTakingShell({
                     size="sm"
                     className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring"
                     disabled={activeIndex >= questions.length - 1}
-                    onClick={() => goToQuestion(activeIndex + 1)}
+                    onClick={() => { goToQuestion(activeIndex + 1); }}
                   >
                     Next
                   </Button>

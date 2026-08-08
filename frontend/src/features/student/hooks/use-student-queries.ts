@@ -70,7 +70,7 @@ export function useCreateStudentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: StudentCreateBody) => studentApi.create(body),
-    onSuccess: () => invalidateStudent(queryClient),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 
@@ -102,7 +102,7 @@ export function useArchiveStudentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => studentApi.archive(id),
-    onSuccess: () => invalidateStudent(queryClient),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 
@@ -110,7 +110,7 @@ export function useRestoreStudentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => studentApi.restore(id),
-    onSuccess: () => invalidateStudent(queryClient),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 
@@ -118,7 +118,7 @@ export function useActivateStudentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => studentApi.activate(id),
-    onSuccess: () => invalidateStudent(queryClient),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 
@@ -126,7 +126,7 @@ export function useDeactivateStudentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => studentApi.deactivate(id),
-    onSuccess: () => invalidateStudent(queryClient),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 
@@ -134,7 +134,7 @@ export function useBulkArchiveStudentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => studentApi.bulkArchive({ ids }),
-    onSuccess: () => invalidateStudent(queryClient),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 
@@ -142,7 +142,7 @@ export function useBulkActivateStudentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => studentApi.bulkActivate({ ids }),
-    onSuccess: () => invalidateStudent(queryClient),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 
@@ -150,15 +150,15 @@ export function useBulkSuspendStudentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => studentApi.bulkSuspend({ ids }),
-    onSuccess: () => invalidateStudent(queryClient),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 
 export function useStudentImportMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (rows: Array<Record<string, string>>) => studentApi.import(rows, false),
-    onSuccess: () => invalidateStudent(queryClient),
+    mutationFn: (rows: Record<string, string>[]) => studentApi.import(rows, false),
+    onSuccess: () => { invalidateStudent(queryClient); },
   });
 }
 

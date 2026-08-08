@@ -37,7 +37,7 @@ export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
   const reset = useBuilderStore((s) => s.reset);
 
   useEffect(() => {
-    return () => reset();
+    return () => { reset(); };
   }, [reset]);
 
   if (query.isLoading) {

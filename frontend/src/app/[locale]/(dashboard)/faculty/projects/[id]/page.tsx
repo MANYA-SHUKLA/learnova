@@ -114,7 +114,7 @@ export default function FacultyProjectDetailPage({
               key={key}
               size="sm"
               variant={tab === key ? 'default' : 'ghost'}
-              onClick={() => setTab(key)}
+              onClick={() => { setTab(key); }}
             >
               {t(`tabs.${key}`)}
             </Button>
@@ -147,7 +147,7 @@ export default function FacultyProjectDetailPage({
                 <div className="flex gap-2">
                   <Input
                     value={milestoneTitle}
-                    onChange={(e) => setMilestoneTitle(e.target.value)}
+                    onChange={(e) => { setMilestoneTitle(e.target.value); }}
                     placeholder={t('milestonePlaceholder')}
                   />
                   <Button
@@ -262,21 +262,21 @@ export default function FacultyProjectDetailPage({
                           placeholder={t('marksPlaceholder')}
                           value={gradeMarks[sub.id] ?? ''}
                           onChange={(e) =>
-                            setGradeMarks((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                            { setGradeMarks((prev) => ({ ...prev, [sub.id]: e.target.value })); }
                           }
                         />
                         <Input
                           placeholder={t('feedbackPlaceholder')}
                           value={gradeFeedback[sub.id] ?? ''}
                           onChange={(e) =>
-                            setGradeFeedback((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                            { setGradeFeedback((prev) => ({ ...prev, [sub.id]: e.target.value })); }
                           }
                         />
                         <Input
                           placeholder={t('suggestionsPlaceholder')}
                           value={gradeSuggestions[sub.id] ?? ''}
                           onChange={(e) =>
-                            setGradeSuggestions((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                            { setGradeSuggestions((prev) => ({ ...prev, [sub.id]: e.target.value })); }
                           }
                         />
                         <label className="flex items-center gap-2 text-sm">
@@ -284,10 +284,10 @@ export default function FacultyProjectDetailPage({
                             type="checkbox"
                             checked={revisionRequired[sub.id] ?? false}
                             onChange={(e) =>
-                              setRevisionRequired((prev) => ({
+                              { setRevisionRequired((prev) => ({
                                 ...prev,
                                 [sub.id]: e.target.checked,
-                              }))
+                              })); }
                             }
                           />
                           {t('revisionRequired')}
@@ -334,7 +334,7 @@ export default function FacultyProjectDetailPage({
                 <div className="flex gap-2">
                   <Input
                     value={commentBody}
-                    onChange={(e) => setCommentBody(e.target.value)}
+                    onChange={(e) => { setCommentBody(e.target.value); }}
                     placeholder={t('commentPlaceholder')}
                   />
                   <Button

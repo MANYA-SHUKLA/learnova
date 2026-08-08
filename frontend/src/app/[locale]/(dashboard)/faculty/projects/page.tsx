@@ -173,7 +173,7 @@ export default function FacultyProjectsPage() {
               <Input
                 className="sm:w-56"
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => { setQ(e.target.value); }}
                 placeholder={t('searchPlaceholder')}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -269,21 +269,21 @@ export default function FacultyProjectsPage() {
                     placeholder={t('marksPlaceholder')}
                     value={gradeMarks[sub.id] ?? ''}
                     onChange={(e) =>
-                      setGradeMarks((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                      { setGradeMarks((prev) => ({ ...prev, [sub.id]: e.target.value })); }
                     }
                   />
                   <Input
                     placeholder={t('feedbackPlaceholder')}
                     value={gradeFeedback[sub.id] ?? ''}
                     onChange={(e) =>
-                      setGradeFeedback((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                      { setGradeFeedback((prev) => ({ ...prev, [sub.id]: e.target.value })); }
                     }
                   />
                   <Input
                     placeholder={t('suggestionsPlaceholder')}
                     value={gradeSuggestions[sub.id] ?? ''}
                     onChange={(e) =>
-                      setGradeSuggestions((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                      { setGradeSuggestions((prev) => ({ ...prev, [sub.id]: e.target.value })); }
                     }
                   />
                   <label className="flex items-center gap-2 text-sm">
@@ -291,7 +291,7 @@ export default function FacultyProjectsPage() {
                       type="checkbox"
                       checked={revisionRequired[sub.id] ?? false}
                       onChange={(e) =>
-                        setRevisionRequired((prev) => ({ ...prev, [sub.id]: e.target.checked }))
+                        { setRevisionRequired((prev) => ({ ...prev, [sub.id]: e.target.checked })); }
                       }
                     />
                     {t('revisionRequired')}

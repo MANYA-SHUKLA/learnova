@@ -40,14 +40,14 @@ export default function CreatePracticeLabPage() {
             />
             <div className="space-y-2">
               <label className="text-sm font-medium">Title</label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Intro to Python" />
+              <Input value={title} onChange={(e) => { setTitle(e.target.value); }} placeholder="Intro to Python" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Description</label>
               <textarea
                 className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => { setDescription(e.target.value); }}
               />
             </div>
             {error ? <p className="text-sm text-destructive">{error}</p> : null}

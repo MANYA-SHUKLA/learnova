@@ -83,13 +83,13 @@ export default function InstitutionGradebookPage() {
                   <Button
                     variant="outline"
                     disabled={syncMutation.isPending}
-                    onClick={() => syncMutation.mutate(activeCourseId)}
+                    onClick={() => { syncMutation.mutate(activeCourseId); }}
                   >
                     {t('sync')}
                   </Button>
                   <Button
                     disabled={finalizeMutation.isPending}
-                    onClick={() => finalizeMutation.mutate(activeCourseId)}
+                    onClick={() => { finalizeMutation.mutate(activeCourseId); }}
                   >
                     {t('finalize')}
                   </Button>

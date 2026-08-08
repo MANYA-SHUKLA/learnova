@@ -69,7 +69,7 @@ export default function StudentActivityPage() {
                 type="button"
                 className="rounded-lg border border-border px-3 py-1.5 text-sm disabled:opacity-50"
                 disabled={!meta.hasPrevPage}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => { setPage((p) => Math.max(1, p - 1)); }}
               >
                 {t('prev')}
               </button>
@@ -77,7 +77,7 @@ export default function StudentActivityPage() {
                 type="button"
                 className="rounded-lg border border-border px-3 py-1.5 text-sm disabled:opacity-50"
                 disabled={!meta.hasNextPage}
-                onClick={() => setPage((p) => p + 1)}
+                onClick={() => { setPage((p) => p + 1); }}
               >
                 {t('next')}
               </button>

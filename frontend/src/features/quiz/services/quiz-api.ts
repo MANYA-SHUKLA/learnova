@@ -54,14 +54,14 @@ function toQuery(params: Record<string, string | number | boolean | undefined>):
 export const quizApi = {
   list: async (params: QuizListParams = {}): Promise<QuizListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: Quiz[] }>(
-      `${base}${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
 
   search: async (params: QuizListParams = {}): Promise<QuizListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: Quiz[] }>(
-      `${base}/search${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}/search${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
@@ -140,6 +140,6 @@ export const quizApi = {
 
   listAttempts: (params: { quizId?: string; page?: number; limit?: number } = {}) =>
     apiClient.getWithMeta<{ items: QuizAttempt[] }>(
-      `/attempts${toQuery(params as Record<string, string | number | undefined>)}`,
+      `/attempts${toQuery(params)}`,
     ),
 };

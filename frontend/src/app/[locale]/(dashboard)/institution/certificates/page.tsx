@@ -64,7 +64,7 @@ export default function InstitutionCertificatesPage() {
               <Button
                 className="sm:mb-0.5"
                 disabled={!courseId || bulkMutation.isPending}
-                onClick={() => bulkMutation.mutate(courseId)}
+                onClick={() => { bulkMutation.mutate(courseId); }}
               >
                 {t('bulkIssue')}
               </Button>

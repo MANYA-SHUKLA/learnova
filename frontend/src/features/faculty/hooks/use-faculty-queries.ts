@@ -70,7 +70,7 @@ export function useCreateFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: FacultyCreateBody) => facultyApi.create(body),
-    onSuccess: () => invalidateFaculty(queryClient),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 
@@ -102,7 +102,7 @@ export function useArchiveFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => facultyApi.archive(id),
-    onSuccess: () => invalidateFaculty(queryClient),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 
@@ -110,7 +110,7 @@ export function useRestoreFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => facultyApi.restore(id),
-    onSuccess: () => invalidateFaculty(queryClient),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 
@@ -118,7 +118,7 @@ export function useActivateFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => facultyApi.activate(id),
-    onSuccess: () => invalidateFaculty(queryClient),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 
@@ -126,7 +126,7 @@ export function useDeactivateFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => facultyApi.deactivate(id),
-    onSuccess: () => invalidateFaculty(queryClient),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 
@@ -134,7 +134,7 @@ export function useBulkArchiveFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => facultyApi.bulkArchive({ ids }),
-    onSuccess: () => invalidateFaculty(queryClient),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 
@@ -142,7 +142,7 @@ export function useBulkActivateFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => facultyApi.bulkActivate({ ids }),
-    onSuccess: () => invalidateFaculty(queryClient),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 
@@ -150,15 +150,15 @@ export function useBulkSuspendFacultyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => facultyApi.bulkSuspend({ ids }),
-    onSuccess: () => invalidateFaculty(queryClient),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 
 export function useFacultyImportMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (rows: Array<Record<string, string>>) => facultyApi.import(rows, false),
-    onSuccess: () => invalidateFaculty(queryClient),
+    mutationFn: (rows: Record<string, string>[]) => facultyApi.import(rows, false),
+    onSuccess: () => { invalidateFaculty(queryClient); },
   });
 }
 

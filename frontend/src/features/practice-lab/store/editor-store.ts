@@ -30,11 +30,11 @@ const initial = {
 
 export const usePracticeEditorStore = create<EditorState>((set) => ({
   ...initial,
-  setLanguage: (language) => set({ language }),
-  setSourceCode: (sourceCode) => set({ sourceCode }),
-  setStdin: (stdin) => set({ stdin }),
-  setFontSize: (fontSize) => set({ fontSize }),
-  setWordWrap: (wordWrap) => set({ wordWrap }),
-  setTheme: (theme) => set({ theme }),
-  reset: () => set(initial),
+  setLanguage: (language) => { set({ language }); },
+  setSourceCode: (sourceCode) => { set({ sourceCode }); },
+  setStdin: (stdin) => { set({ stdin }); },
+  setFontSize: (fontSize) => { set({ fontSize }); },
+  setWordWrap: (wordWrap) => { set({ wordWrap }); },
+  setTheme: (theme) => { set({ theme }); },
+  reset: () => { set(initial); },
 }));

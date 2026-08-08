@@ -110,7 +110,7 @@ export function SearchableSelect({
   const openDropdown = () => {
     if (isDisabled || open) return;
     setOpen(true);
-    window.requestAnimationFrame(() => setPanelVisible(true));
+    window.requestAnimationFrame(() => { setPanelVisible(true); });
   };
 
   const toggleDropdown = () => {
@@ -203,7 +203,7 @@ export function SearchableSelect({
               <Input
                 ref={searchRef}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { setQuery(e.target.value); }}
                 placeholder={searchPlaceholder}
                 autoComplete="off"
                 className="h-9 rounded-lg border-border/70 bg-background"
@@ -225,8 +225,8 @@ export function SearchableSelect({
                     optionClassName,
                     value === '' && 'bg-primary/10 pl-4 font-medium text-primary',
                   )}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => selectOption('')}
+                  onMouseDown={(e) => { e.preventDefault(); }}
+                  onClick={() => { selectOption(''); }}
                 >
                   <Check
                     className={cn(
@@ -255,7 +255,7 @@ export function SearchableSelect({
                         selected && 'bg-primary/10 pl-4 font-medium text-primary',
                         option.disabled && 'cursor-not-allowed opacity-50 hover:pl-3 hover:bg-transparent',
                       )}
-                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseDown={(e) => { e.preventDefault(); }}
                       onClick={() => {
                         if (!option.disabled) selectOption(option.value);
                       }}

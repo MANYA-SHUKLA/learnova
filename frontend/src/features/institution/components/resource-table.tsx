@@ -129,7 +129,7 @@ export function PaginationControls({
           type="button"
           className="inline-flex flex-1 items-center justify-center rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-50 sm:flex-none"
           disabled={!hasPrevPage}
-          onClick={() => onPageChange(page - 1)}
+          onClick={() => { onPageChange(page - 1); }}
         >
           {t('previous')}
         </button>
@@ -137,7 +137,7 @@ export function PaginationControls({
           type="button"
           className="inline-flex flex-1 items-center justify-center rounded-xl border border-border px-3 py-1.5 text-sm disabled:opacity-50 sm:flex-none"
           disabled={!hasNextPage}
-          onClick={() => onPageChange(page + 1)}
+          onClick={() => { onPageChange(page + 1); }}
         >
           {t('next')}
         </button>

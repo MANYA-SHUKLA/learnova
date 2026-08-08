@@ -21,9 +21,9 @@ import type {
 } from '../types';
 
 export interface BuilderReorderBody {
-  modules?: Array<{ id: string; orderIndex: number }>;
-  lessons?: Array<{ id: string; moduleId: string; orderIndex: number }>;
-  resources?: Array<{ id: string; lessonId: string; orderIndex: number }>;
+  modules?: { id: string; orderIndex: number }[];
+  lessons?: { id: string; moduleId: string; orderIndex: number }[];
+  resources?: { id: string; lessonId: string; orderIndex: number }[];
 }
 
 export const builderApi = {

@@ -47,7 +47,7 @@ export default function FacultyExamsLivePage() {
               key={exam.id}
               size="sm"
               variant={activeExamId === exam.id ? 'default' : 'outline'}
-              onClick={() => setSelectedExamId(exam.id)}
+              onClick={() => { setSelectedExamId(exam.id); }}
             >
               {exam.title}
             </Button>

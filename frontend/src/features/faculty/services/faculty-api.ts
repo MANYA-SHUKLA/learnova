@@ -94,7 +94,7 @@ export const facultyApi = {
   deactivate: (id: string) => apiClient.post<Faculty>(`${API_ROUTES.FACULTY}/${id}/deactivate`),
 
   audit: (facultyId?: string) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: Record<string, unknown>[] }>(
       `${API_ROUTES.FACULTY}/audit${facultyId ? `?facultyId=${facultyId}` : ''}`,
     ),
 
@@ -116,13 +116,13 @@ export const facultyApi = {
   bulkAssignProgram: (body: FacultyBulkAssignProgramBody) =>
     apiClient.post<{ modified: number }>(`${API_ROUTES.FACULTY}/bulk/assign-program`, body),
 
-  previewImport: (rows: Array<Record<string, string>>) =>
+  previewImport: (rows: Record<string, string>[]) =>
     apiClient.post<FacultyImportPreview>(`${API_ROUTES.FACULTY}/import/preview`, {
       rows,
       dryRun: true,
     }),
 
-  import: (rows: Array<Record<string, string>>, dryRun = false) =>
+  import: (rows: Record<string, string>[], dryRun = false) =>
     apiClient.post<FacultyImportResult & FacultyImportPreview>(`${API_ROUTES.FACULTY}/import`, {
       rows,
       dryRun,

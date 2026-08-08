@@ -26,9 +26,9 @@ const initialFilters = {
 
 export const useProgressStore = create<ProgressFilterState>((set) => ({
   ...initialFilters,
-  setStatus: (status) => set({ status }),
-  setSearch: (search) => set({ search }),
-  setRecent: (recent) => set({ recent }),
-  setBookmarked: (bookmarked) => set({ bookmarked }),
-  resetFilters: () => set(initialFilters),
+  setStatus: (status) => { set({ status }); },
+  setSearch: (search) => { set({ search }); },
+  setRecent: (recent) => { set({ recent }); },
+  setBookmarked: (bookmarked) => { set({ bookmarked }); },
+  resetFilters: () => { set(initialFilters); },
 }));

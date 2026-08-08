@@ -62,7 +62,7 @@ export const registerInstitutionFormSchema = z
     confirmPassword: z.string().min(1, 'Confirm your password'),
     acceptTerms: z
       .boolean()
-      .refine((value) => value === true, { message: 'You must accept the Terms to continue' }),
+      .refine((value) => value, { message: 'You must accept the Terms to continue' }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',

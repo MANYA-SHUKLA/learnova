@@ -50,7 +50,7 @@ export function useSecureExamMode(
       if (document.hidden) report('tab_switch');
     };
 
-    const onBlur = () => report('tab_switch');
+    const onBlur = () => { report('tab_switch'); };
 
     const onFullscreenChange = () => {
       if (policy.requireFullscreen && !document.fullscreenElement) {

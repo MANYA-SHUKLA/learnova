@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       const timeoutMs = 12_000;
       const timeout = new Promise<never>((_, reject) => {
-        window.setTimeout(() => reject(new Error('AUTH_HYDRATE_TIMEOUT')), timeoutMs);
+        window.setTimeout(() => { reject(new Error('AUTH_HYDRATE_TIMEOUT')); }, timeoutMs);
       });
 
       try {

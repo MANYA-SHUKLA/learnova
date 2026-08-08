@@ -72,7 +72,7 @@ export default function FacultyGradebookPage() {
                   variant="outline"
                   className="rounded-xl sm:mb-0.5"
                   disabled={syncMutation.isPending}
-                  onClick={() => syncMutation.mutate(activeCourseId)}
+                  onClick={() => { syncMutation.mutate(activeCourseId); }}
                 >
                   {t('sync')}
                 </Button>

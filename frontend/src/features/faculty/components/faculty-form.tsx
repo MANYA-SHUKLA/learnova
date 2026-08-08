@@ -35,11 +35,9 @@ import {
 import { ApiClientError } from '@/lib/api/client';
 import { useRouter } from '@/lib/i18n/routing';
 
-const DESIGNATIONS = Object.keys(DESIGNATION_LABELS) as Array<keyof typeof DESIGNATION_LABELS>;
-const EMPLOYMENT_TYPES = Object.keys(EMPLOYMENT_TYPE_LABELS) as Array<
-  keyof typeof EMPLOYMENT_TYPE_LABELS
->;
-const STATUSES = Object.keys(FACULTY_STATUS_LABELS) as Array<keyof typeof FACULTY_STATUS_LABELS>;
+const DESIGNATIONS = Object.keys(DESIGNATION_LABELS) as (keyof typeof DESIGNATION_LABELS)[];
+const EMPLOYMENT_TYPES = Object.keys(EMPLOYMENT_TYPE_LABELS) as (keyof typeof EMPLOYMENT_TYPE_LABELS)[];
+const STATUSES = Object.keys(FACULTY_STATUS_LABELS) as (keyof typeof FACULTY_STATUS_LABELS)[];
 
 interface FacultyFormProps {
   mode: 'create' | 'edit';
@@ -105,9 +103,9 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
       lastName: form.lastName.trim(),
       email: form.email.trim(),
       phone: form.phone.trim() || null,
-      designation: form.designation as FacultyCreateBody['designation'],
+      designation: form.designation,
       customDesignation: form.customDesignation.trim() || null,
-      employmentType: form.employmentType as FacultyCreateBody['employmentType'],
+      employmentType: form.employmentType,
       departmentId: form.departmentId.trim() || null,
       schoolId: form.schoolId.trim() || null,
       campusId: form.campusId.trim() || null,
@@ -124,7 +122,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
       officeRoom: form.officeRoom.trim() || null,
       officeHours: form.officeHours.trim() || null,
       bio: form.bio.trim() || null,
-      status: form.status as FacultyCreateBody['status'],
+      status: form.status,
       highestQualification: form.highestQualification.trim() || null,
       country: form.country.trim() || null,
       city: form.city.trim() || null,
@@ -165,7 +163,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
             email: credentials.email,
             temporaryPassword: credentials.temporaryPassword,
           }}
-          onDone={() => router.push(APP_ROUTES.INSTITUTION_FACULTY)}
+          onDone={() => { router.push(APP_ROUTES.INSTITUTION_FACULTY); }}
         />
       </PermissionGate>
     );
@@ -187,7 +185,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
         disabled={pending}
         placeholder={opts?.placeholder}
         autoComplete={opts?.autoComplete}
-        onChange={(e) => set(key, e.target.value)}
+        onChange={(e) => { set(key, e.target.value); }}
       />
     </div>
   );
@@ -224,19 +222,19 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
               id="departmentId"
               value={form.departmentId}
               disabled={pending}
-              onChange={(value) => set('departmentId', value)}
+              onChange={(value) => { set('departmentId', value); }}
             />
             <SchoolSelect
               id="schoolId"
               value={form.schoolId}
               disabled={pending}
-              onChange={(value) => set('schoolId', value)}
+              onChange={(value) => { set('schoolId', value); }}
             />
             <CampusSelect
               id="campusId"
               value={form.campusId}
               disabled={pending}
-              onChange={(value) => set('campusId', value)}
+              onChange={(value) => { set('campusId', value); }}
             />
             {field('academicYearId', 'Academic year ID')}
             {field('semesterId', 'Semester ID')}
@@ -256,7 +254,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
               label="Gender"
               value={form.gender || ''}
               disabled={pending}
-              onChange={(v) => set('gender', v)}
+              onChange={(v) => { set('gender', v); }}
               options={[
                 { value: '', label: 'Not set' },
                 { value: 'male', label: 'Male' },
@@ -270,7 +268,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
               label="Designation"
               value={form.designation}
               disabled={pending}
-              onChange={(v) => set('designation', v)}
+              onChange={(v) => { set('designation', v); }}
               options={DESIGNATIONS.map((d) => ({ value: d, label: DESIGNATION_LABELS[d] }))}
             />
             <SelectField
@@ -278,7 +276,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
               label="Employment type"
               value={form.employmentType}
               disabled={pending}
-              onChange={(v) => set('employmentType', v)}
+              onChange={(v) => { set('employmentType', v); }}
               options={EMPLOYMENT_TYPES.map((d) => ({
                 value: d,
                 label: EMPLOYMENT_TYPE_LABELS[d],
@@ -289,7 +287,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
               label="Status"
               value={form.status}
               disabled={pending}
-              onChange={(v) => set('status', v)}
+              onChange={(v) => { set('status', v); }}
               options={STATUSES.filter((s) => s !== 'archived').map((d) => ({
                 value: d,
                 label: FACULTY_STATUS_LABELS[d],
@@ -320,7 +318,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
               className="min-h-28 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={form.bio}
               disabled={pending}
-              onChange={(e) => set('bio', e.target.value)}
+              onChange={(e) => { set('bio', e.target.value); }}
             />
           </div>
           {field('address', 'Address')}
@@ -342,7 +340,7 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
             type="button"
             variant="outline"
             disabled={pending}
-            onClick={() => router.push(APP_ROUTES.INSTITUTION_FACULTY)}
+            onClick={() => { router.push(APP_ROUTES.INSTITUTION_FACULTY); }}
           >
             Cancel
           </Button>
@@ -364,7 +362,7 @@ function SelectField({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
+  options: { value: string; label: string }[];
   disabled?: boolean;
 }) {
   return (
@@ -377,7 +375,7 @@ function SelectField({
         className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
         value={value}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => { onChange(e.target.value); }}
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

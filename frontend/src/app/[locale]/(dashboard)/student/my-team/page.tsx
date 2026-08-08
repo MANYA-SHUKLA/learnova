@@ -22,7 +22,6 @@ import {
   useMyTeamList,
   useRejectInvitationMutation,
 } from '@/features/project';
-import type { ProjectTeamStatusSpec } from '@/features/project';
 import { Link } from '@/lib/i18n/routing';
 
 export default function StudentMyTeamPage() {
@@ -88,7 +87,7 @@ export default function StudentMyTeamPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">
-                          {formatTeamStatus(entry.status as ProjectTeamStatusSpec)}
+                          {formatTeamStatus(entry.status)}
                         </Badge>
                         <Button asChild size="sm" variant="outline">
                           <Link href={`${APP_ROUTES.STUDENT_PROJECTS}/${entry.projectId}`}>
@@ -141,7 +140,7 @@ export default function StudentMyTeamPage() {
                   variant="outline"
                   size="sm"
                   disabled={!meta.hasPrevPage}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => { setPage((p) => Math.max(1, p - 1)); }}
                 >
                   {t('previous')}
                 </Button>
@@ -152,7 +151,7 @@ export default function StudentMyTeamPage() {
                   variant="outline"
                   size="sm"
                   disabled={!meta.hasNextPage}
-                  onClick={() => setPage((p) => p + 1)}
+                  onClick={() => { setPage((p) => p + 1); }}
                 >
                   {t('next')}
                 </Button>

@@ -18,7 +18,7 @@ import { ApiClientError } from '@/lib/api/client';
 import { Link, useRouter } from '@/lib/i18n/routing';
 import type { StudentImportPreview } from '@learnova/types';
 
-function parseCsv(text: string): Array<Record<string, string>> {
+function parseCsv(text: string): Record<string, string>[] {
   const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
@@ -41,7 +41,7 @@ export default function StudentImportPage() {
   const router = useRouter();
   const importMutation = useStudentImportMutation();
   const [preview, setPreview] = useState<StudentImportPreview | null>(null);
-  const [rows, setRows] = useState<Array<Record<string, string>>>([]);
+  const [rows, setRows] = useState<Record<string, string>[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const onFile = async (file: File | null) => {

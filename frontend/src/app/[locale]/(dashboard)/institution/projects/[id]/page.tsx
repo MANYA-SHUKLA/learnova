@@ -189,7 +189,7 @@ export default function InstitutionProjectDetailPage({
                   key={key}
                   size="sm"
                   variant={tab === key ? 'default' : 'ghost'}
-                  onClick={() => setTab(key)}
+                  onClick={() => { setTab(key); }}
                 >
                   {t(`tabs.${key}`)}
                 </Button>
@@ -206,11 +206,11 @@ export default function InstitutionProjectDetailPage({
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">{t('slug')}</label>
-                      <Input value={slug} onChange={(e) => setSlug(e.target.value)} />
+                      <Input value={slug} onChange={(e) => { setSlug(e.target.value); }} />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">{t('projectTitle')}</label>
-                      <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+                      <Input value={title} onChange={(e) => { setTitle(e.target.value); }} />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -218,7 +218,7 @@ export default function InstitutionProjectDetailPage({
                     <textarea
                       className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={objective}
-                      onChange={(e) => setObjective(e.target.value)}
+                      onChange={(e) => { setObjective(e.target.value); }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -226,7 +226,7 @@ export default function InstitutionProjectDetailPage({
                     <textarea
                       className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={problemStatement}
-                      onChange={(e) => setProblemStatement(e.target.value)}
+                      onChange={(e) => { setProblemStatement(e.target.value); }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -234,17 +234,17 @@ export default function InstitutionProjectDetailPage({
                     <textarea
                       className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={learningOutcomes}
-                      onChange={(e) => setLearningOutcomes(e.target.value)}
+                      onChange={(e) => { setLearningOutcomes(e.target.value); }}
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">{t('totalMarks')}</label>
-                      <Input type="number" value={totalMarks} onChange={(e) => setTotalMarks(e.target.value)} />
+                      <Input type="number" value={totalMarks} onChange={(e) => { setTotalMarks(e.target.value); }} />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">{t('passingMarks')}</label>
-                      <Input type="number" value={passingMarks} onChange={(e) => setPassingMarks(e.target.value)} />
+                      <Input type="number" value={passingMarks} onChange={(e) => { setPassingMarks(e.target.value); }} />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -252,7 +252,7 @@ export default function InstitutionProjectDetailPage({
                     <textarea
                       className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      onChange={(e) => { setDescription(e.target.value); }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -260,7 +260,7 @@ export default function InstitutionProjectDetailPage({
                     <textarea
                       className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={instructions}
-                      onChange={(e) => setInstructions(e.target.value)}
+                      onChange={(e) => { setInstructions(e.target.value); }}
                     />
                   </div>
                   {project.tags?.length ? (
@@ -313,7 +313,7 @@ export default function InstitutionProjectDetailPage({
                     <div className="flex gap-2">
                       <Input
                         value={milestoneTitle}
-                        onChange={(e) => setMilestoneTitle(e.target.value)}
+                        onChange={(e) => { setMilestoneTitle(e.target.value); }}
                         placeholder={t('milestoneTitlePlaceholder')}
                       />
                       <Button
@@ -449,7 +449,7 @@ export default function InstitutionProjectDetailPage({
                     <div className="flex gap-2">
                       <Input
                         value={commentBody}
-                        onChange={(e) => setCommentBody(e.target.value)}
+                        onChange={(e) => { setCommentBody(e.target.value); }}
                         placeholder={t('commentPlaceholder')}
                       />
                       <Button

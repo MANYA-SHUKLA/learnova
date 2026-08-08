@@ -47,7 +47,7 @@ export default function StudentExamDetailPage() {
 
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<
-    Array<{ id: string; question: string; options?: Array<{ id: string; optionText: string }> }>
+    { id: string; question: string; options?: { id: string; optionText: string }[] }[]
   >([]);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [checkedIn, setCheckedIn] = useState(false);
@@ -218,7 +218,7 @@ export default function StudentExamDetailPage() {
             questions={questions}
             answers={answers}
             onSelectOption={(questionId, optionId) =>
-              setAnswers((prev) => ({ ...prev, [questionId]: [optionId] }))
+              { setAnswers((prev) => ({ ...prev, [questionId]: [optionId] })); }
             }
             onSubmit={() => void handleSubmit()}
             submitting={submitMutation.isPending}

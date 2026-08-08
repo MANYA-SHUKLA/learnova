@@ -46,7 +46,7 @@ export function useProctorMedia(options: {
 
     return () => {
       cancelled = true;
-      stream?.getTracks().forEach((track) => track.stop());
+      stream?.getTracks().forEach((track) => { track.stop(); });
     };
   }, [
     options.enabled,

@@ -42,7 +42,7 @@ export function useCreateModuleMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: ModuleCreatePayload) => builderApi.createModule(courseId, body),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -51,7 +51,7 @@ export function useUpdateModuleMutation(courseId: string) {
   return useMutation({
     mutationFn: ({ moduleId, body }: { moduleId: string; body: ModuleUpdatePayload }) =>
       builderApi.updateModule(courseId, moduleId, body),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -59,7 +59,7 @@ export function useDeleteModuleMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (moduleId: string) => builderApi.deleteModule(courseId, moduleId),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -67,7 +67,7 @@ export function useDuplicateModuleMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (moduleId: string) => builderApi.duplicateModule(courseId, moduleId),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -100,7 +100,7 @@ export function useReorderModulesMutation(courseId: string) {
         queryClient.setQueryData(builderKeys.tree(courseId), context.prev);
       }
     },
-    onSettled: () => invalidateTree(queryClient, courseId),
+    onSettled: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -108,7 +108,7 @@ export function useCreateLessonMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: LessonCreatePayload) => builderApi.createLesson(courseId, body),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -117,7 +117,7 @@ export function useUpdateLessonMutation(courseId: string) {
   return useMutation({
     mutationFn: ({ lessonId, body }: { lessonId: string; body: LessonUpdatePayload }) =>
       builderApi.updateLesson(courseId, lessonId, body),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -125,7 +125,7 @@ export function useDeleteLessonMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (lessonId: string) => builderApi.deleteLesson(courseId, lessonId),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -133,7 +133,7 @@ export function useDuplicateLessonMutation(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (lessonId: string) => builderApi.duplicateLesson(courseId, lessonId),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -170,7 +170,7 @@ export function useReorderLessonsMutation(courseId: string) {
         queryClient.setQueryData(builderKeys.tree(courseId), context.prev);
       }
     },
-    onSettled: () => invalidateTree(queryClient, courseId),
+    onSettled: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -181,7 +181,7 @@ export function useCreateResourceMutation(courseId: string) {
       const { lessonId, ...rest } = body;
       return builderApi.createResource(courseId, lessonId, rest);
     },
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -197,7 +197,7 @@ export function useUpdateResourceMutation(courseId: string) {
       resourceId: string;
       body: ResourceUpdatePayload;
     }) => builderApi.updateResource(courseId, lessonId, resourceId, body),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }
 
@@ -206,6 +206,6 @@ export function useDeleteResourceMutation(courseId: string) {
   return useMutation({
     mutationFn: ({ lessonId, resourceId }: { lessonId: string; resourceId: string }) =>
       builderApi.deleteResource(courseId, lessonId, resourceId),
-    onSuccess: () => invalidateTree(queryClient, courseId),
+    onSuccess: () => { invalidateTree(queryClient, courseId); },
   });
 }

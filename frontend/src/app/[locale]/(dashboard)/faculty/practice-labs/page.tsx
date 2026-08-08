@@ -91,7 +91,7 @@ export default function FacultyPracticeLabsPage() {
                     </div>
                     <div className="flex gap-2">
                       {lab.status === 'draft' ? (
-                        <Button size="sm" onClick={() => publish.mutate(lab.id)}>
+                        <Button size="sm" onClick={() => { publish.mutate(lab.id); }}>
                           Publish
                         </Button>
                       ) : null}

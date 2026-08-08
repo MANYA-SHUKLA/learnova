@@ -271,7 +271,7 @@ export default function InstitutionSetupPage() {
                 id="institution-name"
                 label={t('fields.name')}
                 value={form.name}
-                onChange={(v) => setField('name', v)}
+                onChange={(v) => { setField('name', v); }}
                 disabled={saving}
                 required
               />
@@ -279,7 +279,7 @@ export default function InstitutionSetupPage() {
                 id="short-name"
                 label={t('fields.shortName')}
                 value={form.shortName}
-                onChange={(v) => setField('shortName', v)}
+                onChange={(v) => { setField('shortName', v); }}
                 disabled={saving}
                 required
               />
@@ -287,7 +287,7 @@ export default function InstitutionSetupPage() {
                 id="institution-code"
                 label={t('fields.code')}
                 value={form.code}
-                onChange={(v) => setField('code', v)}
+                onChange={(v) => { setField('code', v); }}
                 disabled={saving || Boolean(institution)}
                 required
               />
@@ -296,7 +296,7 @@ export default function InstitutionSetupPage() {
                 label={t('fields.email')}
                 type="email"
                 value={form.email}
-                onChange={(v) => setField('email', v)}
+                onChange={(v) => { setField('email', v); }}
                 disabled={saving}
                 required
               />
@@ -305,7 +305,7 @@ export default function InstitutionSetupPage() {
                 label={t('fields.phone')}
                 type="tel"
                 value={form.phone}
-                onChange={(v) => setField('phone', v)}
+                onChange={(v) => { setField('phone', v); }}
                 disabled={saving}
                 placeholder={t('fields.phonePlaceholder')}
               />
@@ -318,7 +318,7 @@ export default function InstitutionSetupPage() {
                   className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
                   value={form.timezone}
                   disabled={saving}
-                  onChange={(e) => setField('timezone', e.target.value)}
+                  onChange={(e) => { setField('timezone', e.target.value); }}
                 >
                   {TIMEZONES.map((tz) => (
                     <option key={tz} value={tz}>
@@ -331,7 +331,7 @@ export default function InstitutionSetupPage() {
                 id="country"
                 label={t('fields.country')}
                 value={form.country}
-                onChange={(v) => setField('country', v)}
+                onChange={(v) => { setField('country', v); }}
                 disabled={saving}
                 required
               />
@@ -339,14 +339,14 @@ export default function InstitutionSetupPage() {
                 id="city"
                 label={t('fields.city')}
                 value={form.city}
-                onChange={(v) => setField('city', v)}
+                onChange={(v) => { setField('city', v); }}
                 disabled={saving}
               />
               <Field
                 id="state"
                 label={t('fields.state')}
                 value={form.state}
-                onChange={(v) => setField('state', v)}
+                onChange={(v) => { setField('state', v); }}
                 disabled={saving}
               />
               <div className="space-y-1.5 sm:col-span-2">
@@ -357,7 +357,7 @@ export default function InstitutionSetupPage() {
                   id="address"
                   value={form.address}
                   disabled={saving}
-                  onChange={(e) => setField('address', e.target.value)}
+                  onChange={(e) => { setField('address', e.target.value); }}
                   placeholder={t('fields.addressPlaceholder')}
                 />
               </div>
@@ -430,7 +430,7 @@ function Field({
         value={value}
         disabled={disabled}
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => { onChange(e.target.value); }}
       />
     </div>
   );

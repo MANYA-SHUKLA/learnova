@@ -73,7 +73,7 @@ export function useCreateEnrollmentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: EnrollmentCreateBody) => enrollmentApi.create(body),
-    onSuccess: () => invalidateEnrollment(queryClient),
+    onSuccess: () => { invalidateEnrollment(queryClient); },
   });
 }
 
@@ -139,7 +139,7 @@ export function useArchiveEnrollmentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => enrollmentApi.archive(id),
-    onSuccess: () => invalidateEnrollment(queryClient),
+    onSuccess: () => { invalidateEnrollment(queryClient); },
   });
 }
 
@@ -147,7 +147,7 @@ export function useRestoreEnrollmentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => enrollmentApi.restore(id),
-    onSuccess: () => invalidateEnrollment(queryClient),
+    onSuccess: () => { invalidateEnrollment(queryClient); },
   });
 }
 
@@ -155,7 +155,7 @@ export function useBulkApproveEnrollmentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: EnrollmentBulkApproveBody) => enrollmentApi.bulkApprove(body),
-    onSuccess: () => invalidateEnrollment(queryClient),
+    onSuccess: () => { invalidateEnrollment(queryClient); },
   });
 }
 
@@ -163,7 +163,7 @@ export function useBulkRejectEnrollmentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: EnrollmentBulkRejectBody) => enrollmentApi.bulkReject(body),
-    onSuccess: () => invalidateEnrollment(queryClient),
+    onSuccess: () => { invalidateEnrollment(queryClient); },
   });
 }
 
@@ -171,7 +171,7 @@ export function useBulkArchiveEnrollmentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids: string[]) => enrollmentApi.bulkArchive({ ids }),
-    onSuccess: () => invalidateEnrollment(queryClient),
+    onSuccess: () => { invalidateEnrollment(queryClient); },
   });
 }
 
@@ -179,7 +179,7 @@ export function useSelfEnrollMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: EnrollmentSelfEnrollBody) => enrollmentApi.selfEnroll(body),
-    onSuccess: () => invalidateEnrollment(queryClient),
+    onSuccess: () => { invalidateEnrollment(queryClient); },
   });
 }
 
@@ -196,7 +196,7 @@ export function useLeaveWaitlistMutation() {
 export function useEnrollmentImportMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (rows: Array<Record<string, string>>) => enrollmentApi.import(rows, false),
-    onSuccess: () => invalidateEnrollment(queryClient),
+    mutationFn: (rows: Record<string, string>[]) => enrollmentApi.import(rows, false),
+    onSuccess: () => { invalidateEnrollment(queryClient); },
   });
 }

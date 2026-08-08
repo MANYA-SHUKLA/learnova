@@ -48,7 +48,7 @@ export interface EnrollmentListResult {
   meta: PaginatedMeta;
 }
 
-export type EnrollmentCreateBody = {
+export interface EnrollmentCreateBody {
   studentId: string;
   courseId: string;
   departmentId?: string | null;
@@ -59,7 +59,7 @@ export type EnrollmentCreateBody = {
   facultyId?: string | null;
   enrollmentMethod?: EnrollmentMethod;
   notes?: string | null;
-};
+}
 
 export type EnrollmentUpdateBody = Partial<
   Pick<

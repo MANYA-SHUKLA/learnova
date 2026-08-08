@@ -4,13 +4,13 @@ import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } fro
 import { Download, Printer, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 
-export type ProvisionedCredentials = {
+export interface ProvisionedCredentials {
   title?: string;
   displayIdLabel: string;
   displayId: string;
   email: string;
   temporaryPassword: string;
-};
+}
 
 interface CredentialsHandoffProps {
   credentials: ProvisionedCredentials;
@@ -37,7 +37,7 @@ export function CredentialsHandoff({ credentials, onDone }: CredentialsHandoffPr
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      window.setTimeout(() => { setCopied(false); }, 2000);
     } catch {
       setCopied(false);
     }

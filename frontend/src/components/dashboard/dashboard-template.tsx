@@ -228,12 +228,12 @@ export function DashboardCapacityMetric({
 export function DashboardQuickActionGrid({
   actions,
 }: {
-  actions: Array<{
+  actions: {
     href: string;
     title: string;
     description: string;
     icon: LucideIcon;
-  }>;
+  }[];
 }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

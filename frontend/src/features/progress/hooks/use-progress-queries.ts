@@ -293,7 +293,7 @@ export function useStartSessionMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: { courseId: string; lessonId?: string }) => progressApi.startSession(body),
-    onSuccess: () => invalidateProgress(queryClient),
+    onSuccess: () => { invalidateProgress(queryClient); },
   });
 }
 
@@ -302,6 +302,6 @@ export function useEndSessionMutation() {
   return useMutation({
     mutationFn: (body: { sessionId: string; idleSeconds: number; activeSeconds?: number }) =>
       progressApi.endSession(body),
-    onSuccess: () => invalidateProgress(queryClient),
+    onSuccess: () => { invalidateProgress(queryClient); },
   });
 }

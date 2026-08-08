@@ -85,7 +85,7 @@ export const courseApi = {
   duplicate: (id: string) => apiClient.post<Course>(`${API_ROUTES.COURSES}/${id}/duplicate`),
 
   audit: (courseId?: string) =>
-    apiClient.get<{ items: Array<Record<string, unknown>> }>(
+    apiClient.get<{ items: Record<string, unknown>[] }>(
       `${API_ROUTES.COURSES}/audit${courseId ? `?courseId=${courseId}` : ''}`,
     ),
 
@@ -110,13 +110,13 @@ export const courseApi = {
   bulkAssignProgram: (body: CourseBulkAssignProgramBody) =>
     apiClient.post<{ modified: number }>(`${API_ROUTES.COURSES}/bulk/assign-program`, body),
 
-  previewImport: (rows: Array<Record<string, string>>) =>
+  previewImport: (rows: Record<string, string>[]) =>
     apiClient.post<CourseImportPreview>(`${API_ROUTES.COURSES}/import/preview`, {
       rows,
       dryRun: true,
     }),
 
-  import: (rows: Array<Record<string, string>>, dryRun = false) =>
+  import: (rows: Record<string, string>[], dryRun = false) =>
     apiClient.post<CourseImportResult & CourseImportPreview>(`${API_ROUTES.COURSES}/import`, {
       rows,
       dryRun,

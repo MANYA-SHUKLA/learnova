@@ -34,7 +34,7 @@ export default function StudentQuizAttemptPage() {
   const submitMutation = useSubmitQuizMutation();
 
   const [attemptId, setAttemptId] = useState<string | null>(null);
-  const [questions, setQuestions] = useState<Array<{ id: string; question: string; options?: Array<{ id: string; optionText: string }> }>>([]);
+  const [questions, setQuestions] = useState<{ id: string; question: string; options?: { id: string; optionText: string }[] }[]>([]);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [result, setResult] = useState<{ score: number; percentage: number; passed: boolean } | null>(null);
 
@@ -158,7 +158,7 @@ export default function StudentQuizAttemptPage() {
                               ? 'border-primary bg-primary/5'
                               : 'border-border/80 hover:border-primary/40'
                           }`}
-                          onClick={() => toggleOption(q.id, opt.id, false)}
+                          onClick={() => { toggleOption(q.id, opt.id, false); }}
                         >
                           {opt.optionText}
                         </button>

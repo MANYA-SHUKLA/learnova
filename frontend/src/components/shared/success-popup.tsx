@@ -27,7 +27,7 @@ export function SuccessPopup({
   useEffect(() => {
     if (!open) return;
     const timer = window.setTimeout(onClose, durationMs);
-    return () => window.clearTimeout(timer);
+    return () => { window.clearTimeout(timer); };
   }, [open, onClose, durationMs]);
 
   if (typeof document === 'undefined') return null;

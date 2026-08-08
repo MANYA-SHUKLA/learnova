@@ -29,7 +29,7 @@ export type {
   StudentPracticeLabDashboard,
 };
 
-export type PracticeLabListParams = {
+export interface PracticeLabListParams {
   q?: string;
   courseId?: string;
   status?: PracticeLabStatus;
@@ -39,14 +39,14 @@ export type PracticeLabListParams = {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-};
+}
 
-export type PracticeLabListResult = {
+export interface PracticeLabListResult {
   items: PracticeLab[];
   meta: PaginatedMeta;
-};
+}
 
-export type ProblemListParams = {
+export interface ProblemListParams {
   q?: string;
   practiceLabId?: string;
   difficulty?: PracticeDifficulty;
@@ -57,14 +57,14 @@ export type ProblemListParams = {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-};
+}
 
-export type ProblemListResult = {
+export interface ProblemListResult {
   items: LabProblem[];
   meta: PaginatedMeta;
-};
+}
 
-export type CreatePracticeLabBody = {
+export interface CreatePracticeLabBody {
   courseId: string;
   title: string;
   description?: string | null;
@@ -74,9 +74,9 @@ export type CreatePracticeLabBody = {
   allowRun?: boolean;
   allowSubmit?: boolean;
   maxSubmissions?: number;
-};
+}
 
-export type CreateProblemBody = {
+export interface CreateProblemBody {
   practiceLabId: string;
   title: string;
   problemStatement: string;
@@ -85,25 +85,25 @@ export type CreateProblemBody = {
   sampleInput?: string | null;
   sampleOutput?: string | null;
   allowedLanguages?: PracticeLanguage[];
-};
+}
 
-export type RunCodeBody = {
+export interface RunCodeBody {
   problemId?: string;
   practiceLabId?: string;
   language: PracticeLanguage;
   sourceCode: string;
   stdin?: string | null;
-};
+}
 
-export type SubmitBody = {
+export interface SubmitBody {
   problemId: string;
   language: PracticeLanguage;
   sourceCode: string;
-};
+}
 
-export type SubmissionListParams = {
+export interface SubmissionListParams {
   practiceLabId?: string;
   problemId?: string;
   page?: number;
   limit?: number;
-};
+}

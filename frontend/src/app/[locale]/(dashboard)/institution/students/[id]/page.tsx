@@ -104,7 +104,7 @@ export default function StudentDetailPage() {
     }
   };
 
-  const section = (title: string, rows: Array<[string, string | null | undefined]>) => (
+  const section = (title: string, rows: [string, string | null | undefined][]) => (
     <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
@@ -306,13 +306,13 @@ export default function StudentDetailPage() {
                 placeholder="Current password"
                 value={passwordForm.currentPassword}
                 onChange={(e) =>
-                  setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))
+                  { setPasswordForm((p) => ({ ...p, currentPassword: e.target.value })); }
                 }
               />
               <PasswordInput
                 placeholder="New password"
                 value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
+                onChange={(e) => { setPasswordForm((p) => ({ ...p, newPassword: e.target.value })); }}
               />
               {passwordError ? <p className="text-sm text-danger">{passwordError}</p> : null}
               {passwordMessage ? <p className="text-sm text-success">{passwordMessage}</p> : null}

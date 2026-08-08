@@ -92,7 +92,7 @@ export function formatResourceVisibility(visibility: CourseResourceVisibility): 
   return map[visibility] ?? visibility;
 }
 
-export const LESSON_TYPE_OPTIONS: Array<{ value: CourseLessonType; label: string }> = [
+export const LESSON_TYPE_OPTIONS: { value: CourseLessonType; label: string }[] = [
   { value: 'video', label: 'Video' },
   { value: 'pdf', label: 'PDF' },
   { value: 'markdown', label: 'Markdown' },
@@ -106,40 +106,40 @@ export const LESSON_TYPE_OPTIONS: Array<{ value: CourseLessonType; label: string
   { value: 'download', label: 'Download' },
 ];
 
-export const LESSON_STATUS_OPTIONS: Array<{ value: CourseLessonStatus; label: string }> = [
+export const LESSON_STATUS_OPTIONS: { value: CourseLessonStatus; label: string }[] = [
   { value: 'draft', label: 'Draft' },
   { value: 'published', label: 'Published' },
   { value: 'hidden', label: 'Hidden' },
   { value: 'archived', label: 'Archived' },
 ];
 
-export const LESSON_VISIBILITY_OPTIONS: Array<{
+export const LESSON_VISIBILITY_OPTIONS: {
   value: CourseLessonVisibility;
   label: string;
-}> = [
+}[] = [
   { value: 'private', label: 'Private' },
   { value: 'enrolled', label: 'Enrolled' },
   { value: 'public', label: 'Public' },
   { value: 'preview', label: 'Preview' },
 ];
 
-export const MODULE_STATUS_OPTIONS: Array<{ value: CourseModuleStatus; label: string }> = [
+export const MODULE_STATUS_OPTIONS: { value: CourseModuleStatus; label: string }[] = [
   { value: 'draft', label: 'Draft' },
   { value: 'published', label: 'Published' },
   { value: 'hidden', label: 'Hidden' },
   { value: 'archived', label: 'Archived' },
 ];
 
-export const MODULE_VISIBILITY_OPTIONS: Array<{
+export const MODULE_VISIBILITY_OPTIONS: {
   value: CourseModuleVisibility;
   label: string;
-}> = [
+}[] = [
   { value: 'private', label: 'Private' },
   { value: 'enrolled', label: 'Enrolled' },
   { value: 'public', label: 'Public' },
 ];
 
-export const RESOURCE_TYPE_OPTIONS: Array<{ value: CourseResourceType; label: string }> = [
+export const RESOURCE_TYPE_OPTIONS: { value: CourseResourceType; label: string }[] = [
   { value: 'pdf', label: 'PDF' },
   { value: 'video', label: 'Video' },
   { value: 'image', label: 'Image' },
@@ -151,10 +151,10 @@ export const RESOURCE_TYPE_OPTIONS: Array<{ value: CourseResourceType; label: st
   { value: 'presentation', label: 'Presentation' },
 ];
 
-export const RESOURCE_VISIBILITY_OPTIONS: Array<{
+export const RESOURCE_VISIBILITY_OPTIONS: {
   value: CourseResourceVisibility;
   label: string;
-}> = [
+}[] = [
   { value: 'private', label: 'Private' },
   { value: 'enrolled', label: 'Enrolled' },
   { value: 'public', label: 'Public' },

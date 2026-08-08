@@ -42,21 +42,21 @@ export const useExamStore = create<ExamStoreState>((set) => ({
   cameraGranted: false,
   microphoneGranted: false,
   setActiveAttempt: (examId, attemptId) =>
-    set({ activeExamId: examId, activeAttemptId: attemptId, violationCount: 0, warnings: [] }),
+    { set({ activeExamId: examId, activeAttemptId: attemptId, violationCount: 0, warnings: [] }); },
   clearActiveAttempt: () =>
-    set({
+    { set({
       activeExamId: null,
       activeAttemptId: null,
       remainingSeconds: null,
       violationCount: 0,
       warnings: [],
       secureModeEnabled: false,
-    }),
-  setRemainingSeconds: (seconds) => set({ remainingSeconds: seconds }),
-  incrementViolations: () => set((s) => ({ violationCount: s.violationCount + 1 })),
-  addWarning: (message) => set((s) => ({ warnings: [...s.warnings, message] })),
-  setLiveStats: (stats) => set({ liveStats: stats }),
-  setSecureModeEnabled: (enabled) => set({ secureModeEnabled: enabled }),
+    }); },
+  setRemainingSeconds: (seconds) => { set({ remainingSeconds: seconds }); },
+  incrementViolations: () => { set((s) => ({ violationCount: s.violationCount + 1 })); },
+  addWarning: (message) => { set((s) => ({ warnings: [...s.warnings, message] })); },
+  setLiveStats: (stats) => { set({ liveStats: stats }); },
+  setSecureModeEnabled: (enabled) => { set({ secureModeEnabled: enabled }); },
   setMediaPermissions: (camera, microphone) =>
-    set({ cameraGranted: camera, microphoneGranted: microphone }),
+    { set({ cameraGranted: camera, microphoneGranted: microphone }); },
 }));

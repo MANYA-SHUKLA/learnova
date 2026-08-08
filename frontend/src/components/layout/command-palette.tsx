@@ -88,7 +88,7 @@ export function CommandPalette() {
       if (event.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    return () => { window.removeEventListener('keydown', onKeyDown); };
   }, [setOpen, toggle]);
 
   useEffect(() => {
@@ -115,7 +115,7 @@ export function CommandPalette() {
         type="button"
         className="absolute inset-0 bg-background/70 backdrop-blur-sm"
         aria-label={closeLabel}
-        onClick={() => setOpen(false)}
+        onClick={() => { setOpen(false); }}
       />
       <div
         role="dialog"
@@ -128,13 +128,13 @@ export function CommandPalette() {
           <Input
             autoFocus
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); }}
             placeholder={`${searchLabel}…`}
             className="h-12 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => { setOpen(false); }}
             className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label={closeLabel}
           >
@@ -149,7 +149,7 @@ export function CommandPalette() {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => go(item.href)}
+                onClick={() => { go(item.href); }}
                 className="flex w-full flex-col items-start rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted"
               >
                 <span className="text-label text-foreground">{item.label}</span>
@@ -178,7 +178,7 @@ export function CommandPaletteTrigger({
   return (
     <button
       type="button"
-      onClick={() => setOpen(true)}
+      onClick={() => { setOpen(true); }}
       className={cn(
         'flex h-9 min-w-0 items-center gap-2 rounded-xl border border-border/80 bg-muted/40 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted lg:w-[min(100%,14rem)] xl:w-[min(100%,18rem)]',
         className,

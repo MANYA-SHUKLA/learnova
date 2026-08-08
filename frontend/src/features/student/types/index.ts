@@ -44,18 +44,18 @@ export interface StudentListResult {
   meta: PaginatedMeta;
 }
 
-export type StudentCredentials = {
+export interface StudentCredentials {
   email: string;
   temporaryPassword: string;
   studentId: string;
   admissionNumber: string;
-};
+}
 
 export type StudentCreateResult = Student & {
   credentials: StudentCredentials | null;
 };
 
-export type StudentCreateBody = {
+export interface StudentCreateBody {
   studentId: string;
   admissionNumber: string;
   rollNumber?: string | null;
@@ -106,11 +106,11 @@ export type StudentCreateBody = {
   website?: string | null;
   status?: StudentStatus;
   isActive?: boolean;
-};
+}
 
 export type StudentUpdateBody = Partial<StudentCreateBody>;
 
-export type StudentUpdateProfileBody = {
+export interface StudentUpdateProfileBody {
   phone?: string | null;
   alternatePhone?: string | null;
   alternateEmail?: string | null;
@@ -129,7 +129,7 @@ export type StudentUpdateProfileBody = {
   guardianEmail?: string | null;
   emergencyContactName?: string | null;
   emergencyContactPhone?: string | null;
-};
+}
 
 export interface StudentBulkIdsBody {
   ids: string[];

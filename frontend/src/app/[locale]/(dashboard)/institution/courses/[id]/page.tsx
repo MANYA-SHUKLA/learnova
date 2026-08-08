@@ -94,7 +94,7 @@ export default function CourseDetailPage() {
     }
   };
 
-  const section = (title: string, rows: Array<[string, string | null | undefined]>) => (
+  const section = (title: string, rows: [string, string | null | undefined][]) => (
     <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>

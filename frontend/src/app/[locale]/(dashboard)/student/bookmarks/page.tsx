@@ -67,7 +67,7 @@ export default function StudentBookmarksPage() {
                 className="pl-9"
                 placeholder={t('searchPlaceholder')}
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => { setQ(e.target.value); }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') setSearch(q.trim());
                 }}

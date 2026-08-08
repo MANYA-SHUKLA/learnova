@@ -41,28 +41,28 @@ export const useBuilderStore = create<BuilderState>((set) => ({
   ...initialState,
 
   setSelectedModule: (id) =>
-    set({
+    { set({
       selectedModuleId: id,
       selectedLessonId: null,
-    }),
+    }); },
 
-  setSelectedLesson: (id) => set({ selectedLessonId: id }),
+  setSelectedLesson: (id) => { set({ selectedLessonId: id }); },
 
-  setSearchQuery: (query) => set({ searchQuery: query }),
+  setSearchQuery: (query) => { set({ searchQuery: query }); },
 
-  setFilters: (filters) => set({ filters }),
+  setFilters: (filters) => { set({ filters }); },
 
-  setDirty: (dirty) => set({ isDirty: dirty }),
+  setDirty: (dirty) => { set({ isDirty: dirty }); },
 
   markSaved: () =>
-    set({
+    { set({
       isDirty: false,
       lastSavedAt: new Date(),
-    }),
+    }); },
 
-  toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+  toggleSidebar: () => { set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })); },
 
-  toggleProperties: () => set((state) => ({ propertiesCollapsed: !state.propertiesCollapsed })),
+  toggleProperties: () => { set((state) => ({ propertiesCollapsed: !state.propertiesCollapsed })); },
 
-  reset: () => set(initialState),
+  reset: () => { set(initialState); },
 }));

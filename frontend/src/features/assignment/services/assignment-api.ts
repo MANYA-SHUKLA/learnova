@@ -33,9 +33,9 @@ const emptyMeta = (page?: number, limit?: number): PaginatedMeta => ({
   hasPrevPage: false,
 });
 
-function toQuery(params: Record<string, string | number | boolean | undefined>): string {
+function toQuery(params: object = {}): string {
   const search = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
+  for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
     if (value !== undefined && value !== '') search.set(key, String(value));
   }
   const qs = search.toString();
@@ -45,21 +45,21 @@ function toQuery(params: Record<string, string | number | boolean | undefined>):
 export const assignmentApi = {
   list: async (params: AssignmentListParams = {}): Promise<AssignmentListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: Assignment[] }>(
-      `${base}${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
 
   listMine: async (params: AssignmentListParams = {}): Promise<AssignmentListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: Assignment[] }>(
-      `${base}/me${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}/me${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
 
   search: async (params: AssignmentListParams = {}): Promise<AssignmentListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: Assignment[] }>(
-      `${base}/search${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}/search${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },
@@ -81,7 +81,7 @@ export const assignmentApi = {
 
   listSubmissions: async (params: SubmissionListParams = {}): Promise<SubmissionListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: AssignmentSubmission[] }>(
-      `${base}/submissions${toQuery(params as Record<string, string | number | boolean | undefined>)}`,
+      `${base}/submissions${toQuery(params)}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params.page, params.limit) };
   },

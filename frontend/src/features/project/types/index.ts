@@ -80,7 +80,7 @@ export interface MyTeamEntry {
   pendingInvitations: ProjectTeamInvitation[];
 }
 
-export type ProjectListParams = {
+export interface ProjectListParams {
   q?: string;
   courseId?: string;
   facultyId?: string;
@@ -103,19 +103,19 @@ export type ProjectListParams = {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   sort?: ProjectSortOption;
-};
+}
 
-export type ProjectListResult = {
+export interface ProjectListResult {
   items: Project[];
   meta: PaginatedMeta;
-};
+}
 
-export type MilestoneListResult = {
+export interface MilestoneListResult {
   items: ProjectMilestone[];
   total: number;
-};
+}
 
-export type TeamListParams = {
+export interface TeamListParams {
   projectId?: string;
   courseId?: string;
   status?: ProjectTeamStatus;
@@ -124,14 +124,14 @@ export type TeamListParams = {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-};
+}
 
-export type TeamListResult = {
+export interface TeamListResult {
   items: ProjectTeam[];
   meta: PaginatedMeta;
-};
+}
 
-export type SubmissionListParams = {
+export interface SubmissionListParams {
   q?: string;
   projectId?: string;
   courseId?: string;
@@ -145,37 +145,37 @@ export type SubmissionListParams = {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-};
+}
 
-export type SubmissionListResult = {
+export interface SubmissionListResult {
   items: ProjectSubmission[];
   meta: PaginatedMeta;
-};
+}
 
-export type CommentListParams = {
+export interface CommentListParams {
   projectId: string;
   submissionId?: string;
   milestoneId?: string;
   resolved?: boolean;
   page?: number;
   limit?: number;
-};
+}
 
-export type CommentListResult = {
+export interface CommentListResult {
   items: ProjectComment[];
   meta: PaginatedMeta;
-};
+}
 
-export type MyTeamListResult = {
+export interface MyTeamListResult {
   items: MyTeamEntry[];
   meta: PaginatedMeta;
-};
+}
 
-export type BulkIdsBody = { ids: string[] };
-export type BulkAssignFacultyBody = { ids: string[]; facultyId: string };
-export type BulkResult = { modified: number; ids?: string[] };
+export interface BulkIdsBody { ids: string[] }
+export interface BulkAssignFacultyBody { ids: string[]; facultyId: string }
+export interface BulkResult { modified: number; ids?: string[] }
 
-export type ProjectCreateBody = {
+export interface ProjectCreateBody {
   courseId: string;
   moduleId?: string | null;
   lessonId?: string | null;
@@ -215,11 +215,11 @@ export type ProjectCreateBody = {
   estimatedHours?: number | null;
   rubricId?: string | null;
   assignedFacultyIds?: string[];
-};
+}
 
 export type ProjectUpdateBody = Partial<Omit<ProjectCreateBody, 'courseId'>>;
 
-export type MilestoneCreateBody = {
+export interface MilestoneCreateBody {
   projectId: string;
   title: string;
   description?: string | null;
@@ -227,32 +227,32 @@ export type MilestoneCreateBody = {
   dueDate?: string | null;
   order?: number;
   weightage?: number;
-};
+}
 
 export type MilestoneUpdateBody = Partial<Omit<MilestoneCreateBody, 'projectId'>>;
 
-export type TeamCreateBody = {
+export interface TeamCreateBody {
   projectId: string;
   teamName: string;
   repoLink?: string | null;
-};
+}
 
-export type TeamUpdateBody = {
+export interface TeamUpdateBody {
   teamName?: string;
   repoLink?: string | null;
   status?: ProjectTeamStatus;
-};
+}
 
-export type JoinTeamBody = {
+export interface JoinTeamBody {
   teamId: string;
   role?: ProjectTeamMemberRole;
-};
+}
 
-export type TeamInviteBody = { studentId: string };
-export type TeamTransferLeadershipBody = { studentId: string };
-export type TeamRejectBody = { reason?: string | null };
+export interface TeamInviteBody { studentId: string }
+export interface TeamTransferLeadershipBody { studentId: string }
+export interface TeamRejectBody { reason?: string | null }
 
-export type SubmitBody = {
+export interface SubmitBody {
   projectId: string;
   milestoneId?: string | null;
   deliveryType?: 'text' | 'file' | 'link' | 'mixed';
@@ -265,15 +265,15 @@ export type SubmitBody = {
   liveDemoURL?: string | null;
   timeSpentMinutes?: number | null;
   attemptNumber?: number;
-};
+}
 
-export type MarkEvaluationReadyBody = {
+export interface MarkEvaluationReadyBody {
   notes?: string | null;
   returnToStudent?: boolean;
-};
+}
 
 /** @deprecated Gradebook (Step 13) assigns marks */
-export type GradeBody = {
+export interface GradeBody {
   gradingMethod?: 'manual' | 'rubric' | 'pass_fail' | 'marks' | 'percentage';
   marksObtained?: number | null;
   percentage?: number | null;
@@ -283,11 +283,11 @@ export type GradeBody = {
   suggestions?: string | null;
   approval?: boolean | null;
   revisionRequired?: boolean | null;
-  rubricScores?: Array<{ criterionId: string; points: number; comment?: string | null }>;
+  rubricScores?: { criterionId: string; points: number; comment?: string | null }[];
   returnToStudent?: boolean;
-};
+}
 
-export type ReviewCreateBody = {
+export interface ReviewCreateBody {
   projectId: string;
   submissionId: string;
   reviewType?: 'peer' | 'faculty';
@@ -297,28 +297,28 @@ export type ReviewCreateBody = {
   suggestions?: string | null;
   approval?: boolean | null;
   revisionRequired?: boolean | null;
-  rubricScores?: Array<{ criterionId: string; points: number; comment?: string | null }>;
-};
+  rubricScores?: { criterionId: string; points: number; comment?: string | null }[];
+}
 
-export type ReviewSubmitBody = {
+export interface ReviewSubmitBody {
   score?: number | null;
   rating?: number | null;
   feedback?: string | null;
   suggestions?: string | null;
   approval?: boolean | null;
   revisionRequired?: boolean | null;
-  rubricScores?: Array<{ criterionId: string; points: number; comment?: string | null }>;
-};
+  rubricScores?: { criterionId: string; points: number; comment?: string | null }[];
+}
 
-export type CommentCreateBody = {
+export interface CommentCreateBody {
   projectId: string;
   body: string;
   submissionId?: string | null;
   milestoneId?: string | null;
   parentCommentId?: string | null;
-};
+}
 
-export type CommentUpdateBody = {
+export interface CommentUpdateBody {
   body?: string;
   resolved?: boolean;
-};
+}

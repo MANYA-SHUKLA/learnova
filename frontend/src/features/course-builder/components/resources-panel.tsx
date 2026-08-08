@@ -59,7 +59,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
       <div className="flex items-center justify-between">
         <h3 className="font-medium">Resources</h3>
         {!isAdding ? (
-          <Button type="button" variant="outline" size="sm" onClick={() => setIsAdding(true)}>
+          <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(true); }}>
             <Plus className="size-4" />
             Add
           </Button>
@@ -76,7 +76,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
               id="res-title"
               className="mt-1.5"
               value={newTitle}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => { setNewTitle(e.target.value); }}
               placeholder="Resource title"
             />
           </div>
@@ -89,7 +89,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
               className={selectClass}
               value={newType}
               onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                setNewType(e.target.value as CourseResourceType)
+                { setNewType(e.target.value as CourseResourceType); }
               }
             >
               {RESOURCE_TYPE_OPTIONS.map((opt) => (
@@ -107,7 +107,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
               id="res-url"
               className="mt-1.5"
               value={newUrl}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setNewUrl(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => { setNewUrl(e.target.value); }}
               placeholder="https://..."
             />
           </div>
@@ -119,7 +119,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
               id="res-visibility"
               className={selectClass}
               value={newVisibility}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => setNewVisibility(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => { setNewVisibility(e.target.value); }}
             >
               {RESOURCE_VISIBILITY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -133,7 +133,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
               {createMutation.isPending ? <Spinner size="sm" /> : <FileUp className="size-4" />}
               Add
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => setIsAdding(false)}>
+            <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(false); }}>
               Cancel
             </Button>
           </div>
@@ -171,7 +171,7 @@ export function ResourcesPanel({ courseId, lessonId, resources }: ResourcesPanel
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => handleDelete(res.id)}
+              onClick={() => { handleDelete(res.id); }}
               disabled={deleteMutation.isPending}
             >
               <Trash2 className="size-4" />

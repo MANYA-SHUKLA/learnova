@@ -122,7 +122,7 @@ export default function StudentQuizzesPage() {
               variant="outline"
               size="sm"
               disabled={!meta.hasPrevPage}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => { setPage((p) => Math.max(1, p - 1)); }}
             >
               {t('previous')}
             </Button>
@@ -130,7 +130,7 @@ export default function StudentQuizzesPage() {
               variant="outline"
               size="sm"
               disabled={!meta.hasNextPage}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => { setPage((p) => p + 1); }}
             >
               {t('next')}
             </Button>
