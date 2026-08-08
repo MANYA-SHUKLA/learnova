@@ -38,8 +38,8 @@ import {
   useRevokeCertificateMutation,
 } from '@/features/certificate';
 
-function readAutoIssue(settings: Record<string, unknown> | undefined) {
-  const raw = settings?.['certificateSettings'];
+function readAutoIssue(settings: { certificateSettings?: Record<string, unknown> } | undefined) {
+  const raw = settings?.certificateSettings;
   if (!raw || typeof raw !== 'object') {
     return { courseCompletion: false, publishOnIssue: true };
   }
@@ -82,12 +82,12 @@ export default function InstitutionCertificatesPage() {
   const templates = templatesQuery.data ?? [];
   const auditRows = auditQuery.data ?? [];
   const autoIssue = useMemo(
-    () => readAutoIssue(settingsQuery.data as Record<string, unknown> | undefined),
+    () => readAutoIssue(settingsQuery.data),
     [settingsQuery.data],
   );
 
   const handleAutoIssueToggle = (enabled: boolean) => {
-    const current = (settingsQuery.data?.certificateSettings ?? {}) as Record<string, unknown>;
+    const current = settingsQuery.data?.certificateSettings ?? {};
     void saveSettingsMutation.mutateAsync({
       certificateSettings: {
         ...current,
