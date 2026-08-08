@@ -171,6 +171,89 @@ export async function seedCertificates(
     certificateCount += 1;
   }
 
+  // Fill remaining target with alternate document types (merit) from published passes.
+  if (certificateCount < certificateTarget) {
+    const extraSummaries = await CourseGradeSummaryModel.find({
+      institutionId: instOid,
+      published: true,
+      result: 'pass',
+    })
+      .limit((certificateTarget - certificateCount) * 3)
+      .exec();
+
+    for (const summary of extraSummaries) {
+      if (certificateCount >= certificateTarget) break;
+
+      for (const documentType of ['merit', 'semester_completion'] as const) {
+        if (certificateCount >= certificateTarget) break;
+
+        const exists = await AcademicCertificateModel.findOne({
+          institutionId: instOid,
+          studentId: summary.studentId,
+          courseId: summary.courseId,
+          documentType,
+          status: { $in: ['issued', 'published'] },
+        }).exec();
+        if (exists) continue;
+
+        const [student, course] = await Promise.all([
+          StudentModel.findById(summary.studentId).select('fullName rollNumber programId').lean().exec(),
+          CourseModel.findById(summary.courseId).select('title courseCode').lean().exec(),
+        ]);
+        if (!student || !course) continue;
+
+        const verificationCode = generateVerificationCode();
+        const now = new Date();
+        const certificateNumber = await allocateCertificateNumber(institutionId);
+        const party = {
+          institutionName: institution.name as string,
+          institutionLogo: (institution.logo as string | null) ?? null,
+          studentName: student.fullName as string,
+          studentRollNumber: (student.rollNumber as string | null) ?? null,
+          programName: null,
+          courseTitle: course.title as string,
+          courseCode: course.courseCode as string,
+        };
+
+        await AcademicCertificateModel.create({
+          institutionId: instOid,
+          studentId: summary.studentId,
+          certificateNumber,
+          documentType,
+          templateId: templates[0]?._id ?? null,
+          courseId: summary.courseId,
+          courseGradeId: summary._id,
+          verificationCode,
+          verificationURL: buildVerificationUrl(getPublicBaseUrl(), verificationCode),
+          status: certificateCount % 3 === 0 ? 'published' : 'issued',
+          revoked: false,
+          title: defaultTitleForDocumentType(documentType),
+          version: 1,
+          documentPayload: buildCourseCompletionPayload(party, {
+            letterGrade: summary.letterGrade ?? null,
+            percentage: summary.percentage ?? null,
+            gradePoints: summary.gradePoints ?? null,
+            result: summary.result ?? null,
+            publishedAt: summary.publishedAt?.toISOString() ?? null,
+            snapshotVersion: summary.snapshotVersion ?? null,
+          }),
+          gradebookReference: {
+            courseGradeId: summary._id,
+            snapshotVersion: summary.snapshotVersion ?? null,
+            semesterId: summary.semesterId ?? null,
+            programId: null,
+          },
+          issueDate: now,
+          issuedAt: now,
+          publishedAt: certificateCount % 3 === 0 ? now : null,
+          issuedBy: oid(actorUserId),
+          downloadCount: 0,
+        });
+        certificateCount += 1;
+      }
+    }
+  }
+
   const students = await StudentModel.find({ institutionId: instOid, deletedAt: null })
     .select('_id fullName rollNumber programId')
     .limit(transcriptTarget * 2)

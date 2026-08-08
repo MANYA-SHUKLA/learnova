@@ -127,12 +127,15 @@ async function pageAccessBlocked(
     headers: { Cookie: cookieHeader },
   });
   if (manual.status === 403) return true;
+  const manualBody = await manual.text();
+  if (manualBody.includes('Access denied') || manualBody.includes('>403<')) return true;
 
   const res = await fetch(`${WEB}${path}`, {
     redirect: 'follow',
     headers: { Cookie: cookieHeader },
   });
-  if (res.status === 403) return true;
+  const body = await res.text();
+  if (res.status === 403 || body.includes('Access denied') || body.includes('>403<')) return true;
   const finalUrl = res.url.toLowerCase();
   if (finalUrl.includes('/forbidden')) return true;
   return !finalUrl.includes(blockedSegment.toLowerCase());
