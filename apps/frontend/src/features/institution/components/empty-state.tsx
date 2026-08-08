@@ -2,6 +2,7 @@
 
 import { Button, Card, CardContent } from '@learnova/ui';
 import { motion } from 'framer-motion';
+import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import {
@@ -14,6 +15,7 @@ interface EmptyStateProps {
   description?: string;
   action?: ReactNode;
   illustration?: IllustrationVariant;
+  icon?: LucideIcon;
 }
 
 export function EmptyState({
@@ -21,6 +23,7 @@ export function EmptyState({
   description,
   action,
   illustration = 'inbox',
+  icon: Icon,
 }: EmptyStateProps) {
   return (
     <Card className="overflow-hidden border-dashed border-border/80">
@@ -30,7 +33,13 @@ export function EmptyState({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.35 }}
         >
-          <EmptyIllustration variant={illustration} />
+          {Icon ? (
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-soft-sm">
+              <Icon className="size-8" aria-hidden />
+            </div>
+          ) : (
+            <EmptyIllustration variant={illustration} />
+          )}
         </motion.div>
         <div className="space-y-2">
           <p className="font-display text-lg font-semibold tracking-tight">{title}</p>
