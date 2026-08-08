@@ -56,7 +56,14 @@ export default function FacultyExamDetailPage() {
   };
 
   if (examQuery.isError) {
-    return <ErrorState title={t('error')} onRetry={() => void examQuery.refetch()} />;
+    return (
+      <ErrorState
+        message={t('error')}
+        onRetry={() => {
+          void examQuery.refetch();
+        }}
+      />
+    );
   }
 
   return (

@@ -24,7 +24,7 @@ export default function StudentExamCheckInPage() {
   if (examQuery.isError) {
     return (
       <ErrorState
-        title={t('error')}
+        message={t('error')}
         onRetry={() => {
           void examQuery.refetch();
         }}
