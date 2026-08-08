@@ -76,6 +76,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     async function hydrate() {
+      const token = getAccessToken();
+      const payload = token ? decodeJwtPayload(token) : null;
+      const tokenUsable = Boolean(token && payload && !isTokenExpired(payload));
+      const existing = useAuthStore.getState();
+
+      // Locale switches remount providers — skip network if session is already warm.
+      if (tokenUsable && existing.isAuthenticated && existing.user && existing.session) {
+        if (existing.isLoading) setLoading(false);
+        return;
+      }
+
       setLoading(true);
       const timeoutMs = 12_000;
       const timeout = new Promise<never>((_, reject) => {

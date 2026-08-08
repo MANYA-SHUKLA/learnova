@@ -3,10 +3,11 @@
 import { Button } from '@learnova/ui';
 import { Languages } from 'lucide-react';
 import { useLocale } from 'next-intl';
+import { useTransition } from 'react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { locales, type AppLocale } from '@/lib/i18n/config';
-import { usePathname } from '@/lib/i18n/routing';
+import { usePathname, useRouter } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
 const LOCALE_LABELS: Record<AppLocale, string> = {
@@ -28,7 +29,9 @@ interface LanguageToggleProps {
 
 export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const locale = useLocale() as AppLocale;
+  const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -88,12 +91,11 @@ export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) 
 
   const switchLocale = (next: AppLocale) => {
     setOpen(false);
-    if (next === locale) return;
+    if (next === locale || pending) return;
 
-    // Hard navigation: soft App Router locale swaps were leaving a blank client tree
-    // until a full refresh. Preserve path, query, and hash.
-    const path = pathname === '/' ? '' : pathname;
-    window.location.assign(`/${next}${path}${window.location.search}${window.location.hash}`);
+    startTransition(() => {
+      router.replace(pathname, { locale: next });
+    });
   };
 
   const menu =
@@ -139,6 +141,8 @@ export function LanguageToggle({ className, size = 'sm' }: LanguageToggleProps) 
         aria-label="Switch language"
         aria-expanded={open}
         aria-haspopup="listbox"
+        aria-busy={pending}
+        disabled={pending}
         onClick={() => setOpen((v) => !v)}
         className={cn(size === 'sm' && 'gap-1.5 px-2.5')}
       >
