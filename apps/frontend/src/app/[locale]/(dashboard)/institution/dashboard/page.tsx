@@ -38,7 +38,9 @@ import {
 } from 'recharts';
 import {
   DashboardAnalyticsGrid,
+  DashboardCapacityMetric,
   DashboardHeroCard,
+  DashboardInsightRow,
   DashboardPage,
   DashboardPanelCard,
   DashboardPanelEmpty,
@@ -49,7 +51,7 @@ import {
   DASHBOARD_CHART_COLORS,
   DASHBOARD_CHART_TOOLTIP,
   dashboardFadeUp,
-} from '@/components/dashboard/dashboard-template';
+} from '@/components/dashboard';
 import {
   EmptyState,
   ErrorState,
@@ -83,27 +85,10 @@ function locationLabel(institution: {
   return [institution.city, institution.state, institution.country].filter(Boolean).join(', ');
 }
 
-function CapacityMeter({ label, value, planCapacity }: { label: string; value: number; planCapacity: string }) {
-  return (
-    <div className="rounded-xl border border-border/60 bg-background/75 p-4 backdrop-blur-sm">
-      <p className="text-meta">{label}</p>
-      <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-tight">{value.toLocaleString()}</p>
-      <p className="mt-0.5 text-caption">{planCapacity}</p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-        <motion.div
-          className="h-full rounded-full bg-brand-gradient"
-          initial={{ width: 0 }}
-          animate={{ width: '100%' }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        />
-      </div>
-    </div>
-  );
-}
-
 export default function InstitutionDashboardPage() {
   const t = useTranslations('dashboard.home');
   const tCommon = useTranslations('common');
+  const tNav = useTranslations('nav');
 
   const institutionQuery = useMyInstitution();
   const campusesQuery = useCampuses(LIST_PARAMS);
@@ -285,8 +270,8 @@ export default function InstitutionDashboardPage() {
               <Link href={APP_ROUTES.INSTITUTION_PROFILE}>{t('editBranding')}</Link>
             </Button>
             <Button asChild className="rounded-xl">
-              <Link href={APP_ROUTES.INSTITUTION}>
-                {t('openInstitution')}
+              <Link href={APP_ROUTES.INSTITUTION_SETTINGS}>
+                {tNav('settings')}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -358,15 +343,15 @@ export default function InstitutionDashboardPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                <CapacityMeter
+                <DashboardCapacityMetric
                   label={t('students')}
                   value={institution.maxStudents}
-                  planCapacity={t('planCapacity')}
+                  hint={t('planCapacity')}
                 />
-                <CapacityMeter
+                <DashboardCapacityMetric
                   label={t('faculty')}
                   value={institution.maxFaculty}
-                  planCapacity={t('planCapacity')}
+                  hint={t('planCapacity')}
                 />
               </div>
             </div>
@@ -483,20 +468,16 @@ export default function InstitutionDashboardPage() {
                     </>
                   ) : upcomingEvents.length > 0 ? (
                     upcomingEvents.map((event) => (
-                      <div
+                      <DashboardInsightRow
                         key={event.id}
-                        className="rounded-xl border border-border/70 bg-muted/30 px-3 py-2.5 transition-colors hover:bg-muted/50"
-                      >
-                        <p className="text-label">{event.title}</p>
-                        <p className="mt-0.5 text-caption">
-                          {event.calendarName} ·{' '}
-                          {new Date(event.startDate).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </p>
-                      </div>
+                        title={event.title}
+                        subtitle={`${event.calendarName} · ${new Date(event.startDate).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}`}
+                        href={APP_ROUTES.INSTITUTION_CALENDAR}
+                      />
                     ))
                   ) : (
                     <DashboardPanelEmpty message={t('noUpcomingEvents')} />

@@ -1,5 +1,12 @@
 'use client';
 
+/**
+ * Dashboard template primitives — reference: institution/dashboard/page.tsx
+ *
+ * Layout rhythm uses `.page-shell` (32px vertical gap) from @learnova/ui globals.
+ * Pair with PageHeader, StatGrid/StatCard from @learnova/ui for full page structure.
+ */
+
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@learnova/ui';
 import { motion, type MotionProps } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
@@ -181,6 +188,38 @@ export function DashboardProgressMetric({
         />
       </div>
       {hint ? <p className="mt-2 text-caption">{hint}</p> : null}
+    </div>
+  );
+}
+
+/** Plan capacity / quota meter — institution hero sidebar */
+export function DashboardCapacityMetric({
+  label,
+  value,
+  hint,
+  percent = 100,
+}: {
+  label: string;
+  value: number;
+  hint?: string;
+  /** Visual fill; defaults to full bar for plan limits display */
+  percent?: number;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-background/75 p-4 backdrop-blur-sm">
+      <p className="text-meta">{label}</p>
+      <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-tight">
+        {value.toLocaleString()}
+      </p>
+      {hint ? <p className="mt-0.5 text-caption">{hint}</p> : null}
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+        <motion.div
+          className="h-full rounded-full bg-brand-gradient"
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </div>
     </div>
   );
 }

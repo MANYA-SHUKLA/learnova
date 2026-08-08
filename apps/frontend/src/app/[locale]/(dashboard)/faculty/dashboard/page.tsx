@@ -17,14 +17,12 @@ import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import {
   DashboardPage,
-  dashboardFadeUp,
-} from '@/components/dashboard/dashboard-template';
-import {
   DashboardPanel,
   DashboardQuickActions,
   DashboardTaskList,
+  dashboardFadeUp,
   type DashboardTaskItem,
-} from '@/components/dashboard/dashboard-panels';
+} from '@/components/dashboard';
 import {
   formatDueDate,
   formatSubmissionStatus,

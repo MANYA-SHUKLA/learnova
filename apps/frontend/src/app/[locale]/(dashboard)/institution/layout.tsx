@@ -12,7 +12,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { can } from '@/lib/auth/permissions';
 
 const NAV_ITEMS = [
-  { href: APP_ROUTES.INSTITUTION, labelKey: 'overview', exact: true },
+  { href: APP_ROUTES.INSTITUTION_DASHBOARD, labelKey: 'overview', exact: true },
   { href: APP_ROUTES.INSTITUTION_PROFILE, labelKey: 'profile' },
   { href: APP_ROUTES.INSTITUTION_CAMPUSES, labelKey: 'campuses' },
   { href: APP_ROUTES.INSTITUTION_SCHOOLS, labelKey: 'schools' },

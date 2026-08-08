@@ -9,13 +9,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DataTable,
   Input,
-  Skeleton,
+  PageHeader,
+  StatCard,
+  StatGrid,
 } from '@learnova/ui';
+import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
+import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { ErrorState } from '@/features/institution';
 import {
   formatAssignmentStatus,
   formatAssignmentType,
@@ -60,22 +65,17 @@ export default function FacultyAssignmentsPage() {
   const gradeMutation = useGradeSubmissionMutation();
 
   const rows = listQuery.data?.items ?? [];
+  const meta = listQuery.data?.meta;
   const dash = dashQuery.data;
   const pending = submissionsQuery.data?.items ?? [];
   const late = lateQuery.data?.items ?? [];
 
   return (
     <PermissionGate permission={PERMISSIONS.ASSIGNMENT_READ} enforce>
-      <div className="space-y-8">
-        <div>
-          <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-            {t('title')}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
-        </div>
+      <DashboardPage>
+        <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatGrid className="sm:grid-cols-2 xl:grid-cols-5">
           {[
             { label: t('stats.created'), value: dash?.assignmentsCreated },
             { label: t('stats.pending'), value: dash?.pendingReviews },
@@ -89,95 +89,145 @@ export default function FacultyAssignmentsPage() {
               value: dash ? `${Math.round(dash.submissionRate * 100)}%` : '—',
             },
           ].map((stat) => (
-            <Card key={stat.label} className="rounded-2xl border-border/80">
-              <CardHeader className="pb-2">
-                <CardDescription>{stat.label}</CardDescription>
-                <CardTitle className="text-2xl">
-                  {dashQuery.isLoading ? <Skeleton className="h-8 w-12" /> : (stat.value ?? '—')}
-                </CardTitle>
-              </CardHeader>
-            </Card>
+            <StatCard
+              key={stat.label}
+              label={stat.label}
+              value={stat.value ?? '—'}
+              loading={dashQuery.isLoading}
+              accent="primary"
+            />
           ))}
-        </div>
+        </StatGrid>
 
-        <Card className="rounded-2xl border-border/80">
-          <CardHeader className="gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <CardTitle className="text-base">{t('listTitle')}</CardTitle>
-              <CardDescription>{t('listDescription')}</CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Input
-                className="sm:w-56"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder={t('searchPlaceholder')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setSearch(q.trim());
-                    setPage(1);
-                  }
-                }}
-              />
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearch(q.trim());
-                  setPage(1);
-                }}
-              >
-                {t('search')}
-              </Button>
-            </div>
+        <Card className="directory-shell overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-card-title">{t('listTitle')}</CardTitle>
+            <CardDescription>{t('listDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             {listQuery.isError ? (
-              <ErrorState message={t('error')} />
-            ) : listQuery.isLoading ? (
-              <Skeleton className="h-40 w-full rounded-xl" />
-            ) : rows.length === 0 ? (
-              <EmptyState
-                illustration="inbox"
-                title={t('emptyTitle')}
-                description={t('emptyDescription')}
-              />
+              <ErrorState message={t('error')} onRetry={() => void listQuery.refetch()} />
             ) : (
-              <ul className="divide-y divide-border rounded-xl border">
-                {rows.map((row) => (
-                  <li
-                    key={row.id}
-                    className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
+              <DataTable
+                caption={t('listTitle')}
+                loading={listQuery.isLoading}
+                data={rows}
+                rowKey={(row) => row.id}
+                toolbar={
+                  <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+                    <Input
+                      className="rounded-xl sm:w-56"
+                      value={q}
+                      onChange={(e) => setQ(e.target.value)}
+                      placeholder={t('searchPlaceholder')}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setSearch(q.trim());
+                          setPage(1);
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="secondary"
+                      className="rounded-xl"
+                      onClick={() => {
+                        setSearch(q.trim());
+                        setPage(1);
+                      }}
+                    >
+                      {t('search')}
+                    </Button>
+                  </div>
+                }
+                emptyTitle={t('emptyTitle')}
+                emptyDescription={t('emptyDescription')}
+                pagination={
+                  meta
+                    ? {
+                        page: meta.page,
+                        totalPages: meta.totalPages,
+                        total: meta.total,
+                        hasNextPage: meta.hasNextPage,
+                        hasPrevPage: meta.hasPrevPage,
+                        onPageChange: setPage,
+                      }
+                    : undefined
+                }
+                columns={[
+                  {
+                    id: 'title',
+                    header: t('listTitle'),
+                    sortable: true,
+                    sortValue: (row) => row.title,
+                    cell: (row) => <span className="font-medium">{row.title}</span>,
+                  },
+                  {
+                    id: 'status',
+                    header: 'Status',
+                    cell: (row) => (
+                      <Badge variant="secondary">{formatAssignmentStatus(row.status)}</Badge>
+                    ),
+                  },
+                  {
+                    id: 'type',
+                    header: 'Type',
+                    cell: (row) => (
+                      <Badge variant="outline">{formatAssignmentType(row.assignmentType)}</Badge>
+                    ),
+                  },
+                  {
+                    id: 'due',
+                    header: t('due'),
+                    cell: (row) => (
+                      <span className="text-sm text-muted-foreground">
+                        {formatDueDate(row.dueDate)}
+                      </span>
+                    ),
+                  },
+                ]}
+                rowActions={(row) =>
+                  row.status === 'draft' ? (
+                    <Button
+                      size="sm"
+                      className="rounded-lg"
+                      disabled={publishMutation.isPending}
+                      onClick={() => void publishMutation.mutateAsync(row.id)}
+                    >
+                      {t('publish')}
+                    </Button>
+                  ) : null
+                }
+                mobileRow={(row) => (
+                  <Card className="rounded-xl">
+                    <CardContent className="space-y-3 p-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium">{row.title}</p>
                         <Badge variant="secondary">{formatAssignmentStatus(row.status)}</Badge>
-                        <Badge variant="outline">{formatAssignmentType(row.assignmentType)}</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {t('due')}: {formatDueDate(row.dueDate)}
                       </p>
-                    </div>
-                    {row.status === 'draft' ? (
-                      <Button
-                        size="sm"
-                        disabled={publishMutation.isPending}
-                        onClick={() => void publishMutation.mutateAsync(row.id)}
-                      >
-                        {t('publish')}
-                      </Button>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
+                      {row.status === 'draft' ? (
+                        <Button
+                          size="sm"
+                          disabled={publishMutation.isPending}
+                          onClick={() => void publishMutation.mutateAsync(row.id)}
+                        >
+                          {t('publish')}
+                        </Button>
+                      ) : null}
+                    </CardContent>
+                  </Card>
+                )}
+              />
             )}
           </CardContent>
         </Card>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="rounded-2xl border-border/80">
+          <Card className="rounded-xl border-border/80 shadow-soft-md">
             <CardHeader>
-              <CardTitle className="text-base">{t('pendingTitle')}</CardTitle>
+              <CardTitle className="text-card-title">{t('pendingTitle')}</CardTitle>
               <CardDescription>{t('pendingDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -191,9 +241,7 @@ export default function FacultyAssignmentsPage() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <Badge variant="outline">{formatSubmissionStatus(sub.status)}</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        #{sub.attemptNumber}
-                      </span>
+                      <span className="text-xs text-muted-foreground">#{sub.attemptNumber}</span>
                     </div>
                     <Input
                       type="number"
@@ -205,6 +253,7 @@ export default function FacultyAssignmentsPage() {
                     />
                     <Button
                       size="sm"
+                      className="rounded-xl"
                       disabled={gradeMutation.isPending || !gradeMarks[sub.id]}
                       onClick={() =>
                         void gradeMutation.mutateAsync({
@@ -225,9 +274,9 @@ export default function FacultyAssignmentsPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-border/80">
+          <Card className="rounded-xl border-border/80 shadow-soft-md">
             <CardHeader>
-              <CardTitle className="text-base">{t('lateTitle')}</CardTitle>
+              <CardTitle className="text-card-title">{t('lateTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {late.length === 0 ? (
@@ -246,7 +295,7 @@ export default function FacultyAssignmentsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </DashboardPage>
     </PermissionGate>
   );
 }

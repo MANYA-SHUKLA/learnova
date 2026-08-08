@@ -9,12 +9,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Skeleton,
+  DataTable,
+  PageHeader,
+  StatCard,
+  StatGrid,
 } from '@learnova/ui';
+import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
+import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { ErrorState } from '@/features/institution';
 import {
   formatAssignmentStatus,
   formatAssignmentType,
@@ -47,16 +52,10 @@ export default function StudentAssignmentsPage() {
 
   return (
     <PermissionGate permission={PERMISSIONS.ASSIGNMENT_READ} enforce>
-      <div className="space-y-8">
-        <div>
-          <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-            {t('title')}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
-        </div>
+      <DashboardPage>
+        <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatGrid className="sm:grid-cols-2 xl:grid-cols-5">
           {[
             { label: t('stats.upcoming'), value: dash?.upcoming },
             { label: t('stats.submitted'), value: dash?.submitted },
@@ -64,86 +63,119 @@ export default function StudentAssignmentsPage() {
             { label: t('stats.late'), value: dash?.late },
             { label: t('stats.grades'), value: dash?.gradesReceived },
           ].map((stat) => (
-            <Card key={stat.label} className="rounded-2xl border-border/80">
-              <CardHeader className="pb-2">
-                <CardDescription>{stat.label}</CardDescription>
-                <CardTitle className="text-2xl">
-                  {dashQuery.isLoading ? <Skeleton className="h-8 w-10" /> : (stat.value ?? '—')}
-                </CardTitle>
-              </CardHeader>
-            </Card>
+            <StatCard
+              key={stat.label}
+              label={stat.label}
+              value={stat.value ?? '—'}
+              loading={dashQuery.isLoading}
+              accent="primary"
+            />
           ))}
-        </div>
+        </StatGrid>
 
-        <Card className="rounded-2xl border-border/80">
-          <CardHeader>
-            <CardTitle className="text-base">{t('listTitle')}</CardTitle>
+        <Card className="directory-shell overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-card-title">{t('listTitle')}</CardTitle>
             <CardDescription>{t('listDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             {listQuery.isError ? (
-              <ErrorState message={t('error')} />
-            ) : listQuery.isLoading ? (
-              <Skeleton className="h-40 w-full rounded-xl" />
-            ) : rows.length === 0 ? (
-              <EmptyState
-                illustration="inbox"
-                title={t('emptyTitle')}
-                description={t('emptyDescription')}
-              />
+              <ErrorState message={t('error')} onRetry={() => void listQuery.refetch()} />
             ) : (
-              <ul className="divide-y divide-border rounded-xl border">
-                {rows.map((row) => (
-                  <li
-                    key={row.id}
-                    className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
+              <DataTable
+                caption={t('listTitle')}
+                loading={listQuery.isLoading}
+                data={rows}
+                rowKey={(row) => row.id}
+                emptyTitle={t('emptyTitle')}
+                emptyDescription={t('emptyDescription')}
+                pagination={
+                  meta
+                    ? {
+                        page: meta.page,
+                        totalPages: meta.totalPages,
+                        total: meta.total,
+                        hasNextPage: meta.hasNextPage,
+                        hasPrevPage: meta.hasPrevPage,
+                        onPageChange: setPage,
+                      }
+                    : undefined
+                }
+                columns={[
+                  {
+                    id: 'title',
+                    header: t('listTitle'),
+                    sortable: true,
+                    sortValue: (row) => row.title,
+                    cell: (row) => (
+                      <Link
+                        href={`${APP_ROUTES.STUDENT_ASSIGNMENTS}/${row.id}`}
+                        className="font-medium hover:text-primary"
+                      >
+                        {row.title}
+                      </Link>
+                    ),
+                  },
+                  {
+                    id: 'status',
+                    header: 'Status',
+                    cell: (row) => (
+                      <Badge variant="secondary">{formatAssignmentStatus(row.status)}</Badge>
+                    ),
+                  },
+                  {
+                    id: 'type',
+                    header: 'Type',
+                    cell: (row) => (
+                      <Badge variant="outline">{formatAssignmentType(row.assignmentType)}</Badge>
+                    ),
+                  },
+                  {
+                    id: 'due',
+                    header: t('due'),
+                    sortable: true,
+                    sortValue: (row) => row.dueDate ?? '',
+                    cell: (row) => (
+                      <span className="text-sm text-muted-foreground">
+                        {formatDueDate(row.dueDate)}
+                      </span>
+                    ),
+                  },
+                  {
+                    id: 'marks',
+                    header: t('marks'),
+                    cell: (row) => <span className="tabular-nums">{row.totalMarks}</span>,
+                  },
+                ]}
+                rowActions={(row) => (
+                  <Button asChild size="sm" className="rounded-lg">
+                    <Link href={`${APP_ROUTES.STUDENT_ASSIGNMENTS}/${row.id}`}>{t('open')}</Link>
+                  </Button>
+                )}
+                mobileRow={(row) => (
+                  <Card className="rounded-xl">
+                    <CardContent className="space-y-3 p-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium">{row.title}</p>
                         <Badge variant="secondary">{formatAssignmentStatus(row.status)}</Badge>
-                        <Badge variant="outline">{formatAssignmentType(row.assignmentType)}</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {t('due')}: {formatDueDate(row.dueDate)} · {row.totalMarks} {t('marks')}
                       </p>
-                    </div>
-                    <Button asChild size="sm">
-                      <Link href={`${APP_ROUTES.STUDENT_ASSIGNMENTS}/${row.id}`}>
-                        {t('open')}
-                      </Link>
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+                      <Button asChild size="sm" variant="outline" className="w-full rounded-xl">
+                        <Link href={`${APP_ROUTES.STUDENT_ASSIGNMENTS}/${row.id}`}>
+                          {t('open')}
+                          <ArrowRight className="size-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              />
             )}
-
-            {meta && meta.totalPages > 1 ? (
-              <div className="mt-4 flex items-center justify-between">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!meta.hasPrevPage}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  {t('previous')}
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                  {meta.page} / {meta.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!meta.hasNextPage}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  {t('next')}
-                </Button>
-              </div>
-            ) : null}
           </CardContent>
         </Card>
-      </div>
+      </DashboardPage>
     </PermissionGate>
   );
 }

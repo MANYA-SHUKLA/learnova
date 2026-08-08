@@ -9,24 +9,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DataTable,
   Input,
-  Skeleton,
+  PageHeader,
+  StatCard,
+  StatGrid,
 } from '@learnova/ui';
-import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  Download,
-  Plus,
-  Search,
-  Upload,
-} from 'lucide-react';
+import { ArrowRight, Download, Plus, Search, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
+import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
-import {
-  EmptyState,
-  ErrorState,
-} from '@/features/institution';
+import { ErrorState } from '@/features/institution';
 import {
   formatCourseCategory,
   formatCourseDifficulty,
@@ -40,6 +34,7 @@ import {
 } from '@/features/course';
 import type { CourseStatus } from '@/features/course';
 import { Link } from '@/lib/i18n/routing';
+import { cn } from '@/lib/utils';
 
 const STATUS_FILTERS: Array<CourseStatus | 'all'> = [
   'all',
@@ -82,61 +77,43 @@ export default function CourseListPage() {
   const meta = listQuery.data?.meta;
   const stats = statsQuery.data;
 
-  const toggleAll = () => {
-    if (selected.length === rows.length) setSelected([]);
-    else setSelected(rows.map((r) => r.id));
-  };
-
-  const toggleOne = (id: string) => {
-    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  };
-
   return (
     <PermissionGate permission={PERMISSIONS.COURSE_READ} enforce>
-      <div className="space-y-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-primary">{t('eyebrow')}</p>
-            <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-              {t('title')}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t('description')}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline">
-              <Link href={APP_ROUTES.INSTITUTION_COURSES_IMPORT}>
-                <Upload className="size-4" />
-                {tCommon('import')}
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={APP_ROUTES.INSTITUTION_COURSES_EXPORT}>
-                <Download className="size-4" />
-                {tCommon('export')}
-              </Link>
-            </Button>
-            <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
-              <Button asChild>
-                <Link href={APP_ROUTES.INSTITUTION_COURSES_CREATE}>
-                  <Plus className="size-4" />
-                  {t('addCourse')}
+      <DashboardPage>
+        <PageHeader
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
+          actions={
+            <>
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link href={APP_ROUTES.INSTITUTION_COURSES_IMPORT}>
+                  <Upload className="size-4" />
+                  {tCommon('import')}
                 </Link>
               </Button>
-            </PermissionGate>
-          </div>
-        </div>
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link href={APP_ROUTES.INSTITUTION_COURSES_EXPORT}>
+                  <Download className="size-4" />
+                  {tCommon('export')}
+                </Link>
+              </Button>
+              <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
+                <Button asChild className="rounded-xl">
+                  <Link href={APP_ROUTES.INSTITUTION_COURSES_CREATE}>
+                    <Plus className="size-4" />
+                    {t('addCourse')}
+                  </Link>
+                </Button>
+              </PermissionGate>
+            </>
+          }
+        />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <StatGrid className="sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
           {statsQuery.isLoading
             ? Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="rounded-2xl border-border/80">
-                  <CardContent className="p-4">
-                    <Skeleton className="h-3 w-16" />
-                    <Skeleton className="mt-3 h-8 w-12" />
-                  </CardContent>
-                </Card>
+                <StatCard key={i} label="…" value="—" loading />
               ))
             : [
                 { label: t('stats.total'), value: stats?.total ?? 0 },
@@ -145,256 +122,259 @@ export default function CourseListPage() {
                 { label: t('stats.review'), value: stats?.review ?? 0 },
                 { label: t('stats.archived'), value: stats?.archived ?? 0 },
                 { label: t('stats.programs'), value: stats?.programs ?? 0 },
-              ].map((card, i) => (
-                <motion.div
+              ].map((card) => (
+                <StatCard
                   key={card.label}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                >
-                  <Card className="rounded-2xl border-border/80">
-                    <CardContent className="p-4">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {card.label}
-                      </p>
-                      <p className="mt-2 font-display text-2xl font-semibold tabular-nums">
-                        {card.value.toLocaleString()}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                  label={card.label}
+                  value={card.value.toLocaleString()}
+                  accent="primary"
+                />
               ))}
-        </div>
+        </StatGrid>
 
-        <Card className="rounded-2xl border-border/80">
+        <Card className="directory-shell overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t('catalog')}</CardTitle>
+            <CardTitle className="text-card-title">{t('catalog')}</CardTitle>
             <CardDescription>{t('catalogDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-col gap-3 lg:flex-row">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder={t('searchPlaceholder')}
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') setSearch(q);
-                  }}
-                  className="pl-9"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button type="button" onClick={() => setSearch(q)}>
-                  {tCommon('search')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setQ('');
-                    setSearch('');
-                    setStatus('all');
-                    setPage(1);
-                  }}
-                >
-                  Clear
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {STATUS_FILTERS.map((st) => (
-                <Button
-                  key={st}
-                  type="button"
-                  variant={status === st ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setStatus(st);
-                    setPage(1);
-                  }}
-                >
-                  {st === 'all' ? 'All' : formatCourseStatus(st as CourseStatus)}
-                </Button>
-              ))}
-            </div>
-
-            {selected.length > 0 ? (
-              <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-muted/30 p-3">
-                <p className="text-sm font-medium">
-                  {t('bulkSelected', { count: selected.length })}
-                </p>
-                <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkPublish.isPending}
-                    onClick={() => {
-                      void bulkPublish.mutateAsync(selected).then(() => setSelected([]));
-                    }}
-                  >
-                    {t('bulkPublish')}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkUnpublish.isPending}
-                    onClick={() => {
-                      void bulkUnpublish.mutateAsync(selected).then(() => setSelected([]));
-                    }}
-                  >
-                    {t('bulkUnpublish')}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkArchive.isPending}
-                    onClick={() => {
-                      void bulkArchive.mutateAsync(selected).then(() => setSelected([]));
-                    }}
-                  >
-                    {t('bulkArchive')}
-                  </Button>
-                </PermissionGate>
-              </div>
-            ) : null}
-
-            {listQuery.isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : listQuery.isError ? (
+            {listQuery.isError ? (
               <ErrorState
                 message={listQuery.error instanceof Error ? listQuery.error.message : t('loadError')}
                 onRetry={() => void listQuery.refetch()}
               />
-            ) : rows.length === 0 ? (
-              <EmptyState
-                illustration="courses"
-                title={t('emptyTitle')}
-                description={t('emptyDescription')}
-                action={
+            ) : (
+              <DataTable
+                caption={t('catalog')}
+                loading={listQuery.isLoading}
+                data={rows}
+                rowKey={(row) => row.id}
+                selectable
+                selectedIds={selected}
+                onSelectionChange={setSelected}
+                bulkActions={
                   <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
-                    <Button asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl"
+                      disabled={bulkPublish.isPending}
+                      onClick={() => void bulkPublish.mutateAsync(selected).then(() => setSelected([]))}
+                    >
+                      {t('bulkPublish')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl"
+                      disabled={bulkUnpublish.isPending}
+                      onClick={() => void bulkUnpublish.mutateAsync(selected).then(() => setSelected([]))}
+                    >
+                      {t('bulkUnpublish')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      className="rounded-xl"
+                      disabled={bulkArchive.isPending}
+                      onClick={() => void bulkArchive.mutateAsync(selected).then(() => setSelected([]))}
+                    >
+                      {t('bulkArchive')}
+                    </Button>
+                  </PermissionGate>
+                }
+                filters={
+                  <div className="flex flex-wrap gap-2">
+                    {STATUS_FILTERS.map((st) => (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => {
+                          setStatus(st);
+                          setPage(1);
+                        }}
+                        className={cn(
+                          'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                          status === st
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-border text-muted-foreground hover:bg-muted/60',
+                        )}
+                      >
+                        {st === 'all' ? tCommon('all') : formatCourseStatus(st as CourseStatus)}
+                      </button>
+                    ))}
+                  </div>
+                }
+                toolbar={
+                  <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+                    <div className="relative min-w-0 flex-1 sm:w-64">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        className="rounded-xl pl-9"
+                        placeholder={t('searchPlaceholder')}
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setSearch(q.trim());
+                            setPage(1);
+                          }
+                        }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="rounded-xl"
+                      onClick={() => {
+                        setSearch(q.trim());
+                        setPage(1);
+                      }}
+                    >
+                      {tCommon('search')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-xl"
+                      onClick={() => {
+                        setQ('');
+                        setSearch('');
+                        setStatus('all');
+                        setPage(1);
+                      }}
+                    >
+                      {tCommon('clear')}
+                    </Button>
+                  </div>
+                }
+                emptyTitle={t('emptyTitle')}
+                emptyDescription={t('emptyDescription')}
+                emptyAction={
+                  <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
+                    <Button asChild className="rounded-xl">
                       <Link href={APP_ROUTES.INSTITUTION_COURSES_CREATE}>{t('addCourse')}</Link>
                     </Button>
                   </PermissionGate>
                 }
+                pagination={
+                  meta
+                    ? {
+                        page: meta.page,
+                        totalPages: meta.totalPages,
+                        total: meta.total,
+                        hasNextPage: meta.hasNextPage,
+                        hasPrevPage: meta.hasPrevPage,
+                        onPageChange: setPage,
+                      }
+                    : undefined
+                }
+                columns={[
+                  {
+                    id: 'code',
+                    header: t('table.code'),
+                    sortable: true,
+                    sortValue: (row) => row.courseCode,
+                    cell: (row) => <span className="font-mono text-xs">{row.courseCode}</span>,
+                  },
+                  {
+                    id: 'title',
+                    header: t('table.title'),
+                    sortable: true,
+                    sortValue: (row) => row.title,
+                    cell: (row) => (
+                      <Link
+                        href={`${APP_ROUTES.INSTITUTION_COURSES}/${row.id}`}
+                        className="font-medium hover:text-primary"
+                      >
+                        {row.title}
+                      </Link>
+                    ),
+                  },
+                  {
+                    id: 'category',
+                    header: t('table.category'),
+                    cell: (row) => (
+                      <span className="text-muted-foreground">{formatCourseCategory(row.category)}</span>
+                    ),
+                  },
+                  {
+                    id: 'difficulty',
+                    header: t('table.difficulty'),
+                    cell: (row) => (
+                      <Badge variant="outline" className="text-xs">
+                        {formatCourseDifficulty(row.difficulty)}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    id: 'credits',
+                    header: t('table.credits'),
+                    cell: (row) => <span className="tabular-nums">{row.credits}</span>,
+                  },
+                  {
+                    id: 'status',
+                    header: t('table.status'),
+                    cell: (row) => (
+                      <Badge
+                        variant={
+                          row.status === 'published'
+                            ? 'default'
+                            : row.status === 'draft'
+                              ? 'secondary'
+                              : 'outline'
+                        }
+                        className="text-xs"
+                      >
+                        {formatCourseStatus(row.status)}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    id: 'visibility',
+                    header: t('table.visibility'),
+                    cell: (row) => (
+                      <span className="text-xs text-muted-foreground">
+                        {formatCourseVisibility(row.visibility)}
+                      </span>
+                    ),
+                  },
+                ]}
+                rowActions={(row) => (
+                  <Button asChild size="sm" variant="ghost" className="rounded-lg">
+                    <Link href={`${APP_ROUTES.INSTITUTION_COURSES}/${row.id}`}>
+                      {tCommon('view')}
+                      <ArrowRight className="size-4" />
+                    </Link>
+                  </Button>
+                )}
+                mobileRow={(row) => (
+                  <Card className="rounded-xl">
+                    <CardContent className="space-y-3 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-medium">{row.title}</p>
+                          <p className="font-mono text-xs text-muted-foreground">{row.courseCode}</p>
+                        </div>
+                        <Badge variant="secondary">{formatCourseStatus(row.status)}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {formatCourseCategory(row.category)} · {row.credits} credits
+                      </p>
+                      <Button asChild size="sm" variant="outline" className="w-full rounded-xl">
+                        <Link href={`${APP_ROUTES.INSTITUTION_COURSES}/${row.id}`}>
+                          {tCommon('view')}
+                          <ArrowRight className="size-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
               />
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="p-2 text-left">
-                        <input
-                          type="checkbox"
-                          checked={selected.length === rows.length && rows.length > 0}
-                          onChange={toggleAll}
-                        />
-                      </th>
-                      <th className="p-2 text-left font-medium">{t('table.code')}</th>
-                      <th className="p-2 text-left font-medium">{t('table.title')}</th>
-                      <th className="p-2 text-left font-medium">{t('table.category')}</th>
-                      <th className="p-2 text-left font-medium">{t('table.difficulty')}</th>
-                      <th className="p-2 text-left font-medium">{t('table.credits')}</th>
-                      <th className="p-2 text-left font-medium">{t('table.status')}</th>
-                      <th className="p-2 text-left font-medium">{t('table.visibility')}</th>
-                      <th className="p-2 text-right font-medium">{tCommon('actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row) => (
-                      <tr key={row.id} className="border-b border-border/50 hover:bg-muted/20">
-                        <td className="p-2">
-                          <input
-                            type="checkbox"
-                            checked={selected.includes(row.id)}
-                            onChange={() => toggleOne(row.id)}
-                          />
-                        </td>
-                        <td className="p-2 font-mono text-xs">{row.courseCode}</td>
-                        <td className="p-2 font-medium">{row.title}</td>
-                        <td className="p-2 text-muted-foreground">{formatCourseCategory(row.category)}</td>
-                        <td className="p-2">
-                          <Badge variant="outline" className="text-xs">
-                            {formatCourseDifficulty(row.difficulty)}
-                          </Badge>
-                        </td>
-                        <td className="p-2 tabular-nums">{row.credits}</td>
-                        <td className="p-2">
-                          <Badge
-                            variant={
-                              row.status === 'published'
-                                ? 'default'
-                                : row.status === 'draft'
-                                  ? 'secondary'
-                                  : 'outline'
-                            }
-                            className="text-xs"
-                          >
-                            {formatCourseStatus(row.status)}
-                          </Badge>
-                        </td>
-                        <td className="p-2 text-xs text-muted-foreground">
-                          {formatCourseVisibility(row.visibility)}
-                        </td>
-                        <td className="p-2 text-right">
-                          <Button asChild size="sm" variant="ghost">
-                            <Link href={`${APP_ROUTES.INSTITUTION_COURSES}/${row.id}`}>
-                              <ArrowRight className="size-4" />
-                            </Link>
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             )}
-
-            {meta && meta.totalPages > 1 ? (
-              <div className="flex items-center justify-between border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground">
-                  {t('pagination.showing', {
-                    start: (meta.page - 1) * meta.limit + 1,
-                    end: Math.min(meta.page * meta.limit, meta.total),
-                    total: meta.total,
-                  })}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={!meta.hasPrevPage}
-                    onClick={() => setPage((p) => p - 1)}
-                  >
-                    {tCommon('previous')}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={!meta.hasNextPage}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
-                    {tCommon('next')}
-                  </Button>
-                </div>
-              </div>
-            ) : null}
           </CardContent>
         </Card>
-      </div>
+      </DashboardPage>
     </PermissionGate>
   );
 }

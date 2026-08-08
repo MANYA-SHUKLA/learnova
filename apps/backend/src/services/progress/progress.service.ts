@@ -26,6 +26,7 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { progressRepository } from '../../repositories/progress/index.js';
+import { facultyCanAccessStudent } from '../access/faculty-scope.js';
 import {
   clampPercent,
   computeCompletionPercentage,
@@ -144,6 +145,16 @@ export class ProgressService {
         deletedAt: null,
       }).exec();
       if (!student) throw new NotFoundError('Student not found');
+
+      if (actor.role === 'faculty') {
+        const allowed = await facultyCanAccessStudent(
+          institutionId,
+          actor.email,
+          String(student._id),
+        );
+        if (!allowed) throw new ForbiddenError('Not allowed to access this student record');
+      }
+
       return String(student._id);
     }
 
@@ -1285,6 +1296,14 @@ export class ProgressService {
 
     if (actor.role === 'student') {
       studentId = await this.resolveStudentId(actor, institutionId);
+    } else if (actor.role === 'faculty') {
+      if (query.courseId) {
+        await this.ensureFacultyCourseAccess(actor, institutionId, query.courseId);
+      } else if (query.studentId) {
+        studentId = await this.resolveStudentId(actor, institutionId, query.studentId);
+      } else {
+        throw new ForbiddenError('courseId or studentId required for faculty activity queries');
+      }
     } else if (query.studentId) {
       studentId = query.studentId;
     }
@@ -1378,7 +1397,7 @@ export class ProgressService {
 
   async institutionDashboard(actor: ActorContext) {
     const institutionId = requireTenant(actor);
-    if (actor.role === 'student') {
+    if (actor.role === 'student' || actor.role === 'faculty') {
       throw new ForbiddenError('Access denied');
     }
     return progressRepository.getInstitutionAnalytics(institutionId);
@@ -1386,6 +1405,9 @@ export class ProgressService {
 
   async getStats(actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (actor.role === 'faculty') {
+      throw new ForbiddenError('Access denied');
+    }
     const studentId =
       actor.role === 'student'
         ? await this.resolveStudentId(actor, institutionId)
@@ -1395,6 +1417,9 @@ export class ProgressService {
 
   async search(q: string, page: number, limit: number, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (actor.role === 'faculty') {
+      throw new ForbiddenError('Access denied');
+    }
     const studentId =
       actor.role === 'student'
         ? await this.resolveStudentId(actor, institutionId)

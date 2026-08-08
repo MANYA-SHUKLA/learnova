@@ -103,7 +103,7 @@ const NAV_GROUPS: NavGroup[] = [
     id: 'institution',
     items: [
       { id: 'dashboard', href: APP_ROUTES.INSTITUTION_DASHBOARD, icon: LayoutDashboard, exact: true },
-      { id: 'institution', href: APP_ROUTES.INSTITUTION, icon: Building2, exact: true },
+      { id: 'institution', href: APP_ROUTES.INSTITUTION_PROFILE, icon: Building2, exact: true },
       { id: 'departments', href: APP_ROUTES.INSTITUTION_DEPARTMENTS, icon: Network },
       { id: 'programs', href: APP_ROUTES.INSTITUTION_PROGRAMS, icon: BookOpen },
       { id: 'academicYears', href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, icon: CalendarRange },

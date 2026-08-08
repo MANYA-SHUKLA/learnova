@@ -29,7 +29,7 @@ export function DashboardPanel({
   className?: string;
 }) {
   return (
-    <Card className={cn('overflow-hidden', className)}>
+    <Card className={cn('overflow-hidden rounded-xl border-border/80 shadow-soft-md', className)}>
       <div className="flex items-start justify-between gap-3 border-b border-border/60 px-5 py-4 sm:px-6">
         <div>
           <h2 className="text-section-title text-foreground">{title}</h2>
