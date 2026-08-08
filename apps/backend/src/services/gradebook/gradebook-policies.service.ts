@@ -13,7 +13,6 @@ import type {
 } from '@learnova/validation';
 import type { GradeVersionComparison } from '@learnova/types';
 import { CourseGradeSummaryModel } from '../../models/course-grade-summary.model.js';
-import { GradebookEntryModel } from '../../models/gradebook-entry.model.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { StudentModel } from '../../models/student.model.js';
 import { eventBus } from '../../events/index.js';

@@ -6,21 +6,17 @@
 import '../config/load-env.js';
 import mongoose from 'mongoose';
 import { connectMongo, disconnectMongo } from '../database/index.js';
-import * as models from '../models/index.js';
+import '../models/index.js';
 
 async function main() {
   await connectMongo();
-  const modelExports = Object.values(models).filter(
-    (value): value is mongoose.Model<unknown> =>
-      typeof value === 'function' &&
-      'syncIndexes' in value &&
-      typeof (value as mongoose.Model<unknown>).syncIndexes === 'function',
-  );
 
-  console.log(`Syncing indexes for ${modelExports.length} models…\n`);
+  const modelNames = Object.keys(mongoose.models);
+  console.log(`Syncing indexes for ${modelNames.length} models…\n`);
 
-  for (const model of modelExports) {
-    const name = model.modelName;
+  for (const name of modelNames.sort()) {
+    const model = mongoose.models[name];
+    if (!model) continue;
     try {
       await model.syncIndexes();
       console.log(`  ${name}: OK`);
