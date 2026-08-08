@@ -5,6 +5,9 @@
 export {
   dashboardPathForRole as dashboardPathForRoleCookie,
   isPathAllowedForRole,
-  parseActiveRole as isActiveRole,
+  parseActiveRole,
   requiredRoleForPath,
 } from '@learnova/shared';
+
+/** Cookie role parser alias for middleware */
+export { parseActiveRole as isActiveRole } from '@learnova/shared';

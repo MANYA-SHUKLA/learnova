@@ -13,9 +13,6 @@ export function parseActiveRole(value: string | null | undefined): ActiveRole | 
   return ACTIVE_ROLE_VALUES.includes(value as ActiveRole) ? (value as ActiveRole) : null;
 }
 
-/** @deprecated Use parseActiveRole — kept for frontend middleware alias */
-export const isActiveRole = parseActiveRole;
-
 export function requiredRoleForPath(pathWithoutLocale: string): ActiveRole | null {
   const normalized = pathWithoutLocale === '' ? '/' : pathWithoutLocale;
   if (normalized === APP_ROUTES.INSTITUTION || normalized.startsWith(`${APP_ROUTES.INSTITUTION}/`)) {
