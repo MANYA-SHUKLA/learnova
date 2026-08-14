@@ -58,6 +58,7 @@ function VerifyEmailContent() {
 
   return (
     <AuthCardShell
+      brand="company"
       icon={MailCheck}
       title={t('title')}
       description={status === 'loading' ? tCommon('loading') : t('description')}
@@ -91,7 +92,7 @@ function VerifyEmailContent() {
 
 function VerifyFallback() {
   return (
-    <AuthCardShell icon={MailCheck} title="…" description="">
+    <AuthCardShell brand="company" icon={MailCheck} title="…" description="">
       <CardContent className="flex min-h-[200px] items-center justify-center py-10">
         <Spinner size="lg" />
       </CardContent>

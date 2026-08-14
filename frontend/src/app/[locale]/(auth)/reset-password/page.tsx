@@ -76,7 +76,7 @@ function ResetPasswordForm() {
 
   if (!tokenFromUrl) {
     return (
-      <AuthCardShell icon={LockKeyhole} title={tCommon('error')} description={t('description')}>
+      <AuthCardShell brand="company" icon={LockKeyhole} title={tCommon('error')} description={t('description')}>
         <CardFooter className={authFooterClassName}>
           <AuthButtonMotion>
             <Button asChild className={authPrimaryButtonClassName}>
@@ -96,7 +96,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <AuthCardShell icon={LockKeyhole} title={t('title')} description={t('description')}>
+    <AuthCardShell brand="company" icon={LockKeyhole} title={t('title')} description={t('description')}>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className={authContentClassName}>
           <input type="hidden" {...register('token')} />
@@ -173,7 +173,7 @@ function ResetPasswordForm() {
 
 function ResetFallback() {
   return (
-    <AuthCardShell icon={LockKeyhole} title="…" description="">
+    <AuthCardShell brand="company" icon={LockKeyhole} title="…" description="">
       <CardContent className="flex min-h-[200px] items-center justify-center py-10">
         <Spinner size="lg" />
       </CardContent>
