@@ -1168,6 +1168,10 @@ class PracticeLabService {
 
     await this.assertStudentEnrolled(studentId, String(lab.courseId), institutionId);
 
+    if (!input.runExecutionId) {
+      throw new ValidationError('Run your code successfully before submitting');
+    }
+
     await this.assertVerifiedRunBeforeSubmit({
       institutionId,
       studentId,
