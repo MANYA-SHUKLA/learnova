@@ -21,7 +21,6 @@ import {
   type LearningBookmarkDocument,
 } from '../../models/learning-bookmark.model.js';
 import { LearningNoteModel, type LearningNoteDocument } from '../../models/learning-note.model.js';
-import { LabProgressModel } from '../../models/lab-progress.model.js';
 import {
   LearningActivityModel,
   type LearningActivityDocument,
@@ -614,14 +613,6 @@ export class ProgressRepository {
       ModuleProgressModel.countDocuments({ ...match, status: 'completed' }).exec(),
     ]);
 
-    const [labTimeAgg] = await LabProgressModel.aggregate([
-      { $match: match },
-      { $group: { _id: null, totalSeconds: { $sum: '$timeSpentSeconds' } } },
-    ]).exec();
-    const labMinutes = Math.round(((labTimeAgg?.totalSeconds ?? 0) / 60) * 10) / 10;
-    const courseMinutes = Math.round(((courseAgg?.totalMinutes ?? 0) / 60) * 10) / 10;
-    const combinedMinutes = Math.round((courseMinutes + labMinutes) * 10) / 10;
-
     const continueLearning = await CourseProgressModel.find({
       ...match,
       status: { $in: ['in_progress', 'paused'] },
@@ -633,7 +624,7 @@ export class ProgressRepository {
     return {
       coursesInProgress: courseAgg?.coursesInProgress ?? 0,
       completedCourses: courseAgg?.completedCourses ?? 0,
-      hoursLearned: combinedMinutes,
+      hoursLearned: Math.round(((courseAgg?.totalMinutes ?? 0) / 60) * 10) / 10,
       lessonsCompleted,
       modulesCompleted,
       bookmarks: courseAgg?.bookmarks ?? 0,
