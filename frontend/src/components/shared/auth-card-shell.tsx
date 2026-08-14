@@ -9,6 +9,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@learnova/ui';
 import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { CompanyLogo } from '@/components/layout/company-logo';
 import { cn } from '@/lib/utils';
 
 export function AuthCardShell({
@@ -18,6 +19,7 @@ export function AuthCardShell({
   children,
   maxWidthClass = 'max-w-md',
   className,
+  brand = 'icon',
 }: {
   icon: LucideIcon;
   title: string;
@@ -26,6 +28,8 @@ export function AuthCardShell({
   children: ReactNode;
   maxWidthClass?: string;
   className?: string;
+  /** Company mark on auth pages; icon for in-app password flows */
+  brand?: 'company' | 'icon';
 }) {
   return (
     <div
@@ -58,11 +62,20 @@ export function AuthCardShell({
           >
             <CardHeader className="space-y-4 pb-2 pt-8 text-center">
               <motion.div
-                className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110"
-                whileHover={{ rotate: [-2, 2, 0], scale: 1.08 }}
+                className={cn(
+                  'mx-auto flex items-center justify-center transition-transform duration-300 group-hover:scale-110',
+                  brand === 'company'
+                    ? 'rounded-2xl bg-primary/5 p-3'
+                    : 'size-14 rounded-2xl bg-primary/10 text-primary',
+                )}
+                whileHover={{ rotate: brand === 'company' ? 0 : [-2, 2, 0], scale: 1.08 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 14 }}
               >
-                <Icon className="size-6" strokeWidth={1.75} />
+                {brand === 'company' ? (
+                  <CompanyLogo href={undefined} size="lg" showName={false} />
+                ) : (
+                  <Icon className="size-6" strokeWidth={1.75} />
+                )}
               </motion.div>
               <div className="space-y-1.5">
                 <CardTitle className="font-display text-2xl tracking-tight">{title}</CardTitle>

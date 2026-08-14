@@ -8,12 +8,12 @@ import { InstitutionMark } from '@/components/institution/institution-mark';
 interface LogoProps {
   collapsed?: boolean;
   href: string;
-  branding?: InstitutionBranding | null;
+  branding: InstitutionBranding | null | undefined;
   className?: string;
 }
 
 export function Logo({ collapsed = false, href, branding, className }: LogoProps) {
-  const label = branding?.name ?? 'Learnova';
+  const label = branding?.name ?? branding?.shortName ?? 'Institution';
 
   return (
     <Link
