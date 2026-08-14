@@ -118,6 +118,8 @@ export const APP_ROUTES = {
   INSTITUTION_PRACTICE_LAB_DETAIL: '/institution/practice-labs/:id',
   INSTITUTION_PRACTICE_LAB_PROBLEMS: '/institution/practice-labs/:id/problems',
   FACULTY_PRACTICE_LABS: '/faculty/practice-labs',
+  FACULTY_PRACTICE_LABS_CREATE: '/faculty/practice-labs/create',
+  FACULTY_PRACTICE_LAB_PROBLEMS: '/faculty/practice-labs/:id/problems',
   STUDENT_PRACTICE_LABS: '/student/practice-labs',
   STUDENT_PRACTICE_PROBLEM: '/student/practice-labs/:problemId',
   INSTITUTION_PROJECTS: '/institution/projects',

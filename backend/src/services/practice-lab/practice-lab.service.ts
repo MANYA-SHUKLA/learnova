@@ -53,6 +53,7 @@ import {
   labActivityRef,
 } from '../coding-engine/index.js';
 import { outputsMatch } from '@learnova/shared';
+import { facultyCanAccessCourse } from '../access/faculty-scope.js';
 import {
   ACTIVE_ENROLLMENT_STATUSES,
   canTransitionStatus,
@@ -543,6 +544,10 @@ class PracticeLabService {
     const institutionId = requireTenant(actor);
     if (actor.role === 'student') throw new ForbiddenError('Students cannot create labs');
     await this.assertCourseAccess(input.courseId, institutionId);
+    if (actor.role === 'faculty' && !canManage(actor)) {
+      const allowed = await facultyCanAccessCourse(institutionId, actor.email, input.courseId);
+      if (!allowed) throw new ForbiddenError('You can only create labs for your assigned courses');
+    }
 
     const doc = await practiceLabRepository.createLab({
       institutionId,

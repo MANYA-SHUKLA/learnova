@@ -68,7 +68,7 @@ export default function FacultyPracticeLabsPage() {
               <CardDescription>Labs you own.</CardDescription>
             </div>
             <Button asChild>
-              <Link href={APP_ROUTES.INSTITUTION_PRACTICE_LABS_CREATE}>Create lab</Link>
+              <Link href={APP_ROUTES.FACULTY_PRACTICE_LABS_CREATE}>Create lab</Link>
             </Button>
           </CardHeader>
           <CardContent>
@@ -96,7 +96,11 @@ export default function FacultyPracticeLabsPage() {
                         </Button>
                       ) : null}
                       <Button size="sm" variant="outline" asChild>
-                        <Link href={`/institution/practice-labs/${lab.id}/problems`}>Problems</Link>
+                        <Link
+                          href={APP_ROUTES.FACULTY_PRACTICE_LAB_PROBLEMS.replace(':id', lab.id)}
+                        >
+                          Problems
+                        </Link>
                       </Button>
                     </div>
                   </li>

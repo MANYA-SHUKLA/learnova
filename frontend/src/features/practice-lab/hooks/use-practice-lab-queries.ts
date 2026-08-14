@@ -115,6 +115,7 @@ export function useCreatePracticeLabMutation() {
     mutationFn: (body: CreatePracticeLabBody) => practiceLabApi.create(body),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: practiceLabKeys.lists() });
+      void qc.invalidateQueries({ queryKey: practiceLabKeys.facultyDash() });
     },
   });
 }
