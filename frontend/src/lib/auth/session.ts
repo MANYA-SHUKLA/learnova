@@ -47,6 +47,7 @@ export function probeLocalSession(): SessionState {
       avatarUrl: null,
       isEmailVerified: true,
       mustChangePassword: false,
+      institutionBranding: null,
     },
     session: {
       id: payload.sessionId,
