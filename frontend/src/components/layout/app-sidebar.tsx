@@ -42,6 +42,7 @@ import { useEffect } from 'react';
 import { Link, usePathname } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 import { useUIStore } from '@/stores/ui-store';
+import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { cn } from '@/lib/utils';
 import { Logo } from './logo';
 
@@ -356,6 +357,12 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   );
 }
 
+function SidebarBrand({ collapsed }: { collapsed: boolean }) {
+  const { user } = useAuth();
+  const href = dashboardPathForRole(user?.role);
+  return <Logo collapsed={collapsed} href={href} branding={user?.institutionBranding} />;
+}
+
 function DesktopSidebar() {
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
@@ -374,7 +381,7 @@ function DesktopSidebar() {
           collapsed ? 'justify-center' : 'justify-between gap-2',
         )}
       >
-        <Logo collapsed={collapsed} />
+        <SidebarBrand collapsed={collapsed} />
         <button
           type="button"
           onClick={toggleSidebar}
@@ -436,7 +443,7 @@ function MobileDrawer() {
             className="fixed inset-y-0 left-0 z-50 flex w-[min(100vw-2.5rem,18rem)] max-w-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-soft-lg lg:hidden"
           >
             <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
-              <Logo />
+              <SidebarBrand collapsed={false} />
               <button
                 type="button"
                 onClick={() => {
