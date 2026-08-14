@@ -20,6 +20,10 @@ import { FacultyModel } from '../../models/faculty.model.js';
 import { CourseModel } from '../../models/course.model.js';
 import { CourseModuleModel } from '../../models/course-module.model.js';
 import { CourseLessonModel } from '../../models/course-lesson.model.js';
+import { LabProgressModel } from '../../models/lab-progress.model.js';
+import { PracticeLabModel } from '../../models/practice-lab.model.js';
+import { LabProblemModel } from '../../models/lab-problem.model.js';
+import { LearningActivityModel } from '../../models/learning-activity.model.js';
 import {
   ForbiddenError,
   NotFoundError,

@@ -14,7 +14,9 @@ export type LearningActivityType =
   | 'bookmark_created'
   | 'note_created'
   | 'session_started'
-  | 'session_ended';
+  | 'session_ended'
+  | 'lab_problem_solved'
+  | 'lab_completed';
 
 export type BookmarkTargetType = 'module' | 'lesson' | 'resource';
 

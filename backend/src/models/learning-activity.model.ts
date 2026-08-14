@@ -12,6 +12,8 @@ export const LEARNING_ACTIVITY_TYPES = [
   'note_created',
   'session_started',
   'session_ended',
+  'lab_problem_solved',
+  'lab_completed',
 ] as const;
 
 export type LearningActivityEventType = (typeof LEARNING_ACTIVITY_TYPES)[number];

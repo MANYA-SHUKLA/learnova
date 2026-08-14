@@ -25,6 +25,8 @@ export const ACTIVITY_TYPE_LABELS: Record<LearningActivityType, string> = {
   note_created: 'Note created',
   session_started: 'Session started',
   session_ended: 'Session ended',
+  lab_problem_solved: 'Practice problem solved',
+  lab_completed: 'Practice lab completed',
 };
 
 export function formatLearningStatus(status: LearningStatus) {
