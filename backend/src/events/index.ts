@@ -16,3 +16,4 @@ export {
   registerNotificationListeners,
   startDueReminderScheduler,
 } from './listeners/notification.listeners.js';
+export { registerProgressListeners } from './listeners/progress.listeners.js';

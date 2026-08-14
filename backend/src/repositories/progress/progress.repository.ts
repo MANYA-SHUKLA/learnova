@@ -20,6 +20,8 @@ import {
   LearningBookmarkModel,
   type LearningBookmarkDocument,
 } from '../../models/learning-bookmark.model.js';
+import { LearningNoteModel, type LearningNoteDocument } from '../../models/learning-note.model.js';
+import { LabProgressModel } from '../../models/lab-progress.model.js';
 import {
   LearningActivityModel,
   type LearningActivityDocument,

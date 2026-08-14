@@ -19,6 +19,9 @@ import { StudentModel } from '../../models/student.model.js';
 import { FacultyModel } from '../../models/faculty.model.js';
 import { CourseModel } from '../../models/course.model.js';
 import { CourseModuleModel } from '../../models/course-module.model.js';
+import {
+  LessonProgressModel,
+} from '../../models/lesson-progress.model.js';
 import { CourseLessonModel } from '../../models/course-lesson.model.js';
 import { LabProgressModel } from '../../models/lab-progress.model.js';
 import { PracticeLabModel } from '../../models/practice-lab.model.js';
@@ -532,6 +535,7 @@ export class ProgressService {
   async listMine(query: ProgressListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const studentId = await this.resolveStudentId(actor, institutionId, query.studentId);
+    await this.syncLabProgressForStudent(institutionId, studentId);
     const result = await progressRepository.listCourseProgress(institutionId, studentId, query);
     return {
       items: result.items.map(toDto),
@@ -1329,9 +1333,336 @@ export class ProgressService {
     };
   }
 
+  async onLabProblemSolved(payload: {
+    institutionId: string;
+    studentId: string;
+    practiceLabId: string;
+    problemId: string;
+  }) {
+    const [lab, problem] = await Promise.all([
+      PracticeLabModel.findOne({
+        _id: payload.practiceLabId,
+        institutionId: payload.institutionId,
+        deletedAt: null,
+      })
+        .select('courseId title')
+        .lean(),
+      LabProblemModel.findOne({ _id: payload.problemId }).select('title').lean(),
+    ]);
+    if (!lab?.courseId) return;
+
+    await this.applyLabProgressToCourse({
+      institutionId: payload.institutionId,
+      studentId: payload.studentId,
+      courseId: String(lab.courseId),
+      practiceLabId: payload.practiceLabId,
+      labTitle: lab.title,
+      problemTitle: problem?.title ?? 'Problem',
+      recordActivity: {
+        type: 'lab_problem_solved',
+        metadata: {
+          practiceLabId: payload.practiceLabId,
+          problemId: payload.problemId,
+          labTitle: lab.title,
+          problemTitle: problem?.title ?? 'Problem',
+        },
+      },
+    });
+  }
+
+  async onLabCompleted(payload: {
+    institutionId: string;
+    studentId: string;
+    labId: string;
+  }) {
+    const lab = await PracticeLabModel.findOne({
+      _id: payload.labId,
+      institutionId: payload.institutionId,
+      deletedAt: null,
+    })
+      .select('courseId title')
+      .lean();
+    if (!lab?.courseId) return;
+
+    await this.applyLabProgressToCourse({
+      institutionId: payload.institutionId,
+      studentId: payload.studentId,
+      courseId: String(lab.courseId),
+      practiceLabId: payload.labId,
+      labTitle: lab.title,
+      recordActivity: {
+        type: 'lab_completed',
+        metadata: {
+          practiceLabId: payload.labId,
+          labTitle: lab.title,
+        },
+      },
+    });
+  }
+
+  private async syncLabProgressForStudent(institutionId: string, studentId: string) {
+    const progressRows = await LabProgressModel.find({
+      institutionId,
+      studentId,
+      $or: [{ problemsSolved: { $gt: 0 } }, { completedAt: { $ne: null } }],
+    }).lean();
+
+    for (const row of progressRows) {
+      const lab = await PracticeLabModel.findOne({
+        _id: row.practiceLabId,
+        institutionId,
+        deletedAt: null,
+      })
+        .select('courseId title')
+        .lean();
+      if (!lab?.courseId) continue;
+
+      const hasActivity = await LearningActivityModel.exists({
+        institutionId: new Types.ObjectId(institutionId),
+        studentId: new Types.ObjectId(studentId),
+        courseId: lab.courseId,
+        type: { $in: ['lab_problem_solved', 'lab_completed'] },
+        'metadata.practiceLabId': String(row.practiceLabId),
+      }).exec();
+
+      await this.applyLabProgressToCourse({
+        institutionId,
+        studentId,
+        courseId: String(lab.courseId),
+        practiceLabId: String(row.practiceLabId),
+        labTitle: lab.title,
+        lastActivityAt: row.lastSolvedAt ?? row.updatedAt ?? new Date(),
+        recordActivity: hasActivity
+          ? null
+          : row.completedAt
+            ? {
+                type: 'lab_completed' as const,
+                occurredAt: row.completedAt,
+                metadata: {
+                  practiceLabId: String(row.practiceLabId),
+                  labTitle: lab.title,
+                  problemsSolved: row.problemsSolved ?? 0,
+                },
+              }
+            : (row.problemsSolved ?? 0) > 0
+              ? {
+                  type: 'lab_problem_solved' as const,
+                  occurredAt: row.lastSolvedAt ?? row.updatedAt ?? new Date(),
+                  metadata: {
+                    practiceLabId: String(row.practiceLabId),
+                    labTitle: lab.title,
+                    problemsSolved: row.problemsSolved ?? 0,
+                  },
+                }
+              : null,
+      });
+    }
+  }
+
+  private async computeLabProgressPercentage(
+    institutionId: string,
+    studentId: string,
+    courseId: string,
+  ): Promise<number> {
+    const labs = await PracticeLabModel.find({
+      institutionId: new Types.ObjectId(institutionId),
+      courseId: new Types.ObjectId(courseId),
+      status: 'published',
+      deletedAt: null,
+    })
+      .select('_id problemCount')
+      .lean();
+
+    if (labs.length === 0) return 0;
+
+    const labIds = labs.map((lab) => lab._id);
+    const progressRows = await LabProgressModel.find({
+      institutionId,
+      studentId,
+      practiceLabId: { $in: labIds },
+    }).lean();
+
+    const totalProblems = labs.reduce((sum, lab) => sum + (lab.problemCount ?? 0), 0);
+    const solvedProblems = progressRows.reduce((sum, row) => sum + (row.problemsSolved ?? 0), 0);
+
+    if (totalProblems > 0) {
+      return Math.min(100, Math.round((solvedProblems / totalProblems) * 100));
+    }
+
+    const completedLabs = progressRows.filter((row) => row.completedAt).length;
+    return Math.min(100, Math.round((completedLabs / labs.length) * 100));
+  }
+
+  private async getLabTimeMinutesForCourse(
+    institutionId: string,
+    studentId: string,
+    courseId: string,
+  ): Promise<number> {
+    const labs = await PracticeLabModel.find({
+      institutionId: new Types.ObjectId(institutionId),
+      courseId: new Types.ObjectId(courseId),
+      deletedAt: null,
+    })
+      .select('_id')
+      .lean();
+    if (labs.length === 0) return 0;
+
+    const [agg] = await LabProgressModel.aggregate([
+      {
+        $match: {
+          institutionId: new Types.ObjectId(institutionId),
+          studentId: new Types.ObjectId(studentId),
+          practiceLabId: { $in: labs.map((lab) => lab._id) },
+        },
+      },
+      { $group: { _id: null, totalSeconds: { $sum: '$timeSpentSeconds' } } },
+    ]).exec();
+
+    return secondsToMinutes(agg?.totalSeconds ?? 0);
+  }
+
+  private async getLessonTimeMinutesForCourse(
+    institutionId: string,
+    studentId: string,
+    courseId: string,
+  ): Promise<number> {
+    const [agg] = await LessonProgressModel.aggregate([
+      {
+        $match: {
+          institutionId: new Types.ObjectId(institutionId),
+          studentId: new Types.ObjectId(studentId),
+          courseId: new Types.ObjectId(courseId),
+        },
+      },
+      { $group: { _id: null, totalSeconds: { $sum: '$timeSpentSeconds' } } },
+    ]).exec();
+
+    return secondsToMinutes(agg?.totalSeconds ?? 0);
+  }
+
+  private async applyLabProgressToCourse(input: {
+    institutionId: string;
+    studentId: string;
+    courseId: string;
+    practiceLabId: string;
+    labTitle?: string;
+    problemTitle?: string;
+    lastActivityAt?: Date;
+    recordActivity?: {
+      type: 'lab_problem_solved' | 'lab_completed';
+      metadata?: Record<string, unknown>;
+      occurredAt?: Date;
+    } | null;
+  }) {
+    let enrollment;
+    try {
+      enrollment = await this.requireActiveEnrollment(
+        input.institutionId,
+        input.studentId,
+        input.courseId,
+      );
+    } catch {
+      return;
+    }
+
+    let courseProgress = await progressRepository.findCourseProgress(
+      input.institutionId,
+      input.studentId,
+      input.courseId,
+    );
+    if (!courseProgress) {
+      courseProgress = await this.ensureCourseProgress(
+        input.institutionId,
+        input.studentId,
+        input.courseId,
+        String(enrollment._id),
+      );
+    }
+
+    const now = input.lastActivityAt ?? new Date();
+    const labPct = await this.computeLabProgressPercentage(
+      input.institutionId,
+      input.studentId,
+      input.courseId,
+    );
+    const lessonPct = courseProgress.progressPercentage ?? 0;
+    const progressPercentage = Math.max(lessonPct, labPct);
+    const labMinutes = await this.getLabTimeMinutesForCourse(
+      input.institutionId,
+      input.studentId,
+      input.courseId,
+    );
+    const lessonMinutes = await this.getLessonTimeMinutesForCourse(
+      input.institutionId,
+      input.studentId,
+      input.courseId,
+    );
+    const timeSpentMinutes = Math.round((labMinutes + lessonMinutes) * 10) / 10;
+    const wasNotStarted = courseProgress.status === 'not_started';
+    const status =
+      courseProgress.status === 'completed'
+        ? 'completed'
+        : progressPercentage > 0 || labPct > 0
+          ? 'in_progress'
+          : courseProgress.status;
+
+    await progressRepository.upsertCourseProgress(
+      {
+        institutionId: input.institutionId,
+        studentId: input.studentId,
+        courseId: input.courseId,
+      },
+      {
+        institutionId: new Types.ObjectId(input.institutionId),
+        studentId: new Types.ObjectId(input.studentId),
+        courseId: new Types.ObjectId(input.courseId),
+        enrollmentId: courseProgress.enrollmentId,
+        progressPercentage,
+        status,
+        startedAt: courseProgress.startedAt ?? now,
+        lastAccessedAt: now,
+        completedAt:
+          status === 'completed' ? (courseProgress.completedAt ?? now) : courseProgress.completedAt,
+        estimatedRemainingMinutes: courseProgress.estimatedRemainingMinutes ?? 0,
+        timeSpentMinutes,
+        currentModuleId: courseProgress.currentModuleId,
+        currentLessonId: courseProgress.currentLessonId,
+        bookmarksCount: courseProgress.bookmarksCount ?? 0,
+        notesCount: courseProgress.notesCount ?? 0,
+      },
+    );
+
+    if (wasNotStarted && status === 'in_progress') {
+      await progressRepository.createActivity({
+        institutionId: input.institutionId,
+        studentId: input.studentId,
+        courseId: input.courseId,
+        type: 'course_started',
+        occurredAt: now,
+      });
+      await EnrollmentModel.findOneAndUpdate(
+        { _id: enrollment._id, institutionId: new Types.ObjectId(input.institutionId) },
+        { $set: { completionStatus: 'in_progress' } },
+      ).exec();
+    }
+
+    if (input.recordActivity) {
+      await progressRepository.createActivity({
+        institutionId: input.institutionId,
+        studentId: input.studentId,
+        courseId: input.courseId,
+        type: input.recordActivity.type,
+        metadata: input.recordActivity.metadata ?? null,
+        occurredAt: input.recordActivity.occurredAt ?? now,
+        durationSeconds: 300,
+      });
+    }
+  }
+
   async studentDashboard(actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const studentId = await this.resolveStudentId(actor, institutionId);
+    await this.syncLabProgressForStudent(institutionId, studentId);
     const counts = await progressRepository.getStudentDashboardCounts(
       institutionId,
       studentId,
