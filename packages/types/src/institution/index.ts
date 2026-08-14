@@ -23,6 +23,14 @@ export interface SoftDeleteFields {
   deletedAt: string | null;
 }
 
+/** Read-only tenant branding for layouts and auth session. */
+export interface InstitutionBranding {
+  name: string;
+  shortName: string;
+  logo: string | null;
+  favicon: string | null;
+}
+
 export interface Institution {
   id: ID;
   name: string;

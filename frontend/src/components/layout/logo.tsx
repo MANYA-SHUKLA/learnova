@@ -1,35 +1,37 @@
 'use client';
 
-import { APP_ROUTES } from '@learnova/constants';
+import type { InstitutionBranding } from '@learnova/types';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
+import { InstitutionMark } from '@/components/institution/institution-mark';
 
 interface LogoProps {
   collapsed?: boolean;
-  href?: string;
+  href: string;
+  branding?: InstitutionBranding | null;
   className?: string;
 }
 
-export function Logo({ collapsed = false, href = APP_ROUTES.INSTITUTION_DASHBOARD, className }: LogoProps) {
+export function Logo({ collapsed = false, href, branding, className }: LogoProps) {
+  const label = branding?.name ?? 'Learnova';
+
   return (
     <Link
       href={href}
       className={cn(
-        'flex items-center gap-3 rounded-xl outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring',
+        'flex min-w-0 items-center gap-3 rounded-xl outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring',
         className,
       )}
-      aria-label="Learnova"
+      aria-label={label}
     >
-      <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary font-display text-xs font-bold tracking-tight text-primary-foreground shadow-soft-sm">
-        MS
-      </span>
+      <InstitutionMark branding={branding} size="md" />
       <span
         className={cn(
-          'font-display text-lg font-semibold tracking-tight text-foreground transition-all duration-200',
+          'truncate font-display text-lg font-semibold tracking-tight text-foreground transition-all duration-200',
           collapsed ? 'w-0 overflow-hidden opacity-0' : 'w-auto opacity-100',
         )}
       >
-        Learnova
+        {label}
       </span>
     </Link>
   );

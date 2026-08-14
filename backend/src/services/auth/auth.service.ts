@@ -1,6 +1,13 @@
 import { Types } from 'mongoose';
 import { AUTH } from '@learnova/constants';
-import type { AuthUser, AuthTokens, Permission, Role, Session } from '@learnova/types';
+import type {
+  AuthUser,
+  AuthTokens,
+  InstitutionBranding,
+  Permission,
+  Role,
+  Session,
+} from '@learnova/types';
 import type {
   ChangePasswordInput,
   ForgotPasswordInput,
@@ -42,6 +49,7 @@ import {
   mailText,
 } from '../../mail/mail-copy.js';
 import { env } from '../../config/env.js';
+import { InstitutionModel } from '../../models/institution.model.js';
 import { logger } from '../../utils/logger/index.js';
 import {
   auditAuthLogRepository,
@@ -60,7 +68,12 @@ function frontendBaseUrl(): string {
   return (env.CORS_ORIGINS ?? 'http://localhost:3000').split(',')[0]?.trim() ?? 'http://localhost:3000';
 }
 
-function toAuthUser(user: UserEntity, role: Role, permissions: Permission[]): AuthUser {
+function toAuthUser(
+  user: UserEntity,
+  role: Role,
+  permissions: Permission[],
+  institutionBranding: InstitutionBranding | null = null,
+): AuthUser {
   return {
     id: String(user._id),
     email: user.email,
@@ -73,7 +86,35 @@ function toAuthUser(user: UserEntity, role: Role, permissions: Permission[]): Au
     avatarUrl: user.avatarUrl ?? null,
     isEmailVerified: user.isEmailVerified,
     mustChangePassword: Boolean(user.mustChangePassword),
+    institutionBranding,
   };
+}
+
+async function loadInstitutionBranding(
+  institutionId: Types.ObjectId | string,
+): Promise<InstitutionBranding | null> {
+  const doc = await InstitutionModel.findById(institutionId)
+    .select('name shortName logo favicon')
+    .lean()
+    .exec();
+  if (!doc) return null;
+  return {
+    name: doc.name as string,
+    shortName: doc.shortName as string,
+    logo: (doc.logo as string | null) ?? null,
+    favicon: (doc.favicon as string | null) ?? null,
+  };
+}
+
+async function toAuthUserWithBranding(
+  user: UserEntity,
+  role: Role,
+  permissions: Permission[],
+): Promise<AuthUser> {
+  const institutionBranding = user.institutionId
+    ? await loadInstitutionBranding(user.institutionId)
+    : null;
+  return toAuthUser(user, role, permissions, institutionBranding);
 }
 
 function toSessionDto(
@@ -340,7 +381,7 @@ export class AuthService {
     });
 
     return {
-      user: toAuthUser(user, 'institution_admin', permissions),
+      user: await toAuthUserWithBranding(user, 'institution_admin', permissions),
       session: issued.session,
       tokens: issued.tokens,
     };
@@ -430,7 +471,7 @@ export class AuthService {
     });
 
     return {
-      user: toAuthUser(activeUser, role, permissions),
+      user: await toAuthUserWithBranding(activeUser, role, permissions),
       session: issued.session,
       tokens: issued.tokens,
     };
@@ -518,7 +559,7 @@ export class AuthService {
     });
 
     return {
-      user: toAuthUser(user, role, permissions),
+      user: await toAuthUserWithBranding(user, role, permissions),
       session: toSessionDto(session, true),
       tokens: {
         accessToken,
@@ -710,7 +751,7 @@ export class AuthService {
 
     return {
       message: 'Password changed successfully.',
-      user: toAuthUser(fresh, role, permissions),
+      user: await toAuthUserWithBranding(fresh, role, permissions),
       session: issued.session,
       tokens: issued.tokens,
     };
@@ -755,7 +796,7 @@ export class AuthService {
     const user = await userRepository.findById(userId);
     if (!user) throw new NotFoundError('User not found');
     const { role, permissions } = await resolveRolePermissions(user.roleId);
-    return toAuthUser(user, role, permissions);
+    return toAuthUserWithBranding(user, role, permissions);
   }
 
   async getCurrentSession(userId: string, sessionId: string) {

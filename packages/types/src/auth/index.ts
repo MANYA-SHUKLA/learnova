@@ -3,6 +3,7 @@
  */
 
 import type { ActiveRole, ID, Locale, ModuleName, Role } from '../common/index.js';
+import type { InstitutionBranding } from '../institution/index.js';
 
 /** Fine-grained permission keys — extend per module as features land */
 export type Permission =
@@ -101,6 +102,8 @@ export interface AuthUser {
   isEmailVerified: boolean;
   /** Faculty/student first login must set a personal password */
   mustChangePassword: boolean;
+  /** Tenant name/logo for sidebar and chrome — all roles */
+  institutionBranding: InstitutionBranding | null;
 }
 
 export interface Session {
