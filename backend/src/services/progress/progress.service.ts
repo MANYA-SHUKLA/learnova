@@ -1515,7 +1515,20 @@ export class ProgressService {
           practiceLabId: { $in: labs.map((lab) => lab._id) },
         },
       },
-      { $group: { _id: null, totalSeconds: { $sum: '$timeSpentSeconds' } } },
+      {
+        $group: {
+          _id: null,
+          totalSeconds: {
+            $sum: {
+              $cond: [
+                { $gt: ['$timeSpentSeconds', 0] },
+                '$timeSpentSeconds',
+                { $multiply: [{ $max: ['$attempts', 1] }, 120] },
+              ],
+            },
+          },
+        },
+      },
     ]).exec();
 
     return secondsToMinutes(agg?.totalSeconds ?? 0);
