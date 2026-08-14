@@ -28,12 +28,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Optional local Judge0 — enable when coding platform work begins
-  # judge0:
-  #   image: judge0/judge0:1.13.0
-  #   ports:
-  #     - '2358:2358'
-  #   privileged: true
+  # Optional local Judge0 — use `pnpm docker:judge0` (see docs/Judge0.md)
 
 volumes:
   mongo_data:
