@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <AuthCardShell icon={KeyRound} title={t('title')} description={t('description')}>
+    <AuthCardShell brand="company" icon={KeyRound} title={t('title')} description={t('description')}>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className={authContentClassName}>
           {errors.root?.message ? (

@@ -100,6 +100,7 @@ export default function RegisterInstitutionPage() {
 
   return (
     <AuthCardShell
+      brand="company"
       icon={Building2}
       title={t('title')}
       description={t('subtitle')}

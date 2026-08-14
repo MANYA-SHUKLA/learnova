@@ -79,7 +79,7 @@ function LoginForm() {
   };
 
   return (
-    <AuthCardShell icon={LogIn} title={t('title')}>
+    <AuthCardShell brand="company" icon={LogIn} title={t('title')}>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className={authContentClassName}>
           {registered ? (
@@ -187,7 +187,7 @@ function LoginForm() {
 
 function LoginFallback() {
   return (
-    <AuthCardShell icon={LogIn} title="…" description="">
+    <AuthCardShell brand="company" icon={LogIn} title="…" description="">
       <CardContent className="flex min-h-[200px] items-center justify-center py-10">
         <Spinner size="lg" />
       </CardContent>

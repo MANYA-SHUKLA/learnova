@@ -7,7 +7,7 @@ import { LogoMark } from '@/components/marketing/logo-mark';
 
 interface CompanyLogoProps {
   collapsed?: boolean;
-  href?: string;
+  href?: string | null;
   size?: 'sm' | 'md' | 'lg';
   showName?: boolean;
   className?: string;
@@ -51,7 +51,7 @@ export function CompanyLogo({
 
   const classes = cn('flex min-w-0 items-center gap-2.5', className);
 
-  if (href) {
+  if (href != null) {
     return (
       <Link
         href={href}
