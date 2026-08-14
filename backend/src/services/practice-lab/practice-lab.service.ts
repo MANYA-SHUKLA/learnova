@@ -52,6 +52,7 @@ import {
   createPracticeLabCodingStorage,
   labActivityRef,
 } from '../coding-engine/index.js';
+import { outputsMatch } from '@learnova/shared';
 import {
   ACTIVE_ENROLLMENT_STATUSES,
   canTransitionStatus,
@@ -437,6 +438,46 @@ class PracticeLabService {
       .select('_id')
       .lean();
     if (!enrollment) throw new ForbiddenError('Active enrollment required');
+  }
+
+  private async assertVerifiedRunBeforeSubmit(input: {
+    institutionId: string;
+    studentId: string;
+    problemId: string;
+    language: string;
+    sourceCode: string;
+    runExecutionId: string;
+    sampleOutput?: string | null;
+  }) {
+    const execution = await practiceLabRepository.findExecutionById(
+      input.institutionId,
+      input.runExecutionId,
+    );
+    if (!execution || execution.isSubmission) {
+      throw new ValidationError('Run your code successfully before submitting');
+    }
+    if (String(execution.studentId) !== input.studentId) {
+      throw new ForbiddenError('Run execution does not belong to this student');
+    }
+    if (String(execution.problemId) !== input.problemId) {
+      throw new ValidationError('Run execution does not match this problem');
+    }
+    if (execution.language !== input.language) {
+      throw new ValidationError('Code or language changed since last run — run again before submitting');
+    }
+    if (execution.sourceCode !== input.sourceCode) {
+      throw new ValidationError('Code changed since last run — run again before submitting');
+    }
+    if (execution.status !== 'accepted') {
+      throw new ValidationError('Last run did not succeed — fix errors and run again before submitting');
+    }
+    if (input.sampleOutput != null && input.sampleOutput !== '') {
+      if (!outputsMatch(execution.stdout, input.sampleOutput)) {
+        throw new ValidationError(
+          'Sample test did not pass — run with sample input and match the expected output before submitting',
+        );
+      }
+    }
   }
 
   private async scopeLabFilter(
@@ -1126,6 +1167,16 @@ class PracticeLabService {
     }
 
     await this.assertStudentEnrolled(studentId, String(lab.courseId), institutionId);
+
+    await this.assertVerifiedRunBeforeSubmit({
+      institutionId,
+      studentId,
+      problemId: input.problemId,
+      language: input.language,
+      sourceCode: input.sourceCode,
+      runExecutionId: input.runExecutionId,
+      sampleOutput: problem.sampleOutput,
+    });
 
     const previousAttempts = await practiceLabRepository.countSubmissionsForProblem(
       studentId,

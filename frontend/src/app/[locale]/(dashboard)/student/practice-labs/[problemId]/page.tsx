@@ -1,7 +1,8 @@
 'use client';
 
 import { PRACTICE_LANGUAGE_META, PERMISSIONS } from '@learnova/constants';
-import type { PracticeLanguage } from '@learnova/types';
+import type { PracticeLanguage, RunCodeResult } from '@learnova/types';
+import { outputsMatch } from '@learnova/shared';
 import {
   Badge,
   Button,
@@ -26,6 +27,17 @@ import {
 } from '@/features/practice-lab';
 import { Link } from '@/lib/i18n/routing';
 
+function isSuccessfulRun(
+  result: RunCodeResult,
+  sampleOutput: string | null | undefined,
+): boolean {
+  if (result.status !== 'accepted') return false;
+  if (sampleOutput != null && sampleOutput !== '') {
+    return outputsMatch(result.stdout, sampleOutput);
+  }
+  return true;
+}
+
 export default function StudentPracticeProblemPage({
   params,
 }: {
@@ -49,8 +61,14 @@ export default function StudentPracticeProblemPage({
 
   const [output, setOutput] = useState<string>('');
   const [verdict, setVerdict] = useState<string | null>(null);
+  const [verifiedRunExecutionId, setVerifiedRunExecutionId] = useState<string | null>(null);
 
   const problem = problemQuery.data;
+
+  useEffect(() => {
+    setVerifiedRunExecutionId(null);
+    setVerdict(null);
+  }, [sourceCode, language, stdin, problem?.id]);
 
   useEffect(() => {
     if (!problem) return;
@@ -169,24 +187,36 @@ export default function StudentPracticeProblemPage({
                 >
                   Theme
                 </Button>
-                <div className="ml-auto flex gap-2">
+                <div className="ml-auto flex flex-wrap items-center gap-2">
                   <Button
                     variant="secondary"
                     disabled={runMutation.isPending}
                     onClick={async () => {
                       setVerdict(null);
+                      setVerifiedRunExecutionId(null);
                       const result = await runMutation.mutateAsync({
                         problemId: problem.id,
                         language,
                         sourceCode,
                         stdin,
                       });
+                      const passed = isSuccessfulRun(result, problem.sampleOutput);
+                      if (passed) {
+                        setVerifiedRunExecutionId(result.executionId);
+                      }
                       setOutput(
                         [
                           result.compileOutput && `Compile:\n${result.compileOutput}`,
                           result.stdout && `Stdout:\n${result.stdout}`,
                           result.stderr && `Stderr:\n${result.stderr}`,
                           `Status: ${result.status}`,
+                          passed
+                            ? 'Sample check: PASS — you can submit now.'
+                            : problem.sampleOutput
+                              ? 'Sample check: FAIL — fix output and run again before submitting.'
+                              : result.status === 'accepted'
+                                ? 'Run succeeded — you can submit now.'
+                                : 'Run failed — fix errors and run again before submitting.',
                           result.executionTimeMS != null && `Time: ${result.executionTimeMS}ms`,
                           result.memoryKB != null && `Memory: ${result.memoryKB}KB`,
                         ]
@@ -198,12 +228,19 @@ export default function StudentPracticeProblemPage({
                     Run code
                   </Button>
                   <Button
-                    disabled={submitMutation.isPending}
+                    disabled={submitMutation.isPending || !verifiedRunExecutionId}
+                    title={
+                      verifiedRunExecutionId
+                        ? 'Submit for grading'
+                        : 'Run your code successfully before submitting'
+                    }
                     onClick={async () => {
+                      if (!verifiedRunExecutionId) return;
                       const result = await submitMutation.mutateAsync({
                         problemId: problem.id,
                         language,
                         sourceCode,
+                        runExecutionId: verifiedRunExecutionId,
                       });
                       setVerdict(result.verdict);
                       setOutput(
@@ -229,6 +266,16 @@ export default function StudentPracticeProblemPage({
                 </div>
               </div>
 
+              {!verifiedRunExecutionId ? (
+                <p className="text-xs text-muted-foreground">
+                  Run your code with the sample input and pass before submitting.
+                </p>
+              ) : (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                  Sample run passed — submit is unlocked.
+                </p>
+              )}
+
               <CodeEditor language={language} value={sourceCode} onChange={setSourceCode} height="380px" />
 
               <div className="grid gap-3 md:grid-cols-2">
@@ -245,7 +292,7 @@ export default function StudentPracticeProblemPage({
                     output {verdict ? `· ${formatVerdict(verdict as never)}` : ''}
                   </p>
                   <pre className="min-h-24 overflow-auto rounded-md border border-border/60 bg-muted/40 p-3 font-mono text-xs">
-                    {output || 'Run or submit to see results.'}
+                    {output || 'Run your code to see results. Submit unlocks after a successful run.'}
                   </pre>
                 </div>
               </div>

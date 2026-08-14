@@ -99,6 +99,7 @@ export interface SubmitBody {
   problemId: string;
   language: PracticeLanguage;
   sourceCode: string;
+  runExecutionId: string;
 }
 
 export interface SubmissionListParams {

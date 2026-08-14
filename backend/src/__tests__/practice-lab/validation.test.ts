@@ -75,6 +75,7 @@ describe('practice lab validation', () => {
         problemId: OBJECT_ID,
         language: 'cpp',
         sourceCode: 'int main(){}',
+        runExecutionId: OBJECT_ID,
       }).language,
     ).toBe('cpp');
   });

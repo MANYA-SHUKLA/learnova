@@ -188,6 +188,8 @@ export const submitSolutionSchema = z.object({
   problemId: objectIdField,
   language: practiceLanguageSchema,
   sourceCode: z.string().min(1).max(200_000),
+  /** Required — must reference a successful interactive run with the same code. */
+  runExecutionId: objectIdField,
 });
 
 export const problemListQuerySchema = z.object({

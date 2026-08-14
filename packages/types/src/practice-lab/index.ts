@@ -292,6 +292,7 @@ export interface SubmitSolutionRequest {
   problemId: ID;
   language: PracticeLanguage;
   sourceCode: string;
+  runExecutionId: ID;
 }
 
 export interface ExecutionStatusEvent {
