@@ -367,14 +367,42 @@ class PracticeLabService {
   private async resolveStudentId(actor: ActorContext): Promise<string> {
     const institutionId = requireTenant(actor);
     const student = await StudentModel.findOne({
-      userId: actor.userId,
       institutionId,
+      email: actor.email.toLowerCase(),
       deletedAt: null,
     })
       .select('_id')
       .lean();
     if (!student) throw new ForbiddenError('Student profile required');
     return String(student._id);
+  }
+
+  /** Published labs in courses where the student has an active enrollment. */
+  private async studentAccessibleLabIds(
+    actor: ActorContext,
+    institutionId: string,
+  ): Promise<string[]> {
+    const studentId = await this.resolveStudentId(actor);
+    const enrollments = await EnrollmentModel.find({
+      institutionId,
+      studentId,
+      status: { $in: [...ACTIVE_ENROLLMENT_STATUSES] },
+      deletedAt: null,
+    })
+      .select('courseId')
+      .lean();
+    const courseIds = enrollments.map((e) => e.courseId);
+    if (courseIds.length === 0) return [];
+
+    const labs = await PracticeLabModel.find({
+      institutionId,
+      courseId: { $in: courseIds },
+      status: 'published',
+      deletedAt: null,
+    })
+      .select('_id')
+      .lean();
+    return labs.map((lab) => String(lab._id));
   }
 
   private async assertCourseAccess(courseId: string, institutionId: string) {
@@ -717,6 +745,27 @@ class PracticeLabService {
   async listProblems(query: ProblemListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const filter = practiceLabRepository.buildProblemFilter(institutionId, query);
+
+    if (actor.role === 'student') {
+      const accessibleLabIds = await this.studentAccessibleLabIds(actor, institutionId);
+      if (accessibleLabIds.length === 0) {
+        return {
+          items: [],
+          meta: pageMeta(0, query.page ?? 1, query.limit ?? 20),
+        };
+      }
+      if (query.practiceLabId) {
+        if (!accessibleLabIds.includes(query.practiceLabId)) {
+          return {
+            items: [],
+            meta: pageMeta(0, query.page ?? 1, query.limit ?? 20),
+          };
+        }
+      } else {
+        filter.practiceLabId = { $in: accessibleLabIds.map((id) => new Types.ObjectId(id)) };
+      }
+    }
+
     const result = await practiceLabRepository.listProblems(filter, query);
     const includePrivate = actor.role !== 'student';
     let items = result.items.map((p) => toProblemDto(p, includePrivate));
@@ -739,8 +788,12 @@ class PracticeLabService {
     if (!problem) throw new NotFoundError('Problem not found');
     const lab = await practiceLabRepository.findLabById(institutionId, String(problem.practiceLabId));
     if (!lab) throw new NotFoundError('Practice lab not found');
-    if (actor.role === 'student' && lab.status !== 'published') {
-      throw new ForbiddenError('Practice lab is not published');
+    if (actor.role === 'student') {
+      if (lab.status !== 'published') {
+        throw new ForbiddenError('Practice lab is not available');
+      }
+      const studentId = await this.resolveStudentId(actor);
+      await this.assertStudentEnrolled(studentId, String(lab.courseId), institutionId);
     }
     return toProblemDto(problem, actor.role !== 'student');
   }

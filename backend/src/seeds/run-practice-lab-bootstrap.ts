@@ -12,6 +12,7 @@ import {
   CourseModel,
   EnrollmentModel,
   FacultyModel,
+  PracticeLabModel,
   StudentModel,
   UserModel,
 } from '../models/index.js';
@@ -110,8 +111,22 @@ async function main(): Promise<void> {
       problemTarget: 9,
       testCaseTarget: 27,
       submissionTarget: 0,
+      publishAll: true,
     },
   );
+
+  const republished = await PracticeLabModel.updateMany(
+    {
+      institutionId: institutionOid,
+      courseId: course._id,
+      deletedAt: null,
+      status: { $ne: 'published' },
+    },
+    { $set: { status: 'published', updatedBy: admin._id } },
+  );
+  if (republished.modifiedCount > 0) {
+    logger.info({ count: republished.modifiedCount }, 'Republished demo practice labs');
+  }
 
   logger.info(result, 'Practice lab bootstrap completed');
   await disconnectMongo();

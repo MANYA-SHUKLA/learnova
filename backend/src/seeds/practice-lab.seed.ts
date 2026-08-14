@@ -107,6 +107,8 @@ export interface SeedPracticeLabOptions {
   problemTarget?: number;
   testCaseTarget?: number;
   submissionTarget?: number;
+  /** When true, every seeded lab is published (recommended for demo/bootstrap). */
+  publishAll?: boolean;
 }
 
 export interface PracticeLabSeedResult {
@@ -187,7 +189,7 @@ export async function seedPracticeLabs(
       title: `${LAB_TITLES[i % LAB_TITLES.length]}${i >= LAB_TITLES.length ? ` ${i + 1}` : ''}`,
       description: `Seeded practice lab #${i + 1} for coding practice.`,
       visibility: 'enrolled',
-      status: i % 5 === 0 ? 'draft' : 'published',
+      status: options.publishAll || (options.labTarget ?? 30) <= 10 ? 'published' : i % 5 === 0 ? 'draft' : 'published',
       difficulty: randomItem(PRACTICE_DIFFICULTIES),
       estimatedMinutes: randomInt(30, 180),
       languages,
