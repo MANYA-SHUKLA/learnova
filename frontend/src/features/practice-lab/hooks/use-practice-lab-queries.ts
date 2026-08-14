@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { progressKeys } from '@/features/progress';
 import { practiceLabApi } from '../services/practice-lab-api';
 import type {
   CreatePracticeLabBody,

@@ -1318,6 +1318,27 @@ class PracticeLabService {
     return toSubmissionDto(updated as unknown as SubmissionDocInput);
   }
 
+  private computeLabStreakDays(
+    lastSolvedAt: Date | null,
+    existingStreak: number,
+    accepted: boolean,
+  ): number {
+    if (!accepted) return existingStreak;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (!lastSolvedAt) return Math.max(existingStreak, 1);
+
+    const last = new Date(lastSolvedAt);
+    last.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((today.getTime() - last.getTime()) / 86_400_000);
+
+    if (diffDays === 0) return Math.max(existingStreak, 1);
+    if (diffDays === 1) return Math.max(existingStreak, 0) + 1;
+    return 1;
+  }
+
   private async updateProgressAfterSubmission(input: {
     institutionId: string;
     practiceLabId: string;
@@ -1352,6 +1373,13 @@ class PracticeLabService {
     const successRate = attempts === 0 ? 0 : Math.round((accepted / attempts) * 1000) / 10;
     const completedAt =
       input.totalProblems > 0 && problemsSolved >= input.totalProblems ? new Date() : null;
+    const attemptSeconds = input.verdict === 'accepted' ? 480 : 120;
+    const timeSpentSeconds = (existing?.timeSpentSeconds ?? 0) + attemptSeconds;
+    const streakDays = this.computeLabStreakDays(
+      existing?.lastSolvedAt ?? null,
+      existing?.streakDays ?? 0,
+      input.verdict === 'accepted',
+    );
 
     await LabProgressModel.findOneAndUpdate(
       {
@@ -1371,13 +1399,13 @@ class PracticeLabService {
           successRate,
           lastSolvedAt: input.verdict === 'accepted' ? new Date() : existing?.lastSolvedAt ?? null,
           completedAt,
-          streakDays: existing?.streakDays ?? 0,
+          streakDays,
+          timeSpentSeconds,
         },
         $setOnInsert: {
           institutionId: input.institutionId,
           practiceLabId: input.practiceLabId,
           studentId: input.studentId,
-          timeSpentSeconds: 0,
         },
       },
       { upsert: true, new: true },
