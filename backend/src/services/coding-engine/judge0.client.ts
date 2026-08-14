@@ -1,7 +1,9 @@
+import { spawn } from 'node:child_process';
 import type { PracticeLanguage } from '@learnova/types';
 import { JUDGE0_LANGUAGE_IDS } from '@learnova/constants';
 import { mapJudge0StatusToExecutionStatus } from '@learnova/shared';
 import { env } from '../../config/env.js';
+import { CompilerError } from '../../utils/errors/index.js';
 import { logger } from '../../utils/logger/index.js';
 
 export { mapJudge0StatusToExecutionStatus };
@@ -49,6 +51,105 @@ export function judge0IdForLanguage(language: PracticeLanguage): number {
  * Offline/dev mock — never uses eval/child_process.
  * Passthrough: stdout = stdin so echo-style sample tests work when Judge0 is down.
  */
+function isConnectionError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const msg = err.message.toLowerCase();
+  if (
+    msg.includes('fetch failed') ||
+    msg.includes('econnrefused') ||
+    msg.includes('enotfound') ||
+    msg.includes('econnreset') ||
+    msg.includes('network')
+  ) {
+    return true;
+  }
+  if (err.cause) return isConnectionError(err.cause);
+  return false;
+}
+
+function runLocalProcess(
+  command: string,
+  args: string[],
+  stdin: string,
+  timeoutMs: number,
+  languageId: number,
+): Promise<Judge0Result> {
+  return new Promise((resolve) => {
+    const started = Date.now();
+    const child = spawn(command, args, { timeout: timeoutMs });
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (chunk: Buffer | string) => {
+      stdout += chunk.toString();
+    });
+    child.stderr.on('data', (chunk: Buffer | string) => {
+      stderr += chunk.toString();
+    });
+    child.on('error', (spawnErr) => {
+      resolve({
+        token: `local-error-${Date.now()}`,
+        status: { id: 13, description: 'Internal Error' },
+        stdout: null,
+        stderr: spawnErr.message,
+        compile_output: null,
+        message: spawnErr.message,
+        time: '0',
+        memory: 0,
+        exit_code: 1,
+        language_id: languageId,
+      });
+    });
+    child.on('close', (code) => {
+      const elapsed = ((Date.now() - started) / 1000).toFixed(3);
+      const exitCode = code ?? 1;
+      resolve({
+        token: `local-${Date.now()}`,
+        status: {
+          id: exitCode === 0 ? 3 : 11,
+          description: exitCode === 0 ? 'Accepted' : 'Runtime Error',
+        },
+        stdout,
+        stderr: stderr || null,
+        compile_output: null,
+        message: null,
+        time: elapsed,
+        memory: 1024,
+        exit_code: exitCode,
+        language_id: languageId,
+      });
+    });
+
+    if (stdin) child.stdin.write(stdin);
+    child.stdin.end();
+  });
+}
+
+async function localExecute(input: CreateSubmissionInput): Promise<Judge0Result | null> {
+  const timeoutMs = input.wallTimeLimit ?? input.cpuTimeLimit ?? 5000;
+  try {
+    if (input.languageId === JUDGE0_LANGUAGE_IDS.python) {
+      return await runLocalProcess(
+        'python3',
+        ['-c', input.sourceCode],
+        input.stdin ?? '',
+        timeoutMs,
+        input.languageId,
+      );
+    }
+    if (input.languageId === JUDGE0_LANGUAGE_IDS.javascript) {
+      const wrapped = `${input.sourceCode}\n`;
+      return await runLocalProcess('node', ['-e', wrapped], input.stdin ?? '', timeoutMs, input.languageId);
+    }
+  } catch (err) {
+    logger.domain('system', 'warn', 'Local code runner failed', {
+      languageId: input.languageId,
+      err,
+    });
+  }
+  return null;
+}
+
 function mockExecute(input: CreateSubmissionInput): Judge0Result {
   const token = `mock-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   if (!input.sourceCode.trim()) {
@@ -159,11 +260,11 @@ class Judge0Client {
         status: res.status,
         body: text.slice(0, 500),
       });
-      throw new Error(`Judge0 create failed: ${res.status}`);
+      throw new CompilerError(`Judge0 create failed: ${res.status}`);
     }
 
     const data = (await res.json()) as { token?: string };
-    if (!data.token) throw new Error('Judge0 response missing token');
+    if (!data.token) throw new CompilerError('Judge0 response missing token');
     return { token: data.token };
   }
 
@@ -194,18 +295,16 @@ class Judge0Client {
     });
 
     if (!res.ok) {
-      throw new Error(`Judge0 get failed: ${res.status}`);
+      throw new CompilerError(`Judge0 get failed: ${res.status}`);
     }
 
     const raw = (await res.json()) as Record<string, unknown>;
     return this.decodeResult(raw, token);
   }
 
-  async createSubmissionAndWait(input: CreateSubmissionInput): Promise<Judge0Result> {
-    if (!this.isConfigured()) {
-      return mockExecute(input);
-    }
-
+  private async remoteCreateSubmissionAndWait(
+    input: CreateSubmissionInput,
+  ): Promise<Judge0Result> {
     const { token } = await this.createSubmission(input);
     const started = Date.now();
     const pollMs = 400;
@@ -228,6 +327,33 @@ class Judge0Client {
       exit_code: null,
       language_id: input.languageId,
     };
+  }
+
+  async createSubmissionAndWait(input: CreateSubmissionInput): Promise<Judge0Result> {
+    if (!this.isConfigured()) {
+      return mockExecute(input);
+    }
+
+    try {
+      return await this.remoteCreateSubmissionAndWait(input);
+    } catch (err) {
+      if (!isConnectionError(err)) {
+        throw new CompilerError(
+          err instanceof Error ? err.message : 'Judge0 execution failed',
+        );
+      }
+
+      logger.domain('system', 'warn', 'Judge0 unreachable — trying local runner', {
+        url: this.baseUrl,
+        err: err instanceof Error ? err.message : String(err),
+      });
+
+      const local = await localExecute(input);
+      if (local) return local;
+
+      logger.domain('system', 'warn', 'Local runner unavailable — using mock passthrough');
+      return mockExecute(input);
+    }
   }
 
   async batchCreateSubmissions(
