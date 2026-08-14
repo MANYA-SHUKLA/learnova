@@ -163,6 +163,7 @@ export function useSubmitSolutionMutation() {
     mutationFn: (body: SubmitBody) => practiceLabApi.submit(body),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: practiceLabKeys.all });
+      void qc.invalidateQueries({ queryKey: progressKeys.all });
     },
   });
 }
