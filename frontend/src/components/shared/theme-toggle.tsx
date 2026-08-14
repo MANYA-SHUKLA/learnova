@@ -9,6 +9,21 @@ export function ThemeToggle() {
   const t = useTranslations('common');
   const { resolvedTheme, setTheme, mounted } = useMountedTheme();
 
+  if (!mounted) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        disabled
+        aria-label={t('themeDark')}
+        title={t('themeDark')}
+      >
+        <Moon className="size-4" />
+      </Button>
+    );
+  }
+
   const isDark = resolvedTheme === 'dark';
 
   return (
@@ -16,7 +31,6 @@ export function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon"
-      disabled={!mounted}
       aria-label={isDark ? t('themeLight') : t('themeDark')}
       title={isDark ? t('themeLight') : t('themeDark')}
       onClick={() => {

@@ -15,7 +15,10 @@ const API = process.env.SMOKE_API_URL ?? 'http://127.0.0.1:4000/api/v1';
 const WEB = process.env.SMOKE_WEB_URL ?? 'http://127.0.0.1:3000';
 
 const CREDS = {
-  admin: { email: 'shuklamanya99@gmail.com', password: 'Admin@Test1' },
+  admin: {
+    email: 'shuklamanya99@gmail.com',
+    password: process.env.SMOKE_ADMIN_PASSWORD ?? 'Admin@Test1',
+  },
   faculty: { email: 'faculty.demo@learnova.test', password: 'Demo@12345' },
   student: { email: 'student.demo@learnova.test', password: 'Demo@12345' },
 } as const;
