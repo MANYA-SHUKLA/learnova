@@ -255,15 +255,16 @@ export async function seedPracticeLabs(
   const casesPerProblem = Math.max(1, Math.ceil(testCaseTarget / createdProblems.length));
   const testCases = [];
   for (const problem of createdProblems) {
-    const tpl = PROBLEM_TEMPLATES[Math.abs(problem.order) % PROBLEM_TEMPLATES.length]!;
+    const sampleIn = problem.sampleInput ?? '1';
+    const sampleOut = problem.sampleOutput ?? '1';
     for (let t = 0; t < casesPerProblem && testCases.length < testCaseTarget; t++) {
       const visibility = t === 0 ? 'public' : 'hidden';
       testCases.push({
         institutionId: oid,
         practiceLabId: problem.practiceLabId,
         problemId: problem._id,
-        input: t === 0 ? tpl.sampleIn : `${tpl.sampleIn}\n${t}`,
-        expectedOutput: t === 0 ? tpl.sampleOut : tpl.sampleOut,
+        input: sampleIn,
+        expectedOutput: sampleOut,
         visibility,
         weight: visibility === 'public' ? 1 : 2,
         timeoutMS: 2000,
@@ -378,4 +379,32 @@ export async function seedPracticeLabs(
   };
   logger.info(result, 'Practice lab seed inserted');
   return result;
+}
+
+/** Align seeded test cases with each problem's sample I/O (fixes legacy template-index mismatch). */
+export async function repairPracticeLabTestCases(institutionId: string): Promise<number> {
+  const oid = new Types.ObjectId(institutionId);
+  const problems = await LabProblemModel.find({
+    institutionId: oid,
+    deletedAt: null,
+    sampleInput: { $ne: null },
+    sampleOutput: { $ne: null },
+  })
+    .select('_id sampleInput sampleOutput')
+    .lean();
+
+  let modified = 0;
+  for (const problem of problems) {
+    const result = await ProblemTestCaseModel.updateMany(
+      { institutionId: oid, problemId: problem._id, deletedAt: null },
+      {
+        $set: {
+          input: problem.sampleInput,
+          expectedOutput: problem.sampleOutput,
+        },
+      },
+    );
+    modified += result.modifiedCount;
+  }
+  return modified;
 }

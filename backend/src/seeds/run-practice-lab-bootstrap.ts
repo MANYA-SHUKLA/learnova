@@ -17,7 +17,7 @@ import {
   UserModel,
 } from '../models/index.js';
 import { logger } from '../utils/logger/index.js';
-import { seedPracticeLabs } from './practice-lab.seed.js';
+import { seedPracticeLabs, repairPracticeLabTestCases } from './practice-lab.seed.js';
 
 async function main(): Promise<void> {
   const institutionId = process.env.SEED_INSTITUTION_ID?.trim();
@@ -126,6 +126,11 @@ async function main(): Promise<void> {
   );
   if (republished.modifiedCount > 0) {
     logger.info({ count: republished.modifiedCount }, 'Republished demo practice labs');
+  }
+
+  const repairedCases = await repairPracticeLabTestCases(institutionId);
+  if (repairedCases > 0) {
+    logger.info({ count: repairedCases }, 'Repaired practice lab test cases to match problem samples');
   }
 
   logger.info(result, 'Practice lab bootstrap completed');
