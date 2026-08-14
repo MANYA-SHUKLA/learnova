@@ -5,6 +5,7 @@ import { Card, CardContent, Spinner } from '@learnova/ui';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { SessionLoadingShell } from '@/components/shared/session-loading-shell';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { isPathAllowedForRole } from '@/lib/auth/role-routes';
 import { usePathname, useRouter } from '@/lib/i18n/routing';
@@ -44,21 +45,11 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
   }, [isLoading, isAuthenticated, user, onChangePasswordPage, pathname, router, roleAllowed]);
 
   if (isLoading || !isAuthenticated || !user) {
-    return (
-      <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-3 bg-background">
-        <Spinner size="lg" />
-        <p className="text-sm text-muted-foreground">Loading your session…</p>
-      </div>
-    );
+    return <SessionLoadingShell message="Loading your session…" />;
   }
 
   if (user.mustChangePassword && !onChangePasswordPage) {
-    return (
-      <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-3 bg-background">
-        <Spinner size="lg" />
-        <p className="text-sm text-muted-foreground">Redirecting…</p>
-      </div>
-    );
+    return <SessionLoadingShell message="Redirecting…" />;
   }
 
   if (!roleAllowed) {

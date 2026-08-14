@@ -13,6 +13,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
   type ReactNode,
 } from 'react';
 import { authApi } from '@/features/auth/services/auth-api';
@@ -61,9 +62,10 @@ export function resolveUserPermissions(user: AuthUser): AuthUser {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [hasMounted, setHasMounted] = useState(false);
   const user = useAuthStore((s) => s.user);
   const session = useAuthStore((s) => s.session);
-  const isLoading = useAuthStore((s) => s.isLoading);
+  const storeLoading = useAuthStore((s) => s.isLoading);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const permissions = useAuthStore((s) => s.permissions);
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -71,6 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setSession = useAuthStore((s) => s.setSession);
   const setLoading = useAuthStore((s) => s.setLoading);
   const clear = useAuthStore((s) => s.clear);
+
+  // Session tokens live in sessionStorage — keep SSR and first client paint identical.
+  const isLoading = !hasMounted || storeLoading;
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
