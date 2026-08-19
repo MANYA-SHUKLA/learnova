@@ -420,7 +420,7 @@ async function main(): Promise<void> {
   );
 
   // Always force-replace enrollments for this stack seed (clears bogus/partial data).
-  logger.info('Forcing enrollment reseed with target %d', counts.enrollments);
+  logger.info({ target: counts.enrollments }, 'Forcing enrollment reseed');
   const result = await seedEnrollments(
     institutionId,
     {
