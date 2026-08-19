@@ -155,9 +155,14 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
     });
 
     const studentRecord = await StudentModel.findOneAndUpdate(
-      { email: account.email, institutionId: instOid },
+      {
+        institutionId: instOid,
+        $or: [{ email: account.email }, { studentId: account.studentId }],
+        deletedAt: null,
+      },
       {
         $set: {
+          email: account.email,
           firstName: account.firstName,
           lastName: account.lastName,
           fullName: `${account.firstName} ${account.lastName}`,
@@ -168,7 +173,6 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
           studentId: account.studentId,
           admissionNumber: account.admissionNumber,
           rollNumber: account.rollNumber,
-          email: account.email,
           institutionId: instOid,
           yearOfStudy: 1,
           currentSemester: 1,
