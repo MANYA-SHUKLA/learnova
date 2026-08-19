@@ -60,6 +60,8 @@ export interface SeedExaminationOptions {
   force?: boolean;
   examTarget?: number;
   attemptTarget?: number;
+  announcementTarget?: number;
+  auditLogTarget?: number;
 }
 
 export interface ExaminationSeedResult {
@@ -88,6 +90,8 @@ export async function seedExaminations(
   const userOid = new Types.ObjectId(refs.userId);
   const examTarget = options.examTarget ?? 50;
   const attemptTarget = options.attemptTarget ?? 1000;
+  const announcementTarget = options.announcementTarget ?? 30;
+  const auditLogTarget = options.auditLogTarget ?? 20;
 
   logger.info({ institutionId, examTarget, attemptTarget }, 'Starting examination seed');
 
