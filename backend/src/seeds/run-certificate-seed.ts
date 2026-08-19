@@ -22,10 +22,11 @@ async function main(): Promise<void> {
   if (!user) throw new Error('No institution user found for seed actor');
 
   const force = process.env.SEED_FORCE === '1' || process.env.SEED_FORCE === 'true';
+  const counts = getSeedCounts();
   const result = await seedCertificates(institutionId, String(user._id), {
     force,
-    certificateTarget: 1000,
-    transcriptTarget: 500,
+    certificateTarget: counts.certificates,
+    transcriptTarget: counts.transcripts,
   });
 
   logger.info(result, 'Certificate seed completed');

@@ -84,16 +84,26 @@ function generateLessonContent(lessonTitle: string, lessonType: string): string 
   return `${intro}${body}Key points:\n\n${points}\n\n## Summary\n\nThis lesson provides a comprehensive overview of the topic.`;
 }
 
-export async function seedCourseBuilder(institutionId: string): Promise<void> {
+export interface SeedCourseBuilderOptions {
+  targetCourseCount?: number;
+  modulesPerCourse?: number;
+  lessonsPerModule?: number;
+}
+
+export async function seedCourseBuilder(
+  institutionId: string,
+  options: SeedCourseBuilderOptions = {},
+): Promise<void> {
   logger.info('Starting course builder seed...');
 
   const institutionOid = new Types.ObjectId(institutionId);
+  const targetCourseCount = options.targetCourseCount ?? 30;
+  const modulesPerCourse = options.modulesPerCourse ?? 3;
+  const lessonsPerModule = options.lessonsPerModule ?? 6;
 
   let courses = await CourseModel.find({ institutionId: institutionOid, deletedAt: null })
-    .limit(30)
+    .limit(targetCourseCount)
     .exec();
-
-  const targetCourseCount = 30;
   if (courses.length < targetCourseCount) {
     logger.info(
       `Found only ${courses.length} courses, creating ${targetCourseCount - courses.length} minimal courses...`,

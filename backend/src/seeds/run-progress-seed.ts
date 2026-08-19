@@ -13,6 +13,7 @@ import '../config/load-env.js';
 import { connectMongo, disconnectMongo } from '../database/index.js';
 import { logger } from '../utils/logger/index.js';
 import { seedProgress } from './progress.seed.js';
+import { getSeedCounts } from './seed-utils.js';
 
 async function main(): Promise<void> {
   await connectMongo();
@@ -23,7 +24,8 @@ async function main(): Promise<void> {
   }
 
   const force = process.env.SEED_FORCE === '1' || process.env.SEED_FORCE === 'true';
-  const result = await seedProgress(institutionId, { force, limit: 500 });
+  const counts = getSeedCounts();
+  const result = await seedProgress(institutionId, { force, limit: counts.progressLimit });
 
   logger.info(result, 'Progress seed finished');
   await disconnectMongo();
