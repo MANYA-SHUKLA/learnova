@@ -36,6 +36,7 @@
     "seed:demo-data": "tsx --env-file=.env src/seeds/run-demo-data-seed.ts",
     "seed:demo-finalize": "tsx --env-file=.env src/seeds/run-demo-finalize-seed.ts",
     "seed:complete": "tsx --env-file=.env src/seeds/run-complete-seed.ts",
+    "seed:minimal": "tsx --env-file=.env src/seeds/run-minimal-seed.ts",
     "mail:test": "tsx --env-file=.env src/scripts/test-smtp.ts",
     "db:reset-keep-jnu": "tsx --env-file=.env src/scripts/reset-keep-jnu.ts",
     "verify:platform": "tsx --env-file=.env src/scripts/verify-platform.ts",

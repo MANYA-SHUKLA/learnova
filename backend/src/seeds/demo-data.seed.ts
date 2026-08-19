@@ -48,10 +48,10 @@ import { InstitutionModel } from '../models/institution.model.js';
 import { CertificateTemplateModel } from '../models/certificate-template.model.js';
 import { logger } from '../utils/logger/index.js';
 import type { DemoSeedResult } from './demo-users.seed.js';
+import { getSeedCounts } from './seed-utils.js';
 
 const DEMO_FACULTY_EMAIL = 'faculty.demo@learnova.test';
 const DEMO_STUDENT_EMAIL = 'student.demo@learnova.test';
-const DEMO_COURSE_COUNT = 3;
 
 function activeEnrollmentStatuses(): readonly string[] {
   return ASSESSMENT_ENROLLMENT_STATUSES;
@@ -152,7 +152,7 @@ export async function seedDemoData(
     status: { $in: ['published', 'active'] },
   })
     .sort({ createdAt: 1 })
-    .limit(DEMO_COURSE_COUNT)
+    .limit(getSeedCounts().demoCourseCount)
     .select('_id title courseCode departmentId programIds semesterIds')
     .lean()
     .exec();

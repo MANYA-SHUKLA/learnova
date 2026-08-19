@@ -39,6 +39,7 @@
     "judge0:verify": "pnpm --filter @learnova/backend judge0:verify",
     "db:indexes": "pnpm --filter @learnova/backend db:indexes",
     "seed:complete": "pnpm --filter @learnova/backend seed:complete",
+    "seed:minimal": "pnpm --filter @learnova/backend seed:minimal",
     "seed:demo-data": "pnpm --filter @learnova/backend seed:demo-data",
     "generate:types": "turbo run generate:types --filter=@learnova/types"
   },

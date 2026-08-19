@@ -27,96 +27,147 @@ export interface DemoSeedResult {
 
 export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResult> {
   const instOid = new Types.ObjectId(institutionId);
-  
-  // Provision faculty login user
-  logger.info('Provisioning faculty demo login user...');
-  const facultyUser = await provisionLoginUser({
-    email: 'faculty.demo@learnova.test',
-    firstName: 'Faculty',
-    lastName: 'Demo',
-    institutionId,
-    role: 'faculty',
-    password: DEMO_PASSWORD,
-    mustChangePassword: false,
-  });
-  
-  // Create or update faculty ERP record
-  logger.info('Creating/updating faculty demo ERP record...');
-  const facultyRecord = await FacultyModel.findOneAndUpdate(
-    { email: 'faculty.demo@learnova.test', institutionId: instOid },
+  const demoUsers = getSeedCounts().demoUsers;
+
+  const demoAccounts = [
     {
-      $setOnInsert: {
-        employeeId: 'FAC-DEMO-001',
-        facultyCode: 'FDEMO001',
-        firstName: 'Faculty',
-        lastName: 'Demo',
-        fullName: 'Faculty Demo',
-        email: 'faculty.demo@learnova.test',
-        designation: 'assistant_professor',
-        employmentType: 'full_time',
-        institutionId: instOid,
-        status: 'active',
-        isActive: true,
-      },
+      role: 'faculty' as const,
+      email: 'faculty.demo@learnova.test',
+      firstName: 'Faculty',
+      lastName: 'Demo',
+      employeeId: 'FAC-DEMO-001',
+      facultyCode: 'FDEMO001',
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
-  );
-  
-  // Provision student login user
-  logger.info('Provisioning student demo login user...');
-  const studentUser = await provisionLoginUser({
-    email: 'student.demo@learnova.test',
-    firstName: 'Student',
-    lastName: 'Demo',
-    institutionId,
-    role: 'student',
-    password: DEMO_PASSWORD,
-    mustChangePassword: false,
-  });
-  
-  // Create or update student ERP record
-  logger.info('Creating/updating student demo ERP record...');
-  const studentRecord = await StudentModel.findOneAndUpdate(
-    { email: 'student.demo@learnova.test', institutionId: instOid },
+    ...(demoUsers >= 2
+      ? [
+          {
+            role: 'faculty' as const,
+            email: 'faculty.demo2@learnova.test',
+            firstName: 'Faculty',
+            lastName: 'Demo Two',
+            employeeId: 'FAC-DEMO-002',
+            facultyCode: 'FDEMO002',
+          },
+        ]
+      : []),
+  ];
+
+  const studentAccounts = [
     {
-      $setOnInsert: {
-        studentId: 'STU-DEMO-001',
-        admissionNumber: 'ADM2026001',
-        rollNumber: 'ROLL2026001',
-        firstName: 'Student',
-        lastName: 'Demo',
-        fullName: 'Student Demo',
-        email: 'student.demo@learnova.test',
-        institutionId: instOid,
-        status: 'active',
-        isActive: true,
-        yearOfStudy: 1,
-        currentSemester: 1,
-      },
+      email: 'student.demo@learnova.test',
+      firstName: 'Student',
+      lastName: 'Demo',
+      studentId: 'STU-DEMO-001',
+      admissionNumber: 'ADM2026001',
+      rollNumber: 'ROLL2026001',
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
-  );
-  
+    ...(demoUsers >= 2
+      ? [
+          {
+            email: 'student.demo2@learnova.test',
+            firstName: 'Student',
+            lastName: 'Demo Two',
+            studentId: 'STU-DEMO-002',
+            admissionNumber: 'ADM2026002',
+            rollNumber: 'ROLL2026002',
+          },
+        ]
+      : []),
+  ];
+
+  let facultyUserId = '';
+  let facultyRecordId = '';
+  for (const account of demoAccounts) {
+    logger.info({ email: account.email }, 'Provisioning faculty demo login user...');
+    const facultyUser = await provisionLoginUser({
+      email: account.email,
+      firstName: account.firstName,
+      lastName: account.lastName,
+      institutionId,
+      role: 'faculty',
+      password: DEMO_PASSWORD,
+      mustChangePassword: false,
+    });
+
+    const facultyRecord = await FacultyModel.findOneAndUpdate(
+      { email: account.email, institutionId: instOid },
+      {
+        $setOnInsert: {
+          employeeId: account.employeeId,
+          facultyCode: account.facultyCode,
+          firstName: account.firstName,
+          lastName: account.lastName,
+          fullName: `${account.firstName} ${account.lastName}`,
+          email: account.email,
+          designation: 'assistant_professor',
+          employmentType: 'full_time',
+          institutionId: instOid,
+          status: 'active',
+          isActive: true,
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+
+    facultyUserId = facultyUser.userId;
+    facultyRecordId = String(facultyRecord._id);
+  }
+
+  let studentUserId = '';
+  let studentRecordId = '';
+  for (const account of studentAccounts) {
+    logger.info({ email: account.email }, 'Provisioning student demo login user...');
+    const studentUser = await provisionLoginUser({
+      email: account.email,
+      firstName: account.firstName,
+      lastName: account.lastName,
+      institutionId,
+      role: 'student',
+      password: DEMO_PASSWORD,
+      mustChangePassword: false,
+    });
+
+    const studentRecord = await StudentModel.findOneAndUpdate(
+      { email: account.email, institutionId: instOid },
+      {
+        $setOnInsert: {
+          studentId: account.studentId,
+          admissionNumber: account.admissionNumber,
+          rollNumber: account.rollNumber,
+          firstName: account.firstName,
+          lastName: account.lastName,
+          fullName: `${account.firstName} ${account.lastName}`,
+          email: account.email,
+          institutionId: instOid,
+          status: 'active',
+          isActive: true,
+          yearOfStudy: 1,
+          currentSemester: 1,
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+
+    studentUserId = studentUser.userId;
+    studentRecordId = String(studentRecord._id);
+  }
+
   logger.info(
     {
-      faculty: {
-        userId: facultyUser.userId,
-        recordId: String(facultyRecord._id),
-        created: facultyUser.created,
-      },
-      student: {
-        userId: studentUser.userId,
-        recordId: String(studentRecord._id),
-        created: studentUser.created,
-      },
+      facultyAccounts: demoAccounts.length,
+      studentAccounts: studentAccounts.length,
+      facultyUserId,
+      facultyRecordId,
+      studentUserId,
+      studentRecordId,
     },
     'Demo users seeded successfully',
   );
-  
+
   return {
-    facultyUserId: facultyUser.userId,
-    facultyRecordId: String(facultyRecord._id),
-    studentUserId: studentUser.userId,
-    studentRecordId: String(studentRecord._id),
+    facultyUserId,
+    facultyRecordId,
+    studentUserId,
+    studentRecordId,
   };
 }
