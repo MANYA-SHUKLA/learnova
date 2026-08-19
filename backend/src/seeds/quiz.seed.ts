@@ -58,6 +58,7 @@ export interface SeedQuizOptions {
   quizTarget?: number;
   questionTarget?: number;
   attemptTarget?: number;
+  questionBankTarget?: number;
 }
 
 export interface QuizSeedResult {
@@ -81,6 +82,7 @@ export async function seedQuizzes(
   const quizTarget = options.quizTarget ?? 100;
   const questionTarget = options.questionTarget ?? 5000;
   const attemptTarget = options.attemptTarget ?? 10000;
+  const questionBankTarget = options.questionBankTarget ?? 10;
 
   logger.info(
     { institutionId, quizTarget, questionTarget, attemptTarget },
@@ -118,7 +120,7 @@ export async function seedQuizzes(
     ]);
   }
 
-  const bankDocs = Array.from({ length: 10 }, (_, i) => ({
+  const bankDocs = Array.from({ length: questionBankTarget }, (_, i) => ({
     institutionId: oid,
     title: `Seed Question Bank ${String(i + 1)}`,
     slug: `seed-question-bank-${String(i + 1)}`,
