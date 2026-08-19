@@ -17,6 +17,7 @@ import {
   UserModel,
 } from '../models/index.js';
 import { logger } from '../utils/logger/index.js';
+import { DEMO_STUDENT_EMAIL } from './demo-users.seed.js';
 import { seedPracticeLabs, repairPracticeLabTestCases } from './practice-lab.seed.js';
 
 async function main(): Promise<void> {
@@ -37,7 +38,7 @@ async function main(): Promise<void> {
       .lean(),
     StudentModel.findOne({
       institutionId: institutionOid,
-      email: 'student.demo@learnova.test',
+      email: DEMO_STUDENT_EMAIL,
       deletedAt: null,
     })
       .select('_id')
@@ -46,7 +47,7 @@ async function main(): Promise<void> {
 
   if (!admin) throw new Error('No institution admin user — log in / register first');
   if (!faculty) throw new Error('Run pnpm seed:demo first (faculty.demo@learnova.test)');
-  if (!student) throw new Error('Run pnpm seed:demo first (student.demo@learnova.test)');
+  if (!student) throw new Error(`Run pnpm seed:demo first (${DEMO_STUDENT_EMAIL})`);
 
   let course = await CourseModel.findOne({
     institutionId: institutionOid,

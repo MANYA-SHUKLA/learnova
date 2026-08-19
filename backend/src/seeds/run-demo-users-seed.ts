@@ -7,7 +7,13 @@
 import '../config/load-env.js';
 import { connectMongo, disconnectMongo } from '../database/index.js';
 import { logger } from '../utils/logger/index.js';
-import { seedDemoUsers } from './demo-users.seed.js';
+import {
+  DEMO_FACULTY_EMAIL,
+  DEMO_FACULTY_PASSWORD,
+  DEMO_STUDENT_EMAIL,
+  DEMO_STUDENT_PASSWORD,
+  seedDemoUsers,
+} from './demo-users.seed.js';
 
 import { resolveSeedInstitutionId } from './seed-utils.js';
 
@@ -20,8 +26,8 @@ async function main(): Promise<void> {
 
   logger.info(result, 'Demo users seed completed');
   logger.info('Login credentials:');
-  logger.info('  Faculty: faculty.demo@learnova.test / Demo@12345');
-  logger.info('  Student: student.demo@learnova.test / Demo@12345');
+  logger.info(`  Faculty: ${DEMO_FACULTY_EMAIL} / ${DEMO_FACULTY_PASSWORD}`);
+  logger.info(`  Student: ${DEMO_STUDENT_EMAIL} / ${DEMO_STUDENT_PASSWORD}`);
 
   await disconnectMongo();
 }

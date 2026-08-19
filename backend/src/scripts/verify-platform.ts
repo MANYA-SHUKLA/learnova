@@ -20,7 +20,7 @@ const CREDS = {
     password: process.env.SMOKE_ADMIN_PASSWORD ?? 'Admin@Test1',
   },
   faculty: { email: 'faculty.demo@learnova.test', password: 'Demo@12345' },
-  student: { email: 'student.demo@learnova.test', password: 'Demo@12345' },
+  student: { email: 'geragunjan02@gmail.com', password: 'MANYAshukla@1' },
 } as const;
 
 type LoginResult = {

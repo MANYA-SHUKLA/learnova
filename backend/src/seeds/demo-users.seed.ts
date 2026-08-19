@@ -1,22 +1,45 @@
 /**
  * Demo users seed - creates demo login accounts for faculty and student roles
- * 
- * Passwords:
- * - faculty.demo@learnova.test: Demo@12345
- * - student.demo@learnova.test: Demo@12345
- * 
+ *
  * Requires: SEED_INSTITUTION_ID env variable
  * Usage: pnpm seed:demo
  */
 
 import { Types } from 'mongoose';
-import { provisionLoginUser } from '../services/users/provision-login-user.js';
+import { hashPassword } from '../security/index.js';
+import { userRepository } from '../repositories/auth/index.js';
+import {
+  provisionLoginUser,
+  type ProvisionLoginUserInput,
+} from '../services/users/provision-login-user.js';
 import { FacultyModel } from '../models/faculty.model.js';
 import { StudentModel } from '../models/student.model.js';
 import { logger } from '../utils/logger/index.js';
 import { getSeedCounts } from './seed-utils.js';
 
-const DEMO_PASSWORD = 'Demo@12345';
+export const DEMO_FACULTY_EMAIL = 'faculty.demo@learnova.test';
+export const DEMO_FACULTY_PASSWORD = 'Demo@12345';
+export const DEMO_STUDENT_EMAIL = 'geragunjan02@gmail.com';
+export const DEMO_STUDENT_PASSWORD = 'MANYAshukla@1';
+
+const DEMO_PASSWORD = DEMO_FACULTY_PASSWORD;
+
+async function ensureLoginUser(input: ProvisionLoginUserInput): Promise<{
+  userId: string;
+  created: boolean;
+}> {
+  const result = await provisionLoginUser(input);
+  if (!result.created && input.password) {
+    const passwordHash = await hashPassword(input.password);
+    await userRepository.updateById(result.userId, {
+      passwordHash,
+      mustChangePassword: input.mustChangePassword ?? false,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+    });
+  }
+  return { userId: result.userId, created: result.created };
+}
 
 export interface DemoSeedResult {
   facultyUserId: string;
@@ -54,9 +77,9 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
 
   const studentAccounts = [
     {
-      email: 'student.demo@learnova.test',
-      firstName: 'Student',
-      lastName: 'Demo',
+      email: DEMO_STUDENT_EMAIL,
+      firstName: 'Gunjan',
+      lastName: 'Gera',
       studentId: 'STU-DEMO-001',
       admissionNumber: 'ADM2026001',
       rollNumber: 'ROLL2026001',
@@ -79,7 +102,7 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
   let facultyRecordId = '';
   for (const account of demoAccounts) {
     logger.info({ email: account.email }, 'Provisioning faculty demo login user...');
-    const facultyUser = await provisionLoginUser({
+    const facultyUser = await ensureLoginUser({
       email: account.email,
       firstName: account.firstName,
       lastName: account.lastName,
@@ -117,30 +140,36 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
   let studentRecordId = '';
   for (const account of studentAccounts) {
     logger.info({ email: account.email }, 'Provisioning student demo login user...');
-    const studentUser = await provisionLoginUser({
+    const studentPassword =
+      account.email.toLowerCase() === DEMO_STUDENT_EMAIL.toLowerCase()
+        ? DEMO_STUDENT_PASSWORD
+        : DEMO_PASSWORD;
+    const studentUser = await ensureLoginUser({
       email: account.email,
       firstName: account.firstName,
       lastName: account.lastName,
       institutionId,
       role: 'student',
-      password: DEMO_PASSWORD,
+      password: studentPassword,
       mustChangePassword: false,
     });
 
     const studentRecord = await StudentModel.findOneAndUpdate(
       { email: account.email, institutionId: instOid },
       {
+        $set: {
+          firstName: account.firstName,
+          lastName: account.lastName,
+          fullName: `${account.firstName} ${account.lastName}`,
+          status: 'active',
+          isActive: true,
+        },
         $setOnInsert: {
           studentId: account.studentId,
           admissionNumber: account.admissionNumber,
           rollNumber: account.rollNumber,
-          firstName: account.firstName,
-          lastName: account.lastName,
-          fullName: `${account.firstName} ${account.lastName}`,
           email: account.email,
           institutionId: instOid,
-          status: 'active',
-          isActive: true,
           yearOfStudy: 1,
           currentSemester: 1,
         },
