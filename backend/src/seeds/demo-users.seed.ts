@@ -17,12 +17,12 @@ import { StudentModel } from '../models/student.model.js';
 import { logger } from '../utils/logger/index.js';
 import { getSeedCounts } from './seed-utils.js';
 
-export const DEMO_FACULTY_EMAIL = 'faculty.demo@learnova.test';
-export const DEMO_FACULTY_PASSWORD = 'Demo@12345';
+export const DEMO_FACULTY_EMAIL = 'noreply@moonair.in';
+export const DEMO_FACULTY_PASSWORD = 'MANYAshukl@1';
 export const DEMO_STUDENT_EMAIL = 'geragunjan02@gmail.com';
 export const DEMO_STUDENT_PASSWORD = 'MANYAshukla@1';
 
-const DEMO_PASSWORD = DEMO_FACULTY_PASSWORD;
+const LEGACY_DEMO_PASSWORD = 'Demo@12345';
 
 async function ensureLoginUser(input: ProvisionLoginUserInput): Promise<{
   userId: string;
@@ -55,9 +55,9 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
   const demoAccounts = [
     {
       role: 'faculty' as const,
-      email: 'faculty.demo@learnova.test',
+      email: DEMO_FACULTY_EMAIL,
       firstName: 'Faculty',
-      lastName: 'Demo',
+      lastName: 'Moonair',
       employeeId: 'FAC-DEMO-001',
       facultyCode: 'FDEMO001',
     },
@@ -102,31 +102,41 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
   let facultyRecordId = '';
   for (const account of demoAccounts) {
     logger.info({ email: account.email }, 'Provisioning faculty demo login user...');
+    const facultyPassword =
+      account.email.toLowerCase() === DEMO_FACULTY_EMAIL.toLowerCase()
+        ? DEMO_FACULTY_PASSWORD
+        : LEGACY_DEMO_PASSWORD;
     const facultyUser = await ensureLoginUser({
       email: account.email,
       firstName: account.firstName,
       lastName: account.lastName,
       institutionId,
       role: 'faculty',
-      password: DEMO_PASSWORD,
+      password: facultyPassword,
       mustChangePassword: false,
     });
 
     const facultyRecord = await FacultyModel.findOneAndUpdate(
-      { email: account.email, institutionId: instOid },
       {
-        $setOnInsert: {
-          employeeId: account.employeeId,
-          facultyCode: account.facultyCode,
+        institutionId: instOid,
+        $or: [{ email: account.email }, { employeeId: account.employeeId }],
+        deletedAt: null,
+      },
+      {
+        $set: {
+          email: account.email,
           firstName: account.firstName,
           lastName: account.lastName,
           fullName: `${account.firstName} ${account.lastName}`,
-          email: account.email,
+          status: 'active',
+          isActive: true,
+        },
+        $setOnInsert: {
+          employeeId: account.employeeId,
+          facultyCode: account.facultyCode,
           designation: 'assistant_professor',
           employmentType: 'full_time',
           institutionId: instOid,
-          status: 'active',
-          isActive: true,
         },
       },
       { upsert: true, new: true, setDefaultsOnInsert: true },
@@ -143,7 +153,7 @@ export async function seedDemoUsers(institutionId: string): Promise<DemoSeedResu
     const studentPassword =
       account.email.toLowerCase() === DEMO_STUDENT_EMAIL.toLowerCase()
         ? DEMO_STUDENT_PASSWORD
-        : DEMO_PASSWORD;
+        : LEGACY_DEMO_PASSWORD;
     const studentUser = await ensureLoginUser({
       email: account.email,
       firstName: account.firstName,

@@ -19,7 +19,7 @@ const CREDS = {
     email: 'shuklamanya99@gmail.com',
     password: process.env.SMOKE_ADMIN_PASSWORD ?? 'Admin@Test1',
   },
-  faculty: { email: 'faculty.demo@learnova.test', password: 'Demo@12345' },
+  faculty: { email: 'noreply@moonair.in', password: 'MANYAshukl@1' },
   student: { email: 'geragunjan02@gmail.com', password: 'MANYAshukla@1' },
 } as const;
 
