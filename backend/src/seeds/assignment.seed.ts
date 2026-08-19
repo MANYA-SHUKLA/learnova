@@ -205,6 +205,8 @@ export async function seedAssignments(
   const grades: Record<string, unknown>[] = [];
   const comments: Record<string, unknown>[] = [];
 
+  const usedSubmissionPairs = new Set<string>();
+
   outer: for (const assignment of submittableAssignments) {
     const assignmentId = assignment._id as Types.ObjectId;
     const totalMarks = assignment.totalMarks as number;
@@ -212,17 +214,14 @@ export async function seedAssignments(
     const latePenaltyPercent = assignment.latePenaltyPercent as number;
     const dueDate = assignment.dueDate as Date | null;
 
-    const studentCount = Math.min(
-      refs.studentIds.length,
-      Math.ceil(submissionTarget / Math.max(1, submittableAssignments.length)) + 2,
-    );
-
-    for (let s = 0; s < studentCount; s++) {
+    for (const studentIdStr of refs.studentIds) {
       if (submissions.length >= submissionTarget) break outer;
 
-      const studentId = new Types.ObjectId(
-        refs.studentIds[(s + submissions.length) % refs.studentIds.length]!,
-      );
+      const pairKey = `${String(assignmentId)}:${studentIdStr}`;
+      if (usedSubmissionPairs.has(pairKey)) continue;
+      usedSubmissionPairs.add(pairKey);
+
+      const studentId = new Types.ObjectId(studentIdStr);
       const submissionId = new Types.ObjectId();
       const late = randomBool(0.18);
       const submittedAt = dueDate
