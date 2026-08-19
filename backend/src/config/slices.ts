@@ -113,7 +113,13 @@ export const rateLimitConfig = {
 } as const;
 
 export const cookiesConfig = {
-  secure: env.COOKIE_SECURE === 'true' || env.NODE_ENV === 'production',
+  // Honor explicit COOKIE_SECURE=false for local http dev even when NODE_ENV=production.
+  secure:
+    env.COOKIE_SECURE === 'true'
+      ? true
+      : env.COOKIE_SECURE === 'false'
+        ? false
+        : env.NODE_ENV === 'production',
   sameSite: (env.COOKIE_SAME_SITE ?? 'lax'),
   domain: env.COOKIE_DOMAIN,
   path: env.COOKIE_PATH ?? '/',
