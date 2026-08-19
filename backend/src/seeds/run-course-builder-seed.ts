@@ -1,35 +1,39 @@
-#!/usr/bin/env node
 /**
  * Seed course builder data (modules, lessons, resources) for existing courses.
- * Requires: SEED_INSTITUTION_ID env variable (or uses default)
  *
- * Usage:
- *   npm run seed:course-builder
+ * Usage: pnpm --filter @learnova/backend seed:course-builder
  */
 
-import { connect, disconnect } from 'mongoose';
-import { seedCourseBuilder } from './course-builder.seed.js';
+import '../config/load-env.js';
+import { connectMongo, disconnectMongo } from '../database/index.js';
 import { logger } from '../utils/logger/index.js';
+import { seedCourseBuilder } from './course-builder.seed.js';
+import { getSeedCounts, resolveSeedInstitutionId } from './seed-utils.js';
 
-async function run() {
-  try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learnova_dev';
-    logger.info(`Connecting to MongoDB: ${mongoUri}`);
-    await connect(mongoUri);
+async function main(): Promise<void> {
+  await connectMongo();
 
-    const institutionId = process.env.SEED_INSTITUTION_ID || '507f1f77bcf86cd799439011';
-    logger.info(`Using institution ID: ${institutionId}`);
+  const institutionId = process.env.SEED_INSTITUTION_ID?.trim() ?? (await resolveSeedInstitutionId());
+  const counts = getSeedCounts();
 
-    await seedCourseBuilder(institutionId);
+  logger.info({ institutionId }, 'Using institution ID for course builder seed');
 
-    logger.info('Course builder seed completed successfully');
-    await disconnect();
-    process.exit(0);
-  } catch (err) {
-    logger.error({ error: err }, 'Course builder seed failed');
-    await disconnect();
-    process.exit(1);
-  }
+  await seedCourseBuilder(institutionId, {
+    targetCourseCount: counts.courseBuilderCourses,
+    modulesPerCourse: counts.modulesPerCourse,
+    lessonsPerModule: counts.lessonsPerModule,
+  });
+
+  logger.info('Course builder seed completed successfully');
+  await disconnectMongo();
 }
 
-run();
+main().catch(async (err: unknown) => {
+  logger.error({ err }, 'Course builder seed failed');
+  try {
+    await disconnectMongo();
+  } catch {
+    // ignore
+  }
+  process.exit(1);
+});

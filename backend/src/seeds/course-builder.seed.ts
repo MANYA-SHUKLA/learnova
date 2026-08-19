@@ -150,7 +150,7 @@ export async function seedCourseBuilder(
       continue;
     }
 
-    const numModules = Math.floor(Math.random() * 3) + 2;
+    const numModules = modulesPerCourse;
 
     for (let m = 0; m < numModules; m++) {
       const moduleTitle = MODULE_TITLES[m % MODULE_TITLES.length] ?? 'Module';
@@ -170,7 +170,7 @@ export async function seedCourseBuilder(
       });
       totalModules++;
 
-      const numLessons = Math.floor(Math.random() * 6) + 4;
+      const numLessons = lessonsPerModule;
 
       for (let l = 0; l < numLessons; l++) {
         const lessonTitle = LESSON_TITLES[l % LESSON_TITLES.length] ?? 'Lesson';

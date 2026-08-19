@@ -14,6 +14,7 @@ import { provisionLoginUser } from '../services/users/provision-login-user.js';
 import { FacultyModel } from '../models/faculty.model.js';
 import { StudentModel } from '../models/student.model.js';
 import { logger } from '../utils/logger/index.js';
+import { getSeedCounts } from './seed-utils.js';
 
 const DEMO_PASSWORD = 'Demo@12345';
 
