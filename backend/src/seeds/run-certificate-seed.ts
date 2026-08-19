@@ -9,6 +9,7 @@ import { connectMongo, disconnectMongo } from '../database/index.js';
 import { UserModel } from '../models/index.js';
 import { logger } from '../utils/logger/index.js';
 import { seedCertificates } from './certificate.seed.js';
+import { getSeedCounts } from './seed-utils.js';
 
 async function main(): Promise<void> {
   await connectMongo();

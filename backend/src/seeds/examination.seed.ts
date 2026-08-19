@@ -467,7 +467,7 @@ export async function seedExaminations(
   }
 
   await ExamAuditLogModel.insertMany(
-    Array.from({ length: 20 }, (_, i) => ({
+    Array.from({ length: auditLogTarget }, (_, i) => ({
       institutionId: oid,
       examId: randomItem(exams)._id,
       attemptId: null,
@@ -480,7 +480,7 @@ export async function seedExaminations(
   );
 
   const announcements = await ExamAnnouncementModel.insertMany(
-    Array.from({ length: 30 }, (_, i) => {
+    Array.from({ length: announcementTarget }, (_, i) => {
       const exam = randomItem(exams);
       return {
         institutionId: oid,
@@ -523,7 +523,7 @@ export async function seedExaminations(
     attendance: attendanceCreated,
     devices: devicesCreated,
     announcements: announcements.length,
-    auditLogs: 20,
+    auditLogs: auditLogTarget,
   };
 
   logger.info(result, 'Examination seed completed');

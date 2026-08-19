@@ -9,6 +9,7 @@ import { connectMongo, disconnectMongo } from '../database/index.js';
 import { CourseModel, StudentModel, UserModel } from '../models/index.js';
 import { logger } from '../utils/logger/index.js';
 import { seedGradebook, type GradebookSeedRefs } from './gradebook.seed.js';
+import { getSeedCounts } from './seed-utils.js';
 
 async function loadRefs(institutionId: string): Promise<GradebookSeedRefs> {
   const oid = new Types.ObjectId(institutionId);
@@ -31,11 +32,12 @@ async function main(): Promise<void> {
   if (!institutionId) throw new Error('SEED_INSTITUTION_ID is required');
 
   const force = process.env.SEED_FORCE === '1' || process.env.SEED_FORCE === 'true';
+  const counts = getSeedCounts();
   const refs = await loadRefs(institutionId);
   const result = await seedGradebook(institutionId, refs, {
     force,
-    gradeTarget: 5000,
-    itemTarget: 10000,
+    gradeTarget: counts.gradeSummaries,
+    itemTarget: counts.gradeItems,
   });
 
   logger.info(result, 'Gradebook seed completed');
