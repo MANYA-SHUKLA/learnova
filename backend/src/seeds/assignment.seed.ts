@@ -70,6 +70,7 @@ export interface SeedAssignmentOptions {
   force?: boolean;
   assignmentTarget?: number;
   submissionTarget?: number;
+  rubricTarget?: number;
 }
 
 export interface AssignmentSeedResult {
@@ -95,6 +96,7 @@ export async function seedAssignments(
   const userOid = new Types.ObjectId(refs.userId);
   const assignmentTarget = options.assignmentTarget ?? 100;
   const submissionTarget = options.submissionTarget ?? 1000;
+  const rubricTarget = options.rubricTarget ?? 12;
 
   logger.info({ institutionId, assignmentTarget, submissionTarget }, 'Starting assignment seed');
 
@@ -123,7 +125,7 @@ export async function seedAssignments(
   const futureEnd = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
   // ------------------------------------------------------------------ rubrics
-  const rubrics = Array.from({ length: 12 }, (_, i) => {
+  const rubrics = Array.from({ length: rubricTarget }, (_, i) => {
     const criteria = Array.from({ length: randomInt(3, 5) }, (_, c) => ({
       id: new Types.ObjectId().toHexString(),
       title: `Criterion ${c + 1}`,

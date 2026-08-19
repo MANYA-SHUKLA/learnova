@@ -24,3 +24,5 @@ export async function resolveSeedInstitutionId(): Promise<string> {
 export function seedForceEnabled(): boolean {
   return process.env.SEED_FORCE === '1' || process.env.SEED_FORCE === 'true';
 }
+
+export { getSeedCounts, resolveSeedProfile, type SeedCounts, type SeedProfileName } from './seed-config.js';

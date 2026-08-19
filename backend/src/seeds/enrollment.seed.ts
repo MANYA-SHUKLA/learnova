@@ -55,6 +55,7 @@ export interface SeedRefs {
 export interface SeedEnrollmentOptions {
   force?: boolean;
   target?: number;
+  waitlistTarget?: number;
 }
 
 export async function seedEnrollments(
@@ -65,6 +66,7 @@ export async function seedEnrollments(
   const oid = new Types.ObjectId(institutionId);
   const userOid = new Types.ObjectId(refs.userId);
   const target = options.target ?? 1200;
+  const waitlistTarget = options.waitlistTarget ?? 50;
 
   logger.info({ institutionId, target }, 'Starting enrollment seed');
 
@@ -154,9 +156,9 @@ export async function seedEnrollments(
   // Waitlist from remaining unused pairs
   let waitPosition = 1;
   for (const studentId of refs.studentIds) {
-    if (waitlistEntries.length >= 50) break;
+    if (waitlistEntries.length >= waitlistTarget) break;
     for (const courseId of refs.courseIds) {
-      if (waitlistEntries.length >= 50) break;
+      if (waitlistEntries.length >= waitlistTarget) break;
       const key = `${studentId}:${courseId}`;
       if (used.has(key)) continue;
       used.add(key);

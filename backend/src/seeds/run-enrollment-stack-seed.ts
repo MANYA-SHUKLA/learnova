@@ -27,6 +27,7 @@ import {
 } from '../models/index.js';
 import { logger } from '../utils/logger/index.js';
 import { seedEnrollments } from './enrollment.seed.js';
+import { getSeedCounts } from './seed-utils.js';
 
 async function main(): Promise<void> {
   await connectMongo();
@@ -44,6 +45,7 @@ async function main(): Promise<void> {
   }
   const userId = String(admin._id);
   const userOid = new Types.ObjectId(userId);
+  const counts = getSeedCounts();
 
   // Campus — required: institutionId, name, code
   let campus = await CampusModel.findOne({ institutionId: institutionOid, deletedAt: null }).lean();
@@ -84,7 +86,7 @@ async function main(): Promise<void> {
     { name: 'Business', code: 'BBA' },
   ];
   const departmentIds: string[] = [];
-  for (const spec of deptSpecs) {
+  for (const spec of deptSpecs.slice(0, counts.departments)) {
     let dept = await DepartmentModel.findOne({
       institutionId: institutionOid,
       code: spec.code,
@@ -140,7 +142,7 @@ async function main(): Promise<void> {
     },
   ];
   const programIds: string[] = [];
-  for (const spec of programSpecs) {
+  for (const spec of programSpecs.slice(0, counts.programs)) {
     let program = await ProgramModel.findOne({
       institutionId: institutionOid,
       code: spec.code,
@@ -184,7 +186,7 @@ async function main(): Promise<void> {
 
   // Semesters — required: institutionId, academicYearId, name, number, term, startDate, endDate
   const semesterIds: string[] = [];
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= counts.semesters; i++) {
     let semester = await SemesterModel.findOne({
       institutionId: institutionOid,
       academicYearId: year._id,
@@ -223,7 +225,7 @@ async function main(): Promise<void> {
   // Batch required: institutionId, programId, name, year
   const sectionIds: string[] = [];
   const batchIds: string[] = [];
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < counts.sections; i++) {
     const programId = programIds[i % programIds.length]!;
     const semesterId = semesterIds[i % semesterIds.length]!;
     const sectionName = `Section ${String.fromCharCode(65 + i)}`;
@@ -281,7 +283,7 @@ async function main(): Promise<void> {
       .lean()
   ).map((d) => String(d._id));
 
-  while (facultyCount < 100) {
+  while (facultyCount < counts.faculty) {
     const n = facultyCount + 1;
     const firstName = 'Faculty';
     const lastName = `${n}`;
@@ -318,7 +320,7 @@ async function main(): Promise<void> {
       .lean()
   ).map((d) => String(d._id));
 
-  while (studentCount < 1000) {
+  while (studentCount < counts.students) {
     const n = studentCount + 1;
     const firstName = 'Student';
     const lastName = `${n}`;
@@ -371,7 +373,7 @@ async function main(): Promise<void> {
     'general',
   ] as const;
 
-  while (courseCount < 100) {
+  while (courseCount < counts.courses) {
     const n = courseCount + 1;
     const title = `Seed Course ${n}`;
     const created = await CourseModel.create({
@@ -418,7 +420,7 @@ async function main(): Promise<void> {
   );
 
   // Always force-replace enrollments for this stack seed (clears bogus/partial data).
-  logger.info('Forcing enrollment reseed with target 1200');
+  logger.info('Forcing enrollment reseed with target %d', counts.enrollments);
   const result = await seedEnrollments(
     institutionId,
     {
@@ -432,7 +434,7 @@ async function main(): Promise<void> {
       sectionIds,
       userId,
     },
-    { force: true, target: 1200 },
+    { force: true, target: counts.enrollments, waitlistTarget: counts.waitlist },
   );
 
   logger.info(result, 'Enrollment stack seed completed');

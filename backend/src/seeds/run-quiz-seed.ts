@@ -14,6 +14,7 @@ import { connectMongo, disconnectMongo } from '../database/index.js';
 import { CourseModel, StudentModel, UserModel } from '../models/index.js';
 import { logger } from '../utils/logger/index.js';
 import { seedQuizzes, type QuizSeedRefs } from './quiz.seed.js';
+import { getSeedCounts } from './seed-utils.js';
 
 async function loadRefs(institutionId: string): Promise<QuizSeedRefs> {
   const oid = new Types.ObjectId(institutionId);
@@ -54,12 +55,14 @@ async function main(): Promise<void> {
   }
 
   const force = process.env.SEED_FORCE === '1' || process.env.SEED_FORCE === 'true';
+  const counts = getSeedCounts();
   const refs = await loadRefs(institutionId);
   const result = await seedQuizzes(institutionId, refs, {
     force,
-    quizTarget: 100,
-    questionTarget: 5000,
-    attemptTarget: 10000,
+    quizTarget: counts.quizzes,
+    questionTarget: counts.questions,
+    attemptTarget: counts.quizAttempts,
+    questionBankTarget: counts.questionBanks,
   });
 
   logger.info(result, 'Quiz seed completed');
