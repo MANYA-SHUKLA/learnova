@@ -43,6 +43,8 @@ import {
 } from '../hooks/use-timetable-queries';
 
 import type { CsvCell } from '@/features/institution/utils/export';
+
+const DAY_VALUES: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const TIME_PATTERN = /^(\d{1,2}):(\d{2})$/;
 const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
 
@@ -50,6 +52,50 @@ function normalizeTime(value: string): string {
   const match = value.trim().match(TIME_PATTERN);
   if (!match?.[1] || !match[2]) return value.trim();
   return `${match[1].padStart(2, '0')}:${match[2]}`;
+}
+
+function TimetablePrintView({
+  title,
+  semesterName,
+  headers,
+  rows,
+}: {
+  title: string;
+  semesterName: string;
+  headers: string[];
+  rows: CsvCell[][];
+}) {
+  return (
+    <div className="timetable-print-only">
+      <h1 className="mb-1 text-xl font-semibold text-foreground">{title}</h1>
+      {semesterName ? <p className="mb-4 text-sm text-muted-foreground">{semesterName}</p> : null}
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr>
+            {headers.map((header) => (
+              <th
+                key={header}
+                className="border border-border px-3 py-2 text-left font-semibold text-foreground"
+              >
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((cell, cellIndex) => (
+                <td key={cellIndex} className="border border-border px-3 py-2 align-top text-foreground">
+                  {cell ?? ''}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export interface TimetablePageProps {
@@ -331,9 +377,12 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   );
 
   const semesterOptions = semestersData?.items ?? [];
+  const selectedSemesterName =
+    semesterOptions.find((s) => s.id === selectedSemesterId)?.name ?? '';
 
   return (
     <div className="space-y-6">
+      <div className="timetable-no-print">
       <PageHeader
         eyebrow={t('eyebrow')}
         title={t('title')}
@@ -378,8 +427,18 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           ) : undefined
         }
       />
+      </div>
 
-      <Card className="rounded-2xl shadow-soft-md">
+      {filteredRows.length > 0 ? (
+        <TimetablePrintView
+          title={t('title')}
+          semesterName={selectedSemesterName}
+          headers={exportHeaders}
+          rows={exportRows}
+        />
+      ) : null}
+
+      <Card className="timetable-no-print rounded-2xl shadow-soft-md">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>{t('tableTitle')}</CardTitle>
@@ -473,7 +532,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           ) : slotsQuery.isError ? (
             <ErrorState message={t('loadFailed')} />
           ) : (
-            <>
+            <div className="timetable-no-print">
               <ResourceTable
                 columns={columns}
                 rows={filteredRows}
@@ -520,7 +579,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                   onPageChange={setPage}
                 />
               ) : null}
-            </>
+            </div>
           )}
         </CardContent>
       </Card>
