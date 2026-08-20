@@ -421,6 +421,15 @@ export function TimetablePage({ mode }: TimetablePageProps) {
 
   const semesterOptions = isAdmin ? (semestersData?.items ?? []) : readSemesterOptions;
 
+  const selectedSemesterName = useMemo(() => {
+    const fromOptions = semesterOptions.find((s) => s.id === selectedSemesterId)?.name;
+    if (fromOptions) return fromOptions;
+    if (timetable?.name) {
+      return timetable.name.replace(/\s+timetable$/i, '').trim() || timetable.name;
+    }
+    return '';
+  }, [semesterOptions, selectedSemesterId, timetable?.name]);
+
   return (
     <div className="space-y-6">
       <div className="timetable-no-print">
@@ -509,20 +518,28 @@ export function TimetablePage({ mode }: TimetablePageProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
-            <select
-              className="flex h-10 min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
-              value={selectedSemesterId}
-              onChange={(e) => {
-                setSemesterId(e.target.value);
-                setPage(1);
-              }}
-            >
-              {semesterOptions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="font-medium text-foreground">{t('semesterLabel')}</span>
+              <select
+                className="flex h-10 min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                value={selectedSemesterId}
+                disabled={!isAdmin && publishedTimetablesQuery.isLoading}
+                onChange={(e) => {
+                  setSemesterId(e.target.value);
+                  setPage(1);
+                }}
+              >
+                {semesterOptions.length === 0 ? (
+                  <option value="">{t('selectSemester')}</option>
+                ) : (
+                  semesterOptions.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
             {isAdmin ? (
             <select
               className="flex h-10 min-w-[140px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
