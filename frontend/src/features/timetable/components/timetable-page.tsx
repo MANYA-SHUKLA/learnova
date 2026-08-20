@@ -384,7 +384,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           {timetablesQuery.isLoading ? (
             <Skeleton className="h-48 w-full rounded-xl" />
           ) : timetablesQuery.isError ? (
-            <ErrorState title={t('loadFailed')} />
+            <ErrorState message={t('loadFailed')} />
           ) : !timetable ? (
             <EmptyState
               title={t('emptyTitle')}
@@ -395,7 +395,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           ) : slotsQuery.isLoading ? (
             <Skeleton className="h-48 w-full rounded-xl" />
           ) : slotsQuery.isError ? (
-            <ErrorState title={t('loadFailed')} />
+            <ErrorState message={t('loadFailed')} />
           ) : (
             <>
               <ResourceTable
@@ -436,7 +436,11 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               />
               {slotsQuery.data?.meta ? (
                 <PaginationControls
-                  meta={slotsQuery.data.meta}
+                  page={slotsQuery.data.meta.page}
+                  totalPages={slotsQuery.data.meta.totalPages}
+                  hasNextPage={slotsQuery.data.meta.hasNextPage}
+                  hasPrevPage={slotsQuery.data.meta.hasPrevPage}
+                  total={slotsQuery.data.meta.total}
                   onPageChange={setPage}
                 />
               ) : null}

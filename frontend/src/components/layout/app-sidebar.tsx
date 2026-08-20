@@ -10,6 +10,7 @@ import {
   Bookmark,
   Building2,
   CalendarDays,
+  CalendarClock,
   BarChart3,
   ChevronLeft,
   ChevronRight,
@@ -62,6 +63,7 @@ type SidebarItemId =
   | 'sections'
   | 'batches'
   | 'calendar'
+  | 'timetable'
   | 'faculty'
   | 'students'
   | 'courses'
