@@ -400,8 +400,6 @@ export class TimetableService {
 
   async isHolidayToday(institutionId: string, date: Date, timeZone: string): Promise<boolean> {
     const today = formatDateInTimeZone(date, timeZone);
-    const startOfDay = new Date(`${today}T00:00:00.000Z`);
-    const endOfDay = new Date(`${today}T23:59:59.999Z`);
 
     const calendars = await AcademicCalendarModel.find({
       institutionId: oid(institutionId),
@@ -415,9 +413,9 @@ export class TimetableService {
     for (const cal of calendars) {
       for (const event of cal.events ?? []) {
         if (event.type !== 'holiday') continue;
-        const eventStart = new Date(event.startDate);
-        const eventEnd = new Date(event.endDate);
-        if (eventStart <= endOfDay && eventEnd >= startOfDay) {
+        const start = formatDateInTimeZone(new Date(event.startDate), timeZone);
+        const end = formatDateInTimeZone(new Date(event.endDate), timeZone);
+        if (today >= start && today <= end) {
           return true;
         }
       }
