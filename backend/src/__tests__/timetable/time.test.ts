@@ -4,7 +4,7 @@ import {
   dayOfWeekFromDate,
   sortSlotsByDayAndTime,
   timesOverlap,
-} from '../../src/utils/timetable/time.js';
+} from '../../utils/timetable/time.js';
 
 describe('timetable time utils', () => {
   it('detects overlapping time ranges', () => {

@@ -34,6 +34,7 @@ export async function seedTimetable(
   }
 
   const semesterId = String(semester._id);
+
   const existing = await TimetableModel.findOne({
     institutionId: institutionOid,
     semesterId: semester._id,

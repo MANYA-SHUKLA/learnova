@@ -9,7 +9,7 @@ import {
   mailHtml,
   mailLoginUrl,
   mailParagraph,
-} from '../mail-copy.js';
+} from '../mail/mail-copy.js';
 
 export interface ClassReminderRow {
   startTime: string;
