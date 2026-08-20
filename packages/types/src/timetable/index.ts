@@ -1,4 +1,4 @@
-import type { ID, ISODateString } from '../common/index.js';
+import type { ID } from '../common/index.js';
 
 export type TimetableStatus = 'draft' | 'published' | 'archived';
 
@@ -20,10 +20,10 @@ export interface Timetable {
   academicYearId: ID;
   name: string;
   status: TimetableStatus;
-  publishedAt: ISODateString | null;
+  publishedAt: string | null;
   slotCount?: number;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TimetableSlot {
@@ -42,8 +42,8 @@ export interface TimetableSlot {
   facultyName: string;
   room: string;
   status: TimetableSlotStatus;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TimetableTodayClass {
