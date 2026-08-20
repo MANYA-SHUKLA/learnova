@@ -43,8 +43,6 @@ import {
 } from '../hooks/use-timetable-queries';
 import { WeeklyTimetableGrid } from './weekly-timetable-grid';
 
-import type { CsvCell } from '@/features/institution/utils/export';
-
 const DAY_VALUES: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const TIME_PATTERN = /^(\d{1,2}):(\d{2})$/;
 const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
@@ -64,50 +62,6 @@ function filterSlotsBySearch(slots: TimetableSlot[], search: string): TimetableS
       row.sectionName.toLowerCase().includes(q) ||
       row.facultyName.toLowerCase().includes(q) ||
       row.room.toLowerCase().includes(q),
-  );
-}
-
-function TimetablePrintView({
-  title,
-  semesterName,
-  headers,
-  rows,
-}: {
-  title: string;
-  semesterName: string;
-  headers: string[];
-  rows: CsvCell[][];
-}) {
-  return (
-    <div className="timetable-print-only">
-      <h1 className="mb-1 text-xl font-semibold text-foreground">{title}</h1>
-      {semesterName ? <p className="mb-4 text-sm text-muted-foreground">{semesterName}</p> : null}
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr>
-            {headers.map((header) => (
-              <th
-                key={header}
-                className="border border-border px-3 py-2 text-left font-semibold text-foreground"
-              >
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className="border border-border px-3 py-2 align-top text-foreground">
-                  {cell ?? ''}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }
 
@@ -609,68 +563,85 @@ export function TimetablePage({ mode }: TimetablePageProps) {
             />
           ) : !isAdmin && timetable.status !== 'published' ? (
             <EmptyState title={t('notPublishedTitle')} description={t('notPublishedDescription')} />
-          ) : (isAdmin ? slotsQuery.isLoading : gridSlotsQuery.isLoading) ? (
+          ) : gridSlotsQuery.isLoading ? (
             <Skeleton className="h-48 w-full rounded-xl" />
-          ) : (isAdmin ? slotsQuery.isError : gridSlotsQuery.isError) ? (
+          ) : gridSlotsQuery.isError ? (
             <ErrorState message={t('loadFailed')} />
-          ) : isAdmin ? (
-            <div className="timetable-no-print">
-              <ResourceTable
-                columns={columns}
-                rows={filteredRows}
-                emptyTitle={t('noSlotsTitle')}
-                emptyDescription={t('noSlotsDescriptionAdmin')}
-                rowActions={(row) => (
-                  <div className="flex gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditing(row);
-                        setFormError(null);
-                        setDialogOpen(true);
-                      }}
-                    >
-                      {tCommon('edit')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive"
-                      disabled={deleteSlotMutation.isPending}
-                      onClick={() => void deleteSlotMutation.mutateAsync(row.id)}
-                    >
-                      {tCommon('delete')}
-                    </Button>
-                  </div>
-                )}
-              />
-              {slotsQuery.data?.meta ? (
-                <PaginationControls
-                  page={slotsQuery.data.meta.page}
-                  totalPages={slotsQuery.data.meta.totalPages}
-                  hasNextPage={slotsQuery.data.meta.hasNextPage}
-                  hasPrevPage={slotsQuery.data.meta.hasPrevPage}
-                  total={slotsQuery.data.meta.total}
-                  onPageChange={setPage}
+          ) : (
+            <div className="space-y-6">
+              {gridSlots.length === 0 ? (
+                <EmptyState
+                  title={t('noSlotsTitle')}
+                  description={isAdmin ? t('noSlotsDescriptionAdmin') : t('noSlotsDescriptionRead')}
                 />
+              ) : (
+                <WeeklyTimetableGrid
+                  slots={gridSlots}
+                  dayLabels={dayLabels}
+                  timeColumnLabel={t('gridTimeColumn')}
+                  title={t('gridTitle')}
+                  subtitle={selectedSemesterName}
+                />
+              )}
+              {isAdmin ? (
+                <div className="space-y-4 border-t border-border pt-6">
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">{t('manageSlotsTitle')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('tableDescription')}</p>
+                  </div>
+                  {slotsQuery.isLoading ? (
+                    <Skeleton className="h-48 w-full rounded-xl" />
+                  ) : slotsQuery.isError ? (
+                    <ErrorState message={t('loadFailed')} />
+                  ) : (
+                    <>
+                      <ResourceTable
+                        columns={columns}
+                        rows={filteredRows}
+                        emptyTitle={t('noSlotsTitle')}
+                        emptyDescription={t('noSlotsDescriptionAdmin')}
+                        rowActions={(row) => (
+                          <div className="flex gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setEditing(row);
+                                setFormError(null);
+                                setDialogOpen(true);
+                              }}
+                            >
+                              {tCommon('edit')}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive"
+                              disabled={deleteSlotMutation.isPending}
+                              onClick={() => void deleteSlotMutation.mutateAsync(row.id)}
+                            >
+                              {tCommon('delete')}
+                            </Button>
+                          </div>
+                        )}
+                      />
+                      {slotsQuery.data?.meta ? (
+                        <PaginationControls
+                          page={slotsQuery.data.meta.page}
+                          totalPages={slotsQuery.data.meta.totalPages}
+                          hasNextPage={slotsQuery.data.meta.hasNextPage}
+                          hasPrevPage={slotsQuery.data.meta.hasPrevPage}
+                          total={slotsQuery.data.meta.total}
+                          onPageChange={setPage}
+                        />
+                      ) : null}
+                    </>
+                  )}
+                </div>
               ) : null}
             </div>
-          ) : gridSlots.length === 0 ? (
-            <EmptyState
-              title={t('noSlotsTitle')}
-              description={t('noSlotsDescriptionRead')}
-            />
-          ) : (
-            <WeeklyTimetableGrid
-              slots={gridSlots}
-              dayLabels={dayLabels}
-              timeColumnLabel={t('gridTimeColumn')}
-              title={t('gridTitle')}
-              subtitle={selectedSemesterName}
-            />
           )}
         </CardContent>
       </Card>
