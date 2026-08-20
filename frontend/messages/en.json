@@ -614,6 +614,7 @@
         "sections": "Sections",
         "batches": "Batches",
         "calendar": "Calendar",
+        "timetable": "Timetable",
         "faculty": "Faculty",
         "students": "Students",
         "courses": "Courses",
@@ -655,7 +656,7 @@
     "notifications": {
       "eyebrow": "Inbox",
       "title": "Notifications",
-      "description": "Assignment due dates, exam schedules, grades, certificates, and course announcements.",
+      "description": "Assignment due dates, exam schedules, grades, certificates, course announcements, and class reminders.",
       "search": "Search notifications…",
       "markRead": "Mark read",
       "markAllRead": "Mark all read",

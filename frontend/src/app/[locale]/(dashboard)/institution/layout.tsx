@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { href: APP_ROUTES.INSTITUTION_SECTIONS, labelKey: 'sections' },
   { href: APP_ROUTES.INSTITUTION_BATCHES, labelKey: 'batches' },
   { href: APP_ROUTES.INSTITUTION_CALENDAR, labelKey: 'calendar' },
+  { href: APP_ROUTES.INSTITUTION_TIMETABLE, labelKey: 'timetable' },
   { href: APP_ROUTES.INSTITUTION_FACULTY, labelKey: 'faculty' },
   { href: APP_ROUTES.INSTITUTION_STUDENTS, labelKey: 'students' },
   { href: APP_ROUTES.INSTITUTION_COURSES, labelKey: 'courses' },

@@ -128,6 +128,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'sections', href: APP_ROUTES.INSTITUTION_SECTIONS, icon: Grid3X3 },
       { id: 'batches', href: APP_ROUTES.INSTITUTION_BATCHES, icon: UsersRound },
       { id: 'calendar', href: APP_ROUTES.INSTITUTION_CALENDAR, icon: CalendarDays },
+      { id: 'timetable', href: APP_ROUTES.INSTITUTION_TIMETABLE, icon: CalendarClock },
     ],
   },
   {
@@ -165,6 +166,7 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
     id: 'facultyHome',
     items: [
       { id: 'dashboard', href: APP_ROUTES.FACULTY_DASHBOARD, icon: LayoutDashboard, exact: true },
+      { id: 'timetable', href: APP_ROUTES.FACULTY_TIMETABLE, icon: CalendarClock },
       { id: 'enrollments', href: APP_ROUTES.FACULTY_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.FACULTY_PROGRESS, icon: BarChart3 },
       { id: 'assignments', href: APP_ROUTES.FACULTY_ASSIGNMENTS, icon: ClipboardCheck },
@@ -190,6 +192,7 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
     id: 'studentHome',
     items: [
       { id: 'dashboard', href: APP_ROUTES.STUDENT_DASHBOARD, icon: LayoutDashboard, exact: true },
+      { id: 'timetable', href: APP_ROUTES.STUDENT_TIMETABLE, icon: CalendarClock },
       { id: 'enrollments', href: APP_ROUTES.STUDENT_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.STUDENT_PROGRESS, icon: BarChart3 },
       { id: 'assignments', href: APP_ROUTES.STUDENT_ASSIGNMENTS, icon: ClipboardCheck },
