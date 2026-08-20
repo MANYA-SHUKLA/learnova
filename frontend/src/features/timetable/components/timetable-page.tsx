@@ -48,7 +48,7 @@ const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
 
 function normalizeTime(value: string): string {
   const match = value.trim().match(TIME_PATTERN);
-  if (!match) return value.trim();
+  if (!match?.[1] || !match[2]) return value.trim();
   return `${match[1].padStart(2, '0')}:${match[2]}`;
 }
 

@@ -20,7 +20,7 @@ export const timetableSlotStatusSchema = z.enum(['active', 'cancelled']);
 function normalizeTimeInput(value: string): string {
   const trimmed = value.trim();
   const match = trimmed.match(/^(\d{1,2}):(\d{2})$/);
-  if (!match) return trimmed;
+  if (!match?.[1] || !match[2]) return trimmed;
   return `${match[1].padStart(2, '0')}:${match[2]}`;
 }
 
