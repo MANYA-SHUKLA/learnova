@@ -58,6 +58,8 @@ export const PERMISSIONS = {
   CERTIFICATE_READ: 'certificate:read',
   CERTIFICATE_WRITE: 'certificate:write',
   CERTIFICATE_MANAGE: 'certificate:manage',
+  TIMETABLE_READ: 'timetable:read',
+  TIMETABLE_MANAGE: 'timetable:manage',
 } as const;
 
 export type PermissionConstant = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

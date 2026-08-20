@@ -373,3 +373,5 @@ export {
   type ExamAuditEvent,
   EXAM_AUDIT_EVENTS,
 } from './exam-audit-log.model.js';
+export { TimetableModel, type TimetableDocument } from './timetable.model.js';
+export { TimetableSlotModel, type TimetableSlotDocument } from './timetable-slot.model.js';

@@ -63,7 +63,9 @@ export type Permission =
   | 'gradebook:manage'
   | 'certificate:read'
   | 'certificate:write'
-  | 'certificate:manage';
+  | 'certificate:manage'
+  | 'timetable:read'
+  | 'timetable:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
 

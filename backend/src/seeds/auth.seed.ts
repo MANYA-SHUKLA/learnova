@@ -248,6 +248,16 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Manage certificate templates, registry, and institution dashboard',
   },
+  'timetable:read': {
+    resource: 'timetable',
+    action: 'read',
+    description: 'View class timetable',
+  },
+  'timetable:manage': {
+    resource: 'timetable',
+    action: 'manage',
+    description: 'Create and manage class timetables',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {

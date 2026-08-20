@@ -18,4 +18,5 @@ export * from './gradebook/index.js';
 export * from './certificate/index.js';
 export * from './modules/index.js';
 export * from './jobs/index.js';
+export * from './timetable/index.js';
 
