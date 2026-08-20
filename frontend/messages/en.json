@@ -679,6 +679,8 @@
       "editSlot": "Edit class slot",
       "allDays": "All days",
       "allSections": "All sections",
+      "semesterLabel": "Semester",
+      "selectSemester": "Select semester",
       "searchPlaceholder": "Search course, section, faculty, room…",
       "emptyTitle": "No timetable yet",
       "emptyDescriptionAdmin": "Select a semester and create a timetable to add weekly class slots.",

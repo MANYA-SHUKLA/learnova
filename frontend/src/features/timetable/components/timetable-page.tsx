@@ -140,7 +140,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const [editing, setEditing] = useState<TimetableSlot | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const { data: semestersData } = useSemesters({ limit: 100, status: 'active' });
+  const { data: semestersData } = useSemesters({ limit: 100, status: 'active' }, isAdmin);
 
   const publishedTimetablesQuery = useTimetables(
     { status: 'published', limit: 50 },
@@ -401,14 +401,25 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     }
   };
 
+  const exportSourceRows = isAdmin ? filteredRows : gridSlots;
   const exportHeaders = columns.map((c) => c.header);
-  const exportRows = filteredRows.map((row) =>
+  const exportRows = exportSourceRows.map((row) =>
     columns.map((c) => c.exportValue?.(row) ?? ''),
   );
 
-  const semesterOptions = semestersData?.items ?? [];
-  const selectedSemesterName =
-    semesterOptions.find((s) => s.id === selectedSemesterId)?.name ?? '';
+  const readSemesterOptions = useMemo(() => {
+    const items = publishedTimetablesQuery.data?.items ?? [];
+    const bySemester = new Map<string, string>();
+    for (const tt of items) {
+      if (!bySemester.has(tt.semesterId)) {
+        const label = tt.name.replace(/\s+timetable$/i, '').trim() || tt.name;
+        bySemester.set(tt.semesterId, label);
+      }
+    }
+    return [...bySemester.entries()].map(([id, name]) => ({ id, name }));
+  }, [publishedTimetablesQuery.data?.items]);
+
+  const semesterOptions = isAdmin ? (semestersData?.items ?? []) : readSemesterOptions;
 
   return (
     <div className="space-y-6">
@@ -512,6 +523,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                 </option>
               ))}
             </select>
+            {isAdmin ? (
             <select
               className="flex h-10 min-w-[140px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={dayFilter}
@@ -527,6 +539,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                 </option>
               ))}
             </select>
+            ) : null}
             <select
               className="flex h-10 min-w-[160px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={sectionFilter}
@@ -569,47 +582,43 @@ export function TimetablePage({ mode }: TimetablePageProps) {
             />
           ) : !isAdmin && timetable.status !== 'published' ? (
             <EmptyState title={t('notPublishedTitle')} description={t('notPublishedDescription')} />
-          ) : slotsQuery.isLoading ? (
+          ) : (isAdmin ? slotsQuery.isLoading : gridSlotsQuery.isLoading) ? (
             <Skeleton className="h-48 w-full rounded-xl" />
-          ) : slotsQuery.isError ? (
+          ) : (isAdmin ? slotsQuery.isError : gridSlotsQuery.isError) ? (
             <ErrorState message={t('loadFailed')} />
-          ) : (
+          ) : isAdmin ? (
             <div className="timetable-no-print">
               <ResourceTable
                 columns={columns}
                 rows={filteredRows}
                 emptyTitle={t('noSlotsTitle')}
-                emptyDescription={isAdmin ? t('noSlotsDescriptionAdmin') : t('noSlotsDescriptionRead')}
-                rowActions={
-                  isAdmin
-                    ? (row) => (
-                        <div className="flex gap-1">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setEditing(row);
-                              setFormError(null);
-                              setDialogOpen(true);
-                            }}
-                          >
-                            {tCommon('edit')}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive"
-                            disabled={deleteSlotMutation.isPending}
-                            onClick={() => void deleteSlotMutation.mutateAsync(row.id)}
-                          >
-                            {tCommon('delete')}
-                          </Button>
-                        </div>
-                      )
-                    : undefined
-                }
+                emptyDescription={t('noSlotsDescriptionAdmin')}
+                rowActions={(row) => (
+                  <div className="flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setEditing(row);
+                        setFormError(null);
+                        setDialogOpen(true);
+                      }}
+                    >
+                      {tCommon('edit')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      disabled={deleteSlotMutation.isPending}
+                      onClick={() => void deleteSlotMutation.mutateAsync(row.id)}
+                    >
+                      {tCommon('delete')}
+                    </Button>
+                  </div>
+                )}
               />
               {slotsQuery.data?.meta ? (
                 <PaginationControls
@@ -622,6 +631,19 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                 />
               ) : null}
             </div>
+          ) : gridSlots.length === 0 ? (
+            <EmptyState
+              title={t('noSlotsTitle')}
+              description={t('noSlotsDescriptionRead')}
+            />
+          ) : (
+            <WeeklyTimetableGrid
+              slots={gridSlots}
+              dayLabels={dayLabels}
+              timeColumnLabel={t('gridTimeColumn')}
+              title={t('gridTitle')}
+              subtitle={selectedSemesterName}
+            />
           )}
         </CardContent>
       </Card>
