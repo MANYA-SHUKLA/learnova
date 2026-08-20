@@ -70,7 +70,7 @@ const emptyMeta = (page?: number, limit?: number): PaginatedMeta => ({
   hasPrevPage: false,
 });
 
-function toQuery(params: Record<string, string | number | undefined>): string {
+function toQuery(params: Record<string, string | number | undefined> = {}): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '') {
@@ -84,7 +84,7 @@ function toQuery(params: Record<string, string | number | undefined>): string {
 export const timetableApi = {
   list: async (params?: TimetableListParams): Promise<TimetableListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: Timetable[] }>(
-      `${API_ROUTES.TIMETABLES}${toQuery(params ?? {})}`,
+      `${API_ROUTES.TIMETABLES}${toQuery({ ...params })}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params?.page, params?.limit) };
   },
@@ -100,7 +100,7 @@ export const timetableApi = {
     params?: TimetableSlotListParams,
   ): Promise<TimetableSlotListResult> => {
     const { data, meta } = await apiClient.getWithMeta<{ items: TimetableSlot[] }>(
-      `${API_ROUTES.TIMETABLES}/${timetableId}/slots${toQuery(params ?? {})}`,
+      `${API_ROUTES.TIMETABLES}/${timetableId}/slots${toQuery({ ...params })}`,
     );
     return { items: data.items, meta: meta ?? emptyMeta(params?.page, params?.limit) };
   },

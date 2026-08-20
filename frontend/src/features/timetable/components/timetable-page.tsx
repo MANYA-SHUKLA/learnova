@@ -234,13 +234,13 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     if (!timetable) return;
     setFormError(null);
     const body = {
-      dayOfWeek: String(values.dayOfWeek) as TimetableDayOfWeek,
-      startTime: String(values.startTime),
-      endTime: String(values.endTime),
-      courseId: String(values.courseId),
-      sectionId: String(values.sectionId),
-      facultyId: String(values.facultyId),
-      room: String(values.room),
+      dayOfWeek: String(values['dayOfWeek']) as TimetableDayOfWeek,
+      startTime: String(values['startTime']),
+      endTime: String(values['endTime']),
+      courseId: String(values['courseId']),
+      sectionId: String(values['sectionId']),
+      facultyId: String(values['facultyId']),
+      room: String(values['room']),
     };
     try {
       if (editing) {
