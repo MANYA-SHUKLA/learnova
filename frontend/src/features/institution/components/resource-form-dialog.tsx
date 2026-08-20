@@ -11,6 +11,7 @@ export type FormFieldType =
   | 'url'
   | 'number'
   | 'date'
+  | 'time'
   | 'textarea'
   | 'select'
   | 'checkbox';
@@ -113,6 +114,11 @@ export function ResourceFormDialog({
 
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
     await onSubmit(values);
   };
 

@@ -21,6 +21,19 @@ export class ApiClientError extends Error {
   }
 }
 
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiClientError) {
+    if (error.details?.length) {
+      return error.details
+        .map((detail) => (detail.field ? `${detail.field}: ${detail.message}` : detail.message))
+        .join('. ');
+    }
+    return error.message;
+  }
+  if (error instanceof Error) return error.message;
+  return fallback;
+}
+
 function createRequestId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID();

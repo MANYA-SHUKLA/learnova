@@ -31,6 +31,7 @@ import {
   useSemesters,
   useSections,
 } from '@/features/institution';
+import { getApiErrorMessage } from '@/lib/api/client';
 import {
   useCreateTimetableMutation,
   useCreateTimetableSlotMutation,
@@ -42,6 +43,14 @@ import {
 } from '../hooks/use-timetable-queries';
 
 const DAY_VALUES: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const TIME_PATTERN = /^(\d{1,2}):(\d{2})$/;
+const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
+
+function normalizeTime(value: string): string {
+  const match = value.trim().match(TIME_PATTERN);
+  if (!match) return value.trim();
+  return `${match[1].padStart(2, '0')}:${match[2]}`;
+}
 
 export interface TimetablePageProps {
   mode: 'admin' | 'read';
@@ -178,8 +187,8 @@ export function TimetablePage({ mode }: TimetablePageProps) {
         required: true,
         options: dayOptions,
       },
-      { name: 'startTime', label: t('fields.startTime'), type: 'text', required: true, placeholder: '09:00' },
-      { name: 'endTime', label: t('fields.endTime'), type: 'text', required: true, placeholder: '10:00' },
+      { name: 'startTime', label: t('fields.startTime'), type: 'time', required: true },
+      { name: 'endTime', label: t('fields.endTime'), type: 'time', required: true },
       {
         name: 'courseId',
         label: t('columns.course'),
@@ -233,14 +242,47 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const handleSubmitSlot = async (values: Record<string, string | number | boolean | null>) => {
     if (!timetable) return;
     setFormError(null);
+
+    const startTime = normalizeTime(String(values['startTime'] ?? ''));
+    const endTime = normalizeTime(String(values['endTime'] ?? ''));
+    const courseId = String(values['courseId'] ?? '').trim();
+    const sectionId = String(values['sectionId'] ?? '').trim();
+    const facultyId = String(values['facultyId'] ?? '').trim();
+    const room = String(values['room'] ?? '').trim();
+
+    if (!TIME_PATTERN.test(startTime) || !TIME_PATTERN.test(endTime)) {
+      setFormError(t('invalidTime'));
+      return;
+    }
+    if (startTime >= endTime) {
+      setFormError(t('endBeforeStart'));
+      return;
+    }
+    if (!OBJECT_ID_PATTERN.test(courseId)) {
+      setFormError(t('selectCourse'));
+      return;
+    }
+    if (!OBJECT_ID_PATTERN.test(sectionId)) {
+      setFormError(t('selectSection'));
+      return;
+    }
+    if (!OBJECT_ID_PATTERN.test(facultyId)) {
+      setFormError(t('selectFaculty'));
+      return;
+    }
+    if (!room) {
+      setFormError(t('roomRequired'));
+      return;
+    }
+
     const body = {
       dayOfWeek: String(values['dayOfWeek']) as TimetableDayOfWeek,
-      startTime: String(values['startTime']),
-      endTime: String(values['endTime']),
-      courseId: String(values['courseId']),
-      sectionId: String(values['sectionId']),
-      facultyId: String(values['facultyId']),
-      room: String(values['room']),
+      startTime,
+      endTime,
+      courseId,
+      sectionId,
+      facultyId,
+      room,
     };
     try {
       if (editing) {
@@ -250,8 +292,8 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       }
       setDialogOpen(false);
       setEditing(null);
-    } catch {
-      setFormError(t('saveFailed'));
+    } catch (err) {
+      setFormError(getApiErrorMessage(err, t('saveFailed')));
     }
   };
 
@@ -465,7 +507,11 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                   facultyId: editing.facultyId,
                   room: editing.room,
                 }
-              : undefined
+              : {
+                  dayOfWeek: 'mon',
+                  startTime: '09:00',
+                  endTime: '10:00',
+                }
           }
           isSubmitting={createSlotMutation.isPending || updateSlotMutation.isPending}
           error={formError}

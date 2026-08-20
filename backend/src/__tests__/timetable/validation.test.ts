@@ -43,6 +43,20 @@ describe('timetable validation', () => {
     expect(parsed.status).toBe('active');
   });
 
+  it('normalizes single-digit hour times', () => {
+    const parsed = createTimetableSlotSchema.parse({
+      dayOfWeek: 'mon',
+      startTime: '9:00',
+      endTime: '10:00',
+      courseId: OBJECT_ID,
+      sectionId: OBJECT_ID,
+      facultyId: OBJECT_ID,
+      room: 'Room 101',
+    });
+    expect(parsed.startTime).toBe('09:00');
+    expect(parsed.endTime).toBe('10:00');
+  });
+
   it('allows partial slot updates', () => {
     const parsed = updateTimetableSlotSchema.parse({ room: 'Lab 3' });
     expect(parsed.room).toBe('Lab 3');

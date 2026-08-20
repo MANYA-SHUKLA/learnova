@@ -17,9 +17,18 @@ export const timetableStatusSchema = z.enum(['draft', 'published', 'archived']);
 
 export const timetableSlotStatusSchema = z.enum(['active', 'cancelled']);
 
+function normalizeTimeInput(value: string): string {
+  const trimmed = value.trim();
+  const match = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return trimmed;
+  return `${match[1].padStart(2, '0')}:${match[2]}`;
+}
+
 const timeField = z
   .string()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Time must be HH:MM (24-hour)');
+  .trim()
+  .transform(normalizeTimeInput)
+  .pipe(z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Time must be HH:MM (24-hour)'));
 
 export const timetableListQuerySchema = z.object({
   semesterId: objectIdField.optional(),
