@@ -479,28 +479,25 @@ export function TimetablePage({ mode }: TimetablePageProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium text-foreground">{t('semesterLabel')}</span>
-              <select
-                className="flex h-10 min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                value={selectedSemesterId}
-                disabled={!isAdmin && publishedTimetablesQuery.isLoading}
-                onChange={(e) => {
-                  setSemesterId(e.target.value);
-                  setPage(1);
-                }}
-              >
-                {semesterOptions.length === 0 ? (
-                  <option value="">{t('selectSemester')}</option>
-                ) : (
-                  semesterOptions.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))
-                )}
-              </select>
-            </label>
+            <select
+              className="flex h-10 min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              value={selectedSemesterId}
+              disabled={!isAdmin && publishedTimetablesQuery.isLoading}
+              onChange={(e) => {
+                setSemesterId(e.target.value);
+                setPage(1);
+              }}
+            >
+              {semesterOptions.length === 0 ? (
+                <option value="">{t('selectSemester')}</option>
+              ) : (
+                semesterOptions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))
+              )}
+            </select>
             {isAdmin ? (
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="font-medium text-foreground">{t('columns.day')}</span>
