@@ -41,6 +41,7 @@ const PIPELINE: readonly string[] = [
   'seed:examinations',
   'seed:demo',
   'seed:demo-data',
+  'seed:timetable',
   'seed:gradebook',
   'seed:certificates',
 ];
