@@ -12,7 +12,7 @@ import {
   FacultyModel,
   InstitutionModel,
   SectionModel,
-  TimetableSlotModel,
+  StudentModel,
 } from '../../models/index.js';
 import { timetableRepository } from '../../repositories/timetable/index.js';
 import { buildClassReminderEmail } from '../../mail/class-reminder-email.js';
