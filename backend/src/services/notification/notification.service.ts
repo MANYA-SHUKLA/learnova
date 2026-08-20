@@ -39,6 +39,8 @@ export type NotifyInput = {
   body: string;
   data?: Record<string, unknown>;
   dedupeKey?: string | null;
+  emailHtml?: string;
+  emailText?: string;
 };
 
 function requireTenant(actor: ActorContext): string {
@@ -94,8 +96,8 @@ export class NotificationService {
         await enqueueEmail({
           to: user.email,
           subject: input.title,
-          text: input.body,
-          html: `<p>${input.body.replace(/\n/g, '<br/>')}</p>`,
+          text: input.emailText ?? input.body,
+          html: input.emailHtml ?? `<p>${input.body.replace(/\n/g, '<br/>')}</p>`,
         });
         doc.emailSent = true;
         await doc.save();

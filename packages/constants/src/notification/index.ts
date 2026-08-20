@@ -5,6 +5,7 @@ export const NOTIFICATION_TYPES = [
   'grade_published',
   'certificate_issued',
   'course_announcement',
+  'class_reminder',
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
