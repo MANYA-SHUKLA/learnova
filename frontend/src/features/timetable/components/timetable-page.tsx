@@ -41,6 +41,7 @@ import {
   useTimetables,
   useUpdateTimetableSlotMutation,
 } from '../hooks/use-timetable-queries';
+import { WeeklyTimetableGrid } from './weekly-timetable-grid';
 
 import type { CsvCell } from '@/features/institution/utils/export';
 
@@ -52,6 +53,18 @@ function normalizeTime(value: string): string {
   const match = value.trim().match(TIME_PATTERN);
   if (!match?.[1] || !match[2]) return value.trim();
   return `${match[1].padStart(2, '0')}:${match[2]}`;
+}
+
+function filterSlotsBySearch(slots: TimetableSlot[], search: string): TimetableSlot[] {
+  if (!search.trim()) return slots;
+  const q = search.toLowerCase();
+  return slots.filter(
+    (row) =>
+      row.courseTitle.toLowerCase().includes(q) ||
+      row.sectionName.toLowerCase().includes(q) ||
+      row.facultyName.toLowerCase().includes(q) ||
+      row.room.toLowerCase().includes(q),
+  );
 }
 
 function TimetablePrintView({
@@ -175,7 +188,18 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       sortBy: 'dayOfWeek',
       sortOrder: 'asc',
     },
-    Boolean(timetable?.id),
+    Boolean(timetable?.id) && isAdmin,
+  );
+
+  const gridSlotsQuery = useTimetableSlots(
+    timetable?.id ?? '',
+    {
+      limit: 500,
+      sectionId: sectionFilter || undefined,
+      sortBy: 'startTime',
+      sortOrder: 'asc',
+    },
+    Boolean(timetable?.id) && !isAdmin,
   );
 
   const { data: sectionsData } = useSections({ limit: 100, status: 'active' });
@@ -190,18 +214,24 @@ export function TimetablePage({ mode }: TimetablePageProps) {
 
   const dayOptions = DAY_VALUES.map((d) => ({ value: d, label: tDays(d) }));
 
-  const filteredRows = useMemo(() => {
-    const items = slotsQuery.data?.items ?? [];
-    if (!search.trim()) return items;
-    const q = search.toLowerCase();
-    return items.filter(
-      (row) =>
-        row.courseTitle.toLowerCase().includes(q) ||
-        row.sectionName.toLowerCase().includes(q) ||
-        row.facultyName.toLowerCase().includes(q) ||
-        row.room.toLowerCase().includes(q),
-    );
-  }, [slotsQuery.data?.items, search]);
+  const filteredRows = useMemo(
+    () => filterSlotsBySearch(slotsQuery.data?.items ?? [], search),
+    [slotsQuery.data?.items, search],
+  );
+
+  const gridSlots = useMemo(
+    () => filterSlotsBySearch(gridSlotsQuery.data?.items ?? [], search),
+    [gridSlotsQuery.data?.items, search],
+  );
+
+  const dayLabels = useMemo(
+    () =>
+      Object.fromEntries(DAY_VALUES.map((day) => [day, tDays(day)])) as Record<
+        TimetableDayOfWeek,
+        string
+      >,
+    [tDays],
+  );
 
   const columns: ResourceColumn<TimetableSlot>[] = [
     {
@@ -429,7 +459,17 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       />
       </div>
 
-      {filteredRows.length > 0 ? (
+      {!isAdmin && gridSlots.length > 0 ? (
+        <div className="timetable-print-only">
+          <WeeklyTimetableGrid
+            slots={gridSlots}
+            dayLabels={dayLabels}
+            timeColumnLabel={t('gridTimeColumn')}
+            title={t('gridTitle')}
+            subtitle={selectedSemesterName}
+          />
+        </div>
+      ) : filteredRows.length > 0 ? (
         <TimetablePrintView
           title={t('title')}
           semesterName={selectedSemesterName}
@@ -441,8 +481,10 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       <Card className="timetable-no-print rounded-2xl shadow-soft-md">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>{t('tableTitle')}</CardTitle>
-            <CardDescription>{t('tableDescription')}</CardDescription>
+            <CardTitle>{isAdmin ? t('tableTitle') : t('gridTitle')}</CardTitle>
+            <CardDescription>
+              {isAdmin ? t('tableDescription') : t('tableDescription')}
+            </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {timetable ? <TimetableStatusBadge status={timetable.status} /> : null}
@@ -450,7 +492,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               filename={`timetable-${selectedSemesterId || 'export'}`}
               headers={exportHeaders}
               rows={exportRows}
-              disabled={filteredRows.length === 0}
+              disabled={(isAdmin ? filteredRows : gridSlots).length === 0}
             />
           </div>
         </CardHeader>
