@@ -671,6 +671,8 @@
       "description": "Weekly class schedule for the semester — set once by the institution admin.",
       "tableTitle": "Weekly schedule",
       "tableDescription": "All classes for the selected semester.",
+      "gridTitle": "School timetable",
+      "gridTimeColumn": "Time",
       "createTimetable": "Create timetable",
       "publish": "Publish timetable",
       "addSlot": "Add class slot",
