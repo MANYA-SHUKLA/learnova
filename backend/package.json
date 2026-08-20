@@ -35,6 +35,7 @@
     "seed:demo": "tsx --env-file=.env src/seeds/run-demo-users-seed.ts",
     "seed:demo-data": "tsx --env-file=.env src/seeds/run-demo-data-seed.ts",
     "seed:timetable": "tsx --env-file=.env src/seeds/run-timetable-seed.ts",
+    "reminders:timetable": "tsx --env-file=.env src/scripts/send-timetable-reminders-now.ts",
     "seed:demo-finalize": "tsx --env-file=.env src/seeds/run-demo-finalize-seed.ts",
     "seed:complete": "tsx --env-file=.env src/seeds/run-complete-seed.ts",
     "seed:minimal": "tsx --env-file=.env src/seeds/run-minimal-seed.ts",
