@@ -11,12 +11,15 @@ describe('RBAC permission matrix', () => {
     const perms = getPermissionsForRole('institution_admin');
     expect(hasPermission(perms, 'institution:manage')).toBe(true);
     expect(hasPermission(perms, 'users:manage')).toBe(true);
+    expect(hasPermission(perms, 'timetable:manage')).toBe(true);
   });
 
   it('restricts faculty from institution permissions', () => {
     const perms = getPermissionsForRole('faculty');
     expect(hasPermission(perms, 'institution:read')).toBe(false);
     expect(hasPermission(perms, 'institution:manage')).toBe(false);
+    expect(hasPermission(perms, 'timetable:read')).toBe(true);
+    expect(hasPermission(perms, 'timetable:manage')).toBe(false);
     expect(hasAllPermissions(perms, ['lms:read', 'lms:write'])).toBe(true);
   });
 
