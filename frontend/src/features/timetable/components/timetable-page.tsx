@@ -82,13 +82,42 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const [formError, setFormError] = useState<string | null>(null);
 
   const { data: semestersData } = useSemesters({ limit: 100, status: 'active' });
-  const selectedSemesterId = semesterId || semestersData?.items[0]?.id || '';
+
+  const publishedTimetablesQuery = useTimetables(
+    { status: 'published', limit: 50 },
+    !isAdmin,
+  );
+
+  const selectedSemesterId = useMemo(() => {
+    if (semesterId) return semesterId;
+    if (!isAdmin) {
+      const published = publishedTimetablesQuery.data?.items ?? [];
+      if (published.length > 0) {
+        return published[0].semesterId;
+      }
+    }
+    return semestersData?.items[0]?.id || '';
+  }, [semesterId, isAdmin, publishedTimetablesQuery.data?.items, semestersData?.items]);
 
   const timetablesQuery = useTimetables(
-    { semesterId: selectedSemesterId || undefined, limit: 1 },
+    {
+      semesterId: selectedSemesterId || undefined,
+      limit: 1,
+      ...(!isAdmin ? { status: 'published' as const } : {}),
+    },
     Boolean(selectedSemesterId),
   );
   const timetable = timetablesQuery.data?.items[0] ?? null;
+
+  const draftTimetablesQuery = useTimetables(
+    {
+      semesterId: selectedSemesterId || undefined,
+      status: 'draft',
+      limit: 1,
+    },
+    !isAdmin && Boolean(selectedSemesterId) && !timetable && !timetablesQuery.isLoading,
+  );
+  const draftTimetable = draftTimetablesQuery.data?.items[0] ?? null;
 
   const slotsQuery = useTimetableSlots(
     timetable?.id ?? '',
@@ -428,8 +457,14 @@ export function TimetablePage({ mode }: TimetablePageProps) {
             <ErrorState message={t('loadFailed')} />
           ) : !timetable ? (
             <EmptyState
-              title={t('emptyTitle')}
-              description={isAdmin ? t('emptyDescriptionAdmin') : t('emptyDescriptionRead')}
+              title={draftTimetable ? t('notPublishedTitle') : t('emptyTitle')}
+              description={
+                draftTimetable
+                  ? t('notPublishedDescription')
+                  : isAdmin
+                    ? t('emptyDescriptionAdmin')
+                    : t('emptyDescriptionRead')
+              }
             />
           ) : !isAdmin && timetable.status !== 'published' ? (
             <EmptyState title={t('notPublishedTitle')} description={t('notPublishedDescription')} />

@@ -20,6 +20,7 @@ interface CommandItem {
 function navForRole(role: string | undefined): CommandItem[] {
   const institution: CommandItem[] = [
     { id: 'idash', label: 'Dashboard', href: APP_ROUTES.INSTITUTION_DASHBOARD, group: 'Institution' },
+    { id: 'itimetable', label: 'Timetable', href: APP_ROUTES.INSTITUTION_TIMETABLE, group: 'Institution' },
     { id: 'icampus', label: 'Campuses', href: APP_ROUTES.INSTITUTION_CAMPUSES, group: 'Institution' },
     { id: 'istudents', label: 'Students', href: APP_ROUTES.INSTITUTION_STUDENTS, group: 'People' },
     { id: 'ifaculty', label: 'Faculty', href: APP_ROUTES.INSTITUTION_FACULTY, group: 'People' },
@@ -31,6 +32,7 @@ function navForRole(role: string | undefined): CommandItem[] {
 
   const faculty: CommandItem[] = [
     { id: 'fdash', label: 'Dashboard', href: APP_ROUTES.FACULTY_DASHBOARD, group: 'Faculty' },
+    { id: 'ftimetable', label: 'Timetable', href: APP_ROUTES.FACULTY_TIMETABLE, group: 'Faculty' },
     { id: 'fcourses', label: 'My Courses', href: APP_ROUTES.FACULTY_ENROLLMENTS, group: 'Faculty' },
     { id: 'fassign', label: 'Assignments', href: APP_ROUTES.FACULTY_ASSIGNMENTS, group: 'Teaching' },
     { id: 'fgrade', label: 'Gradebook', href: APP_ROUTES.FACULTY_GRADEBOOK, group: 'Teaching' },
@@ -41,6 +43,7 @@ function navForRole(role: string | undefined): CommandItem[] {
 
   const student: CommandItem[] = [
     { id: 'sdash', label: 'Dashboard', href: APP_ROUTES.STUDENT_DASHBOARD, group: 'Student' },
+    { id: 'stimetable', label: 'Timetable', href: APP_ROUTES.STUDENT_TIMETABLE, group: 'Student' },
     { id: 'scourses', label: 'Courses', href: APP_ROUTES.STUDENT_ENROLLMENTS, group: 'Student' },
     { id: 'slearn', label: 'Learning', href: APP_ROUTES.STUDENT_PROGRESS, group: 'Student' },
     { id: 'sassign', label: 'Assignments', href: APP_ROUTES.STUDENT_ASSIGNMENTS, group: 'Work' },

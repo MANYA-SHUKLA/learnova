@@ -259,7 +259,9 @@ function SidebarNav({
             )}
             <ul className="space-y-1">
               {group.items.map((item) => {
-                const label = t(`items.${item.id}`);
+                const label = t.has(`items.${item.id}`)
+                  ? t(`items.${item.id}`)
+                  : item.id;
                 const active = !item.comingSoon && isNavActive(pathname, item.href, item.exact);
                 const Icon = item.icon;
                 if (item.comingSoon) {

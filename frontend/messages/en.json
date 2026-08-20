@@ -680,7 +680,7 @@
       "searchPlaceholder": "Search course, section, faculty, room…",
       "emptyTitle": "No timetable yet",
       "emptyDescriptionAdmin": "Select a semester and create a timetable to add weekly class slots.",
-      "emptyDescriptionRead": "Your institution has not published a timetable for this semester yet.",
+      "emptyDescriptionRead": "No published timetable for this semester. Try another semester from the dropdown above, or ask your institution admin to publish the timetable.",
       "notPublishedTitle": "Timetable not published",
       "notPublishedDescription": "The timetable for this semester is still in draft. Check back after your admin publishes it.",
       "noSlotsTitle": "No class slots",
