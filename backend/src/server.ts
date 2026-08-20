@@ -9,7 +9,7 @@ import {
   disconnectMongo,
   disconnectRedis,
 } from './database/index.js';
-import { registerInfrastructureListeners, registerCertificateListeners, registerNotificationListeners, registerProgressListeners, startDueReminderScheduler } from './events/index.js';
+import { registerInfrastructureListeners, registerCertificateListeners, registerNotificationListeners, registerProgressListeners, startDueReminderScheduler, startTimetableReminderScheduler } from './events/index.js';
 import { closeQueues, initQueues } from './queues/index.js';
 import { getStorage } from './storage/index.js';
 import { getMailer } from './mail/index.js';
@@ -45,6 +45,7 @@ async function bootstrap(): Promise<void> {
   registerNotificationListeners();
   registerProgressListeners();
   startDueReminderScheduler();
+  startTimetableReminderScheduler();
 
   const storageOk = await storage.isHealthy();
   const mailOk = await mailer.isHealthy();

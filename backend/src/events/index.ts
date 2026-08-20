@@ -15,5 +15,6 @@ export { registerCertificateListeners } from './listeners/certificate.listeners.
 export {
   registerNotificationListeners,
   startDueReminderScheduler,
+  startTimetableReminderScheduler,
 } from './listeners/notification.listeners.js';
 export { registerProgressListeners } from './listeners/progress.listeners.js';

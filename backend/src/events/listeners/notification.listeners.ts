@@ -1,5 +1,7 @@
 import { EVENTS } from '@learnova/events';
 import { notificationService } from '../../services/notification/notification.service.js';
+import { timetableService } from '../../services/timetable/timetable.service.js';
+import { msUntilNextLocalTime } from '../../utils/timetable/time.js';
 import { logger } from '../../utils/logger/index.js';
 import { eventBus } from '../event-bus.js';
 
@@ -48,4 +50,30 @@ export function startDueReminderScheduler(): void {
   run();
   setInterval(run, 6 * 60 * 60 * 1000);
   logger.info('Due reminder scheduler started (every 6h)');
+}
+
+export function startTimetableReminderScheduler(): void {
+  const timeZone = process.env.TIMETABLE_REMINDER_TZ ?? 'Asia/Kolkata';
+  const hour = Number(process.env.TIMETABLE_REMINDER_HOUR ?? 9);
+  const minute = 0;
+
+  const scheduleNext = () => {
+    const delay = msUntilNextLocalTime(hour, minute, timeZone);
+    setTimeout(() => {
+      void timetableService
+        .sendDailyClassReminders()
+        .then((result) => {
+          logger.info(result, 'Daily class reminders sent');
+        })
+        .catch((err) => {
+          logger.warn({ err }, 'Daily class reminder job failed');
+        })
+        .finally(() => {
+          scheduleNext();
+        });
+    }, delay);
+  };
+
+  scheduleNext();
+  logger.info({ timeZone, hour, minute }, 'Timetable reminder scheduler started');
 }
