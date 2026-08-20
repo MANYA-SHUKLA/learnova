@@ -72,7 +72,26 @@ export const createTimetableSlotSchema = z
     path: ['endTime'],
   });
 
-export const updateTimetableSlotSchema = createTimetableSlotSchema.partial();
+const timetableSlotFieldsSchema = z.object({
+  dayOfWeek: timetableDayOfWeekSchema,
+  startTime: timeField,
+  endTime: timeField,
+  courseId: objectIdField,
+  sectionId: objectIdField,
+  facultyId: objectIdField,
+  room: z.string().trim().min(1).max(100),
+  status: timetableSlotStatusSchema.optional(),
+});
+
+export const updateTimetableSlotSchema = timetableSlotFieldsSchema
+  .partial()
+  .refine(
+    (v) => {
+      if (v.startTime && v.endTime) return v.startTime < v.endTime;
+      return true;
+    },
+    { message: 'End time must be after start time', path: ['endTime'] },
+  );
 
 export const timetableIdParamsSchema = z.object({
   id: objectIdField,
