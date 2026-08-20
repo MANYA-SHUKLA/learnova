@@ -12,7 +12,6 @@ import {
   FacultyModel,
   InstitutionModel,
   SectionModel,
-  StudentModel,
   TimetableSlotModel,
 } from '../../models/index.js';
 import { timetableRepository } from '../../repositories/timetable/index.js';
