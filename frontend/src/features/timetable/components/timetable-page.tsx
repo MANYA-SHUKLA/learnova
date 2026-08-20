@@ -42,7 +42,7 @@ import {
   useUpdateTimetableSlotMutation,
 } from '../hooks/use-timetable-queries';
 
-const DAY_VALUES: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+import type { CsvCell } from '@/features/institution/utils/export';
 const TIME_PATTERN = /^(\d{1,2}):(\d{2})$/;
 const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
 
@@ -105,7 +105,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       limit: 1,
       ...(!isAdmin ? { status: 'published' as const } : {}),
     },
-    Boolean(selectedSemesterId),
+    Boolean(selectedSemesterId) && (isAdmin || !publishedTimetablesQuery.isLoading || Boolean(semesterId)),
   );
   const timetable = timetablesQuery.data?.items[0] ?? null;
 

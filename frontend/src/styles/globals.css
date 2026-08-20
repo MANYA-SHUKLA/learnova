@@ -1,2 +1,25 @@
 @import 'tailwindcss';
 @import '@learnova/ui/globals.css';
+
+@media print {
+  .timetable-no-print {
+    display: none !important;
+  }
+
+  .timetable-print-only {
+    display: block !important;
+  }
+
+  .timetable-print-only table {
+    page-break-inside: auto;
+  }
+
+  .timetable-print-only tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}
+
+.timetable-print-only {
+  display: none;
+}

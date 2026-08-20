@@ -15,7 +15,7 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
   return (
     <footer
       className={cn(
-        'mt-auto w-full shrink-0 border-t border-border bg-muted/30 py-4 text-center',
+        'mt-auto w-full shrink-0 border-t border-border bg-muted/30 py-4 text-center print:hidden',
         siteGutter,
         className,
       )}

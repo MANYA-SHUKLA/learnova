@@ -380,7 +380,7 @@ function DesktopSidebar() {
       initial={false}
       animate={{ width: collapsed ? 72 : 272 }}
       transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-      className="sticky top-0 z-30 hidden h-svh shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex"
+      className="sticky top-0 z-30 hidden h-svh shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex print:hidden"
     >
       <div
         className={cn(

@@ -108,7 +108,7 @@ export function AppTopbar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 w-full min-w-0 border-b border-border/80 bg-background/85 backdrop-blur-md">
+    <header className="sticky top-0 z-20 w-full min-w-0 border-b border-border/80 bg-background/85 backdrop-blur-md print:hidden">
       <div className={cn('flex h-14 min-w-0 items-center gap-2 sm:h-16 sm:gap-3', siteGutter)}>
         <Button
           type="button"
