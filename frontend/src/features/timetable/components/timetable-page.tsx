@@ -71,7 +71,6 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const t = useTranslations('dashboard.timetable');
   const tDays = useTranslations('dashboard.timetable.days');
   const tCommon = useTranslations('common');
-  const tCrud = useTranslations('dashboard.institution.crud');
 
   const [semesterId, setSemesterId] = useState('');
   const [dayFilter, setDayFilter] = useState<TimetableDayOfWeek | ''>('');
@@ -469,7 +468,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                             disabled={deleteSlotMutation.isPending}
                             onClick={() => void deleteSlotMutation.mutateAsync(row.id)}
                           >
-                            {tCrud('delete')}
+                            {tCommon('delete')}
                           </Button>
                         </div>
                       )
