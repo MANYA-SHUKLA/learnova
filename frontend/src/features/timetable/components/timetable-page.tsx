@@ -152,7 +152,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     if (!isAdmin) {
       const published = publishedTimetablesQuery.data?.items ?? [];
       if (published.length > 0) {
-        return published[0].semesterId;
+        return published[0]?.semesterId ?? '';
       }
     }
     return semestersData?.items[0]?.id || '';
@@ -195,14 +195,13 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     timetable?.id ?? '',
     {
       limit: 500,
-      sectionId: sectionFilter || undefined,
       sortBy: 'startTime',
       sortOrder: 'asc',
     },
-    Boolean(timetable?.id) && !isAdmin,
+    Boolean(timetable?.id),
   );
 
-  const { data: sectionsData } = useSections({ limit: 100, status: 'active' });
+  const { data: sectionsData } = useSections({ limit: 100, status: 'active' }, isAdmin);
   const { data: coursesData } = useCourseList({ limit: 100, status: 'published' });
   const { data: facultyData } = useFacultyList({ limit: 100, status: 'active' });
 
@@ -219,10 +218,27 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     [slotsQuery.data?.items, search],
   );
 
-  const gridSlots = useMemo(
-    () => filterSlotsBySearch(gridSlotsQuery.data?.items ?? [], search),
-    [gridSlotsQuery.data?.items, search],
-  );
+  const gridSlots = useMemo(() => {
+    let items = gridSlotsQuery.data?.items ?? [];
+    if (sectionFilter) {
+      items = items.filter((slot) => slot.sectionId === sectionFilter);
+    }
+    if (dayFilter) {
+      items = items.filter((slot) => slot.dayOfWeek === dayFilter);
+    }
+    return filterSlotsBySearch(items, search);
+  }, [gridSlotsQuery.data?.items, sectionFilter, dayFilter, search]);
+
+  const readSectionOptions = useMemo(() => {
+    const items = gridSlotsQuery.data?.items ?? [];
+    const bySection = new Map<string, string>();
+    for (const slot of items) {
+      bySection.set(slot.sectionId, slot.sectionName);
+    }
+    return [...bySection.entries()].map(([id, name]) => ({ id, name }));
+  }, [gridSlotsQuery.data?.items]);
+
+  const sectionOptions = isAdmin ? (sectionsData?.items ?? []) : readSectionOptions;
 
   const dayLabels = useMemo(
     () =>
@@ -401,7 +417,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     }
   };
 
-  const exportSourceRows = isAdmin ? filteredRows : gridSlots;
+  const exportSourceRows = gridSlots;
   const exportHeaders = columns.map((c) => c.header);
   const exportRows = exportSourceRows.map((row) =>
     columns.map((c) => c.exportValue?.(row) ?? ''),
@@ -479,7 +495,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       />
       </div>
 
-      {!isAdmin && gridSlots.length > 0 ? (
+      {gridSlots.length > 0 ? (
         <div className="timetable-print-only">
           <WeeklyTimetableGrid
             slots={gridSlots}
@@ -489,22 +505,13 @@ export function TimetablePage({ mode }: TimetablePageProps) {
             subtitle={selectedSemesterName}
           />
         </div>
-      ) : filteredRows.length > 0 ? (
-        <TimetablePrintView
-          title={t('title')}
-          semesterName={selectedSemesterName}
-          headers={exportHeaders}
-          rows={exportRows}
-        />
       ) : null}
 
       <Card className="timetable-no-print rounded-2xl shadow-soft-md">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle>{isAdmin ? t('tableTitle') : t('gridTitle')}</CardTitle>
-            <CardDescription>
-              {isAdmin ? t('tableDescription') : t('tableDescription')}
-            </CardDescription>
+            <CardTitle>{t('gridTitle')}</CardTitle>
+            <CardDescription>{t('tableDescription')}</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {timetable ? <TimetableStatusBadge status={timetable.status} /> : null}
@@ -512,7 +519,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               filename={`timetable-${selectedSemesterId || 'export'}`}
               headers={exportHeaders}
               rows={exportRows}
-              disabled={(isAdmin ? filteredRows : gridSlots).length === 0}
+              disabled={gridSlots.length === 0}
             />
           </div>
         </CardHeader>
@@ -541,21 +548,24 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               </select>
             </label>
             {isAdmin ? (
-            <select
-              className="flex h-10 min-w-[140px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
-              value={dayFilter}
-              onChange={(e) => {
-                setDayFilter(e.target.value as TimetableDayOfWeek | '');
-                setPage(1);
-              }}
-            >
-              <option value="">{t('allDays')}</option>
-              {dayOptions.map((d) => (
-                <option key={d.value} value={d.value}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="font-medium text-foreground">{t('columns.day')}</span>
+              <select
+                className="flex h-10 min-w-[140px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                value={dayFilter}
+                onChange={(e) => {
+                  setDayFilter(e.target.value as TimetableDayOfWeek | '');
+                  setPage(1);
+                }}
+              >
+                <option value="">{t('allDays')}</option>
+                {dayOptions.map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             ) : null}
             <select
               className="flex h-10 min-w-[160px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
@@ -566,7 +576,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               }}
             >
               <option value="">{t('allSections')}</option>
-              {(sectionsData?.items ?? []).map((s) => (
+              {sectionOptions.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
                 </option>

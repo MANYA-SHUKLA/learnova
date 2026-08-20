@@ -673,6 +673,7 @@
       "tableDescription": "All classes for the selected semester.",
       "gridTitle": "School timetable",
       "gridTimeColumn": "Time",
+      "manageSlotsTitle": "Manage class slots",
       "createTimetable": "Create timetable",
       "publish": "Publish timetable",
       "addSlot": "Add class slot",
