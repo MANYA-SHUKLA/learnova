@@ -3,7 +3,7 @@ import { getRedis } from '../database/redis/connection.js';
 import { logger } from '../utils/logger/index.js';
 
 export interface CacheSetOptions {
-  /** TTL in seconds. 0 = no expiry. Default MEDIUM. */
+
   ttlSeconds?: number;
   /** Optional namespace override (appended under REDIS_KEYS.CACHE) */
   namespace?: string;
