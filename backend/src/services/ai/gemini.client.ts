@@ -3,7 +3,7 @@ import { env } from '../../config/env.js';
 import { AIError } from '../../utils/errors/index.js';
 import { logger } from '../../utils/logger/index.js';
 
-const DEFAULT_MODEL = 'gemini-2.0-flash';
+const DEFAULT_MODEL = 'gemini-2.5-flash';
 const DEFAULT_TIMEOUT_MS = 45_000;
 
 export interface GeminiGenerateOptions {

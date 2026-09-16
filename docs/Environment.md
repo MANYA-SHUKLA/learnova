@@ -47,7 +47,7 @@ Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
 | `RATE_LIMIT_WINDOW_MS` | no | `60000` | Rate limit window |
 | `RATE_LIMIT_MAX` | no | `100` | Max requests per window |
 | `GEMINI_API_KEY` | no | — | Google Gemini API key (free tier from [Google AI Studio](https://aistudio.google.com/)). Required for AI timetable generation when `ENABLE_AI=true` |
-| `GEMINI_MODEL` | no | `gemini-2.0-flash` | Gemini model id |
+| `GEMINI_MODEL` | no | `gemini-2.5-flash` | Gemini model id |
 | `GEMINI_MAX_TOKENS` | no | `2048` | Default max output tokens (timetable generate requests 8192) |
 | `JUDGE0_API_URL` | no | — | Reserved for coding judge |
 | `JUDGE0_API_KEY` | no | — | Judge0 auth |
