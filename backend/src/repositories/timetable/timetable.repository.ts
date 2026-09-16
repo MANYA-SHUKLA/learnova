@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { TimetableModel, TimetableSlotModel } from '../../models/index.js';
+import { TimetableModel, TimetableSlotModel, type TimetableSlotDocument } from '../../models/index.js';
 import { timetableSlotToDto, timetableToDto } from './timetable.mapper.js';
 
 export const timetableRepository = {
@@ -127,6 +127,31 @@ export const timetableRepository = {
     };
     if (excludeSlotId) query._id = { $ne: new Types.ObjectId(excludeSlotId) };
     return TimetableSlotModel.find(query).select('startTime endTime').lean().exec();
+  },
+
+  async revertToDraft(id: string, institutionId: string) {
+    return TimetableModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(id), institutionId: new Types.ObjectId(institutionId), deletedAt: null },
+      { status: 'draft', publishedAt: null },
+      { new: true },
+    ).exec();
+  },
+
+  async softDeleteSlotsForTimetable(timetableId: string, institutionId: string) {
+    await TimetableSlotModel.updateMany(
+      {
+        timetableId: new Types.ObjectId(timetableId),
+        institutionId: new Types.ObjectId(institutionId),
+        deletedAt: null,
+      },
+      { $set: { deletedAt: new Date() } },
+    ).exec();
+  },
+
+  async createSlots(data: Record<string, unknown>[]) {
+    if (data.length === 0) return [];
+    const docs = await TimetableSlotModel.insertMany(data);
+    return docs.map((doc) => timetableSlotToDto(doc as unknown as TimetableSlotDocument));
   },
 
   async createSlot(data: Record<string, unknown>) {

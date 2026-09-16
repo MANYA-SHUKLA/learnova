@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createTimetableSchema,
   createTimetableSlotSchema,
+  generateTimetableSchema,
   updateTimetableSlotSchema,
 } from '@learnova/validation';
 
@@ -60,5 +61,33 @@ describe('timetable validation', () => {
   it('allows partial slot updates', () => {
     const parsed = updateTimetableSlotSchema.parse({ room: 'Lab 3' });
     expect(parsed.room).toBe('Lab 3');
+  });
+
+  it('generates timetable with semester only and defaults', () => {
+    const parsed = generateTimetableSchema.parse({ semesterId: OBJECT_ID });
+    expect(parsed.semesterId).toBe(OBJECT_ID);
+    expect(parsed.replaceExisting).toBe(false);
+    expect(parsed.notes).toBeUndefined();
+  });
+
+  it('accepts notes, working days, and periods', () => {
+    const parsed = generateTimetableSchema.parse({
+      semesterId: OBJECT_ID,
+      academicYearId: OBJECT_ID,
+      replaceExisting: true,
+      notes: 'Labs after 13:00',
+      workingDays: ['mon', 'wed', 'fri'],
+      periods: [{ startTime: '9:00', endTime: '10:00' }],
+    });
+    expect(parsed.replaceExisting).toBe(true);
+    expect(parsed.periods?.[0]?.startTime).toBe('09:00');
+  });
+
+  it('rejects generate notes over 500 characters', () => {
+    const result = generateTimetableSchema.safeParse({
+      semesterId: OBJECT_ID,
+      notes: 'x'.repeat(501),
+    });
+    expect(result.success).toBe(false);
   });
 });

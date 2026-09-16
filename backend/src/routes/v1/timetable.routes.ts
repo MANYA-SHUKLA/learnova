@@ -3,6 +3,7 @@ import { PERMISSIONS } from '@learnova/constants';
 import {
   createTimetableSchema,
   createTimetableSlotSchema,
+  generateTimetableSchema,
   timetableIdParamsSchema,
   timetableListQuerySchema,
   timetableSlotIdParamsSchema,
@@ -43,6 +44,13 @@ timetableRoutes.post(
   ...manageAuth,
   validate(createTimetableSchema),
   ctrl.createTimetable,
+);
+
+timetableRoutes.post(
+  '/timetables/generate',
+  ...manageAuth,
+  validate(generateTimetableSchema),
+  ctrl.generateTimetable,
 );
 
 timetableRoutes.patch(

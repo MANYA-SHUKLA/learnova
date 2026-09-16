@@ -46,7 +46,9 @@ Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
 | `CORS_ORIGINS` | no | `http://localhost:3000` | Comma-separated origins |
 | `RATE_LIMIT_WINDOW_MS` | no | `60000` | Rate limit window |
 | `RATE_LIMIT_MAX` | no | `100` | Max requests per window |
-| `GEMINI_API_KEY` | no | — | Reserved for AI ideation |
+| `GEMINI_API_KEY` | no | — | Google Gemini API key (free tier from [Google AI Studio](https://aistudio.google.com/)). Required for AI timetable generation when `ENABLE_AI=true` |
+| `GEMINI_MODEL` | no | `gemini-2.0-flash` | Gemini model id |
+| `GEMINI_MAX_TOKENS` | no | `2048` | Default max output tokens (timetable generate requests 8192) |
 | `JUDGE0_API_URL` | no | — | Reserved for coding judge |
 | `JUDGE0_API_KEY` | no | — | Judge0 auth |
 | `STORAGE_DRIVER` | no | `local` | `local` \| `s3` |
@@ -61,7 +63,7 @@ Read by `@learnova/feature-flags`. Defaults are safe (most capabilities off).
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `ENABLE_AI` | `false` | Gemini / ideation surfaces |
+| `ENABLE_AI` | `false` | Gemini surfaces (AI timetable generation, future ideation). Set `true` and provide `GEMINI_API_KEY` |
 | `ENABLE_CHAT` | `false` | Chat features |
 | `ENABLE_PROCTORING` | `false` | Exam proctoring |
 | `ENABLE_GPU` | `false` | GPU-backed workloads |
@@ -84,7 +86,7 @@ Read by `@learnova/feature-flags`. Defaults are safe (most capabilities off).
 | `MONGODB_DB_NAME` | no | `learnova` | DB name |
 | `REDIS_URL` | **yes** | — | Redis / BullMQ |
 | `WORKER_CONCURRENCY` | no | `5` | Jobs per worker |
-| `GEMINI_API_KEY` | no | — | Reserved |
+| `GEMINI_API_KEY` | no | — | Same Gemini key as backend; used if worker AI jobs are enabled |
 | `JUDGE0_API_URL` | no | — | Reserved |
 
 ---

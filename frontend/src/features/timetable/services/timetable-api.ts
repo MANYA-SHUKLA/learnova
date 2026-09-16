@@ -1,5 +1,6 @@
 import { API_ROUTES, PAGINATION } from '@learnova/constants';
 import type {
+  GenerateTimetableResult,
   PaginatedMeta,
   Timetable,
   TimetableSlot,
@@ -61,6 +62,15 @@ export interface TimetableTodayResult {
   classes: TimetableTodayClass[];
 }
 
+export interface GenerateTimetableBody {
+  semesterId: string;
+  academicYearId?: string;
+  replaceExisting?: boolean;
+  notes?: string;
+  workingDays?: TimetableSlot['dayOfWeek'][];
+  periods?: { startTime: string; endTime: string }[];
+}
+
 const emptyMeta = (page?: number, limit?: number): PaginatedMeta => ({
   page: page ?? PAGINATION.DEFAULT_PAGE,
   limit: limit ?? PAGINATION.DEFAULT_LIMIT,
@@ -91,6 +101,9 @@ export const timetableApi = {
 
   create: (body: CreateTimetableBody) =>
     apiClient.post<Timetable>(API_ROUTES.TIMETABLES, body),
+
+  generate: (body: GenerateTimetableBody) =>
+    apiClient.post<GenerateTimetableResult>(`${API_ROUTES.TIMETABLES}/generate`, body),
 
   publish: (id: string) =>
     apiClient.patch<Timetable>(`${API_ROUTES.TIMETABLES}/${id}/publish`),

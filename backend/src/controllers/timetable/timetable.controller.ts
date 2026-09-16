@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import type {
   CreateTimetableInput,
   CreateTimetableSlotInput,
+  GenerateTimetableInput,
   TimetableListQuery,
   TimetableSlotListQuery,
   UpdateTimetableSlotInput,
@@ -12,6 +13,7 @@ import {
   timetableService,
   type ActorContext,
 } from '../../services/timetable/timetable.service.js';
+import { timetableGeneratorService } from '../../services/timetable/timetable-generator.service.js';
 
 function actorFrom(req: Request): ActorContext {
   if (!req.user) throw new UnauthorizedError();
@@ -35,6 +37,18 @@ export async function listTimetables(req: Request, res: Response, next: NextFunc
 export async function createTimetable(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await timetableService.create(req.body as CreateTimetableInput, actorFrom(req));
+    sendCreated(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function generateTimetable(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await timetableGeneratorService.generate(
+      req.body as GenerateTimetableInput,
+      actorFrom(req),
+    );
     sendCreated(res, data, { requestId: req.requestId });
   } catch (err) {
     next(err);

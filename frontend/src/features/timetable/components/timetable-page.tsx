@@ -1,6 +1,11 @@
 'use client';
 
-import type { Timetable, TimetableDayOfWeek, TimetableSlot } from '@learnova/types';
+import type {
+  GenerateTimetableResult,
+  Timetable,
+  TimetableDayOfWeek,
+  TimetableSlot,
+} from '@learnova/types';
 import { PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
@@ -28,6 +33,7 @@ import {
   ResourceTable,
   type FormField,
   type ResourceColumn,
+  useAcademicYears,
   useSemesters,
   useSections,
 } from '@/features/institution';
@@ -36,11 +42,13 @@ import {
   useCreateTimetableMutation,
   useCreateTimetableSlotMutation,
   useDeleteTimetableSlotMutation,
+  useGenerateTimetableMutation,
   usePublishTimetableMutation,
   useTimetableSlots,
   useTimetables,
   useUpdateTimetableSlotMutation,
 } from '../hooks/use-timetable-queries';
+import { GenerateTimetableDialog } from './generate-timetable-dialog';
 import { WeeklyTimetableGrid } from './weekly-timetable-grid';
 
 const DAY_VALUES: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
@@ -86,15 +94,28 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const tCommon = useTranslations('common');
 
   const [semesterId, setSemesterId] = useState('');
+  const [academicYearId, setAcademicYearId] = useState('');
   const [dayFilter, setDayFilter] = useState<TimetableDayOfWeek | ''>('');
   const [sectionFilter, setSectionFilter] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [generateOpen, setGenerateOpen] = useState(false);
   const [editing, setEditing] = useState<TimetableSlot | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [generateResult, setGenerateResult] = useState<GenerateTimetableResult | null>(null);
 
-  const { data: semestersData } = useSemesters({ limit: 100, status: 'active' }, isAdmin);
+  const { data: yearsData } = useAcademicYears({ limit: 100, status: 'active' }, isAdmin);
+  const selectedYearId = useMemo(() => {
+    if (academicYearId) return academicYearId;
+    const years = yearsData?.items ?? [];
+    return years.find((year) => year.isActive)?.id || years[0]?.id || '';
+  }, [academicYearId, yearsData?.items]);
+
+  const { data: semestersData } = useSemesters(
+    { limit: 100, status: 'active', academicYearId: selectedYearId || undefined },
+    isAdmin,
+  );
 
   const publishedTimetablesQuery = useTimetables(
     { status: 'published', limit: 50 },
@@ -102,14 +123,17 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   );
 
   const selectedSemesterId = useMemo(() => {
-    if (semesterId) return semesterId;
     if (!isAdmin) {
+      if (semesterId) return semesterId;
       const published = publishedTimetablesQuery.data?.items ?? [];
       if (published.length > 0) {
         return published[0]?.semesterId ?? '';
       }
+      return '';
     }
-    return semestersData?.items[0]?.id || '';
+    const items = semestersData?.items ?? [];
+    if (semesterId && items.some((row) => row.id === semesterId)) return semesterId;
+    return items[0]?.id || '';
   }, [semesterId, isAdmin, publishedTimetablesQuery.data?.items, semestersData?.items]);
 
   const timetablesQuery = useTimetables(
@@ -160,6 +184,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const { data: facultyData } = useFacultyList({ limit: 100, status: 'active' });
 
   const createTimetableMutation = useCreateTimetableMutation();
+  const generateMutation = useGenerateTimetableMutation();
   const publishMutation = usePublishTimetableMutation();
   const createSlotMutation = useCreateTimetableSlotMutation(timetable?.id ?? '');
   const updateSlotMutation = useUpdateTimetableSlotMutation(timetable?.id ?? '');
@@ -313,6 +338,23 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     }
   };
 
+  const handleGenerate = async (values: { notes: string; replaceExisting: boolean }) => {
+    if (!selectedSemesterId) return;
+    setFormError(null);
+    try {
+      const result = await generateMutation.mutateAsync({
+        semesterId: selectedSemesterId,
+        academicYearId: selectedYearId || undefined,
+        replaceExisting: values.replaceExisting,
+        notes: values.notes || undefined,
+      });
+      setGenerateResult(result);
+      setGenerateOpen(false);
+    } catch (err) {
+      setFormError(getApiErrorMessage(err, t('generateFailed')));
+    }
+  };
+
   const handleSubmitSlot = async (values: Record<string, string | number | boolean | null>) => {
     if (!timetable) return;
     setFormError(null);
@@ -400,6 +442,20 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     return '';
   }, [semesterOptions, selectedSemesterId, timetable?.name]);
 
+  const selectedYearName = useMemo(() => {
+    const years = yearsData?.items ?? [];
+    return years.find((year) => year.id === selectedYearId)?.name || '';
+  }, [yearsData?.items, selectedYearId]);
+
+  const assignmentRows =
+    generateResult && generateResult.timetable.semesterId === selectedSemesterId
+      ? generateResult.assignments
+      : [];
+  const generateWarnings =
+    generateResult && generateResult.timetable.semesterId === selectedSemesterId
+      ? generateResult.warnings
+      : [];
+
   return (
     <div className="space-y-6">
       <div className="timetable-no-print">
@@ -429,6 +485,17 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                     {t('publish')}
                   </Button>
                 ) : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!selectedSemesterId || generateMutation.isPending}
+                  onClick={() => {
+                    setFormError(null);
+                    setGenerateOpen(true);
+                  }}
+                >
+                  {t('generateWithAi')}
+                </Button>
                 {timetable ? (
                   <Button
                     type="button"
@@ -479,6 +546,28 @@ export function TimetablePage({ mode }: TimetablePageProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
+            {isAdmin ? (
+            <select
+              className="flex h-10 min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              value={selectedYearId}
+              onChange={(e) => {
+                setAcademicYearId(e.target.value);
+                setSemesterId('');
+                setPage(1);
+                setGenerateResult(null);
+              }}
+            >
+              {(yearsData?.items ?? []).length === 0 ? (
+                <option value="">{t('selectAcademicYear')}</option>
+              ) : (
+                (yearsData?.items ?? []).map((year) => (
+                  <option key={year.id} value={year.id}>
+                    {year.name}
+                  </option>
+                ))
+              )}
+            </select>
+            ) : null}
             <select
               className="flex h-10 min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={selectedSemesterId}
@@ -486,6 +575,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               onChange={(e) => {
                 setSemesterId(e.target.value);
                 setPage(1);
+                setGenerateResult(null);
               }}
             >
               {semesterOptions.length === 0 ? (
@@ -542,6 +632,30 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           </div>
 
           {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
+
+          {assignmentRows.length > 0 ? (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">{t('assignmentsTitle')}</h3>
+              <div className="flex flex-wrap gap-2">
+                {assignmentRows.map((row) => (
+                  <Badge key={`${row.courseId}-${row.facultyId}`} variant="secondary">
+                    {row.facultyName} — {row.courseTitle}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {generateWarnings.length > 0 ? (
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold text-foreground">{t('warningsTitle')}</h3>
+              {generateWarnings.map((warning) => (
+                <p key={warning} className="text-sm text-muted-foreground">
+                  {warning}
+                </p>
+              ))}
+            </div>
+          ) : null}
 
           {timetablesQuery.isLoading ? (
             <Skeleton className="h-48 w-full rounded-xl" />
@@ -673,6 +787,21 @@ export function TimetablePage({ mode }: TimetablePageProps) {
             setFormError(null);
           }}
           onSubmit={handleSubmitSlot}
+        />
+      ) : null}
+
+      {isAdmin ? (
+        <GenerateTimetableDialog
+          open={generateOpen}
+          semesterName={selectedSemesterName || t('selectSemester')}
+          academicYearName={selectedYearName || t('selectAcademicYear')}
+          hasExistingSlots={Boolean(timetable && (timetable.slotCount ?? gridSlots.length) > 0)}
+          isSubmitting={generateMutation.isPending}
+          error={formError}
+          onClose={() => {
+            setGenerateOpen(false);
+          }}
+          onSubmit={handleGenerate}
         />
       ) : null}
     </div>

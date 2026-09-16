@@ -55,3 +55,23 @@ export interface TimetableTodayClass {
   facultyName: string;
   room: string;
 }
+
+export interface TimetablePeriod {
+  startTime: string;
+  endTime: string;
+}
+
+export interface TimetableTeachingAssignment {
+  courseId: ID;
+  courseTitle: string;
+  facultyId: ID;
+  facultyName: string;
+  sessionsPerWeek: number;
+}
+
+export interface GenerateTimetableResult {
+  timetable: Timetable;
+  assignments: TimetableTeachingAssignment[];
+  slots: TimetableSlot[];
+  warnings: string[];
+}

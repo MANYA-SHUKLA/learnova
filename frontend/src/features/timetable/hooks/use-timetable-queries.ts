@@ -5,6 +5,7 @@ import {
   timetableApi,
   type CreateTimetableBody,
   type CreateTimetableSlotBody,
+  type GenerateTimetableBody,
   type TimetableListParams,
   type TimetableSlotListParams,
   type UpdateTimetableSlotBody,
@@ -51,6 +52,16 @@ export function useCreateTimetableMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateTimetableBody) => timetableApi.create(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: timetableKeys.all });
+    },
+  });
+}
+
+export function useGenerateTimetableMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: GenerateTimetableBody) => timetableApi.generate(body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: timetableKeys.all });
     },

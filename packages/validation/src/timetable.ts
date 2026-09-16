@@ -110,8 +110,28 @@ export const timetableSlotIdParamsSchema = z.object({
   id: objectIdField,
 });
 
+export const timetablePeriodSchema = z
+  .object({
+    startTime: timeField,
+    endTime: timeField,
+  })
+  .refine((v) => v.startTime < v.endTime, {
+    message: 'End time must be after start time',
+    path: ['endTime'],
+  });
+
+export const generateTimetableSchema = z.object({
+  semesterId: objectIdField,
+  academicYearId: objectIdField.optional(),
+  replaceExisting: z.boolean().default(false),
+  notes: z.string().trim().max(500).optional(),
+  workingDays: z.array(timetableDayOfWeekSchema).min(1).max(7).optional(),
+  periods: z.array(timetablePeriodSchema).min(1).max(12).optional(),
+});
+
 export type TimetableListQuery = z.infer<typeof timetableListQuerySchema>;
 export type TimetableSlotListQuery = z.infer<typeof timetableSlotListQuerySchema>;
 export type CreateTimetableInput = z.infer<typeof createTimetableSchema>;
 export type CreateTimetableSlotInput = z.infer<typeof createTimetableSlotSchema>;
 export type UpdateTimetableSlotInput = z.infer<typeof updateTimetableSlotSchema>;
+export type GenerateTimetableInput = z.infer<typeof generateTimetableSchema>;

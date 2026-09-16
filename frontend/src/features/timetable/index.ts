@@ -2,6 +2,7 @@ export { timetableApi } from './services/timetable-api';
 export type {
   CreateTimetableBody,
   CreateTimetableSlotBody,
+  GenerateTimetableBody,
   TimetableListParams,
   TimetableSlotListParams,
   TimetableTodayResult,
@@ -12,6 +13,7 @@ export {
   useCreateTimetableMutation,
   useCreateTimetableSlotMutation,
   useDeleteTimetableSlotMutation,
+  useGenerateTimetableMutation,
   usePublishTimetableMutation,
   useTodayClasses,
   useTimetableSlots,
