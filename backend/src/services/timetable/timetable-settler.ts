@@ -78,15 +78,29 @@ export interface SettleResult {
   warnings: string[];
 }
 
+/** SOE JNU campus grid — generation always uses these, not client overrides. */
 export const DEFAULT_WORKING_DAYS: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri'];
 
 export const DEFAULT_PERIODS: TimetablePeriod[] = [
   { startTime: '09:00', endTime: '10:00' },
   { startTime: '10:00', endTime: '11:00' },
-  { startTime: '11:15', endTime: '12:15' },
-  { startTime: '13:15', endTime: '14:15' },
-  { startTime: '14:15', endTime: '15:15' },
+  { startTime: '11:00', endTime: '12:00' },
+  { startTime: '12:00', endTime: '13:00' },
+  { startTime: '14:00', endTime: '15:00' },
+  { startTime: '15:00', endTime: '16:00' },
+  { startTime: '16:00', endTime: '17:00' },
+  { startTime: '17:00', endTime: '18:00' },
 ];
+
+export const DEFAULT_LECTURE_ROOMS = [
+  'ELC Class 1',
+  'ELC Class 2',
+  'ELC Class 3',
+  'ELC Class 4',
+  'ELC Class 5',
+] as const;
+
+export const DEFAULT_LAB_ROOMS = ['SOE Lab 1', 'SOE Lab 2', 'SOE Lab 3', 'SOE Lab 4'] as const;
 
 const DAY_SET = new Set<string>(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']);
 
@@ -229,9 +243,29 @@ function slotConflicts(existing: SettledSlot[], candidate: SettledSlot): boolean
   );
 }
 
-function nextRoom(used: SettledSlot[], dayOfWeek: TimetableDayOfWeek, startTime: string, endTime: string): string {
-  for (let n = 101; n <= 180; n += 1) {
-    const room = `R-${n}`;
+export function isLabCourse(course: Pick<CourseRecord, 'title' | 'category'>): boolean {
+  const blob = `${course.title} ${course.category ?? ''}`.toLowerCase();
+  return /\blab\b|practical|workshop/.test(blob);
+}
+
+function venuePool(preferLab: boolean): readonly string[] {
+  return preferLab ? DEFAULT_LAB_ROOMS : DEFAULT_LECTURE_ROOMS;
+}
+
+function isAllowedVenue(room: string, preferLab: boolean): boolean {
+  const wanted = room.trim().toLowerCase();
+  return venuePool(preferLab).some((name) => name.toLowerCase() === wanted);
+}
+
+function nextRoom(
+  used: SettledSlot[],
+  dayOfWeek: TimetableDayOfWeek,
+  startTime: string,
+  endTime: string,
+  preferLab: boolean,
+): string {
+  const rooms = venuePool(preferLab);
+  for (const room of rooms) {
     const taken = used.some(
       (slot) =>
         slot.dayOfWeek === dayOfWeek &&
@@ -240,7 +274,7 @@ function nextRoom(used: SettledSlot[], dayOfWeek: TimetableDayOfWeek, startTime:
     );
     if (!taken) return room;
   }
-  return 'R-101';
+  return rooms[0] ?? 'ELC Class 1';
 }
 
 export function parseGeminiTimetableProposal(raw: unknown): {
@@ -357,8 +391,10 @@ export function settleTimetable(input: SettleInput): SettleResult {
     const key = `${course.id}|${section.id}`;
     if ((remaining.get(key) ?? 0) <= 0) continue;
 
+    const preferLab = isLabCourse(course);
     const room =
       proposed.room &&
+      isAllowedVenue(proposed.room, preferLab) &&
       !slots.some(
         (slot) =>
           slot.dayOfWeek === proposed.dayOfWeek &&
@@ -366,7 +402,7 @@ export function settleTimetable(input: SettleInput): SettleResult {
           timesOverlap(slot.startTime, slot.endTime, proposed.startTime, proposed.endTime),
       )
         ? proposed.room
-        : nextRoom(slots, proposed.dayOfWeek, proposed.startTime, proposed.endTime);
+        : nextRoom(slots, proposed.dayOfWeek, proposed.startTime, proposed.endTime, preferLab);
 
     const candidate: SettledSlot = {
       dayOfWeek: proposed.dayOfWeek,
@@ -394,7 +430,7 @@ export function settleTimetable(input: SettleInput): SettleResult {
     for (const day of workingDays) {
       for (const period of periods) {
         if (left <= 0) break;
-        const room = nextRoom(slots, day, period.startTime, period.endTime);
+        const room = nextRoom(slots, day, period.startTime, period.endTime, isLabCourse(course));
         const candidate: SettledSlot = {
           dayOfWeek: day,
           startTime: period.startTime,

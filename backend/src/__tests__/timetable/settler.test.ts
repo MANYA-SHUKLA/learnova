@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DEFAULT_LAB_ROOMS,
+  DEFAULT_LECTURE_ROOMS,
+  DEFAULT_PERIODS,
+  DEFAULT_WORKING_DAYS,
   extractTeachingMap,
   fillUnassignedFaculty,
+  isLabCourse,
   parseGeminiTimetableProposal,
   settleTimetable,
   sessionsPerWeek,
@@ -169,5 +174,65 @@ describe('timetable settler', () => {
       periods: [{ startTime: '09:00', endTime: '10:00' }],
     });
     expect(result.slots.every((slot) => slot.sectionId === 's1')).toBe(true);
+  });
+
+  it('keeps the SOE JNU grid: Mon–Fri, 09:00–18:00, ELC and SOE labs', () => {
+    expect(DEFAULT_WORKING_DAYS).toEqual(['mon', 'tue', 'wed', 'thu', 'fri']);
+    expect(DEFAULT_PERIODS[0]).toEqual({ startTime: '09:00', endTime: '10:00' });
+    expect(DEFAULT_PERIODS.at(-1)).toEqual({ startTime: '17:00', endTime: '18:00' });
+    expect(DEFAULT_PERIODS.some((period) => period.startTime === '13:00')).toBe(false);
+
+    const result = settleTimetable({
+      courses: [courses[0]!],
+      faculty,
+      sections: [sections[0]!],
+      workingDays: DEFAULT_WORKING_DAYS,
+      periods: DEFAULT_PERIODS,
+    });
+
+    expect(result.slots.length).toBeGreaterThan(0);
+    expect(result.slots.every((slot) => DEFAULT_WORKING_DAYS.includes(slot.dayOfWeek))).toBe(true);
+    expect(result.slots.every((slot) => slot.startTime >= '09:00' && slot.endTime <= '18:00')).toBe(true);
+    expect(
+      result.slots.every(
+        (slot) =>
+          DEFAULT_LECTURE_ROOMS.includes(slot.room as (typeof DEFAULT_LECTURE_ROOMS)[number]) ||
+          DEFAULT_LAB_ROOMS.includes(slot.room as (typeof DEFAULT_LAB_ROOMS)[number]),
+      ),
+    ).toBe(true);
+  });
+
+  it('puts lab courses in SOE labs and remaps unknown rooms', () => {
+    const labCourse: CourseRecord = {
+      ...courses[0]!,
+      id: 'c-lab',
+      title: 'Programming Lab',
+      category: 'programming',
+    };
+    expect(isLabCourse(labCourse)).toBe(true);
+
+    const result = settleTimetable({
+      courses: [labCourse],
+      faculty,
+      sections: [sections[0]!],
+      workingDays: ['mon'],
+      periods: [{ startTime: '09:00', endTime: '10:00' }],
+      proposedSlots: [
+        {
+          dayOfWeek: 'mon',
+          startTime: '09:00',
+          endTime: '10:00',
+          courseId: 'c-lab',
+          sectionId: 's1',
+          facultyId: 'f2',
+          room: 'R-101',
+        },
+      ],
+    });
+
+    expect(result.slots.length).toBeGreaterThan(0);
+    expect(result.slots.every((slot) => DEFAULT_LAB_ROOMS.includes(slot.room as (typeof DEFAULT_LAB_ROOMS)[number]))).toBe(
+      true,
+    );
   });
 });

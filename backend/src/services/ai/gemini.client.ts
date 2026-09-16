@@ -27,13 +27,11 @@ interface GeminiResponse {
 
 export function ensureGeminiEnabled(): { apiKey: string; model: string } {
   if (!isFeatureEnabled(FEATURE_FLAGS.ENABLE_AI)) {
-    throw new AIError(
-      'AI timetable generation is disabled. Set ENABLE_AI=true and configure GEMINI_API_KEY.',
-    );
+    throw new AIError('AI timetable generation is not available.');
   }
   const apiKey = env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
-    throw new AIError('Gemini API key is not configured. Set GEMINI_API_KEY in the backend environment.');
+    throw new AIError('AI is not configured. Ask an administrator to enable it.');
   }
   return {
     apiKey,
@@ -44,7 +42,7 @@ export function ensureGeminiEnabled(): { apiKey: string; model: string } {
 export function parseJsonFromModelText(text: string): unknown {
   const trimmed = text.trim();
   if (!trimmed) {
-    throw new AIError('Gemini returned an empty response');
+    throw new AIError('AI returned an empty response');
   }
   const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const raw = fenced?.[1]?.trim() ?? trimmed;
@@ -57,10 +55,10 @@ export function parseJsonFromModelText(text: string): unknown {
       try {
         return JSON.parse(raw.slice(start, end + 1)) as unknown;
       } catch {
-        throw new AIError('Gemini returned invalid JSON');
+        throw new AIError('AI returned an invalid response');
       }
     }
-    throw new AIError('Gemini returned invalid JSON');
+    throw new AIError('AI returned an invalid response');
   }
 }
 
@@ -97,19 +95,22 @@ export async function generateGeminiJson(options: GeminiGenerateOptions): Promis
     });
   } catch (err) {
     logger.warn({ err }, 'Gemini request failed');
-    throw new AIError('Could not reach Gemini. Check network access and try again.');
+    throw new AIError('Could not reach the AI service. Try again.');
   }
 
   let payload: GeminiResponse;
   try {
     payload = (await response.json()) as GeminiResponse;
   } catch {
-    throw new AIError('Gemini returned a non-JSON error payload');
+    throw new AIError('AI service returned an unexpected error');
   }
 
   if (!response.ok) {
-    const message = payload.error?.message || `Gemini request failed (${response.status})`;
-    throw new AIError(message);
+    logger.warn(
+      { status: response.status, message: payload.error?.message },
+      'AI request failed',
+    );
+    throw new AIError('AI request failed. Try again.');
   }
 
   const text = extractText(payload);

@@ -84,16 +84,18 @@ export function GenerateTimetableDialog({
         </div>
 
         <form className="space-y-4" onSubmit={(e) => void handleSubmit(e)}>
-          <div className="space-y-1.5">
-            <label htmlFor={notesId} className="text-sm font-medium">
+          <div className="flex flex-col gap-2">
+            <label htmlFor={notesId} className="block text-sm font-medium leading-5 text-foreground">
               {t('generateNotes')}
             </label>
+            <p className="text-sm text-muted-foreground">{t('generateNotesHint')}</p>
             <textarea
               id={notesId}
-              className="flex min-h-24 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="block min-h-24 w-full resize-y rounded-lg border border-input bg-background px-3 py-2.5 text-sm leading-5 placeholder:text-muted-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isSubmitting}
               maxLength={500}
               placeholder={t('generateNotesPlaceholder')}
+              rows={4}
               value={notes}
               onChange={(e) => {
                 setNotes(e.target.value);

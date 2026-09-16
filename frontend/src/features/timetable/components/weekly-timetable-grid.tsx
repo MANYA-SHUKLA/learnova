@@ -4,7 +4,7 @@ import type { TimetableDayOfWeek, TimetableSlot } from '@learnova/types';
 import { cn } from '@learnova/ui';
 import { useMemo } from 'react';
 
-const DEFAULT_GRID_DAYS: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const DEFAULT_GRID_DAYS: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri'];
 
 const DAY_COLORS: Record<TimetableDayOfWeek, { header: string; cell: string }> = {
   mon: { header: 'bg-orange-500 text-white', cell: 'bg-orange-50' },
@@ -80,6 +80,9 @@ export function WeeklyTimetableGrid({
 }: WeeklyTimetableGridProps) {
   const gridDays = useMemo(() => {
     const days = [...DEFAULT_GRID_DAYS];
+    if (slots.some((slot) => slot.dayOfWeek === 'sat') && !days.includes('sat')) {
+      days.push('sat');
+    }
     if (slots.some((slot) => slot.dayOfWeek === 'sun') && !days.includes('sun')) {
       days.push('sun');
     }

@@ -85,11 +85,15 @@ function buildPrompt(input: {
     'Place each course for every compatible section (matching programIds, or all sections if programIds is empty).',
     'Sessions per course per section = max(2, min(4, credits or 2)).',
     'No faculty, section, or room may overlap on the same day and time.',
-    `Working days: ${input.workingDays.join(', ')}.`,
-    `Periods: ${JSON.stringify(input.periods)}.`,
-    input.notes ? `Admin notes (honor if possible): ${input.notes}` : '',
+    'Campus constraints are fixed. Do not change days, times, or venues.',
+    `Working days (Mon–Fri only): ${input.workingDays.join(', ')}.`,
+    `Periods (09:00–18:00, lunch 13:00–14:00 skipped): ${JSON.stringify(input.periods)}.`,
+    'Lecture venues: ELC Class 1–5. Lab venues: SOE Lab 1–4.',
+    'Use ELC Class rooms for theory and SOE Lab rooms for lab/practical courses.',
+    'If admin notes name subjects that should keep labs, schedule those as lab sessions in SOE labs at the times they give. If they omit a subject, do not add a lab for it.',
+    input.notes ? `Admin notes (honor if they do not break the campus constraints): ${input.notes}` : '',
     'Return JSON only with shape:',
-    '{"assignments":[{"courseId":"","facultyId":""}],"slots":[{"dayOfWeek":"mon","startTime":"09:00","endTime":"10:00","courseId":"","sectionId":"","facultyId":"","room":"R-101"}]}',
+    '{"assignments":[{"courseId":"","facultyId":""}],"slots":[{"dayOfWeek":"mon","startTime":"09:00","endTime":"10:00","courseId":"","sectionId":"","facultyId":"","room":"ELC Class 1"}]}',
     'Catalog:',
     JSON.stringify({
       faculty: compactFaculty,
@@ -207,8 +211,8 @@ export class TimetableGeneratorService {
       departmentDocs.map((doc) => [String(doc._id), doc.name as string]),
     );
 
-    const workingDays = uniqueDays(input.workingDays ?? DEFAULT_WORKING_DAYS);
-    const periods = input.periods?.length ? input.periods : DEFAULT_PERIODS;
+    const workingDays = uniqueDays(DEFAULT_WORKING_DAYS);
+    const periods = DEFAULT_PERIODS;
 
     const extracted = extractTeachingMap(courses, faculty);
     const assigned = [...extracted.entries()].map(([courseId, facultyId]) => ({
@@ -258,7 +262,7 @@ export class TimetableGeneratorService {
 
     const warnings = [...settled.warnings];
     if (!geminiUsed) {
-      warnings.unshift('Gemini was unavailable; timetable was generated with the local scheduler.');
+      warnings.unshift('AI was unavailable; timetable was generated with the local scheduler.');
     }
 
     let timetable = await timetableRepository.findByInstitutionSemester(institutionId, input.semesterId);
