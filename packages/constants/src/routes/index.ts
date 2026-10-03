@@ -34,6 +34,7 @@ export const API_ROUTES = {
   CERTIFICATES: '/certificates',
   REPORTS: '/reports',
   NOTIFICATIONS: '/notifications',
+  AI: '/ai',
   LMS: '/lms',
   ERP: '/erp',
   EXAMINATION: '/examination',

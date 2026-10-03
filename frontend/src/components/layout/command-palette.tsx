@@ -33,7 +33,8 @@ function navForRole(role: string | undefined): CommandItem[] {
   const faculty: CommandItem[] = [
     { id: 'fdash', label: 'Dashboard', href: APP_ROUTES.FACULTY_DASHBOARD, group: 'Faculty' },
     { id: 'ftimetable', label: 'Timetable', href: APP_ROUTES.FACULTY_TIMETABLE, group: 'Faculty' },
-    { id: 'fcourses', label: 'My Courses', href: APP_ROUTES.FACULTY_ENROLLMENTS, group: 'Faculty' },
+    { id: 'fcourses', label: 'Courses', href: APP_ROUTES.FACULTY_COURSES, group: 'Faculty' },
+    { id: 'fenroll', label: 'Enrollments', href: APP_ROUTES.FACULTY_ENROLLMENTS, group: 'Faculty' },
     { id: 'fassign', label: 'Assignments', href: APP_ROUTES.FACULTY_ASSIGNMENTS, group: 'Teaching' },
     { id: 'fgrade', label: 'Gradebook', href: APP_ROUTES.FACULTY_GRADEBOOK, group: 'Teaching' },
     { id: 'fexams', label: 'Exams', href: APP_ROUTES.FACULTY_EXAMS, group: 'Teaching' },

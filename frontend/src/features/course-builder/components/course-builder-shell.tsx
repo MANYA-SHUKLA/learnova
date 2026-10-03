@@ -15,7 +15,7 @@ import { useBuilderTree } from '../hooks/use-builder-queries';
 import { ModuleSidebar } from './module-sidebar';
 import { LessonEditor } from './lesson-editor';
 import { LessonProperties } from './lesson-properties';
-import { BuilderEmptyState } from './builder-empty-state';
+import { AiContentPanel } from '@/features/ai-content';
 import {
   BuilderSidebarSkeleton,
   BuilderEditorSkeleton,
@@ -24,9 +24,10 @@ import {
 
 interface CourseBuilderShellProps {
   courseId: string;
+  audience?: 'institution' | 'faculty';
 }
 
-export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
+export function CourseBuilderShell({ courseId, audience = 'institution' }: CourseBuilderShellProps) {
   const query = useBuilderTree(courseId);
   const courseQuery = useCourse(courseId);
   const selectedLessonId = useBuilderStore((s) => s.selectedLessonId);
@@ -74,6 +75,10 @@ export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
 
   const tree = query.data;
   const courseTitle = courseQuery.data?.title ?? 'Course';
+  const coursesHref =
+    audience === 'faculty' ? APP_ROUTES.FACULTY_COURSES : APP_ROUTES.INSTITUTION_COURSES;
+  const courseHref =
+    audience === 'faculty' ? APP_ROUTES.FACULTY_COURSES : `${APP_ROUTES.INSTITUTION_COURSES}/${courseId}`;
   const selectedLesson = selectedLessonId
     ? tree.modules.flatMap((m) => m.lessons).find((l) => l.id === selectedLessonId)
     : null;
@@ -94,12 +99,12 @@ export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
           </Button>
           <div className="min-w-0 flex-1 text-center">
             <nav aria-label="Breadcrumb" className="mb-1 flex items-center justify-center gap-1 text-caption text-muted-foreground">
-              <Link href={APP_ROUTES.INSTITUTION_COURSES} className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+              <Link href={coursesHref} className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
                 Courses
               </Link>
               <ChevronRight className="size-3.5 shrink-0" aria-hidden />
               <Link
-                href={`${APP_ROUTES.INSTITUTION_COURSES}/${courseId}`}
+                href={courseHref}
                 className="max-w-[10rem] truncate hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm sm:max-w-xs"
               >
                 {courseTitle}
@@ -111,10 +116,13 @@ export function CourseBuilderShell({ courseId }: CourseBuilderShellProps) {
               {tree.meta.moduleCount} modules · {tree.meta.lessonCount} lessons
             </p>
           </div>
-          <Button type="button" variant="ghost" size="sm" className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring" onClick={toggleProperties}>
-            {propertiesCollapsed ? 'Properties' : 'Hide properties'}
-            {propertiesCollapsed ? <PanelRightOpen className="size-4" /> : <PanelRightClose className="size-4" />}
-          </Button>
+          <div className="flex items-center gap-2">
+            <AiContentPanel courseId={courseId} onSaved={() => void query.refetch()} />
+            <Button type="button" variant="ghost" size="sm" className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring" onClick={toggleProperties}>
+              {propertiesCollapsed ? 'Properties' : 'Hide properties'}
+              {propertiesCollapsed ? <PanelRightOpen className="size-4" /> : <PanelRightClose className="size-4" />}
+            </Button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-hidden bg-muted/10">
