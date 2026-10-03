@@ -9,7 +9,7 @@ import { useCourseList } from '@/features/course';
 import { Link } from '@/lib/i18n/routing';
 
 export default function FacultyCoursesPage() {
-  const t = useTranslations('dashboard.aiContent');
+  const t = useTranslations('dashboard.institution.aiContent');
   const courses = useCourseList({ page: 1, limit: 50 });
 
   return (

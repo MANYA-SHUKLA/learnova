@@ -816,8 +816,12 @@ export class QuizService {
       institutionId,
       generateSlug(input.title),
       async (candidate) => {
-        const existing = await quizRepository.findQuestionBankById(institutionId, candidate);
-        return existing !== null;
+        const count = await QuestionBankModel.countDocuments({
+          institutionId: oid(institutionId),
+          slug: candidate,
+          deletedAt: null,
+        }).exec();
+        return count > 0;
       },
     );
 

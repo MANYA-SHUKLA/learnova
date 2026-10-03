@@ -114,7 +114,8 @@ export function CourseBuilderShell({ courseId, audience = 'institution' }: Cours
               <span className="truncate font-medium text-foreground">Builder</span>
             </nav>
             <p className="text-caption text-muted-foreground">
-              {tree.meta.moduleCount} modules · {tree.meta.lessonCount} lessons
+              {tree.modules.length} modules ·{' '}
+              {tree.modules.reduce((sum, module) => sum + module.lessons.length, 0)} lessons
             </p>
           </div>
           <div className="flex items-center gap-2">

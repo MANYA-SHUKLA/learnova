@@ -42,7 +42,7 @@ interface AiContentPanelProps {
 }
 
 export function AiContentPanel({ courseId, onSaved }: AiContentPanelProps) {
-  const t = useTranslations('dashboard.aiContent');
+  const t = useTranslations('dashboard.institution.aiContent');
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<TabId>('outline');
   const [error, setError] = useState<string | null>(null);
@@ -435,7 +435,7 @@ function TeacherBrief({
   onInstructions: (value: string) => void;
   onNegativeMarks: (value: number) => void;
 }) {
-  const t = useTranslations('dashboard.aiContent');
+  const t = useTranslations('dashboard.institution.aiContent');
 
   return (
     <div className="mb-4 space-y-3 rounded-xl border border-border p-3">
@@ -501,7 +501,7 @@ function QuizTab({
   onGenerate: () => void;
   onSave: () => void;
 }) {
-  const t = useTranslations('dashboard.aiContent');
+  const t = useTranslations('dashboard.institution.aiContent');
 
   function updateQuestion(index: number, patch: Partial<AiQuestionProposal>) {
     if (!quiz) return;
