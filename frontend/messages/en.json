@@ -1616,6 +1616,37 @@
         "auditDescription": "Recent certificate actions in your institution.",
         "auditEmpty": "No certificate audit events yet."
       },
+      "aiContent": {
+        "open": "Generate with AI",
+        "title": "Draft with AI",
+        "description": "Gemini drafts from the course description. Nothing is saved until you save a draft, and nothing is published.",
+        "tabs": {
+          "outline": "Outline",
+          "quiz": "Quiz",
+          "blueprint": "Exam blueprint"
+        },
+        "moduleCount": "Modules",
+        "lessonsPerModule": "Lessons each",
+        "questionCount": "Questions",
+        "difficulty": "Difficulty",
+        "mixed": "Mixed",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard",
+        "totalMarks": "Total marks",
+        "duration": "Minutes",
+        "generate": "Generate",
+        "generating": "Generating…",
+        "saveDraft": "Save draft",
+        "failed": "Could not generate. Check that AI is enabled, then try again.",
+        "outlineSaved": "Outline saved as draft lessons. Publish them from the lesson properties when they look right.",
+        "quizSaved": "Quiz saved as a draft. Publish it from the quizzes page when you are ready.",
+        "blueprintSaved": "Blueprint saved. It is not an exam until you publish one.",
+        "applyExam": "Apply to a draft exam",
+        "applyExamNone": "Do not apply yet",
+        "myCourses": "My courses",
+        "myCoursesDescription": "Open a course to draft lessons, quizzes, and exam blueprints."
+      },
       "courseBuilder": {
         "title": "Course Builder",
         "openBuilder": "Open Builder",
