@@ -7,19 +7,30 @@ export const aiCourseParamsSchema = z.object({
   courseId: objectIdField,
 });
 
+const teacherBriefFields = {
+  topics: z.string().trim().max(2000).optional().default(''),
+  instructions: z.string().trim().max(4000).optional().default(''),
+};
+
 export const generateOutlineSchema = z.object({
   moduleCount: z.number().int().min(1).max(8).default(5),
   lessonsPerModule: z.number().int().min(1).max(4).default(3),
+  ...teacherBriefFields,
 });
 
 export const generateQuizSchema = z.object({
   questionCount: z.number().int().min(5).max(20).default(10),
   difficulty: z.enum(['easy', 'medium', 'hard', 'mixed']).default('mixed'),
+  marks: z.number().min(0).max(100).optional(),
+  negativeMarks: z.number().min(0).max(100).default(0),
+  ...teacherBriefFields,
 });
 
 export const generateBlueprintSchema = z.object({
   totalMarks: z.number().min(1).max(10000).default(100),
   durationMinutes: z.number().int().min(1).max(600).default(120),
+  negativeMarks: z.number().min(0).max(100).default(0),
+  ...teacherBriefFields,
 });
 
 export const aiLessonSchema = z.object({
@@ -51,6 +62,7 @@ export const aiQuestionSchema = z
     questionType: aiQuestionTypeSchema,
     difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
     marks: z.number().min(0).max(100).default(1),
+    negativeMarks: z.number().min(0).max(100).default(0),
     explanation: z.string().trim().max(5000).optional().default(''),
     options: z.array(aiQuestionOptionSchema).min(2).max(6),
   })
@@ -112,6 +124,20 @@ export type AiModuleProposal = z.infer<typeof aiModuleSchema>;
 export type AiOutlineProposal = z.infer<typeof aiOutlineProposalSchema>;
 export type AiQuestionProposal = z.infer<typeof aiQuestionSchema>;
 export type AiQuizProposal = z.infer<typeof aiQuizProposalSchema>;
+
+export function applyTeacherQuizRules(
+  proposal: AiQuizProposal,
+  rules: { marks?: number; negativeMarks: number },
+): AiQuizProposal {
+  return {
+    ...proposal,
+    questions: proposal.questions.map((question) => ({
+      ...question,
+      marks: rules.marks ?? question.marks,
+      negativeMarks: rules.negativeMarks,
+    })),
+  };
+}
 export type AiBlueprintSlot = z.infer<typeof aiBlueprintSlotSchema>;
 export type AiBlueprintProposal = z.infer<typeof aiBlueprintProposalSchema>;
 export type AcceptOutlineInput = z.infer<typeof acceptOutlineSchema>;
@@ -123,25 +149,35 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value as Record<string, unknown>;
 }
 
+function field(row: Record<string, unknown>, key: string): unknown {
+  return row[key];
+}
+
+function arrayField(row: Record<string, unknown> | null, key: string): unknown[] {
+  if (!row) return [];
+  const value = field(row, key);
+  return Array.isArray(value) ? value : [];
+}
+
 function coerceQuestion(raw: unknown): unknown {
   const row = asRecord(raw);
   if (!row) return raw;
-  const options = Array.isArray(row.options)
-    ? row.options.map((option) => {
+  const options = Array.isArray(field(row, 'options'))
+    ? (field(row, 'options') as unknown[]).map((option) => {
         const item = asRecord(option);
         if (!item) return option;
         return {
-          optionText: item.optionText ?? item.text ?? item.label ?? '',
-          isCorrect: Boolean(item.isCorrect ?? item.correct),
+          optionText: field(item, 'optionText') ?? field(item, 'text') ?? field(item, 'label') ?? '',
+          isCorrect: Boolean(field(item, 'isCorrect') ?? field(item, 'correct')),
         };
       })
     : [];
   return {
-    question: row.question ?? row.stem ?? row.prompt ?? '',
-    questionType: row.questionType ?? row.type,
-    difficulty: row.difficulty ?? 'medium',
-    marks: row.marks ?? 1,
-    explanation: row.explanation ?? '',
+    question: field(row, 'question') ?? field(row, 'stem') ?? field(row, 'prompt') ?? '',
+    questionType: field(row, 'questionType') ?? field(row, 'type'),
+    difficulty: field(row, 'difficulty') ?? 'medium',
+    marks: field(row, 'marks') ?? 1,
+    explanation: field(row, 'explanation') ?? '',
     options,
   };
 }
@@ -151,7 +187,7 @@ export function parseOutlineProposal(
   limits: { moduleCount?: number; lessonsPerModule?: number } = {},
 ): AiOutlineProposal | null {
   const row = asRecord(raw);
-  const modulesRaw = Array.isArray(row?.modules) ? row.modules : [];
+  const modulesRaw = arrayField(row, 'modules');
   const moduleCap = limits.moduleCount ?? 8;
   const lessonCap = limits.lessonsPerModule ?? 4;
   const modules: AiModuleProposal[] = [];
@@ -159,7 +195,7 @@ export function parseOutlineProposal(
   for (const item of modulesRaw) {
     const moduleRow = asRecord(item);
     if (!moduleRow) continue;
-    const lessonsRaw = Array.isArray(moduleRow.lessons) ? moduleRow.lessons : [];
+    const lessonsRaw = arrayField(moduleRow, 'lessons');
     const lessons: AiLessonProposal[] = [];
     for (const lesson of lessonsRaw) {
       const parsed = aiLessonSchema.safeParse(lesson);
@@ -181,7 +217,7 @@ export function parseQuizProposal(
   limits: { questionCount?: number; fallbackTitle?: string } = {},
 ): AiQuizProposal | null {
   const row = asRecord(raw);
-  const questionsRaw = Array.isArray(row?.questions) ? row.questions : [];
+  const questionsRaw = arrayField(row, 'questions');
   const cap = limits.questionCount ?? 20;
   const questions: AiQuestionProposal[] = [];
 
@@ -193,9 +229,10 @@ export function parseQuizProposal(
   }
 
   if (questions.length < 5) return null;
+  const titleValue = row ? field(row, 'title') : undefined;
   const title =
-    typeof row?.title === 'string' && row.title.trim().length > 0
-      ? row.title.trim().slice(0, 200)
+    typeof titleValue === 'string' && titleValue.trim().length > 0
+      ? titleValue.trim().slice(0, 200)
       : (limits.fallbackTitle ?? 'Practice quiz');
   const proposal = aiQuizProposalSchema.safeParse({ title, questions });
   return proposal.success ? proposal.data : null;
@@ -212,14 +249,14 @@ export function rescaleBlueprintSlots(
   const scaled = slots.map((slot) => ({ ...slot }));
   if (Math.abs(current - totalMarks) > 0.001) {
     const factor = totalMarks / current;
-    for (let index = 0; index < scaled.length - 1; index += 1) {
-      const slot = scaled[index]!;
+    for (const slot of scaled.slice(0, -1)) {
       slot.marks = Math.round(slot.marks * factor * 100) / 100;
     }
     const others = scaled
       .slice(0, -1)
       .reduce((sum, slot) => sum + slot.marks * slot.count, 0);
-    const last = scaled[scaled.length - 1]!;
+    const last = scaled.at(-1);
+    if (!last) return null;
     last.marks = Math.round(((totalMarks - others) / last.count) * 100) / 100;
   }
 
@@ -234,16 +271,16 @@ export function parseBlueprintProposal(
   defaults: { totalMarks: number; durationMinutes: number; fallbackName: string },
 ): AiBlueprintProposal | null {
   const row = asRecord(raw);
-  const slotsRaw = Array.isArray(row?.slots) ? row.slots : [];
+  const slotsRaw = arrayField(row, 'slots');
   const slots: AiBlueprintSlot[] = [];
   for (const item of slotsRaw) {
     const slot = asRecord(item);
     if (!slot) continue;
     const parsed = aiBlueprintSlotSchema.safeParse({
-      difficulty: slot.difficulty ?? 'medium',
-      category: slot.category ?? slot.topic ?? null,
-      marks: slot.marks ?? 1,
-      count: slot.count ?? slot.questionCount,
+      difficulty: field(slot, 'difficulty') ?? 'medium',
+      category: field(slot, 'category') ?? field(slot, 'topic') ?? null,
+      marks: field(slot, 'marks') ?? 1,
+      count: field(slot, 'count') ?? field(slot, 'questionCount'),
     });
     if (parsed.success) slots.push(parsed.data);
   }
@@ -251,12 +288,14 @@ export function parseBlueprintProposal(
   const scaled = rescaleBlueprintSlots(slots, defaults.totalMarks);
   if (!scaled) return null;
 
+  const nameValue = row ? field(row, 'name') : undefined;
   const name =
-    typeof row?.name === 'string' && row.name.trim().length > 0
-      ? row.name.trim().slice(0, 120)
+    typeof nameValue === 'string' && nameValue.trim().length > 0
+      ? nameValue.trim().slice(0, 120)
       : defaults.fallbackName;
+  const descriptionValue = row ? field(row, 'description') : undefined;
   const description =
-    typeof row?.description === 'string' ? row.description.trim().slice(0, 2000) : '';
+    typeof descriptionValue === 'string' ? descriptionValue.trim().slice(0, 2000) : '';
 
   const proposal = aiBlueprintProposalSchema.safeParse({
     name,

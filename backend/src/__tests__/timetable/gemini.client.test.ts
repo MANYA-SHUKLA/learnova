@@ -50,7 +50,9 @@ describe('gemini client', () => {
 
   it('throws when ENABLE_AI is off', async () => {
     isFeatureEnabled.mockReturnValue(false);
-    await expect(generateGeminiJson({ prompt: 'hi' })).rejects.toBeInstanceOf(AIError);
+    await expect(generateGeminiJson({ prompt: 'hi' })).rejects.toThrow(
+      'AI generation is not available.',
+    );
   });
 
   it('throws when the API key is missing', async () => {

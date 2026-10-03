@@ -15,6 +15,7 @@ import { useBuilderTree } from '../hooks/use-builder-queries';
 import { ModuleSidebar } from './module-sidebar';
 import { LessonEditor } from './lesson-editor';
 import { LessonProperties } from './lesson-properties';
+import { BuilderEmptyState } from './builder-empty-state';
 import { AiContentPanel } from '@/features/ai-content';
 import {
   BuilderSidebarSkeleton,

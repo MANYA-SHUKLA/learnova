@@ -11,10 +11,12 @@ import type {
   GenerateQuizInput,
 } from '@learnova/validation';
 import {
+  applyTeacherQuizRules,
   parseBlueprintProposal,
   parseOutlineProposal,
   parseQuizProposal,
   renderLessonHtml,
+  rescaleBlueprintSlots,
 } from '@learnova/validation';
 import { facultyCanAccessCourse } from '../access/faculty-scope.js';
 import { CourseModel } from '../../models/course.model.js';
@@ -38,7 +40,7 @@ interface CourseContext {
   requirements: string[];
   skills: string[];
   difficulty: string;
-  credits: number | null;
+  credits: number;
 }
 
 function stringList(value: unknown): string[] {
@@ -46,10 +48,11 @@ function stringList(value: unknown): string[] {
   return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
 }
 
-function recordId(row: Record<string, unknown>): string {
+function recordId(row: { id?: unknown; _id?: unknown }): string {
   const id = row.id ?? row._id;
-  if (!id) throw new AIError('Could not save the generated draft');
-  return String(id);
+  if (typeof id === 'string' && id.length > 0) return id;
+  if (id instanceof Types.ObjectId) return id.toHexString();
+  throw new AIError('Could not save the generated draft');
 }
 
 function builderPath(role: string, courseId: string): string {
@@ -103,8 +106,8 @@ async function loadCourse(courseId: string, actor: ActorContext): Promise<Course
     prerequisites: stringList(course.prerequisites),
     requirements: stringList(course.requirements),
     skills: stringList(course.skills),
-    difficulty: course.difficulty ?? 'beginner',
-    credits: course.credits ?? null,
+    difficulty: course.difficulty,
+    credits: course.credits,
   };
 }
 
@@ -118,6 +121,21 @@ async function moduleTitles(courseId: string): Promise<string[]> {
     .lean()
     .exec();
   return modules.map((module) => module.title).filter(Boolean);
+}
+
+function teacherBlock(input: {
+  topics: string;
+  instructions: string;
+  extras?: string[];
+}): string {
+  const lines = ['Teacher instructions. Follow these exactly when they are present.'];
+  if (input.topics.trim()) lines.push(`Chapters and topics to cover: ${input.topics.trim()}`);
+  if (input.instructions.trim()) lines.push(input.instructions.trim());
+  for (const extra of input.extras ?? []) {
+    lines.push(extra);
+  }
+  if (lines.length === 1) lines.push('No extra teacher notes. Use the course description.');
+  return lines.join('\n');
 }
 
 function contextBlock(course: CourseContext, includeModules: string[]): string {
@@ -150,11 +168,12 @@ class ContentGeneratorService {
     const course = await loadCourse(courseId, actor);
     const prompt = [
       'Draft a course outline as JSON only.',
-      `Create exactly ${input.moduleCount} modules.`,
-      `Each module has exactly ${input.lessonsPerModule} lessons.`,
+      `Create exactly ${String(input.moduleCount)} modules.`,
+      `Each module has exactly ${String(input.lessonsPerModule)} lessons.`,
       'Do not copy a syllabus that is not in the course context. Ignore any existing module list.',
       'Each lesson needs a title, a one-sentence summary, and 3 to 5 bullet points of what the lesson teaches.',
       'Return {"modules":[{"title":"","description":"","lessons":[{"title":"","summary":"","bullets":[""]}]}]}.',
+      teacherBlock({ topics: input.topics, instructions: input.instructions }),
       'Course context:',
       contextBlock(course, []),
     ].join('\n');
@@ -226,30 +245,46 @@ class ContentGeneratorService {
     const titles = await moduleTitles(courseId);
     const prompt = [
       'Draft quiz questions as JSON only.',
-      `Create ${input.questionCount} questions at ${input.difficulty} difficulty.`,
+      `Create ${String(input.questionCount)} questions at ${input.difficulty} difficulty.`,
       'Allowed questionType values: single_choice, multiple_choice, true_false.',
       'single_choice and multiple_choice need exactly 4 options. true_false needs exactly 2 options named True and False.',
       'Mark correct options with isCorrect. single_choice and true_false have exactly one correct option.',
       'Use the course description and existing module titles. Do not invent a different subject.',
-      'Return {"title":"","questions":[{"question":"","questionType":"single_choice","difficulty":"medium","marks":1,"explanation":"","options":[{"optionText":"","isCorrect":false}]}]}.',
+      'Return {"title":"","questions":[{"question":"","questionType":"single_choice","difficulty":"medium","marks":1,"negativeMarks":0,"explanation":"","options":[{"optionText":"","isCorrect":false}]}]}.',
+      teacherBlock({
+        topics: input.topics,
+        instructions: input.instructions,
+        extras: [
+          input.marks === undefined
+            ? 'Choose a sensible mark value for each question.'
+            : `Every question is worth exactly ${String(input.marks)} marks.`,
+          input.negativeMarks > 0
+            ? `A wrong answer deducts ${String(input.negativeMarks)} marks. Set negativeMarks to that value on every question.`
+            : 'There is no negative marking. Set negativeMarks to 0 on every question.',
+        ],
+      }),
       'Course context:',
       contextBlock(course, titles),
     ].join('\n');
 
     const raw = await generateGeminiJson({ prompt, temperature: 0.4, maxOutputTokens: 8192 });
-    const proposal = parseQuizProposal(raw, {
+    const parsed = parseQuizProposal(raw, {
       questionCount: input.questionCount,
       fallbackTitle: `${course.title} practice quiz`.slice(0, 200),
     });
-    if (!proposal) {
+    if (!parsed) {
       throw new AIError('AI could not draft enough valid quiz questions. Try again.');
     }
-    return proposal;
+    return applyTeacherQuizRules(parsed, {
+      ...(input.marks === undefined ? {} : { marks: input.marks }),
+      negativeMarks: input.negativeMarks,
+    });
   }
 
   async acceptQuiz(courseId: string, input: AcceptQuizInput, actor: ActorContext) {
     const course = await loadCourse(courseId, actor);
-    const institutionId = actor.institutionId!;
+    const institutionId = actor.institutionId;
+    if (!institutionId) throw new ForbiddenError('Institution context is required');
     let questionBankId = input.questionBankId;
 
     if (!questionBankId) {
@@ -285,7 +320,7 @@ class ContentGeneratorService {
           questionType: question.questionType,
           difficulty: question.difficulty,
           marks: question.marks,
-          negativeMarks: 0,
+          negativeMarks: question.negativeMarks,
           explanation: question.explanation ? { text: question.explanation, mediaUrl: null } : null,
           hint: null,
           tags: [],
@@ -305,6 +340,10 @@ class ContentGeneratorService {
     }
 
     const totalMarks = input.questions.reduce((sum, question) => sum + question.marks, 0);
+    const negativeMarkValue = input.questions.reduce(
+      (highest, question) => Math.max(highest, question.negativeMarks),
+      0,
+    );
     const quiz = await quizService.create(
       {
         courseId,
@@ -325,8 +364,8 @@ class ContentGeneratorService {
         showResultsImmediately: true,
         showCorrectAnswers: false,
         allowReview: true,
-        negativeMarking: false,
-        negativeMarkValue: 0.25,
+        negativeMarking: negativeMarkValue > 0,
+        negativeMarkValue: Math.min(10, negativeMarkValue),
         publishDate: null,
         closeDate: null,
         questionIds,
@@ -363,11 +402,20 @@ class ContentGeneratorService {
     const titles = await moduleTitles(courseId);
     const prompt = [
       'Draft an exam blueprint as JSON only. Do not write the questions.',
-      `Total marks must be ${input.totalMarks}. Suggested duration is ${input.durationMinutes} minutes.`,
+      `Total marks must be ${String(input.totalMarks)}. Suggested duration is ${String(input.durationMinutes)} minutes.`,
       'Slots describe how many questions to draw by difficulty and topic.',
       'Each slot has difficulty (easy, medium, or hard), category, marks per question, and count.',
       'marks multiplied by count across slots must equal the total marks.',
       'Return {"name":"","description":"","slots":[{"difficulty":"medium","category":"","marks":5,"count":4}]}.',
+      teacherBlock({
+        topics: input.topics,
+        instructions: input.instructions,
+        extras: [
+          input.negativeMarks > 0
+            ? `Wrong answers deduct ${String(input.negativeMarks)} marks. Mention that negative marking in the description.`
+            : 'There is no negative marking.',
+        ],
+      }),
       'Course context:',
       contextBlock(course, titles),
     ].join('\n');
@@ -381,14 +429,29 @@ class ContentGeneratorService {
     if (!proposal) {
       throw new AIError('AI could not draft a usable exam blueprint. Try again.');
     }
+    const teacherNotes = [
+      input.topics.trim() ? `Chapters and topics: ${input.topics.trim()}` : '',
+      input.negativeMarks > 0
+        ? `Negative marking: ${String(input.negativeMarks)} per wrong answer.`
+        : '',
+      input.instructions.trim(),
+    ].filter((line) => line.length > 0);
+    if (teacherNotes.length > 0) {
+      proposal.description = [proposal.description, ...teacherNotes].join(' ').slice(0, 2000);
+    }
     return proposal;
   }
 
   async acceptBlueprint(courseId: string, input: AcceptBlueprintInput, actor: ActorContext) {
     await loadCourse(courseId, actor);
+    const slots = rescaleBlueprintSlots(input.slots, input.totalMarks);
+    if (!slots) {
+      throw new ValidationError('Blueprint slot marks must add up to the total.');
+    }
+
     const description = [
       input.description,
-      `Suggested duration: ${input.durationMinutes} minutes.`,
+      `Suggested duration: ${String(input.durationMinutes)} minutes.`,
     ]
       .filter(Boolean)
       .join(' ')
@@ -400,8 +463,8 @@ class ContentGeneratorService {
         name: input.name,
         description,
         totalMarks: input.totalMarks,
-        slots: input.slots,
-        questionPoolIds: input.questionPoolIds ?? [],
+        slots,
+        questionPoolIds: input.questionPoolIds,
       },
       actor,
     );

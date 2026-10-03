@@ -1,5 +1,6 @@
 import { Router, type RequestHandler } from 'express';
 import { PERMISSIONS } from '@learnova/constants';
+import type { Permission } from '@learnova/types';
 import {
   acceptBlueprintSchema,
   acceptOutlineSchema,
@@ -15,7 +16,7 @@ import * as ctrl from '../../controllers/ai/ai-content.controller.js';
 
 const aiRoutes = Router();
 
-function writeAuth(permission: string): RequestHandler[] {
+function writeAuth(permission: Permission): RequestHandler[] {
   return [authenticate({ required: true }), requirePermission(permission)];
 }
 
