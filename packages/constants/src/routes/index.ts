@@ -94,6 +94,8 @@ export const APP_ROUTES = {
   INSTITUTION_STUDENTS_EXPORT: '/institution/students/export',
   STUDENT_PROFILE: '/student/profile',
   FACULTY_PROFILE: '/faculty/profile',
+  FACULTY_COURSES: '/faculty/courses',
+  FACULTY_COURSE_BUILDER: '/faculty/courses/:courseId/builder',
   INSTITUTION_COURSES: '/institution/courses',
   INSTITUTION_COURSES_CREATE: '/institution/courses/create',
   INSTITUTION_COURSES_IMPORT: '/institution/courses/import',

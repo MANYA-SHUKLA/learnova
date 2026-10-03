@@ -18,6 +18,7 @@ import reportsRoutes from './reports.routes.js';
 import projectRoutes from './project.routes.js';
 import practiceLabRoutes from './practice-lab.routes.js';
 import timetableRoutes from './timetable.routes.js';
+import aiRoutes from './ai.routes.js';
 import {
   healthCheck,
   livenessCheck,
@@ -50,6 +51,7 @@ v1Router.use(notificationRoutes);
 v1Router.use(projectRoutes);
 v1Router.use(practiceLabRoutes);
 v1Router.use(timetableRoutes);
+v1Router.use('/ai', aiRoutes);
 v1Router.get('/live', livenessCheck);
 v1Router.get('/ready', readinessCheck);
 v1Router.get('/version', versionCheck);

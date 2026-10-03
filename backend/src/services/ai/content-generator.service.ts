@@ -178,7 +178,9 @@ class ContentGeneratorService {
         {
           title: module.title,
           description: module.description || null,
+          visibility: 'enrolled',
           status: 'draft',
+          isLocked: false,
         },
         actor,
       );
@@ -194,8 +196,13 @@ class ContentGeneratorService {
             summary: lesson.summary,
             description: lesson.summary,
             content: renderLessonHtml(lesson),
+            visibility: 'enrolled',
             status: 'draft',
             lessonType: 'rich_text',
+            allowComments: true,
+            allowDownloads: true,
+            isPreview: false,
+            isLocked: false,
           },
           actor,
         );
