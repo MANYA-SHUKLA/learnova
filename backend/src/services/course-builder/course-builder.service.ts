@@ -16,6 +16,7 @@ import { eventBus } from '../../events/index.js';
 import { CourseModel } from '../../models/course.model.js';
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
+import { facultyCanAccessCourse } from '../access/faculty-scope.js';
 import { ForbiddenError, NotFoundError } from '../../utils/errors/index.js';
 import { builderRepository } from '../../repositories/course-builder/builder.repository.js';
 
@@ -88,11 +89,8 @@ async function verifyCourseAccess(courseId: string, actor: ActorContext): Promis
   }
 
   if (actor.role === 'faculty') {
-    const facultyIdStr = actor.userId;
-    const coordinatorIdStr = course.coordinatorId ? String(course.coordinatorId) : null;
-    const facultyIdsStr = (course.facultyIds ?? []).map(String);
-
-    if (facultyIdStr !== coordinatorIdStr && !facultyIdsStr.includes(facultyIdStr)) {
+    const allowed = await facultyCanAccessCourse(institutionId, actor.email, courseId);
+    if (!allowed) {
       throw new ForbiddenError('You do not have access to this course');
     }
   }

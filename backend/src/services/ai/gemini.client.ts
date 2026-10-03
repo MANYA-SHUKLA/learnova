@@ -27,7 +27,7 @@ interface GeminiResponse {
 
 export function ensureGeminiEnabled(): { apiKey: string; model: string } {
   if (!isFeatureEnabled(FEATURE_FLAGS.ENABLE_AI)) {
-    throw new AIError('AI timetable generation is not available.');
+    throw new AIError('AI generation is not available.');
   }
   const apiKey = env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
