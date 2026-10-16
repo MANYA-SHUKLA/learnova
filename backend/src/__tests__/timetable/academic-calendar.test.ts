@@ -3,6 +3,8 @@ import {
   classYearForSemesterNumber,
   semesterDateRange,
   semesterNumberFor,
+  semesterNumberForClassYearOnDate,
+  termForDate,
   termForSemesterNumber,
 } from '../../utils/timetable/academic-calendar.js';
 
@@ -16,6 +18,24 @@ describe('academic calendar', () => {
     expect(classYearForSemesterNumber(7)).toBe(4);
     expect(termForSemesterNumber(1)).toBe('odd');
     expect(termForSemesterNumber(2)).toBe('even');
+  });
+
+  it('follows the calendar date onto the class-year semester', () => {
+    const october = new Date('2026-10-16T04:30:00.000Z');
+    expect(termForDate(october)).toBe('odd');
+    expect(semesterNumberForClassYearOnDate(1, october)).toBe(1);
+    expect(semesterNumberForClassYearOnDate(2, october)).toBe(3);
+    expect(semesterNumberForClassYearOnDate(4, october)).toBe(7);
+
+    const january = new Date('2027-01-15T04:30:00.000Z');
+    expect(termForDate(january)).toBe('even');
+    expect(semesterNumberForClassYearOnDate(1, january)).toBe(2);
+    expect(semesterNumberForClassYearOnDate(2, january)).toBe(4);
+    expect(semesterNumberForClassYearOnDate(3, january)).toBe(6);
+    expect(semesterNumberForClassYearOnDate(4, january)).toBe(8);
+
+    expect(termForDate(new Date('2027-05-31T12:00:00.000Z'))).toBe('even');
+    expect(termForDate(new Date('2026-07-01T00:00:00.000Z'))).toBe('odd');
   });
 
   it('keeps odd semesters in July–December and even semesters in January–May', () => {

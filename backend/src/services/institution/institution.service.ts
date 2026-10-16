@@ -31,6 +31,7 @@ import {
   NotFoundError,
   ValidationError,
 } from '../../utils/errors/index.js';
+import { syncSemesterCalendar } from './sync-semester-calendar.js';
 import { cache } from '../../cache/cache.service.js';
 import {
   academicCalendarRepository,
@@ -495,8 +496,10 @@ export class InstitutionService {
       'semester.created',
     );
   }
-  listSemesters = (query: OrgListQuery, actor: ActorContext) =>
-    this.listTenantResource(semesterRepository, actor, query);
+  listSemesters = async (query: OrgListQuery, actor: ActorContext) => {
+    if (actor.institutionId) await syncSemesterCalendar(actor.institutionId);
+    return this.listTenantResource(semesterRepository, actor, query);
+  };
   getSemester = (id: string, actor: ActorContext) =>
     this.getTenantResource(semesterRepository, actor, id);
   updateSemester = (id: string, input: UpdateSemesterInput, actor: ActorContext) =>

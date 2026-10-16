@@ -54,6 +54,23 @@ import { WeeklyTimetableGrid } from './weekly-timetable-grid';
 const DAY_VALUES: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const TIME_PATTERN = /^(\d{1,2}):(\d{2})$/;
 const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
+const CALENDAR_TIME_ZONE = 'Asia/Kolkata';
+
+function calendarDateKey(value: string | Date): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: CALENDAR_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
+function semesterIsInSession(semester: { startDate: string | null; endDate: string | null }): boolean {
+  if (!semester.startDate || !semester.endDate) return false;
+  const today = calendarDateKey(new Date());
+  return calendarDateKey(semester.startDate) <= today && today <= calendarDateKey(semester.endDate);
+}
 
 function normalizeTime(value: string): string {
   const match = value.trim().match(TIME_PATTERN);
@@ -133,7 +150,11 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     }
     const items = semestersData?.items ?? [];
     if (semesterId && items.some((row) => row.id === semesterId)) return semesterId;
-    return items[0]?.id || '';
+    const inSession = items
+      .filter((row) => semesterIsInSession(row))
+      .sort((a, b) => a.number - b.number);
+    if (inSession[0]) return inSession[0].id;
+    return [...items].sort((a, b) => a.number - b.number)[0]?.id || '';
   }, [semesterId, isAdmin, publishedTimetablesQuery.data?.items, semestersData?.items]);
 
   const timetablesQuery = useTimetables(
@@ -217,7 +238,11 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     return [...bySection.entries()].map(([id, name]) => ({ id, name }));
   }, [gridSlotsQuery.data?.items]);
 
-  const sectionOptions = isAdmin ? (sectionsData?.items ?? []) : readSectionOptions;
+  const sectionOptions = isAdmin
+    ? (sectionsData?.items ?? []).filter(
+        (section) => !selectedSemesterId || section.semesterId === selectedSemesterId,
+      )
+    : readSectionOptions;
 
   const dayLabels = useMemo(
     () =>
@@ -269,7 +294,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
 
   const formFields: FormField[] = useMemo(() => {
     const sectionOptions =
-      sectionsData?.items.map((s) => ({ value: s.id, label: s.name })) ?? [];
+      sectionsData?.items
+        .filter((section) => !selectedSemesterId || section.semesterId === selectedSemesterId)
+        .map((s) => ({ value: s.id, label: s.name })) ?? [];
     const courseOptions =
       coursesData?.items.map((c) => ({ value: c.id, label: c.title })) ?? [];
     const facultyOptions =
@@ -311,7 +338,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       },
       { name: 'room', label: t('columns.room'), type: 'text', required: true },
     ];
-  }, [sectionsData, coursesData, facultyData, dayOptions, t]);
+  }, [sectionsData, coursesData, facultyData, dayOptions, selectedSemesterId, t]);
 
   const handleCreateTimetable = async () => {
     const semester = semestersData?.items.find((s) => s.id === selectedSemesterId);
@@ -431,7 +458,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     return [...bySemester.entries()].map(([id, name]) => ({ id, name }));
   }, [publishedTimetablesQuery.data?.items]);
 
-  const semesterOptions = isAdmin ? (semestersData?.items ?? []) : readSemesterOptions;
+  const semesterOptions = isAdmin
+    ? [...(semestersData?.items ?? [])].sort((a, b) => a.number - b.number)
+    : readSemesterOptions;
 
   const selectedSemesterName = useMemo(() => {
     const fromOptions = semesterOptions.find((s) => s.id === selectedSemesterId)?.name;

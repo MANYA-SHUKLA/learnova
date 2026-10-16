@@ -47,3 +47,43 @@ export function semesterWindowLabel(term: string): string {
   if (term === 'even') return 'January–May';
   return term;
 }
+
+const CALENDAR_TIME_ZONE = 'Asia/Kolkata';
+
+export function calendarParts(
+  date: Date,
+  timeZone = CALENDAR_TIME_ZONE,
+): { year: number; month: number; day: number } {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(date);
+  const read = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value);
+  return { year: read('year'), month: read('month'), day: read('day') };
+}
+
+/**
+ * July–December is the odd term (Year 1 → Sem 1, Year 2 → Sem 3, …).
+ * January–June is the even term (Year 1 → Sem 2, Year 2 → Sem 4, …).
+ * June stays on the even term until the odd term opens on 1 July.
+ */
+export function termForDate(date: Date, timeZone = CALENDAR_TIME_ZONE): SemesterTerm {
+  return calendarParts(date, timeZone).month >= 7 ? 'odd' : 'even';
+}
+
+export function termWindowsForDate(
+  date: Date,
+  timeZone = CALENDAR_TIME_ZONE,
+): { term: SemesterTerm; oddYear: number; evenYear: number } {
+  const { year } = calendarParts(date, timeZone);
+  const term = termForDate(date, timeZone);
+  if (term === 'odd') return { term, oddYear: year, evenYear: year + 1 };
+  return { term, oddYear: year - 1, evenYear: year };
+}
+
+export function semesterNumberForClassYearOnDate(classYear: number, date: Date): number {
+  return semesterNumberFor(classYear, termForDate(date));
+}
