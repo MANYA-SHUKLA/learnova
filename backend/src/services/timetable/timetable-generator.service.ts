@@ -8,8 +8,14 @@ import {
   FacultyModel,
   SectionModel,
   SemesterModel,
+  TimetableSlotModel,
 } from '../../models/index.js';
 import { timetableRepository } from '../../repositories/timetable/index.js';
+import {
+  classYearForSemesterNumber,
+  oppositeTerm,
+  semesterWindowLabel,
+} from '../../utils/timetable/academic-calendar.js';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors/index.js';
 import { logger } from '../../utils/logger/index.js';
 import { generateGeminiJson, ensureGeminiEnabled } from '../ai/gemini.client.js';
@@ -78,13 +84,15 @@ function buildPrompt(input: {
   }));
 
   return [
-    'You are scheduling a college weekly class timetable.',
+    'You are scheduling a college weekly class timetable for ONE semester only.',
     `Semester: ${input.semesterName}. Academic year: ${input.academicYearName}.`,
+    'Class years are 1 to 4. Odd semesters (1, 3, 5, 7) run July–December. Even semesters (2, 4, 6, 8) run January–May.',
+    'Do not place Semester 1 and Semester 2, or any odd semester with an even semester, in this timetable.',
+    'A teacher must not be used for both the odd term and the even term. Honor assignedFacultyId. If it is null, pick a teacher who is not already teaching the other term.',
     'Use only the provided ids. Do not invent ids, emails, or people.',
-    'Honor existing assignedFacultyId values. Fill faculty only for courses where assignedFacultyId is null.',
     'Place each course for every compatible section (matching programIds, or all sections if programIds is empty).',
     'Sessions per course per section = max(2, min(4, credits or 2)).',
-    'No faculty, section, or room may overlap on the same day and time.',
+    'No faculty, section, or room may overlap on the same day and time. Other class years in this same term already occupy the busy slots listed below.',
     'Campus constraints are fixed. Do not change days, times, or venues.',
     `Working days (Mon–Fri only): ${input.workingDays.join(', ')}.`,
     `Periods (09:00–18:00, lunch 13:00–14:00 skipped): ${JSON.stringify(input.periods)}.`,
