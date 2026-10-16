@@ -354,14 +354,15 @@ async function main(): Promise<void> {
           },
           { upsert: true, new: true, setDefaultsOnInsert: true },
         );
-        ids.push(String(course._id));
-      }
+          ids.push(String(course._id));
+        }
 
-      await FacultyModel.updateOne(
-        { _id: new Types.ObjectId(teacher.id) },
-        { $set: { courseIds: ids.map((id) => new Types.ObjectId(id)) } },
-      );
-      courseIdsBySemester.set(semesterNumber, ids);
+        await FacultyModel.updateOne(
+          { _id: new Types.ObjectId(teacher.id) },
+          { $set: { courseIds: ids.map((id) => new Types.ObjectId(id)) } },
+        );
+        courseIdsByBranchSemester.set(`${branchPlan.branch}-${semesterNumber}`, ids);
+      }
     }
   }
 
