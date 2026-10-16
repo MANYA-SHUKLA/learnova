@@ -81,6 +81,8 @@ export function CourseSelect({
   limit = 100,
   value,
   onChange,
+  placeholder = 'Select a course',
+  emptyMessage = 'No courses found.',
   ...props
 }: CourseSelectProps & { value: string; onChange: (value: string) => void }) {
   const { search, setSearch, debouncedQuery } = useDebouncedSearch();
@@ -114,8 +116,8 @@ export function CourseSelect({
       onChange={onChange}
       options={options}
       loading={query.isLoading}
-      placeholder="Select a course"
-      emptyMessage="No courses found."
+      placeholder={placeholder}
+      emptyMessage={emptyMessage}
       searchPlaceholder="Search courses…"
       searchQuery={search}
       onSearchQueryChange={setSearch}
@@ -370,6 +372,8 @@ export function SemesterSelect({
   limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
+  allowEmpty = true,
+  emptyLabel = 'No semester',
   ...props
 }: EntitySelectProps & { value: string; onChange: (value: string) => void }) {
   const query = useSemesters({ page: 1, limit, ...listParams });
@@ -386,8 +390,8 @@ export function SemesterSelect({
       onChange={onChange}
       options={options}
       loading={query.isLoading}
-      allowEmpty
-      emptyLabel="No semester"
+      allowEmpty={allowEmpty}
+      emptyLabel={emptyLabel}
       placeholder="Select a semester"
       searchPlaceholder="Search semesters…"
     />

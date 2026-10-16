@@ -25,6 +25,7 @@ import {
   formatAssignmentType,
   formatDueDate,
   formatSubmissionStatus,
+  GiveAssignmentForm,
   useAssignmentList,
   useFacultyAssignmentDashboard,
   useGradeSubmissionMutation,
@@ -74,6 +75,8 @@ export default function FacultyAssignmentsPage() {
     <PermissionGate permission={PERMISSIONS.ASSIGNMENT_READ} enforce>
       <DashboardPage>
         <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
+
+        <GiveAssignmentForm />
 
         <StatGrid className="sm:grid-cols-2 xl:grid-cols-5">
           {[
