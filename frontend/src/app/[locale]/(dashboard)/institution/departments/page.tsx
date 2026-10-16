@@ -26,10 +26,10 @@ export default function DepartmentsPage() {
     { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
     { id: 'code', header: tf('code'), cell: (r) => r.code, exportValue: (r) => r.code },
     {
-      id: 'schoolId',
-      header: tf('schoolId'),
-      cell: (r) => <span className="font-mono text-xs">{r.schoolId}</span>,
-      exportValue: (r) => r.schoolId,
+      id: 'school',
+      header: tf('school'),
+      cell: (r) => schoolOptions.find((school) => school.value === r.schoolId)?.label ?? '—',
+      exportValue: (r) => schoolOptions.find((school) => school.value === r.schoolId)?.label ?? '',
     },
   ];
 

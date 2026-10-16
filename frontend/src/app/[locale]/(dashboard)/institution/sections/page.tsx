@@ -36,16 +36,16 @@ export default function SectionsPage() {
       exportValue: (r) => r.capacity,
     },
     {
-      id: 'programId',
-      header: tf('programId'),
-      cell: (r) => <span className="font-mono text-xs">{r.programId}</span>,
-      exportValue: (r) => r.programId,
+      id: 'program',
+      header: tf('program'),
+      cell: (r) => programOptions.find((program) => program.value === r.programId)?.label ?? '—',
+      exportValue: (r) => programOptions.find((program) => program.value === r.programId)?.label ?? '',
     },
     {
-      id: 'semesterId',
-      header: tf('semesterId'),
-      cell: (r) => <span className="font-mono text-xs">{r.semesterId}</span>,
-      exportValue: (r) => r.semesterId,
+      id: 'semester',
+      header: tf('semester'),
+      cell: (r) => semesterOptions.find((semester) => semester.value === r.semesterId)?.label ?? '—',
+      exportValue: (r) => semesterOptions.find((semester) => semester.value === r.semesterId)?.label ?? '',
     },
   ];
 

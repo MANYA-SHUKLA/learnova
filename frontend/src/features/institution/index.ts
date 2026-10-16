@@ -85,4 +85,6 @@ export {
 } from './components/resource-form-dialog';
 export { ResourceCrudPage } from './components/resource-crud-page';
 export { exportToCsv, rowsToCsv, downloadCsv, escapeCsvCell } from './utils/export';
+export { displayName, displayNames } from './utils/display-name';
+export { useOrgLabels } from './hooks/use-org-labels';
 export type * from './types';

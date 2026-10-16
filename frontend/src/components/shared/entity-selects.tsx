@@ -8,6 +8,7 @@ import { useFacultyList } from '@/features/faculty';
 import type { OrgListParams } from '@/features/institution';
 import {
   useAcademicYears,
+  useBatches,
   useCampuses,
   useDepartments,
   usePrograms,
@@ -389,6 +390,36 @@ export function SemesterSelect({
       emptyLabel="No semester"
       placeholder="Select a semester"
       searchPlaceholder="Search semesters…"
+    />
+  );
+}
+
+export function BatchSelect({
+  label = 'Batch',
+  listParams,
+  limit = DEFAULT_LIST_LIMIT,
+  value,
+  onChange,
+  ...props
+}: EntitySelectProps & { value: string; onChange: (value: string) => void }) {
+  const query = useBatches({ page: 1, limit, ...listParams });
+  const options = useListOptions(query.data?.items, (batch) => ({
+    value: batch.id,
+    label: batch.name,
+  }));
+
+  return (
+    <SearchableSelect
+      {...props}
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={options}
+      loading={query.isLoading}
+      allowEmpty
+      emptyLabel="No batch"
+      placeholder="Select a batch"
+      searchPlaceholder="Search batches…"
     />
   );
 }

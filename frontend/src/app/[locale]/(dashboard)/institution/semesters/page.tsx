@@ -32,10 +32,10 @@ export default function SemestersPage() {
     { id: 'number', header: tf('number'), cell: (r) => r.number, exportValue: (r) => r.number },
     { id: 'term', header: tf('term'), cell: (r) => r.term, exportValue: (r) => r.term },
     {
-      id: 'academicYearId',
-      header: tf('yearId'),
-      cell: (r) => <span className="font-mono text-xs">{r.academicYearId}</span>,
-      exportValue: (r) => r.academicYearId,
+      id: 'academicYear',
+      header: tf('academicYear'),
+      cell: (r) => yearOptions.find((year) => year.value === r.academicYearId)?.label ?? '—',
+      exportValue: (r) => yearOptions.find((year) => year.value === r.academicYearId)?.label ?? '',
     },
   ];
 

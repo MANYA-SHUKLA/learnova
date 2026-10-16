@@ -13,6 +13,16 @@ import {
   Spinner,
 } from '@learnova/ui';
 import { useState } from 'react';
+import {
+  AcademicYearSelect,
+  BatchSelect,
+  CampusSelect,
+  DepartmentSelect,
+  ProgramSelect,
+  SchoolSelect,
+  SectionSelect,
+  SemesterSelect,
+} from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { CredentialsHandoff } from '@/components/shared/credentials-handoff';
 import {
@@ -269,14 +279,14 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
             {field('nationality', 'Nationality')}
             {field('religion', 'Religion')}
             {field('category', 'Category')}
-            {field('campusId', 'Campus ID')}
-            {field('schoolId', 'School ID')}
-            {field('departmentId', 'Department ID')}
-            {field('programId', 'Program ID')}
-            {field('academicYearId', 'Academic year ID')}
-            {field('semesterId', 'Semester ID')}
-            {field('sectionId', 'Section ID')}
-            {field('batchId', 'Batch ID')}
+            <CampusSelect id="campusId" value={form.campusId} disabled={pending} onChange={(value) => { set('campusId', value); }} />
+            <SchoolSelect id="schoolId" value={form.schoolId} disabled={pending} onChange={(value) => { set('schoolId', value); }} />
+            <DepartmentSelect id="departmentId" value={form.departmentId} disabled={pending} onChange={(value) => { set('departmentId', value); }} />
+            <ProgramSelect id="programId" value={form.programId} disabled={pending} onChange={(value) => { set('programId', value); }} />
+            <AcademicYearSelect id="academicYearId" value={form.academicYearId} disabled={pending} onChange={(value) => { set('academicYearId', value); }} />
+            <SemesterSelect id="semesterId" value={form.semesterId} disabled={pending} onChange={(value) => { set('semesterId', value); }} />
+            <SectionSelect id="sectionId" value={form.sectionId} disabled={pending} onChange={(value) => { set('sectionId', value); }} />
+            <BatchSelect id="batchId" value={form.batchId} disabled={pending} onChange={(value) => { set('batchId', value); }} />
             {field('admissionDate', 'Admission date', { type: 'date' })}
             {field('expectedGraduationDate', 'Expected graduation date', { type: 'date' })}
             {field('programDuration', 'Program duration (years)', { type: 'number' })}

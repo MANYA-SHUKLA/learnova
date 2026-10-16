@@ -16,7 +16,8 @@ import { ArrowLeft, Copy, Pencil, FolderOpen } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { ErrorState } from '@/features/institution';
+import { ErrorState, useOrgLabels } from '@/features/institution';
+import { useFacultyList } from '@/features/faculty';
 import {
   formatCourseCategory,
   formatCourseDifficulty,
@@ -38,6 +39,8 @@ export default function CourseDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const query = useCourse(id);
+  const labels = useOrgLabels();
+  const facultyQuery = useFacultyList({ page: 1, limit: 200 });
   const auditQuery = useCourseAudit(id);
   const thumbnailMutation = useCourseThumbnailUploadMutation();
   const publishMutation = usePublishCourseMutation();
@@ -279,17 +282,29 @@ export default function CourseDetailPage() {
         ])}
 
         {section('Academic mapping', [
-          ['Institution ID', course.institutionId],
-          ['Campus ID', course.campusId],
-          ['School ID', course.schoolId],
-          ['Department ID', course.departmentId],
-          ['Program IDs', course.programIds.join(', ') || 'None'],
-          ['Semester IDs', course.semesterIds.join(', ') || 'None'],
+          ['Campus', labels.campus(course.campusId)],
+          ['School', labels.school(course.schoolId)],
+          ['Department', labels.department(course.departmentId)],
+          ['Programs', course.programIds.length ? labels.programs(course.programIds) : 'None'],
+          ['Semesters', course.semesterIds.length ? labels.semesters(course.semesterIds) : 'None'],
         ])}
 
         {section('Faculty', [
-          ['Faculty IDs', course.facultyIds.join(', ') || 'None'],
-          ['Coordinator ID', course.coordinatorId],
+          [
+            'Faculty',
+            course.facultyIds.length
+              ? course.facultyIds
+                  .map((facultyId) =>
+                    facultyQuery.data?.items.find((faculty) => faculty.id === facultyId)?.fullName,
+                  )
+                  .filter(Boolean)
+                  .join(', ') || null
+              : 'None',
+          ],
+          [
+            'Coordinator',
+            facultyQuery.data?.items.find((faculty) => faculty.id === course.coordinatorId)?.fullName,
+          ],
         ])}
 
         <Card className="rounded-2xl">

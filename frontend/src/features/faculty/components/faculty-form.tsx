@@ -16,11 +16,13 @@ import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { CredentialsHandoff } from '@/components/shared/credentials-handoff';
 import {
+  AcademicYearSelect,
   CampusSelect,
   CourseMultiSelect,
   DepartmentSelect,
   ProgramMultiSelect,
   SchoolSelect,
+  SemesterSelect,
 } from '@/components/shared/entity-selects';
 import {
   DESIGNATION_LABELS,
@@ -247,8 +249,8 @@ export function FacultyForm({ mode, initial }: FacultyFormProps) {
               disabled={pending}
               onChange={(value) => { set('campusId', value); }}
             />
-            {field('academicYearId', 'Academic year ID')}
-            {field('semesterId', 'Semester ID')}
+            <AcademicYearSelect id="academicYearId" value={form.academicYearId} disabled={pending} onChange={(value) => { set('academicYearId', value); }} />
+            <SemesterSelect id="semesterId" value={form.semesterId} disabled={pending} onChange={(value) => { set('semesterId', value); }} />
             {field('specialization', 'Specialization')}
             {field('highestQualification', 'Highest qualification')}
             {field('officeRoom', 'Office room')}

@@ -26,10 +26,10 @@ export default function BatchesPage() {
     { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
     { id: 'year', header: tf('year'), cell: (r) => r.year, exportValue: (r) => r.year },
     {
-      id: 'programId',
-      header: tf('programId'),
-      cell: (r) => <span className="font-mono text-xs">{r.programId}</span>,
-      exportValue: (r) => r.programId,
+      id: 'program',
+      header: tf('program'),
+      cell: (r) => programOptions.find((program) => program.value === r.programId)?.label ?? '—',
+      exportValue: (r) => programOptions.find((program) => program.value === r.programId)?.label ?? '',
     },
   ];
 
