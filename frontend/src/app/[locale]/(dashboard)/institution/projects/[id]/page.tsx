@@ -30,11 +30,13 @@ import {
   useCreateCommentMutation,
   useCreateMilestoneMutation,
   useProject,
+  useProjectCategories,
   useProjectComments,
   useProjectMilestones,
   usePublishProjectMutation,
   useResolveCommentMutation,
   useSubmissionList,
+  useProjectTags,
   useTeamList,
   useUpdateProjectMutation,
 } from '@/features/project';
@@ -70,6 +72,8 @@ export default function InstitutionProjectDetailPage({
   const tCommon = useTranslations('common');
   const [tab, setTab] = useState<DetailTab>('overview');
   const projectQuery = useProject(id);
+  const categoriesQuery = useProjectCategories();
+  const tagsQuery = useProjectTags();
   const milestonesQuery = useProjectMilestones(id);
   const teamsQuery = useTeamList({ projectId: id, limit: 50 });
   const submissionsQuery = useSubmissionList({ projectId: id, limit: 20 });
