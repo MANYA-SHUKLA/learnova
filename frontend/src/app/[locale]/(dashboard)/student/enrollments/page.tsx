@@ -19,7 +19,8 @@ import { useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
 import { CourseSelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { ErrorState } from '@/features/institution';
+import { displayName, ErrorState } from '@/features/institution';
+import { useCourseList } from '@/features/course';
 import {
   formatEnrollmentStatus,
   useLeaveWaitlistMutation,
@@ -33,6 +34,13 @@ import { ApiClientError } from '@/lib/api/client';
 export default function StudentEnrollmentsPage() {
   const t = useTranslations('dashboard.student.enrollments');
   const myQuery = useMyEnrollments();
+  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const courseLabel = (id: string) =>
+    displayName(
+      coursesQuery.data?.items,
+      id,
+      (course) => `${course.courseCode} — ${course.title}`,
+    ) ?? '—';
   const waitlistQuery = useWaitlist();
   const selfEnrollMutation = useSelfEnrollMutation();
   const withdrawMutation = useWithdrawEnrollmentMutation();
