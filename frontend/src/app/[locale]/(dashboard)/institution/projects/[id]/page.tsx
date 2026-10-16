@@ -148,7 +148,10 @@ export default function InstitutionProjectDetailPage({
                     <Badge variant="outline">{formatProjectDifficulty(project.difficulty)}</Badge>
                   ) : null}
                   {project.categoryId ? (
-                    <Badge variant="outline">{project.categoryId}</Badge>
+                    <Badge variant="outline">
+                      {categoriesQuery.data?.items.find((category) => category.id === project.categoryId)
+                        ?.name ?? 'Category'}
+                    </Badge>
                   ) : null}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -271,7 +274,7 @@ export default function InstitutionProjectDetailPage({
                     <div className="flex flex-wrap gap-2">
                       {project.tags.map((tagId) => (
                         <Badge key={tagId} variant="outline">
-                          {tagId}
+                          {tagsQuery.data?.items.find((tag) => tag.id === tagId)?.name ?? 'Tag'}
                         </Badge>
                       ))}
                     </div>
