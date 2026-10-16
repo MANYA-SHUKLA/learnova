@@ -1,5 +1,5 @@
 import type { GenerateTimetableInput } from '@learnova/validation';
-import type { GenerateTimetableResult } from '@learnova/types';
+import type { GenerateTimetableResult, TimetableDayOfWeek } from '@learnova/types';
 import { Types } from 'mongoose';
 import {
   AcademicYearModel,
@@ -284,7 +284,7 @@ export class TimetableGeneratorService {
             .lean()
             .exec();
     const occupied = occupiedDocs.map((row) => ({
-      dayOfWeek: row.dayOfWeek as string,
+      dayOfWeek: row.dayOfWeek as TimetableDayOfWeek,
       startTime: row.startTime as string,
       endTime: row.endTime as string,
       facultyId: String(row.facultyId),
