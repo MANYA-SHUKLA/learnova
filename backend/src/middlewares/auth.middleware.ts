@@ -97,6 +97,23 @@ export function requirePermission(...permissions: Permission[]) {
   return requirePermissions(...permissions);
 }
 
+/** Passes when the user has at least one of the listed permissions. */
+export function requireAnyPermission(...permissions: Permission[]) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      next(new UnauthorizedError('Unauthorized'));
+      return;
+    }
+    const ok = permissions.some((permission) => req.user?.permissions.includes(permission));
+    if (!ok) {
+      void logAccessDenial(req, 'Insufficient permissions', { requiredPermissions: permissions });
+      next(new ForbiddenError('Insufficient permissions'));
+      return;
+    }
+    next();
+  };
+}
+
 export function requirePermissions(...permissions: Permission[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {

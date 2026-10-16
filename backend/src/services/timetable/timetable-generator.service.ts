@@ -13,7 +13,6 @@ import {
 import { timetableRepository } from '../../repositories/timetable/index.js';
 import {
   classYearForSemesterNumber,
-  oppositeTerm,
   semesterWindowLabel,
 } from '../../utils/timetable/academic-calendar.js';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors/index.js';
@@ -64,7 +63,6 @@ function buildPrompt(input: {
   sections: SectionRecord[];
   departments: Map<string, string>;
   assigned: Array<{ courseId: string; facultyId: string }>;
-  avoidFacultyIds: string[];
   occupied: Array<{ dayOfWeek: string; startTime: string; endTime: string; facultyId: string; room: string }>;
 }): string {
   const compactFaculty = input.faculty.map((row) => ({
@@ -92,7 +90,8 @@ function buildPrompt(input: {
     `Semester: ${input.semesterName}. Class year ${input.classYear} of 4. Term window: ${input.termLabel}. Academic year: ${input.academicYearName}.`,
     'Class years are 1 to 4. Odd semesters (1, 3, 5, 7) run July–December. Even semesters (2, 4, 6, 8) run January–May.',
     'Do not place Semester 1 and Semester 2, or any odd semester with an even semester, in this timetable.',
-    'A teacher must not be used for both the odd term and the even term. Honor assignedFacultyId. If it is null, pick a teacher who is not already teaching the other term.',
+    'Honor assignedFacultyId. A year class is taught by several teachers. Do not give every subject in the year to one or two people.',
+    'Odd and even terms run in different months, so a teacher may teach in both. The same term still cannot double-book a teacher.',
     'Use only the provided ids. Do not invent ids, emails, or people.',
     'Place each course for every compatible section (matching programIds, or all sections if programIds is empty).',
     'Sessions per course per section = max(2, min(4, credits or 2)).',
@@ -113,7 +112,6 @@ function buildPrompt(input: {
       faculty: compactFaculty,
       courses: compactCourses,
       sections: compactSections,
-      doNotAssignFacultyIds: input.avoidFacultyIds,
       busySlots: input.occupied,
     }),
   ]
@@ -230,38 +228,6 @@ export class TimetableGeneratorService {
     const workingDays = uniqueDays(DEFAULT_WORKING_DAYS);
     const periods = DEFAULT_PERIODS;
 
-    const otherTerm = oppositeTerm(String(semester.term));
-    const otherTermSemesters = otherTerm
-      ? await SemesterModel.find({
-          institutionId: oid(institutionId),
-          academicYearId: semester.academicYearId,
-          term: otherTerm,
-          deletedAt: null,
-        })
-          .select('_id')
-          .lean()
-          .exec()
-      : [];
-    const otherTermCourses =
-      otherTermSemesters.length === 0
-        ? []
-        : await CourseModel.find({
-            institutionId: oid(institutionId),
-            deletedAt: null,
-            semesterIds: { $in: otherTermSemesters.map((row) => row._id) },
-          })
-            .select('coordinatorId facultyIds')
-            .lean()
-            .exec();
-    const avoidFacultyIds = [
-      ...new Set(
-        otherTermCourses.flatMap((row) => {
-          const primary = row.coordinatorId ?? row.facultyIds?.[0];
-          return primary ? [String(primary)] : [];
-        }),
-      ),
-    ];
-
     const sameTermSemesters = await SemesterModel.find({
       institutionId: oid(institutionId),
       academicYearId: semester.academicYearId,
@@ -293,9 +259,7 @@ export class TimetableGeneratorService {
       room: row.room as string,
     }));
 
-    const extracted = extractTeachingMap(courses, faculty, {
-      avoidFacultyIds: new Set(avoidFacultyIds),
-    });
+    const extracted = extractTeachingMap(courses, faculty);
     const assigned = [...extracted.entries()].map(([courseId, facultyId]) => ({
       courseId,
       facultyId,
@@ -320,7 +284,6 @@ export class TimetableGeneratorService {
           sections,
           departments,
           assigned,
-          avoidFacultyIds,
           occupied,
         }),
         maxOutputTokens: 8192,
@@ -339,7 +302,6 @@ export class TimetableGeneratorService {
       periods,
       geminiAssignments: proposal.assignments,
       proposedSlots: proposal.slots,
-      avoidFacultyIds,
       occupied,
     });
 

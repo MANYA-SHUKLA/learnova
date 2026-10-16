@@ -1,6 +1,7 @@
 /**
  * Four-year curriculum for the two branches, CSE and ECE.
- * Five subjects per semester, one lab each. One faculty per branch, year, and term.
+ * Five subjects per semester, one lab each. Faculty belong to a department and
+ * share a year's subjects. A subject taught to both CSE and ECE is one class.
  * One student login, in CSE Year 1.
  *
  * Usage: pnpm seed:curriculum
@@ -28,6 +29,7 @@ import { provisionLoginUser } from '../services/users/provision-login-user.js';
 import {
   DEFAULT_PERIODS,
   DEFAULT_WORKING_DAYS,
+  sessionsPerWeek,
   settleTimetable,
   type CourseRecord,
   type FacultyRecord,
@@ -191,30 +193,29 @@ const ECE_YEARS: Array<{ year: number; odd: Subject[]; even: Subject[] }> = [
 
 type FacultyPlan = {
   branch: 'CSE' | 'ECE';
-  year: number;
-  term: 'odd' | 'even';
   email: string;
   firstName: string;
   lastName: string;
 };
 
+/** Department pools. A teacher is not locked to one year or one term. */
 const FACULTY_PLAN: FacultyPlan[] = [
-  { branch: 'CSE', year: 1, term: 'odd', email: FACULTY_EMAIL, firstName: 'Ananya', lastName: 'Rao' },
-  { branch: 'CSE', year: 2, term: 'odd', email: 'faculty.year2.odd@learnova.test', firstName: 'Rohan', lastName: 'Iyer' },
-  { branch: 'CSE', year: 3, term: 'odd', email: 'faculty.year3.odd@learnova.test', firstName: 'Meera', lastName: 'Nair' },
-  { branch: 'CSE', year: 4, term: 'odd', email: 'faculty.year4.odd@learnova.test', firstName: 'Vikram', lastName: 'Shah' },
-  { branch: 'CSE', year: 1, term: 'even', email: 'faculty.year1.even@learnova.test', firstName: 'Kavya', lastName: 'Menon' },
-  { branch: 'CSE', year: 2, term: 'even', email: 'faculty.year2.even@learnova.test', firstName: 'Arjun', lastName: 'Das' },
-  { branch: 'CSE', year: 3, term: 'even', email: 'faculty.year3.even@learnova.test', firstName: 'Neha', lastName: 'Kapoor' },
-  { branch: 'CSE', year: 4, term: 'even', email: 'faculty.year4.even@learnova.test', firstName: 'Suresh', lastName: 'Patel' },
-  { branch: 'ECE', year: 1, term: 'odd', email: 'faculty.ece.year1@learnova.test', firstName: 'Priya', lastName: 'Krishnan' },
-  { branch: 'ECE', year: 2, term: 'odd', email: 'faculty.ece.year2.odd@learnova.test', firstName: 'Karthik', lastName: 'Reddy' },
-  { branch: 'ECE', year: 3, term: 'odd', email: 'faculty.ece.year3.odd@learnova.test', firstName: 'Divya', lastName: 'Joshi' },
-  { branch: 'ECE', year: 4, term: 'odd', email: 'faculty.ece.year4.odd@learnova.test', firstName: 'Amit', lastName: 'Verma' },
-  { branch: 'ECE', year: 1, term: 'even', email: 'faculty.ece.year1.even@learnova.test', firstName: 'Lakshmi', lastName: 'Nair' },
-  { branch: 'ECE', year: 2, term: 'even', email: 'faculty.ece.year2.even@learnova.test', firstName: 'Rahul', lastName: 'Ghosh' },
-  { branch: 'ECE', year: 3, term: 'even', email: 'faculty.ece.year3.even@learnova.test', firstName: 'Sneha', lastName: 'Kulkarni' },
-  { branch: 'ECE', year: 4, term: 'even', email: 'faculty.ece.year4.even@learnova.test', firstName: 'Imran', lastName: 'Qureshi' },
+  { branch: 'CSE', email: FACULTY_EMAIL, firstName: 'Ananya', lastName: 'Rao' },
+  { branch: 'CSE', email: 'faculty.year2.odd@learnova.test', firstName: 'Rohan', lastName: 'Iyer' },
+  { branch: 'CSE', email: 'faculty.year3.odd@learnova.test', firstName: 'Meera', lastName: 'Nair' },
+  { branch: 'CSE', email: 'faculty.year4.odd@learnova.test', firstName: 'Vikram', lastName: 'Shah' },
+  { branch: 'CSE', email: 'faculty.year1.even@learnova.test', firstName: 'Kavya', lastName: 'Menon' },
+  { branch: 'CSE', email: 'faculty.year2.even@learnova.test', firstName: 'Arjun', lastName: 'Das' },
+  { branch: 'CSE', email: 'faculty.year3.even@learnova.test', firstName: 'Neha', lastName: 'Kapoor' },
+  { branch: 'CSE', email: 'faculty.year4.even@learnova.test', firstName: 'Suresh', lastName: 'Patel' },
+  { branch: 'ECE', email: 'faculty.ece.year1@learnova.test', firstName: 'Priya', lastName: 'Krishnan' },
+  { branch: 'ECE', email: 'faculty.ece.year2.odd@learnova.test', firstName: 'Karthik', lastName: 'Reddy' },
+  { branch: 'ECE', email: 'faculty.ece.year3.odd@learnova.test', firstName: 'Divya', lastName: 'Joshi' },
+  { branch: 'ECE', email: 'faculty.ece.year4.odd@learnova.test', firstName: 'Amit', lastName: 'Verma' },
+  { branch: 'ECE', email: 'faculty.ece.year1.even@learnova.test', firstName: 'Lakshmi', lastName: 'Nair' },
+  { branch: 'ECE', email: 'faculty.ece.year2.even@learnova.test', firstName: 'Rahul', lastName: 'Ghosh' },
+  { branch: 'ECE', email: 'faculty.ece.year3.even@learnova.test', firstName: 'Sneha', lastName: 'Kulkarni' },
+  { branch: 'ECE', email: 'faculty.ece.year4.even@learnova.test', firstName: 'Imran', lastName: 'Qureshi' },
 ];
 
 const BRANCHES = [
@@ -226,8 +227,13 @@ function slugify(code: string, title: string): string {
   return `${code}-${title}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function facultyKey(branch: string, year: number, term: string): string {
-  return `${branch}-${year}-${term}`;
+function sharedTitleKey(title: string): string {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 async function setLoginPassword(email: string, firstName: string, lastName: string, role: 'faculty' | 'student', institutionId: string) {
@@ -283,11 +289,14 @@ async function main(): Promise<void> {
     { $set: { isActive: false, status: 'archived' } },
   );
 
-  const facultyByKey = new Map<string, { id: string; name: string }>();
+  const teachers: Array<{ id: string; name: string; branch: 'CSE' | 'ECE'; departmentId: string }> = [];
+  const branchCounts = new Map<string, number>();
   for (const plan of FACULTY_PLAN) {
     const fullName = `${plan.firstName} ${plan.lastName}`;
     const branch = branchRecords.get(plan.branch)!;
-    const code = `${plan.branch}-Y${plan.year}${plan.term === 'odd' ? 'O' : 'E'}`;
+    const index = (branchCounts.get(plan.branch) ?? 0) + 1;
+    branchCounts.set(plan.branch, index);
+    const code = `${plan.branch}-${String(index).padStart(2, '0')}`;
     const faculty = await FacultyModel.findOneAndUpdate(
       { institutionId: institutionOid, email: plan.email },
       {
@@ -297,7 +306,7 @@ async function main(): Promise<void> {
           fullName,
           departmentId: branch.departmentId,
           programIds: [branch.programId],
-          designation: plan.branch === 'CSE' && plan.year === 1 && plan.term === 'odd' ? 'associate_professor' : 'assistant_professor',
+          designation: plan.email === FACULTY_EMAIL ? 'associate_professor' : 'assistant_professor',
           employmentType: 'full_time',
           isActive: true,
           status: 'active',
@@ -311,11 +320,81 @@ async function main(): Promise<void> {
       },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
-    facultyByKey.set(facultyKey(plan.branch, plan.year, plan.term), { id: String(faculty._id), name: fullName });
+    teachers.push({
+      id: String(faculty._id),
+      name: fullName,
+      branch: plan.branch,
+      departmentId: String(branch.departmentId),
+    });
   }
 
   const curriculumCodes: string[] = [];
   const courseIdsByBranchSemester = new Map<string, string[]>();
+  const courseIdsByTeacher = new Map<string, string[]>();
+  const coordinatorByCourseId = new Map<string, string>();
+
+  type Offering = {
+    branch: 'CSE' | 'ECE';
+    year: number;
+    term: 'odd' | 'even';
+    semesterNumber: number;
+    subject: Subject;
+  };
+  const offerings: Offering[] = [];
+  for (const branchPlan of BRANCHES) {
+    for (const yearPlan of branchPlan.years) {
+      for (const term of ['odd', 'even'] as const) {
+        const semesterNumber = (yearPlan.year - 1) * 2 + (term === 'odd' ? 1 : 2);
+        const subjects = term === 'odd' ? yearPlan.odd : yearPlan.even;
+        for (const subject of subjects) {
+          offerings.push({ branch: branchPlan.branch, year: yearPlan.year, term, semesterNumber, subject });
+        }
+      }
+    }
+  }
+
+  const termLoad = new Map<string, number>();
+  const semesterLoad = new Map<string, number>();
+  const teacherByCourseCode = new Map<string, (typeof teachers)[number]>();
+
+  const pickTeacher = (branch: 'CSE' | 'ECE', term: 'odd' | 'even', semesterNumber: number) => {
+    const pool = teachers.filter((teacher) => teacher.branch === branch);
+    const ranked = [...pool].sort((a, b) => {
+      const semesterDiff =
+        (semesterLoad.get(`${a.id}|${String(semesterNumber)}`) ?? 0) -
+        (semesterLoad.get(`${b.id}|${String(semesterNumber)}`) ?? 0);
+      if (semesterDiff !== 0) return semesterDiff;
+      return (termLoad.get(`${a.id}|${term}`) ?? 0) - (termLoad.get(`${b.id}|${term}`) ?? 0);
+    });
+    const chosen = ranked[0];
+    if (!chosen) throw new Error(`No ${branch} faculty available`);
+    return chosen;
+  };
+
+  for (let semesterNumber = 1; semesterNumber <= 8; semesterNumber += 1) {
+    const rows = offerings.filter((row) => row.semesterNumber === semesterNumber);
+    const groups = new Map<string, Offering[]>();
+    for (const row of rows) {
+      const key = sharedTitleKey(row.subject.title);
+      const list = groups.get(key) ?? [];
+      list.push(row);
+      groups.set(key, list);
+    }
+    for (const group of groups.values()) {
+      const sample = group[0];
+      if (!sample) continue;
+      const branches = new Set(group.map((row) => row.branch));
+      const teacher =
+        branches.size > 1
+          ? pickTeacher('CSE', sample.term, semesterNumber)
+          : pickTeacher(sample.branch, sample.term, semesterNumber);
+      const semesterKey = `${teacher.id}|${String(semesterNumber)}`;
+      const termKey = `${teacher.id}|${sample.term}`;
+      semesterLoad.set(semesterKey, (semesterLoad.get(semesterKey) ?? 0) + 1);
+      termLoad.set(termKey, (termLoad.get(termKey) ?? 0) + sessionsPerWeek(sample.subject.credits));
+      for (const row of group) teacherByCourseCode.set(row.subject.code, teacher);
+    }
+  }
 
   for (const branchPlan of BRANCHES) {
     const branch = branchRecords.get(branchPlan.branch)!;
@@ -323,12 +402,13 @@ async function main(): Promise<void> {
       for (const term of ['odd', 'even'] as const) {
         const semesterNumber = (yearPlan.year - 1) * 2 + (term === 'odd' ? 1 : 2);
         const semester = semesterByNumber.get(semesterNumber)!;
-        const teacher = facultyByKey.get(facultyKey(branchPlan.branch, yearPlan.year, term))!;
         const subjects = term === 'odd' ? yearPlan.odd : yearPlan.even;
         const ids: string[] = [];
 
         for (const subject of subjects) {
           curriculumCodes.push(subject.code);
+          const teacher = teacherByCourseCode.get(subject.code);
+          if (!teacher) throw new Error(`No teacher for ${subject.code}`);
           const course = await CourseModel.findOneAndUpdate(
             { institutionId: institutionOid, courseCode: subject.code },
             {
@@ -341,29 +421,38 @@ async function main(): Promise<void> {
                 semesterIds: [semester._id],
                 facultyIds: [new Types.ObjectId(teacher.id)],
                 coordinatorId: new Types.ObjectId(teacher.id),
-              category: subject.category,
-              credits: subject.credits,
-              status: 'published',
-              visibility: 'institution',
-              deletedAt: null,
+                category: subject.category,
+                credits: subject.credits,
+                status: 'published',
+                visibility: 'institution',
+                deletedAt: null,
+              },
+              $setOnInsert: {
+                institutionId: institutionOid,
+                courseCode: subject.code,
+              },
             },
-            $setOnInsert: {
-              institutionId: institutionOid,
-              courseCode: subject.code,
-            },
-          },
-          { upsert: true, new: true, setDefaultsOnInsert: true },
-        );
-          ids.push(String(course._id));
+            { upsert: true, new: true, setDefaultsOnInsert: true },
+          );
+          const courseId = String(course._id);
+          ids.push(courseId);
+          coordinatorByCourseId.set(courseId, teacher.id);
+          const taught = courseIdsByTeacher.get(teacher.id) ?? [];
+          taught.push(courseId);
+          courseIdsByTeacher.set(teacher.id, taught);
         }
 
-        await FacultyModel.updateOne(
-          { _id: new Types.ObjectId(teacher.id) },
-          { $set: { courseIds: ids.map((id) => new Types.ObjectId(id)) } },
-        );
-        courseIdsByBranchSemester.set(`${branchPlan.branch}-${semesterNumber}`, ids);
+        courseIdsByBranchSemester.set(`${branchPlan.branch}-${String(semesterNumber)}`, ids);
       }
     }
+  }
+
+  for (const teacher of teachers) {
+    const ids = courseIdsByTeacher.get(teacher.id) ?? [];
+    await FacultyModel.updateOne(
+      { _id: new Types.ObjectId(teacher.id) },
+      { $set: { courseIds: ids.map((id) => new Types.ObjectId(id)) } },
+    );
   }
 
   await CourseModel.updateMany(
@@ -464,7 +553,8 @@ async function main(): Promise<void> {
   await setLoginPassword(STUDENT_EMAIL, 'Aarav', 'Mehta', 'student', institutionId);
 
   const sem1CourseIds = courseIdsByBranchSemester.get('CSE-1') ?? [];
-  const sem1Teacher = facultyByKey.get(facultyKey('CSE', 1, 'odd'))!;
+  const fallbackTeacher = teachers[0];
+  if (!fallbackTeacher) throw new Error('No faculty available');
   await EnrollmentModel.deleteMany({ institutionId: institutionOid, studentId: student._id });
   await EnrollmentModel.insertMany(
     sem1CourseIds.map((courseId, index) => ({
@@ -476,7 +566,7 @@ async function main(): Promise<void> {
       academicYearId: sem1.academicYearId,
       semesterId: sem1._id,
       sectionId: section!._id,
-      facultyId: new Types.ObjectId(sem1Teacher.id),
+      facultyId: new Types.ObjectId(coordinatorByCourseId.get(courseId) ?? fallbackTeacher.id),
       enrollmentNumber: `ENR-Y1-${String(index + 1).padStart(2, '0')}`,
       enrollmentDate: new Date(),
       enrollmentMethod: 'manual',
@@ -508,22 +598,20 @@ async function main(): Promise<void> {
       departmentId: doc.departmentId ? String(doc.departmentId) : null,
       category: doc.category ?? null,
     }));
-    const faculty: FacultyRecord[] = BRANCHES.flatMap((branchPlan) => {
-      const teacher = facultyByKey.get(facultyKey(branchPlan.branch, year, 'odd'));
-      const record = branchRecords.get(branchPlan.branch);
-      if (!teacher || !record) return [];
-      return [
-        {
-          id: teacher.id,
-          name: teacher.name,
-          departmentId: String(record.departmentId),
-          specialization: null,
-          courseIds: courses
-            .filter((course) => course.programIds.includes(String(record.programId)))
-            .map((course) => course.id),
-        },
-      ];
-    });
+    const teachingIds = new Set(
+      courses.flatMap((course) => [...course.facultyIds, ...(course.coordinatorId ? [course.coordinatorId] : [])]),
+    );
+    const faculty: FacultyRecord[] = teachers
+      .filter((teacher) => teachingIds.has(teacher.id))
+      .map((teacher) => ({
+        id: teacher.id,
+        name: teacher.name,
+        departmentId: teacher.departmentId,
+        specialization: null,
+        courseIds: courses
+          .filter((course) => course.facultyIds.includes(teacher.id) || course.coordinatorId === teacher.id)
+          .map((course) => course.id),
+      }));
     const sectionDocs = await SectionModel.find({
       institutionId: institutionOid,
       semesterId: semester._id,
@@ -594,9 +682,12 @@ async function main(): Promise<void> {
         })),
       );
     }
+    const teacherNames = new Set(settled.slots.map((slot) => slot.facultyName));
+    const unscheduled = settled.warnings.filter((warning) => warning.includes('left unscheduled'));
     console.log(
-      `Year ${year} Semester ${semesterNumber}: ${courses.length} subjects across CSE and ECE, ${settled.slots.length} slots`,
+      `Year ${year} Semester ${semesterNumber}: ${courses.length} subjects, ${String(teacherNames.size)} teachers, ${String(settled.slots.length)} slots`,
     );
+    for (const warning of unscheduled) console.log(`  ${warning}`);
   }
 
   console.log(

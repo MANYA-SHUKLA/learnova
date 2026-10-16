@@ -1,4 +1,5 @@
 import { Router, type RequestHandler } from 'express';
+import type { Permission } from '@learnova/types';
 import type { ZodSchema } from 'zod';
 import { PERMISSIONS } from '@learnova/constants';
 import {
@@ -27,7 +28,7 @@ import {
   updateSectionSchema,
   updateSemesterSchema,
 } from '@learnova/validation';
-import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
+import { authenticate, requireAnyPermission, requirePermission } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/institution/institution.controller.js';
 import type { ResourceControllers } from '../../controllers/institution/institution.controller.js';
@@ -38,10 +39,13 @@ function mountResource(
   controllers: ResourceControllers,
   createSchema: ZodSchema<unknown>,
   updateSchema: ZodSchema<unknown>,
+  readPermissions: Permission[] = [PERMISSIONS.INSTITUTION_READ],
 ) {
   const read = [
     authenticate({ required: true }),
-    requirePermission(PERMISSIONS.INSTITUTION_READ),
+    readPermissions.length > 1
+      ? requireAnyPermission(...readPermissions)
+      : requirePermission(...readPermissions),
   ] as RequestHandler[];
   const manage = [
     authenticate({ required: true }),
@@ -198,6 +202,7 @@ mountResource(
   ctrl.semesterControllers,
   createSemesterSchema,
   updateSemesterSchema,
+  [PERMISSIONS.INSTITUTION_READ, PERMISSIONS.COURSE_WRITE],
 );
 mountResource(
   institutionRoutes,
