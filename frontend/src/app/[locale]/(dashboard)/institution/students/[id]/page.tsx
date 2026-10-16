@@ -18,7 +18,7 @@ import { useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { PasswordInput } from '@/components/shared/password-input';
 import { authApi, useSessions } from '@/features/auth';
-import { ErrorState } from '@/features/institution';
+import { ErrorState, useOrgLabels } from '@/features/institution';
 import {
   formatStudentStatus,
   formatStudentGender,
@@ -37,6 +37,7 @@ export default function StudentDetailPage() {
   const id = params.id;
   const { user } = useAuth();
   const query = useStudent(id);
+  const labels = useOrgLabels();
   const auditQuery = useStudentAudit(id);
   const photoMutation = useStudentPhotoUploadMutation();
   const activateMutation = useActivateStudentMutation();
@@ -250,14 +251,14 @@ export default function StudentDetailPage() {
         ])}
 
         {section('Academic details', [
-          ['Program ID', student.programId],
-          ['Department ID', student.departmentId],
-          ['School ID', student.schoolId],
-          ['Campus ID', student.campusId],
-          ['Academic year ID', student.academicYearId],
-          ['Semester ID', student.semesterId],
-          ['Section ID', student.sectionId],
-          ['Batch ID', student.batchId],
+          ['Program', labels.program(student.programId)],
+          ['Department', labels.department(student.departmentId)],
+          ['School', labels.school(student.schoolId)],
+          ['Campus', labels.campus(student.campusId)],
+          ['Academic year', labels.year(student.academicYearId)],
+          ['Semester', labels.semester(student.semesterId)],
+          ['Section', labels.section(student.sectionId)],
+          ['Batch', labels.batch(student.batchId)],
           ['Admission date', student.admissionDate?.slice(0, 10)],
           ['Expected graduation', student.expectedGraduationDate?.slice(0, 10)],
           ['Program duration (years)', student.programDuration?.toString()],

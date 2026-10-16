@@ -18,7 +18,8 @@ import { useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { PasswordInput } from '@/components/shared/password-input';
 import { authApi, useSessions } from '@/features/auth';
-import { ErrorState } from '@/features/institution';
+import { ErrorState, useOrgLabels } from '@/features/institution';
+import { useCourseList } from '@/features/course';
 import {
   formatDesignation,
   formatEmploymentType,
@@ -38,6 +39,8 @@ export default function FacultyDetailPage() {
   const id = params.id;
   const { user } = useAuth();
   const query = useFaculty(id);
+  const labels = useOrgLabels();
+  const coursesQuery = useCourseList({ page: 1, limit: 200 });
   const auditQuery = useFacultyAudit(id);
   const photoMutation = useFacultyPhotoUploadMutation();
   const activateMutation = useActivateFacultyMutation();
