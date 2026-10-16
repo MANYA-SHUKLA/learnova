@@ -62,6 +62,14 @@ export interface SettledSlot {
   room: string;
 }
 
+export interface OccupiedSlot {
+  dayOfWeek: TimetableDayOfWeek;
+  startTime: string;
+  endTime: string;
+  facultyId: string;
+  room: string;
+}
+
 export interface SettleInput {
   courses: CourseRecord[];
   faculty: FacultyRecord[];
@@ -70,6 +78,10 @@ export interface SettleInput {
   periods: TimetablePeriod[];
   geminiAssignments?: Array<{ courseId: string; facultyId: string }>;
   proposedSlots?: ProposedSlot[];
+  /** Teachers already assigned to the other term (odd vs even). Used only when someone else can teach. */
+  avoidFacultyIds?: string[];
+  /** Classes already placed in other years of this same term. */
+  occupied?: OccupiedSlot[];
 }
 
 export interface SettleResult {
@@ -131,25 +143,34 @@ function facultyName(faculty: FacultyRecord): string {
   return faculty.name.trim() || faculty.id;
 }
 
+function preferredFacultyId(linked: string[], avoid: Set<string>, preferred?: string | null): string | null {
+  const open = linked.filter((id) => !avoid.has(id));
+  const pool = open.length > 0 ? open : linked;
+  if (preferred && pool.includes(preferred)) return preferred;
+  return pool[0] ?? null;
+}
+
 export function extractTeachingMap(
   courses: CourseRecord[],
   faculty: FacultyRecord[],
+  options?: { avoidFacultyIds?: Set<string> },
 ): Map<string, string> {
   const facultyIds = new Set(faculty.map((row) => row.id));
+  const avoid = options?.avoidFacultyIds ?? new Set<string>();
   const map = new Map<string, string>();
 
   for (const course of courses) {
     const coordinator =
       course.coordinatorId && facultyIds.has(course.coordinatorId) ? course.coordinatorId : null;
     const linked = course.facultyIds.filter((id) => facultyIds.has(id));
-    if (coordinator && linked.includes(coordinator)) {
-      map.set(course.id, coordinator);
-    } else if (linked[0]) {
-      map.set(course.id, linked[0]);
-    }
+    const pick = preferredFacultyId(linked, avoid, coordinator);
+    if (pick) map.set(course.id, pick);
   }
 
   for (const row of faculty) {
+    if (avoid.has(row.id) && faculty.some((other) => other.id !== row.id && !avoid.has(other.id))) {
+      continue;
+    }
     for (const courseId of row.courseIds) {
       if (!map.has(courseId) && courses.some((course) => course.id === courseId)) {
         map.set(courseId, row.id);
@@ -174,14 +195,18 @@ export function fillUnassignedFaculty(
   faculty: FacultyRecord[],
   current: Map<string, string>,
   extras?: Array<{ courseId: string; facultyId: string }>,
+  options?: { avoidFacultyIds?: Set<string> },
 ): Map<string, string> {
   const next = new Map(current);
   const facultyIds = new Set(faculty.map((row) => row.id));
+  const avoid = options?.avoidFacultyIds ?? new Set<string>();
+  const hasAlternative = faculty.some((row) => !avoid.has(row.id));
 
   for (const extra of extras ?? []) {
     if (next.has(extra.courseId)) continue;
     if (!courses.some((course) => course.id === extra.courseId)) continue;
     if (!facultyIds.has(extra.facultyId)) continue;
+    if (avoid.has(extra.facultyId) && hasAlternative) continue;
     next.set(extra.courseId, extra.facultyId);
   }
 
@@ -193,6 +218,8 @@ export function fillUnassignedFaculty(
   for (const course of courses) {
     if (next.has(course.id) || faculty.length === 0) continue;
     const ranked = [...faculty].sort((a, b) => {
+      const avoidDiff = Number(avoid.has(a.id)) - Number(avoid.has(b.id));
+      if (avoidDiff !== 0) return avoidDiff;
       const scoreDiff = scoreFacultyForCourse(course, b) - scoreFacultyForCourse(course, a);
       if (scoreDiff !== 0) return scoreDiff;
       return (load.get(a.id) ?? 0) - (load.get(b.id) ?? 0);
@@ -232,13 +259,25 @@ function coursesForSection(course: CourseRecord, section: SectionRecord): boolea
   return course.programIds.length === 0 || course.programIds.includes(section.programId);
 }
 
-function slotConflicts(existing: SettledSlot[], candidate: SettledSlot): boolean {
-  return existing.some(
+function slotConflicts(
+  existing: SettledSlot[],
+  occupied: OccupiedSlot[],
+  candidate: SettledSlot,
+): boolean {
+  const overlapsPlaced = existing.some(
     (slot) =>
       slot.dayOfWeek === candidate.dayOfWeek &&
       timesOverlap(slot.startTime, slot.endTime, candidate.startTime, candidate.endTime) &&
       (slot.sectionId === candidate.sectionId ||
         slot.facultyId === candidate.facultyId ||
+        slot.room.toLowerCase() === candidate.room.toLowerCase()),
+  );
+  if (overlapsPlaced) return true;
+  return occupied.some(
+    (slot) =>
+      slot.dayOfWeek === candidate.dayOfWeek &&
+      timesOverlap(slot.startTime, slot.endTime, candidate.startTime, candidate.endTime) &&
+      (slot.facultyId === candidate.facultyId ||
         slot.room.toLowerCase() === candidate.room.toLowerCase()),
   );
 }
@@ -259,6 +298,7 @@ function isAllowedVenue(room: string, preferLab: boolean): boolean {
 
 function nextRoom(
   used: SettledSlot[],
+  occupied: OccupiedSlot[],
   dayOfWeek: TimetableDayOfWeek,
   startTime: string,
   endTime: string,
@@ -266,12 +306,19 @@ function nextRoom(
 ): string {
   const rooms = venuePool(preferLab);
   for (const room of rooms) {
-    const taken = used.some(
-      (slot) =>
-        slot.dayOfWeek === dayOfWeek &&
-        slot.room.toLowerCase() === room.toLowerCase() &&
-        timesOverlap(slot.startTime, slot.endTime, startTime, endTime),
-    );
+    const taken =
+      used.some(
+        (slot) =>
+          slot.dayOfWeek === dayOfWeek &&
+          slot.room.toLowerCase() === room.toLowerCase() &&
+          timesOverlap(slot.startTime, slot.endTime, startTime, endTime),
+      ) ||
+      occupied.some(
+        (slot) =>
+          slot.dayOfWeek === dayOfWeek &&
+          slot.room.toLowerCase() === room.toLowerCase() &&
+          timesOverlap(slot.startTime, slot.endTime, startTime, endTime),
+      );
     if (!taken) return room;
   }
   return rooms[0] ?? 'ELC Class 1';
@@ -328,19 +375,30 @@ export function settleTimetable(input: SettleInput): SettleResult {
   const facultyById = new Map(input.faculty.map((row) => [row.id, row]));
   const courseById = new Map(input.courses.map((row) => [row.id, row]));
   const sectionById = new Map(input.sections.map((row) => [row.id, row]));
+  const avoid = new Set(input.avoidFacultyIds ?? []);
+  const occupied = input.occupied ?? [];
 
-  const extracted = extractTeachingMap(input.courses, input.faculty);
+  const extracted = extractTeachingMap(input.courses, input.faculty, { avoidFacultyIds: avoid });
   const teachingMap = fillUnassignedFaculty(
     input.courses,
     input.faculty,
     extracted,
     input.geminiAssignments,
+    { avoidFacultyIds: avoid },
   );
   const assignments = toAssignments(input.courses, input.faculty, teachingMap);
 
   for (const course of input.courses) {
-    if (!teachingMap.has(course.id)) {
+    const facultyId = teachingMap.get(course.id);
+    if (!facultyId) {
       warnings.push(`No faculty available to teach ${course.title}`);
+      continue;
+    }
+    if (avoid.has(facultyId)) {
+      const teacher = facultyById.get(facultyId);
+      warnings.push(
+        `${teacher ? facultyName(teacher) : 'This teacher'} already teaches the other term, and no other faculty could take ${course.title}`,
+      );
     }
   }
 
@@ -365,7 +423,7 @@ export function settleTimetable(input: SettleInput): SettleResult {
   const slots: SettledSlot[] = [];
 
   const tryPlace = (candidate: SettledSlot, key: DemandKey | null, repaired: boolean): boolean => {
-    if (slotConflicts(slots, candidate)) return false;
+    if (slotConflicts(slots, occupied, candidate)) return false;
     slots.push(candidate);
     if (key) {
       const left = (remaining.get(key) ?? 0) - 1;
@@ -400,9 +458,15 @@ export function settleTimetable(input: SettleInput): SettleResult {
           slot.dayOfWeek === proposed.dayOfWeek &&
           slot.room.toLowerCase() === proposed.room!.toLowerCase() &&
           timesOverlap(slot.startTime, slot.endTime, proposed.startTime, proposed.endTime),
+      ) &&
+      !occupied.some(
+        (slot) =>
+          slot.dayOfWeek === proposed.dayOfWeek &&
+          slot.room.toLowerCase() === proposed.room!.toLowerCase() &&
+          timesOverlap(slot.startTime, slot.endTime, proposed.startTime, proposed.endTime),
       )
         ? proposed.room
-        : nextRoom(slots, proposed.dayOfWeek, proposed.startTime, proposed.endTime, preferLab);
+        : nextRoom(slots, occupied, proposed.dayOfWeek, proposed.startTime, proposed.endTime, preferLab);
 
     const candidate: SettledSlot = {
       dayOfWeek: proposed.dayOfWeek,
@@ -430,7 +494,7 @@ export function settleTimetable(input: SettleInput): SettleResult {
     for (const day of workingDays) {
       for (const period of periods) {
         if (left <= 0) break;
-        const room = nextRoom(slots, day, period.startTime, period.endTime, isLabCourse(course));
+        const room = nextRoom(slots, occupied, day, period.startTime, period.endTime, isLabCourse(course));
         const candidate: SettledSlot = {
           dayOfWeek: day,
           startTime: period.startTime,
