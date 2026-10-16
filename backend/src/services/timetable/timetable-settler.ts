@@ -104,15 +104,12 @@ export const DEFAULT_PERIODS: TimetablePeriod[] = [
   { startTime: '17:00', endTime: '18:00' },
 ];
 
-export const DEFAULT_LECTURE_ROOMS = [
-  'ELC Class 1',
-  'ELC Class 2',
-  'ELC Class 3',
-  'ELC Class 4',
-  'ELC Class 5',
-] as const;
+/** Three rooms for the whole campus. Theory and lab sessions share them. */
+export const CAMPUS_ROOMS = ['ELC Class 1', 'ELC Class 2', 'ELC Class 3'] as const;
 
-export const DEFAULT_LAB_ROOMS = ['SOE Lab 1', 'SOE Lab 2', 'SOE Lab 3', 'SOE Lab 4'] as const;
+export const DEFAULT_LECTURE_ROOMS = CAMPUS_ROOMS;
+
+export const DEFAULT_LAB_ROOMS = CAMPUS_ROOMS;
 
 const DAY_SET = new Set<string>(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']);
 
@@ -259,27 +256,97 @@ function coursesForSection(course: CourseRecord, section: SectionRecord): boolea
   return course.programIds.length === 0 || course.programIds.includes(section.programId);
 }
 
-function slotConflicts(
+/** Same subject taught to more than one branch, such as CSE and ECE maths. */
+export function sharedCourseKey(title: string): string {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+interface ClassMeeting {
+  key: string;
+  title: string;
+  sessions: number;
+  sessionsLeft: number;
+  facultyId: string;
+  preferLab: boolean;
+  members: Array<{ courseId: string; sectionId: string }>;
+}
+
+function meetingBlocked(
   existing: SettledSlot[],
   occupied: OccupiedSlot[],
-  candidate: SettledSlot,
+  dayOfWeek: TimetableDayOfWeek,
+  startTime: string,
+  endTime: string,
+  facultyId: string,
+  room: string,
+  sectionIds: string[],
 ): boolean {
+  const sections = new Set(sectionIds);
   const overlapsPlaced = existing.some(
     (slot) =>
-      slot.dayOfWeek === candidate.dayOfWeek &&
-      timesOverlap(slot.startTime, slot.endTime, candidate.startTime, candidate.endTime) &&
-      (slot.sectionId === candidate.sectionId ||
-        slot.facultyId === candidate.facultyId ||
-        slot.room.toLowerCase() === candidate.room.toLowerCase()),
+      slot.dayOfWeek === dayOfWeek &&
+      timesOverlap(slot.startTime, slot.endTime, startTime, endTime) &&
+      (sections.has(slot.sectionId) ||
+        slot.facultyId === facultyId ||
+        slot.room.toLowerCase() === room.toLowerCase()),
   );
   if (overlapsPlaced) return true;
   return occupied.some(
     (slot) =>
-      slot.dayOfWeek === candidate.dayOfWeek &&
-      timesOverlap(slot.startTime, slot.endTime, candidate.startTime, candidate.endTime) &&
-      (slot.facultyId === candidate.facultyId ||
-        slot.room.toLowerCase() === candidate.room.toLowerCase()),
+      slot.dayOfWeek === dayOfWeek &&
+      timesOverlap(slot.startTime, slot.endTime, startTime, endTime) &&
+      (slot.facultyId === facultyId || slot.room.toLowerCase() === room.toLowerCase()),
   );
+}
+
+function chooseMeetingRoom(
+  existing: SettledSlot[],
+  occupied: OccupiedSlot[],
+  dayOfWeek: TimetableDayOfWeek,
+  startTime: string,
+  endTime: string,
+  facultyId: string,
+  sectionIds: string[],
+  preferLab: boolean,
+  proposedRoom?: string,
+): string | null {
+  const pool = [...venuePool(preferLab)];
+  if (proposedRoom && isAllowedVenue(proposedRoom, preferLab)) {
+    const index = pool.findIndex((room) => room.toLowerCase() === proposedRoom.toLowerCase());
+    if (index > 0) {
+      const [preferred] = pool.splice(index, 1);
+      if (preferred) pool.unshift(preferred);
+    }
+  }
+  for (const room of pool) {
+    if (!meetingBlocked(existing, occupied, dayOfWeek, startTime, endTime, facultyId, room, sectionIds)) {
+      return room;
+    }
+  }
+  return null;
+}
+
+function preferredMeetingFaculty(votes: string[]): string | null {
+  if (votes.length === 0) return null;
+  const counts = new Map<string, number>();
+  for (const facultyId of votes) {
+    counts.set(facultyId, (counts.get(facultyId) ?? 0) + 1);
+  }
+  let best = votes[0] ?? null;
+  let bestCount = best ? (counts.get(best) ?? 0) : 0;
+  for (const facultyId of votes) {
+    const count = counts.get(facultyId) ?? 0;
+    if (count > bestCount) {
+      best = facultyId;
+      bestCount = count;
+    }
+  }
+  return best;
 }
 
 export function isLabCourse(course: Pick<CourseRecord, 'title' | 'category'>): boolean {
@@ -294,34 +361,6 @@ function venuePool(preferLab: boolean): readonly string[] {
 function isAllowedVenue(room: string, preferLab: boolean): boolean {
   const wanted = room.trim().toLowerCase();
   return venuePool(preferLab).some((name) => name.toLowerCase() === wanted);
-}
-
-function nextRoom(
-  used: SettledSlot[],
-  occupied: OccupiedSlot[],
-  dayOfWeek: TimetableDayOfWeek,
-  startTime: string,
-  endTime: string,
-  preferLab: boolean,
-): string {
-  const rooms = venuePool(preferLab);
-  for (const room of rooms) {
-    const taken =
-      used.some(
-        (slot) =>
-          slot.dayOfWeek === dayOfWeek &&
-          slot.room.toLowerCase() === room.toLowerCase() &&
-          timesOverlap(slot.startTime, slot.endTime, startTime, endTime),
-      ) ||
-      occupied.some(
-        (slot) =>
-          slot.dayOfWeek === dayOfWeek &&
-          slot.room.toLowerCase() === room.toLowerCase() &&
-          timesOverlap(slot.startTime, slot.endTime, startTime, endTime),
-      );
-    if (!taken) return room;
-  }
-  return rooms[0] ?? 'ELC Class 1';
 }
 
 export function parseGeminiTimetableProposal(raw: unknown): {
@@ -386,6 +425,18 @@ export function settleTimetable(input: SettleInput): SettleResult {
     input.geminiAssignments,
     { avoidFacultyIds: avoid },
   );
+  const meetings = buildClassMeetings(input.courses, input.sections, teachingMap, sectionById);
+  for (const meeting of meetings) {
+    if (meeting.members.length < 2) continue;
+    for (const member of meeting.members) {
+      teachingMap.set(member.courseId, meeting.facultyId);
+    }
+    const names = meeting.members
+      .map((member) => sectionById.get(member.sectionId)?.name)
+      .filter((name): name is string => Boolean(name));
+    warnings.push(`${meeting.title} is a combined class for ${names.join(' and ')}`);
+  }
+
   const assignments = toAssignments(input.courses, input.faculty, teachingMap);
 
   for (const course of input.courses) {
@@ -402,124 +453,170 @@ export function settleTimetable(input: SettleInput): SettleResult {
     }
   }
 
-  type DemandKey = string;
-  const remaining = new Map<DemandKey, number>();
-  const demandMeta = new Map<
-    DemandKey,
-    { courseId: string; sectionId: string; facultyId: string }
-  >();
-
-  for (const section of input.sections) {
-    for (const course of input.courses) {
-      if (!coursesForSection(course, section)) continue;
-      const facultyId = teachingMap.get(course.id);
-      if (!facultyId) continue;
-      const key = `${course.id}|${section.id}`;
-      remaining.set(key, sessionsPerWeek(course.credits));
-      demandMeta.set(key, { courseId: course.id, sectionId: section.id, facultyId });
+  const slots: SettledSlot[] = [];
+  const meetingByMember = new Map<string, ClassMeeting>();
+  for (const meeting of meetings) {
+    for (const member of meeting.members) {
+      meetingByMember.set(`${member.courseId}|${member.sectionId}`, meeting);
     }
   }
 
-  const slots: SettledSlot[] = [];
-
-  const tryPlace = (candidate: SettledSlot, key: DemandKey | null, repaired: boolean): boolean => {
-    if (slotConflicts(slots, occupied, candidate)) return false;
-    slots.push(candidate);
-    if (key) {
-      const left = (remaining.get(key) ?? 0) - 1;
-      if (left <= 0) remaining.delete(key);
-      else remaining.set(key, left);
+  const placeMeeting = (
+    meeting: ClassMeeting,
+    dayOfWeek: TimetableDayOfWeek,
+    startTime: string,
+    endTime: string,
+    room: string,
+    repaired: boolean,
+  ): boolean => {
+    const teacher = facultyById.get(meeting.facultyId);
+    if (!teacher || meeting.sessionsLeft <= 0) return false;
+    const sectionIds = meeting.members.map((member) => member.sectionId);
+    if (meetingBlocked(slots, occupied, dayOfWeek, startTime, endTime, teacher.id, room, sectionIds)) {
+      return false;
     }
+    const placed: SettledSlot[] = [];
+    for (const member of meeting.members) {
+      const course = courseById.get(member.courseId);
+      const section = sectionById.get(member.sectionId);
+      if (!course || !section) return false;
+      placed.push({
+        dayOfWeek,
+        startTime,
+        endTime,
+        courseId: course.id,
+        courseTitle: course.title,
+        sectionId: section.id,
+        sectionName: section.name,
+        facultyId: teacher.id,
+        facultyName: facultyName(teacher),
+        room,
+      });
+    }
+    slots.push(...placed);
+    meeting.sessionsLeft -= 1;
     if (repaired) {
-      warnings.push(
-        `Repaired overlap for ${candidate.courseTitle} / ${candidate.sectionName} on ${candidate.dayOfWeek} ${candidate.startTime}`,
-      );
+      const sectionLabel = meeting.members
+        .map((member) => sectionById.get(member.sectionId)?.name)
+        .filter(Boolean)
+        .join(' + ');
+      warnings.push(`Repaired overlap for ${meeting.title} / ${sectionLabel} on ${dayOfWeek} ${startTime}`);
     }
     return true;
   };
 
   for (const proposed of input.proposedSlots ?? []) {
-    const course = courseById.get(proposed.courseId);
-    const section = sectionById.get(proposed.sectionId);
-    if (!course || !section || !coursesForSection(course, section)) continue;
+    const meeting = meetingByMember.get(`${proposed.courseId}|${proposed.sectionId}`);
+    if (!meeting || meeting.sessionsLeft <= 0) continue;
     if (!workingDays.includes(proposed.dayOfWeek)) continue;
-    const facultyId = teachingMap.get(course.id) ?? proposed.facultyId;
-    const teacher = facultyById.get(facultyId);
-    if (!teacher) continue;
-    const key = `${course.id}|${section.id}`;
-    if ((remaining.get(key) ?? 0) <= 0) continue;
-
-    const preferLab = isLabCourse(course);
-    const room =
-      proposed.room &&
-      isAllowedVenue(proposed.room, preferLab) &&
-      !slots.some(
-        (slot) =>
-          slot.dayOfWeek === proposed.dayOfWeek &&
-          slot.room.toLowerCase() === proposed.room!.toLowerCase() &&
-          timesOverlap(slot.startTime, slot.endTime, proposed.startTime, proposed.endTime),
-      ) &&
-      !occupied.some(
-        (slot) =>
-          slot.dayOfWeek === proposed.dayOfWeek &&
-          slot.room.toLowerCase() === proposed.room!.toLowerCase() &&
-          timesOverlap(slot.startTime, slot.endTime, proposed.startTime, proposed.endTime),
-      )
-        ? proposed.room
-        : nextRoom(slots, occupied, proposed.dayOfWeek, proposed.startTime, proposed.endTime, preferLab);
-
-    const candidate: SettledSlot = {
-      dayOfWeek: proposed.dayOfWeek,
-      startTime: proposed.startTime,
-      endTime: proposed.endTime,
-      courseId: course.id,
-      courseTitle: course.title,
-      sectionId: section.id,
-      sectionName: section.name,
-      facultyId: teacher.id,
-      facultyName: facultyName(teacher),
+    const room = chooseMeetingRoom(
+      slots,
+      occupied,
+      proposed.dayOfWeek,
+      proposed.startTime,
+      proposed.endTime,
+      meeting.facultyId,
+      meeting.members.map((member) => member.sectionId),
+      meeting.preferLab,
+      proposed.room,
+    );
+    if (!room) continue;
+    placeMeeting(
+      meeting,
+      proposed.dayOfWeek,
+      proposed.startTime,
+      proposed.endTime,
       room,
-    };
-    tryPlace(candidate, key, room !== (proposed.room ?? room));
+      Boolean(proposed.room) && room.toLowerCase() !== proposed.room.toLowerCase(),
+    );
   }
 
-  for (const [key, meta] of demandMeta) {
-    let left = remaining.get(key) ?? 0;
-    if (left <= 0) continue;
-    const course = courseById.get(meta.courseId);
-    const section = sectionById.get(meta.sectionId);
-    const teacher = facultyById.get(meta.facultyId);
-    if (!course || !section || !teacher) continue;
-
-    for (const day of workingDays) {
-      for (const period of periods) {
-        if (left <= 0) break;
-        const room = nextRoom(slots, occupied, day, period.startTime, period.endTime, isLabCourse(course));
-        const candidate: SettledSlot = {
-          dayOfWeek: day,
-          startTime: period.startTime,
-          endTime: period.endTime,
-          courseId: course.id,
-          courseTitle: course.title,
-          sectionId: section.id,
-          sectionName: section.name,
-          facultyId: teacher.id,
-          facultyName: facultyName(teacher),
-          room,
-        };
-        if (tryPlace(candidate, key, false)) {
-          left -= 1;
-        }
+  const pending = [...meetings].sort(
+    (a, b) => b.members.length - a.members.length || b.sessions - a.sessions,
+  );
+  for (const day of workingDays) {
+    for (const period of periods) {
+      for (const meeting of pending) {
+        if (meeting.sessionsLeft <= 0) continue;
+        const sectionIds = meeting.members.map((member) => member.sectionId);
+        const room = chooseMeetingRoom(
+          slots,
+          occupied,
+          day,
+          period.startTime,
+          period.endTime,
+          meeting.facultyId,
+          sectionIds,
+          meeting.preferLab,
+        );
+        if (!room) continue;
+        placeMeeting(meeting, day, period.startTime, period.endTime, room, false);
       }
-      if (left <= 0) break;
     }
+  }
 
-    if ((remaining.get(key) ?? 0) > 0) {
-      warnings.push(
-        `Could not place all sessions for ${course.title} (${section.name}); ${remaining.get(key)} left unscheduled`,
-      );
-    }
+  for (const meeting of pending) {
+    if (meeting.sessionsLeft <= 0) continue;
+    const sectionLabel = meeting.members
+      .map((member) => sectionById.get(member.sectionId)?.name)
+      .filter(Boolean)
+      .join(' + ');
+    warnings.push(
+      `Could not place all sessions for ${meeting.title} (${sectionLabel}); ${meeting.sessionsLeft} left unscheduled`,
+    );
   }
 
   return { assignments, slots, warnings };
+}
+
+function buildClassMeetings(
+  courses: CourseRecord[],
+  sections: SectionRecord[],
+  teachingMap: Map<string, string>,
+  sectionById: Map<string, SectionRecord>,
+): ClassMeeting[] {
+  const grouped = new Map<string, Array<{ courseId: string; sectionId: string; facultyId: string }>>();
+  const titles = new Map<string, string>();
+  const sessions = new Map<string, number>();
+  const labs = new Map<string, boolean>();
+
+  for (const section of sections) {
+    const seen = new Set<string>();
+    for (const course of courses) {
+      if (!coursesForSection(course, section)) continue;
+      const facultyId = teachingMap.get(course.id);
+      if (!facultyId) continue;
+      const key = sharedCourseKey(course.title);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      const members = grouped.get(key) ?? [];
+      members.push({ courseId: course.id, sectionId: section.id, facultyId });
+      grouped.set(key, members);
+      if (!titles.has(key)) titles.set(key, course.title);
+      sessions.set(key, Math.max(sessions.get(key) ?? 0, sessionsPerWeek(course.credits)));
+      labs.set(key, (labs.get(key) ?? false) || isLabCourse(course));
+    }
+  }
+
+  const meetings: ClassMeeting[] = [];
+  for (const [key, members] of grouped) {
+    const ordered = [...members].sort((a, b) => {
+      const left = sectionById.get(a.sectionId)?.name ?? a.sectionId;
+      const right = sectionById.get(b.sectionId)?.name ?? b.sectionId;
+      return left.localeCompare(right);
+    });
+    const facultyId = preferredMeetingFaculty(ordered.map((member) => member.facultyId));
+    const sessionCount = sessions.get(key) ?? 0;
+    if (!facultyId || sessionCount <= 0) continue;
+    meetings.push({
+      key,
+      title: titles.get(key) ?? key,
+      sessions: sessionCount,
+      sessionsLeft: sessionCount,
+      facultyId,
+      preferLab: labs.get(key) ?? false,
+      members: ordered.map((member) => ({ courseId: member.courseId, sectionId: member.sectionId })),
+    });
+  }
+  return meetings;
 }

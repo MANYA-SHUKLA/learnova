@@ -37,6 +37,32 @@ export interface ActorContext {
   role: string;
 }
 
+function collapseCombinedClasses<T extends TimetableTodayClass | {
+  startTime: string;
+  endTime: string;
+  courseTitle: string;
+  sectionName: string;
+  facultyName: string;
+  room: string;
+}>(classes: T[]): T[] {
+  const order: string[] = [];
+  const groups = new Map<string, T>();
+  for (const item of classes) {
+    const key = `${item.startTime}|${item.endTime}|${item.courseTitle.trim().toLowerCase()}|${item.room.trim().toLowerCase()}|${item.facultyName.trim().toLowerCase()}`;
+    const existing = groups.get(key);
+    if (!existing) {
+      groups.set(key, { ...item });
+      order.push(key);
+      continue;
+    }
+    const names = existing.sectionName.split(' + ');
+    if (!names.includes(item.sectionName)) {
+      existing.sectionName = `${existing.sectionName} + ${item.sectionName}`;
+    }
+  }
+  return order.map((key) => groups.get(key)!);
+}
+
 function requireTenant(actor: ActorContext): string {
   if (!actor.institutionId) throw new ForbiddenError('Institution context required');
   return actor.institutionId;
@@ -351,7 +377,7 @@ export class TimetableService {
       return {
         date: formatDateInTimeZone(now, timeZone),
         dayOfWeek,
-        classes: activeSlots.map((s) => this.slotToTodayClass(s)),
+        classes: collapseCombinedClasses(activeSlots.map((s) => this.slotToTodayClass(s))),
       };
     }
 
@@ -372,7 +398,7 @@ export class TimetableService {
       return {
         date: formatDateInTimeZone(now, timeZone),
         dayOfWeek,
-        classes: mine.map((s) => this.slotToTodayClass(s)),
+        classes: collapseCombinedClasses(mine.map((s) => this.slotToTodayClass(s))),
       };
     }
 
@@ -485,14 +511,16 @@ export class TimetableService {
         const name =
           (faculty.fullName as string) ||
           `${faculty.firstName as string} ${faculty.lastName as string}`.trim();
-        const rows = facultySlots.map((s) => ({
-          startTime: s.startTime,
-          endTime: s.endTime,
-          courseTitle: s.courseTitle,
-          sectionName: s.sectionName,
-          facultyName: s.facultyName,
-          room: s.room,
-        }));
+        const rows = collapseCombinedClasses(
+          facultySlots.map((s) => ({
+            startTime: s.startTime,
+            endTime: s.endTime,
+            courseTitle: s.courseTitle,
+            sectionName: s.sectionName,
+            facultyName: s.facultyName,
+            room: s.room,
+          })),
+        );
         const mail = buildClassReminderEmail(name, dateLabel, rows);
         const bodyText = rows
           .map(

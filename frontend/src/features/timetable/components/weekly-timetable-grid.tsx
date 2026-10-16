@@ -36,9 +36,31 @@ function formatTimeRange(timeKey: string): string {
 
 function slotsAt(slots: TimetableSlot[], day: TimetableDayOfWeek, timeKey: string): TimetableSlot[] {
   const [start, end] = timeKey.split('|');
-  return slots.filter(
-    (slot) => slot.dayOfWeek === day && slot.startTime === start && slot.endTime === end,
+  return collapseCombinedSlots(
+    slots.filter((slot) => slot.dayOfWeek === day && slot.startTime === start && slot.endTime === end),
   );
+}
+
+function collapseCombinedSlots(slots: TimetableSlot[]): TimetableSlot[] {
+  const groups = new Map<string, TimetableSlot[]>();
+  const order: string[] = [];
+  for (const slot of slots) {
+    const key = `${slot.courseTitle.trim().toLowerCase()}|${slot.room.trim().toLowerCase()}|${slot.facultyId}`;
+    const list = groups.get(key);
+    if (list) {
+      list.push(slot);
+    } else {
+      groups.set(key, [slot]);
+      order.push(key);
+    }
+  }
+  return order.map((key) => {
+    const group = groups.get(key) ?? [];
+    const first = group[0];
+    if (!first || group.length === 1) return first!;
+    const names = [...new Set(group.map((slot) => slot.sectionName))];
+    return { ...first, sectionName: names.join(' + ') };
+  });
 }
 
 function TimetableCell({ slots }: { slots: TimetableSlot[] }) {
