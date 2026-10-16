@@ -190,7 +190,7 @@ export default function FacultyEnrollmentsPage() {
                     cell: (row) => (
                       <span className="flex items-center gap-2 text-sm">
                         <UserRound className="size-4 text-muted-foreground" aria-hidden />
-                        {row.studentId}
+                        {studentLabel(row.studentId)}
                       </span>
                     ),
                   },

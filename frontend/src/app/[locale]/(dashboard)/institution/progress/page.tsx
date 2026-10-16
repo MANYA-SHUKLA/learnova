@@ -164,7 +164,6 @@ export default function InstitutionProgressPage() {
                       {course.hours}h · {formatPercent(course.averageProgress)}
                     </p>
                   </div>
-                  <Badge variant="secondary">{formatPercent(course.averageProgress)}</Badge>
                 </div>
               ))
             )}
