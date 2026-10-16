@@ -714,6 +714,15 @@ export class ProgressRepository {
       },
       { $sort: { hours: -1 } },
       { $limit: 10 },
+      {
+        $lookup: {
+          from: 'courses',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'course',
+        },
+      },
+      { $unwind: { path: '$course', preserveNullAndEmptyArrays: true } },
     ]).exec();
 
     const total = agg?.total ?? 0;
@@ -735,12 +744,17 @@ export class ProgressRepository {
         averageProgress: number;
         count: number;
       }>,
-      mostActiveCourses: byCourse.map((c) => ({
-        courseId: String(c._id),
-        title: String(c._id),
-        hours: Math.round((c.hours ?? 0) * 10) / 10,
-        averageProgress: Math.round(c.averageProgress ?? 0),
-      })),
+      mostActiveCourses: byCourse.map((c) => {
+        const code = typeof c.course?.courseCode === 'string' ? c.course.courseCode : '';
+        const name = typeof c.course?.title === 'string' ? c.course.title : '';
+        const title = code && name ? `${code} — ${name}` : name || code || 'Course';
+        return {
+          courseId: String(c._id),
+          title,
+          hours: Math.round((c.hours ?? 0) * 10) / 10,
+          averageProgress: Math.round(c.averageProgress ?? 0),
+        };
+      }),
       progressTrend: [] as Array<{ date: string; averageProgress: number; hours: number }>,
       weeklyActivity: [] as Array<{ week: string; events: number; hours: number }>,
     };
