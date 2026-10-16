@@ -529,12 +529,12 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       ) : null}
 
       <Card className="timetable-no-print rounded-2xl shadow-soft-md">
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+        <CardHeader className="flex flex-row flex-nowrap items-center justify-between gap-4">
+          <div className="min-w-0">
             <CardTitle>{t('gridTitle')}</CardTitle>
             <CardDescription>{t('tableDescription')}</CardDescription>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex shrink-0 flex-nowrap items-center gap-2">
             {timetable ? <TimetableStatusBadge status={timetable.status} /> : null}
             <ExportMenu
               filename={`timetable-${selectedSemesterId || 'export'}`}
@@ -545,10 +545,11 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-nowrap items-center gap-3 overflow-x-auto">
             {isAdmin ? (
             <select
-              className="flex h-10 min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              aria-label={t('selectAcademicYear')}
+              className="flex h-10 w-40 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={selectedYearId}
               onChange={(e) => {
                 setAcademicYearId(e.target.value);
@@ -569,7 +570,8 @@ export function TimetablePage({ mode }: TimetablePageProps) {
             </select>
             ) : null}
             <select
-              className="flex h-10 min-w-[180px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              aria-label={t('selectSemester')}
+              className="flex h-10 w-56 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={selectedSemesterId}
               disabled={!isAdmin && publishedTimetablesQuery.isLoading}
               onChange={(e) => {
@@ -589,10 +591,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               )}
             </select>
             {isAdmin ? (
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium text-foreground">{t('columns.day')}</span>
               <select
-                className="flex h-10 min-w-[140px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                aria-label={t('columns.day')}
+                className="flex h-10 w-36 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 value={dayFilter}
                 onChange={(e) => {
                   setDayFilter(e.target.value as TimetableDayOfWeek | '');
@@ -606,10 +607,10 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                   </option>
                 ))}
               </select>
-            </label>
             ) : null}
             <select
-              className="flex h-10 min-w-[160px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              aria-label={t('allSections')}
+              className="flex h-10 w-40 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={sectionFilter}
               onChange={(e) => {
                 setSectionFilter(e.target.value);
@@ -624,7 +625,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               ))}
             </select>
             <Input
-              className="max-w-xs"
+              className="h-10 w-72 shrink-0"
               placeholder={t('searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
