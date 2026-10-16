@@ -6,13 +6,15 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { CourseSelect } from '@/components/shared/entity-selects';
-import { ErrorState } from '@/features/institution';
+import { displayName, ErrorState } from '@/features/institution';
+import { useStudentList } from '@/features/student';
 import { ReportExportMenu, useFacultyReport } from '@/features/reports';
 
 export default function FacultyReportsPage() {
   const t = useTranslations('dashboard.faculty.reports');
   const [courseId, setCourseId] = useState('');
   const reportQuery = useFacultyReport(courseId, Boolean(courseId));
+  const studentsQuery = useStudentList({ page: 1, limit: 200 });
   const data = reportQuery.data;
 
   return (
@@ -69,7 +71,10 @@ export default function FacultyReportsPage() {
               <div className="divide-y divide-border px-6 pb-6 text-sm">
                 {(data?.studentPerformance ?? []).slice(0, 30).map((row) => (
                   <div key={row.studentId} className="flex justify-between py-3">
-                    <span className="font-mono text-xs">{row.studentId.slice(-8)}</span>
+                    <span>
+                      {displayName(studentsQuery.data?.items, row.studentId, (student) => student.fullName) ??
+                        'Student'}
+                    </span>
                     <span className="text-muted-foreground">
                       {row.percentage ?? '—'}% · {row.letterGrade ?? '—'} · {row.result ?? '—'}
                     </span>

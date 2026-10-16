@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl';
 import { useState, useRef } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { SuccessPopup } from '@/components/shared/success-popup';
-import { ErrorState } from '@/features/institution';
+import { ErrorState, useOrgLabels } from '@/features/institution';
 import {
   formatStudentStatus,
   formatStudentGender,
@@ -31,6 +31,7 @@ import { ApiClientError } from '@/lib/api/client';
 export default function StudentProfilePage() {
   const t = useTranslations('common');
   const query = useMyStudentProfile();
+  const labels = useOrgLabels();
   const updateMutation = useUpdateMyStudentProfileMutation();
   const photoMutation = useStudentPhotoUploadMutation();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -324,8 +325,8 @@ export default function StudentProfilePage() {
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             {[
-              ['Program ID', student.programId],
-              ['Department ID', student.departmentId],
+              ['Program', labels.program(student.programId)],
+              ['Department', labels.department(student.departmentId)],
               ['Year of study', student.yearOfStudy?.toString()],
               ['Current semester', student.currentSemester?.toString()],
               ['Admission date', student.admissionDate?.slice(0, 10)],

@@ -60,6 +60,7 @@ export default function FacultyAssignmentsPage() {
     sortOrder: 'desc',
   });
   const lateQuery = useSubmissionList({ late: true, page: 1, limit: 10 });
+  const assignmentCatalog = useAssignmentList({ page: 1, limit: 100 });
   const publishMutation = usePublishAssignmentMutation();
   const gradeMutation = useGradeSubmissionMutation();
 
@@ -286,7 +287,10 @@ export default function FacultyAssignmentsPage() {
                     key={sub.id}
                     className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
                   >
-                    <span className="truncate">{sub.assignmentId}</span>
+                    <span className="truncate">
+                      {assignmentCatalog.data?.items.find((item) => item.id === sub.assignmentId)?.title ??
+                        'Assignment'}
+                    </span>
                     <Badge variant="danger">{t('late')}</Badge>
                   </div>
                 ))

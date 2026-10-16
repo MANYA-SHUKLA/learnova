@@ -5,7 +5,7 @@ import { Card, CardDescription, CardHeader, CardTitle, Skeleton } from '@learnov
 import { GraduationCap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { displayName, EmptyState, ErrorState, useSemesters } from '@/features/institution';
 import { useStudentGradebookDashboard } from '@/features/gradebook';
 import { gradebookApi } from '@/features/gradebook/services/gradebook-api';
 import { useQuery } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 export default function StudentSemesterPage() {
   const t = useTranslations('dashboard.student.gradebook');
   const dashQuery = useStudentGradebookDashboard();
+  const semestersCatalog = useSemesters({ limit: 50 });
   const semesterQuery = useQuery({
     queryKey: ['gradebook', 'semester'],
     queryFn: () => gradebookApi.semesterGrades(),
@@ -79,7 +80,10 @@ export default function StudentSemesterPage() {
             <div className="divide-y divide-border/60">
               {semesters.map((row) => (
                 <div key={row.id} className="flex items-center justify-between p-4 text-sm">
-                  <span>Semester {row.semesterId}</span>
+                  <span>
+                    {displayName(semestersCatalog.data?.items, row.semesterId, (semester) => semester.name) ??
+                      'Semester'}
+                  </span>
                   <span>
                     GPA {row.semesterGpa != null ? row.semesterGpa.toFixed(2) : '—'} ·{' '}
                     {row.earnedCredits}/{row.totalCredits} credits
