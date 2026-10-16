@@ -356,7 +356,7 @@ describe('timetable settler', () => {
   });
 
   it('schedules every odd-semester CSE and ECE class inside 3 rooms', () => {
-    const years: Array<Array<{ title: string; credits: number; lab?: boolean }>> = [
+    const years: { title: string; credits: number; lab?: boolean }[][] = [
       [
         { title: 'Engineering Mathematics I', credits: 4 },
         { title: 'Branch Subject A', credits: 3 },
@@ -389,7 +389,7 @@ describe('timetable settler', () => {
 
     let occupied: OccupiedSlot[] = [];
     for (const [index, subjects] of years.entries()) {
-      const year = 4 - index;
+      const year = String(4 - index);
       const courses: CourseRecord[] = [];
       const facultyRows: FacultyRecord[] = [
         { id: `cse-f-${year}`, name: `CSE ${year}`, departmentId: 'cse', specialization: null, courseIds: [] },

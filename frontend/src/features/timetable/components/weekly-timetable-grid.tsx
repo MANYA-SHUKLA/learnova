@@ -54,12 +54,13 @@ function collapseCombinedSlots(slots: TimetableSlot[]): TimetableSlot[] {
       order.push(key);
     }
   }
-  return order.map((key) => {
-    const group = groups.get(key) ?? [];
-    const first = group[0];
-    if (!first || group.length === 1) return first!;
+  return order.flatMap((key) => {
+    const group = groups.get(key);
+    const first = group?.[0];
+    if (!group || !first) return [];
+    if (group.length === 1) return [first];
     const names = [...new Set(group.map((slot) => slot.sectionName))];
-    return { ...first, sectionName: names.join(' + ') };
+    return [{ ...first, sectionName: names.join(' + ') }];
   });
 }
 

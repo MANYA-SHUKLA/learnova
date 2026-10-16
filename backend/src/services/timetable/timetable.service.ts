@@ -60,7 +60,10 @@ function collapseCombinedClasses<T extends TimetableTodayClass | {
       existing.sectionName = `${existing.sectionName} + ${item.sectionName}`;
     }
   }
-  return order.map((key) => groups.get(key)!);
+  return order.flatMap((key) => {
+    const row = groups.get(key);
+    return row ? [row] : [];
+  });
 }
 
 function requireTenant(actor: ActorContext): string {

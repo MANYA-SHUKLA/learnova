@@ -273,7 +273,7 @@ interface ClassMeeting {
   sessionsLeft: number;
   facultyId: string;
   preferLab: boolean;
-  members: Array<{ courseId: string; sectionId: string }>;
+  members: { courseId: string; sectionId: string }[];
 }
 
 function meetingBlocked(
@@ -302,6 +302,31 @@ function meetingBlocked(
       timesOverlap(slot.startTime, slot.endTime, startTime, endTime) &&
       (slot.facultyId === facultyId || slot.room.toLowerCase() === room.toLowerCase()),
   );
+}
+
+function freeRoomCount(
+  existing: SettledSlot[],
+  occupied: OccupiedSlot[],
+  dayOfWeek: TimetableDayOfWeek,
+  startTime: string,
+  endTime: string,
+): number {
+  return venuePool(false).filter((room) => {
+    const taken =
+      existing.some(
+        (slot) =>
+          slot.dayOfWeek === dayOfWeek &&
+          slot.room.toLowerCase() === room.toLowerCase() &&
+          timesOverlap(slot.startTime, slot.endTime, startTime, endTime),
+      ) ||
+      occupied.some(
+        (slot) =>
+          slot.dayOfWeek === dayOfWeek &&
+          slot.room.toLowerCase() === room.toLowerCase() &&
+          timesOverlap(slot.startTime, slot.endTime, startTime, endTime),
+      );
+    return !taken;
+  }).length;
 }
 
 function chooseMeetingRoom(
@@ -521,39 +546,40 @@ export function settleTimetable(input: SettleInput): SettleResult {
       proposed.room,
     );
     if (!room) continue;
-    placeMeeting(
-      meeting,
-      proposed.dayOfWeek,
-      proposed.startTime,
-      proposed.endTime,
-      room,
-      Boolean(proposed.room) && room.toLowerCase() !== proposed.room.toLowerCase(),
-    );
+    const proposedRoom = proposed.room;
+    const repaired = typeof proposedRoom === 'string' && room.toLowerCase() !== proposedRoom.toLowerCase();
+    placeMeeting(meeting, proposed.dayOfWeek, proposed.startTime, proposed.endTime, room, repaired);
   }
 
   const pending = [...meetings].sort(
     (a, b) => b.members.length - a.members.length || b.sessions - a.sessions,
   );
-  for (const day of workingDays) {
-    for (const period of periods) {
-      for (const meeting of pending) {
-        if (meeting.sessionsLeft <= 0) continue;
-        const sectionIds = meeting.members.map((member) => member.sectionId);
-        const room = chooseMeetingRoom(
-          slots,
-          occupied,
-          day,
-          period.startTime,
-          period.endTime,
-          meeting.facultyId,
-          sectionIds,
-          meeting.preferLab,
-        );
-        if (!room) continue;
-        placeMeeting(meeting, day, period.startTime, period.endTime, room, false);
+  const fillOpenPeriods = (minFreeRooms: number) => {
+    for (const day of workingDays) {
+      for (const period of periods) {
+        if (freeRoomCount(slots, occupied, day, period.startTime, period.endTime) < minFreeRooms) continue;
+        for (const meeting of pending) {
+          if (meeting.sessionsLeft <= 0) continue;
+          const sectionIds = meeting.members.map((member) => member.sectionId);
+          const room = chooseMeetingRoom(
+            slots,
+            occupied,
+            day,
+            period.startTime,
+            period.endTime,
+            meeting.facultyId,
+            sectionIds,
+            meeting.preferLab,
+          );
+          if (!room) continue;
+          placeMeeting(meeting, day, period.startTime, period.endTime, room, false);
+        }
       }
     }
-  }
+  };
+  // Keep both branches side by side while two rooms are free, then use leftover rooms.
+  fillOpenPeriods(2);
+  fillOpenPeriods(1);
 
   for (const meeting of pending) {
     if (meeting.sessionsLeft <= 0) continue;
@@ -562,7 +588,7 @@ export function settleTimetable(input: SettleInput): SettleResult {
       .filter(Boolean)
       .join(' + ');
     warnings.push(
-      `Could not place all sessions for ${meeting.title} (${sectionLabel}); ${meeting.sessionsLeft} left unscheduled`,
+      `Could not place all sessions for ${meeting.title} (${sectionLabel}); ${String(meeting.sessionsLeft)} left unscheduled`,
     );
   }
 
@@ -575,7 +601,7 @@ function buildClassMeetings(
   teachingMap: Map<string, string>,
   sectionById: Map<string, SectionRecord>,
 ): ClassMeeting[] {
-  const grouped = new Map<string, Array<{ courseId: string; sectionId: string; facultyId: string }>>();
+  const grouped = new Map<string, { courseId: string; sectionId: string; facultyId: string }[]>();
   const titles = new Map<string, string>();
   const sessions = new Map<string, number>();
   const labs = new Map<string, boolean>();
