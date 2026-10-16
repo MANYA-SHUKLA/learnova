@@ -18,7 +18,9 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { ErrorState } from '@/features/institution';
+import { displayName, ErrorState } from '@/features/institution';
+import { useCourseList } from '@/features/course';
+import { useStudentList } from '@/features/student';
 import {
   formatEnrollmentStatus,
   useApproveEnrollmentMutation,
@@ -57,6 +59,16 @@ export default function FacultyEnrollmentsPage() {
   );
 
   const listQuery = useEnrollmentList(params);
+  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const studentsQuery = useStudentList({ page: 1, limit: 200 });
+  const courseLabel = (id: string) =>
+    displayName(
+      coursesQuery.data?.items,
+      id,
+      (course) => `${course.courseCode} — ${course.title}`,
+    ) ?? '—';
+  const studentLabel = (id: string) =>
+    displayName(studentsQuery.data?.items, id, (student) => student.fullName) ?? '—';
   const approveMutation = useApproveEnrollmentMutation();
   const rejectMutation = useRejectEnrollmentMutation();
 
@@ -188,7 +200,7 @@ export default function FacultyEnrollmentsPage() {
                     cell: (row) => (
                       <span className="flex items-center gap-2 text-sm">
                         <BookOpen className="size-4 text-muted-foreground" aria-hidden />
-                        {row.courseId}
+                        {courseLabel(row.courseId)}
                       </span>
                     ),
                   },
@@ -248,7 +260,7 @@ export default function FacultyEnrollmentsPage() {
                         <Badge variant="secondary">{formatEnrollmentStatus(row.status)}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {row.studentId} · {row.courseId}
+                        {studentLabel(row.studentId)} · {courseLabel(row.courseId)}
                       </p>
                       {row.approvalStatus === 'pending' ? (
                         <PermissionGate permission={PERMISSIONS.ENROLLMENT_WRITE}>

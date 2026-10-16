@@ -22,7 +22,8 @@ import {
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { displayName, EmptyState, ErrorState } from '@/features/institution';
+import { useCourseList } from '@/features/course';
 import {
   ActivityTimeline,
   ContinueLearningCard,
@@ -50,6 +51,10 @@ export default function StudentProgressPage() {
   const resetFilters = useProgressStore((s) => s.resetFilters);
 
   const [submittedSearch, setSubmittedSearch] = useState('');
+  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const courseLabel = (id: string) =>
+    displayName(coursesQuery.data?.items, id, (course) => `${course.courseCode} — ${course.title}`) ??
+    'Course';
 
   const listParams = useMemo(
     () => ({
@@ -185,7 +190,7 @@ export default function StudentProgressPage() {
                         <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                           <div className="min-w-0 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="font-medium">{row.courseId}</p>
+                              <p className="font-medium">{courseLabel(row.courseId)}</p>
                               <Badge variant="secondary">
                                 {formatLearningStatus(row.status)}
                               </Badge>

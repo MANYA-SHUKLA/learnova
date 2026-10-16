@@ -16,7 +16,8 @@ import { Bookmark, Search, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { displayName, EmptyState, ErrorState } from '@/features/institution';
+import { useCourseList } from '@/features/course';
 import {
   formatBookmarkTarget,
   useBookmarks,
@@ -28,6 +29,10 @@ export default function StudentBookmarksPage() {
   const t = useTranslations('dashboard.student.progress.bookmarks');
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
+  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const courseLabel = (id: string) =>
+    displayName(coursesQuery.data?.items, id, (course) => `${course.courseCode} — ${course.title}`) ??
+    'Course';
 
   const params = useMemo(
     () => ({
@@ -105,7 +110,7 @@ export default function StudentBookmarksPage() {
                         <div className="min-w-0 space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <Bookmark className="size-4 text-primary" />
-                            <p className="font-medium">{item.courseId}</p>
+                            <p className="font-medium">{courseLabel(item.courseId)}</p>
                             <Badge variant="secondary">
                               {formatBookmarkTarget(item.targetType)}
                             </Badge>

@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
+import { useCourse } from '@/features/course';
 import {
   formatLearningStatus,
   formatMinutes,
@@ -34,6 +35,7 @@ export default function StudentCourseProgressPage() {
   const courseId = params.id;
 
   const courseQuery = useCourseProgress(courseId);
+  const courseRecord = useCourse(courseId);
   const resumeQuery = useResumePoint(courseId);
   const openLesson = useOpenLessonMutation();
   const completeLesson = useCompleteLessonMutation();
@@ -89,7 +91,11 @@ export default function StudentCourseProgressPage() {
               <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{detail.course.courseId}</p>
+                    <p className="font-medium">
+                      {courseRecord.data
+                        ? `${courseRecord.data.courseCode} — ${courseRecord.data.title}`
+                        : 'Course'}
+                    </p>
                     <Badge variant="secondary">
                       {formatLearningStatus(detail.course.status)}
                     </Badge>

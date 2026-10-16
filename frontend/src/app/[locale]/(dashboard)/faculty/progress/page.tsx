@@ -16,7 +16,8 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { CourseSelect } from '@/components/shared/entity-selects';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { displayName, EmptyState, ErrorState } from '@/features/institution';
+import { useStudentList } from '@/features/student';
 import { useCourseList } from '@/features/course';
 import {
   ProgressStatCards,
@@ -29,6 +30,9 @@ export default function FacultyProgressPage() {
   const [courseId, setCourseId] = useState('');
 
   const coursesQuery = useCourseList({ page: 1, limit: 50, sortBy: 'title', sortOrder: 'asc' });
+  const studentsQuery = useStudentList({ page: 1, limit: 200 });
+  const studentLabel = (id: string) =>
+    displayName(studentsQuery.data?.items, id, (student) => student.fullName) ?? 'Student';
   const courses = coursesQuery.data?.items ?? [];
 
   useEffect(() => {
@@ -139,7 +143,7 @@ export default function FacultyProgressPage() {
                         key={learner.studentId}
                         className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2.5"
                       >
-                        <p className="truncate text-sm font-medium">{learner.studentId}</p>
+                        <p className="truncate text-sm font-medium">{studentLabel(learner.studentId)}</p>
                         <Badge variant="secondary">
                           {formatPercent(learner.progressPercentage)}
                         </Badge>
@@ -168,7 +172,7 @@ export default function FacultyProgressPage() {
                         className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2.5"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{learner.studentId}</p>
+                          <p className="truncate text-sm font-medium">{studentLabel(learner.studentId)}</p>
                           <p className="text-xs text-muted-foreground">
                             {learner.lastAccessedAt
                               ? learner.lastAccessedAt.slice(0, 10)

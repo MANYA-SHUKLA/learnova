@@ -15,7 +15,8 @@ import { NotebookPen, Search, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { EmptyState, ErrorState } from '@/features/institution';
+import { displayName, EmptyState, ErrorState } from '@/features/institution';
+import { useCourseList } from '@/features/course';
 import {
   useDeleteNoteMutation,
   useNotes,
@@ -30,6 +31,10 @@ export default function StudentNotesPage() {
   const [search, setSearch] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
+  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const courseLabel = (id: string) =>
+    displayName(coursesQuery.data?.items, id, (course) => `${course.courseCode} — ${course.title}`) ??
+    'Course';
 
   const params = useMemo(
     () => ({
@@ -121,7 +126,7 @@ export default function StudentNotesPage() {
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <NotebookPen className="size-4 text-primary" />
-                            <p className="text-sm font-medium">{item.courseId}</p>
+                            <p className="text-sm font-medium">{courseLabel(item.courseId)}</p>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             {item.updatedAt.slice(0, 10)}
