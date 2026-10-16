@@ -14,7 +14,10 @@ import {
 import { ArrowLeft, BookOpen, Calendar, CheckCircle2, UserRound, XCircle } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { ErrorState } from '@/features/institution';
+import { ErrorState, useOrgLabels } from '@/features/institution';
+import { useCourse } from '@/features/course';
+import { useFaculty } from '@/features/faculty';
+import { useStudent } from '@/features/student';
 import {
   formatEnrollmentApprovalStatus,
   formatEnrollmentCompletionStatus,
@@ -33,6 +36,10 @@ export default function EnrollmentDetailPage() {
   const id = typeof params['id'] === 'string' ? params['id'] : '';
   const query = useEnrollment(id);
   const enrollment = query.data;
+  const labels = useOrgLabels();
+  const studentQuery = useStudent(enrollment?.studentId ?? '', Boolean(enrollment?.studentId));
+  const courseQuery = useCourse(enrollment?.courseId ?? '', Boolean(enrollment?.courseId));
+  const facultyQuery = useFaculty(enrollment?.facultyId ?? '', Boolean(enrollment?.facultyId));
 
   const approveMutation = useApproveEnrollmentMutation();
   const rejectMutation = useRejectEnrollmentMutation();
@@ -103,7 +110,14 @@ export default function EnrollmentDetailPage() {
             <CardTitle className="text-base">Student information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <InfoRow icon={UserRound} label="Student ID" value={enrollment.studentId} />
+            <InfoRow
+              icon={UserRound}
+              label="Student"
+              value={studentQuery.data?.fullName ?? '—'}
+            />
+            {studentQuery.data?.studentId ? (
+              <InfoRow label="Student ID" value={studentQuery.data.studentId} />
+            ) : null}
             <InfoRow
               icon={Calendar}
               label="Enrollment date"
@@ -122,12 +136,20 @@ export default function EnrollmentDetailPage() {
             <CardTitle className="text-base">Course information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <InfoRow icon={BookOpen} label="Course ID" value={enrollment.courseId} />
+            <InfoRow
+              icon={BookOpen}
+              label="Course"
+              value={
+                courseQuery.data
+                  ? `${courseQuery.data.courseCode} — ${courseQuery.data.title}`
+                  : '—'
+              }
+            />
             {enrollment.facultyId ? (
-              <InfoRow icon={UserRound} label="Faculty ID" value={enrollment.facultyId} />
+              <InfoRow icon={UserRound} label="Faculty" value={facultyQuery.data?.fullName ?? '—'} />
             ) : null}
             {enrollment.sectionId ? (
-              <InfoRow label="Section ID" value={enrollment.sectionId} />
+              <InfoRow label="Section" value={labels.section(enrollment.sectionId) ?? '—'} />
             ) : null}
           </CardContent>
         </Card>
@@ -138,16 +160,16 @@ export default function EnrollmentDetailPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {enrollment.departmentId ? (
-              <InfoRow label="Department ID" value={enrollment.departmentId} />
+              <InfoRow label="Department" value={labels.department(enrollment.departmentId) ?? '—'} />
             ) : null}
             {enrollment.programId ? (
-              <InfoRow label="Program ID" value={enrollment.programId} />
+              <InfoRow label="Program" value={labels.program(enrollment.programId) ?? '—'} />
             ) : null}
             {enrollment.academicYearId ? (
-              <InfoRow label="Academic Year ID" value={enrollment.academicYearId} />
+              <InfoRow label="Academic year" value={labels.year(enrollment.academicYearId) ?? '—'} />
             ) : null}
             {enrollment.semesterId ? (
-              <InfoRow label="Semester ID" value={enrollment.semesterId} />
+              <InfoRow label="Semester" value={labels.semester(enrollment.semesterId) ?? '—'} />
             ) : null}
             {!enrollment.departmentId &&
             !enrollment.programId &&

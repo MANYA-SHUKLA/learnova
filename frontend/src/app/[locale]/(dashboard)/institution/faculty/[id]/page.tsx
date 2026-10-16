@@ -259,25 +259,30 @@ export default function FacultyDetailPage() {
           ['Highest qualification', faculty.highestQualification],
           ['Specialization', faculty.specialization],
           ['Research areas', faculty.researchAreas.join(', ')],
-          ['Institution ID', faculty.institutionId],
-          ['Campus ID', faculty.campusId],
-          ['School ID', faculty.schoolId],
-          ['Department ID', faculty.departmentId],
-          ['Academic year ID', faculty.academicYearId],
-          ['Semester ID', faculty.semesterId],
+          ['Campus', labels.campus(faculty.campusId)],
+          ['School', labels.school(faculty.schoolId)],
+          ['Department', labels.department(faculty.departmentId)],
+          ['Academic year', labels.year(faculty.academicYearId)],
+          ['Semester', labels.semester(faculty.semesterId)],
         ])}
 
         {section('Assignments', [
-          ['Assigned department', faculty.departmentId],
-          ['Assigned programs', faculty.programIds.join(', ') || 'None'],
+          ['Assigned department', labels.department(faculty.departmentId)],
+          ['Assigned programs', faculty.programIds.length ? labels.programs(faculty.programIds) : 'None'],
           [
             'Assigned courses',
-            faculty.courseIds.length > 0
-              ? faculty.courseIds.join(', ')
-              : 'Placeholder — available when Courses module ships',
+            faculty.courseIds.length
+              ? faculty.courseIds
+                  .map((courseId) => {
+                    const course = coursesQuery.data?.items.find((row) => row.id === courseId);
+                    return course ? `${course.courseCode} — ${course.title}` : null;
+                  })
+                  .filter(Boolean)
+                  .join(', ') || null
+              : 'None',
           ],
-          ['Academic year', faculty.academicYearId],
-          ['Semester', faculty.semesterId],
+          ['Academic year', labels.year(faculty.academicYearId)],
+          ['Semester', labels.semester(faculty.semesterId)],
         ])}
 
         {section('Office & contact', [
