@@ -7,8 +7,6 @@ import { io, type Socket } from 'socket.io-client';
 import { useAuth } from '@/providers/auth-provider';
 import { notificationKeys } from '../hooks/use-notification-queries';
 
-let socket: Socket | null = null;
-
 export function useNotificationSocket() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -16,23 +14,28 @@ export function useNotificationSocket() {
   useEffect(() => {
     if (!user?.id) return;
 
+    let socket: Socket | null = null;
     const baseUrl = process.env['NEXT_PUBLIC_API_URL'] ?? '';
-    socket = io(`${baseUrl}${SOCKET_NAMESPACES.NOTIFICATIONS}`, {
-      withCredentials: true,
-      transports: ['websocket', 'polling'],
-    });
+    // Wait past React's development setup/cleanup so the handshake is not aborted.
+    const timer = window.setTimeout(() => {
+      socket = io(`${baseUrl}${SOCKET_NAMESPACES.NOTIFICATIONS}`, {
+        withCredentials: true,
+        transports: ['polling', 'websocket'],
+        reconnection: true,
+      });
 
-    socket.on('connect', () => {
-      socket?.emit('join', { userId: user.id });
-    });
+      socket.on('connect', () => {
+        socket?.emit('join', { userId: user.id });
+      });
 
-    socket.on('notification.new', () => {
-      void qc.invalidateQueries({ queryKey: notificationKeys.all });
-    });
+      socket.on('notification.new', () => {
+        void qc.invalidateQueries({ queryKey: notificationKeys.all });
+      });
+    }, 0);
 
     return () => {
+      window.clearTimeout(timer);
       socket?.disconnect();
-      socket = null;
     };
   }, [user?.id, qc]);
 }
