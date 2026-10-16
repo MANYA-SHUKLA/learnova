@@ -148,7 +148,7 @@ export default function StudentEnrollmentsPage() {
                     cell: (row) => (
                       <span className="flex items-center gap-2 text-sm">
                         <BookOpen className="size-4 text-muted-foreground" aria-hidden />
-                        {row.courseId}
+                        {courseLabel(row.courseId)}
                       </span>
                     ),
                   },
@@ -198,7 +198,7 @@ export default function StudentEnrollmentsPage() {
                         </div>
                         <Badge variant="secondary">{formatEnrollmentStatus(row.status)}</Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground">Course: {row.courseId}</p>
+                      <p className="text-sm text-muted-foreground">Course: {courseLabel(row.courseId)}</p>
                       {row.status === 'active' || row.status === 'approved' ? (
                         <PermissionGate permission={PERMISSIONS.ENROLLMENT_WRITE}>
                           <Button
@@ -238,7 +238,7 @@ export default function StudentEnrollmentsPage() {
                   {
                     id: 'course',
                     header: 'Course',
-                    cell: (row) => <span className="font-medium">{row.courseId}</span>,
+                    cell: (row) => <span className="font-medium">{courseLabel(row.courseId)}</span>,
                   },
                   {
                     id: 'position',
@@ -268,7 +268,7 @@ export default function StudentEnrollmentsPage() {
                   <Card className="rounded-xl">
                     <CardContent className="flex items-center justify-between gap-4 p-4">
                       <div>
-                        <p className="font-medium">Course: {row.courseId}</p>
+                        <p className="font-medium">{courseLabel(row.courseId)}</p>
                         <p className="text-xs text-muted-foreground">
                           Position {row.position} · {row.requestedAt.slice(0, 10)}
                         </p>
