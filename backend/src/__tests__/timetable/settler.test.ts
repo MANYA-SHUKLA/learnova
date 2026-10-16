@@ -165,6 +165,41 @@ describe('timetable settler', () => {
     expect(facultyClashes).toHaveLength(0);
   });
 
+  it('does not reuse a teacher who already teaches the other term', () => {
+    const shared: CourseRecord = {
+      ...courses[0]!,
+      id: 'c-shared',
+      facultyIds: ['f1', 'f2'],
+      coordinatorId: 'f1',
+    };
+    const map = extractTeachingMap([shared], faculty, { avoidFacultyIds: new Set(['f1']) });
+    expect(map.get('c-shared')).toBe('f2');
+
+    const result = settleTimetable({
+      courses: [shared],
+      faculty,
+      sections: [sections[0]!],
+      workingDays: ['mon'],
+      periods: [
+        { startTime: '09:00', endTime: '10:00' },
+        { startTime: '10:00', endTime: '11:00' },
+      ],
+      avoidFacultyIds: ['f1'],
+      occupied: [
+        {
+          dayOfWeek: 'mon',
+          startTime: '09:00',
+          endTime: '10:00',
+          facultyId: 'f2',
+          room: 'ELC Class 1',
+        },
+      ],
+    });
+    expect(result.assignments[0]?.facultyId).toBe('f2');
+    expect(result.slots.some((slot) => slot.facultyId === 'f2' && slot.startTime === '09:00')).toBe(false);
+    expect(result.slots.some((slot) => slot.facultyId === 'f2' && slot.startTime === '10:00')).toBe(true);
+  });
+
   it('does not schedule a course into a section of another program', () => {
     const result = settleTimetable({
       courses: [courses[0]!],

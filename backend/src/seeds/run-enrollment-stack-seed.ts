@@ -195,14 +195,14 @@ async function main(): Promise<void> {
     }).lean();
     if (!semester) {
       const term = i % 2 === 1 ? ('odd' as const) : ('even' as const);
-      // Pair semesters into academic-year halves: odd = Jul–Dec, even = Jan–Jun
+      // One term at a time. Odd = July–December, even = January–May. Years 1–4 share a term.
       const pair = Math.floor((i - 1) / 2);
       const semStart =
         term === 'odd' ? new Date(2025 + pair, 6, 1) : new Date(2026 + pair, 0, 1);
       const semEnd =
         term === 'odd'
           ? new Date(semStart.getFullYear(), 11, 31)
-          : new Date(semStart.getFullYear(), 5, 30);
+          : new Date(semStart.getFullYear(), 4, 31);
 
       const created = await SemesterModel.create({
         institutionId: institutionOid,

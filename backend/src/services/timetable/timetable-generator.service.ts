@@ -54,6 +54,8 @@ function facultyDisplayName(row: {
 function buildPrompt(input: {
   semesterName: string;
   academicYearName: string;
+  classYear: number;
+  termLabel: string;
   notes?: string;
   workingDays: string[];
   periods: Array<{ startTime: string; endTime: string }>;
@@ -62,6 +64,8 @@ function buildPrompt(input: {
   sections: SectionRecord[];
   departments: Map<string, string>;
   assigned: Array<{ courseId: string; facultyId: string }>;
+  avoidFacultyIds: string[];
+  occupied: Array<{ dayOfWeek: string; startTime: string; endTime: string; facultyId: string; room: string }>;
 }): string {
   const compactFaculty = input.faculty.map((row) => ({
     id: row.id,
@@ -85,7 +89,7 @@ function buildPrompt(input: {
 
   return [
     'You are scheduling a college weekly class timetable for ONE semester only.',
-    `Semester: ${input.semesterName}. Academic year: ${input.academicYearName}.`,
+    `Semester: ${input.semesterName}. Class year ${input.classYear} of 4. Term window: ${input.termLabel}. Academic year: ${input.academicYearName}.`,
     'Class years are 1 to 4. Odd semesters (1, 3, 5, 7) run July–December. Even semesters (2, 4, 6, 8) run January–May.',
     'Do not place Semester 1 and Semester 2, or any odd semester with an even semester, in this timetable.',
     'A teacher must not be used for both the odd term and the even term. Honor assignedFacultyId. If it is null, pick a teacher who is not already teaching the other term.',
@@ -107,6 +111,8 @@ function buildPrompt(input: {
       faculty: compactFaculty,
       courses: compactCourses,
       sections: compactSections,
+      doNotAssignFacultyIds: input.avoidFacultyIds,
+      busySlots: input.occupied,
     }),
   ]
     .filter(Boolean)
@@ -222,7 +228,72 @@ export class TimetableGeneratorService {
     const workingDays = uniqueDays(DEFAULT_WORKING_DAYS);
     const periods = DEFAULT_PERIODS;
 
-    const extracted = extractTeachingMap(courses, faculty);
+    const otherTerm = oppositeTerm(String(semester.term));
+    const otherTermSemesters = otherTerm
+      ? await SemesterModel.find({
+          institutionId: oid(institutionId),
+          academicYearId: semester.academicYearId,
+          term: otherTerm,
+          deletedAt: null,
+        })
+          .select('_id')
+          .lean()
+          .exec()
+      : [];
+    const otherTermCourses =
+      otherTermSemesters.length === 0
+        ? []
+        : await CourseModel.find({
+            institutionId: oid(institutionId),
+            deletedAt: null,
+            semesterIds: { $in: otherTermSemesters.map((row) => row._id) },
+          })
+            .select('coordinatorId facultyIds')
+            .lean()
+            .exec();
+    const avoidFacultyIds = [
+      ...new Set(
+        otherTermCourses.flatMap((row) => {
+          const primary = row.coordinatorId ?? row.facultyIds?.[0];
+          return primary ? [String(primary)] : [];
+        }),
+      ),
+    ];
+
+    const sameTermSemesters = await SemesterModel.find({
+      institutionId: oid(institutionId),
+      academicYearId: semester.academicYearId,
+      term: semester.term,
+      _id: { $ne: semester._id },
+      status: 'active',
+      deletedAt: null,
+    })
+      .select('_id')
+      .lean()
+      .exec();
+    const occupiedDocs =
+      sameTermSemesters.length === 0
+        ? []
+        : await TimetableSlotModel.find({
+            institutionId: oid(institutionId),
+            semesterId: { $in: sameTermSemesters.map((row) => row._id) },
+            status: 'active',
+            deletedAt: null,
+          })
+            .select('dayOfWeek startTime endTime facultyId room')
+            .lean()
+            .exec();
+    const occupied = occupiedDocs.map((row) => ({
+      dayOfWeek: row.dayOfWeek as string,
+      startTime: row.startTime as string,
+      endTime: row.endTime as string,
+      facultyId: String(row.facultyId),
+      room: row.room as string,
+    }));
+
+    const extracted = extractTeachingMap(courses, faculty, {
+      avoidFacultyIds: new Set(avoidFacultyIds),
+    });
     const assigned = [...extracted.entries()].map(([courseId, facultyId]) => ({
       courseId,
       facultyId,
@@ -237,6 +308,8 @@ export class TimetableGeneratorService {
         prompt: buildPrompt({
           semesterName: semester.name,
           academicYearName: academicYear?.name ?? semesterYearId,
+          classYear: classYearForSemesterNumber(Number(semester.number)),
+          termLabel: semesterWindowLabel(String(semester.term)),
           notes: input.notes,
           workingDays,
           periods,
@@ -245,6 +318,8 @@ export class TimetableGeneratorService {
           sections,
           departments,
           assigned,
+          avoidFacultyIds,
+          occupied,
         }),
         maxOutputTokens: 8192,
       });
@@ -262,6 +337,8 @@ export class TimetableGeneratorService {
       periods,
       geminiAssignments: proposal.assignments,
       proposedSlots: proposal.slots,
+      avoidFacultyIds,
+      occupied,
     });
 
     if (settled.slots.length === 0) {

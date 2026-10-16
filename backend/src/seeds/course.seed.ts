@@ -150,15 +150,8 @@ export async function seedCourses(institutionId: string, refs: SeedRefs): Promis
         availablePrograms.splice(idx, 1);
       }
 
-      // Randomly assign 1-2 semesters
-      const numSemesters = randomInt(1, Math.min(2, refs.semesterIds.length));
-      const semesterIds = [];
-      const availableSemesters = [...refs.semesterIds];
-      for (let i = 0; i < numSemesters; i++) {
-        const idx = randomInt(0, availableSemesters.length - 1);
-        semesterIds.push(new Types.ObjectId(availableSemesters[idx]!));
-        availableSemesters.splice(idx, 1);
-      }
+      // One semester only. Odd and even terms never share a course.
+      const semesterIds = [new Types.ObjectId(randomItem(refs.semesterIds))];
 
       // Randomly assign 1-3 faculty
       const numFaculty = randomInt(1, Math.min(3, refs.facultyIds.length));
