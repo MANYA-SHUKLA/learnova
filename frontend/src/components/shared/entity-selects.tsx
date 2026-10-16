@@ -78,7 +78,7 @@ export function CourseSelect({
   label = 'Course',
   listParams,
   excludeIds,
-  limit = DEFAULT_LIST_LIMIT,
+  limit = 100,
   value,
   onChange,
   ...props

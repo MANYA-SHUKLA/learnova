@@ -3,6 +3,7 @@
 import { Input, Spinner } from '@learnova/ui';
 import { Check, ChevronDown } from 'lucide-react';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
 export interface SearchableSelectOption {
@@ -36,7 +37,7 @@ const triggerClassName =
   'flex h-10 w-full items-center gap-2 rounded-xl border border-input bg-background px-3 py-2 text-left text-sm shadow-sm transition-all duration-200 ease-out hover:border-primary/40 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 
 const panelClassName =
-  'absolute left-0 right-0 top-[calc(100%+0.375rem)] z-50 overflow-hidden rounded-xl border border-border/80 bg-popover shadow-lg ring-1 ring-black/5';
+  'z-50 overflow-hidden rounded-xl border border-border/80 bg-popover shadow-lg ring-1 ring-black/5';
 
 const optionClassName =
   'group flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-all duration-150 ease-out hover:bg-primary/10 hover:pl-4';
@@ -63,7 +64,13 @@ export function SearchableSelect({
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
   const [panelVisible, setPanelVisible] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<{ top: number; left: number; width: number }>({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
   const containerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
 
@@ -107,6 +114,19 @@ export function SearchableSelect({
     }, 150);
   };
 
+  const placePanel = () => {
+    const trigger = containerRef.current?.querySelector('button');
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    const estimatedHeight = visibleRows * 40 + 64;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const top =
+      spaceBelow < estimatedHeight && rect.top > spaceBelow
+        ? Math.max(8, rect.top - estimatedHeight - 6)
+        : rect.bottom + 6;
+    setPanelStyle({ top, left: rect.left, width: rect.width });
+  };
+
   const openDropdown = () => {
     if (isDisabled || open) return;
     setOpen(true);
@@ -130,9 +150,9 @@ export function SearchableSelect({
     const focusTimer = window.setTimeout(() => searchRef.current?.focus(), 0);
 
     const handlePointerDown = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        closeDropdown();
-      }
+      const target = event.target as Node;
+      if (containerRef.current?.contains(target) || panelRef.current?.contains(target)) return;
+      closeDropdown();
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -141,14 +161,19 @@ export function SearchableSelect({
       }
     };
 
+    placePanel();
+    window.addEventListener('resize', placePanel);
+    window.addEventListener('scroll', placePanel, true);
     document.addEventListener('mousedown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       window.clearTimeout(focusTimer);
+      window.removeEventListener('resize', placePanel);
+      window.removeEventListener('scroll', placePanel, true);
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open]);
+  }, [open, visibleRows]);
 
   return (
     <div className={cn('space-y-1.5', className)}>
@@ -191,8 +216,11 @@ export function SearchableSelect({
           )}
         </button>
 
-        {open ? (
+        {open
+          ? createPortal(
           <div
+            ref={panelRef}
+            style={{ position: 'fixed', top: panelStyle.top, left: panelStyle.left, width: panelStyle.width }}
             className={cn(
               panelClassName,
               'origin-top transition-all duration-200 ease-out',
@@ -272,8 +300,10 @@ export function SearchableSelect({
                 })
               )}
             </ul>
-          </div>
-        ) : null}
+          </div>,
+          document.body,
+        )
+          : null}
       </div>
     </div>
   );
