@@ -137,6 +137,7 @@ export async function SiteFooter({
                 links={[
                   { href: '/about', label: t('companyLinks.about') },
                   { href: '/contact', label: t('companyLinks.contact') },
+                  { href: '/login', label: t('companyLinks.institutionLogin') },
                 ]}
               />
             </>

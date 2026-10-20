@@ -5,13 +5,13 @@ const SINGLETON_KEY = 'default';
 
 function defaultMarketing(): PlatformMarketingInput {
   return {
-    heroTitle: 'Learnova — campus ERP, LMS, and exams in one place',
+    heroTitle: 'Run your college on one live academic stack',
     heroSubtitle:
-      'Run programs, sections, timetables, assignments, quizzes, examinations, and gradebook work on one stack. Each college gets a branded portal at a short URL (for example /soe) where students and faculty sign in with institute-issued accounts.',
+      'Timetables, courses, coding labs, exams, and gradebook tied to real sections — plus a branded portal at a short URL your campus can share on day one.',
     heroCtaLabel: 'Request a demo',
     features: [
       {
-        title: 'Registrar-friendly structure',
+        title: 'Registration-friendly structure',
         body: 'Departments, programs, academic years, semesters, batches, and sections — configured once and reused across timetables and enrollments.',
       },
       {

@@ -12,13 +12,17 @@ import {
   LineChart,
   ShieldCheck,
   Sparkles,
+  ArrowRight,
+  LayoutGrid,
+  CheckCircle2,
+  Package,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { publicApi } from '@/features/public/services/public-api';
 import { siteContainer } from '@/lib/layout';
-import { ctaButtonClass } from '@/lib/cta';
+import { ctaButtonClass, platformHeroPrimaryClass, platformHeroSecondaryClass } from '@/lib/cta';
 import { ApiClientError } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
 import type { PlatformMarketingI18nOverlay } from '@/lib/platform-marketing-i18n';
@@ -69,7 +73,7 @@ export function PlatformHomePage({
   marketingI18n,
 }: {
   /** Resolved on the server from locale — overrides English CMS fields for hi/te. */
-  marketingI18n?: PlatformMarketingI18nOverlay;
+  marketingI18n: PlatformMarketingI18nOverlay;
 }) {
   const t = useTranslations('marketing.landing');
   const tPlatform = useTranslations('marketing.platformHome');
@@ -126,48 +130,82 @@ export function PlatformHomePage({
     );
   }
 
-  const heroTitle = marketingI18n?.heroTitle ?? marketing.heroTitle;
-  const heroSubtitle = marketingI18n?.heroSubtitle ?? marketing.heroSubtitle;
-  const heroCtaLabel = marketingI18n?.heroCtaLabel ?? marketing.heroCtaLabel ?? tPlatform('requestDemo');
+  const heroEyebrow = marketingI18n.heroEyebrow;
+  const heroTitle = marketingI18n.heroTitle;
+  const heroSubtitle = marketingI18n.heroSubtitle;
+  const heroTagline = marketingI18n.heroTagline;
+  const heroCtaLabel = marketingI18n.heroCtaLabel;
 
-  const highlightFeatures = marketingI18n?.highlights.length
-    ? marketingI18n.highlights
-    : marketing.features;
+  const highlightFeatures =
+    marketingI18n.highlights.length > 0 ? marketingI18n.highlights : marketing.features;
 
-  const pricingTitle = marketingI18n?.pricingTitle ?? marketing.pricingTitle ?? tPlatform('pricingTitle');
-  const pricingBody = marketingI18n?.pricingBody ?? marketing.pricingBody;
+  const pricingTitle = marketingI18n.pricingTitle ?? marketing.pricingTitle ?? tPlatform('pricingTitle');
+  const pricingBody = marketingI18n.pricingBody ?? marketing.pricingBody;
 
   const messageFaqs = platformFaqFromMessages(tPlatform);
   const faqItems = messageFaqs.length > 0 ? messageFaqs : marketing.faq;
 
   const outcomeKeys = ['outcome1', 'outcome2', 'outcome3', 'outcome4'] as const;
   const testimonialKeys = ['testimonial1', 'testimonial2', 'testimonial3', 'testimonial4'] as const;
+  const buyerKeys = ([1, 2, 3, 4, 5, 6] as const).filter((i) =>
+    tPlatform.has(`buyer${i}` as Parameters<typeof tPlatform>[0]),
+  );
 
   return (
     <main className="overflow-x-clip font-body">
-      {/* Hero — clean, Google-inspired spacing */}
-      <section className="relative border-b border-border/60 bg-background pb-20 pt-16 sm:pb-28 sm:pt-24">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,hsl(var(--primary)/0.12),transparent)]"
-        />
-        <div className={siteContainer('relative mx-auto max-w-4xl text-center')}>
-          <p className="text-sm font-medium tracking-wide text-primary">{t('hero.brand')}</p>
-          <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-            {heroTitle}
+      {/* Hero */}
+      <section className="relative isolate overflow-hidden border-b border-border/60 bg-background pb-16 pt-14 sm:pb-24 sm:pt-20 lg:pb-28 lg:pt-24">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-30%,hsl(var(--primary)/0.18),transparent_55%)]" />
+          <div className="absolute -left-[20%] top-1/4 size-[min(480px,70vw)] rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute -right-[15%] top-0 size-[min(420px,60vw)] rounded-full bg-violet-500/10 blur-3xl dark:bg-violet-400/10" />
+          <div
+            className="absolute inset-0 opacity-[0.35] dark:opacity-[0.2]"
+            style={{
+              backgroundImage:
+                'linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / 0.35) 1px, transparent 1px)',
+              backgroundSize: '48px 48px',
+              maskImage: 'radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent)',
+            }}
+          />
+        </div>
+        <div className={siteContainer('relative mx-auto max-w-5xl text-center')}>
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.07] px-4 py-1.5 shadow-sm backdrop-blur-sm">
+            <Sparkles className="size-3.5 text-primary" aria-hidden />
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+              {heroEyebrow}
+            </span>
+          </div>
+          <h1 className="mt-8 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.35rem] lg:leading-[1.06]">
+            <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/65 bg-clip-text text-transparent">
+              {heroTitle}
+            </span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl sm:leading-relaxed">
             {heroSubtitle}
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button asChild size="lg" className={cn('h-12 px-8 text-base', ctaButtonClass)}>
-              <a href="#request-demo">{heroCtaLabel}</a>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
+            <Button asChild size="lg" className={platformHeroPrimaryClass}>
+              <a href="#request-demo" className="group inline-flex items-center gap-2">
+                {heroCtaLabel}
+                <ArrowRight
+                  className="size-4 transition-transform duration-300 group-hover:translate-x-1"
+                  aria-hidden
+                />
+              </a>
             </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base">
-              <a href="#modules">{tPlatform('exploreModules')}</a>
+            <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
+              <a href="#modules" className="inline-flex items-center gap-2">
+                <LayoutGrid className="size-4 opacity-80" aria-hidden />
+                {tPlatform('exploreModules')}
+              </a>
             </Button>
           </div>
-          <p className="mt-8 text-sm text-muted-foreground">{t('hero.subtitle')}</p>
+          {heroTagline ? (
+            <p className="mx-auto mt-10 max-w-xl rounded-2xl border border-border/60 bg-card/50 px-5 py-3 text-sm font-medium leading-relaxed text-muted-foreground shadow-sm backdrop-blur-sm">
+              {heroTagline}
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -197,6 +235,61 @@ export function PlatformHomePage({
           ))}
         </div>
       </section>
+
+      {buyerKeys.length > 0 ? (
+        <section
+          id="package"
+          className="scroll-mt-24 border-b border-border/60 bg-gradient-to-b from-primary/[0.06] via-muted/25 to-background py-20 sm:py-24"
+        >
+          <div className={siteContainer('max-w-6xl')}>
+            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-center lg:gap-16">
+              <div className="text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/80 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+                  <Package className="size-3.5" aria-hidden />
+                  {tPlatform('buyerEyebrow')}
+                </div>
+                <h2 className="mt-5 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+                  {tPlatform('buyerTitle')}
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                  {tPlatform('buyerSubtitle')}
+                </p>
+                <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
+                  <Button asChild size="lg" className={platformHeroPrimaryClass}>
+                    <a href="#request-demo" className="group inline-flex items-center gap-2">
+                      {tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
+                    <a href="#modules">{tPlatform('exploreModules')}</a>
+                  </Button>
+                </div>
+              </div>
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {buyerKeys.map((i) => (
+                  <li
+                    key={i}
+                    className={cn(
+                      'flex gap-3 rounded-2xl border border-border/80 bg-card/90 p-4 shadow-sm backdrop-blur-sm',
+                      marketingCardHover,
+                      'overflow-visible hover:scale-[1.02] motion-reduce:hover:scale-100',
+                    )}
+                  >
+                    <CheckCircle2
+                      className="mt-0.5 size-5 shrink-0 text-primary transition-transform duration-300 group-hover:scale-110 motion-reduce:group-hover:scale-100"
+                      aria-hidden
+                    />
+                    <span className="text-sm font-medium leading-snug text-foreground">
+                      {tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0])}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* Eight modules */}
       <section id="modules" className={siteContainer('scroll-mt-24 py-20 sm:py-28')}>
@@ -271,24 +364,31 @@ export function PlatformHomePage({
           <h2 className="font-display text-3xl font-bold">{tPlatform('howItWorksTitle')}</h2>
           <p className="mt-4 text-muted-foreground">{tPlatform('howItWorksSubtitle')}</p>
         </div>
-        <ol className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
+        <ol className="mx-auto mt-12 grid max-w-4xl list-none gap-6 sm:grid-cols-3">
           {(['step1', 'step2', 'step3'] as const).map((step, i) => (
             <li
               key={step}
               className={cn(
-                'relative rounded-2xl border border-border bg-card p-6 pt-8 shadow-sm',
+                'rounded-2xl border border-border bg-card p-6 shadow-sm',
                 marketingCardHover,
-                'hover:scale-[1.03] motion-reduce:hover:scale-100',
+                'overflow-visible hover:scale-[1.03] motion-reduce:hover:scale-100',
               )}
             >
-              <span className="absolute -top-3 left-6 z-[2] flex size-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/30 motion-reduce:group-hover:scale-100">
-                {i + 1}
-              </span>
-              <div className={marketingCardInner}>
-                <h3 className="font-semibold transition-colors duration-300 group-hover:text-primary">
-                  {tPlatform(`${step}Title`)}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">{tPlatform(`${step}Body`)}</p>
+              <div className={cn(marketingCardInner, 'flex gap-4')}>
+                <span
+                  className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary font-display text-lg font-bold text-primary-foreground shadow-md ring-4 ring-background transition-transform duration-500 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/25 motion-reduce:group-hover:scale-100"
+                  aria-hidden
+                >
+                  {i + 1}
+                </span>
+                <div className="min-w-0 pt-0.5">
+                  <h3 className="font-semibold leading-snug transition-colors duration-300 group-hover:text-primary">
+                    {tPlatform(`${step}Title`)}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {tPlatform(`${step}Body`)}
+                  </p>
+                </div>
               </div>
             </li>
           ))}
@@ -370,12 +470,41 @@ export function PlatformHomePage({
 
       {/* Pricing */}
       {pricingBody ? (
-        <section id="pricing" className="scroll-mt-24 border-t border-border/60 bg-muted/20 py-20">
+        <section id="pricing" className="scroll-mt-24 border-t border-border/60 bg-muted/20 py-20 sm:py-24">
           <div className={siteContainer('mx-auto max-w-3xl')}>
-            <h2 className="font-display text-3xl font-bold">{pricingTitle}</h2>
-            <p className="mt-6 whitespace-pre-wrap text-base leading-relaxed text-muted-foreground">
-              {pricingBody}
-            </p>
+            <div
+              className={cn(
+                'relative overflow-hidden rounded-3xl border-2 border-primary/25 bg-card p-8 shadow-xl shadow-primary/10 sm:p-10',
+                'ring-1 ring-primary/10',
+              )}
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-primary/15 blur-3xl"
+              />
+              <div className="relative">
+                <h2 className="font-display text-3xl font-bold tracking-tight">{pricingTitle}</h2>
+                <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">{pricingBody}</p>
+                {buyerKeys.length > 0 ? (
+                  <div className="mt-8 border-t border-border/60 pt-6">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                      {tPlatform('pricingIncludesLabel')}
+                    </p>
+                    <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                      {buyerKeys.slice(0, 4).map((i) => (
+                        <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                          <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
+                          {tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0])}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                <Button asChild size="lg" className={cn('mt-8', platformHeroPrimaryClass)}>
+                  <a href="#request-demo">{tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}</a>
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
       ) : null}
@@ -404,6 +533,27 @@ export function PlatformHomePage({
           </div>
         </div>
       </section>
+
+      {tPlatform.has('closingTitle') ? (
+        <section className="relative overflow-hidden border-t border-border/60 py-16 sm:py-20">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/15 via-primary/5 to-violet-500/10"
+          />
+          <div className={siteContainer('relative mx-auto max-w-3xl text-center')}>
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              {tPlatform('closingTitle')}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">{tPlatform('closingSubtitle')}</p>
+            <Button asChild size="lg" className={cn('mt-8', platformHeroPrimaryClass)}>
+              <a href="#request-demo" className="group inline-flex items-center gap-2">
+                {tPlatform.has('closingCta') ? tPlatform('closingCta') : heroCtaLabel}
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+              </a>
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       {/* Demo request — no login */}
       <section id="request-demo" className="scroll-mt-24 border-t border-border/60 bg-muted/30 py-20">

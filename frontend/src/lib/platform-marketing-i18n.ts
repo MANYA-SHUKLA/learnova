@@ -2,8 +2,10 @@ import { getTranslations } from 'next-intl/server';
 import type { AppLocale } from '@/lib/i18n/config';
 
 export type PlatformMarketingI18nOverlay = {
+  heroEyebrow: string;
   heroTitle: string;
   heroSubtitle: string;
+  heroTagline: string;
   heroCtaLabel: string;
   highlights: { title: string; body: string }[];
   pricingTitle: string;
@@ -11,12 +13,11 @@ export type PlatformMarketingI18nOverlay = {
   faq: { title: string; body: string }[];
 };
 
-/** CMS copy is English-only; non-English locales use message files for hero, highlights, pricing, and FAQ. */
+/** Message files drive hero, highlights, pricing, and FAQ on the public homepage (all locales). */
 export async function getPlatformMarketingI18nOverlay(
   locale: AppLocale,
-): Promise<PlatformMarketingI18nOverlay | undefined> {
-  if (locale === 'en') return undefined;
-
+): Promise<PlatformMarketingI18nOverlay> {
+  void locale;
   const t = await getTranslations('marketing.platformHome');
 
   const faq: PlatformMarketingI18nOverlay['faq'] = [];
@@ -28,16 +29,19 @@ export async function getPlatformMarketingI18nOverlay(
   }
 
   return {
+    heroEyebrow: t.has('heroEyebrow') ? t('heroEyebrow') : t('requestDemo'),
     heroTitle: t('heroTitle'),
     heroSubtitle: t('heroSubtitle'),
+    heroTagline: t.has('heroTagline') ? t('heroTagline') : '',
     heroCtaLabel: t('requestDemo'),
-    highlights: [
-      { title: t('highlight1Title'), body: t('highlight1Body') },
-      { title: t('highlight2Title'), body: t('highlight2Body') },
-      { title: t('highlight3Title'), body: t('highlight3Body') },
-    ],
+    highlights: ([1, 2, 3] as const).flatMap((i) => {
+      const titleKey = `highlight${i}Title` as Parameters<typeof t>[0];
+      const bodyKey = `highlight${i}Body` as Parameters<typeof t>[0];
+      if (!t.has(titleKey) || !t.has(bodyKey)) return [];
+      return [{ title: t(titleKey), body: t(bodyKey) }];
+    }),
     pricingTitle: t('pricingTitle'),
-    pricingBody: t('pricingBody'),
+    pricingBody: t.has('pricingBody') ? t('pricingBody') : '',
     faq,
   };
 }
