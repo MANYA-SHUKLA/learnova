@@ -24,6 +24,10 @@ const institutionAuditLogSchema = new Schema(
         'settings.updated',
         'entity.archived',
         'entity.restored',
+        'institution.provisioned',
+        'institution.suspended',
+        'institution.reactivated',
+        'institution.permanently_deleted',
       ],
     },
     institutionId: {

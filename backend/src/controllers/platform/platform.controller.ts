@@ -5,6 +5,7 @@ import type {
   DeclineDemoRequestInput,
   DemoRequestListQuery,
   InstitutionAdminLoginAuditQuery,
+  PermanentDeleteCampusInput,
   PlatformMarketingInput,
   ProvisionCampusInput,
   ResendAdminCredentialsInput,
@@ -122,6 +123,37 @@ export async function resendAdminCredentials(req: Request, res: Response, next: 
     const data = await superAdminService.resendAdminCredentials(
       req.params.id as string,
       req.body as ResendAdminCredentialsInput,
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function suspendCampus(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await superAdminService.suspendCampus(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function reactivateCampus(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await superAdminService.reactivateCampus(req.params.id as string, actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function permanentlyDeleteCampus(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await superAdminService.permanentlyDeleteCampus(
+      req.params.id as string,
+      req.body as PermanentDeleteCampusInput,
       actorFrom(req),
     );
     sendSuccess(res, data, { requestId: req.requestId });

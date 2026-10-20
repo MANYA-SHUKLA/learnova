@@ -1,5 +1,6 @@
 import type {
   InstitutionAdminLoginAuditQuery,
+  PermanentDeleteCampusInput,
   ProvisionCampusInput,
   ResendAdminCredentialsInput,
 } from '@learnova/validation';
@@ -10,18 +11,33 @@ import {
   institutionRepository,
   institutionSettingsRepository,
 } from '../../repositories/institution/index.js';
-import { auditAuthLogRepository, roleRepository, userRepository } from '../../repositories/auth/index.js';
+import {
+  auditAuthLogRepository,
+  roleRepository,
+  sessionRepository,
+  userRepository,
+} from '../../repositories/auth/index.js';
 import { sendInstitutionAdminCredentialsEmail } from '../../mail/institution-admin-credentials-email.js';
 import { demoRequestService } from './demo-request.service.js';
 import type { ActorContext } from '../institution/institution.service.js';
 import { UserModel } from '../../models/user.model.js';
 import { institutionAuditRepository } from '../../repositories/institution/index.js';
 import { resolveProvisionIdentifiers } from './provision-campus.helpers.js';
+import { purgeInstitutionData } from './purge-institution.js';
 
 function assertSuperAdmin(actor: ActorContext) {
   if (actor.role !== 'super_admin') {
     throw new ForbiddenError('Super admin access required');
   }
+}
+
+async function revokeAllInstitutionSessions(institutionId: string) {
+  const oid = new Types.ObjectId(institutionId);
+  const users = await UserModel.find({ institutionId: oid }).select('_id').exec();
+  for (const user of users) {
+    await sessionRepository.revokeAllForUser(String(user._id));
+  }
+  await UserModel.updateMany({ institutionId: oid }, { $inc: { tokenVersion: 1 } }).exec();
 }
 
 function pageMeta(total: number, page: number, limit: number) {
@@ -193,6 +209,65 @@ export class SuperAdminService {
     });
 
     return { sent: true, adminEmail: target.email };
+  }
+
+  async suspendCampus(institutionId: string, actor: ActorContext) {
+    assertSuperAdmin(actor);
+    const institution = await institutionRepository.findById(institutionId);
+    if (!institution) throw new NotFoundError('Institution not found');
+    if (institution.status === 'inactive') {
+      return { institutionId, status: 'inactive' as const, alreadySuspended: true };
+    }
+    const doc = await institutionRepository.updateById(institutionId, { status: 'inactive' });
+    if (!doc) throw new NotFoundError('Institution not found');
+    await revokeAllInstitutionSessions(institutionId);
+    await institutionAuditRepository.log({
+      event: 'institution.suspended',
+      institutionId,
+      userId: actor.userId,
+      email: actor.email,
+      metadata: { name: institution.name, slug: institution.slug },
+    });
+    return { institutionId, status: 'inactive' as const, alreadySuspended: false };
+  }
+
+  async reactivateCampus(institutionId: string, actor: ActorContext) {
+    assertSuperAdmin(actor);
+    const institution = await institutionRepository.findById(institutionId);
+    if (!institution) throw new NotFoundError('Institution not found');
+    if (institution.status === 'active') {
+      return { institutionId, status: 'active' as const, alreadyActive: true };
+    }
+    const doc = await institutionRepository.updateById(institutionId, { status: 'active' });
+    if (!doc) throw new NotFoundError('Institution not found');
+    await institutionAuditRepository.log({
+      event: 'institution.reactivated',
+      institutionId,
+      userId: actor.userId,
+      email: actor.email,
+      metadata: { name: institution.name, slug: institution.slug },
+    });
+    return { institutionId, status: 'active' as const, alreadyActive: false };
+  }
+
+  async permanentlyDeleteCampus(
+    institutionId: string,
+    input: PermanentDeleteCampusInput,
+    actor: ActorContext,
+  ) {
+    assertSuperAdmin(actor);
+    const institution = await institutionRepository.findById(institutionId);
+    if (!institution) throw new NotFoundError('Institution not found');
+    const expected = (institution.name as string).trim();
+    if (input.confirmName.trim() !== expected) {
+      throw new ValidationError('Confirmation name must match the institution name exactly');
+    }
+    const { deletedByCollection } = await purgeInstitutionData(institutionId);
+    return {
+      deleted: true,
+      institutionId,
+      deletedByCollection,
+    };
   }
 }
 

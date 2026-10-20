@@ -2,6 +2,14 @@ import type { PaginatedMeta } from '@learnova/types';
 import { apiClient } from '@/lib/api/client';
 import type { PlatformMarketingContent } from '@/features/public/services/public-api';
 
+export type CampusListItem = {
+  id: string;
+  name: string;
+  slug: string;
+  code?: string;
+  status?: string;
+};
+
 export type InstitutionAdminLoginRow = {
   id: string;
   email: string;
@@ -69,7 +77,26 @@ export const superadminApi = {
   },
 
   listInstitutions() {
-    return apiClient.get<{ items: unknown[] }>('/institutions?limit=100');
+    return apiClient.get<{ items: CampusListItem[] }>('/institutions?limit=100');
+  },
+
+  suspendCampus(institutionId: string) {
+    return apiClient.post<{ institutionId: string; status: 'inactive' }>(
+      `/super-admin/institutions/${institutionId}/suspend`,
+    );
+  },
+
+  reactivateCampus(institutionId: string) {
+    return apiClient.post<{ institutionId: string; status: 'active' }>(
+      `/super-admin/institutions/${institutionId}/reactivate`,
+    );
+  },
+
+  permanentlyDeleteCampus(institutionId: string, body: { confirmName: string }) {
+    return apiClient.post<{ deleted: boolean; institutionId: string }>(
+      `/super-admin/institutions/${institutionId}/permanent-delete`,
+      body,
+    );
   },
 
   resendCredentials(institutionId: string, body?: { rotatePassword?: boolean; newPassword?: string }) {

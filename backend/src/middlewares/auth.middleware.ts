@@ -9,6 +9,10 @@ import { verifyAccessToken } from '../utils/jwt/index.js';
 import { userRepository } from '../repositories/auth/user.repository.js';
 import { sessionRepository } from '../repositories/auth/session.repository.js';
 import { logAccessDenial } from '../services/audit/access-denial.js';
+import {
+  getInstitutionCampusState,
+  INSTITUTION_SUSPENDED_MESSAGE,
+} from '../services/platform/institution-access.js';
 
 declare global {
   namespace Express {
@@ -54,6 +58,16 @@ export function authenticate(options: AuthMiddlewareOptions = {}) {
         if (!session || session.revokedAt || session.expiresAt < new Date()) {
           next(new UnauthorizedError('Session revoked'));
           return;
+        }
+        if (
+          payload.institutionId &&
+          payload.role !== 'super_admin'
+        ) {
+          const campusState = await getInstitutionCampusState(payload.institutionId);
+          if (campusState !== 'active') {
+            next(new ForbiddenError(INSTITUTION_SUSPENDED_MESSAGE));
+            return;
+          }
         }
         void sessionRepository.touch(payload.sessionId);
         req.user = payload;

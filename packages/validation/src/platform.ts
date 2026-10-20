@@ -84,6 +84,12 @@ export const resendAdminCredentialsSchema = z.object({
 
 export type ResendAdminCredentialsInput = z.infer<typeof resendAdminCredentialsSchema>;
 
+export const permanentDeleteCampusSchema = z.object({
+  confirmName: z.string().trim().min(1).max(200),
+});
+
+export type PermanentDeleteCampusInput = z.infer<typeof permanentDeleteCampusSchema>;
+
 const marketingSectionSchema = z.object({
   title: z.string().trim().max(200),
   body: z.string().trim().max(5000),

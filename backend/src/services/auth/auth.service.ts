@@ -50,6 +50,14 @@ import {
 } from '../../mail/mail-copy.js';
 import { env } from '../../config/env.js';
 import { InstitutionModel } from '../../models/institution.model.js';
+import {
+  getInstitutionCampusState,
+  INSTITUTION_SUSPENDED_MESSAGE,
+} from '../platform/institution-access.js';
+import {
+  getInstitutionCampusState,
+  INSTITUTION_SUSPENDED_MESSAGE,
+} from '../platform/institution-access.js';
 import { logger } from '../../utils/logger/index.js';
 import {
   auditAuthLogRepository,
@@ -453,6 +461,12 @@ export class AuthService {
     if (role === 'super_admin') {
       return fail('Super admin must sign in at the super admin login page.', 'forbidden');
     }
+    if (activeUser.institutionId) {
+      const campusState = await getInstitutionCampusState(activeUser.institutionId);
+      if (campusState !== 'active') {
+        return fail(INSTITUTION_SUSPENDED_MESSAGE, 'forbidden');
+      }
+    }
     const issued = await issueSessionTokens(activeUser, role, permissions, ctx);
 
     await loginAttemptRepository.create({
@@ -555,6 +569,14 @@ export class AuthService {
     }
 
     const { role, permissions } = await resolveRolePermissions(user.roleId);
+
+    if (user.institutionId && role !== 'super_admin') {
+      const campusState = await getInstitutionCampusState(user.institutionId);
+      if (campusState !== 'active') {
+        await refreshTokenRepository.revokeFamily(payload.familyId);
+        throw new ForbiddenError(INSTITUTION_SUSPENDED_MESSAGE);
+      }
+    }
 
     // Rotate: revoke old, issue new in same family with version+1
     const newVersion = stored.version + 1;

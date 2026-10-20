@@ -6,6 +6,7 @@ import {
   demoRequestListQuerySchema,
   institutionAdminLoginAuditQuerySchema,
   idParamsSchema,
+  permanentDeleteCampusSchema,
   platformMarketingSchema,
   provisionCampusSchema,
   resendAdminCredentialsSchema,
@@ -74,6 +75,31 @@ superAdminRoutes.post(
   validate(idParamsSchema, 'params'),
   validate(resendAdminCredentialsSchema),
   platformController.resendAdminCredentials,
+);
+
+superAdminRoutes.post(
+  '/institutions/:id/suspend',
+  ...superAuth,
+  requirePermission(PERMISSIONS.INSTITUTION_MANAGE),
+  validate(idParamsSchema, 'params'),
+  platformController.suspendCampus,
+);
+
+superAdminRoutes.post(
+  '/institutions/:id/reactivate',
+  ...superAuth,
+  requirePermission(PERMISSIONS.INSTITUTION_MANAGE),
+  validate(idParamsSchema, 'params'),
+  platformController.reactivateCampus,
+);
+
+superAdminRoutes.post(
+  '/institutions/:id/permanent-delete',
+  ...superAuth,
+  requirePermission(PERMISSIONS.INSTITUTION_MANAGE),
+  validate(idParamsSchema, 'params'),
+  validate(permanentDeleteCampusSchema),
+  platformController.permanentlyDeleteCampus,
 );
 
 superAdminRoutes.get(

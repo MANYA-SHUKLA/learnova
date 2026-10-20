@@ -14,7 +14,7 @@ import {
   Spinner,
 } from '@learnova/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, CalendarClock, Inbox, LogIn, RefreshCw } from 'lucide-react';
+import { Building2, CalendarClock, Inbox, LogIn, PauseCircle, PlayCircle, RefreshCw, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { SuccessPopup } from '@/components/shared/success-popup';
@@ -24,7 +24,11 @@ import {
   SuperAdminConsoleSidebar,
   type SuperAdminConsoleTab,
 } from '@/components/superadmin/super-admin-console-sidebar';
-import { superadminApi, type DemoRequestRow } from '@/features/superadmin/services/superadmin-api';
+import {
+  superadminApi,
+  type CampusListItem,
+  type DemoRequestRow,
+} from '@/features/superadmin/services/superadmin-api';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
@@ -130,10 +134,37 @@ export function SuperAdminConsolePage() {
     [demoQuery.data?.items],
   );
 
-  const campusCount = useMemo(() => {
-    const items = campusesQuery.data?.items as unknown[] | undefined;
-    return items?.length ?? 0;
-  }, [campusesQuery.data?.items]);
+  const campusItems = campusesQuery.data?.items ?? [];
+
+  const campusCount = useMemo(() => campusItems.length, [campusItems.length]);
+
+  const suspendMutation = useMutation({
+    mutationFn: (id: string) => superadminApi.suspendCampus(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['superadmin', 'campuses'] });
+      showSuccess(t('suspendSuccess'));
+    },
+    onError: (err: Error) => alert(err.message || t('campusActionError')),
+  });
+
+  const reactivateMutation = useMutation({
+    mutationFn: (id: string) => superadminApi.reactivateCampus(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['superadmin', 'campuses'] });
+      showSuccess(t('reactivateSuccess'));
+    },
+    onError: (err: Error) => alert(err.message || t('campusActionError')),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: ({ id, confirmName }: { id: string; confirmName: string }) =>
+      superadminApi.permanentlyDeleteCampus(id, { confirmName }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['superadmin'] });
+      showSuccess(t('deleteSuccess'));
+    },
+    onError: (err: Error) => alert(err.message || t('campusActionError')),
+  });
 
   const navItems = useMemo(
     () =>
@@ -385,32 +416,32 @@ export function SuperAdminConsolePage() {
                 </div>
               ) : null}
               <ul className="divide-y divide-border/60">
-                {(campusesQuery.data?.items as { id: string; name: string; slug: string }[] | undefined)?.map(
-                  (inst) => (
-                    <li key={inst.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0">
-                      <div className="min-w-0">
-                        <p className="font-medium text-foreground">{inst.name}</p>
-                        <Link href={`/${inst.slug}`} className="text-sm text-primary hover:underline">
-                          /{inst.slug}
-                        </Link>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          void superadminApi
-                            .resendCredentials(inst.id, { rotatePassword: true })
-                            .then(() => showSuccess(t('emailSentSuccess')))
-                            .catch((err: Error) => alert(err.message || t('provisionError')))
-                        }
-                      >
-                        {t('resendCreds')}
-                      </Button>
-                    </li>
-                  ),
-                )}
+                {campusItems.map((inst) => (
+                  <CampusListRow
+                    key={inst.id}
+                    inst={inst}
+                    onResend={() =>
+                      void superadminApi
+                        .resendCredentials(inst.id, { rotatePassword: true })
+                        .then(() => showSuccess(t('emailSentSuccess')))
+                        .catch((err: Error) => alert(err.message || t('provisionError')))
+                    }
+                    onSuspend={() => {
+                      if (window.confirm(t('suspendConfirm'))) {
+                        suspendMutation.mutate(inst.id);
+                      }
+                    }}
+                    onReactivate={() => reactivateMutation.mutate(inst.id)}
+                    onDelete={(confirmName) => deleteMutation.mutate({ id: inst.id, confirmName })}
+                    busy={
+                      suspendMutation.isPending ||
+                      reactivateMutation.isPending ||
+                      deleteMutation.isPending
+                    }
+                  />
+                ))}
               </ul>
-              {!campusesQuery.isLoading && !(campusesQuery.data?.items as unknown[] | undefined)?.length ? (
+              {!campusesQuery.isLoading && !campusItems.length ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">{t('campusesEmpty')}</p>
               ) : null}
             </CardContent>
@@ -419,6 +450,119 @@ export function SuperAdminConsolePage() {
       ) : null}
     </SuperAdminConsoleShell>
     </>
+  );
+}
+
+function campusStatusLabel(
+  status: string | undefined,
+  t: ReturnType<typeof useTranslations<'superadmin.console'>>,
+): string {
+  if (status === 'inactive') return t('statusSuspended');
+  if (status === 'archived') return t('statusArchived');
+  return t('statusActive');
+}
+
+function campusStatusVariant(status: string | undefined): 'default' | 'secondary' | 'danger' | 'outline' {
+  if (status === 'inactive') return 'secondary';
+  if (status === 'archived') return 'outline';
+  return 'default';
+}
+
+function CampusListRow({
+  inst,
+  onResend,
+  onSuspend,
+  onReactivate,
+  onDelete,
+  busy,
+}: {
+  inst: CampusListItem;
+  onResend: () => void;
+  onSuspend: () => void;
+  onReactivate: () => void;
+  onDelete: (confirmName: string) => void;
+  busy: boolean;
+}) {
+  const t = useTranslations('superadmin.console');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmName, setConfirmName] = useState('');
+  const suspended = inst.status === 'inactive';
+  const portalDisabled = inst.status !== 'active';
+
+  return (
+    <li className="py-4 first:pt-0">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-medium text-foreground">{inst.name}</p>
+            <Badge variant={campusStatusVariant(inst.status)} className="text-[10px] uppercase">
+              {campusStatusLabel(inst.status, t)}
+            </Badge>
+          </div>
+          {portalDisabled ? (
+            <p className="text-sm text-muted-foreground">/{inst.slug}</p>
+          ) : (
+            <Link href={`/${inst.slug}`} className="text-sm text-primary hover:underline">
+              /{inst.slug}
+            </Link>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" disabled={busy} onClick={onResend}>
+            {t('resendCreds')}
+          </Button>
+          {suspended ? (
+            <Button size="sm" variant="secondary" disabled={busy} onClick={onReactivate}>
+              <PlayCircle className="mr-1 size-3.5" aria-hidden />
+              {t('reactivateCampus')}
+            </Button>
+          ) : (
+            <Button size="sm" variant="outline" disabled={busy} onClick={onSuspend}>
+              <PauseCircle className="mr-1 size-3.5" aria-hidden />
+              {t('suspendCampus')}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="danger"
+            disabled={busy}
+            onClick={() => {
+              setConfirmName('');
+              setDeleteOpen((v) => !v);
+            }}
+          >
+            <Trash2 className="mr-1 size-3.5" aria-hidden />
+            {t('deleteCampus')}
+          </Button>
+        </div>
+      </div>
+      {deleteOpen ? (
+        <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3">
+          <p className="text-xs text-muted-foreground">{t('deleteConfirmHint')}</p>
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+            <Input
+              aria-label={t('deleteConfirmPlaceholder')}
+              placeholder={t('deleteConfirmPlaceholder')}
+              value={confirmName}
+              onChange={(e) => setConfirmName(e.target.value)}
+              className="sm:flex-1"
+            />
+            <Button
+              size="sm"
+              variant="danger"
+              disabled={busy || confirmName.trim() !== inst.name.trim()}
+              onClick={() => {
+                onDelete(confirmName.trim());
+                setDeleteOpen(false);
+                setConfirmName('');
+              }}
+            >
+              {t('deleteCampus')}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+    </li>
   );
 }
 
