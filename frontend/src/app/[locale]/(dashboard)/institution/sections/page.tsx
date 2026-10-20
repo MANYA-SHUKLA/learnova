@@ -24,8 +24,12 @@ export default function SectionsPage() {
 
   const programOptions =
     programsData?.items.map((p) => ({ value: p.id, label: `${p.name} (${p.code})` })) ?? [];
+  const activeSemesters =
+    semestersData?.items.filter((s) => s.status === 'active' && s.deletedAt == null) ?? [];
   const semesterOptions =
-    semestersData?.items.map((s) => ({ value: s.id, label: s.name })) ?? [];
+    activeSemesters.length > 0
+      ? activeSemesters.map((s) => ({ value: s.id, label: s.name }))
+      : (semestersData?.items.map((s) => ({ value: s.id, label: s.name })) ?? []);
 
   const columns: ResourceColumn<Section>[] = [
     { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
@@ -97,6 +101,7 @@ export default function SectionsPage() {
       columns={columns}
       fields={fields}
       listQuery={useSections}
+      defaultStatusFilter="active"
       createMutation={useCreateSectionMutation}
       updateMutation={useUpdateSectionMutation}
       archiveMutation={useArchiveSectionMutation}

@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { AcademicYearModel, SemesterModel } from '../../models/index.js';
+import { AcademicYearModel, SectionModel, SemesterModel } from '../../models/index.js';
 import {
   semesterDateRange,
   termWindowsForDate,
@@ -71,5 +71,53 @@ export async function syncSemesterCalendar(
       { _id: yearId, institutionId: institutionOid, deletedAt: null },
       { $set: { startDate: odd.startDate, endDate: even.endDate, isActive: true, status: 'active' } },
     );
+  }
+
+  await syncSectionTermStatus(term, institutionOid);
+}
+
+/**
+ * Class sections follow the same odd/even window as semesters (Jul–Dec odd, Jan–May even).
+ * Archived sections are left unchanged; capacity is preserved on inactive rows.
+ */
+async function syncSectionTermStatus(
+  currentTerm: 'odd' | 'even',
+  institutionOid: Types.ObjectId,
+): Promise<void> {
+  const semesters = await SemesterModel.find({
+    institutionId: institutionOid,
+    deletedAt: null,
+    status: { $ne: 'archived' },
+    term: { $in: ['odd', 'even'] },
+  })
+    .select('_id term')
+    .lean()
+    .exec();
+  if (semesters.length === 0) return;
+
+  const activeSemesterIds = semesters
+    .filter((s) => s.term === currentTerm)
+    .map((s) => s._id);
+  const inactiveSemesterIds = semesters
+    .filter((s) => s.term !== currentTerm)
+    .map((s) => s._id);
+
+  const baseFilter = {
+    institutionId: institutionOid,
+    deletedAt: null,
+    status: { $ne: 'archived' as const },
+  };
+
+  if (activeSemesterIds.length > 0) {
+    await SectionModel.updateMany(
+      { ...baseFilter, semesterId: { $in: activeSemesterIds } },
+      { $set: { status: 'active' } },
+    ).exec();
+  }
+  if (inactiveSemesterIds.length > 0) {
+    await SectionModel.updateMany(
+      { ...baseFilter, semesterId: { $in: inactiveSemesterIds } },
+      { $set: { status: 'inactive' } },
+    ).exec();
   }
 }

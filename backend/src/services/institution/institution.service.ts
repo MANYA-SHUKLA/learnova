@@ -605,8 +605,10 @@ export class InstitutionService {
       'section.created',
     );
   }
-  listSections = (query: OrgListQuery, actor: ActorContext) =>
-    this.listTenantResource(sectionRepository, actor, query);
+  listSections = async (query: OrgListQuery, actor: ActorContext) => {
+    if (actor.institutionId) await syncSemesterCalendar(actor.institutionId);
+    return this.listTenantResource(sectionRepository, actor, query);
+  };
   getSection = (id: string, actor: ActorContext) =>
     this.getTenantResource(sectionRepository, actor, id);
   updateSection = (id: string, input: UpdateSectionInput, actor: ActorContext) =>

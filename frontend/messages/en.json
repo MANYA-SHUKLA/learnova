@@ -1237,7 +1237,7 @@
       "sections": {
         "title": "Sections",
         "singular": "Section",
-        "description": "Class sections by program and semester."
+        "description": "Class sections by program and semester. Odd-term sections (Jul–Dec) are active now; even-term sections stay inactive with capacity saved until January. Refresh this page to sync with the calendar."
       },
       "batches": {
         "title": "Batches",

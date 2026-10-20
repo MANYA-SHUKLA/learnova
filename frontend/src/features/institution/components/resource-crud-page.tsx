@@ -65,6 +65,8 @@ interface ResourceCrudPageProps<T extends SoftRow> {
   getEditValues?: (row: T) => Record<string, string | number | boolean | null | undefined>;
   extraFilters?: ReactNode;
   extraListParams?: Partial<OrgListParams>;
+  /** Initial status filter (e.g. active sections during the current term). */
+  defaultStatusFilter?: '' | OrgEntityStatus;
 }
 
 function defaultMapValues(
@@ -97,6 +99,7 @@ export function ResourceCrudPage<T extends SoftRow>({
   getEditValues,
   extraFilters,
   extraListParams,
+  defaultStatusFilter = '',
 }: ResourceCrudPageProps<T>) {
   const t = useTranslations('dashboard.institution.crud');
   const tStatus = useTranslations('dashboard.institution.status');
@@ -112,7 +115,7 @@ export function ResourceCrudPage<T extends SoftRow>({
 
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<'' | OrgEntityStatus>('');
+  const [status, setStatus] = useState<'' | OrgEntityStatus>(defaultStatusFilter);
   const [includeDeleted, setIncludeDeleted] = useState(false);
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
