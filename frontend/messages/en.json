@@ -1487,6 +1487,11 @@
         "catalog": "Catalog",
         "catalogDescription": "Search, filter, and run bulk actions on the B.Tech course catalog.",
         "showingAll": "Showing all {count} courses in the catalog.",
+        "showingAllWithArchived": "Showing {count} courses ({active} active · {archived} archived). Use Restore on archived rows if one was removed by mistake.",
+        "showingFiltered": "Showing {count} courses for this filter.",
+        "archive": "Archive",
+        "restore": "Restore",
+        "confirmArchive": "Archive this course? You can restore it from the Archived filter or All list.",
         "searchPlaceholder": "Search title, code, category…",
         "stats": {
           "total": "Total",

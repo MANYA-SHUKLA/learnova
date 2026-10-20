@@ -15,7 +15,7 @@ import {
   StatCard,
   StatGrid,
 } from '@learnova/ui';
-import { ArrowRight, Download, Plus, Search, Upload } from 'lucide-react';
+import { ArrowRight, Download, Plus, RotateCcw, Search, Trash2, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
@@ -27,9 +27,11 @@ import {
   formatCourseDifficulty,
   formatCourseStatus,
   formatCourseVisibility,
+  useArchiveCourseMutation,
   useBulkArchiveCourseMutation,
   useBulkPublishCourseMutation,
   useBulkUnpublishCourseMutation,
+  useRestoreCourseMutation,
   courseKeys,
   useCourseStats,
 } from '@/features/course';
@@ -60,7 +62,8 @@ export default function CourseListPage() {
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
-      includeDeleted: status === 'archived',
+      /** Include soft-deleted rows for All + Archived so the full catalog (e.g. 125) is visible. */
+      includeDeleted: status === 'all' || status === 'archived',
       sortBy: 'createdAt',
       sortOrder: 'desc' as const,
     }),
@@ -80,9 +83,12 @@ export default function CourseListPage() {
   const bulkArchive = useBulkArchiveCourseMutation();
   const bulkPublish = useBulkPublishCourseMutation();
   const bulkUnpublish = useBulkUnpublishCourseMutation();
+  const archiveMutation = useArchiveCourseMutation();
+  const restoreMutation = useRestoreCourseMutation();
 
   const rows = listQuery.data?.items ?? [];
-  const catalogTotal = listQuery.data?.total ?? statsQuery.data?.total ?? 0;
+  const catalogTotal = listQuery.isSuccess ? rows.length : (statsQuery.data?.total ?? 0);
+  const activeCatalogTotal = statsQuery.data?.total ?? 0;
 
   return (
     <PermissionGate permission={PERMISSIONS.COURSE_READ} enforce>
@@ -144,7 +150,13 @@ export default function CourseListPage() {
             <CardTitle className="text-card-title">{t('catalog')}</CardTitle>
             <CardDescription>
               {listQuery.isSuccess && catalogTotal > 0
-                ? t('showingAll', { count: catalogTotal })
+                ? status === 'all'
+                  ? t('showingAllWithArchived', {
+                      count: catalogTotal,
+                      active: activeCatalogTotal,
+                      archived: statsQuery.data?.archived ?? 0,
+                    })
+                  : t('showingFiltered', { count: catalogTotal })
                 : t('catalogDescription')}
             </CardDescription>
           </CardHeader>
@@ -337,12 +349,45 @@ export default function CourseListPage() {
                   },
                 ]}
                 rowActions={(row) => (
-                  <Button asChild size="sm" variant="ghost" className="rounded-lg">
-                    <Link href={`${APP_ROUTES.INSTITUTION_COURSES}/${row.id}`}>
-                      {tCommon('view')}
-                      <ArrowRight className="size-4" />
-                    </Link>
-                  </Button>
+                  <div className="flex flex-wrap items-center justify-end gap-1">
+                    <Button asChild size="sm" variant="ghost" className="rounded-lg">
+                      <Link href={`${APP_ROUTES.INSTITUTION_COURSES}/${row.id}`}>
+                        {tCommon('view')}
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                    <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
+                      {row.deletedAt || row.status === 'archived' ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="rounded-lg"
+                          disabled={restoreMutation.isPending}
+                          onClick={() => void restoreMutation.mutateAsync(row.id)}
+                        >
+                          <RotateCcw className="size-3.5" />
+                          {t('restore')}
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="rounded-lg text-danger hover:text-danger"
+                          disabled={archiveMutation.isPending}
+                          onClick={() => {
+                            if (window.confirm(t('confirmArchive'))) {
+                              void archiveMutation.mutateAsync(row.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="size-3.5" />
+                          {t('archive')}
+                        </Button>
+                      )}
+                    </PermissionGate>
+                  </div>
                 )}
                 mobileRow={(row) => (
                   <Card className="rounded-xl">
