@@ -1237,7 +1237,7 @@
       "sections": {
         "title": "Sections",
         "singular": "Section",
-        "description": "Class sections by program and semester. Odd-term sections (Jul–Dec) are active now; even-term sections stay inactive with capacity saved until January. Refresh this page to sync with the calendar."
+        "description": "Class sections by program and semester (e.g. B.Tech ECE Sem VII). Legacy “Year N” rows are removed automatically. Odd-term sections are active Jul–Dec; even-term sections activate in January."
       },
       "batches": {
         "title": "Batches",

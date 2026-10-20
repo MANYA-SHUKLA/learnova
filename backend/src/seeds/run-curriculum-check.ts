@@ -36,6 +36,7 @@ import {
   type OccupiedSlot,
   type SectionRecord,
 } from '../services/timetable/timetable-settler.js';
+import { bTechSectionLabel } from '../utils/timetable/section-labels.js';
 
 const CHECK_PASSWORD = 'Learnova@2026';
 const FACULTY_EMAIL = 'faculty.year1@learnova.test';
@@ -465,47 +466,18 @@ async function main(): Promise<void> {
   );
 
   const sem1 = semesterByNumber.get(1)!;
-  for (const branchPlan of BRANCHES) {
-    const branch = branchRecords.get(branchPlan.branch)!;
-    for (let year = 1; year <= 4; year++) {
-      for (const term of ['odd', 'even'] as const) {
-        const semesterNumber = (year - 1) * 2 + (term === 'odd' ? 1 : 2);
-        const semester = semesterByNumber.get(semesterNumber)!;
-        const label = `${branchPlan.branch} Year ${year}`;
-        const existing = await SectionModel.findOne({
-          institutionId: institutionOid,
-          programId: branch.programId,
-          semesterId: semester._id,
-          deletedAt: null,
-          name: { $in: [`Year ${year}`, label] },
-        });
-        if (existing) {
-          if (existing.name !== label) {
-            existing.name = label;
-            await existing.save();
-          }
-        } else {
-          await SectionModel.create({
-            institutionId: institutionOid,
-            programId: branch.programId,
-            semesterId: semester._id,
-            name: label,
-            capacity: 60,
-            status: 'active',
-            deletedAt: null,
-          });
-        }
-      }
-    }
-  }
   const section = await SectionModel.findOne({
     institutionId: institutionOid,
     programId: cse.programId,
     semesterId: sem1._id,
-    name: 'CSE Year 1',
+    name: bTechSectionLabel('CSE', 1),
     deletedAt: null,
   });
-  if (!section) throw new Error('CSE Year 1 section missing');
+  if (!section) {
+    throw new Error(
+      `${bTechSectionLabel('CSE', 1)} section missing — run Monsoon seed first`,
+    );
+  }
 
   await StudentModel.updateMany(
     { institutionId: institutionOid, email: { $ne: STUDENT_EMAIL }, deletedAt: null },
@@ -580,7 +552,6 @@ async function main(): Promise<void> {
   let occupied: OccupiedSlot[] = [];
   for (const semesterNumber of [7, 5, 3, 1]) {
     const semester = semesterByNumber.get(semesterNumber)!;
-    const year = Math.ceil(semesterNumber / 2);
     const courseDocs = await CourseModel.find({
       institutionId: institutionOid,
       semesterIds: semester._id,
@@ -615,7 +586,11 @@ async function main(): Promise<void> {
     const sectionDocs = await SectionModel.find({
       institutionId: institutionOid,
       semesterId: semester._id,
-      name: { $in: BRANCHES.map((branchPlan) => `${branchPlan.branch} Year ${year}`) },
+      name: {
+        $in: BRANCHES.map((branchPlan) =>
+          bTechSectionLabel(branchPlan.branch, semesterNumber),
+        ),
+      },
       deletedAt: null,
     }).lean();
     const sections: SectionRecord[] = sectionDocs.map((row) => ({
