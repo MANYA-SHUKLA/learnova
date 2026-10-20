@@ -1,5 +1,9 @@
 import { Types } from 'mongoose';
-import { CACHE_TTL } from '@learnova/constants';
+import {
+  CACHE_TTL,
+  INSTITUTION_MAX_FACULTY,
+  INSTITUTION_MAX_STUDENTS,
+} from '@learnova/constants';
 import { createId } from '@learnova/utils';
 import type {
   CreateAcademicCalendarInput,
@@ -112,6 +116,8 @@ function toDto(doc: {
   return {
     id: String(_id),
     ...normalized,
+    maxStudents: INSTITUTION_MAX_STUDENTS,
+    maxFaculty: INSTITUTION_MAX_FACULTY,
     deletedAt:
       rest.deletedAt instanceof Date
         ? rest.deletedAt.toISOString()
@@ -158,6 +164,8 @@ export class InstitutionService {
       const doc = await institutionRepository.create({
         _id: new Types.ObjectId(tenantId),
         ...input,
+        maxStudents: INSTITUTION_MAX_STUDENTS,
+        maxFaculty: INSTITUTION_MAX_FACULTY,
         deletedAt: null,
       });
       await institutionSettingsRepository.getOrCreate(tenantId);
@@ -204,7 +212,19 @@ export class InstitutionService {
 
   async updateInstitution(id: string, input: UpdateInstitutionInput, actor: ActorContext) {
     assertSameInstitution(actor, id);
-    const doc = await institutionRepository.updateById(id, input);
+    const {
+      maxStudents: _ignoredStudents,
+      maxFaculty: _ignoredFaculty,
+      ...patch
+    } = input as UpdateInstitutionInput & {
+      maxStudents?: number;
+      maxFaculty?: number;
+    };
+    const doc = await institutionRepository.updateById(id, {
+      ...patch,
+      maxStudents: INSTITUTION_MAX_STUDENTS,
+      maxFaculty: INSTITUTION_MAX_FACULTY,
+    });
     if (!doc) throw new NotFoundError('Institution not found');
     await audit('institution.updated', actor, id, { fields: Object.keys(input) });
     return toDto(doc);

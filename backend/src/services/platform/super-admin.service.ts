@@ -24,6 +24,7 @@ import { UserModel } from '../../models/user.model.js';
 import { institutionAuditRepository } from '../../repositories/institution/index.js';
 import { resolveProvisionIdentifiers } from './provision-campus.helpers.js';
 import { purgeInstitutionData } from './purge-institution.js';
+import { INSTITUTION_MAX_FACULTY, INSTITUTION_MAX_STUDENTS } from '@learnova/constants';
 import { institutionService } from '../institution/institution.service.js';
 
 function assertSuperAdmin(actor: ActorContext) {
@@ -107,6 +108,8 @@ export class SuperAdminService {
         code,
         email: input.contactEmail,
         phone: input.phone ?? null,
+        maxStudents: INSTITUTION_MAX_STUDENTS,
+        maxFaculty: INSTITUTION_MAX_FACULTY,
         status: 'active',
         deletedAt: null,
       });

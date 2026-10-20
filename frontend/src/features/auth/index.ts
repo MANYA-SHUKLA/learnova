@@ -9,7 +9,6 @@ export {
   useCurrentUser,
   useSessions,
   useLoginMutation,
-  useRegisterInstitutionMutation,
   useLogoutMutation,
   useLogoutAllMutation,
   useForgotPasswordMutation,
@@ -25,13 +24,11 @@ export {
   resetPasswordSchema,
   changePasswordSchema,
   verifyEmailSchema,
-  registerInstitutionFormSchema,
   type LoginFormValues,
   type ForgotPasswordFormValues,
   type ResetPasswordFormValues,
   type ChangePasswordFormValues,
   type VerifyEmailFormValues,
-  type RegisterInstitutionFormValues,
 } from './schemas';
 export type {
   AuthSessionResponse,

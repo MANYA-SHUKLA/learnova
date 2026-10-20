@@ -6,3 +6,7 @@ export const LIMITS = {
   MAX_BATCH_SIZE: 100,
   DEFAULT_REQUEST_TIMEOUT_MS: 30_000,
 } as const;
+
+/** Same seat caps for every institution — not configurable per tenant. */
+export const INSTITUTION_MAX_STUDENTS = 1000;
+export const INSTITUTION_MAX_FACULTY = 50;

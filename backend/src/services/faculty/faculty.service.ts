@@ -14,6 +14,7 @@ import type {
   UpdateFacultyInput,
   UpdateFacultyProfileInput,
 } from '@learnova/validation';
+import { INSTITUTION_MAX_FACULTY } from '@learnova/constants';
 import { createFacultySchema } from '@learnova/validation';
 import { eventBus } from '../../events/index.js';
 import { DepartmentModel } from '../../models/department.model.js';
@@ -155,6 +156,15 @@ function rowsToCsv(rows: Array<Record<string, unknown>>): string {
 }
 
 export class FacultyService {
+  private async assertFacultyCapacity(institutionId: string, additionalCount = 1) {
+    const current = await facultyRepository.countForCapacity(institutionId);
+    if (current + additionalCount > INSTITUTION_MAX_FACULTY) {
+      throw new ValidationError(
+        `This institution can have at most ${INSTITUTION_MAX_FACULTY} faculty.`,
+      );
+    }
+  }
+
   private async audit(
     event: Parameters<typeof facultyRepository.logAudit>[0]['event'],
     actor: ActorContext,
@@ -174,6 +184,7 @@ export class FacultyService {
 
   async create(input: CreateFacultyInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    await this.assertFacultyCapacity(institutionId);
     const { employeeId, facultyCode } = await resolveFacultyCreateIds(institutionId, input);
     const duplicates = await facultyRepository.findDuplicates(institutionId, {
       employeeId,
@@ -699,7 +710,10 @@ export class FacultyService {
       );
     }
 
+    await this.assertFacultyCapacity(institutionId, input.rows.length);
+
     const createdIds: string[] = [];
+    let emailed = 0;
 
     try {
       for (let i = 0; i < input.rows.length; i += 1) {
@@ -737,9 +751,24 @@ export class FacultyService {
 
         const created = await this.create(parsed, actor);
         createdIds.push(created.id);
+        if (created.credentials) {
+          emailed += 1;
+        }
       }
     } catch (err) {
       for (const id of createdIds) {
+        const existing = await facultyRepository.findByIdIncludingDeleted(institutionId, id);
+        if (existing?.email) {
+          try {
+            const { userRepository } = await import('../../repositories/auth/index.js');
+            const loginUser = await userRepository.findByEmail(existing.email);
+            if (loginUser) {
+              await userRepository.deleteById(String(loginUser._id));
+            }
+          } catch (cleanupErr) {
+            logger.warn({ cleanupErr, facultyId: id }, 'Orphan login cleanup after import rollback failed');
+          }
+        }
         await facultyRepository.hardDelete(institutionId, id);
       }
       logger.error({ err, institutionId }, 'Faculty import rolled back');
@@ -748,6 +777,7 @@ export class FacultyService {
 
     await this.audit('faculty.import.completed', actor, institutionId, null, {
       imported: createdIds.length,
+      credentialsEmailed: emailed,
     });
     await this.audit('faculty.imported', actor, institutionId, null, {
       imported: createdIds.length,

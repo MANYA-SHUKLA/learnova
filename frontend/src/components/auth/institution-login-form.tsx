@@ -18,7 +18,6 @@ import { useQuery } from '@tanstack/react-query';
 import { publicApi } from '@/features/public/services/public-api';
 import { useForm } from 'react-hook-form';
 import {
-  AuthAlert,
   AuthButtonMotion,
   AuthCardShell,
   authContentClassName,
@@ -55,7 +54,6 @@ function InstitutionLoginFormInner({
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next');
   const campusSlug = campusSlugProp ?? searchParams.get('campus') ?? undefined;
-  const registered = searchParams.get('registered') === '1';
   const portalQuery = useQuery({
     queryKey: ['public', 'portal', campusSlug],
     queryFn: () => publicApi.getPortal(campusSlug!),
@@ -142,10 +140,6 @@ function InstitutionLoginFormInner({
           {loginSubtitle ? (
             <p className="mb-4 text-center text-sm text-muted-foreground">{loginSubtitle}</p>
           ) : null}
-          {registered ? (
-            <AuthAlert variant="success">{t('registeredMessage')}</AuthAlert>
-          ) : null}
-
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               {t('email')}

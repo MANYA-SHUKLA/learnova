@@ -18,16 +18,6 @@ export const authApi = {
     return apiClient.post<AuthSessionResponse>(`${BASE}/super-admin/login`, body, { auth: false });
   },
 
-  registerInstitution(body: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    institutionName: string;
-  }) {
-    return apiClient.post<AuthSessionResponse>(`${BASE}/register`, body, { auth: false });
-  },
-
   logout() {
     return apiClient.post<MessageResponse>(`${BASE}/logout`);
   },

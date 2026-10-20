@@ -7,7 +7,6 @@ export const APP_CONFIG = {
 export const ROUTES = {
   home: '/',
   login: '/login',
-  registerInstitution: '/register-institution',
   forgotPassword: '/forgot-password',
   dashboard: '/institution/dashboard',
   features: '/features',

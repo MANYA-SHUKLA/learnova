@@ -73,7 +73,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "institution": "Institution",
-    "departments": "Departments",
+    "departments": "Degree programs",
     "programs": "Programs",
     "branches": "Branches",
     "academicYears": "Academic Years",
@@ -881,7 +881,7 @@
         "dashboard": "Dashboard",
         "institution": "Institution",
         "campusPortal": "Campus portal",
-        "departments": "Departments",
+        "departments": "Degree programs",
         "branches": "Branches",
         "programs": "Programs",
         "academicYears": "Academic Years",
@@ -1060,7 +1060,7 @@
         "description": "Structure, academic calendar, and tenant settings for your campus.",
         "editProfile": "Edit profile",
         "finishSetupTitle": "Finish institution setup",
-        "finishSetupDescription": "Add logo, contact details, and branding to unlock departments and branches.",
+        "finishSetupDescription": "Add logo, contact details, and branding to unlock degree programs (B.Tech, M.Tech, Ph.D.) and branches.",
         "continueSetup": "Continue setup",
         "loadFailed": "Failed to load institution.",
         "locationNotSet": "Location not set",
@@ -1082,12 +1082,12 @@
             "description": "Identity, contact, and brand assets."
           },
           "departments": {
-            "title": "Departments",
-            "description": "Academic departments at your institution."
+            "title": "Degree programs",
+            "description": "Degree types your institution offers — B.Tech, M.Tech, Ph.D., and similar."
           },
           "branches": {
             "title": "Branches",
-            "description": "Degree branches such as CSE, ECE, or MBA."
+            "description": "Specializations under each degree — CSE, ECE, Mechanical, and so on."
           },
           "programs": {
             "title": "Programs",
@@ -1147,6 +1147,7 @@
         "school": "School",
         "schoolId": "School ID",
         "department": "Department",
+        "degreeProgram": "Degree program",
         "level": "Level",
         "years": "Years",
         "credits": "Credits",
@@ -1170,7 +1171,7 @@
         "year": "Year",
         "events": "Events",
         "noSchools": "No schools available",
-        "noDepartments": "No departments available",
+        "noDepartments": "Add a degree program first (e.g. B.Tech, M.Tech, Ph.D.)",
         "noAcademicYears": "No academic years available",
         "noPrograms": "No programs available",
         "noSemesters": "No semesters available"
@@ -1198,14 +1199,14 @@
         "description": "Organize faculties and schools under the institution."
       },
       "departments": {
-        "title": "Departments",
-        "singular": "Department",
-        "description": "Organize your institution into departments (for example Engineering or Science)."
+        "title": "Degree programs",
+        "singular": "Degree program",
+        "description": "Define degree types your institution runs — for example B.Tech, M.Tech, or Ph.D. Branches (CSE, ECE) are added under each program."
       },
       "branches": {
         "title": "Branches",
         "singular": "Branch",
-        "description": "Degree branches under a department — for example CSE, ECE, or Mechanical."
+        "description": "Specializations under a degree program — for example CSE or ECE under B.Tech."
       },
       "programs": {
         "title": "Programs",
@@ -1333,9 +1334,9 @@
         "import": {
           "eyebrow": "Faculty",
           "title": "Import CSV",
-          "description": "Upload, preview, validate, and import. Failed imports are rolled back.",
+          "description": "Upload, preview, validate, and import. Each new faculty member gets a login account, temporary password by email, and must set a new password on first sign-in. Failed imports are rolled back.",
           "uploadTitle": "CSV upload",
-          "uploadDescription": "Required columns: employeeId, facultyCode, firstName, lastName, email, designation, employmentType.",
+          "uploadDescription": "Required columns: employeeId, facultyCode, firstName, lastName, email, designation, employmentType. Use real inboxes — credentials are emailed on import.",
           "confirmImport": "Confirm import",
           "importing": "Importing…",
           "previewFailed": "Preview failed",
@@ -2026,13 +2027,13 @@
       "modulesHaveRecords": "{ready} of {total} modules have records",
       "students": "Students",
       "faculty": "Faculty",
-      "planCapacity": "Plan capacity",
+      "planCapacity": "Capacity",
       "planBadge": "{plan} plan",
       "noInstitutionTitle": "No institution linked",
       "noInstitutionDescription": "Connect or create an institution profile to unlock the academic workspace.",
       "emptyStructureTitle": "Your academic structure is empty",
-      "emptyStructureDescription": "Start by adding departments and branches (for example CSE or ECE) to bring this dashboard to life.",
-      "addDepartment": "Add a department",
+      "emptyStructureDescription": "Start with degree programs (B.Tech, M.Tech, Ph.D.), then add branches such as CSE or ECE.",
+      "addDepartment": "Add a degree program",
       "moduleDistribution": "Module distribution",
       "moduleDistributionDescription": "Counts across your institution workspace",
       "calendarSummary": "Calendar summary",
@@ -2048,14 +2049,14 @@
       "quickActionsTitle": "Quick actions",
       "quickActionsDescription": "Jump into the modules you manage most often.",
       "stats": {
-        "departments": "Departments",
+        "departments": "Degree programs",
         "branches": "Branches",
         "programs": "Programs",
         "academicYears": "Academic Years",
         "semesters": "Semesters"
       },
       "chart": {
-        "departments": "Departments",
+        "departments": "Degree programs",
         "branches": "Branches",
         "programs": "Programs",
         "years": "Years",
@@ -2063,12 +2064,12 @@
       },
       "actions": {
         "departments": {
-          "title": "Departments",
-          "description": "Org structure"
+          "title": "Degree programs",
+          "description": "B.Tech, M.Tech, Ph.D., and similar"
         },
         "branches": {
           "title": "Branches",
-          "description": "CSE, ECE, and other branches"
+          "description": "CSE, ECE, and other specializations"
         },
         "programs": {
           "title": "Programs",

@@ -3,7 +3,6 @@ import type {
   ChangePasswordInput,
   ForgotPasswordInput,
   LoginInput,
-  RegisterInstitutionInput,
   ResendVerificationInput,
   ResetPasswordInput,
   VerifyEmailInput,
@@ -17,7 +16,7 @@ import {
   readRefreshToken,
   setRefreshCookie,
 } from '../../services/auth/cookie.utils.js';
-import { UnauthorizedError } from '../../utils/errors/index.js';
+import { ForbiddenError, UnauthorizedError } from '../../utils/errors/index.js';
 
 function authSessionPayload(result: {
   user: { role: string };
@@ -34,22 +33,15 @@ function authSessionPayload(result: {
 }
 
 export async function register(
-  req: Request,
-  res: Response,
+  _req: Request,
+  _res: Response,
   next: NextFunction,
 ): Promise<void> {
-  try {
-    const body = req.body as RegisterInstitutionInput;
-    const result = await authService.registerInstitution(body, getClientContext(req));
-    setRefreshCookie(res, result.tokens.refreshToken);
-    sendCreated(
-      res,
-      authSessionPayload(result),
-      { requestId: req.requestId },
-    );
-  } catch (err) {
-    next(err);
-  }
+  next(
+    new ForbiddenError(
+      'Institution registration is not available. Contact Learnova to provision your campus.',
+    ),
+  );
 }
 
 export async function login(

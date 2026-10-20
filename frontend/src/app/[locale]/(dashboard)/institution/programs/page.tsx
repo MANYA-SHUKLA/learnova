@@ -47,7 +47,7 @@ export default function ProgramsPage() {
   const fields: FormField[] = [
     {
       name: 'departmentId',
-      label: tf('department'),
+      label: tf('degreeProgram'),
       type: 'select',
       required: true,
       options: departmentOptions.length

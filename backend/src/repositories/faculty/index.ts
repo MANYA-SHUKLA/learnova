@@ -68,6 +68,13 @@ export class FacultyRepository {
     return filter;
   }
 
+  async countForCapacity(institutionId: string): Promise<number> {
+    return FacultyModel.countDocuments({
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    }).exec();
+  }
+
   async list(institutionId: string, query: FacultyListQuery): Promise<FacultyListResult> {
     const filter = this.buildFilter(institutionId, query);
     const page = query.page;

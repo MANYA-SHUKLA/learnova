@@ -73,7 +73,7 @@
   "nav": {
     "dashboard": "డాష్‌బోర్డ్",
     "institution": "సంస్థ",
-    "departments": "విభాగాలు",
+    "departments": "డిగ్రీ కార్యక్రమాలు",
     "programs": "కార్యక్రమాలు",
     "branches": "శాఖలు",
     "academicYears": "విద్యా సంవత్సరాలు",
@@ -853,7 +853,7 @@
         "dashboard": "డాష్‌బోర్డ్",
         "institution": "సంస్థ",
         "campusPortal": "క్యాంపస్ పోర్టల్",
-        "departments": "విభాగాలు",
+        "departments": "డిగ్రీ కార్యక్రమాలు",
         "branches": "శాఖలు",
         "programs": "కార్యక్రమాలు",
         "academicYears": "విద్యా సంవత్సరాలు",
@@ -1115,6 +1115,7 @@
         "school": "పాఠశాల",
         "schoolId": "పాఠశాల ID",
         "department": "శాఖ",
+        "degreeProgram": "డిగ్రీ కార్యక్రమం",
         "level": "స్థాయి",
         "years": "సంవత్సరాలు",
         "credits": "క్రెడిట్స్",
@@ -1138,7 +1139,7 @@
         "year": "సంవత్సరం",
         "events": "ఈవెంట్స్",
         "noSchools": "పాఠశాలలు అందుబాటులో లేవు",
-        "noDepartments": "విభాగాలు అందుబాటులో లేవు",
+        "noDepartments": "ముందు డిగ్రీ కార్యక్రమం జోడించండి (ఉదా. B.Tech, M.Tech, Ph.D.)",
         "noAcademicYears": "విద్యా సంవత్సరాలు అందుబాటులో లేవు",
         "noPrograms": "ప్రోగ్రామ్‌లు ఏవీ అందుబాటులో లేవు",
         "noSemesters": "సెమిస్టర్‌లు ఏవీ అందుబాటులో లేవు"
@@ -1166,14 +1167,14 @@
         "description": "సంస్థ కింద అధ్యాపకులు మరియు పాఠశాలలను నిర్వహించండి."
       },
       "departments": {
-        "title": "విభాగాలు",
-        "singular": "శాఖ",
-        "description": "మీ సంస్థను విభాగాలుగా నిర్వహించండి (ఉదా: Engineering)."
+        "title": "డిగ్రీ కార్యక్రమాలు",
+        "singular": "డిగ్రీ కార్యక్రమం",
+        "description": "B.Tech, M.Tech, Ph.D. వంటి డిగ్రీలు — శాఖలు (CSE, ECE) వీటి కింద జోడించండి."
       },
       "branches": {
         "title": "శాఖలు",
         "singular": "శాఖ",
-        "description": "విభాగం కింద డిగ్రీ శాఖలు — ఉదా. CSE, ECE."
+        "description": "డిగ్రీ కింద specialization — ఉదా. B.Tech కింద CSE, ECE."
       },
       "programs": {
         "title": "కార్యక్రమాలు",
@@ -1708,8 +1709,8 @@
       "noInstitutionTitle": "సంస్థ లింక్ చేయబడలేదు",
       "noInstitutionDescription": "అకడమిక్ వర్క్‌స్పేస్‌ను అన్‌లాక్ చేయడానికి సంస్థ ప్రొఫైల్‌ను కనెక్ట్ చేయండి లేదా సృష్టించండి.",
       "emptyStructureTitle": "మీ అకడమిక్ నిర్మాణం ఖాళీగా ఉంది",
-      "emptyStructureDescription": "ఈ డాష్‌బోర్డ్‌ను సజీవం చేయడానికి విభాగాలు మరియు శాఖలు (ఉదా. CSE) జోడించడం ప్రారంభించండి.",
-      "addDepartment": "విభాగం జోడించండి",
+      "emptyStructureDescription": "B.Tech, M.Tech, Ph.D. డిగ్రీ కార్యక్రమాలు జోడించి, తర్వాత CSE, ECE శాఖలు.",
+      "addDepartment": "డిగ్రీ కార్యక్రమం జోడించండి",
       "moduleDistribution": "మాడ్యూల్ పంపిణీ",
       "moduleDistributionDescription": "మీ సంస్థ వర్క్‌స్పేస్‌లో లెక్కలు",
       "calendarSummary": "క్యాలెండర్ సారాంశం",
@@ -1725,14 +1726,14 @@
       "quickActionsTitle": "త్వరిత చర్యలు",
       "quickActionsDescription": "మీరు తరచుగా నిర్వహించే మాడ్యూల్స్‌కు వెళ్లండి.",
       "stats": {
-        "departments": "డిపార్ట్‌మెంట్‌లు",
+        "departments": "డిగ్రీ కార్యక్రమాలు",
         "branches": "శాఖలు",
         "programs": "ప్రోగ్రామ్‌లు",
         "academicYears": "అకడమిక్ సంవత్సరాలు",
         "semesters": "సెమిస్టర్‌లు"
       },
       "chart": {
-        "departments": "డిపార్ట్‌మెంట్‌లు",
+        "departments": "డిగ్రీ కార్యక్రమాలు",
         "branches": "శాఖలు",
         "programs": "ప్రోగ్రామ్‌లు",
         "years": "సంవత్సరాలు",

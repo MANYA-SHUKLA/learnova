@@ -15,6 +15,7 @@ import type {
   UpdateStudentInput,
   UpdateStudentProfileInput,
 } from '@learnova/validation';
+import { INSTITUTION_MAX_STUDENTS } from '@learnova/constants';
 import { createStudentSchema } from '@learnova/validation';
 import { eventBus } from '../../events/index.js';
 import { DepartmentModel } from '../../models/department.model.js';
@@ -160,6 +161,15 @@ async function applyStudentListScope(
 }
 
 export class StudentService {
+  private async assertStudentCapacity(institutionId: string, additionalCount = 1) {
+    const current = await studentRepository.countForCapacity(institutionId);
+    if (current + additionalCount > INSTITUTION_MAX_STUDENTS) {
+      throw new ValidationError(
+        `This institution can have at most ${INSTITUTION_MAX_STUDENTS} students.`,
+      );
+    }
+  }
+
   private async audit(
     event: Parameters<typeof studentRepository.logAudit>[0]['event'],
     actor: ActorContext,
@@ -179,6 +189,7 @@ export class StudentService {
 
   async create(input: CreateStudentInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    await this.assertStudentCapacity(institutionId);
     const { studentId, admissionNumber } = await resolveStudentCreateIds(institutionId, input);
     const duplicates = await studentRepository.findDuplicates(institutionId, {
       studentId,
@@ -792,6 +803,8 @@ export class StudentService {
         })),
       );
     }
+
+    await this.assertStudentCapacity(institutionId, input.rows.length);
 
     const createdIds: string[] = [];
     let emailed = 0;

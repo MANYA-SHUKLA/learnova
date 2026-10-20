@@ -51,27 +51,8 @@ export const verifyEmailSchema = z.object({
   token: z.string().min(20, 'Invalid verification token'),
 });
 
-/** Matches API registerInstitutionSchema — profile details collected on /institution/setup. */
-export const registerInstitutionFormSchema = z
-  .object({
-    institutionName: z.string().trim().min(2, 'Institution name is required').max(200),
-    adminFirstName: z.string().trim().min(1, 'First name is required').max(80),
-    adminLastName: z.string().trim().min(1, 'Last name is required').max(80),
-    adminEmail: emailField,
-    password: passwordStrong,
-    confirmPassword: z.string().min(1, 'Confirm your password'),
-    acceptTerms: z
-      .boolean()
-      .refine((value) => value, { message: 'You must accept the Terms to continue' }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
-
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 export type VerifyEmailFormValues = z.infer<typeof verifyEmailSchema>;
-export type RegisterInstitutionFormValues = z.infer<typeof registerInstitutionFormSchema>;

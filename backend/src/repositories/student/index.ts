@@ -56,6 +56,13 @@ export class StudentRepository {
     return filter;
   }
 
+  async countForCapacity(institutionId: string): Promise<number> {
+    return StudentModel.countDocuments({
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    }).exec();
+  }
+
   async list(institutionId: string, query: StudentListQuery): Promise<StudentListResult> {
     const filter = this.buildFilter(institutionId, query);
     return this.listByFilter(filter, query.page, query.limit, query.sortBy, query.sortOrder);

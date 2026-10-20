@@ -73,8 +73,6 @@ export const createInstitutionSchema = z.object({
   subscriptionPlan: z.string().trim().min(1).max(50).default('standard'),
   subscriptionStart: z.coerce.date().optional().nullable(),
   subscriptionEnd: z.coerce.date().optional().nullable(),
-  maxStudents: z.coerce.number().int().min(1).default(1000),
-  maxFaculty: z.coerce.number().int().min(1).default(100),
   maxStorage: z.coerce.number().int().min(1).default(10_240),
 });
 

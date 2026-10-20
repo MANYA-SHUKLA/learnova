@@ -49,31 +49,6 @@ export function useLoginMutation() {
   });
 }
 
-export function useRegisterInstitutionMutation() {
-  const queryClient = useQueryClient();
-  const setAuth = useAuthStore((s) => s.setAuth);
-
-  return useMutation({
-    mutationFn: (body: {
-      email: string;
-      password: string;
-      firstName: string;
-      lastName: string;
-      institutionName: string;
-    }) => authApi.registerInstitution(body),
-    onSuccess: (data) => {
-      storeAccessToken(data.accessToken);
-      setAuth({
-        user: data.user,
-        accessToken: data.accessToken,
-        session: data.session,
-        roleHint: data.roleHint,
-      });
-      void queryClient.invalidateQueries({ queryKey: authKeys.all });
-    },
-  });
-}
-
 export function useLogoutMutation() {
   const queryClient = useQueryClient();
   const logoutLocal = useAuthStore((s) => s.logout);

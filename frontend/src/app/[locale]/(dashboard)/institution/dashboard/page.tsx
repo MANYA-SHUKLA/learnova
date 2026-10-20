@@ -310,12 +310,10 @@ export default function InstitutionDashboardPage() {
                 <DashboardCapacityMetric
                   label={t('students')}
                   value={institution.maxStudents}
-                  hint={t('planCapacity')}
                 />
                 <DashboardCapacityMetric
                   label={t('faculty')}
                   value={institution.maxFaculty}
-                  hint={t('planCapacity')}
                 />
               </div>
             </div>
