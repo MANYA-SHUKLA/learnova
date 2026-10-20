@@ -31,7 +31,12 @@ import {
 import { useStudentExamDashboard } from '@/features/examination';
 import { formatActivityKind, formatPercentage, useStudentGradebookDashboard } from '@/features/gradebook';
 import { useStudentProjectDashboard } from '@/features/project';
+import { useOrgLabels } from '@/features/institution';
 import { useStudentProgressDashboard } from '@/features/progress';
+import {
+  buildStudentAcademicSummary,
+  useMyStudentProfile,
+} from '@/features/student';
 import { Link } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -45,6 +50,8 @@ function displayName(firstName?: string | null, lastName?: string | null, email?
 export default function StudentDashboardPage() {
   const t = useTranslations('dashboard.studentHome');
   const { user } = useAuth();
+  const labels = useOrgLabels();
+  const studentProfile = useMyStudentProfile(user?.role === 'student');
 
   const progressDash = useStudentProgressDashboard();
   const assignmentDash = useStudentAssignmentDashboard();
@@ -106,20 +113,35 @@ export default function StudentDashboardPage() {
   );
 
   const name = displayName(user?.firstName, user?.lastName, user?.email);
+  const academicSummary = buildStudentAcademicSummary(studentProfile.data, labels);
 
   return (
     <DashboardPage>
       <PageHeader
         eyebrow={t('roleLabel')}
         title={t('welcomeNamed', { name })}
-        description={t('modulesIntro')}
+        description={
+          academicSummary
+            ? t('academicStanding', { summary: academicSummary })
+            : studentProfile.isLoading
+              ? t('modulesIntro')
+              : t('academicStandingMissing')
+        }
         meta={
-          progress?.currentStreakDays ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-2.5 py-1 text-caption font-medium text-warning">
-              <Flame className="size-3.5" />
-              {progress.currentStreakDays} day streak
-            </span>
-          ) : null
+          <div className="flex flex-wrap items-center gap-2">
+            {academicSummary ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-caption font-medium text-primary">
+                <GraduationCap className="size-3.5" />
+                {academicSummary}
+              </span>
+            ) : null}
+            {progress?.currentStreakDays ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-2.5 py-1 text-caption font-medium text-warning">
+                <Flame className="size-3.5" />
+                {progress.currentStreakDays} day streak
+              </span>
+            ) : null}
+          </div>
         }
       />
 

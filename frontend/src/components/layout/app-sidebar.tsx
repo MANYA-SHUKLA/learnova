@@ -46,6 +46,8 @@ import { can } from '@/lib/auth/permissions';
 import { useUIStore } from '@/stores/ui-store';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { cn } from '@/lib/utils';
+import { useOrgLabels } from '@/features/institution';
+import { buildStudentAcademicSummary, useMyStudentProfile } from '@/features/student';
 import { Logo } from './logo';
 
 const SESSIONS_ROUTE = '/sessions';
@@ -328,6 +330,12 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   const { user } = useAuth();
   const tRoles = useTranslations('roles');
   const tCommon = useTranslations('common');
+  const labels = useOrgLabels();
+  const studentProfile = useMyStudentProfile(user?.role === 'student');
+  const academicLine =
+    user?.role === 'student'
+      ? buildStudentAcademicSummary(studentProfile.data, labels)
+      : null;
   const email = user?.email ?? tCommon('account');
   const roleKey = user?.role;
   const role =
@@ -354,7 +362,9 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
         {!collapsed ? (
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-sidebar-foreground">{email}</p>
-            <p className="truncate text-xs text-muted-foreground">{role}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {academicLine ?? role}
+            </p>
           </div>
         ) : null}
       </div>

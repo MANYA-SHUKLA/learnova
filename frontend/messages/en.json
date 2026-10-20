@@ -2514,6 +2514,8 @@
       "modulesIntro": "The following modules will appear automatically once you are enrolled in courses.",
       "welcome": "Welcome",
       "welcomeNamed": "Welcome {name}",
+      "academicStanding": "{summary}",
+      "academicStandingMissing": "Year and program will appear once your profile is set up by the office.",
       "contactAdmin": "Contact your administrator if you believe this is incorrect.",
       "modules": {
         "myCourses": "My Courses",

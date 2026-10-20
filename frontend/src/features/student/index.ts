@@ -7,3 +7,7 @@ export {
   formatStudentStatus,
   formatStudentGender,
 } from './lib/labels';
+export {
+  buildStudentAcademicSummary,
+  formatYearOfStudy,
+} from './utils/academic-standing';

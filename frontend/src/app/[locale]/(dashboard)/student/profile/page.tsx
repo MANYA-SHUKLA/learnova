@@ -321,14 +321,19 @@ export default function StudentProfilePage() {
         <Card className="rounded-2xl">
           <CardHeader>
             <CardTitle className="text-base">Academic details</CardTitle>
-            <CardDescription>Your academic program and year information (read-only).</CardDescription>
+            <CardDescription>
+              Program year and term are updated by the academic office when you advance (e.g. Year 1
+              → Year 2).
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             {[
               ['Program', labels.program(student.programId)],
               ['Department', labels.department(student.departmentId)],
-              ['Year of study', student.yearOfStudy?.toString()],
+              ['Batch', labels.batch(student.batchId)],
+              ['Year of study', student.yearOfStudy != null ? `Year ${student.yearOfStudy}` : null],
               ['Current semester', student.currentSemester?.toString()],
+              ['Term', labels.semester(student.semesterId)],
               ['Admission date', student.admissionDate?.slice(0, 10)],
               ['Expected graduation', student.expectedGraduationDate?.slice(0, 10)],
             ].map(([label, value]) => (
