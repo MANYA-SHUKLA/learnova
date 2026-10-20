@@ -19,7 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { publicApi } from '@/features/public/services/public-api';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass, platformHeroPrimaryClass, platformHeroSecondaryClass } from '@/lib/cta';
@@ -27,11 +27,14 @@ import { ApiClientError } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
 import type { PlatformMarketingI18nOverlay } from '@/lib/platform-marketing-i18n';
 
-/** Expressive card hover — lift, glow, gradient sheen (respects reduced motion). */
+/** Card surface + hover — no hard border jumps; shadow and motion only. */
+const marketingCardSurface =
+  'rounded-2xl bg-card/95 shadow-sm shadow-black/[0.04] ring-1 ring-black/[0.04] dark:shadow-black/25 dark:ring-white/[0.06]';
+
 const marketingCardHover = cn(
   'group relative overflow-hidden',
-  'transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
-  'hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/15',
+  'transition-[transform,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+  'hover:-translate-y-2 hover:bg-card hover:shadow-xl hover:shadow-primary/12',
   'motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-sm',
   'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit]',
   'before:bg-gradient-to-br before:from-primary/[0.12] before:via-primary/[0.04] before:to-transparent',
@@ -94,6 +97,123 @@ function platformFaqFromMessages(
   return items;
 }
 
+type DemoFormState = {
+  institutionName: string;
+  contactName: string;
+  contactEmail: string;
+  phone: string;
+  message: string;
+};
+
+function PlatformDemoRequestSection({
+  introTitle,
+  introSubtitle,
+  submitted,
+  thanksMessage,
+  fieldInstitution,
+  fieldContact,
+  fieldEmail,
+  fieldPhone,
+  fieldMessage,
+  sendingLabel,
+  submitLabel,
+  form,
+  setForm,
+  demoMutation,
+}: {
+  introTitle: string;
+  introSubtitle: string;
+  submitted: boolean;
+  thanksMessage: string;
+  fieldInstitution: string;
+  fieldContact: string;
+  fieldEmail: string;
+  fieldPhone: string;
+  fieldMessage: string;
+  sendingLabel: string;
+  submitLabel: string;
+  form: DemoFormState;
+  setForm: Dispatch<SetStateAction<DemoFormState>>;
+  demoMutation: {
+    mutateAsync: () => Promise<unknown>;
+    isPending: boolean;
+    error: unknown;
+  };
+}) {
+  return (
+    <section id="request-demo" className="scroll-mt-24 bg-gradient-to-b from-muted/15 to-muted/35 py-20 sm:py-24">
+      <div className={siteContainer('w-full')}>
+        <div className={cn(sectionGrid, 'lg:items-start')}>
+          <div className={sectionIntroCol}>
+            <SectionIntro title={introTitle} subtitle={introSubtitle} />
+          </div>
+          <div
+            className={cn(
+              sectionBodyCol,
+              marketingCardSurface,
+              'p-8 sm:p-10',
+              marketingCardHover,
+              'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
+            )}
+          >
+            <div className={marketingCardInner}>
+              {submitted ? (
+                <p className="font-medium text-primary">{thanksMessage}</p>
+              ) : (
+                <form
+                  className="space-y-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void demoMutation.mutateAsync();
+                  }}
+                >
+                  <Input
+                    placeholder={fieldInstitution}
+                    value={form.institutionName}
+                    onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value }))}
+                    required
+                  />
+                  <Input
+                    placeholder={fieldContact}
+                    value={form.contactName}
+                    onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
+                    required
+                  />
+                  <Input
+                    type="email"
+                    placeholder={fieldEmail}
+                    value={form.contactEmail}
+                    onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
+                    required
+                  />
+                  <Input
+                    placeholder={fieldPhone}
+                    value={form.phone}
+                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                    required
+                  />
+                  <textarea
+                    className="flex min-h-[96px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
+                    placeholder={fieldMessage}
+                    value={form.message}
+                    onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                  />
+                  {demoMutation.error instanceof ApiClientError ? (
+                    <p className="text-sm text-destructive">{demoMutation.error.message}</p>
+                  ) : null}
+                  <Button type="submit" className={cn('w-full', ctaButtonClass)} disabled={demoMutation.isPending}>
+                    {demoMutation.isPending ? sendingLabel : submitLabel}
+                  </Button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const MODULE_ICONS: Record<string, LucideIcon> = {
   lms: BookOpen,
   erp: GraduationCap,
@@ -103,6 +223,15 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   aiIdeation: Brain,
   analytics: LineChart,
   audit: ShieldCheck,
+};
+
+const BUYER_LINE_ICONS: Record<number, LucideIcon> = {
+  1: GraduationCap,
+  2: BookOpen,
+  3: ClipboardCheck,
+  4: Code2,
+  5: Sparkles,
+  6: ShieldCheck,
 };
 
 export function PlatformHomePage({
@@ -195,7 +324,7 @@ export function PlatformHomePage({
   return (
     <main className="overflow-x-clip font-body">
       {/* Hero */}
-      <section className="relative isolate overflow-hidden border-b border-border/60 bg-background pb-16 pt-14 sm:pb-24 sm:pt-20 lg:pb-28 lg:pt-24">
+      <section className="relative isolate overflow-hidden bg-background pb-16 pt-14 sm:pb-24 sm:pt-20 lg:pb-28 lg:pt-24">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-30%,hsl(var(--primary)/0.18),transparent_55%)]" />
           <div className="absolute -left-[20%] top-1/4 size-[min(480px,70vw)] rounded-full bg-primary/10 blur-3xl" />
@@ -210,19 +339,21 @@ export function PlatformHomePage({
             }}
           />
         </div>
-        <div className={siteContainer('relative grid w-full items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20')}>
-          <div className="text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.07] px-4 py-1.5 shadow-sm backdrop-blur-sm">
+        <div className={siteContainer('relative w-full')}>
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/[0.08] px-4 py-1.5 shadow-sm shadow-primary/5 backdrop-blur-sm transition-colors duration-500 hover:bg-primary/[0.12]">
               <Sparkles className="size-3.5 text-primary" aria-hidden />
               <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{heroEyebrow}</span>
             </div>
-            <h1 className="mt-8 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.25rem] lg:leading-[1.06] xl:text-[3.5rem]">
+            <h1 className="mt-8 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.35rem] lg:leading-[1.08]">
               <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/65 bg-clip-text text-transparent">
                 {heroTitle}
               </span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">{heroSubtitle}</p>
-            <div className="mt-10 flex flex-wrap gap-4">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+              {heroSubtitle}
+            </p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <Button asChild size="lg" className={platformHeroPrimaryClass}>
                 <a href="#request-demo" className="group inline-flex items-center gap-2">
                   {heroCtaLabel}
@@ -236,49 +367,60 @@ export function PlatformHomePage({
                 </a>
               </Button>
             </div>
-          </div>
-          <div className="relative hidden lg:block">
             {heroTagline ? (
-              <div className="rounded-3xl border border-border/70 bg-card/80 p-8 shadow-xl shadow-primary/5 backdrop-blur-md">
+              <p className="mx-auto mt-8 max-w-xl text-sm font-medium text-muted-foreground">{heroTagline}</p>
+            ) : null}
+          </div>
+
+          {buyerKeys.length > 0 ? (
+            <div
+              className={cn(
+                'mx-auto mt-14 max-w-5xl rounded-3xl bg-card/70 p-6 shadow-lg shadow-primary/[0.07] backdrop-blur-md transition-[box-shadow,background-color] duration-500 hover:bg-card/85 hover:shadow-xl hover:shadow-primary/10 sm:p-8',
+                'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:items-center lg:gap-10 lg:text-left',
+              )}
+            >
+              <div className="text-center lg:text-left">
                 <p className="text-sm font-semibold uppercase tracking-wider text-primary">{tPlatform('buyerEyebrow')}</p>
-                <p className="mt-4 text-lg font-medium leading-relaxed text-foreground">{heroTagline}</p>
-                {buyerKeys.length > 0 ? (
-                  <ul className="mt-6 space-y-3 border-t border-border/60 pt-6">
-                    {buyerKeys.slice(0, 4).map((i) => {
-                      const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
-                      return (
-                        <li key={i} className="flex gap-3 text-sm">
-                          <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
-                          <span>
-                            <span className="font-semibold text-foreground">{line.label}</span>
-                            {line.detail ? (
-                              <span className="text-muted-foreground"> — {line.detail}</span>
-                            ) : null}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : null}
-                <Button asChild variant="link" className="mt-6 h-auto p-0 text-primary">
+                <p className="mt-3 text-base leading-relaxed text-foreground sm:text-lg">
+                  {tPlatform('buyerSubtitle')}
+                </p>
+                <Button asChild variant="link" className="mt-4 hidden h-auto p-0 text-primary lg:inline-flex">
                   <a href="#package" className="inline-flex items-center gap-1">
                     {tPlatform('exploreModules')}
                     <ArrowRight className="size-4" aria-hidden />
                   </a>
                 </Button>
               </div>
-            ) : null}
-          </div>
-          {heroTagline ? (
-            <p className="rounded-2xl border border-border/60 bg-card/50 px-5 py-3 text-sm font-medium leading-relaxed text-muted-foreground shadow-sm backdrop-blur-sm lg:col-span-2 lg:hidden">
-              {heroTagline}
-            </p>
+              <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:mt-0">
+                {buyerKeys.slice(0, 4).map((i) => {
+                  const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
+                  return (
+                    <li
+                      key={i}
+                      className="flex gap-2.5 rounded-xl bg-background/70 px-3 py-2.5 text-left text-sm shadow-sm shadow-black/[0.03] transition-[transform,box-shadow,background-color] duration-300 hover:-translate-y-0.5 hover:bg-background hover:shadow-md motion-reduce:hover:translate-y-0"
+                    >
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                      <span>
+                        <span className="font-semibold text-foreground">{line.label}</span>
+                        {line.detail ? <span className="text-muted-foreground"> — {line.detail}</span> : null}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <Button asChild variant="link" className="mx-auto mt-4 h-auto p-0 text-primary lg:hidden">
+                <a href="#package" className="inline-flex items-center gap-1">
+                  {tPlatform('exploreModules')}
+                  <ArrowRight className="size-4" aria-hidden />
+                </a>
+              </Button>
+            </div>
           ) : null}
         </div>
       </section>
 
       {/* Stats strip */}
-      <section className="border-b border-border/60 bg-muted/20 py-10 sm:py-12">
+      <section className="bg-gradient-to-b from-background to-muted/25 py-10 sm:py-12">
         <div className={siteContainer('w-full')}>
           <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
             {[
@@ -289,7 +431,8 @@ export function PlatformHomePage({
               <div
                 key={stat.label}
                 className={cn(
-                  'rounded-2xl border border-border/50 bg-card/60 px-6 py-5 text-left',
+                  marketingCardSurface,
+                  'bg-card/70 px-6 py-5 text-left',
                   marketingCardHover,
                   'hover:scale-[1.02] motion-reduce:hover:scale-100',
                 )}
@@ -309,67 +452,108 @@ export function PlatformHomePage({
       {buyerKeys.length > 0 ? (
         <section
           id="package"
-          className="scroll-mt-24 border-b border-border/60 bg-gradient-to-br from-primary/[0.08] via-muted/30 to-background py-20 sm:py-24"
+          className="relative scroll-mt-24 overflow-hidden bg-gradient-to-br from-primary/[0.1] via-muted/35 to-background py-20 sm:py-28"
         >
-          <div className={siteContainer('w-full')}>
-            <div className={sectionGrid}>
-              <div className={sectionIntroCol}>
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-                  <Package className="size-3.5" aria-hidden />
-                  {tPlatform('buyerEyebrow')}
-                </div>
-                <SectionIntro className="mt-5" title={tPlatform('buyerTitle')} subtitle={tPlatform('buyerSubtitle')}>
-                  <div className="mt-8 flex flex-wrap gap-3">
-                    <Button asChild size="lg" className={platformHeroPrimaryClass}>
-                      <a href="#request-demo" className="group inline-flex items-center gap-2">
-                        {tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}
-                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-                      </a>
-                    </Button>
-                    <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
-                      <a href="#modules">{tPlatform('exploreModules')}</a>
-                    </Button>
-                  </div>
-                </SectionIntro>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-32 top-1/4 size-96 rounded-full bg-primary/15 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-24 bottom-0 size-80 rounded-full bg-violet-500/10 blur-3xl"
+          />
+          <div className={siteContainer('relative w-full')}>
+            <div className="max-w-3xl text-left lg:max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-background/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary shadow-sm shadow-primary/10">
+                <Package className="size-3.5" aria-hidden />
+                {tPlatform('buyerEyebrow')}
               </div>
-              <ul className={cn(sectionBodyCol, 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3')}>
-                {buyerKeys.map((i) => {
-                  const raw = tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]);
-                  const line = parseBuyerLine(raw);
-                  return (
-                    <li
-                      key={i}
+              <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
+                {tPlatform('buyerTitle')}
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {tPlatform('buyerSubtitle')}
+              </p>
+              {tPlatform.has('buyerExploreHint') ? (
+                <p className="mt-3 text-sm font-medium text-foreground/80">{tPlatform('buyerExploreHint')}</p>
+              ) : null}
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild size="lg" className={platformHeroPrimaryClass}>
+                  <a href="#modules" className="group inline-flex items-center gap-2">
+                    <LayoutGrid className="size-4 opacity-90" aria-hidden />
+                    {tPlatform('exploreModules')}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+                  </a>
+                </Button>
+                <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
+                  <a href="#request-demo">
+                    {tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}
+                  </a>
+                </Button>
+              </div>
+            </div>
+
+            <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-12 lg:gap-5">
+              {buyerKeys.map((i) => {
+                const raw = tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]);
+                const line = parseBuyerLine(raw);
+                const Icon = BUYER_LINE_ICONS[i] ?? CheckCircle2;
+                const isFeatured = i <= 4;
+                return (
+                  <li
+                    key={i}
+                    className={cn(
+                      isFeatured ? 'lg:col-span-6' : 'lg:col-span-6',
+                      i === 1 && 'lg:row-start-1',
+                      i === 2 && 'lg:row-start-1',
+                      i === 3 && 'lg:row-start-2',
+                      i === 4 && 'lg:row-start-2',
+                    )}
+                  >
+                    <div
                       className={cn(
-                        'flex min-h-[7.5rem] flex-col justify-between rounded-2xl border border-border/80 bg-card p-5 shadow-sm',
+                        marketingCardSurface,
+                        'relative h-full overflow-hidden p-6 sm:p-7',
                         marketingCardHover,
-                        'overflow-visible hover:scale-[1.02] motion-reduce:hover:scale-100',
+                        isFeatured && 'sm:min-h-[11rem]',
+                        'overflow-visible hover:scale-[1.015] motion-reduce:hover:scale-100',
                       )}
                     >
-                      <div className={marketingCardInner}>
-                        <div className="flex items-start justify-between gap-2">
-                          <CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden />
-                          <span className="font-display text-xs font-bold tabular-nums text-muted-foreground/80">
+                      <div
+                        aria-hidden
+                        className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-primary/10 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+                      />
+                      <div className={cn(marketingCardInner, 'flex h-full flex-col')}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary shadow-inner transition-transform duration-500 group-hover:scale-110 motion-reduce:group-hover:scale-100">
+                            <Icon className="size-6" aria-hidden />
+                          </div>
+                          <span className="font-display text-sm font-bold tabular-nums tracking-wider text-primary/50">
                             {String(i).padStart(2, '0')}
                           </span>
                         </div>
-                        <p className="mt-3 font-display text-base font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+                        <p className="mt-5 font-display text-lg font-semibold leading-snug text-foreground transition-colors duration-300 group-hover:text-primary">
                           {line.label}
                         </p>
                         {line.detail ? (
-                          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{line.detail}</p>
+                          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{line.detail}</p>
                         ) : null}
+                        <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:opacity-100">
+                          <CheckCircle2 className="size-3.5" aria-hidden />
+                          Included
+                        </div>
                       </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </section>
       ) : null}
 
       {/* Eight modules */}
-      <section id="modules" className="scroll-mt-24 border-b border-border/40 py-20 sm:py-28">
+      <section id="modules" className="scroll-mt-24 bg-background py-20 sm:py-28">
         <div className={siteContainer('w-full')}>
           <div className={sectionGrid}>
             <div className={sectionIntroCol}>
@@ -386,7 +570,8 @@ export function PlatformHomePage({
                   <div
                     key={key}
                     className={cn(
-                      'rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                      marketingCardSurface,
+                      'p-6',
                       marketingCardHover,
                       'hover:scale-[1.02] motion-reduce:hover:scale-100',
                     )}
@@ -415,7 +600,7 @@ export function PlatformHomePage({
 
       {/* CMS highlights */}
       {highlightFeatures.length > 0 ? (
-        <section className="border-b border-border/60 bg-muted/25 py-20 sm:py-24">
+        <section className="bg-gradient-to-b from-muted/20 to-muted/35 py-20 sm:py-24">
           <div className={siteContainer('w-full')}>
             <div className={sectionGrid}>
               <div className={sectionIntroCol}>
@@ -426,7 +611,8 @@ export function PlatformHomePage({
                   <div
                     key={feature.title}
                     className={cn(
-                      'rounded-2xl border border-border/60 bg-background p-8 shadow-soft-md',
+                      marketingCardSurface,
+                      'bg-background/90 p-8',
                       marketingCardHover,
                       'hover:scale-[1.02] motion-reduce:hover:scale-100',
                     )}
@@ -460,7 +646,8 @@ export function PlatformHomePage({
                 <li
                   key={step}
                   className={cn(
-                    'rounded-2xl border border-border bg-card p-6 shadow-sm',
+                    marketingCardSurface,
+                    'p-6',
                     marketingCardHover,
                     'overflow-visible hover:scale-[1.03] motion-reduce:hover:scale-100',
                   )}
@@ -488,7 +675,7 @@ export function PlatformHomePage({
         </div>
       </section>
 
-      <section className="border-y border-border/60 bg-background py-20 sm:py-24">
+      <section className="bg-gradient-to-b from-muted/15 via-background to-background py-20 sm:py-24">
         <div className={siteContainer('w-full')}>
           <div className={sectionGrid}>
             <div className={sectionIntroCol}>
@@ -499,7 +686,8 @@ export function PlatformHomePage({
                 <div
                   key={key}
                   className={cn(
-                    'rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                    marketingCardSurface,
+                    'p-6',
                     marketingCardHover,
                     'hover:scale-[1.02] motion-reduce:hover:scale-100',
                   )}
@@ -507,7 +695,7 @@ export function PlatformHomePage({
                   <div
                     className={cn(
                       marketingCardInner,
-                      'border-l-2 border-primary/0 pl-0 transition-[border-color,padding] duration-500 group-hover:border-primary group-hover:pl-3 motion-reduce:group-hover:pl-0',
+                      'pl-0 transition-[padding] duration-500 group-hover:pl-2 motion-reduce:group-hover:pl-0',
                     )}
                   >
                     <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
@@ -524,7 +712,7 @@ export function PlatformHomePage({
         </div>
       </section>
 
-      <section className="border-t border-border/60 bg-muted/25 py-20 sm:py-24">
+      <section className="bg-gradient-to-b from-background to-muted/25 py-20 sm:py-24">
         <div className={siteContainer('w-full')}>
           <div className={sectionGrid}>
             <div className={sectionIntroCol}>
@@ -538,7 +726,8 @@ export function PlatformHomePage({
                 <figure
                   key={key}
                   className={cn(
-                    'flex h-full flex-col rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                    marketingCardSurface,
+                    'flex h-full flex-col p-6',
                     marketingCardHover,
                     'hover:scale-[1.02] hover:rotate-[0.35deg] motion-reduce:hover:scale-100 motion-reduce:hover:rotate-0',
                   )}
@@ -553,7 +742,7 @@ export function PlatformHomePage({
                       </span>
                       {tPlatform(`${key}Quote`)}
                     </blockquote>
-                    <figcaption className="mt-5 border-t border-border/60 pt-4 transition-colors duration-300 group-hover:border-primary/30">
+                    <figcaption className="mt-5 pt-4 transition-[opacity,transform] duration-500 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0">
                       <p className="font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
                         {tPlatform(`${key}Name`)}
                       </p>
@@ -569,7 +758,7 @@ export function PlatformHomePage({
 
       {/* Pricing — full-width left intro + right checklist (not a centered card) */}
       {pricingBody ? (
-        <section id="pricing" className="scroll-mt-24 border-t border-border/60 bg-muted/20 py-20 sm:py-24">
+        <section id="pricing" className="scroll-mt-24 bg-gradient-to-b from-muted/25 to-muted/10 py-20 sm:py-24">
           <div className={siteContainer('w-full')}>
             <div className={cn(sectionGrid, 'lg:items-start')}>
               <div className={sectionIntroCol}>
@@ -586,7 +775,8 @@ export function PlatformHomePage({
                 <div className={sectionBodyCol}>
                   <div
                     className={cn(
-                      'relative overflow-hidden rounded-2xl border border-border/80 bg-card p-8 shadow-sm sm:p-10',
+                      marketingCardSurface,
+                      'relative overflow-hidden p-8 sm:p-10',
                       marketingCardHover,
                       'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
                     )}
@@ -603,7 +793,7 @@ export function PlatformHomePage({
                         {pricingIncludeKeys.map((i) => {
                           const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
                           return (
-                            <li key={i} className="flex gap-3 border-b border-border/50 pb-4 last:border-0 last:pb-0">
+                            <li key={i} className="flex gap-3 pb-1 transition-opacity duration-300 last:pb-0">
                               <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
                               <span className="text-base leading-snug">
                                 <span className="font-semibold text-foreground">{line.label}</span>
@@ -625,7 +815,7 @@ export function PlatformHomePage({
       ) : null}
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-24 border-t border-border/60 bg-background py-20 sm:py-24">
+      <section id="faq" className="scroll-mt-24 bg-background py-20 sm:py-24">
         <div className={siteContainer('w-full')}>
           <div className={sectionGrid}>
             <div className={sectionIntroCol}>
@@ -636,9 +826,10 @@ export function PlatformHomePage({
                 <details
                   key={item.title}
                   className={cn(
-                    'group rounded-2xl border border-border bg-card px-6 py-4 open:shadow-md open:shadow-primary/10',
-                    'transition-[transform,box-shadow,border-color] duration-300 ease-out',
-                    'hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-primary/10',
+                    marketingCardSurface,
+                    'group px-6 py-4 open:shadow-md open:shadow-primary/10',
+                    'transition-[transform,box-shadow,background-color] duration-500 ease-out',
+                    'hover:-translate-y-0.5 hover:bg-card hover:shadow-lg hover:shadow-primary/10',
                     'motion-reduce:hover:translate-y-0',
                   )}
                 >
@@ -654,11 +845,7 @@ export function PlatformHomePage({
       </section>
 
       {tPlatform.has('closingTitle') ? (
-        <section className="relative overflow-hidden border-t border-border/60 py-16 sm:py-20">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/15 via-primary/5 to-violet-500/10"
-          />
+        <section className="relative overflow-hidden bg-gradient-to-r from-primary/[0.12] via-primary/[0.04] to-violet-500/[0.08] py-16 sm:py-20">
           <div
             className={siteContainer(
               'relative flex w-full flex-col gap-8 text-left lg:flex-row lg:items-center lg:justify-between',
@@ -679,76 +866,22 @@ export function PlatformHomePage({
       ) : null}
 
       {/* Demo request — no login */}
-      <section id="request-demo" className="scroll-mt-24 border-t border-border/60 bg-muted/30 py-20 sm:py-24">
-        <div className={siteContainer('w-full')}>
-          <div className={cn(sectionGrid, 'lg:items-start')}>
-            <div className={sectionIntroCol}>
-              <SectionIntro title={tPlatform('demoTitle')} subtitle={tPlatform('demoSubtitle')} />
-            </div>
-            <div className={sectionBodyCol}>
-              <div
-                className={cn(
-                  'rounded-2xl border border-border bg-card p-8 shadow-soft-md sm:p-10',
-                  marketingCardHover,
-                  'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
-                )}
-              >
-                <div className={marketingCardInner}>
-                  {submitted ? (
-                    <p className="font-medium text-primary">{tPlatform('demoThanks')}</p>
-                  ) : (
-                    <form
-                      className="space-y-4"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        void demoMutation.mutateAsync();
-                      }}
-                    >
-                      <Input
-                        placeholder={tPlatform('fieldInstitution')}
-                        value={form.institutionName}
-                        onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value }))}
-                        required
-                      />
-                      <Input
-                        placeholder={tPlatform('fieldContact')}
-                        value={form.contactName}
-                        onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
-                        required
-                      />
-                      <Input
-                        type="email"
-                        placeholder={tPlatform('fieldEmail')}
-                        value={form.contactEmail}
-                        onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
-                        required
-                      />
-                      <Input
-                        placeholder={tPlatform('fieldPhone')}
-                        value={form.phone}
-                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                        required
-                      />
-                      <textarea
-                        className="flex min-h-[96px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
-                        placeholder={tPlatform('fieldMessage')}
-                        value={form.message}
-                        onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                      />
-                      {demoMutation.error instanceof ApiClientError ? (
-                        <p className="text-sm text-destructive">{demoMutation.error.message}</p>
-                      ) : null}
-                      <Button type="submit" className={cn('w-full', ctaButtonClass)} disabled={demoMutation.isPending}>
-                        {demoMutation.isPending ? tPlatform('sending') : tPlatform('submitDemo')}
-                      </Button>
-                    </form>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PlatformDemoRequestSection
+        introTitle={tPlatform('demoTitle')}
+        introSubtitle={tPlatform('demoSubtitle')}
+        submitted={submitted}
+        thanksMessage={tPlatform('demoThanks')}
+        fieldInstitution={tPlatform('fieldInstitution')}
+        fieldContact={tPlatform('fieldContact')}
+        fieldEmail={tPlatform('fieldEmail')}
+        fieldPhone={tPlatform('fieldPhone')}
+        fieldMessage={tPlatform('fieldMessage')}
+        sendingLabel={tPlatform('sending')}
+        submitLabel={tPlatform('submitDemo')}
+        form={form}
+        setForm={setForm}
+        demoMutation={demoMutation}
+      />
     </main>
   );
 }

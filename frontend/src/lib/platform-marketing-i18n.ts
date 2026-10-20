@@ -33,7 +33,7 @@ export async function getPlatformMarketingI18nOverlay(
     heroTitle: t('heroTitle'),
     heroSubtitle: t('heroSubtitle'),
     heroTagline: t.has('heroTagline') ? t('heroTagline') : '',
-    heroCtaLabel: t('requestDemo'),
+    heroCtaLabel: t.has('requestDemo') ? t('requestDemo') : 'Request a demo',
     highlights: ([1, 2, 3] as const).flatMap((i) => {
       const titleKey = `highlight${i}Title` as Parameters<typeof t>[0];
       const bodyKey = `highlight${i}Body` as Parameters<typeof t>[0];

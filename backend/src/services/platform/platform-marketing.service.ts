@@ -5,9 +5,9 @@ const SINGLETON_KEY = 'default';
 
 function defaultMarketing(): PlatformMarketingInput {
   return {
-    heroTitle: 'Run your college on one live academic stack',
+    heroTitle: 'One vendor. One stack. Your whole campus.',
     heroSubtitle:
-      'Timetables, courses, coding labs, exams, and gradebook tied to real sections — plus a branded portal at a short URL your campus can share on day one.',
+      'Buyers scope ERP, LMS, coding labs, exams, analytics, and a branded student portal in a single demo — then license per campus with clear module pricing.',
     heroCtaLabel: 'Request a demo',
     features: [
       {
