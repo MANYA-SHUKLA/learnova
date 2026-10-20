@@ -11,6 +11,17 @@ export type StudentStatus =
 
 export type StudentGender = 'male' | 'female' | 'other' | 'prefer_not_to_say';
 
+/** Resolved org labels for profile UI (students may not load full org catalog). */
+export interface StudentAcademicDisplay {
+  branch: string | null;
+  program: string | null;
+  department: string | null;
+  section: string | null;
+  batch: string | null;
+  semester: string | null;
+  academicYear: string | null;
+}
+
 export interface Student {
   id: ID;
   studentId: string;
@@ -70,6 +81,8 @@ export interface Student {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  /** Populated on GET /students/me when academic IDs are set. */
+  academicDisplay?: StudentAcademicDisplay;
 }
 
 export interface StudentStats {

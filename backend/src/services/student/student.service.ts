@@ -28,6 +28,15 @@ import { BatchModel } from '../../models/batch.model.js';
 import { SectionModel } from '../../models/section.model.js';
 import { SemesterModel } from '../../models/semester.model.js';
 import { AcademicYearModel } from '../../models/academic-year.model.js';
+type StudentAcademicDisplay = {
+  branch: string | null;
+  program: string | null;
+  department: string | null;
+  section: string | null;
+  batch: string | null;
+  semester: string | null;
+  academicYear: string | null;
+};
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
 import {
@@ -351,6 +360,95 @@ export class StudentService {
     }
 
     return out;
+  }
+
+  private async resolveStudentAcademicDisplay(
+    institutionId: string,
+    student: {
+      programId?: Types.ObjectId | null;
+      departmentId?: Types.ObjectId | null;
+      sectionId?: Types.ObjectId | null;
+      batchId?: Types.ObjectId | null;
+      semesterId?: Types.ObjectId | null;
+      academicYearId?: Types.ObjectId | null;
+    },
+  ): Promise<StudentAcademicDisplay> {
+    const instOid = new Types.ObjectId(institutionId);
+    const empty: StudentAcademicDisplay = {
+      branch: null,
+      program: null,
+      department: null,
+      section: null,
+      batch: null,
+      semester: null,
+      academicYear: null,
+    };
+
+    const [program, department, section, batch, semester, academicYear] = await Promise.all([
+      student.programId
+        ? ProgramModel.findOne({ _id: student.programId, institutionId: instOid, deletedAt: null })
+            .select('name code')
+            .lean()
+            .exec()
+        : null,
+      student.departmentId
+        ? DepartmentModel.findOne({
+            _id: student.departmentId,
+            institutionId: instOid,
+            deletedAt: null,
+          })
+            .select('name code')
+            .lean()
+            .exec()
+        : null,
+      student.sectionId
+        ? SectionModel.findOne({ _id: student.sectionId, institutionId: instOid, deletedAt: null })
+            .select('name')
+            .lean()
+            .exec()
+        : null,
+      student.batchId
+        ? BatchModel.findOne({ _id: student.batchId, institutionId: instOid, deletedAt: null })
+            .select('name')
+            .lean()
+            .exec()
+        : null,
+      student.semesterId
+        ? SemesterModel.findOne({ _id: student.semesterId, institutionId: instOid, deletedAt: null })
+            .select('name number')
+            .lean()
+            .exec()
+        : null,
+      student.academicYearId
+        ? AcademicYearModel.findOne({
+            _id: student.academicYearId,
+            institutionId: instOid,
+            deletedAt: null,
+          })
+            .select('name')
+            .lean()
+            .exec()
+        : null,
+    ]);
+
+    if (!program && !department && !section && !batch && !semester && !academicYear) {
+      return empty;
+    }
+
+    const branchLabel = program ? `${program.name} (${program.code})` : null;
+    const semesterLabel =
+      semester?.name ??
+      (semester?.number != null ? `Semester ${semester.number}` : null);
+
+    return {
+      branch: branchLabel,
+      program: branchLabel,
+      department: department ? `${department.name} (${department.code})` : null,
+      section: section?.name ?? null,
+      batch: batch?.name ?? null,
+      semester: semesterLabel,
+      academicYear: academicYear?.name ?? null,
+    };
   }
 
   private async audit(
@@ -719,9 +817,56 @@ export class StudentService {
 
   async getOwnProfile(actor: ActorContext) {
     const institutionId = requireTenant(actor);
-    const existing = await studentRepository.findByEmail(institutionId, actor.email);
+    let existing = await studentRepository.findByEmail(institutionId, actor.email);
     if (!existing) throw new NotFoundError('Student profile not found for this account');
-    return toDto(existing);
+
+    const fromSection = await this.enrichOrgFieldsFromSection(institutionId, {
+      sectionId: existing.sectionId ? String(existing.sectionId) : null,
+      programId: existing.programId ? String(existing.programId) : null,
+      semesterId: existing.semesterId ? String(existing.semesterId) : null,
+      departmentId: existing.departmentId ? String(existing.departmentId) : null,
+      academicYearId: existing.academicYearId ? String(existing.academicYearId) : null,
+    });
+
+    if (Object.keys(fromSection).length > 0) {
+      const patch: Record<string, unknown> = {};
+      if (fromSection.programId) patch.programId = new Types.ObjectId(fromSection.programId);
+      if (fromSection.semesterId) patch.semesterId = new Types.ObjectId(fromSection.semesterId);
+      if (fromSection.departmentId) patch.departmentId = new Types.ObjectId(fromSection.departmentId);
+      if (fromSection.academicYearId) {
+        patch.academicYearId = new Types.ObjectId(fromSection.academicYearId);
+      }
+      const updated = await studentRepository.updateById(
+        institutionId,
+        String(existing._id),
+        patch,
+      );
+      if (updated) existing = updated;
+    }
+
+    if (existing.programId && !existing.batchId) {
+      const batch = await BatchModel.findOne({
+        institutionId: new Types.ObjectId(institutionId),
+        programId: existing.programId,
+        deletedAt: null,
+      })
+        .sort({ year: -1 })
+        .select('_id')
+        .lean()
+        .exec();
+      if (batch) {
+        const withBatch = await studentRepository.updateById(institutionId, String(existing._id), {
+          batchId: batch._id,
+        });
+        if (withBatch) existing = withBatch;
+      }
+    }
+
+    const academicDisplay = await this.resolveStudentAcademicDisplay(institutionId, existing);
+    return {
+      ...toDto(existing),
+      academicDisplay,
+    };
   }
 
   async updateOwnProfile(input: UpdateStudentProfileInput, actor: ActorContext) {

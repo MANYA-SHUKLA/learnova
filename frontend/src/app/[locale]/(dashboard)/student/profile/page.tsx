@@ -66,6 +66,15 @@ export default function StudentProfilePage() {
   }
 
   const student = query.data;
+  const academic = student.academicDisplay;
+
+  const semesterLine = (() => {
+    const parts: string[] = [];
+    if (student.currentSemester != null) parts.push(`Sem ${student.currentSemester}`);
+    const term = academic?.semester ?? labels.semester(student.semesterId);
+    if (term && term !== '—' && !parts.some((p) => p.includes(term))) parts.push(term);
+    return parts.length > 0 ? parts.join(' · ') : null;
+  })();
 
   const onPickPhoto = async (file: File | null) => {
     if (!file) return;
@@ -571,13 +580,32 @@ export default function StudentProfilePage() {
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             {[
-              ['Program', labels.program(student.programId)],
-              ['Department', labels.department(student.departmentId)],
-              ['Section / class', labels.section(student.sectionId)],
-              ['Batch', labels.batch(student.batchId)],
+              [
+                'Branch',
+                academic?.branch ??
+                  (student.programId ? labels.program(student.programId) : null),
+              ],
+              [
+                'Department',
+                academic?.department ??
+                  (student.departmentId ? labels.department(student.departmentId) : null),
+              ],
+              [
+                'Section / class',
+                academic?.section ??
+                  (student.sectionId ? labels.section(student.sectionId) : null),
+              ],
+              [
+                'Batch',
+                academic?.batch ?? (student.batchId ? labels.batch(student.batchId) : null),
+              ],
               ['Year of study', student.yearOfStudy != null ? `Year ${student.yearOfStudy}` : null],
-              ['Current semester', student.currentSemester?.toString()],
-              ['Term', labels.semester(student.semesterId)],
+              ['Semester', semesterLine],
+              [
+                'Academic year',
+                academic?.academicYear ??
+                  (student.academicYearId ? labels.year(student.academicYearId) : null),
+              ],
               ['Admission date', student.admissionDate?.slice(0, 10)],
               ['Expected graduation', student.expectedGraduationDate?.slice(0, 10)],
             ].map(([label, value]) => (
