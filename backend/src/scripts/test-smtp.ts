@@ -4,6 +4,7 @@
  */
 
 import '../config/load-env.js';
+import { mailConfig } from '../config/slices.js';
 import { env } from '../config/env.js';
 import { resetMailerForTests, sendMail } from '../mail/index.js';
 import {
@@ -30,7 +31,8 @@ async function main() {
       port: env.SMTP_PORT,
       user: env.SMTP_USER,
       from: env.MAIL_FROM,
-      queue: env.MAIL_QUEUE_ENABLED,
+      queueEnabled: mailConfig.queueEnabled,
+      mailQueueEnv: env.MAIL_QUEUE_ENABLED ?? '(unset)',
       to,
     },
     'SMTP smoke test starting (password redacted)',

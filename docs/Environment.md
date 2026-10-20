@@ -56,6 +56,8 @@ Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
 | `STORAGE_LOCAL_PATH` | no | `./uploads` | Local upload root |
 | `MAIL_DRIVER` | no | `console` | `console` \| `smtp` \| `ses` |
 | `MAIL_FROM` | no | `shuklamanya99@gmail.com` | From address |
+| `MAIL_QUEUE_ENABLED` | no | off in dev, on in prod | `true` = BullMQ worker must run; omit/`false` = send immediately (local SMTP) |
+| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` | when `smtp` | — | Gmail: App Password, not login password |
 | `SMTP_HOST` | no | — | SMTP host when driver=smtp |
 | `PLATFORM_ADMIN_EMAIL` | no | `work.shuklamanya@gmail.com` | SOE institution admin login (`/login`) + ops inbox |
 | `INSTITUTION_ADMIN_PASSWORD` | no | `Pass1234` | SOE institution admin seed password |

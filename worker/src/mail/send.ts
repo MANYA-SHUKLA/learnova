@@ -23,7 +23,7 @@ export async function sendWorkerEmail(payload: EmailJobPayload): Promise<WorkerM
       secure: env.SMTP_SECURE === 'true',
       auth:
         env.SMTP_USER && env.SMTP_PASS
-          ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
+          ? { user: env.SMTP_USER, pass: env.SMTP_PASS.replace(/\s+/g, '') }
           : undefined,
     });
 

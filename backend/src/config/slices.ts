@@ -59,7 +59,13 @@ export const mailConfig = {
   },
   resendApiKey: env.RESEND_API_KEY,
   brevoApiKey: env.BREVO_API_KEY,
-  queueEnabled: (env.MAIL_QUEUE_ENABLED ?? 'true') !== 'false',
+  /** In development, send inline unless MAIL_QUEUE_ENABLED=true (no worker required). */
+  queueEnabled: (() => {
+    const raw = env.MAIL_QUEUE_ENABLED;
+    if (raw === 'true') return true;
+    if (raw === 'false') return false;
+    return env.NODE_ENV === 'production' || env.NODE_ENV === 'staging';
+  })(),
 } as const;
 
 export const bullmqConfig = {

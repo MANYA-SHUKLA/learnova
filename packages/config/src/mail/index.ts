@@ -10,7 +10,8 @@ export const mailConfigSchema = z.object({
   SMTP_SECURE: z.enum(['true', 'false']).optional(),
   RESEND_API_KEY: z.string().optional(),
   BREVO_API_KEY: z.string().optional(),
-  MAIL_QUEUE_ENABLED: z.enum(['true', 'false']).default('true'),
+  /** Omit or `false` in local dev for immediate SMTP; `true` when worker processes the email queue. */
+  MAIL_QUEUE_ENABLED: z.enum(['true', 'false']).optional(),
 });
 
 export type MailConfig = z.infer<typeof mailConfigSchema>;

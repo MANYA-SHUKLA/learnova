@@ -1,3 +1,4 @@
+import { env } from '../config/env.js';
 import { mailConfig } from '../config/slices.js';
 import { logger } from '../utils/logger/index.js';
 import { ConsoleMailer } from './console.mailer.js';
@@ -42,16 +43,35 @@ export function getMailer(): IMailer {
 /**
  * Send immediately or enqueue to mail queue based on MAIL_QUEUE_ENABLED.
  */
+function shouldUseMailQueue(): boolean {
+  if (!mailConfig.queueEnabled) return false;
+  // Local dev: send via SMTP/console immediately (no separate worker process).
+  if (env.NODE_ENV === 'development' || env.NODE_ENV === 'test') return false;
+  return true;
+}
+
 export async function sendMail(input: SendMailInput): Promise<SendMailResult | { jobId?: string }> {
-  if (mailConfig.queueEnabled) {
-    const jobId = await enqueueEmail({
-      to: input.to,
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-      replyTo: input.replyTo,
-    });
-    return { jobId };
+  if (shouldUseMailQueue()) {
+    try {
+      const jobId = await enqueueEmail({
+        to: input.to,
+        subject: input.subject,
+        html: input.html,
+        text: input.text,
+        replyTo: input.replyTo,
+      });
+      logger.info(
+        { mail: true, queued: true, jobId, to: input.to, subject: input.subject },
+        'Email queued (worker must be running)',
+      );
+      return { jobId };
+    } catch (err) {
+      logger.warn(
+        { err, to: input.to },
+        'Email queue unavailable — sending inline',
+      );
+      return getMailer().send(input);
+    }
   }
   return getMailer().send(input);
 }
