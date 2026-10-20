@@ -1070,9 +1070,8 @@
         "capacityLine": "{students} students · {faculty} faculty",
         "modules": "Modules",
         "stats": {
-          "campuses": "Campuses",
-          "schools": "Schools",
           "departments": "Departments",
+          "branches": "Branches",
           "programs": "Programs",
           "academicYears": "Academic years",
           "studentCapacity": "Student capacity"
@@ -1082,17 +1081,13 @@
             "title": "Profile & branding",
             "description": "Identity, contact, and brand assets."
           },
-          "campuses": {
-            "title": "Campuses",
-            "description": "Locations and campus contacts."
-          },
-          "schools": {
-            "title": "Schools",
-            "description": "Schools and faculties."
-          },
           "departments": {
             "title": "Departments",
-            "description": "Departments under schools."
+            "description": "Academic departments at your institution."
+          },
+          "branches": {
+            "title": "Branches",
+            "description": "Degree branches such as CSE, ECE, or MBA."
           },
           "programs": {
             "title": "Programs",
@@ -1205,7 +1200,12 @@
       "departments": {
         "title": "Departments",
         "singular": "Department",
-        "description": "Departments belong to a school within the institution."
+        "description": "Organize your institution into departments (for example Engineering or Science)."
+      },
+      "branches": {
+        "title": "Branches",
+        "singular": "Branch",
+        "description": "Degree branches under a department — for example CSE, ECE, or Mechanical."
       },
       "programs": {
         "title": "Programs",
@@ -2031,8 +2031,8 @@
       "noInstitutionTitle": "No institution linked",
       "noInstitutionDescription": "Connect or create an institution profile to unlock the academic workspace.",
       "emptyStructureTitle": "Your academic structure is empty",
-      "emptyStructureDescription": "Start by adding campuses, schools, and programs to bring this dashboard to life.",
-      "addCampus": "Add a campus",
+      "emptyStructureDescription": "Start by adding departments and branches (for example CSE or ECE) to bring this dashboard to life.",
+      "addDepartment": "Add a department",
       "moduleDistribution": "Module distribution",
       "moduleDistributionDescription": "Counts across your institution workspace",
       "calendarSummary": "Calendar summary",
@@ -2048,33 +2048,27 @@
       "quickActionsTitle": "Quick actions",
       "quickActionsDescription": "Jump into the modules you manage most often.",
       "stats": {
-        "campuses": "Campuses",
-        "schools": "Schools",
         "departments": "Departments",
+        "branches": "Branches",
         "programs": "Programs",
         "academicYears": "Academic Years",
         "semesters": "Semesters"
       },
       "chart": {
-        "campuses": "Campuses",
-        "schools": "Schools",
         "departments": "Departments",
+        "branches": "Branches",
         "programs": "Programs",
         "years": "Years",
         "semesters": "Semesters"
       },
       "actions": {
-        "campuses": {
-          "title": "Campuses",
-          "description": "Manage locations"
-        },
-        "schools": {
-          "title": "Schools",
-          "description": "Faculties & schools"
-        },
         "departments": {
           "title": "Departments",
           "description": "Org structure"
+        },
+        "branches": {
+          "title": "Branches",
+          "description": "CSE, ECE, and other branches"
         },
         "programs": {
           "title": "Programs",
