@@ -67,7 +67,7 @@ async function main(): Promise<void> {
   });
   if (!adminUser) {
     throw new Error(
-      'No institution_admin for JNU. Register once at /register-institution or set SMOKE_ADMIN_EMAIL.',
+      'No institution_admin for JNU. Provision via super admin or set SMOKE_ADMIN_EMAIL.',
     );
   }
 
