@@ -393,6 +393,25 @@ export class TimetableGeneratorService {
       await timetableRepository.softDeleteSlotsForTimetable(timetableId, institutionId);
     }
 
+    const created = await timetableRepository.createSlots(
+      settled.slots.map((slot) => ({
+        timetableId: oid(timetableId),
+        institutionId: oid(institutionId),
+        semesterId: oid(input.semesterId),
+        dayOfWeek: slot.dayOfWeek,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        courseId: oid(slot.courseId),
+        courseTitle: slot.courseTitle,
+        sectionId: oid(slot.sectionId),
+        sectionName: slot.sectionName,
+        facultyId: oid(slot.facultyId),
+        facultyName: slot.facultyName,
+        room: slot.room,
+        status: 'active',
+      })),
+    );
+
     const progressionSemesterIds = await SemesterModel.find({
       institutionId: oid(institutionId),
       number: { $in: [...JNU_BTECH_PROGRESSION_SEMESTERS] },
@@ -412,8 +431,8 @@ export class TimetableGeneratorService {
       .lean()
       .exec();
 
-    const validationInput = [
-      ...allInstitutionSlots.map((row) => ({
+    const validation = validateJnuTimetable(
+      allInstitutionSlots.map((row) => ({
         dayOfWeek: row.dayOfWeek as TimetableDayOfWeek,
         startTime: row.startTime as string,
         endTime: row.endTime as string,
@@ -424,43 +443,14 @@ export class TimetableGeneratorService {
         room: row.room as string,
         courseTitle: row.courseTitle as string,
       })),
-      ...settled.slots.map((slot) => ({
-        dayOfWeek: slot.dayOfWeek,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        facultyId: slot.facultyId,
-        facultyName: slot.facultyName,
-        sectionId: slot.sectionId,
-        sectionName: slot.sectionName,
-        room: slot.room,
-        courseTitle: slot.courseTitle,
-      })),
-    ];
-
-    const validation = validateJnuTimetable(validationInput, { uncertainties: sourceUncertainties });
+      { uncertainties: sourceUncertainties },
+    );
     warnings.push(formatValidationReport(validation));
     if (!validation.valid) {
-      warnings.unshift('PROVISIONAL: Generated timetable failed JNU hard-constraint validation. Use seed data or fix conflicts before publishing.');
+      warnings.unshift(
+        'PROVISIONAL: Timetable failed JNU hard-constraint validation across B.Tech semesters. Prefer Monsoon seed or resolve conflicts before publishing.',
+      );
     }
-
-    const created = await timetableRepository.createSlots(
-      settled.slots.map((slot) => ({
-        timetableId: oid(timetableId),
-        institutionId: oid(institutionId),
-        semesterId: oid(input.semesterId),
-        dayOfWeek: slot.dayOfWeek,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        courseId: oid(slot.courseId),
-        courseTitle: slot.courseTitle,
-        sectionId: oid(slot.sectionId),
-        sectionName: slot.sectionName,
-        facultyId: oid(slot.facultyId),
-        facultyName: slot.facultyName,
-        room: slot.room,
-        status: 'active',
-      })),
-    );
 
     return {
       timetable: timetableRepository.toDto(timetable, created.length),
