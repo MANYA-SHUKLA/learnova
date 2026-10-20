@@ -34,6 +34,7 @@ async function ensureLoginUser(input: ProvisionLoginUserInput): Promise<{
     await userRepository.updateById(result.userId, {
       passwordHash,
       mustChangePassword: input.mustChangePassword ?? false,
+      isActive: true,
       failedLoginAttempts: 0,
       lockedUntil: null,
     });
