@@ -53,14 +53,16 @@ function SectionIntro({
   title,
   subtitle,
   children,
+  className,
 }: {
   eyebrow?: string;
   title: string;
   subtitle?: string;
   children?: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="max-w-lg text-left">
+    <div className={cn('max-w-lg text-left', className)}>
       {eyebrow ? (
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{eyebrow}</p>
       ) : null}
@@ -271,8 +273,9 @@ export function PlatformHomePage({
       </section>
 
       {/* Stats strip */}
-      <section className="border-b border-border/60 bg-muted/20 py-10">
-        <div className={siteContainer('grid gap-8 sm:grid-cols-3')}>
+      <section className="border-b border-border/60 bg-muted/20 py-10 sm:py-12">
+        <div className={siteContainer('w-full')}>
+          <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
           {[
             { value: tPlatform('stat1Value'), label: tPlatform('stat1Label') },
             { value: tPlatform('stat2Value'), label: tPlatform('stat2Label') },
@@ -281,9 +284,9 @@ export function PlatformHomePage({
             <div
               key={stat.label}
               className={cn(
-                'rounded-2xl border border-transparent px-4 py-5 text-center',
+                'rounded-2xl border border-border/50 bg-card/60 px-6 py-5 text-left',
                 marketingCardHover,
-                'hover:scale-[1.03] motion-reduce:hover:scale-100',
+                'hover:scale-[1.02] motion-reduce:hover:scale-100',
               )}
             >
               <div className={marketingCardInner}>
@@ -294,6 +297,7 @@ export function PlatformHomePage({
               </div>
             </div>
           ))}
+          </div>
         </div>
       </section>
 
@@ -309,7 +313,7 @@ export function PlatformHomePage({
                   <Package className="size-3.5" aria-hidden />
                   {tPlatform('buyerEyebrow')}
                 </div>
-                <SectionIntro title={tPlatform('buyerTitle')} subtitle={tPlatform('buyerSubtitle')}>
+                <SectionIntro className="mt-5" title={tPlatform('buyerTitle')} subtitle={tPlatform('buyerSubtitle')}>
                   <div className="mt-8 flex flex-wrap gap-3">
                     <Button asChild size="lg" className={platformHeroPrimaryClass}>
                       <a href="#request-demo" className="group inline-flex items-center gap-2">
