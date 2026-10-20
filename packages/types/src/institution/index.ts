@@ -84,6 +84,7 @@ export interface Institution {
   maxStudents: number;
   maxFaculty: number;
   maxStorage: number;
+  portalSettings?: InstitutionPortalSettings;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
