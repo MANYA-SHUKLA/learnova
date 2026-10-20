@@ -785,12 +785,21 @@
       "title": "Learnova platform admin",
       "descriptionRequests": "Review demo submissions from /platform, confirm meetings, and move leads to allocation.",
       "descriptionCampuses": "Provision campuses and resend institution admin credentials.",
+      "descriptionAdminLogins": "Sign-ins at the campus login page by institution admins only (not faculty, students, or super admin).",
       "pendingBadge": "{count, plural, one {# pending request} other {# pending requests}}",
       "tabsLabel": "Console sections",
       "tabs": {
         "requests": "Demo requests",
-        "campuses": "Campuses"
+        "campuses": "Campuses",
+        "adminLogins": "Admin logins"
       },
+      "adminLoginsTitle": "Institution admin sign-ins",
+      "adminLoginsError": "Could not load login audit. Check the API and try again.",
+      "adminLoginsEmpty": "No institution admin logins recorded yet.",
+      "adminLoginsColInstitution": "Institution",
+      "adminLoginsColAdmin": "Admin email",
+      "adminLoginsColTime": "Signed in",
+      "adminLoginsColIp": "IP address",
       "requestsHeading": "Incoming demo requests",
       "refresh": "Refresh",
       "requestsError": "Could not load demo requests. Check the API and try again.",

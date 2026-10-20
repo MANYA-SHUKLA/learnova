@@ -2,6 +2,15 @@ import type { PaginatedMeta } from '@learnova/types';
 import { apiClient } from '@/lib/api/client';
 import type { PlatformMarketingContent } from '@/features/public/services/public-api';
 
+export type InstitutionAdminLoginRow = {
+  id: string;
+  email: string;
+  institutionId: string | null;
+  institutionName: string | null;
+  loggedInAt: string | null;
+  ipAddress: string | null;
+};
+
 export type DemoRequestRow = {
   id: string;
   institutionName: string;
@@ -19,6 +28,16 @@ export type DemoRequestRow = {
 export const superadminApi = {
   login(body: { email: string; password: string }) {
     return apiClient.post('/auth/super-admin/login', body, { auth: false });
+  },
+
+  listInstitutionAdminLogins(params?: { page?: number; limit?: number }) {
+    const search = new URLSearchParams();
+    if (params?.page) search.set('page', String(params.page));
+    if (params?.limit) search.set('limit', String(params.limit));
+    const q = search.toString();
+    return apiClient.get<{ items: InstitutionAdminLoginRow[]; meta: PaginatedMeta }>(
+      `/super-admin/institution-admin-logins${q ? `?${q}` : ''}`,
+    );
   },
 
   listDemoRequests(params?: { page?: number; status?: string }) {

@@ -14,7 +14,7 @@ import {
   Spinner,
 } from '@learnova/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, CalendarClock, Inbox, RefreshCw } from 'lucide-react';
+import { Building2, CalendarClock, Inbox, LogIn, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { SuccessPopup } from '@/components/shared/success-popup';
@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 const TAB_CONFIG: { id: SuperAdminConsoleTab; icon: typeof Inbox }[] = [
   { id: 'requests', icon: Inbox },
   { id: 'campuses', icon: Building2 },
+  { id: 'adminLogins', icon: LogIn },
 ];
 
 function statusVariant(status: DemoRequestRow['status']): 'default' | 'secondary' | 'danger' | 'outline' {
@@ -61,6 +62,12 @@ export function SuperAdminConsolePage() {
   const campusesQuery = useQuery({
     queryKey: ['superadmin', 'campuses'],
     queryFn: () => superadminApi.listInstitutions(),
+  });
+
+  const adminLoginsQuery = useQuery({
+    queryKey: ['superadmin', 'institution-admin-logins'],
+    queryFn: () => superadminApi.listInstitutionAdminLogins({ page: 1, limit: 50 }),
+    enabled: tab === 'adminLogins',
   });
 
   const [provision, setProvision] = useState({
@@ -141,6 +148,20 @@ export function SuperAdminConsolePage() {
   const requestsEmpty =
     !demoQuery.isLoading && !demoQuery.isError && requestItems.length === 0;
 
+  const tabDescription =
+    tab === 'requests'
+      ? t('descriptionRequests')
+      : tab === 'campuses'
+        ? t('descriptionCampuses')
+        : t('descriptionAdminLogins');
+
+  const loginItems = adminLoginsQuery.data?.items ?? [];
+  const loginsEmpty =
+    tab === 'adminLogins' &&
+    !adminLoginsQuery.isLoading &&
+    !adminLoginsQuery.isError &&
+    loginItems.length === 0;
+
   return (
     <>
     <SuccessPopup
@@ -163,21 +184,29 @@ export function SuperAdminConsolePage() {
     >
       <PageHeader
         title={t(`tabs.${tab}`)}
-        description={t(tab === 'requests' ? 'descriptionRequests' : 'descriptionCampuses')}
+        description={tabDescription}
         meta={
           pendingCount > 0 && tab === 'requests' ? (
             <Badge variant="secondary">{t('pendingBadge', { count: pendingCount })}</Badge>
           ) : null
         }
         actions={
-          tab === 'requests' ? (
+          tab === 'requests' || tab === 'adminLogins' ? (
             <Button
               variant="outline"
               size="sm"
-              disabled={demoQuery.isFetching}
-              onClick={() => void demoQuery.refetch()}
+              disabled={tab === 'requests' ? demoQuery.isFetching : adminLoginsQuery.isFetching}
+              onClick={() =>
+                void (tab === 'requests' ? demoQuery.refetch() : adminLoginsQuery.refetch())
+              }
             >
-              <RefreshCw className={cn('mr-1.5 size-4', demoQuery.isFetching && 'animate-spin')} />
+              <RefreshCw
+                className={cn(
+                  'mr-1.5 size-4',
+                  (tab === 'requests' ? demoQuery.isFetching : adminLoginsQuery.isFetching) &&
+                    'animate-spin',
+                )}
+              />
               {t('refresh')}
             </Button>
           ) : null
@@ -238,6 +267,65 @@ export function SuperAdminConsolePage() {
                 />
               ))}
             </div>
+        </section>
+      ) : null}
+
+      {tab === 'adminLogins' ? (
+        <section className="mt-8" aria-labelledby="admin-logins-heading">
+          <h2 id="admin-logins-heading" className="sr-only">
+            {t('adminLoginsTitle')}
+          </h2>
+          <Card className="rounded-2xl shadow-soft-sm">
+            <CardContent className="p-0">
+              {adminLoginsQuery.isLoading ? (
+                <div className="space-y-2 p-6">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : null}
+              {adminLoginsQuery.isError ? (
+                <p className="px-6 py-10 text-center text-sm text-muted-foreground">
+                  {t('adminLoginsError')}
+                </p>
+              ) : null}
+              {loginsEmpty ? (
+                <p className="px-6 py-12 text-center text-sm text-muted-foreground">
+                  {t('adminLoginsEmpty')}
+                </p>
+              ) : null}
+              {!adminLoginsQuery.isLoading && loginItems.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-border/60 text-xs uppercase tracking-wide text-muted-foreground">
+                        <th className="px-4 py-3 font-medium">{t('adminLoginsColInstitution')}</th>
+                        <th className="px-4 py-3 font-medium">{t('adminLoginsColAdmin')}</th>
+                        <th className="px-4 py-3 font-medium">{t('adminLoginsColTime')}</th>
+                        <th className="px-4 py-3 font-medium">{t('adminLoginsColIp')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60">
+                      {loginItems.map((row) => (
+                        <tr key={row.id} className="hover:bg-muted/30">
+                          <td className="px-4 py-3 font-medium text-foreground">
+                            {row.institutionName ?? '—'}
+                          </td>
+                          <td className="px-4 py-3 text-foreground">{row.email}</td>
+                          <td className="px-4 py-3 tabular-nums text-muted-foreground">
+                            {row.loggedInAt ? new Date(row.loggedInAt).toLocaleString() : '—'}
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                            {row.ipAddress ?? '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
         </section>
       ) : null}
 
@@ -330,6 +418,7 @@ export function SuperAdminConsolePage() {
         </section>
       ) : null}
     </SuperAdminConsoleShell>
+    </>
   );
 }
 

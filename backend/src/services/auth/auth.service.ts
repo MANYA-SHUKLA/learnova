@@ -470,7 +470,11 @@ export class AuthService {
       ipAddress: ctx.ipAddress,
       userAgent: ctx.userAgent,
       correlationId: ctx.correlationId,
-      metadata: { sessionId: issued.session.id },
+      metadata: {
+        sessionId: issued.session.id,
+        role,
+        institutionId: activeUser.institutionId ? String(activeUser.institutionId) : null,
+      },
     });
 
     return {

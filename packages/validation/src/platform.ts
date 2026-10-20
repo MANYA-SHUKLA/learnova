@@ -73,6 +73,10 @@ export const provisionCampusSchema = z.object({
 
 export type ProvisionCampusInput = z.infer<typeof provisionCampusSchema>;
 
+export const institutionAdminLoginAuditQuerySchema = paginationSchema;
+
+export type InstitutionAdminLoginAuditQuery = z.infer<typeof institutionAdminLoginAuditQuerySchema>;
+
 export const resendAdminCredentialsSchema = z.object({
   rotatePassword: z.boolean().optional(),
   newPassword: z.string().min(8).max(128).optional(),

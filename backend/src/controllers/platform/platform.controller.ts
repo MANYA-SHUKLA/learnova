@@ -4,6 +4,7 @@ import type {
   CreateDemoRequestInput,
   DeclineDemoRequestInput,
   DemoRequestListQuery,
+  InstitutionAdminLoginAuditQuery,
   PlatformMarketingInput,
   ProvisionCampusInput,
   ResendAdminCredentialsInput,
@@ -40,6 +41,18 @@ export async function listDemoRequests(req: Request, res: Response, next: NextFu
   try {
     const result = await demoRequestService.list(
       req.query as unknown as DemoRequestListQuery,
+      actorFrom(req),
+    );
+    sendSuccess(res, { items: result.items }, { meta: result.meta, requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listInstitutionAdminLogins(req: Request, res: Response, next: NextFunction) {
+  try {
+    const result = await superAdminService.listInstitutionAdminLogins(
+      req.query as unknown as InstitutionAdminLoginAuditQuery,
       actorFrom(req),
     );
     sendSuccess(res, { items: result.items }, { meta: result.meta, requestId: req.requestId });

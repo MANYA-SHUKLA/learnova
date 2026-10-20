@@ -4,6 +4,7 @@ import {
   confirmDemoRequestSchema,
   declineDemoRequestSchema,
   demoRequestListQuerySchema,
+  institutionAdminLoginAuditQuerySchema,
   idParamsSchema,
   platformMarketingSchema,
   provisionCampusSchema,
@@ -30,6 +31,14 @@ superAdminRoutes.get(
   requirePermission(PERMISSIONS.DEMO_REQUEST_MANAGE),
   validate(demoRequestListQuerySchema, 'query'),
   platformController.listDemoRequests,
+);
+
+superAdminRoutes.get(
+  '/institution-admin-logins',
+  ...superAuth,
+  requirePermission(PERMISSIONS.AUDIT_READ),
+  validate(institutionAdminLoginAuditQuerySchema, 'query'),
+  platformController.listInstitutionAdminLogins,
 );
 
 superAdminRoutes.post(

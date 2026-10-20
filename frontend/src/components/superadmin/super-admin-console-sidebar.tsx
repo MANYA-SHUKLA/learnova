@@ -5,7 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
-export type SuperAdminConsoleTab = 'requests' | 'campuses';
+export type SuperAdminConsoleTab = 'requests' | 'campuses' | 'adminLogins';
 
 interface NavItem {
   id: SuperAdminConsoleTab;

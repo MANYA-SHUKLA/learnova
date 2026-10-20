@@ -53,6 +53,64 @@ export class AuditAuthLogRepository {
   }): Promise<AuditAuthLogDocument> {
     return AuditAuthLogModel.create(data);
   }
+
+  /** Successful institution admin sign-ins at `/login` (excludes faculty, student, super admin). */
+  async listInstitutionAdminLogins(query: { page: number; limit: number }) {
+    const skip = (query.page - 1) * query.limit;
+    const baseStages = [
+      { $match: { event: 'user.login' } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: false } },
+      {
+        $lookup: {
+          from: 'roles',
+          localField: 'user.roleId',
+          foreignField: '_id',
+          as: 'role',
+        },
+      },
+      { $unwind: { path: '$role', preserveNullAndEmptyArrays: false } },
+      { $match: { 'role.name': 'institution_admin' } },
+    ];
+
+    const [items, countRows] = await Promise.all([
+      AuditAuthLogModel.aggregate([
+        ...baseStages,
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: query.limit },
+        {
+          $lookup: {
+            from: 'institutions',
+            localField: 'user.institutionId',
+            foreignField: '_id',
+            as: 'institution',
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            email: { $ifNull: ['$email', '$user.email'] },
+            institutionId: '$user.institutionId',
+            institutionName: { $arrayElemAt: ['$institution.name', 0] },
+            loggedInAt: '$createdAt',
+            ipAddress: '$ipAddress',
+          },
+        },
+      ]).exec(),
+      AuditAuthLogModel.aggregate([...baseStages, { $count: 'total' }]).exec(),
+    ]);
+
+    const total = (countRows[0] as { total?: number } | undefined)?.total ?? 0;
+    return { items, total, page: query.page, limit: query.limit };
+  }
 }
 
 export const loginAttemptRepository = new LoginAttemptRepository();

@@ -1,4 +1,8 @@
-import type { ProvisionCampusInput, ResendAdminCredentialsInput } from '@learnova/validation';
+import type {
+  InstitutionAdminLoginAuditQuery,
+  ProvisionCampusInput,
+  ResendAdminCredentialsInput,
+} from '@learnova/validation';
 import mongoose, { Types } from 'mongoose';
 import { hashPassword } from '../../security/index.js';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors/index.js';
@@ -6,7 +10,7 @@ import {
   institutionRepository,
   institutionSettingsRepository,
 } from '../../repositories/institution/index.js';
-import { roleRepository, userRepository } from '../../repositories/auth/index.js';
+import { auditAuthLogRepository, roleRepository, userRepository } from '../../repositories/auth/index.js';
 import { sendInstitutionAdminCredentialsEmail } from '../../mail/institution-admin-credentials-email.js';
 import { demoRequestService } from './demo-request.service.js';
 import type { ActorContext } from '../institution/institution.service.js';
@@ -20,7 +24,45 @@ function assertSuperAdmin(actor: ActorContext) {
   }
 }
 
+function pageMeta(total: number, page: number, limit: number) {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  return {
+    page,
+    limit,
+    total,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
+}
+
 export class SuperAdminService {
+  async listInstitutionAdminLogins(query: InstitutionAdminLoginAuditQuery, actor: ActorContext) {
+    assertSuperAdmin(actor);
+    const result = await auditAuthLogRepository.listInstitutionAdminLogins({
+      page: query.page,
+      limit: query.limit,
+    });
+    const items = result.items.map(
+      (row: {
+        _id: { toString(): string };
+        email?: string;
+        institutionId?: { toString(): string } | null;
+        institutionName?: string | null;
+        loggedInAt?: Date;
+        ipAddress?: string | null;
+      }) => ({
+        id: String(row._id),
+        email: row.email ?? '',
+        institutionId: row.institutionId ? String(row.institutionId) : null,
+        institutionName: row.institutionName ?? null,
+        loggedInAt: row.loggedInAt?.toISOString?.() ?? null,
+        ipAddress: row.ipAddress ?? null,
+      }),
+    );
+    return { items, meta: pageMeta(result.total, result.page, result.limit) };
+  }
+
   async provisionCampus(input: ProvisionCampusInput, actor: ActorContext) {
     assertSuperAdmin(actor);
 
