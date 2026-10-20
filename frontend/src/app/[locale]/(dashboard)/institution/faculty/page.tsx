@@ -360,18 +360,6 @@ export default function FacultyListPage() {
                     </Button>
                   </PermissionGate>
                 }
-                pagination={
-                  meta
-                    ? {
-                        page: meta.page,
-                        totalPages: meta.totalPages,
-                        total: meta.total,
-                        hasNextPage: meta.hasNextPage,
-                        hasPrevPage: meta.hasPrevPage,
-                        onPageChange: setPage,
-                      }
-                    : undefined
-                }
                 columns={[
                   {
                     id: 'faculty',
@@ -520,7 +508,7 @@ export default function FacultyListPage() {
           </CardContent>
         </Card>
 
-        {stats && (stats.byDepartment.length > 0 || stats.byEmploymentType.length > 0) ? (
+        {statsQuery.data && (statsQuery.data.byDepartment.length > 0 || statsQuery.data.byEmploymentType.length > 0) ? (
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="rounded-2xl">
               <CardHeader>
@@ -530,7 +518,7 @@ export default function FacultyListPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {stats.byDepartment.map((d) => (
+                {statsQuery.data.byDepartment.map((d) => (
                   <div
                     key={d.departmentId ?? 'none'}
                     className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2 text-sm"
@@ -546,7 +534,7 @@ export default function FacultyListPage() {
                 <CardTitle className="text-base">Employment types</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {stats.byEmploymentType.map((d) => (
+                {statsQuery.data.byEmploymentType.map((d) => (
                   <div
                     key={d.employmentType}
                     className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2 text-sm"
@@ -564,14 +552,14 @@ export default function FacultyListPage() {
           </div>
         ) : null}
 
-        {stats?.recentJoinees && stats.recentJoinees.length > 0 ? (
+        {statsQuery.data?.recentJoinees && statsQuery.data.recentJoinees.length > 0 ? (
           <Card className="rounded-2xl">
             <CardHeader>
               <CardTitle className="text-base">Recent joinees</CardTitle>
               <CardDescription>Newest faculty by joining date.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              {stats.recentJoinees.map((row) => (
+              {statsQuery.data.recentJoinees.map((row) => (
                 <Link
                   key={row.id}
                   href={`${APP_ROUTES.INSTITUTION_FACULTY}/${row.id}`}
