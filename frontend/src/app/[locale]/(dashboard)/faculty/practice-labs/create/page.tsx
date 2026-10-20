@@ -16,77 +16,62 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import {
   AcademicYearSelect,
+  BatchSelect,
   ProgramSelect,
+  SemesterSelect,
 } from '@/components/shared/entity-selects';
 import { useCourseList } from '@/features/course';
-import { useMyFacultyProfile } from '@/features/faculty';
-import { useCurrentAcademicSession, useSemesters } from '@/features/institution';
+import { resolveActiveAcademicYear, useAcademicYears } from '@/features/institution';
 import { useCreatePracticeLabMutation } from '@/features/practice-lab';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { Link, useRouter } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
+const LIST_LIMIT = 100;
+
 export default function FacultyCreatePracticeLabPage() {
   const router = useRouter();
   const t = useTranslations('dashboard.institution.projects');
   const createMutation = useCreatePracticeLabMutation();
-  const session = useCurrentAcademicSession();
-  const facultyProfile = useMyFacultyProfile();
+
+  const yearsQuery = useAcademicYears({ page: 1, limit: LIST_LIMIT, status: 'active' });
 
   const [programId, setProgramId] = useState('');
   const [academicYearId, setAcademicYearId] = useState('');
+  const [batchId, setBatchId] = useState('');
+  const [semesterId, setSemesterId] = useState('');
   const [courseId, setCourseId] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (session.activeYear?.id && !academicYearId) {
-      setAcademicYearId(session.activeYear.id);
-    }
-  }, [session.activeYear?.id, academicYearId]);
-
-  const semestersQuery = useSemesters(
-    { page: 1, limit: 50, academicYearId: academicYearId || undefined },
-    Boolean(academicYearId),
-  );
-
-  const filterSemesterIds = useMemo(
-    () => (semestersQuery.data?.items ?? []).map((s) => s.id),
-    [semestersQuery.data?.items],
-  );
-
-  const semesterNameById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const s of semestersQuery.data?.items ?? []) {
-      map.set(s.id, s.name);
-    }
-    return map;
-  }, [semestersQuery.data?.items]);
+    if (academicYearId || yearsQuery.isLoading) return;
+    const years = yearsQuery.data?.items ?? [];
+    if (years.length === 0) return;
+    const active = resolveActiveAcademicYear(years) ?? years[0];
+    if (active?.id) setAcademicYearId(active.id);
+  }, [academicYearId, yearsQuery.data?.items, yearsQuery.isLoading]);
 
   const coursesQuery = useCourseList(
     {
       page: 1,
-      limit: 100,
+      limit: LIST_LIMIT,
       sortBy: 'title',
       sortOrder: 'asc',
       includeDeleted: false,
       programId: programId || undefined,
-      facultyId: facultyProfile.data?.id,
+      semesterId: semesterId || undefined,
     },
     Boolean(programId && academicYearId),
   );
 
   const filteredCourses = useMemo(() => {
-    let items = coursesQuery.data?.items ?? [];
-    if (filterSemesterIds.length > 0) {
-      const allowed = new Set(filterSemesterIds);
-      items = items.filter((course) =>
-        course.semesterIds?.some((id) => allowed.has(id)),
-      );
-    }
+    const items = coursesQuery.data?.items ?? [];
+    if (semesterId) return items;
+    if (!academicYearId) return items;
     return items;
-  }, [coursesQuery.data?.items, filterSemesterIds]);
+  }, [academicYearId, coursesQuery.data?.items, semesterId]);
 
   const coursePickerReady = Boolean(programId && academicYearId);
   const courseEmptyMessage = !programId
@@ -102,8 +87,7 @@ export default function FacultyCreatePracticeLabPage() {
           <p className="text-sm font-medium text-primary">Practice Labs</p>
           <h1 className="mt-1 font-display text-2xl font-semibold">Create practice lab</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Attach a coding lab to a course for a specific branch and academic year, then add
-            problems and test cases.
+            Filter by branch, academic year, and batch, then pick a course for that cohort.
           </p>
         </div>
 
@@ -111,8 +95,7 @@ export default function FacultyCreatePracticeLabPage() {
           <CardHeader>
             <CardTitle>Choose course</CardTitle>
             <CardDescription>
-              Pick branch and academic year first — only courses for that cohort are shown (your
-              assigned courses).
+              Select branch and year first. Courses you teach (including timetable) appear below.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -121,16 +104,44 @@ export default function FacultyCreatePracticeLabPage() {
                 label={t('filterBranch')}
                 value={programId}
                 btechOnly
+                limit={LIST_LIMIT}
                 onChange={(id) => {
                   setProgramId(id);
+                  setBatchId('');
+                  setSemesterId('');
                   setCourseId('');
                 }}
               />
               <AcademicYearSelect
                 label={t('filterAcademicYear')}
                 value={academicYearId}
+                limit={LIST_LIMIT}
+                listParams={{ status: 'active' }}
                 onChange={(id) => {
                   setAcademicYearId(id);
+                  setSemesterId('');
+                  setCourseId('');
+                }}
+              />
+              <BatchSelect
+                label="Batch"
+                value={batchId}
+                programId={programId}
+                limit={LIST_LIMIT}
+                disabled={!programId}
+                onChange={setBatchId}
+              />
+              <SemesterSelect
+                label="Semester (term)"
+                value={semesterId}
+                limit={LIST_LIMIT}
+                listParams={{
+                  academicYearId: academicYearId || undefined,
+                  status: 'active',
+                }}
+                disabled={!academicYearId}
+                onChange={(id) => {
+                  setSemesterId(id);
                   setCourseId('');
                 }}
               />
@@ -138,56 +149,59 @@ export default function FacultyCreatePracticeLabPage() {
 
             {!coursePickerReady ? (
               <p className="text-sm text-muted-foreground">{courseEmptyMessage}</p>
-            ) : coursesQuery.isLoading || semestersQuery.isLoading ? (
+            ) : coursesQuery.isLoading || yearsQuery.isLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-16 w-full rounded-xl" />
                 <Skeleton className="h-16 w-full rounded-xl" />
               </div>
+            ) : coursesQuery.isError ? (
+              <p className="text-sm text-destructive">
+                {coursesQuery.error instanceof Error
+                  ? coursesQuery.error.message
+                  : 'Unable to load courses.'}
+              </p>
             ) : filteredCourses.length === 0 ? (
               <p className="text-sm text-muted-foreground">{courseEmptyMessage}</p>
             ) : (
-              <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
-                {filteredCourses.map((course) => {
-                  const selected = course.id === courseId;
-                  const termLabels = (course.semesterIds ?? [])
-                    .map((id) => semesterNameById.get(id))
-                    .filter(Boolean);
-                  return (
-                    <li key={course.id}>
-                      <button
-                        type="button"
-                        onClick={() => { setCourseId(course.id); }}
-                        className={cn(
-                          'flex w-full items-start gap-3 rounded-xl border px-3 py-3 text-left text-sm transition-colors',
-                          selected
-                            ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-                            : 'border-border/70 hover:border-primary/40 hover:bg-muted/40',
-                        )}
-                      >
-                        <BookOpen
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Courses ({filteredCourses.length})
+                </p>
+                <ul className="max-h-[min(24rem,50vh)] space-y-2 overflow-y-auto rounded-xl border border-border/60 bg-muted/10 p-2">
+                  {filteredCourses.map((course) => {
+                    const selected = course.id === courseId;
+                    return (
+                      <li key={course.id}>
+                        <button
+                          type="button"
+                          onClick={() => { setCourseId(course.id); }}
                           className={cn(
-                            'mt-0.5 size-4 shrink-0',
-                            selected ? 'text-primary' : 'text-muted-foreground',
+                            'flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left text-sm transition-colors',
+                            selected
+                              ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                              : 'border-transparent bg-background hover:border-primary/30 hover:bg-muted/50',
                           )}
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="block font-medium">
-                            {course.courseCode} — {course.title}
-                          </span>
-                          {termLabels.length > 0 ? (
-                            <span className="mt-0.5 block text-xs text-muted-foreground">
-                              {termLabels.join(' · ')}
+                        >
+                          <BookOpen
+                            className={cn(
+                              'mt-0.5 size-4 shrink-0',
+                              selected ? 'text-primary' : 'text-muted-foreground',
+                            )}
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="block font-medium">
+                              {course.courseCode} — {course.title}
                             </span>
+                          </span>
+                          {selected ? (
+                            <Check className="size-4 shrink-0 text-primary" aria-hidden />
                           ) : null}
-                        </span>
-                        {selected ? (
-                          <Check className="size-4 shrink-0 text-primary" aria-hidden />
-                        ) : null}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             )}
           </CardContent>
         </Card>

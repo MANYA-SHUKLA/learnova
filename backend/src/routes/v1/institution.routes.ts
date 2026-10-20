@@ -109,6 +109,14 @@ const manageAuth = [
   requirePermission(PERMISSIONS.INSTITUTION_MANAGE),
 ] as RequestHandler[];
 
+/** Faculty/students need catalog lists (branch, year, batch) without full institution admin. */
+const orgCatalogRead: Permission[] = [
+  PERMISSIONS.INSTITUTION_READ,
+  PERMISSIONS.ERP_READ,
+  PERMISSIONS.COURSE_READ,
+  PERMISSIONS.TIMETABLE_READ,
+];
+
 institutionRoutes.get('/institutions/me', ...readAuth, ctrl.getMyInstitution);
 institutionRoutes.get(
   '/institutions',
@@ -196,6 +204,7 @@ mountResource(
   ctrl.programControllers,
   createProgramSchema,
   updateProgramSchema,
+  orgCatalogRead,
 );
 mountResource(
   institutionRoutes,
@@ -203,6 +212,7 @@ mountResource(
   ctrl.academicYearControllers,
   createAcademicYearSchema,
   updateAcademicYearSchema,
+  orgCatalogRead,
 );
 mountResource(
   institutionRoutes,
@@ -210,7 +220,7 @@ mountResource(
   ctrl.semesterControllers,
   createSemesterSchema,
   updateSemesterSchema,
-  [PERMISSIONS.INSTITUTION_READ, PERMISSIONS.COURSE_WRITE],
+  [...orgCatalogRead, PERMISSIONS.COURSE_WRITE],
 );
 mountResource(
   institutionRoutes,
@@ -218,6 +228,7 @@ mountResource(
   ctrl.sectionControllers,
   createSectionSchema,
   updateSectionSchema,
+  orgCatalogRead,
 );
 mountResource(
   institutionRoutes,
@@ -225,6 +236,7 @@ mountResource(
   ctrl.batchControllers,
   createBatchSchema,
   updateBatchSchema,
+  orgCatalogRead,
 );
 mountResource(
   institutionRoutes,

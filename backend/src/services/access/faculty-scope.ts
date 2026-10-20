@@ -4,6 +4,7 @@ import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { CourseModel } from '../../models/course.model.js';
 import { FacultyModel } from '../../models/faculty.model.js';
 import { StudentModel } from '../../models/student.model.js';
+import { TimetableSlotModel } from '../../models/timetable-slot.model.js';
 import { ForbiddenError } from '../../utils/errors/index.js';
 
 function oid(id: string): Types.ObjectId {
@@ -35,15 +36,32 @@ export async function resolveFacultySupervisedCourseIds(
   const faculty = await findFacultyRecord(institutionId, email);
   if (!faculty) return [];
 
-  const courses = await CourseModel.find({
-    institutionId: oid(institutionId),
-    deletedAt: null,
-    $or: [{ facultyIds: faculty._id }, { coordinatorId: faculty._id }],
-  })
-    .select('_id')
-    .exec();
+  const [assignedCourses, timetableCourseIds] = await Promise.all([
+    CourseModel.find({
+      institutionId: oid(institutionId),
+      deletedAt: null,
+      $or: [{ facultyIds: faculty._id }, { coordinatorId: faculty._id }],
+    })
+      .select('_id')
+      .lean()
+      .exec(),
+    TimetableSlotModel.distinct('courseId', {
+      institutionId: oid(institutionId),
+      facultyId: faculty._id,
+      deletedAt: null,
+      status: 'active',
+    }),
+  ]);
 
-  return courses.map((course) => String(course._id));
+  const unique = new Set<string>();
+  for (const course of assignedCourses) {
+    unique.add(String(course._id));
+  }
+  for (const courseId of timetableCourseIds) {
+    unique.add(String(courseId));
+  }
+
+  return [...unique];
 }
 
 export async function resolveFacultySupervisedCourseObjectIds(
