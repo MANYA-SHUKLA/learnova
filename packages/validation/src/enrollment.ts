@@ -56,7 +56,13 @@ export const enrollmentListQuerySchema = z.object({
     .optional()
     .transform((v) => v === 'true'),
   page: z.coerce.number().int().min(1).optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(PAGINATION.MAX_LIMIT)
+    .optional()
+    .default(PAGINATION.DEFAULT_LIMIT),
   sortBy: z
     .enum(['createdAt', 'enrollmentDate', 'enrollmentNumber', 'status', 'updatedAt'])
     .optional()
