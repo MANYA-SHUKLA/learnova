@@ -9,21 +9,30 @@ import {
   CardHeader,
   CardTitle,
   Input,
+  Label,
   Skeleton,
 } from '@learnova/ui';
-import { NotebookPen, Search, Trash2 } from 'lucide-react';
+import { NotebookPen, Plus, Search, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { displayName, EmptyState, ErrorState } from '@/features/institution';
 import { useCourseList } from '@/features/course';
 import {
+  useCourseProgress,
+  useCreateNoteMutation,
   useDeleteNoteMutation,
+  useMyProgress,
   useNotes,
   useUpdateNoteMutation,
 } from '@/features/progress';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
+
+const selectClassName = cn(
+  'flex h-9 w-full rounded-xl border border-input bg-background px-3 py-1 text-sm shadow-sm',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+);
 
 export default function StudentNotesPage() {
   const t = useTranslations('dashboard.student.progress.notes');
@@ -31,7 +40,13 @@ export default function StudentNotesPage() {
   const [search, setSearch] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
+  const [addOpen, setAddOpen] = useState(false);
+  const [addCourseId, setAddCourseId] = useState('');
+  const [addLessonId, setAddLessonId] = useState('');
+  const [addText, setAddText] = useState('');
   const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const myProgressQuery = useMyProgress({ page: 1, limit: 100 });
+  const addCourseProgressQuery = useCourseProgress(addCourseId, Boolean(addCourseId));
   const courseLabel = (id: string) =>
     displayName(coursesQuery.data?.items, id, (course) => `${course.courseCode} — ${course.title}`) ??
     'Course';
@@ -50,7 +65,46 @@ export default function StudentNotesPage() {
   const listQuery = useNotes(params);
   const updateMutation = useUpdateNoteMutation();
   const deleteMutation = useDeleteNoteMutation();
+  const createMutation = useCreateNoteMutation();
   const items = listQuery.data?.items ?? [];
+  const enrolledCourses = myProgressQuery.data?.items ?? [];
+  const lessonOptions = useMemo(() => {
+    const modules = addCourseProgressQuery.data?.modules ?? [];
+    return modules.flatMap((mod) =>
+      mod.lessons.map((lesson) => ({
+        id: lesson.id,
+        label: `${mod.title} — ${lesson.title}`,
+      })),
+    );
+  }, [addCourseProgressQuery.data?.modules]);
+
+  const resetAddForm = () => {
+    setAddOpen(false);
+    setAddCourseId('');
+    setAddLessonId('');
+    setAddText('');
+  };
+
+  const openAddForm = () => {
+    setAddOpen(true);
+    if (!addCourseId && enrolledCourses.length === 1) {
+      setAddCourseId(enrolledCourses[0]!.courseId);
+    }
+  };
+
+  const submitNewNote = async () => {
+    if (!addCourseId || !addLessonId || !addText.trim()) return;
+    try {
+      await createMutation.mutateAsync({
+        courseId: addCourseId,
+        lessonId: addLessonId,
+        text: addText.trim(),
+      });
+      resetAddForm();
+    } catch {
+      /* mutation error surfaced via createMutation.isError */
+    }
+  };
 
   const startEdit = (id: string, text: string) => {
     setEditingId(id);
