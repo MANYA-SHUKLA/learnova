@@ -761,6 +761,56 @@
       "backToLogin": "लॉगिन पर वापस जाएं"
     }
   },
+  "superadmin": {
+    "console": {
+      "badge": "Super admin",
+      "sidebarTitle": "Operations",
+      "statPending": "Pending demos",
+      "statCampuses": "Campuses live",
+      "navPlatform": "Platform page",
+      "eyebrow": "Platform console",
+      "title": "Learnova platform admin",
+      "descriptionRequests": "Review demo submissions from /platform, confirm meetings, and move leads to allocation.",
+      "descriptionCampuses": "Provision campuses and resend institution admin credentials.",
+      "pendingBadge": "{count, plural, one {# pending request} other {# pending requests}}",
+      "tabsLabel": "Console sections",
+      "tabs": {
+        "requests": "Demo requests",
+        "campuses": "Campuses"
+      },
+      "requestsHeading": "Incoming demo requests",
+      "refresh": "Refresh",
+      "requestsError": "Could not load demo requests. Check the API and try again.",
+      "requestsEmptyTitle": "No demo requests yet",
+      "requestsEmptyBody": "Submissions from the public /platform page will appear here for confirmation and campus allocation.",
+      "allocateTitle": "Allocate campus",
+      "allocateDescription": "Create an institution and institution admin login. Public slug and code are generated on the server from the institution name.",
+      "allocateSlugHint": "Public URL slug and institution code are assigned automatically (unique if the name collides).",
+      "allocateSubmit": "Create campus and email admin",
+      "provisionSuccess": "Campus provisioned — admin credentials email queued.",
+      "provisionSuccessWithIds": "Campus live at /{slug} (code {code}). Admin credentials email queued.",
+      "provisionError": "Could not provision campus. Check the form and try again.",
+      "campusesTitle": "Live campuses",
+      "campusesDescription": "Open public portal routes or resend admin credentials.",
+      "campusesEmpty": "No campuses yet. Allocate one from a confirmed demo request.",
+      "resendCreds": "Resend credentials",
+      "credsQueued": "Credentials email queued.",
+      "fields": {
+        "institutionName": "Institution name",
+        "contactEmail": "Contact email",
+        "adminFirstName": "Admin first name",
+        "adminLastName": "Admin last name",
+        "adminEmail": "Admin login email",
+        "initialPassword": "Initial password"
+      },
+      "meetingWhen": "Meeting date and time",
+      "meetingNotes": "Meeting notes (optional)",
+      "confirmMeet": "Confirm meeting",
+      "declineReason": "Decline reason (optional)",
+      "decline": "Decline request",
+      "prefillAllocate": "Prefill campus form"
+    }
+  },
   "dashboard": {
     "sidebar": {
       "groups": {
