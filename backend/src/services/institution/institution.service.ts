@@ -37,6 +37,7 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { syncSemesterCalendar } from './sync-semester-calendar.js';
+import { btechProgramListFilter, isOptionalSoeProgram } from './soe-org-filters.js';
 import { cache } from '../../cache/cache.service.js';
 import {
   academicCalendarRepository,
@@ -499,6 +500,14 @@ export class InstitutionService {
     const institutionId = requireTenant(actor);
     const dept = await departmentRepository.findById(institutionId, input.departmentId);
     if (!dept) throw new ValidationError('Invalid departmentId for this institution');
+    if (isOptionalSoeProgram(input.code, input.level)) {
+      throw new ValidationError(
+        'M.Tech and Ph.D branches are not enabled. Use B.Tech branch codes (BT-CSE, BT-ECE).',
+      );
+    }
+    if (!input.code.trim().toUpperCase().startsWith('BT-') || input.level !== 'undergraduate') {
+      throw new ValidationError('Branches must be undergraduate B.Tech programs (code prefix BT-).');
+    }
     return this.createTenantResource(
       programRepository,
       actor,
@@ -508,22 +517,49 @@ export class InstitutionService {
   }
   listPrograms = async (query: OrgListQuery, actor: ActorContext) => {
     if (actor.institutionId) await syncSemesterCalendar(actor.institutionId);
-    return this.listTenantResource(programRepository, actor, query);
+    const institutionId = requireTenant(actor);
+    const btechOnly = (query as OrgListQuery & { btechOnly?: boolean }).btechOnly !== false;
+    const result = await programRepository.list(
+      institutionId,
+      query,
+      btechOnly ? btechProgramListFilter() : {},
+    );
+    return {
+      items: result.items.map((d) => toDto(d)),
+      meta: pageMeta(result.total, result.page, result.limit),
+    };
   };
   getProgram = (id: string, actor: ActorContext) =>
     this.getTenantResource(programRepository, actor, id);
-  updateProgram = (id: string, input: UpdateProgramInput, actor: ActorContext) =>
-    this.updateTenantResource(
+  updateProgram = async (id: string, input: UpdateProgramInput, actor: ActorContext) => {
+    const institutionId = requireTenant(actor);
+    const existing = await programRepository.findById(institutionId, id);
+    if (!existing) throw new NotFoundError('Resource not found');
+    const programRow = existing as unknown as { code: string; level: string };
+    const code = (input.code ?? programRow.code) as string;
+    const level = (input.level ?? programRow.level) as string;
+    if (isOptionalSoeProgram(code, level)) {
+      throw new ValidationError('M.Tech and Ph.D branches cannot be updated or re-enabled.');
+    }
+    return this.updateTenantResource(
       programRepository,
       actor,
       id,
       input,
       'program.updated',
     );
+  };
   archiveProgram = (id: string, actor: ActorContext) =>
     this.archiveTenantResource(programRepository, actor, id, 'program');
-  restoreProgram = (id: string, actor: ActorContext) =>
-    this.restoreTenantResource(programRepository, actor, id, 'program');
+  restoreProgram = async (id: string, actor: ActorContext) => {
+    const institutionId = requireTenant(actor);
+    const existing = await programRepository.findByIdIncludingDeleted(institutionId, id);
+    const programRow = existing as unknown as { code: string; level: string } | null;
+    if (programRow && isOptionalSoeProgram(String(programRow.code), String(programRow.level))) {
+      throw new ValidationError('M.Tech and Ph.D branches are removed and cannot be restored.');
+    }
+    return this.restoreTenantResource(programRepository, actor, id, 'program');
+  };
 
   // Academic years
   async createAcademicYear(input: CreateAcademicYearInput, actor: ActorContext) {

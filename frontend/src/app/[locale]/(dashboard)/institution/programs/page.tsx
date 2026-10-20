@@ -54,8 +54,20 @@ export default function ProgramsPage() {
         ? departmentOptions
         : [{ value: '', label: tf('noDepartments') }],
     },
-    { name: 'name', label: tf('name'), type: 'text', required: true },
-    { name: 'code', label: tf('code'), type: 'text', required: true },
+    {
+      name: 'name',
+      label: tf('name'),
+      type: 'text',
+      required: true,
+      placeholder: 'B.Tech CSE',
+    },
+    {
+      name: 'code',
+      label: tf('code'),
+      type: 'text',
+      required: true,
+      placeholder: 'BT-CSE',
+    },
     {
       name: 'durationYears',
       label: tf('durationYears'),
@@ -78,13 +90,7 @@ export default function ProgramsPage() {
       label: tf('level'),
       type: 'select',
       required: true,
-      options: [
-        { value: 'certificate', label: tl('certificate') },
-        { value: 'diploma', label: tl('diploma') },
-        { value: 'undergraduate', label: tl('undergraduate') },
-        { value: 'postgraduate', label: tl('postgraduate') },
-        { value: 'doctoral', label: tl('doctoral') },
-      ],
+      options: [{ value: 'undergraduate', label: tl('undergraduate') }],
     },
     {
       name: 'status',
@@ -110,6 +116,8 @@ export default function ProgramsPage() {
       updateMutation={useUpdateProgramMutation}
       archiveMutation={useArchiveProgramMutation}
       restoreMutation={useRestoreProgramMutation}
+      defaultStatusFilter="active"
+      extraListParams={{ btechOnly: true }}
       getEditValues={(row) => ({
         departmentId: row.departmentId,
         name: row.name,

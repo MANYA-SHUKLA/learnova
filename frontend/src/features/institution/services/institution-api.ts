@@ -60,6 +60,7 @@ function toQuery(params: OrgListParams = {}): string {
   if (params.limit) search.set('limit', String(params.limit));
   if (params.sortBy) search.set('sortBy', params.sortBy);
   if (params.sortOrder) search.set('sortOrder', params.sortOrder);
+  if (params.btechOnly !== undefined) search.set('btechOnly', String(params.btechOnly));
   const qs = search.toString();
   return qs ? `?${qs}` : '';
 }

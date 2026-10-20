@@ -41,6 +41,8 @@ export const orgListQuerySchema = z.object({
     .default(PAGINATION.DEFAULT_LIMIT),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
+  /** When true (default for list API), hide M.Tech / Ph.D branches. */
+  btechOnly: z.coerce.boolean().optional(),
 });
 
 export const idParamsSchema = z.object({

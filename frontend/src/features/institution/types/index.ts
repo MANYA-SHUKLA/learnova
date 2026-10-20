@@ -54,6 +54,8 @@ export interface OrgListParams {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  /** Hide M.Tech / Ph.D branches (default true on API when omitted). */
+  btechOnly?: boolean;
 }
 
 export interface OrgListResult<T> {

@@ -1210,7 +1210,7 @@
       "branches": {
         "title": "Branches",
         "singular": "Branch",
-        "description": "Specializations under a degree program — for example CSE or ECE under B.Tech."
+        "description": "B.Tech branches only (CSE, ECE). M.Tech and Ph.D are not used in SOE JNU."
       },
       "programs": {
         "title": "Programs",
@@ -1238,7 +1238,7 @@
       "sections": {
         "title": "Sections",
         "singular": "Section",
-        "description": "One row per program + semester (e.g. B.Tech ECE Sem VII for 4th-year Monsoon). You only need B.Tech CSE/ECE for daily use — M.Tech/Ph.D rows are removed if empty. Current term sections show as Active."
+        "description": "One row per program + semester (e.g. B.Tech ECE Sem VII for 4th-year Monsoon). You only need B.Tech CSE/ECE for daily use. Current term sections show as Active."
       },
       "batches": {
         "title": "Batches",

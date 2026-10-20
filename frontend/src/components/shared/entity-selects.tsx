@@ -264,6 +264,7 @@ export function ProgramSelect({
     page: 1,
     limit: btechOnly ? 100 : limit,
     status: btechOnly ? 'active' : undefined,
+    btechOnly: btechOnly ? true : undefined,
     ...listParams,
   });
   const options = useMemo(() => {
