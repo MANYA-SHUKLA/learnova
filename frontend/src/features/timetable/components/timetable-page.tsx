@@ -51,7 +51,6 @@ import {
   useTimetables,
   useUpdateTimetableSlotMutation,
 } from '../hooks/use-timetable-queries';
-import { GenerateTimetableDialog } from './generate-timetable-dialog';
 import { WeeklyTimetableGrid } from './weekly-timetable-grid';
 
 const DAY_VALUES: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
@@ -125,7 +124,6 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [generateOpen, setGenerateOpen] = useState(false);
   const [editing, setEditing] = useState<TimetableSlot | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [generateResult, setGenerateResult] = useState<GenerateTimetableResult | null>(null);
@@ -432,9 +430,8 @@ export function TimetablePage({ mode }: TimetablePageProps) {
         notes: values.notes || undefined,
       });
       setGenerateResult(result);
-      setGenerateOpen(false);
     } catch (err) {
-      setFormError(getApiErrorMessage(err, t('generateFailed')));
+      setFormError(getApiErrorMessage(err, t('loadOfficialGridFailed')));
     }
   };
 
@@ -582,11 +579,10 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                   variant="outline"
                   disabled={!selectedSemesterId || generateMutation.isPending}
                   onClick={() => {
-                    setFormError(null);
-                    setGenerateOpen(true);
+                    void handleGenerate({ notes: '', replaceExisting: true });
                   }}
                 >
-                  {t('generateWithAi')}
+                  {generateMutation.isPending ? t('loadOfficialGridLoading') : t('loadOfficialGrid')}
                 </Button>
                 {timetable ? (
                   <Button
@@ -886,20 +882,6 @@ export function TimetablePage({ mode }: TimetablePageProps) {
         />
       ) : null}
 
-      {isAdmin ? (
-        <GenerateTimetableDialog
-          open={generateOpen}
-          semesterName={selectedSemesterName || t('selectSemester')}
-          academicYearName={selectedYearName || t('selectAcademicYear')}
-          hasExistingSlots={Boolean(timetable && (timetable.slotCount ?? gridSlots.length) > 0)}
-          isSubmitting={generateMutation.isPending}
-          error={formError}
-          onClose={() => {
-            setGenerateOpen(false);
-          }}
-          onSubmit={handleGenerate}
-        />
-      ) : null}
     </div>
   );
 }
