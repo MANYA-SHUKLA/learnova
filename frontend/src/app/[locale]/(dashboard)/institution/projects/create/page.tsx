@@ -11,9 +11,14 @@ import {
   Input,
 } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SuccessPopup } from '@/components/shared/success-popup';
-import { CourseSelect } from '@/components/shared/entity-selects';
+import {
+  AcademicYearSelect,
+  CourseSelect,
+  ProgramSelect,
+} from '@/components/shared/entity-selects';
+import { useCurrentAcademicSession, useSemesters } from '@/features/institution';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
   useCreateProjectMutation,
@@ -23,6 +28,7 @@ import {
 import type { ProjectDifficulty, ProjectTypeSpec } from '@/features/project';
 import { useSuccessPopup } from '@/hooks/use-success-popup';
 import { Link, useRouter } from '@/lib/i18n/routing';
+import { generateSlug } from '@/lib/slug';
 
 const PROJECT_TYPES: ProjectTypeSpec[] = [
   'mini_project',
@@ -46,8 +52,12 @@ export default function CreateProjectPage() {
   const tagsQuery = useProjectTags();
   const { open, message, showSuccess, closeSuccess } = useSuccessPopup(tCommon('savedSuccessfully'));
 
+  const session = useCurrentAcademicSession();
+  const [programId, setProgramId] = useState('');
+  const [academicYearId, setAcademicYearId] = useState('');
   const [courseId, setCourseId] = useState('');
   const [slug, setSlug] = useState('');
+  const [slugEdited, setSlugEdited] = useState(false);
   const [title, setTitle] = useState('');
   const [objective, setObjective] = useState('');
   const [problemStatement, setProblemStatement] = useState('');
@@ -70,6 +80,33 @@ export default function CreateProjectPage() {
 
   const categories = categoriesQuery.data?.items ?? [];
   const tags = tagsQuery.data?.items ?? [];
+
+  useEffect(() => {
+    if (session.activeYear?.id && !academicYearId) {
+      setAcademicYearId(session.activeYear.id);
+    }
+  }, [session.activeYear?.id, academicYearId]);
+
+  useEffect(() => {
+    if (!slugEdited && title.trim()) {
+      setSlug(generateSlug(title));
+    }
+  }, [title, slugEdited]);
+
+  const semestersQuery = useSemesters(
+    { page: 1, limit: 50, academicYearId: academicYearId || undefined },
+    Boolean(academicYearId),
+  );
+
+  const filterSemesterIds = useMemo(
+    () => (semestersQuery.data?.items ?? []).map((s) => s.id),
+    [semestersQuery.data?.items],
+  );
+
+  const courseListParams = useMemo(
+    () => ({ programId: programId || undefined }),
+    [programId],
+  );
 
   const toggleTag = (tagId: string) => {
     setSelectedTags((prev) =>
@@ -97,24 +134,62 @@ export default function CreateProjectPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
+              <ProgramSelect
+                label={t('filterBranch')}
+                value={programId}
+                btechOnly
+                onChange={(id) => {
+                  setProgramId(id);
+                  setCourseId('');
+                }}
+              />
+              <AcademicYearSelect
+                label={t('filterAcademicYear')}
+                value={academicYearId}
+                onChange={(id) => {
+                  setAcademicYearId(id);
+                  setCourseId('');
+                }}
+              />
               <div className="sm:col-span-2">
                 <CourseSelect
-                  label={t('courseId')}
+                  label={t('course')}
                   value={courseId}
                   onChange={setCourseId}
+                  listParams={courseListParams}
+                  filterSemesterIds={
+                    academicYearId && filterSemesterIds.length > 0
+                      ? filterSemesterIds
+                      : undefined
+                  }
+                  emptyMessage={
+                    !programId
+                      ? t('courseSelectBranchFirst')
+                      : !academicYearId
+                        ? t('courseSelectYearFirst')
+                        : t('courseEmpty')
+                  }
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{t('slug')}</label>
-                <Input value={slug} onChange={(e) => { setSlug(e.target.value); }} placeholder="capstone-2026" />
-              </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium">{t('projectTitle')}</label>
                 <Input
                   value={title}
                   onChange={(e) => { setTitle(e.target.value); }}
                   placeholder={t('projectTitlePlaceholder')}
                 />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium">{t('slug')}</label>
+                <Input
+                  value={slug}
+                  onChange={(e) => {
+                    setSlugEdited(true);
+                    setSlug(e.target.value);
+                  }}
+                  placeholder="capstone-2026"
+                />
+                <p className="text-caption text-muted-foreground">{t('slugAutoHint')}</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('projectType')}</label>

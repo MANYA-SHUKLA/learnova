@@ -35,7 +35,6 @@ import {
   ListChecks,
   Library,
   ShieldCheck,
-  Globe,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -147,7 +146,6 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'gradebookPolicies', href: APP_ROUTES.INSTITUTION_GRADEBOOK_POLICIES, icon: Settings },
       { id: 'gradebookModeration', href: APP_ROUTES.INSTITUTION_GRADEBOOK_MODERATION, icon: ShieldCheck },
       { id: 'academicStanding', href: APP_ROUTES.INSTITUTION_ACADEMIC_STANDING, icon: BarChart3 },
-      { id: 'transcriptRequests', href: APP_ROUTES.INSTITUTION_TRANSCRIPTS, icon: FileText },
       { id: 'reports', href: APP_ROUTES.INSTITUTION_REPORTS, icon: BarChart3 },
       { id: 'certificates', href: APP_ROUTES.INSTITUTION_CERTIFICATES, icon: Award },
     ],

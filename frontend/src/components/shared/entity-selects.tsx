@@ -40,6 +40,8 @@ interface CourseSelectProps extends OmitSelectProps {
   label?: string;
   listParams?: CourseListParams;
   excludeIds?: string[];
+  /** Keep courses linked to at least one of these semesters (e.g. selected academic year). */
+  filterSemesterIds?: string[];
   limit?: number;
 }
 
@@ -78,6 +80,7 @@ export function CourseSelect({
   label = 'Course',
   listParams,
   excludeIds,
+  filterSemesterIds,
   limit = 100,
   value,
   onChange,
@@ -99,8 +102,19 @@ export function CourseSelect({
     true,
   );
 
+  const filteredCourses = useMemo(() => {
+    let items = query.data?.items ?? [];
+    if (filterSemesterIds?.length) {
+      const allowed = new Set(filterSemesterIds);
+      items = items.filter((course) =>
+        course.semesterIds?.some((id) => allowed.has(id)),
+      );
+    }
+    return items;
+  }, [filterSemesterIds, query.data?.items]);
+
   const options = useListOptions(
-    query.data?.items,
+    filteredCourses,
     (course) => ({
       value: course.id,
       label: `${course.courseCode} — ${course.title}`,
