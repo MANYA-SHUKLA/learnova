@@ -235,10 +235,14 @@ function findCourseForOfficialRow(
 }
 
 function slotCountBySectionPrefix(slots: SettledSlot[], prefix: 'CSE' | 'ECE'): number {
-  return slots.filter((slot) => {
-    const name = slot.sectionName;
-    return name.includes(`B.Tech ${prefix}`) && !name.includes(`B.Tech ${prefix === 'CSE' ? 'ECE' : 'CSE'}`);
-  }).length;
+  let count = 0;
+  for (const slot of slots) {
+    const parts = slot.sectionName.split('+').map((s) => s.trim());
+    for (const part of parts) {
+      if (part.includes(`B.Tech ${prefix} Sem`)) count += 1;
+    }
+  }
+  return count;
 }
 
 function matchFacultyId(faculty: FacultyRecord[], facultyCode: string, facultyName: string): string | null {
@@ -286,10 +290,7 @@ export function buildOfficialSettledSlots(
       warnings.push(`No section "${row.sourceSectionLabel}" — skipped ${row.courseKey}.`);
       continue;
     }
-    const course = courses.find((c) => {
-      if ((c.courseCode ?? '').toUpperCase() !== row.courseCode) return false;
-      return c.programIds.length === 0 || c.programIds.includes(section.programId);
-    });
+    const course = findCourseForOfficialRow(section, row.courseCode, courses);
     const facultyId = matchFacultyId(faculty, row.facultyCode, row.facultyName);
     if (!course || !facultyId) {
       warnings.push(
@@ -328,7 +329,23 @@ export function buildOfficialSettledSlots(
     });
   }
 
-  return { slots: slotDocs, warnings, mappedCount, lockedCount: locked.length };
+  const cseSlotCount = slotCountBySectionPrefix(slotDocs, 'CSE');
+  const eceSlotCount = slotCountBySectionPrefix(slotDocs, 'ECE');
+  const gap = Math.abs(cseSlotCount - eceSlotCount);
+  if (cseSlotCount > 0 && eceSlotCount > 0 && gap > 4) {
+    warnings.push(
+      `CSE/ECE slot count uneven (${cseSlotCount} CSE vs ${eceSlotCount} ECE). Official source expects similar weekly load; re-run Monsoon seed if ECE rows are missing.`,
+    );
+  }
+
+  return {
+    slots: slotDocs,
+    warnings,
+    mappedCount,
+    lockedCount: locked.length,
+    cseSlotCount,
+    eceSlotCount,
+  };
 }
 
 export function teachingAssignmentsFromSettledSlots(
@@ -368,10 +385,7 @@ export function mapOfficialSlotsToProposed(
   for (const row of locked) {
     const section = sections.find((s) => s.name === row.sourceSectionLabel);
     if (!section) continue;
-    const course = courses.find((c) => {
-      if ((c.courseCode ?? '').toUpperCase() !== row.courseCode) return false;
-      return c.programIds.length === 0 || c.programIds.includes(section.programId);
-    });
+    const course = findCourseForOfficialRow(section, row.courseCode, courses);
     const facultyId = matchFacultyId(faculty, row.facultyCode, row.facultyName);
     if (!course || !facultyId) continue;
 

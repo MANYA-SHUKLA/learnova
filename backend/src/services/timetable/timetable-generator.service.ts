@@ -229,7 +229,7 @@ export class TimetableGeneratorService {
       throw new ValidationError('No active faculty found to assign courses');
     }
 
-    const courses: CourseRecord[] = courseDocs.map((doc) => ({
+    const mapCourseDoc = (doc: (typeof courseDocsRaw)[number]): CourseRecord => ({
       id: String(doc._id),
       courseCode: doc.courseCode as string,
       title: doc.title as string,
@@ -239,7 +239,16 @@ export class TimetableGeneratorService {
       programIds: ((doc.programIds as Types.ObjectId[] | undefined) ?? []).map(String),
       departmentId: doc.departmentId ? String(doc.departmentId) : null,
       category: (doc.category as string | null) ?? null,
-    }));
+    });
+
+    const courses: CourseRecord[] = courseDocs.map(mapCourseDoc);
+
+    const coursesForOfficialGrid: CourseRecord[] = courseDocsRaw
+      .filter((doc) => {
+        const code = String(doc.courseCode ?? '').toUpperCase();
+        return !JNU_UNVERIFIED_COURSE_CODES.has(code);
+      })
+      .map(mapCourseDoc);
 
     const faculty: FacultyRecord[] = facultyDocs.map((doc) => ({
       id: String(doc._id),
@@ -299,10 +308,16 @@ export class TimetableGeneratorService {
       facultyId,
     }));
 
-    const officialPreview = buildOfficialSettledSlots(semesterNumber, courses, sections, faculty);
-    const useOfficialGrid =
-      officialPreview.lockedCount > 0 &&
-      officialPreview.mappedCount >= Math.ceil(officialPreview.lockedCount * 0.85);
+    const isJnuProgression = JNU_BTECH_PROGRESSION_SEMESTERS.includes(
+      semesterNumber as (typeof JNU_BTECH_PROGRESSION_SEMESTERS)[number],
+    );
+    const officialPreview = buildOfficialSettledSlots(
+      semesterNumber,
+      coursesForOfficialGrid,
+      sections,
+      faculty,
+    );
+    const useOfficialGrid = isJnuProgression && officialPreview.lockedCount > 0;
 
     let geminiUsed = false;
     let proposal = parseGeminiTimetableProposal(null);
@@ -339,9 +354,14 @@ export class TimetableGeneratorService {
 
     let settled: SettleResult;
     if (useOfficialGrid) {
+      if (officialPreview.slots.length === 0) {
+        throw new ValidationError(
+          'Official Monsoon grid could not be mapped. Run: SEED_INSTITUTION_ID=<id> pnpm --filter @learnova/backend seed:monsoon-2026',
+        );
+      }
       settled = {
         slots: officialPreview.slots,
-        assignments: teachingAssignmentsFromSettledSlots(officialPreview.slots, courses),
+        assignments: teachingAssignmentsFromSettledSlots(officialPreview.slots, coursesForOfficialGrid),
         warnings: [...officialPreview.warnings],
       };
     } else {
@@ -372,8 +392,13 @@ export class TimetableGeneratorService {
     }
     if (useOfficialGrid) {
       warnings.unshift(
-        `Loaded ${officialPreview.mappedCount} slots from the official Monsoon 2026 timetable (JC BOSE, labs, groups). AI auto-scheduler was not used.`,
+        `Loaded official Monsoon grid: ${officialPreview.mappedCount}/${officialPreview.lockedCount} rows (CSE ${officialPreview.cseSlotCount}, ECE ${officialPreview.eceSlotCount}) — JC BOSE / labs, combined classes where the source has them.`,
       );
+      if (officialPreview.mappedCount < officialPreview.lockedCount) {
+        warnings.unshift(
+          `Some official rows missing (often EN201 for ECE or B.Tech ECE Sem section). Run: SEED_INSTITUTION_ID=<id> pnpm --filter @learnova/backend seed:monsoon-2026`,
+        );
+      }
     } else if (!isGeminiConfigured()) {
       warnings.unshift(
         'Official grid could not be fully mapped — using the local scheduler with ELC demo rooms. Prefer: pnpm --filter @learnova/backend seed:monsoon-2026',

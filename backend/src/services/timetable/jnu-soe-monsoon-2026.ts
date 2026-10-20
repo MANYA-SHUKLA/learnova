@@ -29,6 +29,8 @@ Monsoon 2026 implementation notes:
 - Server settler preserves locked slots first, then fills remaining sessions without violating hard constraints.
 - LMS AI step assigns faculty only; do not return invented slot times unless they match locked source rows.
 - Do not assign EN711 or EN714 to B.Tech unless explicitly verified.
+- Balance B.Tech CSE and B.Tech ECE weekly sessions per the official grid; never skew most classes to CSE only.
+- Shared subjects at the same time/faculty/room are combined sessions (both section labels).
 `.trim();
 
 type CatalogRow = { code: string; subject: string; faculty: string };

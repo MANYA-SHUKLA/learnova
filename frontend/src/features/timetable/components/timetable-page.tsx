@@ -191,6 +191,10 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   );
   const timetable = timetablesQuery.data?.items[0] ?? null;
 
+  useEffect(() => {
+    setGenerateResult(null);
+  }, [selectedSemesterId, timetable?.id]);
+
   const draftTimetablesQuery = useTimetables(
     {
       semesterId: selectedSemesterId || undefined,
@@ -538,7 +542,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           (line) =>
             !line.startsWith('--- JNU hard-constraint') &&
             !line.startsWith('Repaired overlap') &&
-            !line.startsWith('PROVISIONAL: Timetable failed JNU hard-constraint validation across'),
+            !line.includes('local scheduler') &&
+            !line.startsWith('PROVISIONAL:') &&
+            !line.includes('AI suggested faculty'),
         )
       : [];
 
