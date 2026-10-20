@@ -1,6 +1,8 @@
+'use client';
+
 import { DashboardRouteShell } from '@/components/shared/dashboard-route-shell';
 
-/** Matches `(dashboard)/layout.tsx` gate shell (same component tree as pre-hydration layout). */
+/** Same tree as `(dashboard)/layout.tsx` while auth resolves — avoids Suspense vs layout hydration drift. */
 export default function DashboardRouteLoading() {
-  return <DashboardRouteShell />;
+  return <DashboardRouteShell message="Loading your session…" />;
 }

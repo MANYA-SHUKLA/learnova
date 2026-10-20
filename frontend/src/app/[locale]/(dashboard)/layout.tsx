@@ -7,14 +7,12 @@ import { useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { MadeWithLoveFooter } from '@/components/shared/made-with-love-footer';
 import { DashboardRouteShell } from '@/components/shared/dashboard-route-shell';
-import { useClientReady } from '@/hooks/use-client-ready';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { isPathAllowedForRole } from '@/lib/auth/role-routes';
 import { usePathname, useRouter } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function DashboardGroupLayout({ children }: { children: ReactNode }) {
-  const clientReady = useClientReady();
   const { isLoading, user, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -52,10 +50,6 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
       router.replace(dashboardPathForRole(user.role));
     }
   }, [isLoading, isAuthenticated, user, onChangePasswordPage, pathname, router, roleAllowed]);
-
-  if (!clientReady) {
-    return <DashboardRouteShell message="Loading your session…" />;
-  }
 
   if (isLoading || !isAuthenticated || !user) {
     return <DashboardRouteShell message="Loading your session…" />;
