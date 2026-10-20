@@ -30,9 +30,11 @@ function normalizeLoginNextPath(nextPath: string): string {
     nextPath === '/superadmin/login' ||
     nextPath.startsWith('/superadmin/login?') ||
     nextPath === '/console/sign-in' ||
-    nextPath.startsWith('/console/sign-in?')
+    nextPath.startsWith('/console/sign-in?') ||
+    nextPath === '/superadmin/signin' ||
+    nextPath.startsWith('/superadmin/signin?')
   ) {
-    return APP_ROUTES.SUPERADMIN_SIGN_IN;
+    return APP_ROUTES.SUPERADMIN_LOGIN;
   }
   return nextPath;
 }

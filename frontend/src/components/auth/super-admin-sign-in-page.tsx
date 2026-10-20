@@ -20,7 +20,7 @@ import { storeAccessToken } from '@/lib/auth/jwt';
 import { useRouter } from '@/lib/i18n/routing';
 import { useAuthStore } from '@/features/auth/stores/auth-store';
 
-/** Super-admin sign-in — direct URL only (`/superadmin/signin`), not linked from marketing footer. */
+/** Super-admin sign-in — direct URL only (`/superadmin/login`), not linked from marketing footer. */
 export function SuperAdminSignInPage() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);

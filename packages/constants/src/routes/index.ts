@@ -188,11 +188,11 @@ export const APP_ROUTES = {
   CHANGE_PASSWORD: '/account/change-password',
   PLATFORM: '/platform',
   /** Super-admin sign-in (direct URL; institutions use `/login` from footer) */
-  SUPERADMIN_SIGN_IN: '/superadmin/signin',
+  SUPERADMIN_LOGIN: '/superadmin/login',
   CONSOLE: '/console',
-  /** @deprecated aliases — middleware redirects to SUPERADMIN_SIGN_IN */
-  CONSOLE_SIGN_IN: '/superadmin/signin',
-  SUPERADMIN_LOGIN: '/superadmin/signin',
+  /** Aliases — redirect to SUPERADMIN_LOGIN */
+  SUPERADMIN_SIGN_IN: '/superadmin/login',
+  CONSOLE_SIGN_IN: '/superadmin/login',
   SUPERADMIN: '/console',
   SUPERADMIN_DASHBOARD: '/console',
   CAMPUS: '/campus',

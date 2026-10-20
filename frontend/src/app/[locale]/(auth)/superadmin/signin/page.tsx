@@ -1,5 +1,12 @@
-import { SuperAdminSignInPage } from '@/components/auth/super-admin-sign-in-page';
+import { redirect } from 'next/navigation';
+import { APP_ROUTES } from '@learnova/constants';
 
-export default function SuperAdminSignInRoute() {
-  return <SuperAdminSignInPage />;
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+/** @deprecated use `/superadmin/login` */
+export default async function LegacySuperAdminSigninRedirect({ params }: Props) {
+  const { locale } = await params;
+  redirect(`/${locale}${APP_ROUTES.SUPERADMIN_LOGIN}`);
 }

@@ -5,8 +5,8 @@ interface Props {
   params: Promise<{ locale: string }>;
 }
 
-/** @deprecated use `/superadmin/signin` */
+/** @deprecated use `/superadmin/login` */
 export default async function LegacyConsoleSignInRedirect({ params }: Props) {
   const { locale } = await params;
-  redirect(`/${locale}${APP_ROUTES.SUPERADMIN_SIGN_IN}`);
+  redirect(`/${locale}${APP_ROUTES.SUPERADMIN_LOGIN}`);
 }

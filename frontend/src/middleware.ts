@@ -44,15 +44,15 @@ const PROTECTED_PATH_PREFIXES = [
   '/superadmin',
 ] as const;
 
-/** Guest sign-in under protected prefixes (e.g. /superadmin/signin) */
-const PUBLIC_AUTH_ROUTES = [APP_ROUTES.SUPERADMIN_SIGN_IN] as const;
+/** Guest sign-in under protected prefixes */
+const PUBLIC_AUTH_ROUTES = [APP_ROUTES.SUPERADMIN_LOGIN] as const;
 
-const LEGACY_SUPERADMIN_SIGN_IN = ['/superadmin/login', '/console/sign-in'] as const;
+const LEGACY_SUPERADMIN_SIGN_IN = ['/superadmin/signin', '/console/sign-in'] as const;
 
 /** Auth-only routes (guest) */
 const AUTH_PATH_PREFIXES = [
   '/login',
-  APP_ROUTES.SUPERADMIN_SIGN_IN,
+  APP_ROUTES.SUPERADMIN_LOGIN,
   '/register',
   '/register-institution',
   '/forgot-password',
@@ -91,7 +91,7 @@ export default async function middleware(request: NextRequest) {
 
   if (LEGACY_SUPERADMIN_SIGN_IN.includes(pathWithoutLocale as (typeof LEGACY_SUPERADMIN_SIGN_IN)[number])) {
     return NextResponse.redirect(
-      new URL(`/${locale}${APP_ROUTES.SUPERADMIN_SIGN_IN}`, request.url),
+      new URL(`/${locale}${APP_ROUTES.SUPERADMIN_LOGIN}`, request.url),
     );
   }
 

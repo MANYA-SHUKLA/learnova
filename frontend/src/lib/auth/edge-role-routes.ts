@@ -43,8 +43,8 @@ export function requiredRoleForPath(pathWithoutLocale: string): EdgeActiveRole |
     return 'student';
   }
   if (
-    normalized === '/superadmin/signin' ||
     normalized === '/superadmin/login' ||
+    normalized === '/superadmin/signin' ||
     normalized === `${SUPERADMIN_PREFIX}/sign-in`
   ) {
     return null;
