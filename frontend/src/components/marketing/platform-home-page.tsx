@@ -13,74 +13,44 @@ import {
   ShieldCheck,
   Sparkles,
   ArrowRight,
-  LayoutGrid,
   CheckCircle2,
-  Package,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { PlatformDashboardPreview } from '@/components/marketing/platform-dashboard-preview';
 import { publicApi } from '@/features/public/services/public-api';
-import { siteContainer } from '@/lib/layout';
-import { ctaButtonClass, platformHeroPrimaryClass, platformHeroSecondaryClass } from '@/lib/cta';
 import { ApiClientError } from '@/lib/api/client';
+import {
+  marketingBody,
+  marketingBtnPrimary,
+  marketingBtnSecondary,
+  marketingCard,
+  marketingCardTitle,
+  marketingContainer,
+  marketingEyebrow,
+  marketingFinalCta,
+  marketingHeroTitle,
+  marketingIconTile,
+  marketingPageBg,
+  marketingPill,
+  marketingSectionMutedBg,
+  marketingSectionTitle,
+  marketingSectionY,
+} from '@/lib/marketing-design';
 import { cn } from '@/lib/utils';
 import type { PlatformMarketingI18nOverlay } from '@/lib/platform-marketing-i18n';
 
-/** Card surface + hover — no hard border jumps; shadow and motion only. */
-const marketingCardSurface =
-  'rounded-2xl bg-card/95 shadow-sm shadow-black/[0.04] ring-1 ring-black/[0.04] dark:shadow-black/25 dark:ring-white/[0.06]';
-
-const marketingCardHover = cn(
-  'group relative overflow-hidden',
-  'transition-[transform,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
-  'hover:-translate-y-2 hover:bg-card hover:shadow-xl hover:shadow-primary/12',
-  'motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-sm',
-  'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit]',
-  'before:bg-gradient-to-br before:from-primary/[0.12] before:via-primary/[0.04] before:to-transparent',
-  'before:opacity-0 before:transition-opacity before:duration-500 group-hover:before:opacity-100',
-  'after:pointer-events-none after:absolute after:-right-8 after:-top-8 after:size-32 after:rounded-full',
-  'after:bg-primary/20 after:blur-2xl after:opacity-0 after:transition-opacity after:duration-700',
-  'group-hover:after:opacity-100',
-);
-
-const marketingCardInner = 'relative z-[1]';
-
-/** Full-width sections: intro column + content column (not narrow centered stacks). */
-const sectionGrid = 'grid w-full gap-10 lg:grid-cols-12 lg:gap-14 xl:gap-16';
-const sectionIntroCol = 'lg:col-span-4 lg:sticky lg:top-24 lg:self-start';
-const sectionBodyCol = 'lg:col-span-8';
-
-function SectionIntro({
-  eyebrow,
-  title,
-  subtitle,
-  children,
-  className,
-}: {
-  eyebrow?: string;
-  title: string;
-  subtitle?: string;
-  children?: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn('max-w-lg text-left', className)}>
-      {eyebrow ? (
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{eyebrow}</p>
-      ) : null}
-      <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{title}</h2>
-      {subtitle ? <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">{subtitle}</p> : null}
-      {children}
-    </div>
-  );
-}
-
-function parseBuyerLine(raw: string) {
-  const dash = raw.indexOf(' — ');
-  if (dash < 0) return { label: raw, detail: '' };
-  return { label: raw.slice(0, dash), detail: raw.slice(dash + 3) };
-}
+const MODULE_ICONS: Record<string, LucideIcon> = {
+  lms: BookOpen,
+  erp: GraduationCap,
+  exams: ClipboardCheck,
+  codingLabs: Code2,
+  cloudIDE: Sparkles,
+  aiIdeation: Brain,
+  analytics: LineChart,
+  audit: ShieldCheck,
+};
 
 const PLATFORM_FAQ_COUNT = 5;
 
@@ -95,6 +65,12 @@ function platformFaqFromMessages(
     items.push({ title: tPlatform(titleKey), body: tPlatform(bodyKey) });
   }
   return items;
+}
+
+function parseBuyerLine(raw: string) {
+  const dash = raw.indexOf(' — ');
+  if (dash < 0) return { label: raw, detail: '' };
+  return { label: raw.slice(0, dash), detail: raw.slice(dash + 3) };
 }
 
 type DemoFormState = {
@@ -141,72 +117,66 @@ function PlatformDemoRequestSection({
   };
 }) {
   return (
-    <section id="request-demo" className="scroll-mt-24 bg-gradient-to-b from-muted/15 to-muted/35 py-20 sm:py-24">
-      <div className={siteContainer('w-full')}>
-        <div className={cn(sectionGrid, 'lg:items-start')}>
-          <div className={sectionIntroCol}>
-            <SectionIntro title={introTitle} subtitle={introSubtitle} />
+    <section id="request-demo" className={cn('scroll-mt-24', marketingSectionMutedBg)}>
+      <div className={cn(marketingContainer, marketingSectionY)}>
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
+          <div className="max-w-[560px] text-left">
+            <h2 className={marketingSectionTitle}>{introTitle}</h2>
+            <p className={cn('mt-4', marketingBody)}>{introSubtitle}</p>
           </div>
-          <div
-            className={cn(
-              sectionBodyCol,
-              marketingCardSurface,
-              'p-8 sm:p-10',
-              marketingCardHover,
-              'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
+          <div className={cn(marketingCard, 'p-8')}>
+            {submitted ? (
+              <p className="font-medium text-[#16856B] dark:text-[#6ee7b7]">{thanksMessage}</p>
+            ) : (
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void demoMutation.mutateAsync();
+                }}
+              >
+                <Input
+                  className="h-12 rounded-xl"
+                  placeholder={fieldInstitution}
+                  value={form.institutionName}
+                  onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value }))}
+                  required
+                />
+                <Input
+                  className="h-12 rounded-xl"
+                  placeholder={fieldContact}
+                  value={form.contactName}
+                  onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
+                  required
+                />
+                <Input
+                  className="h-12 rounded-xl"
+                  type="email"
+                  placeholder={fieldEmail}
+                  value={form.contactEmail}
+                  onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
+                  required
+                />
+                <Input
+                  className="h-12 rounded-xl"
+                  placeholder={fieldPhone}
+                  value={form.phone}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                />
+                <textarea
+                  className="flex min-h-[96px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
+                  placeholder={fieldMessage}
+                  value={form.message}
+                  onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                />
+                {demoMutation.error instanceof ApiClientError ? (
+                  <p className="text-sm text-destructive">{demoMutation.error.message}</p>
+                ) : null}
+                <Button type="submit" className={cn('w-full', marketingBtnPrimary)} disabled={demoMutation.isPending}>
+                  {demoMutation.isPending ? sendingLabel : submitLabel}
+                </Button>
+              </form>
             )}
-          >
-            <div className={marketingCardInner}>
-              {submitted ? (
-                <p className="font-medium text-primary">{thanksMessage}</p>
-              ) : (
-                <form
-                  className="space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    void demoMutation.mutateAsync();
-                  }}
-                >
-                  <Input
-                    placeholder={fieldInstitution}
-                    value={form.institutionName}
-                    onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value }))}
-                    required
-                  />
-                  <Input
-                    placeholder={fieldContact}
-                    value={form.contactName}
-                    onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
-                    required
-                  />
-                  <Input
-                    type="email"
-                    placeholder={fieldEmail}
-                    value={form.contactEmail}
-                    onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
-                    required
-                  />
-                  <Input
-                    placeholder={fieldPhone}
-                    value={form.phone}
-                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                    required
-                  />
-                  <textarea
-                    className="flex min-h-[96px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
-                    placeholder={fieldMessage}
-                    value={form.message}
-                    onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                  />
-                  {demoMutation.error instanceof ApiClientError ? (
-                    <p className="text-sm text-destructive">{demoMutation.error.message}</p>
-                  ) : null}
-                  <Button type="submit" className={cn('w-full', ctaButtonClass)} disabled={demoMutation.isPending}>
-                    {demoMutation.isPending ? sendingLabel : submitLabel}
-                  </Button>
-                </form>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -214,30 +184,19 @@ function PlatformDemoRequestSection({
   );
 }
 
-const MODULE_ICONS: Record<string, LucideIcon> = {
-  lms: BookOpen,
-  erp: GraduationCap,
-  exams: ClipboardCheck,
-  codingLabs: Code2,
-  cloudIDE: Sparkles,
-  aiIdeation: Brain,
-  analytics: LineChart,
-  audit: ShieldCheck,
-};
-
-const BUYER_LINE_ICONS: Record<number, LucideIcon> = {
-  1: GraduationCap,
-  2: BookOpen,
-  3: ClipboardCheck,
-  4: Code2,
-  5: Sparkles,
-  6: ShieldCheck,
-};
+function SectionHeading({ eyebrow, title, subtitle }: { eyebrow?: string; title: string; subtitle?: string }) {
+  return (
+    <div className="mx-auto max-w-2xl text-center">
+      {eyebrow ? <p className={marketingEyebrow}>{eyebrow}</p> : null}
+      <h2 className={cn(eyebrow ? 'mt-3' : '', marketingSectionTitle)}>{title}</h2>
+      {subtitle ? <p className={cn('mt-4', marketingBody)}>{subtitle}</p> : null}
+    </div>
+  );
+}
 
 export function PlatformHomePage({
   marketingI18n,
 }: {
-  /** Resolved on the server from locale — overrides English CMS fields for hi/te. */
   marketingI18n: PlatformMarketingI18nOverlay;
 }) {
   const t = useTranslations('marketing.landing');
@@ -249,7 +208,7 @@ export function PlatformHomePage({
     queryFn: () => publicApi.getPlatformMarketing(),
   });
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<DemoFormState>({
     institutionName: '',
     contactName: '',
     contactEmail: '',
@@ -283,13 +242,13 @@ export function PlatformHomePage({
       if (!target) return;
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
-    const t = window.setTimeout(scrollToHash, 80);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(scrollToHash, 80);
+    return () => window.clearTimeout(timer);
   }, [isLoading, marketing]);
 
   if (isLoading || !marketing) {
     return (
-      <div className={siteContainer('flex min-h-[50vh] items-center justify-center text-muted-foreground')}>
+      <div className={cn(marketingContainer, 'flex min-h-[50vh] items-center justify-center text-muted-foreground')}>
         {tCommon('loading')}
       </div>
     );
@@ -298,574 +257,250 @@ export function PlatformHomePage({
   const heroEyebrow = marketingI18n.heroEyebrow;
   const heroTitle = marketingI18n.heroTitle;
   const heroSubtitle = marketingI18n.heroSubtitle;
-  const heroTagline = marketingI18n.heroTagline;
+  const heroTrust = marketingI18n.heroTagline;
   const heroCtaLabel = marketingI18n.heroCtaLabel;
+  const exploreLabel = tPlatform.has('explorePlatform') ? tPlatform('explorePlatform') : tPlatform('exploreModules');
 
   const highlightFeatures =
     marketingI18n.highlights.length > 0 ? marketingI18n.highlights : marketing.features;
-
-  const buyerKeys = ([1, 2, 3, 4, 5, 6] as const).filter((i) =>
-    tPlatform.has(`buyer${i}` as Parameters<typeof tPlatform>[0]),
-  );
 
   const pricingTitle = marketingI18n.pricingTitle ?? marketing.pricingTitle ?? tPlatform('pricingTitle');
   const pricingBody =
     marketingI18n.pricingBody ??
     marketing.pricingBody ??
     (tPlatform.has('pricingBody') ? tPlatform('pricingBody') : '');
-  const pricingIncludeKeys = buyerKeys.slice(0, 4);
 
   const messageFaqs = platformFaqFromMessages(tPlatform);
   const faqItems = messageFaqs.length > 0 ? messageFaqs : marketing.faq;
 
-  const outcomeKeys = ['outcome1', 'outcome2', 'outcome3', 'outcome4'] as const;
-  const testimonialKeys = ['testimonial1', 'testimonial2', 'testimonial3', 'testimonial4'] as const;
+  const workflowOutcomes = ['outcome1', 'outcome2', 'outcome3'] as const;
+  const testimonialKeys = ['testimonial2', 'testimonial3'] as const;
+
+  const heroPills = ['heroPill1', 'heroPill2', 'heroPill3'] as const;
 
   return (
-    <main className="overflow-x-clip font-body">
+    <main className={cn('marketing-site overflow-x-clip font-body', marketingPageBg)}>
       {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-background pb-16 pt-14 sm:pb-24 sm:pt-20 lg:pb-28 lg:pt-24">
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-30%,hsl(var(--primary)/0.18),transparent_55%)]" />
-          <div className="absolute -left-[20%] top-1/4 size-[min(480px,70vw)] rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute -right-[15%] top-0 size-[min(420px,60vw)] rounded-full bg-violet-500/10 blur-3xl dark:bg-violet-400/10" />
-          <div
-            className="absolute inset-0 opacity-[0.35] dark:opacity-[0.2]"
-            style={{
-              backgroundImage:
-                'linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / 0.35) 1px, transparent 1px)',
-              backgroundSize: '48px 48px',
-              maskImage: 'radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent)',
-            }}
-          />
-        </div>
-        <div className={siteContainer('relative w-full')}>
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/[0.08] px-4 py-1.5 shadow-sm shadow-primary/5 backdrop-blur-sm transition-colors duration-500 hover:bg-primary/[0.12]">
-              <Sparkles className="size-3.5 text-primary" aria-hidden />
-              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{heroEyebrow}</span>
-            </div>
-            <h1 className="mt-8 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.35rem] lg:leading-[1.08]">
-              <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/65 bg-clip-text text-transparent">
-                {heroTitle}
-              </span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-              {heroSubtitle}
-            </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Button asChild size="lg" className={platformHeroPrimaryClass}>
-                <a href="#request-demo" className="group inline-flex items-center gap-2">
-                  {heroCtaLabel}
-                  <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
-                </a>
-              </Button>
-              <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
-                <a href="#modules" className="inline-flex items-center gap-2">
-                  <LayoutGrid className="size-4 opacity-80" aria-hidden />
-                  {tPlatform('exploreModules')}
-                </a>
-              </Button>
-            </div>
-            {heroTagline ? (
-              <p className="mx-auto mt-8 max-w-xl text-sm font-medium text-muted-foreground">{heroTagline}</p>
-            ) : null}
-          </div>
-
-          {buyerKeys.length > 0 ? (
-            <div
-              className={cn(
-                'mx-auto mt-14 max-w-5xl rounded-3xl bg-card/70 p-6 shadow-lg shadow-primary/[0.07] backdrop-blur-md transition-[box-shadow,background-color] duration-500 hover:bg-card/85 hover:shadow-xl hover:shadow-primary/10 sm:p-8',
-                'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:items-center lg:gap-10 lg:text-left',
-              )}
-            >
-              <div className="text-center lg:text-left">
-                <p className="text-sm font-semibold uppercase tracking-wider text-primary">{tPlatform('buyerEyebrow')}</p>
-                <p className="mt-3 text-base leading-relaxed text-foreground sm:text-lg">
-                  {tPlatform('buyerSubtitle')}
-                </p>
-                <Button asChild variant="link" className="mt-4 hidden h-auto p-0 text-primary lg:inline-flex">
-                  <a href="#package" className="inline-flex items-center gap-1">
-                    {tPlatform('exploreModules')}
-                    <ArrowRight className="size-4" aria-hidden />
+      <section className={cn('pt-12 lg:pt-16', marketingPageBg)}>
+        <div className={cn(marketingContainer, 'pb-[88px] lg:pb-[104px]')}>
+          <div className="grid items-center gap-12 lg:grid-cols-[44%_56%] lg:gap-10">
+            <div className="max-w-[520px] text-left">
+              <p className={marketingEyebrow}>{heroEyebrow}</p>
+              <h1 className={cn('mt-4', marketingHeroTitle)}>{heroTitle}</h1>
+              <p className={cn('mt-5 max-w-[560px]', marketingBody)}>{heroSubtitle}</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {heroPills.map((key) =>
+                  tPlatform.has(key) ? (
+                    <span key={key} className={marketingPill}>
+                      {tPlatform(key)}
+                    </span>
+                  ) : null,
+                )}
+              </div>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild className={marketingBtnPrimary}>
+                  <a href="#request-demo" className="group inline-flex items-center gap-2">
+                    {heroCtaLabel}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
                   </a>
                 </Button>
+                <Button asChild variant="outline" className={marketingBtnSecondary}>
+                  <a href="#modules">{exploreLabel}</a>
+                </Button>
               </div>
-              <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:mt-0">
-                {buyerKeys.slice(0, 4).map((i) => {
-                  const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
-                  return (
-                    <li
-                      key={i}
-                      className="flex gap-2.5 rounded-xl bg-background/70 px-3 py-2.5 text-left text-sm shadow-sm shadow-black/[0.03] transition-[transform,box-shadow,background-color] duration-300 hover:-translate-y-0.5 hover:bg-background hover:shadow-md motion-reduce:hover:translate-y-0"
-                    >
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                      <span>
-                        <span className="font-semibold text-foreground">{line.label}</span>
-                        {line.detail ? <span className="text-muted-foreground"> — {line.detail}</span> : null}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-              <Button asChild variant="link" className="mx-auto mt-4 h-auto p-0 text-primary lg:hidden">
-                <a href="#package" className="inline-flex items-center gap-1">
-                  {tPlatform('exploreModules')}
-                  <ArrowRight className="size-4" aria-hidden />
-                </a>
-              </Button>
+              {heroTrust ? (
+                <p className="mt-6 text-sm leading-relaxed text-[#64748B] dark:text-[#94a3b8]">{heroTrust}</p>
+              ) : null}
             </div>
-          ) : null}
+            <PlatformDashboardPreview className="w-full lg:max-w-none" />
+          </div>
         </div>
       </section>
 
-      {/* Stats strip */}
-      <section className="bg-gradient-to-b from-background to-muted/25 py-10 sm:py-12">
-        <div className={siteContainer('w-full')}>
-          <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
-            {[
-              { value: tPlatform('stat1Value'), label: tPlatform('stat1Label') },
-              { value: tPlatform('stat2Value'), label: tPlatform('stat2Label') },
-              { value: tPlatform('stat3Value'), label: tPlatform('stat3Label') },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className={cn(
-                  marketingCardSurface,
-                  'bg-card/70 px-6 py-5 text-left',
-                  marketingCardHover,
-                  'hover:scale-[1.02] motion-reduce:hover:scale-100',
-                )}
-              >
-                <div className={marketingCardInner}>
-                  <p className="font-display text-3xl font-bold text-foreground transition-transform duration-500 group-hover:scale-105 motion-reduce:group-hover:scale-100">
-                    {stat.value}
+      {/* Platform modules */}
+      <section id="modules" className={cn('scroll-mt-24', marketingPageBg, marketingSectionY)}>
+        <div className={marketingContainer}>
+          <SectionHeading
+            eyebrow={t('features.eyebrow')}
+            title={t('features.title')}
+            subtitle={t('features.description')}
+          />
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {moduleKeys.map((key) => {
+              const Icon = MODULE_ICONS[key] ?? BarChart3;
+              return (
+                <div key={key} className={cn(marketingCard, 'flex flex-col')}>
+                  <div className={marketingIconTile}>
+                    <Icon className="size-5" aria-hidden />
+                  </div>
+                  <h3 className={cn('mt-4', marketingCardTitle)}>{t(`features.${key}.title`)}</h3>
+                  <p className={cn('mt-2 flex-1 text-sm leading-relaxed', marketingBody)}>
+                    {t(`features.${key}.description`)}
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Academic workflows */}
+      <section id="workflows" className={cn('scroll-mt-24', marketingSectionMutedBg)}>
+        <div className={cn(marketingContainer, marketingSectionY)}>
+          <div className="grid items-start gap-12 lg:grid-cols-2">
+            <div className="max-w-[560px] text-left">
+              <h2 className={marketingSectionTitle}>{tPlatform('workflowsTitle')}</h2>
+              <p className={cn('mt-4', marketingBody)}>{tPlatform('workflowsSubtitle')}</p>
+              <ul className="mt-10 space-y-4">
+                {workflowOutcomes.map((key) => (
+                  <li key={key} className="flex gap-3 text-left">
+                    <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#16856B] dark:text-[#6ee7b7]" aria-hidden />
+                    <div>
+                      <p className="font-semibold text-[#14243A] dark:text-[#e2e8f0]">
+                        {tPlatform(`${key}Title`)}
+                      </p>
+                      <p className={cn('mt-1 text-sm', marketingBody)}>{tPlatform(`${key}Body`)}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <PlatformDashboardPreview />
+          </div>
+          <ol className="mt-16 grid gap-6 sm:grid-cols-3">
+            {(['step1', 'step2', 'step3'] as const).map((step, i) => (
+              <li key={step} className={cn(marketingCard, 'text-left')}>
+                <span className="text-sm font-semibold text-primary dark:text-indigo-300">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h3 className={cn('mt-2', marketingCardTitle)}>{tPlatform(`${step}Title`)}</h3>
+                <p className={cn('mt-2 text-sm', marketingBody)}>{tPlatform(`${step}Body`)}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Trust & administration */}
+      {highlightFeatures.length > 0 ? (
+        <section id="trust" className={cn('scroll-mt-24', marketingPageBg, marketingSectionY)}>
+          <div className={marketingContainer}>
+            <SectionHeading title={tPlatform('highlightsTitle')} />
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {highlightFeatures.map((feature) => (
+                <div key={feature.title} className={cn(marketingCard, 'text-left')}>
+                  <h3 className={marketingCardTitle}>{feature.title}</h3>
+                  <p className={cn('mt-3 text-sm', marketingBody)}>{feature.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Procurement — once */}
+      <section id="procurement" className={cn('scroll-mt-24', marketingSectionMutedBg)}>
+        <div className={cn(marketingContainer, marketingSectionY)}>
+          <div className="max-w-[650px] text-left">
+            <p className={marketingEyebrow}>{tPlatform('buyerEyebrow')}</p>
+            <h2 className={cn('mt-3', marketingSectionTitle)}>
+              {tPlatform.has('procurementTitle') ? tPlatform('procurementTitle') : tPlatform('buyerTitle')}
+            </h2>
+            <p className={cn('mt-4', marketingBody)}>
+              {tPlatform.has('procurementBody') ? tPlatform('procurementBody') : tPlatform('buyerSubtitle')}
+            </p>
+          </div>
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => {
+              if (!tPlatform.has(`buyer${i}` as Parameters<typeof tPlatform>[0])) return null;
+              const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
+              return (
+                <li key={i} className={cn(marketingCard, 'text-left')}>
+                  <p className="text-sm font-semibold text-[#14243A] dark:text-[#e2e8f0]">{line.label}</p>
+                  {line.detail ? <p className={cn('mt-1 text-sm', marketingBody)}>{line.detail}</p> : null}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className={cn(marketingPageBg, marketingSectionY)}>
+        <div className={marketingContainer}>
+          <SectionHeading
+            title={tPlatform('testimonialsTitle')}
+            subtitle={tPlatform('testimonialsSubtitle')}
+          />
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            {testimonialKeys.map((key) => (
+              <figure key={key} className={cn(marketingCard, 'text-left')}>
+                <blockquote className={cn('text-sm leading-relaxed', marketingBody)}>
+                  {tPlatform(`${key}Quote`)}
+                </blockquote>
+                <figcaption className="mt-5">
+                  <p className="font-semibold text-[#14243A] dark:text-[#e2e8f0]">{tPlatform(`${key}Name`)}</p>
+                  <p className="text-sm text-[#64748B] dark:text-[#94a3b8]">{tPlatform(`${key}Role`)}</p>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </div>
       </section>
 
-      {buyerKeys.length > 0 ? (
-        <section
-          id="package"
-          className="relative scroll-mt-24 overflow-hidden bg-gradient-to-br from-primary/[0.1] via-muted/35 to-background py-20 sm:py-28"
-        >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-32 top-1/4 size-96 rounded-full bg-primary/15 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-24 bottom-0 size-80 rounded-full bg-violet-500/10 blur-3xl"
-          />
-          <div className={siteContainer('relative w-full')}>
-            <div className="max-w-3xl text-left lg:max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-background/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary shadow-sm shadow-primary/10">
-                <Package className="size-3.5" aria-hidden />
-                {tPlatform('buyerEyebrow')}
-              </div>
-              <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-[2.65rem] lg:leading-tight">
-                {tPlatform('buyerTitle')}
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-                {tPlatform('buyerSubtitle')}
-              </p>
-              {tPlatform.has('buyerExploreHint') ? (
-                <p className="mt-3 text-sm font-medium text-foreground/80">{tPlatform('buyerExploreHint')}</p>
-              ) : null}
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild size="lg" className={platformHeroPrimaryClass}>
-                  <a href="#modules" className="group inline-flex items-center gap-2">
-                    <LayoutGrid className="size-4 opacity-90" aria-hidden />
-                    {tPlatform('exploreModules')}
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-                  </a>
-                </Button>
-                <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
-                  <a href="#request-demo">
-                    {tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}
-                  </a>
-                </Button>
-              </div>
-            </div>
-
-            <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-12 lg:gap-5">
-              {buyerKeys.map((i) => {
-                const raw = tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]);
-                const line = parseBuyerLine(raw);
-                const Icon = BUYER_LINE_ICONS[i] ?? CheckCircle2;
-                const isFeatured = i <= 4;
-                return (
-                  <li
-                    key={i}
-                    className={cn(
-                      isFeatured ? 'lg:col-span-6' : 'lg:col-span-6',
-                      i === 1 && 'lg:row-start-1',
-                      i === 2 && 'lg:row-start-1',
-                      i === 3 && 'lg:row-start-2',
-                      i === 4 && 'lg:row-start-2',
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        marketingCardSurface,
-                        'relative h-full overflow-hidden p-6 sm:p-7',
-                        marketingCardHover,
-                        isFeatured && 'sm:min-h-[11rem]',
-                        'overflow-visible hover:scale-[1.015] motion-reduce:hover:scale-100',
-                      )}
-                    >
-                      <div
-                        aria-hidden
-                        className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-primary/10 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
-                      />
-                      <div className={cn(marketingCardInner, 'flex h-full flex-col')}>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary shadow-inner transition-transform duration-500 group-hover:scale-110 motion-reduce:group-hover:scale-100">
-                            <Icon className="size-6" aria-hidden />
-                          </div>
-                          <span className="font-display text-sm font-bold tabular-nums tracking-wider text-primary/50">
-                            {String(i).padStart(2, '0')}
-                          </span>
-                        </div>
-                        <p className="mt-5 font-display text-lg font-semibold leading-snug text-foreground transition-colors duration-300 group-hover:text-primary">
-                          {line.label}
-                        </p>
-                        {line.detail ? (
-                          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{line.detail}</p>
-                        ) : null}
-                        <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:opacity-100">
-                          <CheckCircle2 className="size-3.5" aria-hidden />
-                          Included
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Eight modules */}
-      <section id="modules" className="scroll-mt-24 bg-background py-20 sm:py-28">
-        <div className={siteContainer('w-full')}>
-          <div className={sectionGrid}>
-            <div className={sectionIntroCol}>
-              <SectionIntro
-                eyebrow={t('features.eyebrow')}
-                title={t('features.title')}
-                subtitle={t('features.description')}
-              />
-            </div>
-            <div className={cn(sectionBodyCol, 'grid gap-5 sm:grid-cols-2 xl:grid-cols-2')}>
-              {moduleKeys.map((key) => {
-                const Icon = MODULE_ICONS[key] ?? BarChart3;
-                return (
-                  <div
-                    key={key}
-                    className={cn(
-                      marketingCardSurface,
-                      'p-6',
-                      marketingCardHover,
-                      'hover:scale-[1.02] motion-reduce:hover:scale-100',
-                    )}
-                  >
-                    <div className={marketingCardInner}>
-                      <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-500 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-md group-hover:shadow-primary/20 motion-reduce:group-hover:scale-100">
-                        <Icon
-                          className="size-5 transition-transform duration-500 group-hover:-rotate-6 motion-reduce:group-hover:rotate-0"
-                          aria-hidden
-                        />
-                      </div>
-                      <h3 className="mt-4 font-display text-base font-semibold transition-colors duration-300 group-hover:text-primary">
-                        {t(`features.${key}.title`)}
-                      </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                        {t(`features.${key}.description`)}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CMS highlights */}
-      {highlightFeatures.length > 0 ? (
-        <section className="bg-gradient-to-b from-muted/20 to-muted/35 py-20 sm:py-24">
-          <div className={siteContainer('w-full')}>
-            <div className={sectionGrid}>
-              <div className={sectionIntroCol}>
-                <SectionIntro title={tPlatform('highlightsTitle')} />
-              </div>
-              <div className={cn(sectionBodyCol, 'grid gap-6 md:grid-cols-2 xl:grid-cols-3')}>
-                {highlightFeatures.map((feature) => (
-                  <div
-                    key={feature.title}
-                    className={cn(
-                      marketingCardSurface,
-                      'bg-background/90 p-8',
-                      marketingCardHover,
-                      'hover:scale-[1.02] motion-reduce:hover:scale-100',
-                    )}
-                  >
-                    <div className={marketingCardInner}>
-                      <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
-                        {feature.title}
-                      </h3>
-                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* How colleges onboard */}
-      <section className="py-20 sm:py-28">
-        <div className={siteContainer('w-full')}>
-          <div className={sectionGrid}>
-            <div className={sectionIntroCol}>
-              <SectionIntro
-                title={tPlatform('howItWorksTitle')}
-                subtitle={tPlatform('howItWorksSubtitle')}
-              />
-            </div>
-            <ol className={cn(sectionBodyCol, 'grid list-none gap-6')}>
-              {(['step1', 'step2', 'step3'] as const).map((step, i) => (
-                <li
-                  key={step}
-                  className={cn(
-                    marketingCardSurface,
-                    'p-6',
-                    marketingCardHover,
-                    'overflow-visible hover:scale-[1.03] motion-reduce:hover:scale-100',
-                  )}
-                >
-                  <div className={cn(marketingCardInner, 'flex gap-4')}>
-                    <span
-                      className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary font-display text-lg font-bold text-primary-foreground shadow-md ring-4 ring-background transition-transform duration-500 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/25 motion-reduce:group-hover:scale-100"
-                      aria-hidden
-                    >
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0 pt-0.5">
-                      <h3 className="font-semibold leading-snug transition-colors duration-300 group-hover:text-primary">
-                        {tPlatform(`${step}Title`)}
-                      </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                        {tPlatform(`${step}Body`)}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-gradient-to-b from-muted/15 via-background to-background py-20 sm:py-24">
-        <div className={siteContainer('w-full')}>
-          <div className={sectionGrid}>
-            <div className={sectionIntroCol}>
-              <SectionIntro title={tPlatform('outcomesTitle')} subtitle={tPlatform('outcomesSubtitle')} />
-            </div>
-            <div className={cn(sectionBodyCol, 'grid gap-5 sm:grid-cols-2')}>
-              {outcomeKeys.map((key) => (
-                <div
-                  key={key}
-                  className={cn(
-                    marketingCardSurface,
-                    'p-6',
-                    marketingCardHover,
-                    'hover:scale-[1.02] motion-reduce:hover:scale-100',
-                  )}
-                >
-                  <div
-                    className={cn(
-                      marketingCardInner,
-                      'pl-0 transition-[padding] duration-500 group-hover:pl-2 motion-reduce:group-hover:pl-0',
-                    )}
-                  >
-                    <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
-                      {tPlatform(`${key}Title`)}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {tPlatform(`${key}Body`)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-gradient-to-b from-background to-muted/25 py-20 sm:py-24">
-        <div className={siteContainer('w-full')}>
-          <div className={sectionGrid}>
-            <div className={sectionIntroCol}>
-              <SectionIntro
-                title={tPlatform('testimonialsTitle')}
-                subtitle={tPlatform('testimonialsSubtitle')}
-              />
-            </div>
-            <div className={cn(sectionBodyCol, 'grid gap-6 sm:grid-cols-2')}>
-              {testimonialKeys.map((key) => (
-                <figure
-                  key={key}
-                  className={cn(
-                    marketingCardSurface,
-                    'flex h-full flex-col p-6',
-                    marketingCardHover,
-                    'hover:scale-[1.02] hover:rotate-[0.35deg] motion-reduce:hover:scale-100 motion-reduce:hover:rotate-0',
-                  )}
-                >
-                  <div className={marketingCardInner}>
-                    <blockquote className="flex-1 text-sm leading-relaxed text-foreground">
-                      <span
-                        aria-hidden
-                        className="font-display text-3xl leading-none text-primary/30 transition-all duration-500 group-hover:text-primary/60 group-hover:scale-110 motion-reduce:group-hover:scale-100"
-                      >
-                        “
-                      </span>
-                      {tPlatform(`${key}Quote`)}
-                    </blockquote>
-                    <figcaption className="mt-5 pt-4 transition-[opacity,transform] duration-500 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0">
-                      <p className="font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
-                        {tPlatform(`${key}Name`)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">{tPlatform(`${key}Role`)}</p>
-                    </figcaption>
-                  </div>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing — full-width left intro + right checklist (not a centered card) */}
+      {/* Pricing */}
       {pricingBody ? (
-        <section id="pricing" className="scroll-mt-24 bg-gradient-to-b from-muted/25 to-muted/10 py-20 sm:py-24">
-          <div className={siteContainer('w-full')}>
-            <div className={cn(sectionGrid, 'lg:items-start')}>
-              <div className={sectionIntroCol}>
-                <SectionIntro title={pricingTitle} subtitle={pricingBody}>
-                  <Button asChild size="lg" className={cn('mt-8', platformHeroPrimaryClass)}>
-                    <a href="#request-demo" className="group inline-flex items-center gap-2">
-                      {tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}
-                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-                    </a>
-                  </Button>
-                </SectionIntro>
+        <section id="pricing" className={cn('scroll-mt-24', marketingPageBg, marketingSectionY)}>
+          <div className={marketingContainer}>
+            <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
+              <div className="max-w-[560px] text-left">
+                <h2 className={marketingSectionTitle}>{pricingTitle}</h2>
+                <p className={cn('mt-4', marketingBody)}>{pricingBody}</p>
+                <Button asChild className={cn('mt-8', marketingBtnPrimary)}>
+                  <a href="#request-demo">{tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}</a>
+                </Button>
               </div>
-              {pricingIncludeKeys.length > 0 ? (
-                <div className={sectionBodyCol}>
-                  <div
-                    className={cn(
-                      marketingCardSurface,
-                      'relative overflow-hidden p-8 sm:p-10',
-                      marketingCardHover,
-                      'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
-                    )}
-                  >
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-primary/10 blur-3xl"
-                    />
-                    <div className={marketingCardInner}>
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-                        {tPlatform('pricingIncludesLabel')}
+              <div className="space-y-4">
+                {(
+                  [
+                    ['pricingModulesLabel', 'pricingModulesBody'],
+                    ['pricingFitLabel', 'pricingFitBody'],
+                    ['pricingNextLabel', 'pricingNextBody'],
+                  ] as const
+                ).map(([labelKey, bodyKey]) =>
+                  tPlatform.has(labelKey) && tPlatform.has(bodyKey) ? (
+                    <div key={labelKey} className={cn(marketingCard, 'text-left')}>
+                      <p className="text-xs font-medium uppercase tracking-wider text-primary dark:text-indigo-300">
+                        {tPlatform(labelKey)}
                       </p>
-                      <ul className="mt-6 space-y-4">
-                        {pricingIncludeKeys.map((i) => {
-                          const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
-                          return (
-                            <li key={i} className="flex gap-3 pb-1 transition-opacity duration-300 last:pb-0">
-                              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
-                              <span className="text-base leading-snug">
-                                <span className="font-semibold text-foreground">{line.label}</span>
-                                {line.detail ? (
-                                  <span className="text-muted-foreground"> — {line.detail}</span>
-                                ) : null}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
+                      <p className={cn('mt-2 text-sm', marketingBody)}>{tPlatform(bodyKey)}</p>
                     </div>
-                  </div>
-                </div>
-              ) : null}
+                  ) : null,
+                )}
+              </div>
             </div>
           </div>
         </section>
       ) : null}
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-24 bg-background py-20 sm:py-24">
-        <div className={siteContainer('w-full')}>
-          <div className={sectionGrid}>
-            <div className={sectionIntroCol}>
-              <SectionIntro title={tPlatform('faqTitle')} />
-            </div>
-            <div className={cn(sectionBodyCol, 'space-y-4')}>
-              {faqItems.map((item) => (
-                <details
-                  key={item.title}
-                  className={cn(
-                    marketingCardSurface,
-                    'group px-6 py-4 open:shadow-md open:shadow-primary/10',
-                    'transition-[transform,box-shadow,background-color] duration-500 ease-out',
-                    'hover:-translate-y-0.5 hover:bg-card hover:shadow-lg hover:shadow-primary/10',
-                    'motion-reduce:hover:translate-y-0',
-                  )}
-                >
-                  <summary className="cursor-pointer list-none font-medium transition-colors duration-300 marker:content-none group-hover:text-primary [&::-webkit-details-marker]:hidden">
-                    {item.title}
-                  </summary>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
-                </details>
-              ))}
-            </div>
+      <section id="faq" className={cn('scroll-mt-24', marketingSectionMutedBg, marketingSectionY)}>
+        <div className={marketingContainer}>
+          <SectionHeading title={tPlatform('faqTitle')} />
+          <div className="mx-auto mt-10 max-w-3xl space-y-3 text-left">
+            {faqItems.map((item) => (
+              <details key={item.title} className={cn(marketingCard, 'px-6 py-4')}>
+                <summary className="cursor-pointer list-none font-medium text-[#14243A] marker:content-none [&::-webkit-details-marker]:hidden dark:text-[#e2e8f0]">
+                  {item.title}
+                </summary>
+                <p className={cn('mt-3 text-sm', marketingBody)}>{item.body}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
 
-      {tPlatform.has('closingTitle') ? (
-        <section className="relative overflow-hidden bg-gradient-to-r from-primary/[0.12] via-primary/[0.04] to-violet-500/[0.08] py-16 sm:py-20">
-          <div
-            className={siteContainer(
-              'relative flex w-full flex-col gap-8 text-left lg:flex-row lg:items-center lg:justify-between',
-            )}
-          >
-            <div className="max-w-2xl">
-              <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">{tPlatform('closingTitle')}</h2>
-              <p className="mt-4 text-lg text-muted-foreground">{tPlatform('closingSubtitle')}</p>
-            </div>
-            <Button asChild size="lg" className={cn('shrink-0', platformHeroPrimaryClass)}>
-              <a href="#request-demo" className="group inline-flex items-center gap-2">
-                {tPlatform.has('closingCta') ? tPlatform('closingCta') : heroCtaLabel}
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-              </a>
-            </Button>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Demo request — no login */}
+      {/* Demo */}
       <PlatformDemoRequestSection
         introTitle={tPlatform('demoTitle')}
         introSubtitle={tPlatform('demoSubtitle')}
@@ -874,7 +509,9 @@ export function PlatformHomePage({
         fieldInstitution={tPlatform('fieldInstitution')}
         fieldContact={tPlatform('fieldContact')}
         fieldEmail={tPlatform('fieldEmail')}
-        fieldPhone={tPlatform('fieldPhone')}
+        fieldPhone={
+          tPlatform.has('fieldPhoneOptional') ? tPlatform('fieldPhoneOptional') : tPlatform('fieldPhone')
+        }
         fieldMessage={tPlatform('fieldMessage')}
         sendingLabel={tPlatform('sending')}
         submitLabel={tPlatform('submitDemo')}
@@ -882,6 +519,27 @@ export function PlatformHomePage({
         setForm={setForm}
         demoMutation={demoMutation}
       />
+
+      {/* Final CTA */}
+      {tPlatform.has('closingTitle') ? (
+        <section className={cn(marketingFinalCta, 'py-16 text-white sm:py-20')}>
+          <div className={cn(marketingContainer, 'flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between')}>
+            <div className="max-w-xl text-left">
+              <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">{tPlatform('closingTitle')}</h2>
+              <p className="mt-4 text-base leading-relaxed text-white/80">{tPlatform('closingSubtitle')}</p>
+            </div>
+            <Button
+              asChild
+              className={cn(
+                marketingBtnPrimary,
+                'shrink-0 bg-white text-[#14243A] hover:bg-white/90 dark:bg-[#f1f5f9] dark:text-[#14243A] dark:hover:bg-white',
+              )}
+            >
+              <a href="#request-demo">{tPlatform.has('closingCta') ? tPlatform('closingCta') : heroCtaLabel}</a>
+            </Button>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

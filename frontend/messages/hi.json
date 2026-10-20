@@ -103,6 +103,8 @@
   },
   "marketing": {
     "header": {
+      "platform": "प्लेटफ़ॉर्म",
+      "solutions": "समाधान",
       "features": "सुविधाएं",
       "pricing": "मूल्य निर्धारण",
       "faq": "अक्सर पूछे जाने वाले प्रश्न",
@@ -114,9 +116,18 @@
       "goToDashboard": "डैशबोर्ड पर जाएँ"
     },
     "platformHome": {
-      "heroEyebrow": "कॉलेजों के लिए Campus ERP + LMS",
-      "heroTitle": "एक vendor. एक stack. पूरा campus.",
-      "heroSubtitle": "ERP, LMS, coding labs, exams, analytics, branded portal — एक demo में scope; campus-wise license, स्पष्ट module pricing.",
+      "heroEyebrow": "Campus ERP · LMS · Assessments",
+      "heroTitle": "आपके पूरे campus के लिए एक connected platform.",
+      "heroSubtitle": "Academic operations, online learning, assessments, coding practice — आपकी institution के लिए configure, एक जगह.",
+      "heroTrust": "Quote-based licensing · Campus-branded portals · Role-based access",
+      "heroPill1": "ERP + LMS",
+      "heroPill2": "Exams + Gradebook",
+      "heroPill3": "Labs + Analytics",
+      "explorePlatform": "Explore the platform",
+      "workflowsTitle": "Academic workflows, connected",
+      "workflowsSubtitle": "Departments, timetables, courses, assignments, grades — एक graph में।",
+      "procurementTitle": "Fewer disconnected tools. One campus platform.",
+      "procurementBody": "Administration, delivery, assessments, reporting — modules आपकी institution scope के अनुसार।",
       "heroTagline": "नीचे checklist देखें · modules तुलना · quote मांगें",
       "buyerEyebrow": "Procurement के लिए एक line item",
       "buyerTitle": "आप क्या खरीदते हैं",

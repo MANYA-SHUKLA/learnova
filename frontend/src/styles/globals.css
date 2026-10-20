@@ -38,3 +38,8 @@
 .timetable-print-only {
   display: none;
 }
+
+/** Marketing homepage — soft institutional dark (not pure black). */
+.dark .marketing-site {
+  color-scheme: dark;
+}

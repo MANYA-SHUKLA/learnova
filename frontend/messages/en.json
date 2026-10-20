@@ -103,6 +103,8 @@
   },
   "marketing": {
     "header": {
+      "platform": "Platform",
+      "solutions": "Solutions",
       "features": "Features",
       "pricing": "Pricing",
       "faq": "FAQ",
@@ -114,10 +116,18 @@
       "goToDashboard": "Go to dashboard"
     },
     "platformHome": {
-      "heroEyebrow": "Campus ERP + LMS for colleges",
-      "heroTitle": "One vendor. One stack. Your whole campus.",
-      "heroSubtitle": "Buyers scope ERP, LMS, coding labs, exams, analytics, and a branded student portal in a single demo — then license per campus with clear module pricing.",
-      "heroTagline": "See the checklist below · compare modules · request a quote",
+      "heroEyebrow": "Campus ERP · LMS · Assessments",
+      "heroTitle": "One connected platform for your entire campus.",
+      "heroSubtitle": "Manage academic operations, online learning, assessments, and coding practice in one place — configured for your institution.",
+      "heroTrust": "Quote-based licensing · Campus-branded portals · Role-based access for students, faculty, and admins",
+      "heroPill1": "ERP + LMS",
+      "heroPill2": "Exams + Gradebook",
+      "heroPill3": "Labs + Analytics",
+      "explorePlatform": "Explore the platform",
+      "workflowsTitle": "Academic workflows, connected",
+      "workflowsSubtitle": "Departments, timetables, courses, assignments, and grades stay on one graph — not scattered tools.",
+      "procurementTitle": "Fewer disconnected tools. One campus platform.",
+      "procurementBody": "Bring academic administration, course delivery, assessments, and reporting into one coordinated system, with modules scoped to your institution's needs.",
       "buyerEyebrow": "One line item for procurement",
       "buyerTitle": "What you are buying",
       "buyerSubtitle": "No separate LMS contract, exam software, and timetable spreadsheets. Learnova is one line item with everything your academic and IT teams need to run day one.",
@@ -130,9 +140,16 @@
       "buyer6": "Admin console, roles, analytics, and provisioning support",
       "pricingCta": "Get a campus quote",
       "pricingIncludesLabel": "Typical license covers",
-      "closingTitle": "See it live, then decide",
-      "closingSubtitle": "Walk through modules with your registrar or IT lead, get a written quote, and a go-live plan — no card payment on this site.",
-      "closingCta": "Book a demo",
+      "closingTitle": "See how Learnova fits your campus.",
+      "closingSubtitle": "Explore the platform with your academic or IT team. Discuss modules, onboarding, campus branding, and pricing during a guided demo.",
+      "closingCta": "Request a demo",
+      "pricingModulesLabel": "Modules",
+      "pricingModulesBody": "ERP, LMS, exams, coding labs, and optional capabilities — scoped on a demo call.",
+      "pricingFitLabel": "Institution fit",
+      "pricingFitBody": "Campus scope, expected users, and onboarding needs determine your quote.",
+      "pricingNextLabel": "Next step",
+      "pricingNextBody": "Request a campus quote by email after we align on modules and intake.",
+      "fieldPhoneOptional": "Phone (optional)",
       "requestDemo": "Request a demo",
       "exploreModules": "Explore modules",
       "stat1Value": "8+",
@@ -205,7 +222,17 @@
       "fieldPhone": "Phone",
       "fieldMessage": "Message (optional)",
       "sending": "Sending…",
-      "submitDemo": "Submit request"
+      "submitDemo": "Submit request",
+      "dashboardPreview": {
+        "eyebrow": "Campus overview",
+        "title": "Illustrative preview",
+        "sampleBadge": "Sample data",
+        "statCourses": "Courses",
+        "statAssignments": "Assignments",
+        "statAssessments": "Assessments",
+        "activityTitle": "Academic activity",
+        "disclaimer": "Concept mockup of the first screen. Use a genuine Learnova product screenshot in production."
+      }
     },
     "campusPortal": {
       "eyebrow": "School of Engineering, JNU",
@@ -279,8 +306,11 @@
       "empty": "—"
     },
     "footer": {
-      "tagline": "The enterprise AI learning platform for institutions that teach, assess, and innovate at scale.",
+      "tagline": "One connected platform for academic operations, learning, and assessment.",
       "copyright": "All rights reserved.",
+      "builtBy": "Built by Manya Shukla · SOE JNU Minor Project",
+      "productLineModules": "ERP · LMS · Exams",
+      "productLineLabs": "Coding labs · Analytics",
       "contactLabel": "Contact:",
       "product": "Product",
       "company": "Company",

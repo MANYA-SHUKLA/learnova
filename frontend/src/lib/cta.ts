@@ -14,6 +14,22 @@ export const platformHeroPrimaryClass = cn(
   'active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0',
 );
 
+/** Primary “Explore modules” CTA — gradient pill with shimmer (package / discovery). */
+export const platformExploreModulesClass = cn(
+  'relative h-[3.5rem] min-w-[13rem] overflow-hidden rounded-full px-8 text-base font-semibold tracking-tight',
+  'border-0 bg-gradient-to-r from-primary via-primary to-[#4338CA] text-primary-foreground',
+  'shadow-[0_10px_32px_-8px_hsl(var(--primary)/0.55)] ring-1 ring-white/25 ring-inset',
+  'transition-[transform,box-shadow,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+  'hover:-translate-y-1 hover:shadow-[0_16px_44px_-10px_hsl(var(--primary)/0.65)] hover:brightness-[1.03]',
+  'active:translate-y-0 active:brightness-100',
+  'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+  'before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent',
+  'before:-translate-x-full before:transition-transform before:duration-[850ms] before:ease-out',
+  'hover:before:translate-x-full',
+  'after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:opacity-0 after:transition-opacity after:duration-500',
+  'after:bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)] hover:after:opacity-100',
+);
+
 /** Secondary hero CTA on the product homepage */
 export const platformHeroSecondaryClass = cn(
   ctaButtonClass,

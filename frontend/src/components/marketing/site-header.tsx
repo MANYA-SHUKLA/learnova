@@ -24,6 +24,27 @@ const CAMPUS_NAV_LINKS = [
   { href: '/privacy', labelKey: 'privacy' },
 ] as const;
 
+type HeaderNavKey = 'contact' | 'features' | 'pricing' | 'faq' | 'platform' | 'solutions';
+
+const HEADER_NAV_FALLBACK: Record<HeaderNavKey, string> = {
+  platform: 'Platform',
+  solutions: 'Solutions',
+  features: 'Features',
+  pricing: 'Pricing',
+  faq: 'FAQ',
+  contact: 'Contact',
+};
+
+function headerNavLabel(
+  t: ReturnType<typeof useTranslations<'marketing.header'>>,
+  tCommon: ReturnType<typeof useTranslations<'common'>>,
+  labelKey: string,
+) {
+  if (labelKey === 'privacy') return tCommon('privacy');
+  const key = labelKey as HeaderNavKey;
+  return t.has(key) ? t(key) : HEADER_NAV_FALLBACK[key] ?? labelKey;
+}
+
 export function SiteHeader({
   campusPortal = false,
   platformMarketing = false,
@@ -55,16 +76,28 @@ export function SiteHeader({
     ? CAMPUS_NAV_LINKS
     : platformMarketing
       ? ([
-          { href: '/#modules', labelKey: 'features' as const },
+          { href: '/#modules', labelKey: 'platform' as const },
+          { href: '/#workflows', labelKey: 'solutions' as const },
           { href: '/#pricing', labelKey: 'pricing' as const },
           { href: '/#faq', labelKey: 'faq' as const },
-          { href: '/contact', labelKey: 'contact' as const },
         ] as const)
       : SAAS_NAV_LINKS;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-[var(--glass-bg)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--glass-bg)]">
-      <div className={siteContainer('flex h-16 items-center justify-between gap-4 sm:h-[4.25rem]')}>
+    <header
+      className={
+        platformMarketing
+          ? 'sticky top-0 z-50 w-full border-b border-[#E2E8F0] bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#182130]/95'
+          : 'sticky top-0 z-50 w-full border-b border-border/60 bg-[var(--glass-bg)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--glass-bg)]'
+      }
+    >
+      <div
+        className={
+          platformMarketing
+            ? 'mx-auto grid h-[4.5rem] w-full max-w-[1240px] grid-cols-[auto_1fr_auto] items-center gap-6 px-6 lg:gap-10 lg:px-12'
+            : siteContainer('flex h-16 items-center justify-between gap-4 sm:h-[4.25rem]')
+        }
+      >
         <Link
           href="/"
           className="flex min-w-0 items-center gap-2.5 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl"
@@ -73,29 +106,44 @@ export function SiteHeader({
           {tCommon('appName')}
         </Link>
 
-        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+        <nav
+          className={
+            platformMarketing
+              ? 'hidden items-center justify-center gap-8 lg:flex xl:gap-10'
+              : 'hidden items-center gap-0.5 lg:flex'
+          }
+          aria-label="Primary"
+        >
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className={
+                platformMarketing
+                  ? 'rounded-lg px-2 py-2 text-sm font-medium text-[#475569] transition-colors hover:text-[#14243A] dark:text-[#94a3b8] dark:hover:text-[#f1f5f9]'
+                  : 'rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+              }
             >
-              {'labelKey' in link && link.labelKey === 'privacy'
-                ? tCommon('privacy')
-                : t(
-                    link.labelKey as 'contact' | 'features' | 'pricing' | 'faq',
-                  )}
+              {headerNavLabel(t, tCommon, link.labelKey)}
             </Link>
           ))}
         </nav>
 
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
           <LanguageToggle />
           <ThemeToggle />
           {isLoading ? (
             <Skeleton className="hidden h-9 w-28 rounded-md sm:inline-flex" />
           ) : showSignIn || platformMarketing || isAuthenticated ? (
-            <Button asChild size="sm" className="hidden sm:inline-flex">
+            <Button
+              asChild
+              size="sm"
+              className={
+                platformMarketing
+                  ? 'hidden h-11 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-[hsl(var(--primary-hover))] sm:inline-flex'
+                  : 'hidden sm:inline-flex'
+              }
+            >
               {platformMarketing && !isAuthenticated ? (
                 <a href={primaryCtaHref}>{primaryCtaLabel}</a>
               ) : (
@@ -131,11 +179,7 @@ export function SiteHeader({
                     setOpen(false);
                   }}
                 >
-                  {'labelKey' in link && link.labelKey === 'privacy'
-                    ? tCommon('privacy')
-                    : t(
-                    link.labelKey as 'contact' | 'features' | 'pricing' | 'faq',
-                  )}
+                  {headerNavLabel(t, tCommon, link.labelKey)}
                 </Link>
               ))}
             </nav>
