@@ -729,6 +729,7 @@ export class CourseService {
     try {
       for (let i = 0; i < input.rows.length; i += 1) {
         const row = input.rows[i]!;
+        const linked = this.resolveImportIds(row, input.defaults);
         const parsed = createCourseSchema.parse({
           courseCode: row.courseCode?.trim() || undefined,
           slug: row.slug?.trim() || undefined,
@@ -746,7 +747,9 @@ export class CourseService {
           visibility: row.visibility || 'institution',
           campusId: row.campusId || null,
           schoolId: row.schoolId || null,
-          departmentId: row.departmentId || null,
+          departmentId: linked.departmentId,
+          programIds: linked.programIds,
+          semesterIds: linked.semesterIds,
           coordinatorId: row.coordinatorId || null,
           tags: row.tags ? row.tags.split('|').filter(Boolean) : [],
           skills: row.skills ? row.skills.split('|').filter(Boolean) : [],
