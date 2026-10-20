@@ -534,6 +534,54 @@
     outline-offset: 3px;
   }
 
+  /** Marketing site — keep lift/shine; border stays subtle (no strong primary flash) */
+  .marketing-site .card-interactive,
+  .marketing-site .card-static {
+    transition:
+      transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 550ms cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 280ms ease;
+  }
+
+  .marketing-site .card-interactive:hover {
+    border-color: #e2e8f0;
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .dark .marketing-site .card-interactive:hover {
+    border-color: rgb(255 255 255 / 0.12);
+  }
+
+  .marketing-site .card-static:hover {
+    border-color: #e2e8f0;
+  }
+
+  .dark .marketing-site .card-static:hover {
+    border-color: rgb(255 255 255 / 0.12);
+  }
+
+  .marketing-site .card-interactive::before {
+    height: 2px;
+    opacity: 0.28;
+    transition:
+      transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 450ms ease;
+  }
+
+  .marketing-site .card-interactive:hover::before {
+    opacity: 0.55;
+  }
+
+  .marketing-site .card-interactive::after {
+    background: linear-gradient(
+      115deg,
+      transparent 38%,
+      hsl(var(--primary) / 0.06) 50%,
+      transparent 62%
+    );
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .card-static,
     .card-glass,

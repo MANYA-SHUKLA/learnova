@@ -42,6 +42,7 @@ export const marketingCard = cn(
   'card-interactive group h-full rounded-[12px] border p-6',
   'border-[#E2E8F0] bg-white text-card-foreground shadow-soft-md',
   'dark:border-white/10 dark:bg-[#243047]',
+  'hover:border-[#E2E8F0] dark:hover:border-white/[0.12]',
 );
 
 export const marketingCardTitle = cn(
