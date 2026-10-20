@@ -1213,15 +1213,23 @@
         "singular": "Program",
         "description": "Academic programs offered by departments."
       },
+      "session": {
+        "currentLabel": "Current academic session",
+        "notConfigured": "Set active academic year (e.g. 2025–26)",
+        "noSemester": "Add current semester (e.g. Jul–Dec odd)",
+        "oddSem": "Odd sem",
+        "evenSem": "Even sem",
+        "summerSem": "Summer sem"
+      },
       "academicYears": {
         "title": "Academic years",
         "singular": "Academic year",
-        "description": "Define academic year ranges and the currently active year."
+        "description": "Calendar session for the whole campus (e.g. 2025–26), not 1st/2nd/3rd year of a degree. Mark one as active — it appears in the header as the current session."
       },
       "semesters": {
         "title": "Semesters",
         "singular": "Semester",
-        "description": "Terms nested under an academic year."
+        "description": "Terms under the active year (e.g. Jul–Dec odd, Jan–Jun even). Set dates and status Active so the header shows the term you are in now."
       },
       "sections": {
         "title": "Sections",

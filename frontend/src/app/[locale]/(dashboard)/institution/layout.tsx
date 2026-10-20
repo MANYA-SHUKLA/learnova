@@ -4,6 +4,7 @@ import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import { Card, CardContent, Spinner } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
 import { useEffect, type ReactNode } from 'react';
+import { AcademicSessionChip } from '@/components/institution/academic-session-chip';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { Link, usePathname, useRouter } from '@/lib/i18n/routing';
@@ -73,7 +74,10 @@ export default function InstitutionLayout({ children }: { children: ReactNode })
         </Card>
       }
     >
-      <div className="mb-6 w-full min-w-0 print:hidden">
+      <div className="mb-6 w-full min-w-0 space-y-3 print:hidden">
+        <div className="flex flex-wrap items-center gap-2">
+          <AcademicSessionChip className="max-w-full" />
+        </div>
         <nav
           aria-label={t('navAriaLabel')}
           className="flex w-full max-w-full gap-1 overflow-x-auto overscroll-x-contain rounded-full border border-border/80 bg-muted/40 p-1 shadow-soft-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

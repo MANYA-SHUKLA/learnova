@@ -3,6 +3,7 @@
 import type { Semester } from '@learnova/types';
 import { useTranslations } from 'next-intl';
 import {
+  formatSemesterMonthRange,
   ResourceCrudPage,
   useAcademicYears,
   useArchiveSemesterMutation,
@@ -27,10 +28,24 @@ export default function SemestersPage() {
   const yearOptions =
     yearsData?.items.map((y) => ({ value: y.id, label: y.name })) ?? [];
 
+  const termLabel = (term: Semester['term']) => {
+    if (term === 'odd') return tt('odd');
+    if (term === 'even') return tt('even');
+    return tt('summer');
+  };
+
   const columns: ResourceColumn<Semester>[] = [
     { id: 'name', header: tf('name'), cell: (r) => r.name, exportValue: (r) => r.name },
     { id: 'number', header: tf('number'), cell: (r) => r.number, exportValue: (r) => r.number },
-    { id: 'term', header: tf('term'), cell: (r) => r.term, exportValue: (r) => r.term },
+    {
+      id: 'term',
+      header: tf('term'),
+      cell: (r) => {
+        const range = formatSemesterMonthRange(r.startDate, r.endDate);
+        return range ? `${range} · ${termLabel(r.term)}` : termLabel(r.term);
+      },
+      exportValue: (r) => r.term,
+    },
     {
       id: 'academicYear',
       header: tf('academicYear'),
@@ -49,7 +64,13 @@ export default function SemestersPage() {
         ? yearOptions
         : [{ value: '', label: tf('noAcademicYears') }],
     },
-    { name: 'name', label: tf('name'), type: 'text', required: true },
+    {
+      name: 'name',
+      label: tf('name'),
+      type: 'text',
+      required: true,
+      placeholder: 'Jul–Dec (Odd)',
+    },
     { name: 'number', label: tf('number'), type: 'number', required: true, min: 1, max: 20 },
     {
       name: 'term',

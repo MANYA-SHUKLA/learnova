@@ -20,6 +20,7 @@ import { siteGutter } from '@/lib/layout';
 import { useAuth } from '@/providers/auth-provider';
 import { useUIStore } from '@/stores/ui-store';
 import { cn } from '@/lib/utils';
+import { AcademicSessionChip } from '@/components/institution/academic-session-chip';
 import { CommandPaletteTrigger } from './command-palette';
 
 const SESSIONS_ROUTE = '/sessions';
@@ -147,6 +148,8 @@ export function AppTopbar() {
           })}
         </nav>
 
+        <AcademicSessionChip className="hidden min-w-0 shrink lg:inline-flex xl:max-w-[min(100%,22rem)]" />
+
         <div className="ml-auto flex min-w-0 items-center gap-1 sm:gap-1.5">
           <CommandPaletteTrigger className="hidden shrink lg:flex" />
           <Button
@@ -218,11 +221,19 @@ export function AppTopbar() {
         </div>
       </div>
 
-      <div className={cn('flex min-w-0 items-center gap-2 border-t border-border/60 py-2 md:hidden', siteGutter)}>
-        <UserRound className="size-3.5 shrink-0 text-muted-foreground" />
-        <p className="min-w-0 truncate text-xs text-muted-foreground">
-          {breadcrumbs.map((c) => c.label).join(' / ') || tItems('dashboard')}
-        </p>
+      <div
+        className={cn(
+          'flex min-w-0 flex-col gap-2 border-t border-border/60 py-2 md:hidden',
+          siteGutter,
+        )}
+      >
+        <AcademicSessionChip compact className="w-fit max-w-full" />
+        <div className="flex min-w-0 items-center gap-2">
+          <UserRound className="size-3.5 shrink-0 text-muted-foreground" />
+          <p className="min-w-0 truncate text-xs text-muted-foreground">
+            {breadcrumbs.map((c) => c.label).join(' / ') || tItems('dashboard')}
+          </p>
+        </div>
       </div>
     </header>
   );

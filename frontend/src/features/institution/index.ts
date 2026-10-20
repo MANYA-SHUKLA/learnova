@@ -87,4 +87,11 @@ export { ResourceCrudPage } from './components/resource-crud-page';
 export { exportToCsv, rowsToCsv, downloadCsv, escapeCsvCell } from './utils/export';
 export { displayName, displayNames } from './utils/display-name';
 export { useOrgLabels } from './hooks/use-org-labels';
+export { useCurrentAcademicSession } from './hooks/use-current-academic-session';
+export {
+  buildAcademicSessionLabel,
+  formatSemesterMonthRange,
+  resolveActiveAcademicYear,
+  resolveCurrentSemester,
+} from './utils/academic-session';
 export type * from './types';
