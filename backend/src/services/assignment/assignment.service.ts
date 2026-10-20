@@ -193,6 +193,68 @@ export class AssignmentService {
     });
   }
 
+  private async enrichAssignmentsForStudent(
+    assignments: Array<{ _id: Types.ObjectId }>,
+    studentId: Types.ObjectId,
+    institutionId: string,
+  ): Promise<Record<string, unknown>[]> {
+    if (assignments.length === 0) return [];
+    const institutionOid = oid(institutionId);
+    const assignmentIds = assignments.map((a) => a._id);
+
+    const submissions = await AssignmentSubmissionModel.find({
+      institutionId: institutionOid,
+      studentId,
+      assignmentId: { $in: assignmentIds },
+      deletedAt: null,
+    })
+      .sort({ attemptNumber: -1 })
+      .select('assignmentId status gradeId textSubmission')
+      .lean()
+      .exec();
+
+    const latestSubmissionByAssignment = new Map<string, (typeof submissions)[number]>();
+    for (const sub of submissions) {
+      const key = String(sub.assignmentId);
+      if (!latestSubmissionByAssignment.has(key)) {
+        latestSubmissionByAssignment.set(key, sub);
+      }
+    }
+
+    const grades = await AssignmentGradeModel.find({
+      institutionId: institutionOid,
+      studentId,
+      assignmentId: { $in: assignmentIds },
+      deletedAt: null,
+    })
+      .sort({ gradedAt: -1 })
+      .select('assignmentId marksObtained percentage feedback')
+      .lean()
+      .exec();
+
+    const gradeByAssignment = new Map<string, (typeof grades)[number]>();
+    for (const grade of grades) {
+      const key = String(grade.assignmentId);
+      if (!gradeByAssignment.has(key)) {
+        gradeByAssignment.set(key, grade);
+      }
+    }
+
+    return assignments.map((doc) => {
+      const dto = toDto(doc);
+      const key = String(doc._id);
+      const submission = latestSubmissionByAssignment.get(key);
+      const grade = gradeByAssignment.get(key);
+      return {
+        ...dto,
+        mySubmissionStatus: submission?.status ?? null,
+        myMarksObtained: grade?.marksObtained ?? null,
+        myGradePercentage: grade?.percentage ?? null,
+        myGradeFeedback: (grade?.feedback as string | null | undefined) ?? null,
+      };
+    });
+  }
+
   /** Blocks edits after faculty has finalized a grade (status graded). */
   private async assertStudentCanEditSubmission(
     assignmentId: string,
@@ -457,8 +519,21 @@ export class AssignmentService {
     filter = await this.scopeAssignmentFilter(filter, actor, institutionId);
 
     const result = await assignmentRepository.listAssignments(filter, query);
+    let items: Record<string, unknown>[];
+    if (actor.role === 'student') {
+      const student = await StudentModel.findOne({
+        institutionId: oid(institutionId),
+        email: actor.email.toLowerCase(),
+        deletedAt: null,
+      }).exec();
+      items = student
+        ? await this.enrichAssignmentsForStudent(result.items, student._id, institutionId)
+        : result.items.map(toDto);
+    } else {
+      items = result.items.map(toDto);
+    }
     return {
-      items: result.items.map(toDto),
+      items,
       meta: pageMeta(result.total, result.page, result.limit),
     };
   }
@@ -482,6 +557,11 @@ export class AssignmentService {
     if (!doc) throw new NotFoundError('Assignment not found');
 
     await this.assertAssignmentReadAccess(doc, actor, institutionId);
+    if (actor.role === 'student') {
+      const student = await this.resolveStudent(actor, institutionId);
+      const [enriched] = await this.enrichAssignmentsForStudent([doc], student._id, institutionId);
+      return enriched ?? toDto(doc);
+    }
     return toDto(doc);
   }
 

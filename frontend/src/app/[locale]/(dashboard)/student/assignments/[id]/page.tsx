@@ -35,6 +35,7 @@ export default function StudentAssignmentDetailPage({
 }) {
   const { id } = use(params);
   const t = useTranslations('dashboard.student.assignmentDetail');
+  const tList = useTranslations('dashboard.student.assignments');
   const [text, setText] = useState('');
   const [comment, setComment] = useState('');
 
@@ -93,7 +94,15 @@ export default function StudentAssignmentDetailPage({
               <p className="mt-2 text-sm text-muted-foreground">
                 {t('due')}: {formatDueDate(assignment.dueDate)} · {assignment.totalMarks}{' '}
                 {t('marks')}
+                {assignment.myMarksObtained != null
+                  ? ` · ${tList('yourGrade')}: ${assignment.myMarksObtained}/${assignment.totalMarks}`
+                  : ''}
               </p>
+              {assignment.myGradeFeedback ? (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t('facultyFeedback')}: {assignment.myGradeFeedback}
+                </p>
+              ) : null}
             </>
           )}
         </div>

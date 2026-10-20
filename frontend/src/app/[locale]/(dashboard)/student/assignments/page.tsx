@@ -21,9 +21,9 @@ import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { ErrorState } from '@/features/institution';
 import {
-  formatAssignmentStatus,
   formatAssignmentType,
   formatDueDate,
+  formatSubmissionStatus,
   useMyAssignments,
   useStudentAssignmentDashboard,
 } from '@/features/assignment';
@@ -120,7 +120,11 @@ export default function StudentAssignmentsPage() {
                     id: 'status',
                     header: 'Status',
                     cell: (row) => (
-                      <Badge variant="secondary">{formatAssignmentStatus(row.status)}</Badge>
+                      <Badge variant="secondary">
+                        {row.mySubmissionStatus
+                          ? formatSubmissionStatus(row.mySubmissionStatus)
+                          : t('notSubmitted')}
+                      </Badge>
                     ),
                   },
                   {
@@ -142,9 +146,15 @@ export default function StudentAssignmentsPage() {
                     ),
                   },
                   {
-                    id: 'marks',
-                    header: t('marks'),
-                    cell: (row) => <span className="tabular-nums">{row.totalMarks}</span>,
+                    id: 'grade',
+                    header: t('yourGrade'),
+                    cell: (row) => (
+                      <span className="tabular-nums">
+                        {row.myMarksObtained != null
+                          ? `${row.myMarksObtained} / ${row.totalMarks}`
+                          : '—'}
+                      </span>
+                    ),
                   },
                 ]}
                 rowActions={(row) => (
@@ -157,10 +167,17 @@ export default function StudentAssignmentsPage() {
                     <CardContent className="space-y-3 p-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium">{row.title}</p>
-                        <Badge variant="secondary">{formatAssignmentStatus(row.status)}</Badge>
+                        <Badge variant="secondary">
+                          {row.mySubmissionStatus
+                            ? formatSubmissionStatus(row.mySubmissionStatus)
+                            : t('notSubmitted')}
+                        </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {t('due')}: {formatDueDate(row.dueDate)} · {row.totalMarks} {t('marks')}
+                        {t('due')}: {formatDueDate(row.dueDate)}
+                        {row.myMarksObtained != null
+                          ? ` · ${t('yourGrade')}: ${row.myMarksObtained}/${row.totalMarks}`
+                          : ''}
                       </p>
                       <Button asChild size="sm" variant="outline" className="w-full rounded-xl">
                         <Link href={`${APP_ROUTES.STUDENT_ASSIGNMENTS}/${row.id}`}>

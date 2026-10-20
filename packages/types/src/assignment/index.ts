@@ -82,6 +82,11 @@ export interface Assignment {
   activeEnrollmentCount?: number;
   /** True when activeEnrollmentCount is 0 after publish. */
   noActiveEnrollments?: boolean;
+  /** Student-scoped fields when listing/viewing as the enrolled learner. */
+  mySubmissionStatus?: AssignmentSubmissionStatus | null;
+  myMarksObtained?: number | null;
+  myGradePercentage?: number | null;
+  myGradeFeedback?: string | null;
 }
 
 export interface AssignmentAttachment {
