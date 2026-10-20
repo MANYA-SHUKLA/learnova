@@ -455,7 +455,7 @@ export class AuthService {
 
     const { role, permissions } = await resolveRolePermissions(activeUser.roleId);
     if (role === 'super_admin') {
-      return fail('Super admin must sign in at the super admin login page.', 'forbidden');
+      return fail('super_admin_wrong_portal');
     }
     if (activeUser.institutionId) {
       const campusState = await getInstitutionCampusState(activeUser.institutionId);
@@ -531,7 +531,7 @@ export class AuthService {
     }
     const { role, permissions } = await resolveRolePermissions(user.roleId);
     if (role !== 'super_admin') {
-      throw new ForbiddenError('This account cannot sign in here. Use the campus login page.');
+      throw new AuthenticationError('Invalid email or password');
     }
     await userRepository.resetFailedAttempts(String(user._id));
     await userRepository.updateById(String(user._id), { lastLoginAt: new Date() });

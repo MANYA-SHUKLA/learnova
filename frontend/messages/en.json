@@ -706,6 +706,7 @@
       "signingIn": "Signing in…",
       "registeredMessage": "Institution registered. Sign in as Institution Admin to finish setup.",
       "errorMessage": "Unable to sign in. Try again.",
+      "invalidCredentials": "Invalid email or password.",
       "campusSubtitle": "Official sign-in for {campus} — use credentials issued by your institute.",
       "genericSubtitle": "Sign in with the email and password from your institution. You’ll be taken to the right campus workspace after login.",
       "superAdminLogin": "Super admin login"

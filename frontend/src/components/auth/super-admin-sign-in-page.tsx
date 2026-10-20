@@ -5,8 +5,8 @@ import { APP_ROUTES } from '@learnova/constants';
 import { Button, CardContent, Input, Spinner } from '@learnova/ui';
 import { Shield } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useAuthPageFeedback } from '@/components/auth/auth-page-feedback';
 import {
-  AuthAlert,
   AuthCardShell,
   authContentClassName,
   authInputClassName,
@@ -15,7 +15,6 @@ import {
 import { PasswordInput } from '@/components/shared/password-input';
 import { loginSchema, type LoginFormValues } from '@/features/auth';
 import { authApi } from '@/features/auth/services/auth-api';
-import { ApiClientError } from '@/lib/api/client';
 import { storeAccessToken } from '@/lib/auth/jwt';
 import { useRouter } from '@/lib/i18n/routing';
 import { useAuthStore } from '@/features/auth/stores/auth-store';
@@ -24,11 +23,11 @@ import { useAuthStore } from '@/features/auth/stores/auth-store';
 export function SuperAdminSignInPage() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const { showError, clear } = useAuthPageFeedback();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    setError,
+    formState: { isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '', rememberMe: true },
@@ -39,6 +38,7 @@ export function SuperAdminSignInPage() {
       <form
         onSubmit={(e) => {
           void handleSubmit(async (values) => {
+            clear();
             try {
               const data = await authApi.loginSuperAdmin({
                 email: values.email,
@@ -52,16 +52,13 @@ export function SuperAdminSignInPage() {
                 roleHint: data.roleHint,
               });
               router.replace(APP_ROUTES.CONSOLE);
-            } catch (err) {
-              setError('root', {
-                message: err instanceof ApiClientError ? err.message : 'Sign in failed',
-              });
+            } catch {
+              showError('Invalid email or password.');
             }
           })(e);
         }}
       >
         <CardContent className={authContentClassName}>
-          {errors.root?.message ? <AuthAlert variant="error">{errors.root.message}</AuthAlert> : null}
           <Input className={authInputClassName} placeholder="Email" {...register('email')} />
           <PasswordInput className={authInputClassName} {...register('password')} />
           <Button type="submit" className={authPrimaryButtonClassName} disabled={isSubmitting}>

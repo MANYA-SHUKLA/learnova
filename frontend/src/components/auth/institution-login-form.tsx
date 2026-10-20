@@ -33,7 +33,7 @@ import {
   type LoginFormValues,
   useLoginMutation,
 } from '@/features/auth';
-import { ApiClientError } from '@/lib/api/client';
+import { useAuthPageFeedback } from '@/components/auth/auth-page-feedback';
 import { resolvePostLoginPath, dashboardPathForRole } from '@/lib/auth/redirects';
 import { Link, useRouter } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
@@ -62,6 +62,7 @@ function InstitutionLoginFormInner({
     enabled: Boolean(campusSlug) && !portalProp,
   });
   const loginMutation = useLoginMutation();
+  const { showError, clear } = useAuthPageFeedback();
   const [emailFocused, setEmailFocused] = useState(false);
   const { user, isAuthenticated, isLoading } = useAuth();
 
@@ -75,7 +76,6 @@ function InstitutionLoginFormInner({
     register,
     handleSubmit,
     formState: { errors },
-    setError,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '', rememberMe: true },
@@ -87,22 +87,25 @@ function InstitutionLoginFormInner({
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     void handleSubmit(async (values) => {
+      clear();
       try {
         const session = await loginMutation.mutateAsync({
           email: values.email,
           password: values.password,
           campusSlug,
         });
-        if (session.user.mustChangePassword) {
-          router.replace(APP_ROUTES.CHANGE_PASSWORD);
-          return;
+        try {
+          if (session.user.mustChangePassword) {
+            router.replace(APP_ROUTES.CHANGE_PASSWORD);
+            return;
+          }
+          const destination = await resolvePostLoginPath(session.user.role, nextPath);
+          router.replace(destination);
+        } catch {
+          showError(t('errorMessage'));
         }
-        const destination = await resolvePostLoginPath(session.user.role, nextPath);
-        router.replace(destination);
-      } catch (err) {
-        const message =
-          err instanceof ApiClientError ? err.message : t('errorMessage');
-        setError('root', { message });
+      } catch {
+        showError(t('invalidCredentials'));
       }
     })(event);
   };
@@ -133,9 +136,6 @@ function InstitutionLoginFormInner({
           ) : null}
           {registered ? (
             <AuthAlert variant="success">{t('registeredMessage')}</AuthAlert>
-          ) : null}
-          {errors.root?.message ? (
-            <AuthAlert variant="error">{errors.root.message}</AuthAlert>
           ) : null}
 
           <div className="space-y-2">
