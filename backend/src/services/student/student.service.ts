@@ -287,6 +287,72 @@ export class StudentService {
     }
   }
 
+  /** Fill program, department, semester, and academic year from section when omitted. */
+  private async enrichOrgFieldsFromSection(
+    institutionId: string,
+    input: {
+      sectionId?: string | null;
+      programId?: string | null;
+      semesterId?: string | null;
+      departmentId?: string | null;
+      academicYearId?: string | null;
+    },
+  ): Promise<{
+    programId?: string | null;
+    semesterId?: string | null;
+    departmentId?: string | null;
+    academicYearId?: string | null;
+  }> {
+    if (!input.sectionId) return {};
+    const section = await SectionModel.findOne({
+      _id: input.sectionId,
+      institutionId: new Types.ObjectId(institutionId),
+      deletedAt: null,
+    })
+      .select('programId semesterId')
+      .lean()
+      .exec();
+    if (!section) return {};
+
+    const out: {
+      programId?: string | null;
+      semesterId?: string | null;
+      departmentId?: string | null;
+      academicYearId?: string | null;
+    } = {};
+
+    if (!input.programId) out.programId = String(section.programId);
+    if (!input.semesterId) out.semesterId = String(section.semesterId);
+
+    const programId = out.programId ?? input.programId;
+    if (!input.departmentId && programId) {
+      const program = await ProgramModel.findOne({
+        _id: programId,
+        institutionId: new Types.ObjectId(institutionId),
+        deletedAt: null,
+      })
+        .select('departmentId')
+        .lean()
+        .exec();
+      if (program?.departmentId) out.departmentId = String(program.departmentId);
+    }
+
+    const semesterId = out.semesterId ?? input.semesterId;
+    if (!input.academicYearId && semesterId) {
+      const semester = await SemesterModel.findOne({
+        _id: semesterId,
+        institutionId: new Types.ObjectId(institutionId),
+        deletedAt: null,
+      })
+        .select('academicYearId')
+        .lean()
+        .exec();
+      if (semester?.academicYearId) out.academicYearId = String(semester.academicYearId);
+    }
+
+    return out;
+  }
+
   private async audit(
     event: Parameters<typeof studentRepository.logAudit>[0]['event'],
     actor: ActorContext,
@@ -319,43 +385,46 @@ export class StudentService {
       );
     }
 
-    await this.assertSectionMatchesStudent(institutionId, input.sectionId, {
-      programId: input.programId ?? null,
-      semesterId: input.semesterId ?? null,
+    const fromSection = await this.enrichOrgFieldsFromSection(institutionId, input);
+    const createInput = { ...input, ...fromSection };
+
+    await this.assertSectionMatchesStudent(institutionId, createInput.sectionId, {
+      programId: createInput.programId ?? null,
+      semesterId: createInput.semesterId ?? null,
     });
 
-    const fullName = buildFullName(input.firstName, input.middleName, input.lastName);
+    const fullName = buildFullName(createInput.firstName, createInput.middleName, createInput.lastName);
     const resolvedDuration = await this.resolveProgramDurationYears(
       institutionId,
-      input.programId,
-      input.programDuration,
+      createInput.programId,
+      createInput.programDuration,
     );
     const programDuration =
       input.programDuration ?? resolvedDuration ?? DEFAULT_PROGRAM_DURATION_YEARS;
     const expectedGraduationDate =
       input.expectedGraduationDate ??
       this.computeExpectedGraduationForStudent({
-        yearOfStudy: input.yearOfStudy,
+        yearOfStudy: createInput.yearOfStudy,
         programDuration,
-        admissionDate: input.admissionDate,
+        admissionDate: createInput.admissionDate,
         force: true,
       });
     const doc = await studentRepository.create({
-      ...input,
+      ...createInput,
       studentId,
       admissionNumber,
-      email: input.email.toLowerCase(),
+      email: createInput.email.toLowerCase(),
       fullName,
       programDuration,
-      expectedGraduationDate: expectedGraduationDate ?? input.expectedGraduationDate ?? null,
-      campusId: input.campusId ? new Types.ObjectId(input.campusId) : null,
-      schoolId: input.schoolId ? new Types.ObjectId(input.schoolId) : null,
-      departmentId: input.departmentId ? new Types.ObjectId(input.departmentId) : null,
-      programId: input.programId ? new Types.ObjectId(input.programId) : null,
-      academicYearId: input.academicYearId ? new Types.ObjectId(input.academicYearId) : null,
-      semesterId: input.semesterId ? new Types.ObjectId(input.semesterId) : null,
-      sectionId: input.sectionId ? new Types.ObjectId(input.sectionId) : null,
-      batchId: input.batchId ? new Types.ObjectId(input.batchId) : null,
+      expectedGraduationDate: expectedGraduationDate ?? createInput.expectedGraduationDate ?? null,
+      campusId: createInput.campusId ? new Types.ObjectId(createInput.campusId) : null,
+      schoolId: createInput.schoolId ? new Types.ObjectId(createInput.schoolId) : null,
+      departmentId: createInput.departmentId ? new Types.ObjectId(createInput.departmentId) : null,
+      programId: createInput.programId ? new Types.ObjectId(createInput.programId) : null,
+      academicYearId: createInput.academicYearId ? new Types.ObjectId(createInput.academicYearId) : null,
+      semesterId: createInput.semesterId ? new Types.ObjectId(createInput.semesterId) : null,
+      sectionId: createInput.sectionId ? new Types.ObjectId(createInput.sectionId) : null,
+      batchId: createInput.batchId ? new Types.ObjectId(createInput.batchId) : null,
       institutionId: new Types.ObjectId(institutionId),
       createdBy: new Types.ObjectId(actor.userId),
       updatedBy: new Types.ObjectId(actor.userId),
@@ -476,8 +545,43 @@ export class StudentService {
       }
     }
 
+    const sectionIdForEnrich =
+      input.sectionId !== undefined
+        ? input.sectionId
+        : existing.sectionId
+          ? String(existing.sectionId)
+          : null;
+    const fromSection = await this.enrichOrgFieldsFromSection(institutionId, {
+      sectionId: sectionIdForEnrich,
+      programId:
+        input.programId !== undefined
+          ? input.programId
+          : existing.programId
+            ? String(existing.programId)
+            : null,
+      semesterId:
+        input.semesterId !== undefined
+          ? input.semesterId
+          : existing.semesterId
+            ? String(existing.semesterId)
+            : null,
+      departmentId:
+        input.departmentId !== undefined
+          ? input.departmentId
+          : existing.departmentId
+            ? String(existing.departmentId)
+            : null,
+      academicYearId:
+        input.academicYearId !== undefined
+          ? input.academicYearId
+          : existing.academicYearId
+            ? String(existing.academicYearId)
+            : null,
+    });
+
     const patch: Record<string, unknown> = {
       ...input,
+      ...fromSection,
       updatedBy: new Types.ObjectId(actor.userId),
     };
     if (input.email) patch.email = input.email.toLowerCase();

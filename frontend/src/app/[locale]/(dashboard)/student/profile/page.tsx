@@ -564,6 +564,7 @@ export default function StudentProfilePage() {
             {[
               ['Program', labels.program(student.programId)],
               ['Department', labels.department(student.departmentId)],
+              ['Section / class', labels.section(student.sectionId)],
               ['Batch', labels.batch(student.batchId)],
               ['Year of study', student.yearOfStudy != null ? `Year ${student.yearOfStudy}` : null],
               ['Current semester', student.currentSemester?.toString()],

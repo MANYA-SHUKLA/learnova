@@ -8,6 +8,7 @@ import '../config/load-env.js';
 import { Types } from 'mongoose';
 import {
   AcademicYearModel,
+  BatchModel,
   CourseModel,
   DepartmentModel,
   FacultyModel,
@@ -19,6 +20,10 @@ import {
   TimetableModel,
   TimetableSlotModel,
 } from '../models/index.js';
+import {
+  computeExpectedGraduationDate,
+  DEFAULT_PROGRAM_DURATION_YEARS,
+} from '@learnova/utils';
 import { connectMongo, disconnectMongo } from '../database/index.js';
 import { hashPassword } from '../security/index.js';
 import { userRepository } from '../repositories/auth/index.js';
@@ -477,6 +482,35 @@ async function main(): Promise<void> {
   const cseSem1Section = sectionCache.get('B.Tech CSE Sem I');
   if (cseSem1Section) {
     const sem1 = semesterByNumber.get(1)!;
+    const cseProgram = programs.get('BT-CSE')!;
+    const cseDepartmentId = departments.get('CSE')!;
+
+    let cseBatch = await BatchModel.findOne({
+      institutionId: institutionOid,
+      programId: cseProgram.id,
+      name: 'B.Tech CSE',
+      deletedAt: null,
+    }).lean();
+    if (!cseBatch) {
+      cseBatch = (
+        await BatchModel.create({
+          institutionId: institutionOid,
+          programId: cseProgram.id,
+          name: 'B.Tech CSE',
+          year: 2026,
+          status: 'active',
+          deletedAt: null,
+        })
+      ).toObject();
+    }
+
+    const programDuration = DEFAULT_PROGRAM_DURATION_YEARS;
+    const expectedGraduationDate = computeExpectedGraduationDate({
+      yearOfStudy: 1,
+      programDuration,
+      admissionDate: new Date('2026-07-01'),
+    });
+
     await StudentModel.findOneAndUpdate(
       { institutionId: institutionOid, email: STUDENT_LOGIN_EMAIL, deletedAt: null },
       {
@@ -487,6 +521,11 @@ async function main(): Promise<void> {
           sectionId: cseSem1Section,
           semesterId: sem1.id,
           academicYearId: year._id,
+          programId: cseProgram.id,
+          departmentId: cseDepartmentId,
+          batchId: cseBatch._id,
+          programDuration,
+          expectedGraduationDate,
           yearOfStudy: 1,
           currentSemester: 1,
           isActive: true,
