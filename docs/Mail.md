@@ -53,7 +53,13 @@ Success prints `SMTP OK` and delivers a test message. Failure with `535 BadCrede
 
 In **production/staging**, `sendMail()` enqueues to the `email` BullMQ queue when `MAIL_QUEUE_ENABLED` is not `false` — run the **worker** process to deliver.
 
-In **development** (`NODE_ENV=development`), mail is always sent **inline** (SMTP or console), so you do not need the worker for demo/credential emails. Optional: set `MAIL_QUEUE_ENABLED=false` in `backend/.env` for clarity.
+Mail sends **inline** (no worker) when any of these apply:
+
+- `NODE_ENV=development` or `test`
+- `CORS_ORIGINS` includes `localhost` / `127.0.0.1` (typical local `.env` even if `NODE_ENV=production`)
+- `MAIL_SEND_INLINE=true`
+
+On a deployed host with a real public frontend URL, enable the queue (`MAIL_QUEUE_ENABLED=true`) and run the **worker** process.
 
 ## Email layout
 

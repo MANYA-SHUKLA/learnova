@@ -40,13 +40,18 @@ export function getMailer(): IMailer {
   return mailer;
 }
 
-/**
- * Send immediately or enqueue to mail queue based on MAIL_QUEUE_ENABLED.
- */
+function isLocalFrontendOrigin(): boolean {
+  const origins = (env.CORS_ORIGINS ?? 'http://localhost:3000').split(',');
+  return origins.some((origin) => /localhost|127\.0\.0\.1/i.test(origin.trim()));
+}
+
+/** Queue in deployed environments; inline for local dev (no worker required). */
 function shouldUseMailQueue(): boolean {
+  if (env.MAIL_SEND_INLINE === 'true') return false;
+  if (env.MAIL_SEND_INLINE === 'false') return mailConfig.queueEnabled;
   if (!mailConfig.queueEnabled) return false;
-  // Local dev: send via SMTP/console immediately (no separate worker process).
   if (env.NODE_ENV === 'development' || env.NODE_ENV === 'test') return false;
+  if (isLocalFrontendOrigin()) return false;
   return true;
 }
 

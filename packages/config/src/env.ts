@@ -66,6 +66,8 @@ export const backendEnvSchema = baseEnvSchema
     SUPER_ADMIN_EMAIL: z.string().email().default('shuklamanya99@gmail.com'),
     SUPER_ADMIN_PASSWORD: z.string().min(8).default('Pass1234'),
     DEFAULT_INSTITUTION_SLUG: z.string().optional(),
+    /** Force immediate SMTP/console send (skip BullMQ). Auto-off when CORS includes localhost. */
+    MAIL_SEND_INLINE: z.enum(['true', 'false']).optional(),
   });
 
 export const frontendEnvSchema = baseEnvSchema.extend({
