@@ -78,6 +78,10 @@ export interface Assignment {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  /** Set on publish responses — active enrollments for courseId. */
+  activeEnrollmentCount?: number;
+  /** True when activeEnrollmentCount is 0 after publish. */
+  noActiveEnrollments?: boolean;
 }
 
 export interface AssignmentAttachment {

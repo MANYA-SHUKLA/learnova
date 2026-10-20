@@ -16,6 +16,7 @@ import {
   computeExpectedGraduationDate,
   DEFAULT_PROGRAM_DURATION_YEARS,
 } from '@learnova/utils';
+import { syncTimetableSectionEnrollments } from '../services/institution/sync-timetable-section-enrollments.js';
 import { logger } from '../utils/logger/index.js';
 
 const SECTION_NAME = 'B.Tech CSE Sem VII';
@@ -127,6 +128,8 @@ async function main(): Promise<void> {
     if (result) enrollmentsUpserted += 1;
   }
 
+  const timetableSync = await syncTimetableSectionEnrollments(institutionId);
+
   logger.info(
     {
       email: STUDENT_LOGIN_EMAIL,
@@ -135,6 +138,7 @@ async function main(): Promise<void> {
       yearOfStudy: YEAR_OF_STUDY,
       catalogCourses: courses.length,
       enrollmentsUpserted,
+      timetableSync,
     },
     'Gunjan academic term updated',
   );
@@ -147,6 +151,7 @@ async function main(): Promise<void> {
       currentSemester: SEMESTER_NUMBER,
       section: SECTION_NAME,
       enrollments: enrollmentsUpserted,
+      timetableSync,
     }),
   );
 

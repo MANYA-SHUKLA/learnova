@@ -131,6 +131,16 @@ export function usePublishAssignmentMutation() {
   });
 }
 
+export function useDeleteAssignmentMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => assignmentApi.remove(id),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: assignmentKeys.all });
+    },
+  });
+}
+
 export function useArchiveAssignmentMutation() {
   const qc = useQueryClient();
   return useMutation({

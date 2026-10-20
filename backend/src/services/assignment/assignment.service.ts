@@ -161,6 +161,18 @@ export class AssignmentService {
     return resolveFacultySupervisedCourseObjectIds(institutionId, actor.email);
   }
 
+  private async countActiveEnrollmentsForCourse(
+    institutionId: string,
+    courseId: Types.ObjectId,
+  ): Promise<number> {
+    return EnrollmentModel.countDocuments({
+      institutionId: oid(institutionId),
+      courseId,
+      status: { $in: [...ACTIVE_ENROLLMENT_STATUSES] },
+      deletedAt: null,
+    }).exec();
+  }
+
   private async enrolledCourseIds(
     studentId: Types.ObjectId,
     institutionId: string,
@@ -567,7 +579,19 @@ export class AssignmentService {
       });
     }
 
-    return toDto(doc);
+    const dto = toDto(doc);
+    if (to === 'published') {
+      const activeEnrollmentCount = await this.countActiveEnrollmentsForCourse(
+        institutionId,
+        doc.courseId as Types.ObjectId,
+      );
+      return {
+        ...dto,
+        activeEnrollmentCount,
+        noActiveEnrollments: activeEnrollmentCount === 0,
+      };
+    }
+    return dto;
   }
 
   async publish(id: string, actor: ActorContext) {

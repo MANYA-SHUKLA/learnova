@@ -122,6 +122,7 @@ export const APP_ROUTES = {
   INSTITUTION_PROGRESS: '/institution/progress',
   INSTITUTION_ASSIGNMENTS: '/institution/assignments',
   FACULTY_ASSIGNMENTS: '/faculty/assignments',
+  FACULTY_ASSIGNMENT_DETAIL: '/faculty/assignments/:id',
   STUDENT_ASSIGNMENTS: '/student/assignments',
   STUDENT_ASSIGNMENT_DETAIL: '/student/assignments/:id',
   INSTITUTION_PRACTICE_LABS: '/institution/practice-labs',

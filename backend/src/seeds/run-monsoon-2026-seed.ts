@@ -606,7 +606,7 @@ async function main(): Promise<void> {
   logger.info('Monsoon 2026 seed complete');
   logger.info(`  Admin: (institution admin email) / ${DEMO_PASSWORD}`);
   logger.info(`  Faculty (Dr. Krishnan Rajkumar): ${FACULTY_LOGIN_EMAIL} / ${DEMO_PASSWORD}`);
-  logger.info(`  Student (B.Tech CSE Sem I): ${STUDENT_LOGIN_EMAIL} / ${DEMO_PASSWORD}`);
+  logger.info(`  Student (B.Tech CSE Sem VII): ${STUDENT_LOGIN_EMAIL} / ${DEMO_PASSWORD}`);
 
   await disconnectMongo();
 }
