@@ -12,6 +12,7 @@ import {
   Skeleton,
   Spinner,
 } from '@learnova/ui';
+import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, useRef } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
@@ -454,9 +455,25 @@ export default function StudentProfilePage() {
 
         {!editingGuardian ? (
           <Card className="rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-base">Guardian details</CardTitle>
-              <CardDescription>Parent or guardian contact information.</CardDescription>
+            <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-1.5">
+                <CardTitle className="text-base">Guardian details</CardTitle>
+                <CardDescription>
+                  Add or update parent or guardian contact information anytime.
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                className="shrink-0 rounded-xl"
+                onClick={() => {
+                  setEditing(false);
+                  setEditingBasic(false);
+                  setEditingGuardian(true);
+                }}
+              >
+                <Pencil className="size-4" />
+                Update guardian details
+              </Button>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
               {[
@@ -472,17 +489,6 @@ export default function StudentProfilePage() {
                   <p className="mt-1 text-sm font-medium">{value || '—'}</p>
                 </div>
               ))}
-            </CardContent>
-            <CardContent>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setEditingGuardian(true);
-                }}
-              >
-                Edit guardian details
-              </Button>
             </CardContent>
           </Card>
         ) : (

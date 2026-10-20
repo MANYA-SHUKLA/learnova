@@ -1,4 +1,5 @@
 export * from './date/index.js';
+export * from './student/index.js';
 export * from './time/index.js';
 export * from './pagination/index.js';
 export * from './search/index.js';
