@@ -14,7 +14,10 @@ export type Role =
   | 'parent';
 
 /** Active roles in v1 */
-export type ActiveRole = Extract<Role, 'student' | 'faculty' | 'institution_admin'>;
+export type ActiveRole = Extract<
+  Role,
+  'student' | 'faculty' | 'institution_admin' | 'super_admin'
+>;
 
 /** Future roles reserved in the type system */
 export type FutureRole = Exclude<Role, ActiveRole>;

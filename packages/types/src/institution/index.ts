@@ -31,6 +31,34 @@ export interface InstitutionBranding {
   favicon: string | null;
 }
 
+export interface InstitutionPortalSettings {
+  portalTitle: string | null;
+  portalSubtitle: string | null;
+  termLabel: string | null;
+  notices: string[];
+  supportEmail: string | null;
+  officeLabel: string | null;
+  officialCredit: string | null;
+  developerCredit: string | null;
+  showPlatformLink: boolean;
+}
+
+export interface PublicPortalPayload {
+  slug: string;
+  name: string;
+  shortName: string;
+  logo: string | null;
+  favicon: string | null;
+  portalSettings: InstitutionPortalSettings;
+}
+
+export interface PublicInstitutionSummary {
+  slug: string;
+  name: string;
+  shortName: string;
+  logo: string | null;
+}
+
 export interface Institution {
   id: ID;
   name: string;

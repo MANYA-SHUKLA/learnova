@@ -6,7 +6,14 @@
 import type { ActiveRole } from '@learnova/types';
 import { APP_ROUTES } from '@learnova/constants';
 
-const ACTIVE_ROLE_VALUES: readonly ActiveRole[] = ['institution_admin', 'faculty', 'student'];
+const ACTIVE_ROLE_VALUES: readonly ActiveRole[] = [
+  'institution_admin',
+  'faculty',
+  'student',
+  'super_admin',
+];
+
+const SUPERADMIN_PREFIX = '/superadmin';
 
 export function parseActiveRole(value: string | null | undefined): ActiveRole | null {
   if (!value) return null;
@@ -24,6 +31,9 @@ export function requiredRoleForPath(pathWithoutLocale: string): ActiveRole | nul
   if (normalized.startsWith('/student')) {
     return 'student';
   }
+  if (normalized === SUPERADMIN_PREFIX || normalized.startsWith(`${SUPERADMIN_PREFIX}/`)) {
+    return 'super_admin';
+  }
   return null;
 }
 
@@ -39,6 +49,8 @@ export function dashboardPathForRole(role: ActiveRole): string {
       return APP_ROUTES.FACULTY_DASHBOARD;
     case 'student':
       return APP_ROUTES.STUDENT_DASHBOARD;
+    case 'super_admin':
+      return APP_ROUTES.SUPERADMIN_DASHBOARD;
     case 'institution_admin':
     default:
       return APP_ROUTES.INSTITUTION_DASHBOARD;

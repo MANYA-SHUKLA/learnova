@@ -10,7 +10,7 @@ export class UserRepository {
     firstName: string;
     lastName: string;
     roleId: Types.ObjectId;
-    institutionId: Types.ObjectId;
+    institutionId: Types.ObjectId | null;
     isEmailVerified?: boolean;
     passwordHistory?: string[];
     lastPasswordChangedAt?: Date;
@@ -45,6 +45,7 @@ export class UserRepository {
       lastName: string;
       locale: string;
       avatarUrl: string | null;
+      roleId: Types.ObjectId;
     }>,
   ): Promise<UserEntity | null> {
     return UserModel.findByIdAndUpdate(id, { $set: data }, { new: true }).exec();

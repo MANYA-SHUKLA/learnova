@@ -34,6 +34,13 @@ authRoutes.post(
   authController.login,
 );
 
+authRoutes.post(
+  '/super-admin/login',
+  authLimiter,
+  validate(loginSchema),
+  authController.loginSuperAdmin,
+);
+
 authRoutes.post('/logout', authenticate({ required: true }), authController.logout);
 authRoutes.post(
   '/logout-all',

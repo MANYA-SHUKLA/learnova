@@ -86,3 +86,4 @@ export * from './reports.js';
 export * from './notification.js';
 export * from './timetable.js';
 export * from './ai-content.js';
+export * from './platform.js';

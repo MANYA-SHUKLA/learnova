@@ -258,6 +258,21 @@ const PERMISSION_META: Record<
     action: 'manage',
     description: 'Create and manage class timetables',
   },
+  'platform:read': {
+    resource: 'platform',
+    action: 'read',
+    description: 'View public platform marketing content',
+  },
+  'platform:manage': {
+    resource: 'platform',
+    action: 'manage',
+    description: 'Manage platform marketing CMS',
+  },
+  'demo_request:manage': {
+    resource: 'demo_request',
+    action: 'manage',
+    description: 'Review and confirm demo requests',
+  },
 };
 
 export async function seedPermissions(): Promise<Map<string, string>> {

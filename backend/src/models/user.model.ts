@@ -7,7 +7,7 @@ const userSchema = new Schema(
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     roleId: { type: Schema.Types.ObjectId, ref: 'Role', required: true, index: true },
-    institutionId: { type: Schema.Types.ObjectId, required: true, index: true },
+    institutionId: { type: Schema.Types.ObjectId, required: false, default: null, index: true },
     isActive: { type: Boolean, default: true },
     isEmailVerified: { type: Boolean, default: false },
     failedLoginAttempts: { type: Number, default: 0 },

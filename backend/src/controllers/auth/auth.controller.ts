@@ -71,6 +71,21 @@ export async function login(
   }
 }
 
+export async function loginSuperAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const body = req.body as LoginInput;
+    const result = await authService.loginSuperAdmin(body, getClientContext(req));
+    setRefreshCookie(res, result.tokens.refreshToken);
+    sendSuccess(res, authSessionPayload(result), { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function logout(
   req: Request,
   res: Response,

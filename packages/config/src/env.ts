@@ -59,6 +59,12 @@ export const backendEnvSchema = baseEnvSchema
       .enum(['true', 'false', '1', '0'])
       .default('false')
       .transform((v) => v === 'true' || v === '1'),
+    /** Inbox for demo confirmations and platform alerts */
+    PLATFORM_ADMIN_EMAIL: z.string().email().default('work.shuklamanya@gmail.com'),
+    /** Seed target for super admin user (local/dev) */
+    SUPER_ADMIN_EMAIL: z.string().email().default('work.shuklamanya@gmail.com'),
+    SUPER_ADMIN_PASSWORD: z.string().min(8).optional(),
+    DEFAULT_INSTITUTION_SLUG: z.string().optional(),
   });
 
 export const frontendEnvSchema = baseEnvSchema.extend({
@@ -67,6 +73,7 @@ export const frontendEnvSchema = baseEnvSchema.extend({
   NEXT_PUBLIC_WS_URL: z.string().url().default('http://localhost:4000'),
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(['en', 'hi', 'te']).default('en'),
   NEXT_PUBLIC_SAAS_MODE: z.enum(['true', 'false', '1', '0']).optional(),
+  NEXT_PUBLIC_DEFAULT_INSTITUTION_SLUG: z.string().optional(),
 });
 
 export const workerEnvSchema = baseEnvSchema

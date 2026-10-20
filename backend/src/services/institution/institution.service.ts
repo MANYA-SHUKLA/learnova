@@ -20,6 +20,7 @@ import type {
   UpdateDepartmentInput,
   UpdateInstitutionInput,
   UpdateInstitutionSettingsInput,
+  UpdatePortalSettingsInput,
   UpdateProgramInput,
   UpdateSchoolInput,
   UpdateSectionInput,
@@ -233,6 +234,20 @@ export class InstitutionService {
     const doc = await institutionRepository.updateById(id, input);
     if (!doc) throw new NotFoundError('Institution not found');
     await audit('institution.updated', actor, id, { branding: true });
+    return toDto(doc);
+  }
+
+  async updatePortalSettings(id: string, input: UpdatePortalSettingsInput, actor: ActorContext) {
+    assertSameInstitution(actor, id);
+    const patch: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(input)) {
+      if (value !== undefined) {
+        patch[`portalSettings.${key}`] = value;
+      }
+    }
+    const doc = await institutionRepository.updateById(id, patch);
+    if (!doc) throw new NotFoundError('Institution not found');
+    await audit('institution.updated', actor, id, { portalSettings: true });
     return toDto(doc);
   }
 

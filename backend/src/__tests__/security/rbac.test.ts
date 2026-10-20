@@ -13,7 +13,7 @@ describe('RBAC route guards', () => {
     expect(parseActiveRole('student')).toBe('student');
     expect(parseActiveRole('faculty')).toBe('faculty');
     expect(parseActiveRole('institution_admin')).toBe('institution_admin');
-    expect(parseActiveRole('super_admin')).toBeNull();
+    expect(parseActiveRole('super_admin')).toBe('super_admin');
     expect(parseActiveRole('')).toBeNull();
   });
 
@@ -23,6 +23,7 @@ describe('RBAC route guards', () => {
     expect(requiredRoleForPath('/faculty/gradebook')).toBe('faculty');
     expect(requiredRoleForPath('/student/certificates')).toBe('student');
     expect(requiredRoleForPath('/account/sessions')).toBeNull();
+    expect(requiredRoleForPath('/superadmin')).toBe('super_admin');
   });
 
   it('blocks students from faculty and institution areas', () => {
@@ -51,6 +52,7 @@ describe('RBAC route guards', () => {
     expect(dashboardPathForRole('student')).toBe('/student/dashboard');
     expect(dashboardPathForRole('faculty')).toBe('/faculty/dashboard');
     expect(dashboardPathForRole('institution_admin')).toBe('/institution/dashboard');
+    expect(dashboardPathForRole('super_admin')).toBe('/superadmin');
   });
 });
 

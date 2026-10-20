@@ -18,6 +18,7 @@ function getPublicEnv(): NodeJS.ProcessEnv {
     NEXT_PUBLIC_API_URL: readEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000/api/v1'),
     NEXT_PUBLIC_WS_URL: readEnv('NEXT_PUBLIC_WS_URL', 'http://localhost:4000'),
     NEXT_PUBLIC_DEFAULT_LOCALE: readEnv('NEXT_PUBLIC_DEFAULT_LOCALE', 'en'),
+    NEXT_PUBLIC_DEFAULT_INSTITUTION_SLUG: process.env.NEXT_PUBLIC_DEFAULT_INSTITUTION_SLUG,
   };
 }
 

@@ -44,6 +44,8 @@ export const API_ROUTES = {
   ANALYTICS: '/analytics',
   AUDIT: '/audit',
   USERS: '/users',
+  PUBLIC: '/public',
+  SUPER_ADMIN: '/super-admin',
 } as const;
 
 export const APP_ROUTES = {
@@ -183,6 +185,12 @@ export const APP_ROUTES = {
   NOTIFICATIONS: '/notifications',
   VERIFY_CERTIFICATE: '/verify',
   CHANGE_PASSWORD: '/account/change-password',
+  PLATFORM: '/platform',
+  SUPERADMIN_LOGIN: '/superadmin/login',
+  SUPERADMIN: '/superadmin',
+  SUPERADMIN_DASHBOARD: '/superadmin',
+  CAMPUS: '/campus',
+  CAMPUS_GUIDE: '/campus-guide',
 } as const;
 
 export const SOCKET_NAMESPACES = {

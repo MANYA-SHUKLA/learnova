@@ -30,6 +30,20 @@ const institutionSchema = new Schema(
     maxFaculty: { type: Number, default: null },
     maxStorage: { type: Number, default: null },
     deletedAt: { type: Date, default: null },
+    portalSettings: {
+      type: {
+        portalTitle: { type: String, default: null },
+        portalSubtitle: { type: String, default: null },
+        termLabel: { type: String, default: null },
+        notices: { type: [String], default: [] },
+        supportEmail: { type: String, default: null },
+        officeLabel: { type: String, default: null },
+        officialCredit: { type: String, default: null },
+        developerCredit: { type: String, default: null },
+        showPlatformLink: { type: Boolean, default: true },
+      },
+      default: () => ({}),
+    },
   },
   { timestamps: true, collection: 'institutions' },
 );

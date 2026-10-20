@@ -5,7 +5,12 @@
 
 import type { EdgeActiveRole } from '@/lib/auth/edge-role-routes';
 
-const ACTIVE_ROLES: readonly EdgeActiveRole[] = ['institution_admin', 'faculty', 'student'];
+const ACTIVE_ROLES: readonly EdgeActiveRole[] = [
+  'institution_admin',
+  'faculty',
+  'student',
+  'super_admin',
+];
 
 function isActiveRoleValue(value: string): value is EdgeActiveRole {
   return ACTIVE_ROLES.includes(value as EdgeActiveRole);

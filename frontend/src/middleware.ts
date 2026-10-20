@@ -39,6 +39,7 @@ const PROTECTED_PATH_PREFIXES = [
   '/ideation',
   '/analytics',
   '/audit',
+  '/superadmin',
 ] as const;
 
 /** Auth-only routes (guest) */

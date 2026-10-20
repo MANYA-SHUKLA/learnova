@@ -57,10 +57,10 @@ export const ROLE_DEFINITIONS: Record<Role, RoleDefinition> = {
   super_admin: {
     role: 'super_admin',
     label: 'Super Admin',
-    description: 'Platform-wide administrator. Reserved for future release.',
+    description: 'Platform-wide administrator for demos, campuses, and marketing CMS.',
     permissions: [...ROLE_PERMISSIONS.super_admin],
     modules: [...ROLE_MODULES.super_admin],
-    isActive: false,
+    isActive: true,
   },
   teaching_assistant: {
     role: 'teaching_assistant',

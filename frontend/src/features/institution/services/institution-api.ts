@@ -103,6 +103,9 @@ export const institutionApi = {
   updateBranding: (id: string, body: InstitutionBrandingInput) =>
     apiClient.patch<Institution>(`${API_ROUTES.INSTITUTIONS}/${id}/branding`, body),
 
+  updatePortalSettings: (id: string, body: Record<string, unknown>) =>
+    apiClient.patch<Institution>(`${API_ROUTES.INSTITUTIONS}/${id}/portal-settings`, body),
+
   archive: (id: string) =>
     apiClient.delete<Institution>(`${API_ROUTES.INSTITUTIONS}/${id}`),
 

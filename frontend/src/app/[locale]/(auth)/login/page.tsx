@@ -13,6 +13,9 @@ import { LogIn, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { publicApi } from '@/features/public/services/public-api';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import {
   AuthAlert,
@@ -39,7 +42,13 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next');
+  const campusSlug = searchParams.get('campus');
   const registered = searchParams.get('registered') === '1';
+  const portalQuery = useQuery({
+    queryKey: ['public', 'portal', campusSlug],
+    queryFn: () => publicApi.getPortal(campusSlug!),
+    enabled: Boolean(campusSlug),
+  });
   const loginMutation = useLoginMutation();
   const [emailFocused, setEmailFocused] = useState(false);
 
@@ -78,10 +87,28 @@ function LoginForm() {
     })(event);
   };
 
+  const portal = portalQuery.data;
+  const loginTitle = portal?.portalSettings.portalTitle || portal?.name || t('title');
+  const loginSubtitle =
+    portal?.portalSettings.portalSubtitle ||
+    (campusSlug ? t('campusSubtitle', { campus: portal?.shortName ?? campusSlug }) : undefined);
+
   return (
-    <AuthCardShell brand="company" icon={LogIn} title={t('title')}>
+    <AuthCardShell brand="company" icon={LogIn} title={loginTitle}>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className={authContentClassName}>
+          {portal?.logo ? (
+            <Image
+              src={portal.logo}
+              alt=""
+              width={56}
+              height={56}
+              className="mx-auto mb-2 size-14 rounded-lg object-contain"
+            />
+          ) : null}
+          {loginSubtitle ? (
+            <p className="mb-4 text-center text-sm text-muted-foreground">{loginSubtitle}</p>
+          ) : null}
           {registered ? (
             <AuthAlert variant="success">{t('registeredMessage')}</AuthAlert>
           ) : null}

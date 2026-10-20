@@ -14,6 +14,8 @@ export {
 export { LoginAttemptModel, type LoginAttemptDocument } from './login-attempt.model.js';
 export { AuditAuthLogModel, type AuditAuthLogDocument } from './audit-auth-log.model.js';
 export { InstitutionModel, type InstitutionDocument } from './institution.model.js';
+export { DemoRequestModel, type DemoRequestDocument } from './demo-request.model.js';
+export { PlatformMarketingModel, type PlatformMarketingDocument } from './platform-marketing.model.js';
 export { CampusModel, type CampusDocument } from './campus.model.js';
 export { SchoolModel, type SchoolDocument } from './school.model.js';
 export { DepartmentModel, type DepartmentDocument } from './department.model.js';

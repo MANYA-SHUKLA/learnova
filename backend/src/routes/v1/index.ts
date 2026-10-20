@@ -19,6 +19,8 @@ import projectRoutes from './project.routes.js';
 import practiceLabRoutes from './practice-lab.routes.js';
 import timetableRoutes from './timetable.routes.js';
 import aiRoutes from './ai.routes.js';
+import publicRoutes from './public.routes.js';
+import superAdminRoutes from './super-admin.routes.js';
 import {
   healthCheck,
   livenessCheck,
@@ -34,6 +36,8 @@ const v1Router = Router();
 
 v1Router.use('/health', healthRoutes);
 v1Router.use('/auth', authRoutes);
+v1Router.use('/public', publicRoutes);
+v1Router.use('/super-admin', superAdminRoutes);
 v1Router.use(institutionRoutes);
 v1Router.use(facultyRoutes);
 v1Router.use(studentRoutes);

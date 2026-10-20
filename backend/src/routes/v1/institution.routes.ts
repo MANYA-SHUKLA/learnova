@@ -21,6 +21,7 @@ import {
   updateCampusSchema,
   updateDepartmentSchema,
   updateInstitutionBrandingSchema,
+  updatePortalSettingsSchema,
   updateInstitutionSchema,
   updateInstitutionSettingsSchema,
   updateProgramSchema,
@@ -147,6 +148,13 @@ institutionRoutes.patch(
   validate(idParamsSchema, 'params'),
   validate(updateInstitutionBrandingSchema),
   ctrl.updateBranding,
+);
+institutionRoutes.patch(
+  '/institutions/:id/portal-settings',
+  ...manageAuth,
+  validate(idParamsSchema, 'params'),
+  validate(updatePortalSettingsSchema),
+  ctrl.updatePortalSettings,
 );
 institutionRoutes.delete(
   '/institutions/:id',

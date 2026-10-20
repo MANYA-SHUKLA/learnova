@@ -2,9 +2,16 @@
  * Edge middleware role routing — no workspace package imports (Edge cannot load node:crypto).
  */
 
-export type EdgeActiveRole = 'institution_admin' | 'faculty' | 'student';
+export type EdgeActiveRole = 'institution_admin' | 'faculty' | 'student' | 'super_admin';
 
-const ACTIVE_ROLES: readonly EdgeActiveRole[] = ['institution_admin', 'faculty', 'student'];
+const ACTIVE_ROLES: readonly EdgeActiveRole[] = [
+  'institution_admin',
+  'faculty',
+  'student',
+  'super_admin',
+];
+
+const SUPERADMIN_PREFIX = '/superadmin';
 
 const INSTITUTION_PREFIX = '/institution';
 const FACULTY_PREFIX = '/faculty';
@@ -14,6 +21,7 @@ const DASHBOARD_BY_ROLE: Record<EdgeActiveRole, string> = {
   institution_admin: `${INSTITUTION_PREFIX}/dashboard`,
   faculty: `${FACULTY_PREFIX}/dashboard`,
   student: `${STUDENT_PREFIX}/dashboard`,
+  super_admin: SUPERADMIN_PREFIX,
 };
 
 export function isActiveRole(value: string | null | undefined): value is EdgeActiveRole {
@@ -33,6 +41,12 @@ export function requiredRoleForPath(pathWithoutLocale: string): EdgeActiveRole |
   }
   if (normalized.startsWith(STUDENT_PREFIX)) {
     return 'student';
+  }
+  if (normalized === `${SUPERADMIN_PREFIX}/login`) {
+    return null;
+  }
+  if (normalized === SUPERADMIN_PREFIX || normalized.startsWith(`${SUPERADMIN_PREFIX}/`)) {
+    return 'super_admin';
   }
   return null;
 }

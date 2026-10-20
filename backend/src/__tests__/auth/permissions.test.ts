@@ -36,8 +36,13 @@ describe('RBAC permission matrix', () => {
     expect(hasAnyPermission(perms, ['roles:manage', 'ide:access'])).toBe(true);
   });
 
-  it('keeps future roles empty until activated', () => {
-    expect(getPermissionsForRole('super_admin')).toEqual([]);
+  it('grants super_admin platform and demo permissions', () => {
+    const perms = getPermissionsForRole('super_admin');
+    expect(hasPermission(perms, 'platform:manage')).toBe(true);
+    expect(hasPermission(perms, 'demo_request:manage')).toBe(true);
+  });
+
+  it('keeps inactive future roles empty', () => {
     expect(getPermissionsForRole('parent')).toEqual([]);
   });
 });

@@ -22,7 +22,9 @@ describe('role-hint', () => {
     expect(verifyRoleHint(tampered)).toBeNull();
   });
 
-  it('rejects inactive roles', () => {
-    expect(signRoleHint('super_admin')).toBeNull();
+  it('signs super_admin when active', () => {
+    const hint = signRoleHint('super_admin');
+    expect(hint).toBeTruthy();
+    expect(verifyRoleHint(hint!)).toBe('super_admin');
   });
 });

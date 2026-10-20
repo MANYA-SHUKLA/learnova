@@ -132,8 +132,16 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'timetable:read',
     'timetable:manage',
   ],
-  // Future roles — empty until activated
-  super_admin: [],
+  super_admin: [
+    'platform:read',
+    'platform:manage',
+    'demo_request:manage',
+    'institution:read',
+    'institution:manage',
+    'users:read',
+    'users:manage',
+    'audit:read',
+  ],
   teaching_assistant: [
     'project:read',
     'project:write',

@@ -4,6 +4,7 @@ import type {
   OrgListQuery,
   UpdateInstitutionInput,
   UpdateInstitutionSettingsInput,
+  UpdatePortalSettingsInput,
 } from '@learnova/validation';
 import { UnauthorizedError } from '../../utils/errors/index.js';
 import { sendCreated, sendSuccess } from '../../utils/response/index.js';
@@ -106,6 +107,19 @@ export async function updateBranding(req: Request, res: Response, next: NextFunc
     const data = await institutionService.updateBranding(
       req.params.id as string,
       req.body as { logo?: string | null; favicon?: string | null },
+      actorFrom(req),
+    );
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updatePortalSettings(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await institutionService.updatePortalSettings(
+      req.params.id as string,
+      req.body as UpdatePortalSettingsInput,
       actorFrom(req),
     );
     sendSuccess(res, data, { requestId: req.requestId });

@@ -20,6 +20,9 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
     pathname === APP_ROUTES.CHANGE_PASSWORD ||
     pathname.endsWith('/account/change-password');
 
+  const isSuperAdminArea =
+    pathname === APP_ROUTES.SUPERADMIN || pathname.startsWith(`${APP_ROUTES.SUPERADMIN}/`);
+
   const roleAllowed = user ? isPathAllowedForRole(pathname, user.role) : true;
 
   useEffect(() => {
@@ -69,6 +72,10 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
   }
 
   if (user.mustChangePassword && onChangePasswordPage) {
+    return <div className="min-h-screen bg-background">{children}</div>;
+  }
+
+  if (isSuperAdminArea) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 

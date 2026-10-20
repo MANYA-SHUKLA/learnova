@@ -14,6 +14,10 @@ export const authApi = {
     return apiClient.post<AuthSessionResponse>(`${BASE}/login`, body, { auth: false });
   },
 
+  loginSuperAdmin(body: { email: string; password: string }) {
+    return apiClient.post<AuthSessionResponse>(`${BASE}/super-admin/login`, body, { auth: false });
+  },
+
   registerInstitution(body: {
     email: string;
     password: string;

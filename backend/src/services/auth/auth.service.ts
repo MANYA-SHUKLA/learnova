@@ -80,7 +80,7 @@ function toAuthUser(
     firstName: user.firstName,
     lastName: user.lastName,
     role: role as AuthUser['role'],
-    institutionId: String(user.institutionId),
+    institutionId: user.institutionId ? String(user.institutionId) : null,
     permissions,
     locale: user.locale as AuthUser['locale'],
     avatarUrl: user.avatarUrl ?? null,
@@ -210,7 +210,7 @@ async function issueSessionTokens(
     sub: String(user._id),
     email: user.email,
     role,
-    institutionId: String(user.institutionId),
+    institutionId: user.institutionId ? String(user.institutionId) : null,
     permissions,
     sessionId: String(session._id),
     tv: user.tokenVersion,
@@ -450,6 +450,9 @@ export class AuthService {
     await userRepository.updateById(String(activeUser._id), { lastLoginAt: new Date() });
 
     const { role, permissions } = await resolveRolePermissions(activeUser.roleId);
+    if (role === 'super_admin') {
+      return fail('Super admin must sign in at the super admin login page.', 'forbidden');
+    }
     const issued = await issueSessionTokens(activeUser, role, permissions, ctx);
 
     await loginAttemptRepository.create({
@@ -472,6 +475,30 @@ export class AuthService {
 
     return {
       user: await toAuthUserWithBranding(activeUser, role, permissions),
+      session: issued.session,
+      tokens: issued.tokens,
+    };
+  }
+
+  /** Dedicated entry for platform super admins — rejects other roles. */
+  async loginSuperAdmin(input: LoginInput, ctx: ClientContext) {
+    const user = await userRepository.findByEmail(input.email);
+    if (!user?.isActive || !user.isEmailVerified) {
+      throw new AuthenticationError('Invalid email or password');
+    }
+    const valid = await verifyPassword(input.password, user.passwordHash);
+    if (!valid) {
+      throw new AuthenticationError('Invalid email or password');
+    }
+    const { role, permissions } = await resolveRolePermissions(user.roleId);
+    if (role !== 'super_admin') {
+      throw new ForbiddenError('This account cannot sign in here. Use the campus login page.');
+    }
+    await userRepository.resetFailedAttempts(String(user._id));
+    await userRepository.updateById(String(user._id), { lastLoginAt: new Date() });
+    const issued = await issueSessionTokens(user, role, permissions, ctx);
+    return {
+      user: await toAuthUserWithBranding(user, role, permissions),
       session: issued.session,
       tokens: issued.tokens,
     };
@@ -552,7 +579,7 @@ export class AuthService {
       sub: String(user._id),
       email: user.email,
       role,
-      institutionId: String(user.institutionId),
+      institutionId: user.institutionId ? String(user.institutionId) : null,
       permissions,
       sessionId: String(session._id),
       tv: user.tokenVersion,

@@ -121,6 +121,22 @@
       "footerTagline": "Official academic portal for students, faculty, and institute administrators.",
       "footerLinksTitle": "Portal",
       "poweredBy": "Powered by {app}",
+      "aboutPlatform": "About Learnova platform",
+      "credit": {
+        "official": "Official academic portal of your institution.",
+        "developer": "System developed by Manya Shukla · Learnova"
+      },
+      "capabilities": {
+        "title": "Inside the portal",
+        "items": {
+          "timetable": { "title": "Timetable", "body": "Class schedules by section and faculty." },
+          "courses": { "title": "Courses", "body": "Materials, modules, and enrollments." },
+          "assessments": { "title": "Assessments", "body": "Assignments, quizzes, and exams." },
+          "grades": { "title": "Grades", "body": "Gradebook, standing, and certificates." },
+          "notices": { "title": "Notices", "body": "Campus announcements from the institute." },
+          "support": { "title": "Support", "body": "Academic office contact for login help." }
+        }
+      },
       "notices": {
         "title": "Campus notices",
         "item1": "Monsoon semester 2026 — timetables are available after you sign in.",
@@ -129,7 +145,8 @@
       },
       "help": {
         "title": "Academic office",
-        "description": "For login issues, section changes, or timetable corrections, reach out to the SOE office."
+        "description": "For login issues, section changes, or timetable corrections, reach out to the SOE office.",
+        "emailFallback": "Contact your academic office"
       },
       "roles": {
         "student": {

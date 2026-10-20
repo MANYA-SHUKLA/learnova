@@ -65,7 +65,10 @@ export type Permission =
   | 'certificate:write'
   | 'certificate:manage'
   | 'timetable:read'
-  | 'timetable:manage';
+  | 'timetable:manage'
+  | 'platform:read'
+  | 'platform:manage'
+  | 'demo_request:manage';
 
 export type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'unknown';
 
