@@ -1,6 +1,8 @@
+import { Heart } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
-import { siteContainer } from '@/lib/layout';
+import { marketingContainer } from '@/lib/marketing-design';
 import { Link } from '@/lib/i18n/routing';
+import { cn } from '@/lib/utils';
 import { LogoMark } from './logo-mark';
 
 const PRODUCT_LINKS = [
@@ -27,27 +29,19 @@ const LEGAL_LINKS = [
 function FooterColumn({
   title,
   links,
-  inverted = false,
 }: {
   title: string;
   links: readonly { href: string; label: string }[];
-  inverted?: boolean;
 }) {
   return (
     <div>
-      <h3 className={inverted ? 'font-display text-sm font-semibold text-white' : 'font-display text-sm font-semibold text-foreground'}>
-        {title}
-      </h3>
-      <ul className="mt-4 space-y-2.5">
+      <h3 className="font-display text-sm font-semibold text-white">{title}</h3>
+      <ul className="mt-2 space-y-1.5">
         {links.map((link) => (
           <li key={`${title}-${link.label}`}>
             <Link
               href={link.href}
-              className={
-                inverted
-                  ? 'text-sm text-white/70 transition-colors hover:text-white'
-                  : 'text-sm text-muted-foreground transition-colors hover:text-foreground'
-              }
+              className="text-sm text-white/70 transition-colors hover:text-white"
             >
               {link.label}
             </Link>
@@ -82,84 +76,64 @@ export async function SiteFooter({
     tHeader?.has(key) ? tHeader(key) : fallback;
   const tCampus = campusPortal ? await getTranslations('marketing.campusPortal') : null;
   const tCommon = await getTranslations('common');
+  const tLove = await getTranslations('common.madeWithLove');
   const year = new Date().getFullYear();
 
   return (
-    <footer
-      className={
-        platformMarketing
-          ? 'w-full bg-[#14243A] text-white dark:bg-[#152536] dark:ring-1 dark:ring-white/6'
-          : 'w-full border-t border-border bg-muted/40'
-      }
-    >
-      <div
-        className={
-          platformMarketing
-            ? 'mx-auto w-full max-w-[1240px] px-6 py-14 sm:py-16 lg:px-12'
-            : siteContainer('py-14 sm:py-16')
-        }
-      >
+    <footer className="w-full shrink-0 bg-[#14243A] text-white dark:bg-[#152536] dark:ring-1 dark:ring-white/6">
+      <div className={cn(marketingContainer, 'py-8 sm:py-9')}>
         <div
           className={
             campusPortal
-              ? 'grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
-              : 'grid gap-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-16'
+              ? 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8'
+              : 'grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8'
           }
         >
-          <div className={campusPortal ? 'sm:col-span-2' : 'sm:col-span-2 lg:col-span-1'}>
+          <div className="sm:col-span-2 lg:col-span-1">
             <Link
               href="/"
-              className={
-                platformMarketing
-                  ? 'inline-flex items-center gap-2.5 font-display text-xl font-bold tracking-tight text-white'
-                  : 'inline-flex items-center gap-2.5 font-display text-xl font-bold tracking-tight text-foreground'
-              }
+              className="inline-flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-white sm:text-xl"
             >
               <LogoMark />
               {campusPortal
                 ? (campusName ?? tCampus?.('footerCampusName') ?? tCommon('appName'))
                 : tCommon('appName')}
             </Link>
-            <p
-              className={
-                platformMarketing
-                  ? 'mt-4 max-w-sm text-sm leading-relaxed text-white/75 sm:text-base'
-                  : 'mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground sm:text-base'
-              }
-            >
+            <p className="mt-2 max-w-sm text-sm leading-snug text-white/75">
               {campusPortal
                 ? (campusTagline ?? tCampus?.('footerTagline'))
                 : t('tagline')}
             </p>
-            <p className={platformMarketing ? 'mt-4 text-sm text-white/75' : 'mt-4 text-sm text-muted-foreground'}>
+            <p className="mt-2 text-sm text-white/75">
               {t('contactLabel')}{' '}
               <a
                 href="mailto:shuklamanya99@gmail.com"
-                className={
-                  platformMarketing
-                    ? 'font-medium text-white underline-offset-2 hover:underline'
-                    : 'font-medium text-foreground underline-offset-2 hover:underline'
-                }
+                className="font-medium text-white underline-offset-2 hover:underline"
               >
                 shuklamanya99@gmail.com
               </a>
             </p>
           </div>
           {campusPortal ? (
-            <FooterColumn
-              title={tCampus?.('footerLinksTitle') ?? t('company')}
-              links={CAMPUS_PORTAL_LINKS.map((link) => ({
-                href: link.href,
-                label:
-                  link.labelKey === 'campusPortal.footerPlatformLink'
-                    ? (tCampus?.('footerPlatformLink') ?? tCommon('appName'))
-                    : t(link.labelKey),
-              }))}
-            />
+            <div className="grid gap-6 sm:col-span-2 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-2 lg:gap-8">
+              <FooterColumn
+                title={tCampus?.('footerLinksTitle') ?? t('company')}
+                links={CAMPUS_PORTAL_LINKS.map((link) => ({
+                  href: link.href,
+                  label:
+                    link.labelKey === 'campusPortal.footerPlatformLink'
+                      ? (tCampus?.('footerPlatformLink') ?? tCommon('appName'))
+                      : t(link.labelKey),
+                }))}
+              />
+              <FooterColumn
+                title={t('legal')}
+                links={LEGAL_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
+              />
+            </div>
           ) : platformMarketing ? (
             <>
               <FooterColumn
-                inverted
                 title={t('product')}
                 links={[
                   {
@@ -175,7 +149,6 @@ export async function SiteFooter({
                 ]}
               />
               <FooterColumn
-                inverted
                 title={t('company')}
                 links={[
                   { href: '/about', label: t('companyLinks.about') },
@@ -196,20 +169,41 @@ export async function SiteFooter({
               />
             </>
           )}
-          <FooterColumn
-            inverted={platformMarketing}
-            title={t('legal')}
-            links={LEGAL_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
-          />
+          {!campusPortal ? (
+            <FooterColumn
+              title={t('legal')}
+              links={LEGAL_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
+            />
+          ) : null}
         </div>
 
-        <div className={platformMarketing ? 'mt-12 border-t border-white/15 pt-8' : 'mt-12 border-t border-border pt-8'}>
-          <p className={platformMarketing ? 'text-sm text-white/65' : 'text-sm text-muted-foreground'}>
-            © {year} {tCommon('appName')}. {t('copyright')}
-          </p>
-          {platformMarketing && t.has('builtBy') ? (
-            <p className="mt-2 text-xs text-white/50">{t('builtBy')}</p>
-          ) : null}
+        <div className="mt-6 border-t border-white/15 pt-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6 sm:gap-y-2">
+            <p className="text-sm text-white/65">
+              © {year} {tCommon('appName')}. {t('copyright')}
+            </p>
+            {platformMarketing && t.has('builtBy') ? (
+              <p className="text-sm font-medium text-white/90">{t('builtBy')}</p>
+            ) : (
+              <p className="inline-flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5 text-sm text-white/85 sm:justify-end">
+                <span>{tLove('madeWith')}</span>
+                <Heart className="size-3.5 shrink-0 fill-rose-400 text-rose-400" aria-hidden />
+                <span>
+                  {tLove('by')}{' '}
+                  <a
+                    href="https://wa.me/918005586588"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-white underline-offset-2 hover:text-white/95 hover:underline"
+                  >
+                    Manya Shukla
+                  </a>
+                  {' · '}
+                  {tLove('project')}
+                </span>
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </footer>

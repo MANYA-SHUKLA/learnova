@@ -82,6 +82,7 @@ type DemoFormState = {
 };
 
 function PlatformDemoRequestSection({
+  introEyebrow,
   introTitle,
   introSubtitle,
   submitted,
@@ -97,6 +98,7 @@ function PlatformDemoRequestSection({
   setForm,
   demoMutation,
 }: {
+  introEyebrow?: string;
   introTitle: string;
   introSubtitle: string;
   submitted: boolean;
@@ -121,8 +123,12 @@ function PlatformDemoRequestSection({
       <div className={cn(marketingContainer, marketingSectionY)}>
         <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
           <div className="max-w-[560px] text-left">
-            <h2 className={marketingSectionTitle}>{introTitle}</h2>
-            <p className={cn('mt-4', marketingBody)}>{introSubtitle}</p>
+            <SectionHeading
+              align="left"
+              eyebrow={introEyebrow}
+              title={introTitle}
+              subtitle={introSubtitle}
+            />
           </div>
           <div className={cn(marketingCard, 'p-8')}>
             {submitted ? (
@@ -184,14 +190,44 @@ function PlatformDemoRequestSection({
   );
 }
 
-function SectionHeading({ eyebrow, title, subtitle }: { eyebrow?: string; title: string; subtitle?: string }) {
+function SectionHeading({
+  eyebrow,
+  title,
+  subtitle,
+  align = 'center',
+  tone = 'default',
+}: {
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  align?: 'center' | 'left';
+  tone?: 'default' | 'onDark';
+}) {
+  const eyebrowClass =
+    tone === 'onDark'
+      ? 'text-xs font-medium uppercase tracking-[0.12em] text-indigo-200'
+      : marketingEyebrow;
+  const titleClass =
+    tone === 'onDark'
+      ? 'font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl'
+      : marketingSectionTitle;
+  const subtitleClass =
+    tone === 'onDark' ? 'mt-3 text-base leading-relaxed text-white/80' : cn('mt-3', marketingBody);
+
   return (
-    <div className="mx-auto max-w-2xl text-center">
-      {eyebrow ? <p className={marketingEyebrow}>{eyebrow}</p> : null}
-      <h2 className={cn(eyebrow ? 'mt-3' : '', marketingSectionTitle)}>{title}</h2>
-      {subtitle ? <p className={cn('mt-4', marketingBody)}>{subtitle}</p> : null}
+    <div className={cn(align === 'center' ? 'mx-auto max-w-2xl text-center' : 'max-w-[560px] text-left')}>
+      {eyebrow ? <p className={eyebrowClass}>{eyebrow}</p> : null}
+      <h2 className={cn(eyebrow ? 'mt-3' : '', titleClass)}>{title}</h2>
+      {subtitle ? <p className={subtitleClass}>{subtitle}</p> : null}
     </div>
   );
+}
+
+function platformSectionEyebrow(
+  t: ReturnType<typeof useTranslations<'marketing.platformHome'>>,
+  key: Parameters<typeof t>[0],
+) {
+  return t.has(key) ? t(key) : undefined;
 }
 
 export function PlatformHomePage({
@@ -282,7 +318,7 @@ export function PlatformHomePage({
     <main className={cn('marketing-site overflow-x-clip font-body', marketingPageBg)}>
       {/* Hero */}
       <section className={cn('pt-12 lg:pt-16', marketingPageBg)}>
-        <div className={cn(marketingContainer, 'pb-[88px] lg:pb-[104px]')}>
+        <div className={cn(marketingContainer, 'pb-14 lg:pb-16')}>
           <div className="grid items-center gap-12 lg:grid-cols-[44%_56%] lg:gap-10">
             <div className="max-w-[520px] text-left">
               <p className={marketingEyebrow}>{heroEyebrow}</p>
@@ -318,14 +354,17 @@ export function PlatformHomePage({
       </section>
 
       {/* Platform modules */}
-      <section id="modules" className={cn('scroll-mt-24', marketingPageBg, marketingSectionY)}>
+      <section
+        id="modules"
+        className={cn('scroll-mt-24', marketingPageBg, 'pb-16 pt-10 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-14')}
+      >
         <div className={marketingContainer}>
           <SectionHeading
             eyebrow={t('features.eyebrow')}
             title={t('features.title')}
             subtitle={t('features.description')}
           />
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {moduleKeys.map((key) => {
               const Icon = MODULE_ICONS[key] ?? BarChart3;
               return (
@@ -349,8 +388,12 @@ export function PlatformHomePage({
         <div className={cn(marketingContainer, marketingSectionY)}>
           <div className="grid items-start gap-12 lg:grid-cols-2">
             <div className="max-w-[560px] text-left">
-              <h2 className={marketingSectionTitle}>{tPlatform('workflowsTitle')}</h2>
-              <p className={cn('mt-4', marketingBody)}>{tPlatform('workflowsSubtitle')}</p>
+              <SectionHeading
+                align="left"
+                eyebrow={platformSectionEyebrow(tPlatform, 'workflowsEyebrow')}
+                title={tPlatform('workflowsTitle')}
+                subtitle={tPlatform('workflowsSubtitle')}
+              />
               <ul className="mt-10 space-y-4">
                 {workflowOutcomes.map((key) => (
                   <li key={key} className="flex gap-3 text-left">
@@ -385,7 +428,13 @@ export function PlatformHomePage({
       {highlightFeatures.length > 0 ? (
         <section id="trust" className={cn('scroll-mt-24', marketingPageBg, marketingSectionY)}>
           <div className={marketingContainer}>
-            <SectionHeading title={tPlatform('highlightsTitle')} />
+            <SectionHeading
+              eyebrow={platformSectionEyebrow(tPlatform, 'highlightsEyebrow')}
+              title={tPlatform('highlightsTitle')}
+              subtitle={
+                tPlatform.has('highlightsSubtitle') ? tPlatform('highlightsSubtitle') : undefined
+              }
+            />
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {highlightFeatures.map((feature) => (
                 <div key={feature.title} className={cn(marketingCard, 'text-left')}>
@@ -402,13 +451,16 @@ export function PlatformHomePage({
       <section id="procurement" className={cn('scroll-mt-24', marketingSectionMutedBg)}>
         <div className={cn(marketingContainer, marketingSectionY)}>
           <div className="max-w-[650px] text-left">
-            <p className={marketingEyebrow}>{tPlatform('buyerEyebrow')}</p>
-            <h2 className={cn('mt-3', marketingSectionTitle)}>
-              {tPlatform.has('procurementTitle') ? tPlatform('procurementTitle') : tPlatform('buyerTitle')}
-            </h2>
-            <p className={cn('mt-4', marketingBody)}>
-              {tPlatform.has('procurementBody') ? tPlatform('procurementBody') : tPlatform('buyerSubtitle')}
-            </p>
+            <SectionHeading
+              align="left"
+              eyebrow={tPlatform('buyerEyebrow')}
+              title={
+                tPlatform.has('procurementTitle') ? tPlatform('procurementTitle') : tPlatform('buyerTitle')
+              }
+              subtitle={
+                tPlatform.has('procurementBody') ? tPlatform('procurementBody') : tPlatform('buyerSubtitle')
+              }
+            />
           </div>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => {
@@ -429,6 +481,7 @@ export function PlatformHomePage({
       <section className={cn(marketingPageBg, marketingSectionY)}>
         <div className={marketingContainer}>
           <SectionHeading
+            eyebrow={platformSectionEyebrow(tPlatform, 'testimonialsEyebrow')}
             title={tPlatform('testimonialsTitle')}
             subtitle={tPlatform('testimonialsSubtitle')}
           />
@@ -454,8 +507,12 @@ export function PlatformHomePage({
           <div className={marketingContainer}>
             <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
               <div className="max-w-[560px] text-left">
-                <h2 className={marketingSectionTitle}>{pricingTitle}</h2>
-                <p className={cn('mt-4', marketingBody)}>{pricingBody}</p>
+                <SectionHeading
+                  align="left"
+                  eyebrow={platformSectionEyebrow(tPlatform, 'pricingEyebrow')}
+                  title={pricingTitle}
+                  subtitle={pricingBody}
+                />
                 <Button asChild className={cn('mt-8', marketingBtnPrimary)}>
                   <a href="#request-demo">{tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}</a>
                 </Button>
@@ -486,7 +543,11 @@ export function PlatformHomePage({
       {/* FAQ */}
       <section id="faq" className={cn('scroll-mt-24', marketingSectionMutedBg, marketingSectionY)}>
         <div className={marketingContainer}>
-          <SectionHeading title={tPlatform('faqTitle')} />
+          <SectionHeading
+            eyebrow={platformSectionEyebrow(tPlatform, 'faqEyebrow')}
+            title={tPlatform('faqTitle')}
+            subtitle={tPlatform.has('faqSubtitle') ? tPlatform('faqSubtitle') : undefined}
+          />
           <div className="mx-auto mt-10 max-w-3xl space-y-3 text-left">
             {faqItems.map((item) => (
               <details key={item.title} className={cn(marketingCard, 'px-6 py-4')}>
@@ -502,6 +563,7 @@ export function PlatformHomePage({
 
       {/* Demo */}
       <PlatformDemoRequestSection
+        introEyebrow={platformSectionEyebrow(tPlatform, 'demoEyebrow')}
         introTitle={tPlatform('demoTitle')}
         introSubtitle={tPlatform('demoSubtitle')}
         submitted={submitted}
@@ -525,8 +587,13 @@ export function PlatformHomePage({
         <section className={cn(marketingFinalCta, 'py-16 text-white sm:py-20')}>
           <div className={cn(marketingContainer, 'flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between')}>
             <div className="max-w-xl text-left">
-              <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">{tPlatform('closingTitle')}</h2>
-              <p className="mt-4 text-base leading-relaxed text-white/80">{tPlatform('closingSubtitle')}</p>
+              <SectionHeading
+                align="left"
+                tone="onDark"
+                eyebrow={platformSectionEyebrow(tPlatform, 'closingEyebrow')}
+                title={tPlatform('closingTitle')}
+                subtitle={tPlatform('closingSubtitle')}
+              />
             </div>
             <Button
               asChild

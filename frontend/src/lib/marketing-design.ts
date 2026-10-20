@@ -37,14 +37,16 @@ export const marketingBody = cn(
   'dark:text-[#94a3b8]',
 );
 
+/** Lift, primary glow, accent rail, and shine sweep — see `card-interactive` in globals.css */
 export const marketingCard = cn(
-  'h-full rounded-[12px] border p-6 shadow-sm',
-  'border-[#E2E8F0] bg-white transition-shadow duration-200 hover:shadow-md',
-  'dark:border-white/10 dark:bg-[#243047] dark:shadow-black/25 dark:hover:border-white/15 dark:hover:shadow-lg dark:hover:shadow-black/30',
+  'card-interactive group h-full rounded-[12px] border p-6',
+  'border-[#E2E8F0] bg-white text-card-foreground shadow-soft-md',
+  'dark:border-white/10 dark:bg-[#243047]',
 );
 
 export const marketingCardTitle = cn(
-  'text-lg font-semibold leading-snug text-[#14243A] dark:text-[#e2e8f0]',
+  'text-lg font-semibold leading-snug text-[#14243A] transition-colors duration-300',
+  'group-hover:text-primary dark:text-[#e2e8f0] dark:group-hover:text-indigo-300',
 );
 
 export const marketingBtnPrimary = cn(
@@ -65,7 +67,9 @@ export const marketingPill = cn(
 
 export const marketingIconTile = cn(
   'flex size-10 items-center justify-center rounded-lg bg-[#EEF2FF] text-primary',
-  'dark:bg-primary/18 dark:text-indigo-300',
+  'transition-all duration-300 ease-out',
+  'group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-md',
+  'dark:bg-primary/18 dark:text-indigo-300 dark:group-hover:bg-primary dark:group-hover:text-primary-foreground',
 );
 
 export const marketingFinalCta = cn(

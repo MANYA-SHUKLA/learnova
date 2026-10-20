@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { CompanyLogo } from '@/components/layout/company-logo';
 import { LanguageToggle } from '@/components/shared/language-toggle';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { MadeWithLoveFooter } from '@/components/shared/made-with-love-footer';
 import { siteGutter } from '@/lib/layout';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +30,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       >
         <div className="flex w-full min-w-0 justify-center">{children}</div>
       </main>
+      <MadeWithLoveFooter />
     </div>
   );
 }

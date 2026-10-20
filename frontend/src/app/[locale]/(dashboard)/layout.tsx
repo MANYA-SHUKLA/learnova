@@ -5,6 +5,7 @@ import { Card, CardContent, Spinner } from '@learnova/ui';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
+import { MadeWithLoveFooter } from '@/components/shared/made-with-love-footer';
 import { SessionLoadingShell } from '@/components/shared/session-loading-shell';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { isPathAllowedForRole } from '@/lib/auth/role-routes';
@@ -75,12 +76,27 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
   }
 
   if (user.mustChangePassword && onChangePasswordPage) {
-    return <div className="min-h-screen bg-background">{children}</div>;
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <div className="flex-1">{children}</div>
+        <MadeWithLoveFooter />
+      </div>
+    );
   }
 
   if (isSuperAdminArea) {
-    return <div className="min-h-screen bg-background">{children}</div>;
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <div className="flex-1">{children}</div>
+        <MadeWithLoveFooter />
+      </div>
+    );
   }
 
-  return <AppShell>{children}</AppShell>;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <AppShell className="min-h-0 flex-1">{children}</AppShell>
+      <MadeWithLoveFooter />
+    </div>
+  );
 }

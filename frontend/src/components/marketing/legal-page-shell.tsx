@@ -41,7 +41,7 @@ export async function LegalPageShell({
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,_hsl(var(--primary)/0.14),_transparent_55%)]"
           />
-          <div className={siteContainer('relative pb-12 pt-16 sm:pb-16 sm:pt-20')}>
+          <div className={siteContainer('relative pb-10 pt-12 sm:pb-12 sm:pt-14')}>
             <p className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-primary">
               {t('eyebrow')}
             </p>
@@ -75,7 +75,7 @@ export async function LegalPageShell({
           </div>
         </section>
 
-        <section className="py-12 sm:py-16">
+        <section className="py-10 sm:py-12">
           <div className={siteContainer()}>
             <div className="mx-auto w-full max-w-3xl space-y-8 text-sm leading-relaxed text-muted-foreground sm:text-base">
               {children}

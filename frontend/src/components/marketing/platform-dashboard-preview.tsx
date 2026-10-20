@@ -10,8 +10,8 @@ export function PlatformDashboardPreview({ className }: { className?: string }) 
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-[14px] border border-[#E2E8F0] bg-white shadow-lg',
-        'dark:border-white/10 dark:bg-[#243047] dark:shadow-black/40',
+        'card-interactive overflow-hidden rounded-[14px] border border-[#E2E8F0] bg-white shadow-soft-lg',
+        'dark:border-white/10 dark:bg-[#243047]',
         className,
       )}
     >
@@ -36,7 +36,7 @@ export function PlatformDashboardPreview({ className }: { className?: string }) 
         ).map(([key, value]) => (
           <div
             key={key}
-            className="rounded-lg border border-[#E2E8F0] bg-white p-3 dark:border-white/10 dark:bg-[#2a3850]"
+            className="card-static rounded-lg border border-[#E2E8F0] bg-white p-3 dark:border-white/10 dark:bg-[#2a3850]"
           >
             <p className="text-[10px] font-medium uppercase tracking-wide text-[#64748B] dark:text-[#94a3b8]">
               {t(key)}

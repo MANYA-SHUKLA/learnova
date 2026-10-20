@@ -3,7 +3,6 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { HtmlLang } from '@/components/shared/html-lang';
-import { MadeWithLoveFooter } from '@/components/shared/made-with-love-footer';
 import { locales, isValidLocale } from '@/lib/i18n/config';
 import { AppProviders } from '@/providers';
 
@@ -32,7 +31,6 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
       <AppProviders>
         <div className="flex min-h-svh w-full min-w-0 max-w-[100vw] flex-col overflow-x-clip">
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">{children}</div>
-          <MadeWithLoveFooter />
         </div>
       </AppProviders>
     </NextIntlClientProvider>
