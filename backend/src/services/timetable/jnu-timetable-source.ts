@@ -213,8 +213,9 @@ function findCourseForOfficialRow(
   section: SectionRecord,
   courseCode: string,
   courses: CourseRecord[],
+  semesterNumber: number,
 ): CourseRecord | undefined {
-  const normalized = courseCode.toUpperCase();
+  const normalized = courseCodeFromKey(courseCode);
   const forProgram = (code: string) =>
     courses.find((c) => {
       if ((c.courseCode ?? '').toUpperCase() !== code) return false;
@@ -224,12 +225,19 @@ function findCourseForOfficialRow(
   const direct = forProgram(normalized);
   if (direct) return direct;
 
+  if (isSharedCourseCode(semesterNumber, normalized)) {
+    const shared = courses.find((c) => (c.courseCode ?? '').toUpperCase() === normalized);
+    if (shared) return shared;
+  }
+
   if (PHYSICS_CODE_ALIAS.has(normalized)) {
     for (const alt of PHYSICS_CODE_ALIAS) {
       if (alt === normalized) continue;
       const match = forProgram(alt);
       if (match) return match;
     }
+    const physicsShared = courses.find((c) => PHYSICS_CODE_ALIAS.has((c.courseCode ?? '').toUpperCase()));
+    if (physicsShared) return physicsShared;
   }
 
   return courses.find(
@@ -237,6 +245,12 @@ function findCourseForOfficialRow(
       (c.courseCode ?? '').toUpperCase() === normalized &&
       c.programIds.includes(section.programId),
   );
+}
+
+function courseCodeFromKey(courseKey: string): string {
+  const base = courseKey.replace(/\s*\(.*\)$/, '').replace(/\s*—.*$/, '').trim();
+  const token = base.split(/\s+/)[0] ?? courseKey;
+  return token.toUpperCase();
 }
 
 function courseCodeFromSlotTitle(courseTitle: string): string {
@@ -343,7 +357,7 @@ export function buildOfficialSettledSlots(
       warnings.push(`No section "${row.sourceSectionLabel}" — skipped ${row.courseKey}.`);
       continue;
     }
-    const course = findCourseForOfficialRow(section, row.courseCode, courses);
+    const course = findCourseForOfficialRow(section, row.courseCode, courses, semesterNumber);
     const facultyId = matchFacultyId(faculty, row.facultyCode, row.facultyName);
     if (!course || !facultyId) {
       warnings.push(
@@ -469,7 +483,7 @@ export function mapOfficialSlotsToProposed(
   for (const row of locked) {
     const section = sections.find((s) => s.name === row.sourceSectionLabel);
     if (!section) continue;
-    const course = findCourseForOfficialRow(section, row.courseCode, courses);
+    const course = findCourseForOfficialRow(section, row.courseCode, courses, semesterNumber);
     const facultyId = matchFacultyId(faculty, row.facultyCode, row.facultyName);
     if (!course || !facultyId) continue;
 

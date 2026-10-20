@@ -294,9 +294,6 @@ async function main(): Promise<void> {
 
   async function ensureCourse(code: string, title: string, programCode: string, semesterNumber: number): Promise<Types.ObjectId> {
     const normalizedCode = code.toUpperCase();
-    const cached = courseCache.get(normalizedCode);
-    if (cached) return cached;
-
     const program = programs.get(programCode)!;
     const semester = semesterByNumber.get(semesterNumber)!;
     const slug = `${normalizedCode}-${programCode}-s${semesterNumber}`.toLowerCase();
@@ -452,10 +449,16 @@ async function main(): Promise<void> {
             mergeKey,
         );
         if (existing) {
-          const names = String(existing.sectionName).split(' + ').map((s) => s.trim());
-          if (!names.includes(plan.sectionLabel)) {
-            existing.sectionName = `${existing.sectionName} + ${plan.sectionLabel}`;
+          if (String(existing.sectionId) === String(sectionId)) {
+            continue;
           }
+          const combined = [String(existing.sectionName), plan.sectionLabel]
+            .flatMap((s) => s.split(' + '))
+            .map((s) => s.trim())
+            .filter(Boolean);
+          const mergedName = [...new Set(combined)].sort().join(' + ');
+          existing.sectionName = mergedName;
+          slotDocs.push({ ...slotPayload, sectionName: mergedName });
           continue;
         }
         slotDocs.push(slotPayload);

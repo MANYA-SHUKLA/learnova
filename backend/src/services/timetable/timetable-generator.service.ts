@@ -431,7 +431,7 @@ export class TimetableGeneratorService {
         academicYearId: semesterYearId,
         name: `${semester.name} Timetable`,
       });
-    } else if (timetable.status === 'published') {
+    } else if (timetable.status === 'published' && !useOfficialGrid) {
       const reverted = await timetableRepository.revertToDraft(String(timetable._id), institutionId);
       if (reverted) timetable = reverted;
     }
@@ -519,6 +519,11 @@ export class TimetableGeneratorService {
       warnings.push(
         `${globalValidation.facultyClashes.length} faculty time overlap(s) across B.Tech semesters (Years I–IX run in the same week). Re-run Monsoon seed for all semesters or adjust slots before publish.`,
       );
+    }
+
+    if (useOfficialGrid && input.replaceExisting) {
+      const published = await timetableRepository.publish(timetableId, institutionId);
+      if (published) timetable = published;
     }
 
     return {
