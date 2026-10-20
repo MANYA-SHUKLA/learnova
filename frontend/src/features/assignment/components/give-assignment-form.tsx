@@ -3,10 +3,12 @@
 import { PERMISSIONS } from '@learnova/constants';
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CourseSelect, SemesterSelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { useCourseList } from '@/features/course';
 import { getApiErrorMessage } from '@/lib/api/client';
+import { cn } from '@/lib/utils';
 import { useCreateAssignmentMutation, usePublishAssignmentMutation } from '../hooks/use-assignment-queries';
 
 export function GiveAssignmentForm() {
@@ -23,7 +25,16 @@ export function GiveAssignmentForm() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const pending = createMutation.isPending || publishMutation.isPending;
-  const semesterChosen = Boolean(semesterId);
+
+  const coursesQuery = useCourseList({
+    page: 1,
+    limit: 100,
+    sortBy: 'title',
+    sortOrder: 'asc',
+    ...(semesterId ? { semesterId } : {}),
+  });
+
+  const courseOptions = coursesQuery.data?.items ?? [];
 
   const reset = () => {
     setCourseId('');
@@ -36,7 +47,7 @@ export function GiveAssignmentForm() {
     event.preventDefault();
     setError(null);
     setSuccess(null);
-    if (!semesterId || !courseId || !title.trim()) return;
+    if (!courseId || !title.trim()) return;
 
     try {
       const created = await createMutation.mutateAsync({
@@ -54,6 +65,14 @@ export function GiveAssignmentForm() {
     }
   };
 
+  const courseHint = useMemo(() => {
+    if (coursesQuery.isLoading) return t('courseHintLoading');
+    if (courseOptions.length === 0) {
+      return semesterId ? t('noCoursesForSemester') : t('noCoursesAssigned');
+    }
+    return semesterId ? t('courseHintFiltered') : t('courseHint');
+  }, [courseOptions.length, coursesQuery.isLoading, semesterId, t]);
+
   return (
     <PermissionGate permission={PERMISSIONS.ASSIGNMENT_WRITE} fallback={null}>
       <Card className="rounded-xl border-border/80 shadow-soft-md">
@@ -63,32 +82,58 @@ export function GiveAssignmentForm() {
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 sm:grid-cols-2" onSubmit={(event) => void handleSubmit(event)}>
+            <CourseSelect
+              label={t('course')}
+              value={courseId}
+              limit={100}
+              listParams={semesterId ? { semesterId } : undefined}
+              placeholder={t('selectCourse')}
+              emptyMessage={semesterId ? t('noCoursesForSemester') : t('noCoursesAssigned')}
+              hint={courseHint}
+              disabled={coursesQuery.isLoading}
+              onChange={(value) => {
+                setCourseId(value);
+                setSuccess(null);
+              }}
+            />
             <SemesterSelect
-              label={t('semester')}
+              label={t('semesterOptional')}
               value={semesterId}
               limit={100}
-              allowEmpty={false}
+              allowEmpty
+              emptyLabel={t('allSemesters')}
               onChange={(value) => {
                 setSemesterId(value);
                 setCourseId('');
                 setSuccess(null);
               }}
             />
-            <CourseSelect
-              key={semesterId || 'all-courses'}
-              label={t('course')}
-              value={courseId}
-              limit={100}
-              disabled={!semesterChosen}
-              listParams={semesterChosen ? { semesterId } : undefined}
-              placeholder={semesterChosen ? undefined : t('selectSemesterFirst')}
-              emptyMessage={semesterChosen ? t('noCoursesForSemester') : undefined}
-              hint={t('courseHint')}
-              onChange={(value) => {
-                setCourseId(value);
-                setSuccess(null);
-              }}
-            />
+            {courseOptions.length > 0 ? (
+              <div className="space-y-2 sm:col-span-2">
+                <p className="text-xs font-medium text-muted-foreground">{t('yourCourses')}</p>
+                <div className="flex flex-wrap gap-2">
+                  {courseOptions.map((course) => (
+                    <button
+                      key={course.id}
+                      type="button"
+                      className={cn(
+                        'rounded-full border px-3 py-1 text-left text-xs transition-colors',
+                        courseId === course.id
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border bg-background hover:border-primary/40',
+                      )}
+                      onClick={() => {
+                        setCourseId(course.id);
+                        setSuccess(null);
+                      }}
+                    >
+                      <span className="font-medium">{course.courseCode}</span>
+                      <span className="text-muted-foreground"> · {course.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <div className="space-y-1.5 sm:col-span-2">
               <label htmlFor="assignment-title" className="text-sm font-medium">
                 {t('titleLabel')}
@@ -134,7 +179,11 @@ export function GiveAssignmentForm() {
             {error ? <p className="text-sm text-destructive sm:col-span-2">{error}</p> : null}
             {success ? <p className="text-sm text-primary sm:col-span-2">{success}</p> : null}
             <div>
-              <Button type="submit" className="rounded-xl" disabled={pending || !semesterId || !courseId || !title.trim()}>
+              <Button
+                type="submit"
+                className="rounded-xl"
+                disabled={pending || !courseId || !title.trim() || courseOptions.length === 0}
+              >
                 {pending ? t('giving') : t('give')}
               </Button>
             </div>
