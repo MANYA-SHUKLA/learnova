@@ -128,7 +128,7 @@ export default function FacultyAssignmentsPage() {
           </Button>
           <Button
             size="sm"
-            variant="destructive"
+            variant="danger"
             className="rounded-lg"
             disabled={deleteMutation.isPending}
             onClick={() => { handleDelete(row); }}

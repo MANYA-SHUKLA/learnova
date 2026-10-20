@@ -169,7 +169,7 @@ export default function FacultyAssignmentDetailPage({
                   </Button>
                   <Button
                     size="sm"
-                    variant="destructive"
+                    variant="danger"
                     disabled={deleteMutation.isPending}
                     onClick={() => void handleDelete()}
                   >
