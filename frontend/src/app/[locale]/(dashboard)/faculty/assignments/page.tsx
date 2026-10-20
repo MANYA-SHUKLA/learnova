@@ -1,6 +1,6 @@
 'use client';
 
-import { PERMISSIONS } from '@learnova/constants';
+import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,
@@ -20,18 +20,24 @@ import { useMemo, useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { ErrorState } from '@/features/institution';
+import { useCourseList } from '@/features/course';
 import {
+  AssignmentExtendDueDialog,
   formatAssignmentStatus,
   formatAssignmentType,
   formatDueDate,
   formatSubmissionStatus,
   GiveAssignmentForm,
   useAssignmentList,
+  useDeleteAssignmentMutation,
   useFacultyAssignmentDashboard,
   useGradeSubmissionMutation,
   usePublishAssignmentMutation,
   useSubmissionList,
+  useUpdateAssignmentMutation,
 } from '@/features/assignment';
+import { Link } from '@/lib/i18n/routing';
+import type { Assignment } from '@learnova/types';
 
 export default function FacultyAssignmentsPage() {
   const t = useTranslations('dashboard.faculty.assignments');
@@ -39,6 +45,7 @@ export default function FacultyAssignmentsPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [gradeMarks, setGradeMarks] = useState<Record<string, string>>({});
+  const [extendTarget, setExtendTarget] = useState<Assignment | null>(null);
 
   const params = useMemo(
     () => ({
@@ -53,6 +60,7 @@ export default function FacultyAssignmentsPage() {
 
   const listQuery = useAssignmentList(params);
   const dashQuery = useFacultyAssignmentDashboard();
+  const coursesQuery = useCourseList({ page: 1, limit: 200, sortBy: 'title', sortOrder: 'asc' });
   const submissionsQuery = useSubmissionList({
     status: 'submitted',
     page: 1,
@@ -64,6 +72,24 @@ export default function FacultyAssignmentsPage() {
   const assignmentCatalog = useAssignmentList({ page: 1, limit: 100 });
   const publishMutation = usePublishAssignmentMutation();
   const gradeMutation = useGradeSubmissionMutation();
+  const deleteMutation = useDeleteAssignmentMutation();
+  const updateMutation = useUpdateAssignmentMutation();
+
+  const courseById = useMemo(() => {
+    const map = new Map<string, { courseCode: string; title: string }>();
+    for (const c of coursesQuery.data?.items ?? []) {
+      map.set(c.id, { courseCode: c.courseCode, title: c.title });
+    }
+    return map;
+  }, [coursesQuery.data?.items]);
+
+  const assignmentTitleById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const a of assignmentCatalog.data?.items ?? []) {
+      map.set(a.id, a.title);
+    }
+    return map;
+  }, [assignmentCatalog.data?.items]);
 
   const rows = listQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
@@ -71,12 +97,73 @@ export default function FacultyAssignmentsPage() {
   const pending = submissionsQuery.data?.items ?? [];
   const late = lateQuery.data?.items ?? [];
 
+  const handleDelete = (row: Assignment) => {
+    if (!window.confirm(t('deleteConfirm'))) return;
+    void deleteMutation.mutateAsync(row.id);
+  };
+
+  const rowActionButtons = (row: Assignment) => (
+    <div className="flex flex-wrap justify-end gap-1">
+      {row.status === 'draft' ? (
+        <Button
+          size="sm"
+          className="rounded-lg"
+          disabled={publishMutation.isPending}
+          onClick={() => void publishMutation.mutateAsync(row.id)}
+        >
+          {t('publish')}
+        </Button>
+      ) : (
+        <>
+          <Button size="sm" variant="secondary" className="rounded-lg" asChild>
+            <Link href={`${APP_ROUTES.FACULTY_ASSIGNMENTS}/${row.id}`}>{t('manage')}</Link>
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-lg"
+            onClick={() => { setExtendTarget(row); }}
+          >
+            {t('extend')}
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            className="rounded-lg"
+            disabled={deleteMutation.isPending}
+            onClick={() => { handleDelete(row); }}
+          >
+            {t('delete')}
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <PermissionGate permission={PERMISSIONS.ASSIGNMENT_READ} enforce>
       <DashboardPage>
         <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
 
         <GiveAssignmentForm />
+
+        {extendTarget ? (
+          <AssignmentExtendDueDialog
+            assignment={extendTarget}
+            open={Boolean(extendTarget)}
+            pending={updateMutation.isPending}
+            onOpenChange={(open) => {
+              if (!open) setExtendTarget(null);
+            }}
+            onSave={async (dueDate, closeDate) => {
+              await updateMutation.mutateAsync({
+                id: extendTarget.id,
+                body: { dueDate, closeDate },
+              });
+              setExtendTarget(null);
+            }}
+          />
+        ) : null}
 
         <StatGrid className="sm:grid-cols-2 xl:grid-cols-5">
           {[
@@ -159,10 +246,29 @@ export default function FacultyAssignmentsPage() {
                 columns={[
                   {
                     id: 'title',
-                    header: t('listTitle'),
+                    header: t('titleLabel'),
                     sortable: true,
                     sortValue: (row) => row.title,
-                    cell: (row) => <span className="font-medium">{row.title}</span>,
+                    cell: (row) => (
+                      <Link
+                        href={`${APP_ROUTES.FACULTY_ASSIGNMENTS}/${row.id}`}
+                        className="font-medium hover:text-primary"
+                      >
+                        {row.title}
+                      </Link>
+                    ),
+                  },
+                  {
+                    id: 'course',
+                    header: t('course'),
+                    cell: (row) => {
+                      const c = courseById.get(row.courseId);
+                      return (
+                        <span className="text-sm text-muted-foreground">
+                          {c ? `${c.courseCode}` : row.courseId}
+                        </span>
+                      );
+                    },
                   },
                   {
                     id: 'status',
@@ -188,37 +294,24 @@ export default function FacultyAssignmentsPage() {
                     ),
                   },
                 ]}
-                rowActions={(row) =>
-                  row.status === 'draft' ? (
-                    <Button
-                      size="sm"
-                      className="rounded-lg"
-                      disabled={publishMutation.isPending}
-                      onClick={() => void publishMutation.mutateAsync(row.id)}
-                    >
-                      {t('publish')}
-                    </Button>
-                  ) : null
-                }
+                rowActions={rowActionButtons}
                 mobileRow={(row) => (
                   <Card className="rounded-xl">
                     <CardContent className="space-y-3 p-4">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium">{row.title}</p>
+                        <Link
+                          href={`${APP_ROUTES.FACULTY_ASSIGNMENTS}/${row.id}`}
+                          className="font-medium hover:text-primary"
+                        >
+                          {row.title}
+                        </Link>
                         <Badge variant="secondary">{formatAssignmentStatus(row.status)}</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {t('due')}: {formatDueDate(row.dueDate)}
+                        {courseById.get(row.courseId)?.courseCode ?? row.courseId} · {t('due')}:{' '}
+                        {formatDueDate(row.dueDate)}
                       </p>
-                      {row.status === 'draft' ? (
-                        <Button
-                          size="sm"
-                          disabled={publishMutation.isPending}
-                          onClick={() => void publishMutation.mutateAsync(row.id)}
-                        >
-                          {t('publish')}
-                        </Button>
-                      ) : null}
+                      {rowActionButtons(row)}
                     </CardContent>
                   </Card>
                 )}
@@ -242,9 +335,14 @@ export default function FacultyAssignmentsPage() {
                     key={sub.id}
                     className="flex flex-col gap-2 rounded-xl border border-border/80 p-3"
                   >
+                    <p className="text-sm font-medium">
+                      {assignmentTitleById.get(sub.assignmentId) ?? t('titleLabel')}
+                    </p>
                     <div className="flex items-center justify-between gap-2">
                       <Badge variant="outline">{formatSubmissionStatus(sub.status)}</Badge>
-                      <span className="text-xs text-muted-foreground">#{sub.attemptNumber}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t('studentId')}: {sub.studentId} · #{sub.attemptNumber}
+                      </span>
                     </div>
                     <Input
                       type="number"
@@ -264,7 +362,7 @@ export default function FacultyAssignmentsPage() {
                           body: {
                             gradingMethod: 'marks',
                             marksObtained: Number(gradeMarks[sub.id]),
-                            feedback: 'Graded',
+                            feedback: t('gradedDefaultFeedback'),
                           },
                         })
                       }
@@ -291,8 +389,7 @@ export default function FacultyAssignmentsPage() {
                     className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
                   >
                     <span className="truncate">
-                      {assignmentCatalog.data?.items.find((item) => item.id === sub.assignmentId)?.title ??
-                        'Assignment'}
+                      {assignmentTitleById.get(sub.assignmentId) ?? 'Assignment'}
                     </span>
                     <Badge variant="danger">{t('late')}</Badge>
                   </div>
