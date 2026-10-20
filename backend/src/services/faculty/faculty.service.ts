@@ -32,6 +32,10 @@ import {
 } from '../access/faculty-scope.js';
 import { facultyRepository } from '../../repositories/faculty/index.js';
 import { resolveFacultyCreateIds } from '../id/entity-id.helpers.js';
+import {
+  isExcludedSoeDepartmentCode,
+  reassignFacultyFromExcludedSoeDepartments,
+} from '../institution/soe-faculty-departments.js';
 
 export interface ActorContext {
   userId: string;
@@ -278,6 +282,7 @@ export class FacultyService {
         meta: pageMeta(1, query.page, query.limit),
       };
     }
+    await reassignFacultyFromExcludedSoeDepartments(institutionId);
     const result = await facultyRepository.list(institutionId, query);
     return {
       items: result.items.map((d) => toDto(d)),
@@ -443,6 +448,7 @@ export class FacultyService {
   async getStats(actor: ActorContext) {
     const institutionId = requireTenant(actor);
     requireFacultyManage(actor);
+    await reassignFacultyFromExcludedSoeDepartments(institutionId);
     const raw = await facultyRepository.stats(institutionId);
 
     const departmentIds = raw.byDepartment
@@ -452,9 +458,26 @@ export class FacultyService {
 
     const departments =
       departmentIds.length > 0
-        ? await DepartmentModel.find({ _id: { $in: departmentIds } }).exec()
+        ? await DepartmentModel.find({ _id: { $in: departmentIds } })
+            .select('name code')
+            .exec()
         : [];
     const deptName = new Map(departments.map((d) => [String(d._id), d.name]));
+    const deptCode = new Map(departments.map((d) => [String(d._id), d.code]));
+
+    const byDepartment = raw.byDepartment
+      .filter((d) => {
+        if (!d._id) return true;
+        const code = deptCode.get(String(d._id));
+        return !isExcludedSoeDepartmentCode(code);
+      })
+      .map((d) => ({
+        departmentId: d._id ? String(d._id) : null,
+        label: d._id ? (deptName.get(String(d._id)) ?? 'Unknown') : 'Unassigned',
+        count: d.count as number,
+      }));
+
+    const departmentsCount = byDepartment.filter((d) => d.departmentId).length;
 
     return {
       total: raw.total,
@@ -464,13 +487,9 @@ export class FacultyService {
       suspended: raw.suspended,
       retired: raw.retired,
       archived: raw.archived,
-      departments: raw.departments,
+      departments: departmentsCount,
       newThisMonth: raw.newThisMonth,
-      byDepartment: raw.byDepartment.map((d) => ({
-        departmentId: d._id ? String(d._id) : null,
-        label: d._id ? (deptName.get(String(d._id)) ?? 'Unknown') : 'Unassigned',
-        count: d.count as number,
-      })),
+      byDepartment,
       byEmploymentType: raw.byEmploymentType.map((d) => ({
         employmentType: d._id as string,
         count: d.count as number,

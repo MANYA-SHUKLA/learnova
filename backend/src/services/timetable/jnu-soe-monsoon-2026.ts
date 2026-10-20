@@ -133,6 +133,17 @@ export function allowedCourseCodesForSemester(semesterNumber: number): Set<strin
   return entry?.codes ?? null;
 }
 
+/** Union of all official B.Tech course codes across progression semesters (1, 3, 5, 7, 9). */
+export function allJnuBtechOfficialCourseCodes(): ReadonlySet<string> {
+  const codes = new Set<string>();
+  for (const entry of Object.values(JNU_BTECH_SEMESTER_CATALOG)) {
+    for (const row of [...entry.cse, ...entry.ece]) {
+      codes.add(row.code.toUpperCase());
+    }
+  }
+  return codes;
+}
+
 export function sharedCourseCodesForSemester(semesterNumber: number): string[] {
   const split = sharedSubjectsSummaryForSemester(semesterNumber);
   const codes = split.shared.map((r) => r.code);

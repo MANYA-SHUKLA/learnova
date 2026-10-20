@@ -367,7 +367,7 @@ export default function FacultyListPage() {
                     id: 'department',
                     header: t('columns.department'),
                     sortable: true,
-                    sortValue: (row) => labels.department(row.departmentId),
+                    sortValue: (row) => labels.department(row.departmentId) ?? '',
                     cell: (row) => (
                       <span className="text-sm">{labels.department(row.departmentId)}</span>
                     ),

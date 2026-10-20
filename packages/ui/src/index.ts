@@ -9,6 +9,7 @@ export {
   type CardProps,
 } from './components/card';
 export { Input, type InputProps } from './components/input';
+export { Label, type LabelProps } from './components/label';
 export { Badge, badgeVariants, type BadgeProps } from './components/badge';
 export { Separator } from './components/separator';
 export { Skeleton } from './components/skeleton';

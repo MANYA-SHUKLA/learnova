@@ -10,6 +10,7 @@ import {
   TimetableSlotModel,
 } from '../../models/index.js';
 import { SOE_EXCLUDED_DEGREE_DEPARTMENT_CODES } from './soe-org-filters.js';
+import { pruneSoeLearningCatalog } from './prune-soe-enrollments.js';
 
 /** Demo / stack seed clutter — not used in SOE JNU minimal setup. */
 const DEMO_SECTION_NAME = /^Section [A-Z]$/;
@@ -259,4 +260,6 @@ export async function pruneMinimalOrgStructure(institutionId: string): Promise<v
       await softArchiveBatch(institutionOid, batch._id);
     }
   }
+
+  await pruneSoeLearningCatalog(institutionId);
 }

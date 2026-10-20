@@ -19,7 +19,6 @@ import {
   ArrowRight,
   Download,
   Plus,
-  List,
   Search,
   Upload,
   UserMinus,
@@ -43,7 +42,6 @@ import {
   useBulkSuspendStudentMutation,
   useRestoreStudentMutation,
   studentKeys,
-  useStudentList,
   useStudentStats,
 } from '@/features/student';
 import { studentApi } from '@/features/student/services/student-api';
@@ -70,10 +68,8 @@ export default function StudentListPage() {
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StudentStatus | 'all'>('all');
-  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
   const [includeDeleted, setIncludeDeleted] = useState(false);
-  const [viewAll, setViewAll] = useState(false);
 
   const listFilters = useMemo(
     () => ({
@@ -86,24 +82,16 @@ export default function StudentListPage() {
     [search, status, includeDeleted],
   );
 
-  const pagedParams = useMemo(
-    () => ({ ...listFilters, page, limit: 20 }),
-    [listFilters, page],
-  );
-
-  const pagedQuery = useStudentList(pagedParams, !viewAll);
-  const allQuery = useQuery({
-    queryKey: [...studentKeys.list(listFilters), 'all'] as const,
+  const labels = useOrgLabels();
+  const listQuery = useQuery({
+    queryKey: [...studentKeys.list(listFilters), 'directory'] as const,
     queryFn: () =>
       fetchAllListPages((p, limit) =>
         studentApi.list({ ...listFilters, page: p, limit }),
       ),
-    enabled: viewAll,
     staleTime: 30_000,
+    refetchOnMount: 'always',
   });
-
-  const labels = useOrgLabels();
-  const listQuery = viewAll ? allQuery : pagedQuery;
   const statsQuery = useStudentStats();
   const archiveMutation = useArchiveStudentMutation();
   const restoreMutation = useRestoreStudentMutation();
@@ -111,13 +99,8 @@ export default function StudentListPage() {
   const bulkActivate = useBulkActivateStudentMutation();
   const bulkSuspend = useBulkSuspendStudentMutation();
 
-  const rows = viewAll
-    ? (allQuery.data?.items ?? [])
-    : (pagedQuery.data?.items ?? []);
-  const meta = viewAll ? undefined : pagedQuery.data?.meta;
-  const allTotal = viewAll ? allQuery.data?.total : meta?.total;
-  const stats = statsQuery.data;
-  const directoryTotal = stats?.total ?? meta?.total ?? allTotal ?? 0;
+  const rows = listQuery.data?.items ?? [];
+  const directoryTotal = listQuery.data?.total ?? statsQuery.data?.total ?? 0;
 
   const archiveSelected = () => {
     if (!selected.length) return;
@@ -164,21 +147,6 @@ export default function StudentListPage() {
                   {tCommon('export')}
                 </Link>
               </Button>
-              <Button
-                type="button"
-                variant={viewAll ? 'secondary' : 'default'}
-                className="rounded-xl"
-                disabled={listQuery.isLoading || directoryTotal === 0}
-                onClick={() => {
-                  setViewAll((v) => !v);
-                  setPage(1);
-                }}
-              >
-                <List className="size-4" />
-                {viewAll
-                  ? t('viewPages')
-                  : t('viewAllStudents', { count: directoryTotal })}
-              </Button>
               <PermissionGate permission={PERMISSIONS.STUDENT_MANAGE}>
                 <Button asChild className="rounded-xl">
                   <Link href={APP_ROUTES.INSTITUTION_STUDENTS_CREATE}>
@@ -197,12 +165,12 @@ export default function StudentListPage() {
                 <StatCard key={i} label="…" value="—" loading />
               ))
             : [
-                { label: t('stats.total'), value: stats?.total ?? 0 },
-                { label: t('stats.active'), value: stats?.active ?? 0 },
-                { label: t('stats.graduated'), value: stats?.graduated ?? 0 },
-                { label: t('stats.dropped'), value: stats?.dropped ?? 0 },
-                { label: t('stats.departments'), value: stats?.departments ?? 0 },
-                { label: t('stats.newThisMonth'), value: stats?.newThisMonth ?? 0 },
+                { label: t('stats.total'), value: statsQuery.data?.total ?? 0 },
+                { label: t('stats.active'), value: statsQuery.data?.active ?? 0 },
+                { label: t('stats.graduated'), value: statsQuery.data?.graduated ?? 0 },
+                { label: t('stats.dropped'), value: statsQuery.data?.dropped ?? 0 },
+                { label: t('stats.departments'), value: statsQuery.data?.departments ?? 0 },
+                { label: t('stats.newThisMonth'), value: statsQuery.data?.newThisMonth ?? 0 },
               ].map((card) => (
                 <StatCard
                   key={card.label}
@@ -213,32 +181,17 @@ export default function StudentListPage() {
               ))}
         </StatGrid>
 
-        <Card className="directory-shell overflow-hidden">
+        <Card className="directory-shell">
           <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
               <CardTitle className="text-card-title">{t('directory')}</CardTitle>
               <CardDescription>
-                {viewAll && allTotal != null
-                  ? t('showingAll', { count: allTotal })
+                {listQuery.isSuccess && directoryTotal > 0
+                  ? t('showingAll', { count: directoryTotal })
                   : t('directoryDescription')}
               </CardDescription>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
-              <Button
-                type="button"
-                variant={viewAll ? 'secondary' : 'default'}
-                className="rounded-xl"
-                disabled={listQuery.isLoading || directoryTotal === 0}
-                onClick={() => {
-                  setViewAll((v) => !v);
-                  setPage(1);
-                }}
-              >
-                <List className="size-4" />
-                {viewAll
-                  ? t('viewPages')
-                  : t('viewAllStudents', { count: directoryTotal })}
-              </Button>
               <PermissionGate permission={PERMISSIONS.STUDENT_MANAGE}>
                 <Button
                   type="button"
@@ -267,6 +220,7 @@ export default function StudentListPage() {
             ) : (
               <DataTable
                 caption={t('directory')}
+                className="[&_.card-static]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:max-h-[min(65vh,52rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10"
                 loading={listQuery.isLoading}
                 data={rows}
                 rowKey={(row) => row.id}
@@ -318,7 +272,6 @@ export default function StudentListPage() {
                         onClick={() => {
                           setStatus(s);
                           setIncludeDeleted(s === 'archived');
-                          setPage(1);
                         }}
                         className={cn(
                           'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
@@ -344,7 +297,6 @@ export default function StudentListPage() {
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());
-                            setPage(1);
                           }
                         }}
                       />
@@ -355,7 +307,6 @@ export default function StudentListPage() {
                       className="rounded-xl"
                       onClick={() => {
                         setSearch(q.trim());
-                        setPage(1);
                       }}
                     >
                       Search
@@ -370,18 +321,6 @@ export default function StudentListPage() {
                       <Link href={APP_ROUTES.INSTITUTION_STUDENTS_CREATE}>{t('addStudent')}</Link>
                     </Button>
                   </PermissionGate>
-                }
-                pagination={
-                  meta
-                    ? {
-                        page: meta.page,
-                        totalPages: meta.totalPages,
-                        total: meta.total,
-                        hasNextPage: meta.hasNextPage,
-                        hasPrevPage: meta.hasPrevPage,
-                        onPageChange: setPage,
-                      }
-                    : undefined
                 }
                 columns={[
                   {
@@ -509,7 +448,7 @@ export default function StudentListPage() {
           </CardContent>
         </Card>
 
-        {stats && (stats.byDepartment.length > 0 || stats.byProgram.length > 0) ? (
+        {statsQuery.data && (statsQuery.data.byDepartment.length > 0 || statsQuery.data.byProgram.length > 0) ? (
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="rounded-2xl">
               <CardHeader>
@@ -519,7 +458,7 @@ export default function StudentListPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {stats.byDepartment.map((d) => (
+                {statsQuery.data.byDepartment.map((d) => (
                   <div
                     key={d.departmentId ?? 'none'}
                     className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2 text-sm"
@@ -535,7 +474,7 @@ export default function StudentListPage() {
                 <CardTitle className="text-base">Program distribution</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {stats.byProgram.map((d) => (
+                {statsQuery.data.byProgram.map((d) => (
                   <div
                     key={d.programId ?? 'none'}
                     className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2 text-sm"
@@ -549,14 +488,14 @@ export default function StudentListPage() {
           </div>
         ) : null}
 
-        {stats?.recentAdmissions && stats.recentAdmissions.length > 0 ? (
+        {statsQuery.data?.recentAdmissions && statsQuery.data.recentAdmissions.length > 0 ? (
           <Card className="rounded-2xl">
             <CardHeader>
               <CardTitle className="text-base">Recent admissions</CardTitle>
               <CardDescription>Newest students by admission date.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              {stats.recentAdmissions.map((row) => (
+              {statsQuery.data.recentAdmissions.map((row) => (
                 <Link
                   key={row.id}
                   href={`${APP_ROUTES.INSTITUTION_STUDENTS}/${row.id}`}

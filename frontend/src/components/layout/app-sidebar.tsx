@@ -60,7 +60,6 @@ type SidebarItemId =
   | 'academicYears'
   | 'semesters'
   | 'settings'
-  | 'campusPortal'
   | 'sections'
   | 'batches'
   | 'calendar'
@@ -114,7 +113,6 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: 'dashboard', href: APP_ROUTES.INSTITUTION_DASHBOARD, icon: LayoutDashboard, exact: true },
       { id: 'institution', href: APP_ROUTES.INSTITUTION_PROFILE, icon: Building2, exact: true },
-      { id: 'campusPortal', href: APP_ROUTES.INSTITUTION_PORTAL, icon: Globe, exact: true },
       { id: 'departments', href: APP_ROUTES.INSTITUTION_DEPARTMENTS, icon: Network },
       { id: 'branches', href: APP_ROUTES.INSTITUTION_PROGRAMS, icon: BookOpen },
       { id: 'academicYears', href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, icon: CalendarRange },

@@ -17,6 +17,7 @@ import {
 } from '@learnova/ui';
 import { ArrowRight, Download, Plus, Search, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
@@ -29,9 +30,11 @@ import {
   useBulkArchiveCourseMutation,
   useBulkPublishCourseMutation,
   useBulkUnpublishCourseMutation,
-  useCourseList,
+  courseKeys,
   useCourseStats,
 } from '@/features/course';
+import { courseApi } from '@/features/course/services/course-api';
+import { fetchAllListPages } from '@/lib/api/fetch-all-pages';
 import type { CourseStatus } from '@/features/course';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
@@ -51,31 +54,35 @@ export default function CourseListPage() {
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<CourseStatus | 'all'>('all');
-  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
 
-  const params = useMemo(
+  const listFilters = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
       includeDeleted: status === 'archived',
-      page,
-      limit: 20,
       sortBy: 'createdAt',
       sortOrder: 'desc' as const,
     }),
-    [search, status, page],
+    [search, status],
   );
 
-  const listQuery = useCourseList(params);
+  const listQuery = useQuery({
+    queryKey: [...courseKeys.list(listFilters), 'directory'] as const,
+    queryFn: () =>
+      fetchAllListPages((p, limit) =>
+        courseApi.list({ ...listFilters, page: p, limit }),
+      ),
+    staleTime: 30_000,
+    refetchOnMount: 'always',
+  });
   const statsQuery = useCourseStats();
   const bulkArchive = useBulkArchiveCourseMutation();
   const bulkPublish = useBulkPublishCourseMutation();
   const bulkUnpublish = useBulkUnpublishCourseMutation();
 
   const rows = listQuery.data?.items ?? [];
-  const meta = listQuery.data?.meta;
-  const stats = statsQuery.data;
+  const catalogTotal = listQuery.data?.total ?? statsQuery.data?.total ?? 0;
 
   return (
     <PermissionGate permission={PERMISSIONS.COURSE_READ} enforce>
@@ -116,12 +123,12 @@ export default function CourseListPage() {
                 <StatCard key={i} label="…" value="—" loading />
               ))
             : [
-                { label: t('stats.total'), value: stats?.total ?? 0 },
-                { label: t('stats.published'), value: stats?.published ?? 0 },
-                { label: t('stats.draft'), value: stats?.draft ?? 0 },
-                { label: t('stats.review'), value: stats?.review ?? 0 },
-                { label: t('stats.archived'), value: stats?.archived ?? 0 },
-                { label: t('stats.programs'), value: stats?.programs ?? 0 },
+                { label: t('stats.total'), value: statsQuery.data?.total ?? 0 },
+                { label: t('stats.published'), value: statsQuery.data?.published ?? 0 },
+                { label: t('stats.draft'), value: statsQuery.data?.draft ?? 0 },
+                { label: t('stats.review'), value: statsQuery.data?.review ?? 0 },
+                { label: t('stats.archived'), value: statsQuery.data?.archived ?? 0 },
+                { label: t('stats.programs'), value: statsQuery.data?.programs ?? 0 },
               ].map((card) => (
                 <StatCard
                   key={card.label}
@@ -132,10 +139,14 @@ export default function CourseListPage() {
               ))}
         </StatGrid>
 
-        <Card className="directory-shell overflow-hidden">
+        <Card className="directory-shell">
           <CardHeader className="pb-3">
             <CardTitle className="text-card-title">{t('catalog')}</CardTitle>
-            <CardDescription>{t('catalogDescription')}</CardDescription>
+            <CardDescription>
+              {listQuery.isSuccess && catalogTotal > 0
+                ? t('showingAll', { count: catalogTotal })
+                : t('catalogDescription')}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {listQuery.isError ? (
@@ -146,6 +157,7 @@ export default function CourseListPage() {
             ) : (
               <DataTable
                 caption={t('catalog')}
+                className="[&_.card-static]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:max-h-[min(65vh,52rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10"
                 loading={listQuery.isLoading}
                 data={rows}
                 rowKey={(row) => row.id}
@@ -191,7 +203,6 @@ export default function CourseListPage() {
                         type="button"
                         onClick={() => {
                           setStatus(st);
-                          setPage(1);
                         }}
                         className={cn(
                           'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
@@ -217,7 +228,6 @@ export default function CourseListPage() {
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());
-                            setPage(1);
                           }
                         }}
                       />
@@ -228,7 +238,6 @@ export default function CourseListPage() {
                       className="rounded-xl"
                       onClick={() => {
                         setSearch(q.trim());
-                        setPage(1);
                       }}
                     >
                       {tCommon('search')}
@@ -241,7 +250,6 @@ export default function CourseListPage() {
                         setQ('');
                         setSearch('');
                         setStatus('all');
-                        setPage(1);
                       }}
                     >
                       {tCommon('clear')}
@@ -256,18 +264,6 @@ export default function CourseListPage() {
                       <Link href={APP_ROUTES.INSTITUTION_COURSES_CREATE}>{t('addCourse')}</Link>
                     </Button>
                   </PermissionGate>
-                }
-                pagination={
-                  meta
-                    ? {
-                        page: meta.page,
-                        totalPages: meta.totalPages,
-                        total: meta.total,
-                        hasNextPage: meta.hasNextPage,
-                        hasPrevPage: meta.hasPrevPage,
-                        onPageChange: setPage,
-                      }
-                    : undefined
                 }
                 columns={[
                   {

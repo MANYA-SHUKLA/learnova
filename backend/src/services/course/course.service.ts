@@ -30,6 +30,7 @@ import {
   buildFacultyCourseFilter,
   facultyCanAccessCourse,
 } from '../access/faculty-scope.js';
+import { pruneSoeLearningCatalog } from '../institution/prune-soe-enrollments.js';
 
 export interface ActorContext {
   userId: string;
@@ -207,6 +208,9 @@ export class CourseService {
 
   async list(query: CourseListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (actor.role !== 'faculty') {
+      await pruneSoeLearningCatalog(institutionId);
+    }
     let filter = courseRepository.buildFilter(institutionId, query);
     filter = await scopeByFacultyAccess(filter, actor, institutionId);
 
@@ -406,6 +410,9 @@ export class CourseService {
 
   async getStats(actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (actor.role !== 'faculty') {
+      await pruneSoeLearningCatalog(institutionId);
+    }
     const raw = await courseRepository.getStats(institutionId);
 
     const departmentIds = raw.byDepartment

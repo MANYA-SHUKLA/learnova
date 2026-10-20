@@ -53,6 +53,7 @@ import {
   parseDate,
   rowsToCsv,
 } from './quiz.helpers.js';
+import { pruneSoeLearningCatalog } from '../institution/prune-soe-enrollments.js';
 
 export interface ActorContext {
   userId: string;
@@ -447,6 +448,9 @@ export class QuizService {
 
   async list(query: QuizListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (canManage(actor)) {
+      await pruneSoeLearningCatalog(institutionId);
+    }
     let filter = quizRepository.buildQuizFilter(institutionId, query);
     filter = await this.scopeQuizFilter(filter, actor, institutionId);
 
@@ -1612,6 +1616,7 @@ export class QuizService {
     if (!canManage(actor)) {
       throw new ForbiddenError('Institution admin access required');
     }
+    await pruneSoeLearningCatalog(institutionId);
     return quizRepository.getStats(institutionId);
   }
 
@@ -1726,6 +1731,7 @@ export class QuizService {
       throw new ForbiddenError('Institution admin access required');
     }
 
+    await pruneSoeLearningCatalog(institutionId);
     const stats = await quizRepository.getStats(institutionId);
 
     return {

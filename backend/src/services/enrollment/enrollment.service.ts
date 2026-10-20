@@ -27,6 +27,11 @@ import {
   buildFacultyEnrollmentCourseFilter,
   scopeStudentEnrollmentFilter,
 } from '../access/faculty-scope.js';
+import { pruneSoeLearningCatalog } from '../institution/prune-soe-enrollments.js';
+
+function shouldPruneSoeCatalog(actor: ActorContext): boolean {
+  return actor.role !== 'student' && actor.role !== 'faculty';
+}
 
 export interface ActorContext {
   userId: string;
@@ -232,6 +237,9 @@ export class EnrollmentService {
 
   async list(query: EnrollmentListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (shouldPruneSoeCatalog(actor)) {
+      await pruneSoeLearningCatalog(institutionId);
+    }
     let filter = enrollmentRepository.buildFilter(institutionId, query);
 
     filter = await applyEnrollmentListScope(filter, actor, institutionId);
@@ -809,6 +817,9 @@ export class EnrollmentService {
 
   async getStats(actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (shouldPruneSoeCatalog(actor)) {
+      await pruneSoeLearningCatalog(institutionId);
+    }
     return enrollmentRepository.getStats(institutionId);
   }
 

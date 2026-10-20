@@ -31,6 +31,7 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { studentRepository } from '../../repositories/student/index.js';
+import { isExcludedSoeDepartmentCode } from '../institution/soe-faculty-departments.js';
 import {
   assertStudentSelfAccess,
   buildFacultyStudentFilter,
@@ -567,7 +568,7 @@ export class StudentService {
 
     const [departments, programs, batches, sections] = await Promise.all([
       departmentIds.length > 0
-        ? DepartmentModel.find({ _id: { $in: departmentIds } }).exec()
+        ? DepartmentModel.find({ _id: { $in: departmentIds } }).select('name code').exec()
         : [],
       programIds.length > 0 ? ProgramModel.find({ _id: { $in: programIds } }).exec() : [],
       batchIds.length > 0 ? BatchModel.find({ _id: { $in: batchIds } }).exec() : [],
@@ -575,9 +576,28 @@ export class StudentService {
     ]);
 
     const deptName = new Map(departments.map((d) => [String(d._id), d.name]));
+    const deptCode = new Map(departments.map((d) => [String(d._id), d.code]));
     const progName = new Map(programs.map((p) => [String(p._id), p.name]));
     const batchName = new Map(batches.map((b) => [String(b._id), b.name]));
     const sectionName = new Map(sections.map((s) => [String(s._id), s.name]));
+
+    const byDepartment = raw.byDepartment
+      .filter((d) => {
+        if (!d._id) return true;
+        const code = deptCode.get(String(d._id));
+        return !isExcludedSoeDepartmentCode(code);
+      })
+      .map((d) => ({
+        departmentId: d._id ? String(d._id) : null,
+        label: d._id ? (deptName.get(String(d._id)) ?? 'Unknown') : 'Unassigned',
+        count: d.count as number,
+      }));
+
+    const byProgram = raw.byProgram.map((d) => ({
+      programId: d._id ? String(d._id) : null,
+      label: d._id ? (progName.get(String(d._id)) ?? 'Unknown') : 'Unassigned',
+      count: d.count as number,
+    }));
 
     return {
       total: raw.total,
@@ -588,18 +608,14 @@ export class StudentService {
       dropped: raw.dropped,
       transferred: raw.transferred,
       archived: raw.archived,
+      departments: byDepartment.filter((d) => d.departmentId).length,
+      programs: byProgram.filter((d) => d.programId).length,
+      batches: raw.byBatch.filter((d) => d._id).length,
+      sections: raw.bySection.filter((d) => d._id).length,
       scholarshipCount: raw.scholarshipCount,
       newThisMonth: raw.newThisMonth,
-      byDepartment: raw.byDepartment.map((d) => ({
-        departmentId: d._id ? String(d._id) : null,
-        label: d._id ? (deptName.get(String(d._id)) ?? 'Unknown') : 'Unassigned',
-        count: d.count as number,
-      })),
-      byProgram: raw.byProgram.map((d) => ({
-        programId: d._id ? String(d._id) : null,
-        label: d._id ? (progName.get(String(d._id)) ?? 'Unknown') : 'Unassigned',
-        count: d.count as number,
-      })),
+      byDepartment,
+      byProgram,
       byBatch: raw.byBatch.map((d) => ({
         batchId: d._id ? String(d._id) : null,
         label: d._id ? (batchName.get(String(d._id)) ?? 'Unknown') : 'Unassigned',

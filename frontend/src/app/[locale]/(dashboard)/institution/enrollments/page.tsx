@@ -17,22 +17,25 @@ import {
 } from '@learnova/ui';
 import { ArrowRight, BookOpen, Download, GraduationCap, Plus, Search, Upload, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { displayName, ErrorState } from '@/features/institution';
-import { useCourseList } from '@/features/course';
-import { useStudentList } from '@/features/student';
+import { courseApi, courseKeys } from '@/features/course';
+import { studentApi, studentKeys } from '@/features/student';
 import {
   formatEnrollmentStatus,
+  enrollmentKeys,
   useArchiveEnrollmentMutation,
   useBulkApproveEnrollmentMutation,
   useBulkArchiveEnrollmentMutation,
   useBulkRejectEnrollmentMutation,
-  useEnrollmentList,
   useEnrollmentStats,
   useRestoreEnrollmentMutation,
 } from '@/features/enrollment';
+import { enrollmentApi } from '@/features/enrollment/services/enrollment-api';
+import { fetchAllListPages } from '@/lib/api/fetch-all-pages';
 import type { EnrollmentStatus } from '@/features/enrollment';
 import { Link } from '@/lib/i18n/routing';
 import { env } from '@/config/env';
@@ -55,25 +58,38 @@ export default function EnrollmentListPage() {
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<EnrollmentStatus | 'all'>('all');
-  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
 
-  const params = useMemo(
+  const listFilters = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
       includeDeleted: false,
-      page,
-      limit: 20,
       sortBy: 'enrollmentDate',
       sortOrder: 'desc' as const,
     }),
-    [search, status, page],
+    [search, status],
   );
 
-  const listQuery = useEnrollmentList(params);
-  const coursesQuery = useCourseList({ page: 1, limit: 200 });
-  const studentsQuery = useStudentList({ page: 1, limit: 200 });
+  const listQuery = useQuery({
+    queryKey: [...enrollmentKeys.list(listFilters), 'directory'] as const,
+    queryFn: () =>
+      fetchAllListPages((p, limit) =>
+        enrollmentApi.list({ ...listFilters, page: p, limit }),
+      ),
+    staleTime: 30_000,
+    refetchOnMount: 'always',
+  });
+  const coursesQuery = useQuery({
+    queryKey: [...courseKeys.list({}), 'labels'] as const,
+    queryFn: () => fetchAllListPages((p, limit) => courseApi.list({ page: p, limit })),
+    staleTime: 60_000,
+  });
+  const studentsQuery = useQuery({
+    queryKey: [...studentKeys.list({}), 'labels'] as const,
+    queryFn: () => fetchAllListPages((p, limit) => studentApi.list({ page: p, limit })),
+    staleTime: 60_000,
+  });
   const courseLabel = (id: string) =>
     displayName(
       coursesQuery.data?.items,
@@ -90,8 +106,7 @@ export default function EnrollmentListPage() {
   const bulkArchive = useBulkArchiveEnrollmentMutation();
 
   const rows = listQuery.data?.items ?? [];
-  const meta = listQuery.data?.meta;
-  const stats = statsQuery.data;
+  const directoryTotal = listQuery.data?.total ?? statsQuery.data?.total ?? 0;
 
   const downloadExport = async (format: 'csv' | 'excel' | 'pdf') => {
     const token = getAccessToken();
@@ -148,12 +163,12 @@ export default function EnrollmentListPage() {
                 <StatCard key={i} label="…" value="—" loading />
               ))
             : [
-                { label: t('stats.total'), value: stats?.total ?? 0 },
-                { label: t('stats.active'), value: stats?.active ?? 0 },
-                { label: t('stats.pending'), value: stats?.pending ?? 0 },
-                { label: t('stats.completed'), value: stats?.completed ?? 0 },
-                { label: t('stats.withdrawn'), value: stats?.withdrawn ?? 0 },
-                { label: t('stats.waitlisted'), value: stats?.waitlisted ?? 0 },
+                { label: t('stats.total'), value: statsQuery.data?.total ?? 0 },
+                { label: t('stats.active'), value: statsQuery.data?.active ?? 0 },
+                { label: t('stats.pending'), value: statsQuery.data?.pending ?? 0 },
+                { label: t('stats.completed'), value: statsQuery.data?.completed ?? 0 },
+                { label: t('stats.withdrawn'), value: statsQuery.data?.withdrawn ?? 0 },
+                { label: t('stats.waitlisted'), value: statsQuery.data?.waitlisted ?? 0 },
               ].map((card) => (
                 <StatCard
                   key={card.label}
@@ -164,10 +179,14 @@ export default function EnrollmentListPage() {
               ))}
         </StatGrid>
 
-        <Card className="directory-shell overflow-hidden">
+        <Card className="directory-shell">
           <CardHeader className="pb-3">
             <CardTitle className="text-card-title">{t('directory')}</CardTitle>
-            <CardDescription>{t('directoryDescription')}</CardDescription>
+            <CardDescription>
+              {listQuery.isSuccess && directoryTotal > 0
+                ? t('showingAll', { count: directoryTotal })
+                : t('directoryDescription')}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {listQuery.isError ? (
@@ -182,6 +201,7 @@ export default function EnrollmentListPage() {
             ) : (
               <DataTable
                 caption={t('directory')}
+                className="[&_.card-static]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:max-h-[min(65vh,52rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10"
                 loading={listQuery.isLoading}
                 data={rows}
                 rowKey={(row) => row.id}
@@ -241,7 +261,6 @@ export default function EnrollmentListPage() {
                         type="button"
                         onClick={() => {
                           setStatus(s);
-                          setPage(1);
                         }}
                         className={cn(
                           'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
@@ -267,7 +286,6 @@ export default function EnrollmentListPage() {
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());
-                            setPage(1);
                           }
                         }}
                       />
@@ -278,7 +296,6 @@ export default function EnrollmentListPage() {
                       className="rounded-xl"
                       onClick={() => {
                         setSearch(q.trim());
-                        setPage(1);
                       }}
                     >
                       {tCommon('search')}
@@ -295,18 +312,6 @@ export default function EnrollmentListPage() {
                       </Link>
                     </Button>
                   </PermissionGate>
-                }
-                pagination={
-                  meta
-                    ? {
-                        page: meta.page,
-                        totalPages: meta.totalPages,
-                        total: meta.total,
-                        hasNextPage: meta.hasNextPage,
-                        hasPrevPage: meta.hasPrevPage,
-                        onPageChange: setPage,
-                      }
-                    : undefined
                 }
                 columns={[
                   {
@@ -414,7 +419,7 @@ export default function EnrollmentListPage() {
           </CardContent>
         </Card>
 
-        {stats && (stats.byCourse.length > 0 || stats.byDepartment.length > 0) ? (
+        {statsQuery.data && (statsQuery.data.byCourse.length > 0 || statsQuery.data.byDepartment.length > 0) ? (
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="rounded-xl border-border/80 shadow-soft-md">
               <CardHeader>
@@ -424,7 +429,7 @@ export default function EnrollmentListPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {stats.byCourse.slice(0, 10).map((d) => (
+                {statsQuery.data.byCourse.slice(0, 10).map((d) => (
                   <div
                     key={d.courseId}
                     className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2 text-sm"
@@ -445,7 +450,7 @@ export default function EnrollmentListPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {stats.byDepartment.map((d) => (
+                {statsQuery.data.byDepartment.map((d) => (
                   <div
                     key={d.departmentId ?? 'none'}
                     className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2 text-sm"
