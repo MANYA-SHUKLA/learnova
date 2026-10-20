@@ -45,14 +45,14 @@ const TAB_CONFIG: { id: ConsoleTab; icon: typeof Inbox }[] = [
   { id: 'marketing', icon: Megaphone },
 ];
 
-function statusVariant(status: DemoRequestRow['status']): 'default' | 'secondary' | 'destructive' | 'outline' {
+function statusVariant(status: DemoRequestRow['status']): 'default' | 'secondary' | 'danger' | 'outline' {
   switch (status) {
     case 'pending':
       return 'secondary';
     case 'confirmed':
       return 'default';
     case 'declined':
-      return 'destructive';
+      return 'danger';
     default:
       return 'outline';
   }
