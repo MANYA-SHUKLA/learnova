@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import {
   BatchModel,
+  DepartmentModel,
   EnrollmentModel,
   ProgramModel,
   SectionModel,
@@ -54,10 +55,70 @@ async function softArchiveProgram(institutionOid: Types.ObjectId, id: Types.Obje
 
 /** M.Tech / Ph.D — SOE JNU uses B.Tech CSE & ECE only for now. */
 const optionalProgramQuery = () => ({
-  $or: [{ code: /^MT-/ as RegExp }, { code: 'PHD' }],
+  $or: [
+    { code: /^MT-/i },
+    { code: /^PHD$/i },
+    { level: 'doctoral' as const },
+    { level: 'postgraduate' as const },
+  ],
 });
 
+/** Degree-type rows on the “Degree programs” page — not used while B.Tech-only. */
+const EXCLUDED_DEGREE_DEPARTMENT_FILTER = {
+  $or: [{ code: /^PHD$/i }, { name: /^\s*ph\.?\s*d\.?\s*$/i }],
+};
+
 const POSTGRAD_SLOT_SECTION_NAME = /^(M\.Tech|Ph\.D)\b/i;
+
+async function softArchiveDepartment(institutionOid: Types.ObjectId, id: Types.ObjectId) {
+  await DepartmentModel.updateOne(
+    { _id: id, institutionId: institutionOid },
+    { $set: { deletedAt: new Date(), status: 'archived' } },
+  ).exec();
+}
+
+async function archivePhdDegreeDepartments(institutionOid: Types.ObjectId): Promise<void> {
+  const phdDepartments = await DepartmentModel.find({
+    institutionId: institutionOid,
+    deletedAt: null,
+    ...EXCLUDED_DEGREE_DEPARTMENT_FILTER,
+  })
+    .select('_id')
+    .lean()
+    .exec();
+
+  for (const dept of phdDepartments) {
+    const programs = await ProgramModel.find({
+      institutionId: institutionOid,
+      departmentId: dept._id,
+      deletedAt: null,
+    })
+      .select('_id')
+      .lean()
+      .exec();
+
+    for (const program of programs) {
+      const studentsOnProgram = await StudentModel.countDocuments({
+        institutionId: institutionOid,
+        programId: program._id,
+        deletedAt: null,
+      }).exec();
+      if (studentsOnProgram === 0) {
+        await softArchiveProgram(institutionOid, program._id);
+      }
+    }
+
+    const studentsOnDept = await StudentModel.countDocuments({
+      institutionId: institutionOid,
+      programId: { $in: programs.map((p) => p._id) },
+      deletedAt: null,
+    }).exec();
+
+    if (studentsOnDept === 0) {
+      await softArchiveDepartment(institutionOid, dept._id);
+    }
+  }
+}
 
 async function removePostgraduateTimetableSlots(institutionOid: Types.ObjectId) {
   await TimetableSlotModel.updateMany(
@@ -76,6 +137,8 @@ async function removePostgraduateTimetableSlots(institutionOid: Types.ObjectId) 
  */
 export async function pruneMinimalOrgStructure(institutionId: string): Promise<void> {
   const institutionOid = new Types.ObjectId(institutionId);
+
+  await archivePhdDegreeDepartments(institutionOid);
 
   const optionalPrograms = await ProgramModel.find({
     institutionId: institutionOid,

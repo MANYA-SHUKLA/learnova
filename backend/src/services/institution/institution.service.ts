@@ -475,8 +475,10 @@ export class InstitutionService {
       'department.created',
     );
   }
-  listDepartments = (query: OrgListQuery, actor: ActorContext) =>
-    this.listTenantResource(departmentRepository, actor, query);
+  listDepartments = async (query: OrgListQuery, actor: ActorContext) => {
+    if (actor.institutionId) await syncSemesterCalendar(actor.institutionId);
+    return this.listTenantResource(departmentRepository, actor, query);
+  };
   getDepartment = (id: string, actor: ActorContext) =>
     this.getTenantResource(departmentRepository, actor, id);
   updateDepartment = (id: string, input: UpdateDepartmentInput, actor: ActorContext) =>

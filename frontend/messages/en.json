@@ -1205,7 +1205,7 @@
       "departments": {
         "title": "Degree programs",
         "singular": "Degree program",
-        "description": "Define degree types your institution runs — for example B.Tech, M.Tech, or Ph.D. Branches (CSE, ECE) are added under each program."
+        "description": "Degree types your institution runs. SOE JNU uses B.Tech only for now. Add branches (CSE, ECE) under Branches — not here."
       },
       "branches": {
         "title": "Branches",

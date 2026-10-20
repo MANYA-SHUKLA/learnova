@@ -29,14 +29,14 @@ export default function DepartmentsPage() {
       label: tf('name'),
       type: 'text',
       required: true,
-      placeholder: 'B.Tech, M.Tech, Ph.D., …',
+      placeholder: 'B.Tech',
     },
     {
       name: 'code',
       label: tf('code'),
       type: 'text',
       required: true,
-      placeholder: 'BTECH, MTECH, PHD',
+      placeholder: 'BTECH',
     },
     { name: 'description', label: tf('description'), type: 'textarea' },
     {
