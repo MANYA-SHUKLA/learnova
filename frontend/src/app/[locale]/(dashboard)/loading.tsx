@@ -1,10 +1,6 @@
-import { SessionLoadingShell } from '@/components/shared/session-loading-shell';
+import { DashboardRouteShell } from '@/components/shared/dashboard-route-shell';
 
-/** Matches `(dashboard)/layout.tsx` shell so route loading and auth gate hydrate the same. */
+/** Matches `(dashboard)/layout.tsx` gate shell (same component tree as pre-hydration layout). */
 export default function DashboardRouteLoading() {
-  return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <SessionLoadingShell />
-    </div>
-  );
+  return <DashboardRouteShell />;
 }
