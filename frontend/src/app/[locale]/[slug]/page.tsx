@@ -1,14 +1,16 @@
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { redirect } from '@/lib/i18n/routing';
-import { campusLoginPath, isReservedCampusSlug } from '@/lib/campus-slugs';
+import { CampusPortalPage } from '@/components/marketing/campus-portal-page';
+import { SiteFooter } from '@/components/marketing/site-footer';
+import { SiteHeader } from '@/components/marketing/site-header';
+import { isReservedCampusSlug } from '@/lib/campus-slugs';
 import { fetchPublicPortal } from '@/lib/campus-portal';
 
 interface CampusSlugPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
-/** Public campus root — forwards to shared institution sign-in (optional campus branding). */
+/** Public campus trust page — sign-in CTA; copy is edited under Institution → Campus portal. */
 export default async function CampusSlugPage({ params }: CampusSlugPageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
@@ -18,5 +20,11 @@ export default async function CampusSlugPage({ params }: CampusSlugPageProps) {
   const portal = await fetchPublicPortal(slug);
   if (!portal) notFound();
 
-  redirect({ href: campusLoginPath(portal.slug), locale });
+  return (
+    <>
+      <SiteHeader campusPortal campusSlug={portal.slug} campusName={portal.name} />
+      <CampusPortalPage portal={portal} campusSlug={portal.slug} />
+      <SiteFooter campusPortal campusSlug={portal.slug} supportEmail={portal.portalSettings?.supportEmail} />
+    </>
+  );
 }

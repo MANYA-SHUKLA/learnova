@@ -1237,6 +1237,36 @@
         "singular": "Batch",
         "description": "Optional intake cohort (e.g. B.Tech 2026). Create only when you assign students to a batch — not required for every program."
       },
+      "portal": {
+        "title": "Campus portal",
+        "description": "Edit the public trust page students and staff see before sign-in — not your admin dashboard.",
+        "whatIsThisTitle": "Public entry page (not the LMS dashboard)",
+        "whatIsThisBody": "This copy appears on your campus URL (e.g. /jnu) with a Sign in button. After login, users go to their role dashboard (timetable, courses, etc.). Use Profile for institute contact details; use this page only for portal wording and notices.",
+        "openPublicPage": "Open {path} in new tab",
+        "openSignIn": "Preview sign-in page",
+        "save": "Save portal settings",
+        "saving": "Saving…",
+        "saved": "Portal settings saved.",
+        "saveFailed": "Could not save portal settings.",
+        "fields": {
+          "portalTitle": "Page title",
+          "portalSubtitle": "Intro paragraph",
+          "termLabel": "Eyebrow / school line",
+          "supportEmail": "Support email (academic office)",
+          "officeLabel": "Help box title",
+          "officialCredit": "Official credit line",
+          "developerCredit": "Developer credit line",
+          "notices": "Notices (one per line)",
+          "showPlatformLink": "Show link to Learnova marketing site"
+        },
+        "hints": {
+          "portalTitle": "Shown as the main heading on the public page.",
+          "portalSubtitle": "Short explanation that this page is only the sign-in gate.",
+          "termLabel": "Small line above the title, e.g. school name.",
+          "supportEmail": "Use the academic office inbox (not a personal demo email unless intentional).",
+          "notices": "Bullet list on the public page — term dates, no self-registration, password help, etc."
+        }
+      },
       "settings": {
         "title": "Institution settings",
         "description": "Language, theme, attendance, grading, exams, certificates, storage, AI, notifications, and security.",
