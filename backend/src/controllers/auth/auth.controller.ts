@@ -9,7 +9,7 @@ import type {
 } from '@learnova/validation';
 import { signRoleHint } from '../../services/auth/role-hint.js';
 import { authService } from '../../services/auth/auth.service.js';
-import { sendCreated, sendSuccess } from '../../utils/response/index.js';
+import { sendSuccess } from '../../utils/response/index.js';
 import {
   clearRefreshCookie,
   getClientContext,
