@@ -415,10 +415,12 @@ function DemoRequestCard({
             {row.message ? (
               <p className="rounded-lg bg-muted/50 px-3 py-2 text-sm text-foreground">{row.message}</p>
             ) : null}
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <CalendarClock className="size-3.5" aria-hidden />
-              {new Date(row.createdAt).toLocaleString()}
-            </p>
+            {row.createdAt ? (
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <CalendarClock className="size-3.5" aria-hidden />
+                {new Date(row.createdAt).toLocaleString()}
+              </p>
+            ) : null}
           </div>
 
           <div className="flex w-full shrink-0 flex-col gap-2 lg:w-72">
