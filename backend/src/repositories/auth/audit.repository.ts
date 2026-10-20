@@ -56,7 +56,9 @@ export class AuditAuthLogRepository {
 
   /** Successful institution admin sign-ins at `/login` (excludes faculty, student, super admin). */
   async listInstitutionAdminLogins(query: { page: number; limit: number }) {
-    const skip = (query.page - 1) * query.limit;
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Number(query.limit) || 20);
+    const skip = (page - 1) * limit;
     const baseStages = [
       { $match: { event: 'user.login' } },
       {
@@ -85,7 +87,7 @@ export class AuditAuthLogRepository {
         ...baseStages,
         { $sort: { createdAt: -1 } },
         { $skip: skip },
-        { $limit: query.limit },
+        { $limit: limit },
         {
           $lookup: {
             from: 'institutions',
@@ -109,7 +111,7 @@ export class AuditAuthLogRepository {
     ]);
 
     const total = (countRows[0] as { total?: number } | undefined)?.total ?? 0;
-    return { items, total, page: query.page, limit: query.limit };
+    return { items, total, page, limit };
   }
 }
 
