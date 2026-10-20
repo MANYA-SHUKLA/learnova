@@ -969,6 +969,7 @@ export class EnrollmentService {
     if (courses.length === 0) return;
 
     let created = 0;
+    let synced = 0;
     for (const course of courses) {
       const courseId = String(course._id);
       const existing = await enrollmentRepository.findActiveByStudentCourse(
@@ -976,7 +977,46 @@ export class EnrollmentService {
         String(student._id),
         courseId,
       );
-      if (existing) continue;
+      if (existing) {
+        const patch: Record<string, unknown> = {};
+        if (
+          student.semesterId &&
+          (!existing.semesterId || String(existing.semesterId) !== String(student.semesterId))
+        ) {
+          patch.semesterId = student.semesterId;
+        }
+        if (
+          student.programId &&
+          (!existing.programId || String(existing.programId) !== String(student.programId))
+        ) {
+          patch.programId = student.programId;
+        }
+        if (
+          student.sectionId &&
+          (!existing.sectionId || String(existing.sectionId) !== String(student.sectionId))
+        ) {
+          patch.sectionId = student.sectionId;
+        }
+        if (
+          student.academicYearId &&
+          (!existing.academicYearId ||
+            String(existing.academicYearId) !== String(student.academicYearId))
+        ) {
+          patch.academicYearId = student.academicYearId;
+        }
+        if (
+          student.departmentId &&
+          (!existing.departmentId ||
+            String(existing.departmentId) !== String(student.departmentId))
+        ) {
+          patch.departmentId = student.departmentId;
+        }
+        if (Object.keys(patch).length > 0) {
+          await enrollmentRepository.updateById(institutionId, String(existing._id), patch);
+          synced += 1;
+        }
+        continue;
+      }
 
       await enrollmentRepository.create({
         institutionId: new Types.ObjectId(institutionId),
@@ -998,10 +1038,15 @@ export class EnrollmentService {
       created += 1;
     }
 
-    if (created > 0) {
+    if (created > 0 || synced > 0) {
       logger.info(
-        { studentId: String(student._id), created, semesterId: String(student.semesterId) },
-        'Auto-enrolled student in semester catalog courses',
+        {
+          studentId: String(student._id),
+          created,
+          synced,
+          semesterId: String(student.semesterId),
+        },
+        'Synced student semester catalog enrollments',
       );
     }
   }

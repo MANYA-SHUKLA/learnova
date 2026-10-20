@@ -24,7 +24,6 @@ import { useCourseList } from '@/features/course';
 import {
   formatEnrollmentStatus,
   useLeaveWaitlistMutation,
-  useMyEnrollments,
   useSelfEnrollMutation,
   useWaitlist,
   useWithdrawEnrollmentMutation,
@@ -35,12 +34,11 @@ import { ApiClientError } from '@/lib/api/client';
 export default function StudentEnrollmentsPage() {
   const t = useTranslations('dashboard.student.enrollments');
   const semesterCourses = useStudentSemesterCourses();
-  const myQuery = useMyEnrollments(
-    semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId, page: 1, limit: 200 } : undefined,
-  );
   const coursesQuery = useCourseList({
     page: 1,
     limit: 200,
+    status: 'published',
+    ...(semesterCourses.programId ? { programId: semesterCourses.programId } : {}),
     ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
   });
   const courseLabel = (id: string) =>
@@ -57,7 +55,7 @@ export default function StudentEnrollmentsPage() {
   const [courseId, setCourseId] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const enrollments = myQuery.data?.items ?? [];
+  const enrollments = semesterCourses.enrollments;
   const waitlist = waitlistQuery.data?.items ?? [];
   const enrolledCourseIds = enrollments.map((row) => row.courseId);
 
@@ -99,6 +97,9 @@ export default function StudentEnrollmentsPage() {
                   value={courseId}
                   listParams={{
                     status: 'published',
+                    ...(semesterCourses.programId
+                      ? { programId: semesterCourses.programId }
+                      : {}),
                     ...(semesterCourses.semesterId
                       ? { semesterId: semesterCourses.semesterId }
                       : {}),
@@ -135,19 +136,15 @@ export default function StudentEnrollmentsPage() {
             <CardDescription>{t('myEnrollmentsDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {myQuery.isError ? (
+            {semesterCourses.isError ? (
               <ErrorState
-                message={
-                  myQuery.error instanceof Error
-                    ? myQuery.error.message
-                    : 'Failed to load enrollments.'
-                }
-                onRetry={() => void myQuery.refetch()}
+                message="Failed to load enrollments."
+                onRetry={() => void semesterCourses.refetchEnrollments()}
               />
             ) : (
               <DataTable
                 caption={t('myEnrollments')}
-                loading={myQuery.isLoading}
+                loading={semesterCourses.isLoading}
                 data={enrollments}
                 rowKey={(row) => row.id}
                 emptyTitle={t('emptyTitle')}

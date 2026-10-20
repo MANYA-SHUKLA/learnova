@@ -54,6 +54,7 @@ export function useMyEnrollments(params?: EnrollmentListParams, enabled = true) 
     queryFn: () => enrollmentApi.getMyEnrollments(params),
     enabled,
     staleTime: 30_000,
+    refetchOnMount: 'always',
   });
 }
 
