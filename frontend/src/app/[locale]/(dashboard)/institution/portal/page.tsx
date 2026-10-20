@@ -132,64 +132,73 @@ export default function InstitutionPortalSettingsPage() {
             void save.mutateAsync();
           }}
         >
-          <Field
-            id="portalTitle"
-            label={t('fields.portalTitle')}
-            hint={t('hints.portalTitle')}
-            value={form.portalTitle}
-            onChange={(v) => setForm((f) => ({ ...f, portalTitle: v }))}
-          />
-          <Field
-            id="portalSubtitle"
+          <FormField label={t('fields.portalTitle')} htmlFor="portalTitle" hint={t('hints.portalTitle')}>
+            <Input
+              id="portalTitle"
+              value={form.portalTitle}
+              onChange={(e) => setForm((f) => ({ ...f, portalTitle: e.target.value }))}
+            />
+          </FormField>
+          <FormField
             label={t('fields.portalSubtitle')}
+            htmlFor="portalSubtitle"
             hint={t('hints.portalSubtitle')}
-            value={form.portalSubtitle}
-            multiline
-            onChange={(v) => setForm((f) => ({ ...f, portalSubtitle: v }))}
-          />
-          <Field
-            id="termLabel"
-            label={t('fields.termLabel')}
-            hint={t('hints.termLabel')}
-            value={form.termLabel}
-            onChange={(v) => setForm((f) => ({ ...f, termLabel: v }))}
-          />
-          <Field
-            id="supportEmail"
+          >
+            <textarea
+              id="portalSubtitle"
+              className="min-h-[88px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
+              value={form.portalSubtitle}
+              onChange={(e) => setForm((f) => ({ ...f, portalSubtitle: e.target.value }))}
+            />
+          </FormField>
+          <FormField label={t('fields.termLabel')} htmlFor="termLabel" hint={t('hints.termLabel')}>
+            <Input
+              id="termLabel"
+              value={form.termLabel}
+              onChange={(e) => setForm((f) => ({ ...f, termLabel: e.target.value }))}
+            />
+          </FormField>
+          <FormField
             label={t('fields.supportEmail')}
+            htmlFor="supportEmail"
             hint={t('hints.supportEmail')}
-            value={form.supportEmail}
-            type="email"
-            onChange={(v) => setForm((f) => ({ ...f, supportEmail: v }))}
-          />
-          <Field
-            id="officeLabel"
-            label={t('fields.officeLabel')}
-            value={form.officeLabel}
-            onChange={(v) => setForm((f) => ({ ...f, officeLabel: v }))}
-          />
-          <Field
-            id="officialCredit"
-            label={t('fields.officialCredit')}
-            value={form.officialCredit}
-            onChange={(v) => setForm((f) => ({ ...f, officialCredit: v }))}
-          />
-          <Field
-            id="developerCredit"
-            label={t('fields.developerCredit')}
-            value={form.developerCredit}
-            onChange={(v) => setForm((f) => ({ ...f, developerCredit: v }))}
-          />
-          <div className="space-y-2">
-            <Label htmlFor="notices">{t('fields.notices')}</Label>
-            <p className="text-xs text-muted-foreground">{t('hints.notices')}</p>
+          >
+            <Input
+              id="supportEmail"
+              type="email"
+              value={form.supportEmail}
+              onChange={(e) => setForm((f) => ({ ...f, supportEmail: e.target.value }))}
+            />
+          </FormField>
+          <FormField label={t('fields.officeLabel')} htmlFor="officeLabel">
+            <Input
+              id="officeLabel"
+              value={form.officeLabel}
+              onChange={(e) => setForm((f) => ({ ...f, officeLabel: e.target.value }))}
+            />
+          </FormField>
+          <FormField label={t('fields.officialCredit')} htmlFor="officialCredit">
+            <Input
+              id="officialCredit"
+              value={form.officialCredit}
+              onChange={(e) => setForm((f) => ({ ...f, officialCredit: e.target.value }))}
+            />
+          </FormField>
+          <FormField label={t('fields.developerCredit')} htmlFor="developerCredit">
+            <Input
+              id="developerCredit"
+              value={form.developerCredit}
+              onChange={(e) => setForm((f) => ({ ...f, developerCredit: e.target.value }))}
+            />
+          </FormField>
+          <FormField label={t('fields.notices')} htmlFor="notices" hint={t('hints.notices')}>
             <textarea
               id="notices"
               className="min-h-[120px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
               value={form.noticesText}
               onChange={(e) => setForm((f) => ({ ...f, noticesText: e.target.value }))}
             />
-          </div>
+          </FormField>
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -211,40 +220,5 @@ export default function InstitutionPortalSettingsPage() {
         </form>
       </div>
     </PermissionGate>
-  );
-}
-
-function Field({
-  id,
-  label,
-  hint,
-  value,
-  onChange,
-  multiline,
-  type = 'text',
-}: {
-  id: string;
-  label: string;
-  hint?: string;
-  value: string;
-  onChange: (value: string) => void;
-  multiline?: boolean;
-  type?: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
-      {multiline ? (
-        <textarea
-          id={id}
-          className="min-h-[88px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : (
-        <Input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} />
-      )}
-    </div>
   );
 }
