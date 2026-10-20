@@ -1,5 +1,6 @@
 'use client';
 
+import { Spinner } from '@learnova/ui';
 import { cn } from '@/lib/utils';
 
 interface SessionLoadingShellProps {
@@ -19,11 +20,7 @@ export function SessionLoadingShell({
         className,
       )}
     >
-      <div
-        role="status"
-        aria-label="Loading"
-        className="h-8 w-8 animate-spin rounded-full border-[3px] border-primary border-t-transparent"
-      />
+      <Spinner size="lg" />
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
   );
