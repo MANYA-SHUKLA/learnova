@@ -1391,6 +1391,11 @@
         "archiveSelected": "Archive selected (left)",
         "archiveConfirm": "Archive {count} student record(s)? They will be hidden from the active list (you can restore from Archived filter).",
         "searchPlaceholder": "Search name, student ID, roll number, email…",
+        "columns": {
+          "branch": "Branch",
+          "yearOfStudy": "Year",
+          "unassigned": "—"
+        },
         "stats": {
           "total": "Total",
           "active": "Active",

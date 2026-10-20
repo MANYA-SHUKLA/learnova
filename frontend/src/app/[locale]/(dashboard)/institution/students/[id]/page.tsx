@@ -23,13 +23,15 @@ import {
   formatStudentStatus,
   formatStudentGender,
   useActivateStudentMutation,
+  useArchiveStudentMutation,
   useDeactivateStudentMutation,
   useStudent,
   useStudentAudit,
   useStudentPhotoUploadMutation,
 } from '@/features/student';
 import { ApiClientError } from '@/lib/api/client';
-import { Link } from '@/lib/i18n/routing';
+import { Link, useRouter } from '@/lib/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function StudentDetailPage() {
@@ -40,8 +42,11 @@ export default function StudentDetailPage() {
   const labels = useOrgLabels();
   const auditQuery = useStudentAudit(id);
   const photoMutation = useStudentPhotoUploadMutation();
+  const tStudents = useTranslations('dashboard.institution.students');
+  const router = useRouter();
   const activateMutation = useActivateStudentMutation();
   const deactivateMutation = useDeactivateStudentMutation();
+  const archiveMutation = useArchiveStudentMutation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [passwordForm, setPasswordForm] = useState({
@@ -178,6 +183,21 @@ export default function StudentDetailPage() {
                   Activate
                 </Button>
               )}
+              {!student.deletedAt ? (
+                <Button
+                  type="button"
+                  variant="danger"
+                  disabled={archiveMutation.isPending}
+                  onClick={() => {
+                    if (!window.confirm(tStudents('archiveConfirm', { count: 1 }))) return;
+                    void archiveMutation.mutateAsync(student.id).then(() => {
+                      router.push(APP_ROUTES.INSTITUTION_STUDENTS);
+                    });
+                  }}
+                >
+                  {tStudents('archiveSelected')}
+                </Button>
+              ) : null}
             </PermissionGate>
           </div>
         </div>

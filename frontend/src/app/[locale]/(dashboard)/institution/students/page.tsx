@@ -166,16 +166,18 @@ export default function StudentListPage() {
               </Button>
               <Button
                 type="button"
-                variant={viewAll ? 'secondary' : 'outline'}
+                variant={viewAll ? 'secondary' : 'default'}
                 className="rounded-xl"
-                disabled={listQuery.isLoading}
+                disabled={listQuery.isLoading || directoryTotal === 0}
                 onClick={() => {
                   setViewAll((v) => !v);
                   setPage(1);
                 }}
               >
                 <List className="size-4" />
-                {viewAll ? t('viewPages') : t('viewAll')}
+                {viewAll
+                  ? t('viewPages')
+                  : t('viewAllStudents', { count: directoryTotal })}
               </Button>
               <PermissionGate permission={PERMISSIONS.STUDENT_MANAGE}>
                 <Button asChild className="rounded-xl">
@@ -420,9 +422,27 @@ export default function StudentListPage() {
                     cell: (row) => row.rollNumber ?? '—',
                   },
                   {
-                    id: 'program',
-                    header: 'Program',
-                    cell: (row) => row.programId ?? '—',
+                    id: 'branch',
+                    header: t('columns.branch'),
+                    cell: (row) => (
+                      <span className="text-sm text-muted-foreground">
+                        {row.programIds?.length
+                          ? labels.programs(row.programIds)
+                          : row.programId
+                            ? labels.program(row.programId)
+                            : t('columns.unassigned')}
+                      </span>
+                    ),
+                  },
+                  {
+                    id: 'yearOfStudy',
+                    header: t('columns.yearOfStudy'),
+                    cell: (row) =>
+                      row.yearOfStudy != null ? (
+                        <span className="tabular-nums">{row.yearOfStudy}</span>
+                      ) : (
+                        t('columns.unassigned')
+                      ),
                   },
                   {
                     id: 'status',
