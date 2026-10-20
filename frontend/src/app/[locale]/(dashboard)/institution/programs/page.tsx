@@ -15,7 +15,7 @@ import {
 } from '@/features/institution';
 
 export default function ProgramsPage() {
-  const t = useTranslations('dashboard.institution.programs');
+  const t = useTranslations('dashboard.institution.branches');
   const tf = useTranslations('dashboard.institution.fields');
   const ts = useTranslations('dashboard.institution.status');
   const tl = useTranslations('dashboard.institution.levels');
@@ -102,7 +102,7 @@ export default function ProgramsPage() {
       title={t('title')}
       singularLabel={t('singular')}
       description={t('description')}
-      exportFilename="programs"
+      exportFilename="branches"
       columns={columns}
       fields={fields}
       listQuery={usePrograms}

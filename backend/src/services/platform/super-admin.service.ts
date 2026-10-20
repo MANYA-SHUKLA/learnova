@@ -24,6 +24,7 @@ import { UserModel } from '../../models/user.model.js';
 import { institutionAuditRepository } from '../../repositories/institution/index.js';
 import { resolveProvisionIdentifiers } from './provision-campus.helpers.js';
 import { purgeInstitutionData } from './purge-institution.js';
+import { institutionService } from '../institution/institution.service.js';
 
 function assertSuperAdmin(actor: ActorContext) {
   if (actor.role !== 'super_admin') {
@@ -111,6 +112,7 @@ export class SuperAdminService {
       });
 
       await institutionSettingsRepository.getOrCreate(String(institutionId));
+      await institutionService.ensureDefaultSchoolForInstitution(String(institutionId));
 
       const adminUser = await userRepository.create({
         email: input.adminEmail,

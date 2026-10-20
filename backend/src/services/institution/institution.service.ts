@@ -161,6 +161,7 @@ export class InstitutionService {
         deletedAt: null,
       });
       await institutionSettingsRepository.getOrCreate(tenantId);
+      await this.ensureDefaultSchool(tenantId);
       await audit('institution.created', actor, tenantId, { name: input.name });
       return toDto(doc);
     } catch (err) {
@@ -249,6 +250,39 @@ export class InstitutionService {
     if (!doc) throw new NotFoundError('Institution not found');
     await audit('institution.updated', actor, id, { portalSettings: true });
     return toDto(doc);
+  }
+
+  /** One implicit school per institution — the admin workspace is the school. */
+  private async ensureDefaultSchool(institutionId: string): Promise<string> {
+    const listed = await schoolRepository.list(institutionId, {
+      page: 1,
+      limit: 1,
+      sortBy: 'createdAt',
+      sortOrder: 'asc',
+    });
+    const existing = listed.items.find((s) => (s as { status?: string }).status !== 'archived');
+    if (existing) return String(existing._id);
+
+    const inst = await institutionRepository.findById(institutionId);
+    if (!inst) throw new NotFoundError('Institution not found');
+
+    const code = String(inst.code ?? 'MAIN')
+      .trim()
+      .toUpperCase()
+      .slice(0, 32);
+    const doc = await schoolRepository.create({
+      institutionId: new Types.ObjectId(institutionId),
+      name: String(inst.shortName ?? inst.name),
+      code: code || 'MAIN',
+      description: null,
+      status: 'active',
+      deletedAt: null,
+    });
+    return String(doc._id);
+  }
+
+  async ensureDefaultSchoolForInstitution(institutionId: string): Promise<string> {
+    return this.ensureDefaultSchool(institutionId);
   }
 
   // ---- generic tenant resource helpers ----
@@ -408,12 +442,15 @@ export class InstitutionService {
   // Departments
   async createDepartment(input: CreateDepartmentInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
-    const school = await schoolRepository.findById(institutionId, input.schoolId);
+    const schoolId = input.schoolId?.trim()
+      ? input.schoolId
+      : await this.ensureDefaultSchool(institutionId);
+    const school = await schoolRepository.findById(institutionId, schoolId);
     if (!school) throw new ValidationError('Invalid schoolId for this institution');
     return this.createTenantResource(
       departmentRepository,
       actor,
-      input,
+      { ...input, schoolId },
       'department.created',
     );
   }

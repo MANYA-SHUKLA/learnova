@@ -17,7 +17,6 @@ import {
   GraduationCap,
   LayoutDashboard,
   Layers3,
-  School,
   Settings,
   Shield,
   UsersRound,
@@ -55,13 +54,11 @@ type SidebarItemId =
   | 'dashboard'
   | 'institution'
   | 'departments'
-  | 'programs'
+  | 'branches'
   | 'academicYears'
   | 'semesters'
   | 'settings'
   | 'campusPortal'
-  | 'campuses'
-  | 'schools'
   | 'sections'
   | 'batches'
   | 'calendar'
@@ -117,7 +114,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'institution', href: APP_ROUTES.INSTITUTION_PROFILE, icon: Building2, exact: true },
       { id: 'campusPortal', href: APP_ROUTES.INSTITUTION_PORTAL, icon: Globe, exact: true },
       { id: 'departments', href: APP_ROUTES.INSTITUTION_DEPARTMENTS, icon: Network },
-      { id: 'programs', href: APP_ROUTES.INSTITUTION_PROGRAMS, icon: BookOpen },
+      { id: 'branches', href: APP_ROUTES.INSTITUTION_PROGRAMS, icon: BookOpen },
       { id: 'academicYears', href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, icon: CalendarRange },
       { id: 'semesters', href: APP_ROUTES.INSTITUTION_SEMESTERS, icon: Layers3 },
       { id: 'settings', href: APP_ROUTES.INSTITUTION_SETTINGS, icon: Settings },
@@ -126,8 +123,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'academics',
     items: [
-      { id: 'campuses', href: APP_ROUTES.INSTITUTION_CAMPUSES, icon: School },
-      { id: 'schools', href: APP_ROUTES.INSTITUTION_SCHOOLS, icon: GraduationCap },
       { id: 'sections', href: APP_ROUTES.INSTITUTION_SECTIONS, icon: Grid3X3 },
       { id: 'batches', href: APP_ROUTES.INSTITUTION_BATCHES, icon: UsersRound },
       { id: 'calendar', href: APP_ROUTES.INSTITUTION_CALENDAR, icon: CalendarDays },

@@ -21,7 +21,7 @@ function navForRole(role: string | undefined): CommandItem[] {
   const institution: CommandItem[] = [
     { id: 'idash', label: 'Dashboard', href: APP_ROUTES.INSTITUTION_DASHBOARD, group: 'Institution' },
     { id: 'itimetable', label: 'Timetable', href: APP_ROUTES.INSTITUTION_TIMETABLE, group: 'Institution' },
-    { id: 'icampus', label: 'Campuses', href: APP_ROUTES.INSTITUTION_CAMPUSES, group: 'Institution' },
+    { id: 'ibranches', label: 'Branches', href: APP_ROUTES.INSTITUTION_PROGRAMS, group: 'Institution' },
     { id: 'istudents', label: 'Students', href: APP_ROUTES.INSTITUTION_STUDENTS, group: 'People' },
     { id: 'ifaculty', label: 'Faculty', href: APP_ROUTES.INSTITUTION_FACULTY, group: 'People' },
     { id: 'icourses', label: 'Courses', href: APP_ROUTES.INSTITUTION_COURSES, group: 'Learning' },

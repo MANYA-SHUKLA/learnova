@@ -27,10 +27,8 @@ const SESSIONS_ROUTE = '/sessions';
 const SEGMENT_KEYS: Record<string, string> = {
   dashboard: 'dashboard',
   institution: 'institution',
-  campuses: 'campuses',
-  schools: 'schools',
   departments: 'departments',
-  programs: 'programs',
+  programs: 'branches',
   'academic-years': 'academicYears',
   semesters: 'semesters',
   sections: 'sections',

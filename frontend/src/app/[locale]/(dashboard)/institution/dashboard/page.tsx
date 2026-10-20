@@ -14,12 +14,10 @@ import {
   ArrowRight,
   Building2,
   CalendarDays,
-  GraduationCap,
   Layers3,
   MapPin,
   Network,
   BookOpen,
-  School,
   CalendarRange,
   Sparkles,
   CheckCircle2,
@@ -60,11 +58,9 @@ import {
   useAcademicCalendars,
   useAcademicYears,
   useBatches,
-  useCampuses,
   useDepartments,
   useMyInstitution,
   usePrograms,
-  useSchools,
   useSemesters,
 } from '@/features/institution';
 import { Link } from '@/lib/i18n/routing';
@@ -92,34 +88,14 @@ export default function InstitutionDashboardPage() {
   const tNav = useTranslations('nav');
 
   const institutionQuery = useMyInstitution();
-  const campusesQuery = useCampuses(LIST_PARAMS);
-  const schoolsQuery = useSchools(LIST_PARAMS);
   const departmentsQuery = useDepartments(LIST_PARAMS);
-  const programsQuery = usePrograms(LIST_PARAMS);
+  const branchesQuery = usePrograms(LIST_PARAMS);
   const yearsQuery = useAcademicYears(LIST_PARAMS);
   const semestersQuery = useSemesters(LIST_PARAMS);
   const batchesQuery = useBatches(LIST_PARAMS);
   const calendarsQuery = useAcademicCalendars(LIST_PARAMS);
 
   const stats = [
-    {
-      key: 'campuses' as const,
-      label: t('stats.campuses'),
-      chartLabel: t('chart.campuses'),
-      value: countFromQuery(campusesQuery.data),
-      icon: School,
-      href: APP_ROUTES.INSTITUTION_CAMPUSES,
-      loading: campusesQuery.isLoading,
-    },
-    {
-      key: 'schools' as const,
-      label: t('stats.schools'),
-      chartLabel: t('chart.schools'),
-      value: countFromQuery(schoolsQuery.data),
-      icon: GraduationCap,
-      href: APP_ROUTES.INSTITUTION_SCHOOLS,
-      loading: schoolsQuery.isLoading,
-    },
     {
       key: 'departments' as const,
       label: t('stats.departments'),
@@ -130,13 +106,13 @@ export default function InstitutionDashboardPage() {
       loading: departmentsQuery.isLoading,
     },
     {
-      key: 'programs' as const,
-      label: t('stats.programs'),
-      chartLabel: t('chart.programs'),
-      value: countFromQuery(programsQuery.data),
+      key: 'branches' as const,
+      label: t('stats.branches'),
+      chartLabel: t('chart.branches'),
+      value: countFromQuery(branchesQuery.data),
       icon: BookOpen,
       href: APP_ROUTES.INSTITUTION_PROGRAMS,
-      loading: programsQuery.isLoading,
+      loading: branchesQuery.isLoading,
     },
     {
       key: 'academicYears' as const,
@@ -160,18 +136,6 @@ export default function InstitutionDashboardPage() {
 
   const quickActions = [
     {
-      href: APP_ROUTES.INSTITUTION_CAMPUSES,
-      title: t('actions.campuses.title'),
-      description: t('actions.campuses.description'),
-      icon: School,
-    },
-    {
-      href: APP_ROUTES.INSTITUTION_SCHOOLS,
-      title: t('actions.schools.title'),
-      description: t('actions.schools.description'),
-      icon: GraduationCap,
-    },
-    {
       href: APP_ROUTES.INSTITUTION_DEPARTMENTS,
       title: t('actions.departments.title'),
       description: t('actions.departments.description'),
@@ -179,8 +143,8 @@ export default function InstitutionDashboardPage() {
     },
     {
       href: APP_ROUTES.INSTITUTION_PROGRAMS,
-      title: t('actions.programs.title'),
-      description: t('actions.programs.description'),
+      title: t('actions.branches.title'),
+      description: t('actions.branches.description'),
       icon: BookOpen,
     },
     {
@@ -392,7 +356,7 @@ export default function InstitutionDashboardPage() {
           description={t('emptyStructureDescription')}
           action={
             <Button asChild className="rounded-xl">
-              <Link href={APP_ROUTES.INSTITUTION_CAMPUSES}>{t('addCampus')}</Link>
+              <Link href={APP_ROUTES.INSTITUTION_DEPARTMENTS}>{t('addDepartment')}</Link>
             </Button>
           }
         />

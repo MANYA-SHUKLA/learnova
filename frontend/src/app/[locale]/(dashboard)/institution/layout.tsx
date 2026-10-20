@@ -14,10 +14,8 @@ import { can } from '@/lib/auth/permissions';
 const NAV_ITEMS = [
   { href: APP_ROUTES.INSTITUTION_DASHBOARD, labelKey: 'overview', exact: true },
   { href: APP_ROUTES.INSTITUTION_PROFILE, labelKey: 'profile' },
-  { href: APP_ROUTES.INSTITUTION_CAMPUSES, labelKey: 'campuses' },
-  { href: APP_ROUTES.INSTITUTION_SCHOOLS, labelKey: 'schools' },
   { href: APP_ROUTES.INSTITUTION_DEPARTMENTS, labelKey: 'departments' },
-  { href: APP_ROUTES.INSTITUTION_PROGRAMS, labelKey: 'programs' },
+  { href: APP_ROUTES.INSTITUTION_PROGRAMS, labelKey: 'branches' },
   { href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, labelKey: 'academicYears' },
   { href: APP_ROUTES.INSTITUTION_SEMESTERS, labelKey: 'semesters' },
   { href: APP_ROUTES.INSTITUTION_SECTIONS, labelKey: 'sections' },

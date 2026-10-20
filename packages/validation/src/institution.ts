@@ -107,7 +107,8 @@ export const createSchoolSchema = z.object({
 export const updateSchoolSchema = createSchoolSchema.partial();
 
 export const createDepartmentSchema = z.object({
-  schoolId: objectIdField,
+  /** Omitted when the institution is a single school — server assigns the default school. */
+  schoolId: objectIdField.optional(),
   name: z.string().trim().min(2).max(200),
   code: z.string().trim().min(1).max(32),
   description: z.string().trim().max(1000).optional().nullable(),

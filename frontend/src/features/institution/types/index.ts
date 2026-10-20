@@ -112,7 +112,7 @@ export interface SchoolInput {
 }
 
 export interface DepartmentInput {
-  schoolId: string;
+  schoolId?: string;
   name: string;
   code: string;
   description?: string | null;
