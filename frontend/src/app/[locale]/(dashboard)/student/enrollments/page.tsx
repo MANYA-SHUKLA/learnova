@@ -1,6 +1,6 @@
 'use client';
 
-import { PERMISSIONS } from '@learnova/constants';
+import { PAGINATION, PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,
@@ -36,7 +36,7 @@ export default function StudentEnrollmentsPage() {
   const semesterCourses = useStudentSemesterCourses();
   const coursesQuery = useCourseList({
     page: 1,
-    limit: 200,
+    limit: PAGINATION.MAX_LIMIT,
     status: 'published',
     ...(semesterCourses.programId ? { programId: semesterCourses.programId } : {}),
     ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),

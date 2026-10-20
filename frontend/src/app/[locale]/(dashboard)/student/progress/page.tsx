@@ -55,7 +55,7 @@ export default function StudentProgressPage() {
   const semesterCourses = useStudentSemesterCourses();
   const coursesQuery = useCourseList({
     page: 1,
-    limit: 200,
+    limit: PAGINATION.MAX_LIMIT,
     ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
   });
   const courseLabel = (id: string) =>

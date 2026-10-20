@@ -1,5 +1,6 @@
 'use client';
 
+import { PAGINATION } from '@learnova/constants';
 import type { CourseProgress, Enrollment } from '@learnova/types';
 import { useMemo } from 'react';
 import { useCourseList } from '@/features/course';
@@ -37,7 +38,7 @@ export function useStudentSemesterCourses(enabled = true) {
   const enrollmentsQuery = useMyEnrollments(
     {
       page: 1,
-      limit: 200,
+      limit: PAGINATION.MAX_LIMIT,
       sortBy: 'enrollmentDate',
       sortOrder: 'desc',
     },
@@ -47,7 +48,7 @@ export function useStudentSemesterCourses(enabled = true) {
   const catalogQuery = useCourseList(
     {
       page: 1,
-      limit: 200,
+      limit: PAGINATION.MAX_LIMIT,
       status: 'published',
       ...(programId ? { programId } : {}),
       ...(semesterId ? { semesterId } : {}),

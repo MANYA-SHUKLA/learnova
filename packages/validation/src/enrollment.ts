@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { REGEX } from '@learnova/constants';
+import { PAGINATION, REGEX } from '@learnova/constants';
 
 const objectIdField = z.string().regex(REGEX.OBJECT_ID, 'Invalid ObjectId');
 const optionalString = (max: number) =>

@@ -1,6 +1,6 @@
 'use client';
 
-import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
+import { APP_ROUTES, PAGINATION, PERMISSIONS } from '@learnova/constants';
 import {
   Button,
   Card,
@@ -50,7 +50,11 @@ export default function StudentNotesPage() {
   const [addLessonId, setAddLessonId] = useState('');
   const [addText, setAddText] = useState('');
   const semesterCourses = useStudentSemesterCourses();
-  const coursesQuery = useCourseList({ page: 1, limit: 200, status: 'published' });
+  const coursesQuery = useCourseList({
+    page: 1,
+    limit: PAGINATION.MAX_LIMIT,
+    status: 'published',
+  });
   const myProgressQuery = useMyProgress({ page: 1, limit: 100 });
   const addCourseProgressQuery = useCourseProgress(addCourseId, Boolean(addCourseId));
   const courseLabel = (id: string) =>
