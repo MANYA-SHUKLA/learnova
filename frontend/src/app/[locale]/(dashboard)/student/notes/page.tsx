@@ -130,11 +130,116 @@ export default function StudentNotesPage() {
         </div>
 
         <Card className="rounded-2xl border-border/80">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t('directory')}</CardTitle>
-            <CardDescription>{t('directoryDescription')}</CardDescription>
+          <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle className="text-base">{t('directory')}</CardTitle>
+              <CardDescription>{t('directoryDescription')}</CardDescription>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              className="shrink-0"
+              onClick={() => (addOpen ? resetAddForm() : openAddForm())}
+            >
+              <Plus className="size-4" />
+              {addOpen ? t('cancel') : t('addNote')}
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
+            {addOpen ? (
+              <Card className="rounded-xl border-primary/20 bg-muted/30">
+                <CardContent className="space-y-4 p-4">
+                  <p className="text-sm text-muted-foreground">{t('addNoteHint')}</p>
+                  {myProgressQuery.isLoading ? (
+                    <Skeleton className="h-9 w-full rounded-xl" />
+                  ) : enrolledCourses.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">{t('noCoursesEnrolled')}</p>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="note-course">{t('course')}</Label>
+                        <select
+                          id="note-course"
+                          className={selectClassName}
+                          value={addCourseId}
+                          onChange={(e) => {
+                            setAddCourseId(e.target.value);
+                            setAddLessonId('');
+                          }}
+                        >
+                          <option value="">{t('selectCourse')}</option>
+                          {enrolledCourses.map((row) => (
+                            <option key={row.courseId} value={row.courseId}>
+                              {courseLabel(row.courseId)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {addCourseId ? (
+                        <div className="space-y-2">
+                          <Label htmlFor="note-lesson">{t('lesson')}</Label>
+                          {addCourseProgressQuery.isLoading ? (
+                            <Skeleton className="h-9 w-full rounded-xl" />
+                          ) : lessonOptions.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">{t('noLessons')}</p>
+                          ) : (
+                            <select
+                              id="note-lesson"
+                              className={selectClassName}
+                              value={addLessonId}
+                              onChange={(e) => { setAddLessonId(e.target.value); }}
+                            >
+                              <option value="">{t('selectLesson')}</option>
+                              {lessonOptions.map((lesson) => (
+                                <option key={lesson.id} value={lesson.id}>
+                                  {lesson.label}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+                      ) : null}
+                      <div className="space-y-2">
+                        <Label htmlFor="note-text">{t('addNote')}</Label>
+                        <textarea
+                          id="note-text"
+                          value={addText}
+                          onChange={(e) => { setAddText(e.target.value); }}
+                          rows={4}
+                          placeholder={t('notePlaceholder')}
+                          className={cn(
+                            'flex min-h-[96px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm',
+                            'shadow-sm transition-colors placeholder:text-muted-foreground',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                          )}
+                        />
+                      </div>
+                      {createMutation.isError ? (
+                        <p className="text-sm text-danger">{t('createError')}</p>
+                      ) : null}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={
+                            createMutation.isPending ||
+                            !addCourseId ||
+                            !addLessonId ||
+                            !addText.trim()
+                          }
+                          onClick={() => void submitNewNote()}
+                        >
+                          {t('save')}
+                        </Button>
+                        <Button type="button" size="sm" variant="ghost" onClick={resetAddForm}>
+                          {t('cancel')}
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            ) : null}
             <div className="relative min-w-0">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -168,6 +273,12 @@ export default function StudentNotesPage() {
                 illustration="inbox"
                 title={t('emptyTitle')}
                 description={t('emptyDescription')}
+                action={
+                  <Button type="button" size="sm" onClick={openAddForm}>
+                    <Plus className="size-4" />
+                    {t('addNote')}
+                  </Button>
+                }
               />
             ) : (
               <div className="space-y-3">
