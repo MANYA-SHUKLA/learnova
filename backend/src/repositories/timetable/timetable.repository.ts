@@ -129,6 +129,26 @@ export const timetableRepository = {
     return TimetableSlotModel.find(query).select('startTime endTime').lean().exec();
   },
 
+  async findFacultySlotsForConflictCheck(
+    institutionId: string,
+    facultyId: string,
+    dayOfWeek: string,
+    excludeSlotId?: string,
+  ) {
+    const query: Record<string, unknown> = {
+      institutionId: new Types.ObjectId(institutionId),
+      facultyId: new Types.ObjectId(facultyId),
+      dayOfWeek,
+      status: 'active',
+      deletedAt: null,
+    };
+    if (excludeSlotId) query._id = { $ne: new Types.ObjectId(excludeSlotId) };
+    return TimetableSlotModel.find(query)
+      .select('startTime endTime sectionName courseTitle')
+      .lean()
+      .exec();
+  },
+
   async revertToDraft(id: string, institutionId: string) {
     return TimetableModel.findOneAndUpdate(
       { _id: new Types.ObjectId(id), institutionId: new Types.ObjectId(institutionId), deletedAt: null },

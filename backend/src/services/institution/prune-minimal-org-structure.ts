@@ -5,6 +5,7 @@ import {
   ProgramModel,
   SectionModel,
   StudentModel,
+  TimetableSlotModel,
 } from '../../models/index.js';
 
 /** Demo / stack seed clutter — not used in SOE JNU minimal setup. */
@@ -56,6 +57,19 @@ const optionalProgramQuery = () => ({
   $or: [{ code: /^MT-/ as RegExp }, { code: 'PHD' }],
 });
 
+const POSTGRAD_SLOT_SECTION_NAME = /^(M\.Tech|Ph\.D)\b/i;
+
+async function removePostgraduateTimetableSlots(institutionOid: Types.ObjectId) {
+  await TimetableSlotModel.updateMany(
+    {
+      institutionId: institutionOid,
+      deletedAt: null,
+      sectionName: POSTGRAD_SLOT_SECTION_NAME,
+    },
+    { $set: { deletedAt: new Date(), status: 'inactive' } },
+  ).exec();
+}
+
 /**
  * Keeps org structure lean: archive M.Tech/Ph.D, demo sections, and empty demo batches.
  * Safe to run on every calendar sync (idempotent).
@@ -66,16 +80,25 @@ export async function pruneMinimalOrgStructure(institutionId: string): Promise<v
   const optionalPrograms = await ProgramModel.find({
     institutionId: institutionOid,
     deletedAt: null,
-    status: { $ne: 'archived' },
     ...optionalProgramQuery(),
   })
-    .select('_id code')
+    .select('_id code status')
     .lean()
     .exec();
 
   const optionalProgramIds = optionalPrograms.map((p) => p._id);
 
   if (optionalProgramIds.length > 0) {
+    const optionalSections = await SectionModel.find({
+      institutionId: institutionOid,
+      programId: { $in: optionalProgramIds },
+      deletedAt: null,
+    })
+      .select('_id')
+      .lean()
+      .exec();
+    const optionalSectionIds = optionalSections.map((s) => s._id);
+
     await SectionModel.updateMany(
       {
         institutionId: institutionOid,
@@ -85,6 +108,17 @@ export async function pruneMinimalOrgStructure(institutionId: string): Promise<v
       },
       { $set: { deletedAt: new Date(), status: 'archived' } },
     ).exec();
+
+    if (optionalSectionIds.length > 0) {
+      await TimetableSlotModel.updateMany(
+        {
+          institutionId: institutionOid,
+          sectionId: { $in: optionalSectionIds },
+          deletedAt: null,
+        },
+        { $set: { deletedAt: new Date(), status: 'inactive' } },
+      ).exec();
+    }
 
     await BatchModel.updateMany(
       {
@@ -102,11 +136,13 @@ export async function pruneMinimalOrgStructure(institutionId: string): Promise<v
         programId: program._id,
         deletedAt: null,
       }).exec();
-      if (studentsOnProgram === 0) {
+      if (studentsOnProgram === 0 && program.status !== 'archived') {
         await softArchiveProgram(institutionOid, program._id);
       }
     }
   }
+
+  await removePostgraduateTimetableSlots(institutionOid);
 
   const sectionCandidates = await SectionModel.find({
     institutionId: institutionOid,

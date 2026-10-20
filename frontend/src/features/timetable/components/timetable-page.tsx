@@ -244,10 +244,13 @@ export function TimetablePage({ mode }: TimetablePageProps) {
 
   const dayOptions = DAY_VALUES.map((d) => ({ value: d, label: tDays(d) }));
 
-  const filteredRows = useMemo(
-    () => filterSlotsBySearch(slotsQuery.data?.items ?? [], search),
-    [slotsQuery.data?.items, search],
-  );
+  const filteredRows = useMemo(() => {
+    let rows = slotsQuery.data?.items ?? [];
+    if (isAdmin && !sectionFilter) {
+      rows = rows.filter((row) => row.sectionName.startsWith('B.Tech'));
+    }
+    return filterSlotsBySearch(rows, search);
+  }, [isAdmin, sectionFilter, slotsQuery.data?.items, search]);
 
   const gridSlots = useMemo(() => {
     let items = gridSlotsQuery.data?.items ?? [];
@@ -258,6 +261,8 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       items = items.filter((slot) => slot.sectionId === studentProfileQuery.data.sectionId);
     } else if (sectionFilter) {
       items = items.filter((slot) => slot.sectionId === sectionFilter);
+    } else if (isAdmin) {
+      items = items.filter((slot) => slot.sectionName.startsWith('B.Tech'));
     }
     if (dayFilter) {
       items = items.filter((slot) => slot.dayOfWeek === dayFilter);
@@ -285,7 +290,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
 
   const sectionOptions = isAdmin
     ? (sectionsData?.items ?? []).filter(
-        (section) => !selectedSemesterId || section.semesterId === selectedSemesterId,
+        (section) =>
+          section.name.startsWith('B.Tech') &&
+          (!selectedSemesterId || section.semesterId === selectedSemesterId),
       )
     : readSectionOptions;
 
@@ -606,7 +613,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
         <CardHeader className="flex flex-row flex-nowrap items-center justify-between gap-4">
           <div className="min-w-0">
             <CardTitle>{t('gridTitle')}</CardTitle>
-            <CardDescription>{t('tableDescription')}</CardDescription>
+            <CardDescription>
+              {t('tableDescription')} {t('gridSchoolViewHint')}
+            </CardDescription>
           </div>
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
             {timetable ? <TimetableStatusBadge status={timetable.status} /> : null}

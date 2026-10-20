@@ -29,6 +29,7 @@ import {
   timesOverlap,
 } from '../../utils/timetable/time.js';
 import type { TimetableTodayClass } from '@learnova/types';
+import { syncSemesterCalendar } from '../institution/sync-semester-calendar.js';
 
 export interface ActorContext {
   userId: string;
@@ -110,6 +111,29 @@ async function assertNoSlotConflict(
   }
 }
 
+async function assertNoFacultyConflict(
+  institutionId: string,
+  facultyId: string,
+  dayOfWeek: string,
+  startTime: string,
+  endTime: string,
+  excludeSlotId?: string,
+): Promise<void> {
+  const existing = await timetableRepository.findFacultySlotsForConflictCheck(
+    institutionId,
+    facultyId,
+    dayOfWeek,
+    excludeSlotId,
+  );
+  for (const slot of existing) {
+    if (timesOverlap(startTime, endTime, slot.startTime, slot.endTime)) {
+      throw new ConflictError(
+        `This faculty member is already teaching ${slot.courseTitle} (${slot.sectionName}) at an overlapping time on the same day`,
+      );
+    }
+  }
+}
+
 async function resolveSlotDenormalized(
   institutionId: string,
   input: { courseId: string; sectionId: string; facultyId: string },
@@ -160,6 +184,9 @@ async function ensureTimetableAccess(
 export class TimetableService {
   async list(query: TimetableListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (actor.role === 'institution_admin') {
+      await syncSemesterCalendar(institutionId);
+    }
     const skip = (query.page - 1) * query.limit;
     const { docs, total } = await timetableRepository.list(institutionId, {
       semesterId: query.semesterId,
@@ -215,6 +242,9 @@ export class TimetableService {
 
   async listSlots(timetableId: string, query: TimetableSlotListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (actor.role === 'institution_admin') {
+      await syncSemesterCalendar(institutionId);
+    }
     await ensureTimetableAccess(timetableId, institutionId, actor.role);
 
     const skip = (query.page - 1) * query.limit;
@@ -246,6 +276,13 @@ export class TimetableService {
     await assertNoSlotConflict(
       institutionId,
       input.sectionId,
+      input.dayOfWeek,
+      input.startTime,
+      input.endTime,
+    );
+    await assertNoFacultyConflict(
+      institutionId,
+      input.facultyId,
       input.dayOfWeek,
       input.startTime,
       input.endTime,
@@ -298,6 +335,14 @@ export class TimetableService {
     await assertNoSlotConflict(
       institutionId,
       next.sectionId,
+      next.dayOfWeek,
+      next.startTime,
+      next.endTime,
+      slotId,
+    );
+    await assertNoFacultyConflict(
+      institutionId,
+      next.facultyId,
       next.dayOfWeek,
       next.startTime,
       next.endTime,
