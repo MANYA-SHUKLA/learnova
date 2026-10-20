@@ -70,6 +70,8 @@ export async function SiteFooter({
 }) {
   const t = await getTranslations('marketing.footer');
   const tHeader = platformMarketing ? await getTranslations('marketing.header') : null;
+  const headerLabel = (key: 'pricing' | 'campuses' | 'requestDemo', fallback: string) =>
+    tHeader?.has(key) ? tHeader(key) : fallback;
   const tCampus = campusPortal ? await getTranslations('marketing.campusPortal') : null;
   const tCommon = await getTranslations('common');
   const year = new Date().getFullYear();
@@ -126,9 +128,9 @@ export async function SiteFooter({
                 title={t('product')}
                 links={[
                   { href: '/#modules', label: t('productLinks.features') },
-                  { href: '/#pricing', label: tHeader?.('pricing') ?? 'Pricing' },
-                  { href: '/#campuses', label: tHeader?.('campuses') ?? 'Campuses' },
-                  { href: '/#request-demo', label: tHeader?.('requestDemo') ?? 'Request a demo' },
+                  { href: '/#pricing', label: headerLabel('pricing', 'Pricing') },
+                  { href: '/#campuses', label: headerLabel('campuses', 'Campuses') },
+                  { href: '/#request-demo', label: headerLabel('requestDemo', 'Request a demo') },
                 ]}
               />
               <FooterColumn

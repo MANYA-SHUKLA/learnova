@@ -14,7 +14,7 @@ import {
   Sparkles,
   type LucideIcon,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { publicApi } from '@/features/public/services/public-api';
 import { siteContainer } from '@/lib/layout';
@@ -35,9 +35,16 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   audit: ShieldCheck,
 };
 
+const LOCALIZED_MARKETING_LOCALES = ['te', 'hi'] as const;
+
 export function PlatformHomePage() {
+  const locale = useLocale();
+  const useLocalizedMarketing = LOCALIZED_MARKETING_LOCALES.includes(
+    locale as (typeof LOCALIZED_MARKETING_LOCALES)[number],
+  );
   const t = useTranslations('marketing.landing');
   const tPlatform = useTranslations('marketing.platformHome');
+  const tCommon = useTranslations('common');
 
   const { data: marketing, isLoading } = useQuery({
     queryKey: ['public', 'platform-marketing'],
@@ -77,10 +84,32 @@ export function PlatformHomePage() {
   if (isLoading || !marketing) {
     return (
       <div className={siteContainer('flex min-h-[50vh] items-center justify-center text-muted-foreground')}>
-        Loading…
+        {tCommon('loading')}
       </div>
     );
   }
+
+  const heroTitle = useLocalizedMarketing ? tPlatform('heroTitle') : marketing.heroTitle;
+  const heroSubtitle = useLocalizedMarketing ? tPlatform('heroSubtitle') : marketing.heroSubtitle;
+  const heroCtaLabel = useLocalizedMarketing
+    ? tPlatform('requestDemo')
+    : (marketing.heroCtaLabel ?? tPlatform('requestDemo'));
+
+  const highlightFeatures = useLocalizedMarketing
+    ? ([1, 2, 3] as const).map((i) => ({
+        title: tPlatform(`highlight${i}Title`),
+        body: tPlatform(`highlight${i}Body`),
+      }))
+    : marketing.features;
+
+  const pricingTitle = useLocalizedMarketing
+    ? tPlatform('pricingTitle')
+    : (marketing.pricingTitle ?? tPlatform('pricingTitle'));
+  const pricingBody = useLocalizedMarketing ? tPlatform('pricingBody') : marketing.pricingBody;
+
+  const faqItems = useLocalizedMarketing
+    ? [{ title: tPlatform('faq1Title'), body: tPlatform('faq1Body') }]
+    : marketing.faq;
 
   return (
     <main className="overflow-x-clip font-body">
@@ -93,14 +122,14 @@ export function PlatformHomePage() {
         <div className={siteContainer('relative mx-auto max-w-4xl text-center')}>
           <p className="text-sm font-medium tracking-wide text-primary">{t('hero.brand')}</p>
           <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-            {marketing.heroTitle}
+            {heroTitle}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            {marketing.heroSubtitle}
+            {heroSubtitle}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Button asChild size="lg" className={cn('h-12 px-8 text-base', ctaButtonClass)}>
-              <a href="#request-demo">{marketing.heroCtaLabel ?? tPlatform('requestDemo')}</a>
+              <a href="#request-demo">{heroCtaLabel}</a>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base">
               <a href="#modules">{tPlatform('exploreModules')}</a>
@@ -155,12 +184,12 @@ export function PlatformHomePage() {
       </section>
 
       {/* CMS highlights */}
-      {marketing.features.length > 0 ? (
+      {highlightFeatures.length > 0 ? (
         <section className="border-y border-border/60 bg-muted/25 py-20">
           <div className={siteContainer('max-w-6xl')}>
             <h2 className="font-display text-2xl font-bold sm:text-3xl">{tPlatform('highlightsTitle')}</h2>
             <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {marketing.features.map((feature) => (
+              {highlightFeatures.map((feature) => (
                 <div key={feature.title} className="rounded-2xl bg-background p-8 shadow-soft-md">
                   <h3 className="font-display text-lg font-semibold">{feature.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
@@ -191,12 +220,12 @@ export function PlatformHomePage() {
       </section>
 
       {/* Pricing */}
-      {marketing.pricingBody ? (
+      {pricingBody ? (
         <section id="pricing" className="border-t border-border/60 bg-muted/20 py-20">
           <div className={siteContainer('mx-auto max-w-3xl')}>
-            <h2 className="font-display text-3xl font-bold">{marketing.pricingTitle ?? tPlatform('pricingTitle')}</h2>
+            <h2 className="font-display text-3xl font-bold">{pricingTitle}</h2>
             <p className="mt-6 whitespace-pre-wrap text-base leading-relaxed text-muted-foreground">
-              {marketing.pricingBody}
+              {pricingBody}
             </p>
           </div>
         </section>
@@ -234,7 +263,7 @@ export function PlatformHomePage() {
         <div className={siteContainer('mx-auto max-w-3xl')}>
           <h2 className="font-display text-3xl font-bold">{tPlatform('faqTitle')}</h2>
           <div className="mt-10 space-y-4">
-            {marketing.faq.map((item) => (
+            {faqItems.map((item) => (
               <details
                 key={item.title}
                 className="group rounded-2xl border border-border bg-card px-6 py-4 open:shadow-sm"
