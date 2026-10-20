@@ -198,7 +198,9 @@ function normalizeName(value: string): string {
 
 function matchFacultyId(faculty: FacultyRecord[], facultyCode: string, facultyName: string): string | null {
   const meta = FACULTY_BY_CODE[facultyCode];
-  const needles = [facultyName, meta?.fullName].filter(Boolean).map(normalizeName);
+  const needles = [facultyName, meta?.fullName]
+    .filter((n): n is string => Boolean(n))
+    .map(normalizeName);
   for (const row of faculty) {
     const hay = normalizeName(row.name);
     if (needles.some((n) => hay.includes(n.split(' ')[0] ?? '') || n.includes(hay))) {
@@ -220,12 +222,13 @@ export function mapOfficialSlotsToProposed(
 
   for (const row of locked) {
     const section = sections.find((s) => s.name === row.sourceSectionLabel);
+    if (!section) continue;
     const course = courses.find((c) => {
       if ((c.courseCode ?? '').toUpperCase() !== row.courseCode) return false;
       return c.programIds.length === 0 || c.programIds.includes(section.programId);
     });
     const facultyId = matchFacultyId(faculty, row.facultyCode, row.facultyName);
-    if (!section || !course || !facultyId) continue;
+    if (!course || !facultyId) continue;
 
     proposed.push({
       dayOfWeek: row.dayOfWeek,
