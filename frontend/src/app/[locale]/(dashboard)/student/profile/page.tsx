@@ -555,8 +555,9 @@ export default function StudentProfilePage() {
           <CardHeader>
             <CardTitle className="text-base">Academic details</CardTitle>
             <CardDescription>
-              Program year and term are updated by the academic office when you advance (e.g. Year 1
-              → Year 2).
+              Program year and term are updated by the academic office when you advance. Expected
+              graduation is based on program length and your year (e.g. 4 years in year 1, 2 years
+              left in year 2 of a 4-year program).
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">

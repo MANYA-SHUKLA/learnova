@@ -16,6 +16,10 @@ import type {
   UpdateStudentProfileInput,
 } from '@learnova/validation';
 import { INSTITUTION_MAX_STUDENTS, REGEX } from '@learnova/constants';
+import {
+  computeExpectedGraduationDate,
+  DEFAULT_PROGRAM_DURATION_YEARS,
+} from '@learnova/utils';
 import { createStudentSchema } from '@learnova/validation';
 import { eventBus } from '../../events/index.js';
 import { DepartmentModel } from '../../models/department.model.js';
@@ -165,6 +169,78 @@ async function applyStudentListScope(
 }
 
 export class StudentService {
+  private async resolveProgramDurationYears(
+    institutionId: string,
+    programId: string | null | undefined,
+    explicit?: number | null,
+  ): Promise<number | null> {
+    if (explicit != null && explicit > 0) return explicit;
+    if (!programId) return null;
+    const program = await ProgramModel.findOne({
+      _id: programId,
+      institutionId: new Types.ObjectId(institutionId),
+      deletedAt: null,
+    })
+      .select('durationYears')
+      .lean()
+      .exec();
+    return program?.durationYears ?? null;
+  }
+
+  private computeExpectedGraduationForStudent(input: {
+    yearOfStudy: number | null | undefined;
+    programDuration: number | null | undefined;
+    admissionDate?: Date | null;
+    existingExpected?: Date | null;
+    force?: boolean;
+  }): Date | null {
+    const { yearOfStudy, programDuration, admissionDate, existingExpected, force } = input;
+    if (yearOfStudy == null || yearOfStudy < 1) return existingExpected ?? null;
+    if (!force && existingExpected) return existingExpected;
+    const duration = programDuration ?? DEFAULT_PROGRAM_DURATION_YEARS;
+    return computeExpectedGraduationDate({
+      yearOfStudy,
+      programDuration: duration,
+      admissionDate: admissionDate ?? null,
+      fromDate: new Date(),
+    });
+  }
+
+  private async syncExpectedGraduationForStudents(institutionId: string, ids: string[]) {
+    if (ids.length === 0) return;
+    const students = await studentRepository.findByIds(institutionId, ids);
+    for (const student of students) {
+      const programId = student.programId ? String(student.programId) : null;
+      const resolvedDuration = await this.resolveProgramDurationYears(
+        institutionId,
+        programId,
+        student.programDuration,
+      );
+      const programDuration =
+        resolvedDuration ?? student.programDuration ?? DEFAULT_PROGRAM_DURATION_YEARS;
+      const expectedGraduationDate = this.computeExpectedGraduationForStudent({
+        yearOfStudy: student.yearOfStudy,
+        programDuration,
+        admissionDate: student.admissionDate,
+        existingExpected: student.expectedGraduationDate,
+        force: true,
+      });
+      const patch: Record<string, unknown> = {};
+      if (programDuration !== student.programDuration) {
+        patch.programDuration = programDuration;
+      }
+      if (
+        expectedGraduationDate &&
+        String(student.expectedGraduationDate ?? '') !== expectedGraduationDate.toISOString()
+      ) {
+        patch.expectedGraduationDate = expectedGraduationDate;
+      }
+      if (Object.keys(patch).length > 0) {
+        await studentRepository.updateById(institutionId, String(student._id), patch);
+      }
+    }
+  }
+
   private async assertStudentCapacity(institutionId: string, additionalCount = 1) {
     const current = await studentRepository.countForCapacity(institutionId);
     if (current + additionalCount > INSTITUTION_MAX_STUDENTS) {
@@ -249,12 +325,29 @@ export class StudentService {
     });
 
     const fullName = buildFullName(input.firstName, input.middleName, input.lastName);
+    const resolvedDuration = await this.resolveProgramDurationYears(
+      institutionId,
+      input.programId,
+      input.programDuration,
+    );
+    const programDuration =
+      input.programDuration ?? resolvedDuration ?? DEFAULT_PROGRAM_DURATION_YEARS;
+    const expectedGraduationDate =
+      input.expectedGraduationDate ??
+      this.computeExpectedGraduationForStudent({
+        yearOfStudy: input.yearOfStudy,
+        programDuration,
+        admissionDate: input.admissionDate,
+        force: true,
+      });
     const doc = await studentRepository.create({
       ...input,
       studentId,
       admissionNumber,
       email: input.email.toLowerCase(),
       fullName,
+      programDuration,
+      expectedGraduationDate: expectedGraduationDate ?? input.expectedGraduationDate ?? null,
       campusId: input.campusId ? new Types.ObjectId(input.campusId) : null,
       schoolId: input.schoolId ? new Types.ObjectId(input.schoolId) : null,
       departmentId: input.departmentId ? new Types.ObjectId(input.departmentId) : null,
@@ -444,6 +537,47 @@ export class StudentService {
 
     if (input.status) {
       patch.isActive = input.status === 'active';
+    }
+
+    const resolvedProgramId =
+      input.programId !== undefined
+        ? input.programId
+        : existing.programId
+          ? String(existing.programId)
+          : null;
+    const resolvedDuration = await this.resolveProgramDurationYears(
+      institutionId,
+      resolvedProgramId,
+      input.programDuration !== undefined ? input.programDuration : existing.programDuration,
+    );
+    const programDuration =
+      input.programDuration ??
+      resolvedDuration ??
+      existing.programDuration ??
+      DEFAULT_PROGRAM_DURATION_YEARS;
+    if (input.programDuration !== undefined || resolvedDuration != null) {
+      patch.programDuration = programDuration;
+    }
+    const yearOfStudy =
+      input.yearOfStudy !== undefined ? input.yearOfStudy : existing.yearOfStudy;
+    const admissionDate =
+      input.admissionDate !== undefined ? input.admissionDate : existing.admissionDate;
+    const shouldRecomputeExpected =
+      input.expectedGraduationDate === undefined &&
+      (input.yearOfStudy !== undefined ||
+        input.programDuration !== undefined ||
+        input.programId !== undefined ||
+        input.admissionDate !== undefined);
+    if (shouldRecomputeExpected || input.expectedGraduationDate !== undefined) {
+      patch.expectedGraduationDate =
+        input.expectedGraduationDate ??
+        this.computeExpectedGraduationForStudent({
+          yearOfStudy,
+          programDuration,
+          admissionDate,
+          existingExpected: existing.expectedGraduationDate,
+          force: shouldRecomputeExpected,
+        });
     }
 
     const doc = await studentRepository.updateById(institutionId, id, patch);
@@ -814,6 +948,7 @@ export class StudentService {
       currentSemester: derivedCurrentSemester,
       yearOfStudy: derivedYearOfStudy,
     });
+    await this.syncExpectedGraduationForStudents(institutionId, input.ids);
     await this.audit('student.updated', actor, institutionId, null, {
       bulk: true,
       action: 'assign_semester',

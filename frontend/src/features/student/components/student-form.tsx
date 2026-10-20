@@ -12,7 +12,12 @@ import {
   Input,
   Spinner,
 } from '@learnova/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { usePrograms } from '@/features/institution';
+import {
+  computeExpectedGraduationDateIso,
+  DEFAULT_PROGRAM_DURATION_YEARS,
+} from '@/features/student/utils/expected-graduation';
 import {
   AcademicYearSelect,
   BatchSelect,
@@ -82,7 +87,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
     emergencyContactPhone: initial?.emergencyContactPhone ?? '',
     admissionDate: initial?.admissionDate?.slice(0, 10) ?? '',
     expectedGraduationDate: initial?.expectedGraduationDate?.slice(0, 10) ?? '',
-    programDuration: String(initial?.programDuration ?? ''),
+    programDuration: String(initial?.programDuration ?? DEFAULT_PROGRAM_DURATION_YEARS),
     yearOfStudy: String(initial?.yearOfStudy ?? ''),
     currentSemester: String(initial?.currentSemester ?? ''),
     campusId: initial?.campusId ?? '',
@@ -103,6 +108,43 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
   });
   const [error, setError] = useState<string | null>(null);
   const [credentials, setCredentials] = useState<StudentCredentials | null>(null);
+  const programsQuery = usePrograms({ limit: 200 });
+
+  useEffect(() => {
+    const year = Number(form.yearOfStudy);
+    if (!form.yearOfStudy.trim() || Number.isNaN(year) || year < 1) return;
+    const fromProgram = programsQuery.data?.items.find((p) => p.id === form.programId)
+      ?.durationYears;
+    const parsedDuration = form.programDuration ? Number(form.programDuration) : null;
+    const programDuration =
+      parsedDuration && !Number.isNaN(parsedDuration)
+        ? parsedDuration
+        : (fromProgram ?? DEFAULT_PROGRAM_DURATION_YEARS);
+    const expectedGraduationDate = computeExpectedGraduationDateIso({
+      yearOfStudy: year,
+      programDuration,
+      admissionDate: form.admissionDate || null,
+    });
+    setForm((prev) => {
+      if (
+        prev.expectedGraduationDate === expectedGraduationDate &&
+        prev.programDuration === String(programDuration)
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        programDuration: String(programDuration),
+        expectedGraduationDate,
+      };
+    });
+  }, [
+    form.yearOfStudy,
+    form.programId,
+    form.programDuration,
+    form.admissionDate,
+    programsQuery.data?.items,
+  ]);
 
   const set = (key: keyof typeof form, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -327,7 +369,7 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
             {field('admissionDate', 'Admission date', { type: 'date' })}
             {field('expectedGraduationDate', 'Expected graduation date', { type: 'date' })}
             {field('programDuration', 'Program duration (years)', { type: 'number' })}
-            {field('yearOfStudy', 'Year of study', { type: 'number' })}
+            {field('yearOfStudy', 'Year of study (auto-sets graduation)', { type: 'number' })}
             {field('currentSemester', 'Current semester', { type: 'number' })}
           </div>
 
