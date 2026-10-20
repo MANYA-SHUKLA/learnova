@@ -84,6 +84,14 @@ export function SuperAdminConsolePage() {
     enabled: tab === 'adminLogins',
   });
 
+  const clearAdminLoginsMutation = useMutation({
+    mutationFn: () => superadminApi.clearInstitutionAdminLogins(),
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: ['superadmin', 'institution-admin-logins'] });
+      showSuccess(t('adminLoginsCleared', { count: data.deleted }));
+    },
+  });
+
   const [provision, setProvision] = useState({ ...EMPTY_PROVISION });
 
   const provisionMutation = useMutation({
@@ -228,23 +236,44 @@ export function SuperAdminConsolePage() {
         }
         actions={
           tab === 'requests' || tab === 'adminLogins' ? (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={tab === 'requests' ? demoQuery.isFetching : adminLoginsQuery.isFetching}
-              onClick={() =>
-                void (tab === 'requests' ? demoQuery.refetch() : adminLoginsQuery.refetch())
-              }
-            >
-              <RefreshCw
-                className={cn(
-                  'mr-1.5 size-4',
-                  (tab === 'requests' ? demoQuery.isFetching : adminLoginsQuery.isFetching) &&
-                    'animate-spin',
-                )}
-              />
-              {t('refresh')}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {tab === 'adminLogins' && loginItems.length > 0 ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-danger/40 text-danger hover:bg-danger/10"
+                  disabled={clearAdminLoginsMutation.isPending}
+                  onClick={() => {
+                    if (!window.confirm(t('adminLoginsClearConfirm'))) return;
+                    void clearAdminLoginsMutation.mutateAsync();
+                  }}
+                >
+                  {clearAdminLoginsMutation.isPending ? (
+                    <Spinner size="sm" className="mr-1.5" />
+                  ) : (
+                    <Trash2 className="mr-1.5 size-4" />
+                  )}
+                  {t('adminLoginsClear')}
+                </Button>
+              ) : null}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={tab === 'requests' ? demoQuery.isFetching : adminLoginsQuery.isFetching}
+                onClick={() =>
+                  void (tab === 'requests' ? demoQuery.refetch() : adminLoginsQuery.refetch())
+                }
+              >
+                <RefreshCw
+                  className={cn(
+                    'mr-1.5 size-4',
+                    (tab === 'requests' ? demoQuery.isFetching : adminLoginsQuery.isFetching) &&
+                      'animate-spin',
+                  )}
+                />
+                {t('refresh')}
+              </Button>
+            </div>
           ) : null
         }
       />

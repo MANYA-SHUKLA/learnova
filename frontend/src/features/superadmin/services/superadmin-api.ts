@@ -48,6 +48,10 @@ export const superadminApi = {
     );
   },
 
+  clearInstitutionAdminLogins() {
+    return apiClient.delete<{ deleted: number }>('/super-admin/institution-admin-logins');
+  },
+
   listDemoRequests(params?: { page?: number; status?: string }) {
     const search = new URLSearchParams();
     if (params?.page) search.set('page', String(params.page));

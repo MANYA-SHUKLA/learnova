@@ -21,6 +21,7 @@ import { sendInstitutionAdminCredentialsEmail } from '../../mail/institution-adm
 import { demoRequestService } from './demo-request.service.js';
 import type { ActorContext } from '../institution/institution.service.js';
 import { UserModel } from '../../models/user.model.js';
+import { AuditAuthLogModel } from '../../models/audit-auth-log.model.js';
 import { institutionAuditRepository } from '../../repositories/institution/index.js';
 import { resolveProvisionIdentifiers } from './provision-campus.helpers.js';
 import { purgeInstitutionData } from './purge-institution.js';
@@ -79,6 +80,25 @@ export class SuperAdminService {
       }),
     );
     return { items, meta: pageMeta(result.total, result.page, result.limit) };
+  }
+
+  /** Removes institution-admin login rows from `audit_auth_logs` (UI history only). */
+  async clearInstitutionAdminLogins(actor: ActorContext) {
+    assertSuperAdmin(actor);
+    const role = await roleRepository.findByName('institution_admin');
+    if (!role) {
+      return { deleted: 0 };
+    }
+    const users = await UserModel.find({ roleId: role._id }).select('_id').lean();
+    const userIds = users.map((u) => u._id);
+    if (userIds.length === 0) {
+      return { deleted: 0 };
+    }
+    const result = await AuditAuthLogModel.deleteMany({
+      event: 'user.login',
+      userId: { $in: userIds },
+    }).exec();
+    return { deleted: result.deletedCount ?? 0 };
   }
 
   async provisionCampus(input: ProvisionCampusInput, actor: ActorContext) {

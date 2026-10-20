@@ -62,6 +62,15 @@ export async function listInstitutionAdminLogins(req: Request, res: Response, ne
   }
 }
 
+export async function clearInstitutionAdminLogins(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await superAdminService.clearInstitutionAdminLogins(actorFrom(req));
+    sendSuccess(res, data, { requestId: req.requestId });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function confirmDemoRequest(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await demoRequestService.confirm(

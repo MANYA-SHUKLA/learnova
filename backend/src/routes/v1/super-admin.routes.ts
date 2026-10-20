@@ -42,6 +42,13 @@ superAdminRoutes.get(
   platformController.listInstitutionAdminLogins,
 );
 
+superAdminRoutes.delete(
+  '/institution-admin-logins',
+  ...superAuth,
+  requirePermission(PERMISSIONS.AUDIT_READ),
+  platformController.clearInstitutionAdminLogins,
+);
+
 superAdminRoutes.post(
   '/demo-requests/:id/confirm',
   ...superAuth,
