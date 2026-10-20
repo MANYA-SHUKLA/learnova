@@ -4,43 +4,31 @@
  */
 
 import '../config/load-env.js';
-import mongoose from 'mongoose';
 import { connectMongo, disconnectMongo } from '../database/index.js';
-import { hashPassword } from '../security/index.js';
-import { roleRepository } from '../repositories/auth/index.js';
+import { env } from '../config/env.js';
+import { userRepository } from '../repositories/auth/index.js';
 import { logger } from '../utils/logger/index.js';
+import { seedInstitutionAdminUser } from '../seeds/institution-admin.seed.js';
 
-const PASS = process.env.SMOKE_ADMIN_PASSWORD ?? 'Admin@Test1';
+const PASS = process.env.SMOKE_ADMIN_PASSWORD ?? env.INSTITUTION_ADMIN_PASSWORD;
 
 async function main(): Promise<void> {
   const institutionId = process.env.SEED_INSTITUTION_ID?.trim();
   if (!institutionId) throw new Error('SEED_INSTITUTION_ID required');
 
   await connectMongo();
-  const db = mongoose.connection.db!;
-  const iid = new mongoose.Types.ObjectId(institutionId);
-  const adminRole = await roleRepository.findByName('institution_admin');
-  if (!adminRole) throw new Error('institution_admin role missing — run seed:auth');
+  await seedInstitutionAdminUser(institutionId);
+  const admin = await userRepository.findByEmail(env.PLATFORM_ADMIN_EMAIL.toLowerCase());
+  if (!admin) throw new Error('Institution admin seed failed');
 
-  const admin = await db.collection('users').findOne({ institutionId: iid, roleId: adminRole._id });
-  if (!admin) throw new Error('No institution_admin user for JNU');
-
-  const passwordHash = await hashPassword(PASS);
-  await db.collection('users').updateOne(
-    { _id: admin._id },
-    {
-      $set: {
-        passwordHash,
-        mustChangePassword: false,
-        isActive: true,
-        failedLoginAttempts: 0,
-        lockedUntil: null,
-      },
-    },
+  logger.info({ email: admin.email }, 'SOE institution admin ready');
+  console.log(
+    JSON.stringify({
+      institutionLogin: '/login',
+      email: admin.email,
+      password: PASS,
+    }),
   );
-
-  logger.info({ email: admin.email }, 'Admin password set for local testing');
-  console.log(JSON.stringify({ email: admin.email, password: PASS }));
   await disconnectMongo();
 }
 

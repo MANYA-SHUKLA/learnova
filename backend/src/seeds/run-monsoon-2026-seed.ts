@@ -18,13 +18,13 @@ import {
   StudentModel,
   TimetableModel,
   TimetableSlotModel,
-  UserModel,
 } from '../models/index.js';
 import { connectMongo, disconnectMongo } from '../database/index.js';
 import { hashPassword } from '../security/index.js';
-import { roleRepository, userRepository } from '../repositories/auth/index.js';
+import { userRepository } from '../repositories/auth/index.js';
 import { provisionLoginUser } from '../services/users/provision-login-user.js';
 import { logger } from '../utils/logger/index.js';
+import { seedInstitutionAdminUser } from './institution-admin.seed.js';
 import {
   COURSE_TITLES,
   DEMO_PASSWORD,
@@ -104,23 +104,7 @@ async function main(): Promise<void> {
   await connectMongo();
   const institutionOid = new Types.ObjectId(institutionId);
 
-  const adminRole = await roleRepository.findByName('institution_admin');
-  if (!adminRole) throw new Error('Run seed:auth first');
-
-  const adminUser = await UserModel.findOne({
-    institutionId: institutionOid,
-    roleId: adminRole._id,
-    deletedAt: null,
-  }).lean();
-  if (adminUser?.email) {
-    await ensurePassword(
-      adminUser.email,
-      adminUser.firstName,
-      adminUser.lastName,
-      'institution_admin',
-      institutionId,
-    );
-  }
+  await seedInstitutionAdminUser(institutionId);
 
   const departments = new Map<string, Types.ObjectId>();
   for (const spec of [

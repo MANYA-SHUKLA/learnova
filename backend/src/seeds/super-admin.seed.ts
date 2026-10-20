@@ -7,7 +7,7 @@ import { roleRepository, userRepository } from '../repositories/auth/index.js';
  */
 export async function seedSuperAdminUser(): Promise<void> {
   const email = env.SUPER_ADMIN_EMAIL.toLowerCase();
-  const password = env.SUPER_ADMIN_PASSWORD ?? 'Pass1234';
+  const password = env.SUPER_ADMIN_PASSWORD;
 
   const role = await roleRepository.findByName('super_admin');
   if (!role) {

@@ -16,7 +16,7 @@ const DEFAULT_PORTAL = {
     'Accounts are created by the institute; there is no public student registration.',
     'Forgot your password? Contact the academic office or use Forgot password on the sign-in page.',
   ],
-  supportEmail: 'shuklamanya99@gmail.com',
+  supportEmail: 'work.shuklamanya@gmail.com',
   officeLabel: 'Academic office',
   officialCredit: 'Official academic portal — School of Engineering, Jawaharlal Nehru University.',
   developerCredit: 'System developed by Manya Shukla · Learnova',

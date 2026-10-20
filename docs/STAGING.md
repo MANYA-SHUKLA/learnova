@@ -71,7 +71,8 @@ Demo logins (after seed): see README — admin / faculty.demo / student.demo.
 
 | Role | Login | Smoke paths |
 | --- | --- | --- |
-| **Institution Admin** | `shuklamanya99@gmail.com` | Dashboard, courses, gradebook, certificates, reports, notifications |
+| **Institution Admin (SOE)** | `work.shuklamanya@gmail.com` / `Pass1234` at `/login` | Dashboard, courses, gradebook, certificates, reports, notifications |
+| **Super admin** | `shuklamanya99@gmail.com` / `Pass1234` at `/superadmin/login` | Console, demo queue, campus provisioning |
 | **Faculty** | `faculty.demo@learnova.test` | Assignments, quizzes, gradebook, reports |
 | **Student** | `student.demo@learnova.test` | Courses, grades, certificates, notifications |
 

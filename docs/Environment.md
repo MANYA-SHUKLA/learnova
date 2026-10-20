@@ -57,9 +57,10 @@ Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
 | `MAIL_DRIVER` | no | `console` | `console` \| `smtp` \| `ses` |
 | `MAIL_FROM` | no | `shuklamanya99@gmail.com` | From address |
 | `SMTP_HOST` | no | — | SMTP host when driver=smtp |
-| `PLATFORM_ADMIN_EMAIL` | no | `work.shuklamanya@gmail.com` | SOE / campus ops inbox (demo confirmation copies) |
-| `SUPER_ADMIN_EMAIL` | no | `shuklamanya99@gmail.com` | Console super admin seed + new demo request notifications |
-| `SUPER_ADMIN_PASSWORD` | no | — | Local seed password (default `Pass1234` in seed script if unset) |
+| `PLATFORM_ADMIN_EMAIL` | no | `work.shuklamanya@gmail.com` | SOE institution admin login (`/login`) + ops inbox |
+| `INSTITUTION_ADMIN_PASSWORD` | no | `Pass1234` | SOE institution admin seed password |
+| `SUPER_ADMIN_EMAIL` | no | `shuklamanya99@gmail.com` | Super admin login (`/superadmin/login`) + demo alerts |
+| `SUPER_ADMIN_PASSWORD` | no | `Pass1234` | Super admin seed password |
 | `DEFAULT_INSTITUTION_SLUG` | no | — | Default slug for `GET /public/portal` without `?slug=` |
 
 ### Feature flags (optional)
