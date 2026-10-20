@@ -16,6 +16,7 @@ export interface FacultyRecord {
 
 export interface CourseRecord {
   id: string;
+  courseCode?: string | null;
   title: string;
   credits: number;
   facultyIds: string[];

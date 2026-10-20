@@ -5,6 +5,7 @@ import {
   termWindowsForDate,
 } from '../../utils/timetable/academic-calendar.js';
 import { archiveLegacyYearSections } from './archive-legacy-year-sections.js';
+import { mergeJointTimetableSlots } from './merge-joint-timetable-slots.js';
 import { pruneMinimalOrgStructure } from './prune-minimal-org-structure.js';
 
 /**
@@ -78,6 +79,7 @@ export async function syncSemesterCalendar(
   await syncSectionTermStatus(term, institutionOid);
   await archiveLegacyYearSections(institutionId);
   await pruneMinimalOrgStructure(institutionId);
+  await mergeJointTimetableSlots(institutionId);
 }
 
 /**

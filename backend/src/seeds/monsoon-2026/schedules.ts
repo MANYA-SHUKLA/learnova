@@ -38,7 +38,7 @@ const SEM1_ECE = s(
   ['mon', 0, 'EN103', 'SV', 'JC BOSE'],
   ['mon', 1, 'EN102', 'KK', 'JC BOSE'],
   ['mon', 2, 'EN102', 'KK', 'JC BOSE'],
-  ['tue', 0, 'EN104N', 'AKJ', 'JC BOSE'],
+  ['mon', 3, 'EN104N', 'AKJ', 'JC BOSE'],
   ['tue', 1, 'EN201', 'AK/LKS', 'JC BOSE'],
   ['tue', 2, 'EN201', 'AK/LKS', 'JC BOSE'],
   ['tue', 4, 'EN103', 'SV', 'JC BOSE'],

@@ -22,7 +22,6 @@ import {
   type ActorContext,
 } from './timetable.service.js';
 import {
-  DEFAULT_PERIODS,
   DEFAULT_WORKING_DAYS,
   type CourseRecord,
   type FacultyRecord,
@@ -32,6 +31,13 @@ import {
   settleTimetable,
   uniqueDays,
 } from './timetable-settler.js';
+import {
+  allowedCourseCodesForSemester,
+  catalogSummaryForSemester,
+  JNU_SOE_GENERATION_RULES,
+  JNU_SOE_MONSOON_PERIODS,
+  JNU_UNVERIFIED_COURSE_CODES,
+} from './jnu-soe-monsoon-2026.js';
 
 function requireTenant(actor: ActorContext): string {
   if (!actor.institutionId) throw new ForbiddenError('Institution context required');
@@ -52,6 +58,7 @@ function facultyDisplayName(row: {
 
 function buildPrompt(input: {
   semesterName: string;
+  semesterNumber: number;
   academicYearName: string;
   classYear: number;
   termLabel: string;
@@ -73,6 +80,7 @@ function buildPrompt(input: {
   }));
   const compactCourses = input.courses.map((row) => ({
     id: row.id,
+    courseCode: row.courseCode ?? null,
     title: row.title,
     credits: row.credits,
     department: row.departmentId ? input.departments.get(row.departmentId) ?? null : null,
@@ -86,26 +94,21 @@ function buildPrompt(input: {
   }));
 
   return [
-    'You are scheduling a college weekly class timetable for ONE semester only.',
-    `Semester: ${input.semesterName}. Class year ${input.classYear} of 4. Term window: ${input.termLabel}. Academic year: ${input.academicYearName}.`,
-    'Class years are 1 to 4. Odd semesters (1, 3, 5, 7) run July–December. Even semesters (2, 4, 6, 8) run January–May.',
-    'Do not place Semester 1 and Semester 2, or any odd semester with an even semester, in this timetable.',
-    'Honor assignedFacultyId. A year class is taught by several teachers. Do not give every subject in the year to one or two people.',
-    'Odd and even terms run in different months, so a teacher may teach in both. The same term still cannot double-book a teacher.',
+    'You are scheduling a JNU School of Engineering B.Tech weekly timetable for ONE semester only.',
+    JNU_SOE_GENERATION_RULES,
+    `Semester: ${input.semesterName} (number ${input.semesterNumber}). Class year ${input.classYear} of 4. Term: ${input.termLabel}. Academic year: ${input.academicYearName}.`,
+    'Official course catalogue for this semester number:',
+    catalogSummaryForSemester(input.semesterNumber),
     'Use only the provided ids. Do not invent ids, emails, or people.',
-    'Your job is faculty assignment only. The server will place day, time, and room using campus rules.',
-    'Return one assignment per course in the catalog. Use only courseId and facultyId from the catalog.',
-    'Pick the best teacher for each course. Spread load across faculty. Honor assignedFacultyId unless admin notes say otherwise.',
-    'Courses with the same title for different programs (CSE and ECE) are one combined class and must use the same facultyId.',
+    'Your job is faculty assignment only. The server places day, time, and room and enforces no faculty/room conflicts.',
+    'Return one assignment per course in the LMS catalog below. Use only courseId and facultyId from that catalog.',
+    'Match faculty to the official catalogue names when possible. Shared CSE/ECE courses must use the same facultyId.',
     'Sessions per course per section = max(2, min(4, credits or 2)). The server schedules that many weekly sessions.',
-    'Campus constraints for the server scheduler: Mon–Fri only;',
-    `periods ${JSON.stringify(input.periods)};`,
-    'only 3 rooms (ELC Class 1, ELC Class 2, ELC Class 3); no more than 3 classes at once;',
-    'no faculty double-booking in the same term.',
+    `Campus grid periods: ${JSON.stringify(input.periods)}.`,
+    'Rooms: ELC Class 1, ELC Class 2, ELC Class 3 — max three parallel classes.',
     input.notes ? `Admin notes: ${input.notes}` : '',
-    'Return JSON only with shape: {"assignments":[{"courseId":"","facultyId":""}]}',
-    'Do not return slots, times, rooms, names, or invented ids.',
-    'Catalog:',
+    'Return JSON only: {"assignments":[{"courseId":"","facultyId":""}]}',
+    'LMS catalog (ids for this institution):',
     JSON.stringify({
       faculty: compactFaculty,
       courses: compactCourses,
@@ -133,6 +136,14 @@ export class TimetableGeneratorService {
       .exec();
     if (!semester) throw new NotFoundError('Semester not found');
 
+    const semesterNumber = Number(semester.number);
+    const progressionSemesters = new Set([1, 3, 5, 7, 9]);
+    if (!progressionSemesters.has(semesterNumber)) {
+      throw new ValidationError(
+        'JNU SOE generator supports B.Tech progression semesters I, III, V, VII and IX only',
+      );
+    }
+
     const semesterYearId = String(semester.academicYearId);
     if (input.academicYearId && input.academicYearId !== semesterYearId) {
       throw new ValidationError('academicYearId does not match the selected semester');
@@ -147,14 +158,16 @@ export class TimetableGeneratorService {
       .lean()
       .exec();
 
-    const [courseDocs, facultyDocs, sectionDocs, departmentDocs] = await Promise.all([
+    const allowedCodes = allowedCourseCodesForSemester(semesterNumber);
+
+    const [courseDocsRaw, facultyDocs, sectionDocsRaw, departmentDocs] = await Promise.all([
       CourseModel.find({
         institutionId: oid(institutionId),
         deletedAt: null,
         status: { $in: ['published', 'review', 'scheduled'] },
         semesterIds: oid(input.semesterId),
       })
-        .select('title credits facultyIds coordinatorId programIds departmentId category')
+        .select('courseCode title credits facultyIds coordinatorId programIds departmentId category')
         .lean()
         .exec(),
       FacultyModel.find({
@@ -171,6 +184,7 @@ export class TimetableGeneratorService {
         semesterId: oid(input.semesterId),
         deletedAt: null,
         status: 'active',
+        name: /^B\.Tech /,
       })
         .select('name programId')
         .lean()
@@ -184,11 +198,22 @@ export class TimetableGeneratorService {
         .exec(),
     ]);
 
+    const courseDocs = courseDocsRaw.filter((doc) => {
+      const code = String(doc.courseCode ?? '').toUpperCase();
+      if (JNU_UNVERIFIED_COURSE_CODES.has(code)) return false;
+      if (allowedCodes && code && !allowedCodes.has(code)) return false;
+      return true;
+    });
+
+    const sectionDocs = sectionDocsRaw;
+
     if (sectionDocs.length === 0) {
-      throw new ValidationError('No active sections found for this semester');
+      throw new ValidationError('No active B.Tech sections found for this semester');
     }
     if (courseDocs.length === 0) {
-      throw new ValidationError('No courses linked to this semester');
+      throw new ValidationError(
+        'No eligible B.Tech courses linked to this semester (check course codes against the official catalogue)',
+      );
     }
     if (facultyDocs.length === 0) {
       throw new ValidationError('No active faculty found to assign courses');
@@ -196,6 +221,7 @@ export class TimetableGeneratorService {
 
     const courses: CourseRecord[] = courseDocs.map((doc) => ({
       id: String(doc._id),
+      courseCode: doc.courseCode as string,
       title: doc.title as string,
       credits: Number(doc.credits ?? 0),
       facultyIds: ((doc.facultyIds as Types.ObjectId[] | undefined) ?? []).map(String),
@@ -223,8 +249,8 @@ export class TimetableGeneratorService {
       departmentDocs.map((doc) => [String(doc._id), doc.name as string]),
     );
 
-    const workingDays = uniqueDays(DEFAULT_WORKING_DAYS);
-    const periods = DEFAULT_PERIODS;
+    const workingDays = uniqueDays([...DEFAULT_WORKING_DAYS]);
+    const periods = [...JNU_SOE_MONSOON_PERIODS];
 
     const sameTermSemesters = await SemesterModel.find({
       institutionId: oid(institutionId),
@@ -270,8 +296,9 @@ export class TimetableGeneratorService {
         const raw = await generateGeminiJson({
           prompt: buildPrompt({
             semesterName: semester.name,
+            semesterNumber,
             academicYearName: academicYear?.name ?? semesterYearId,
-            classYear: classYearForSemesterNumber(Number(semester.number)),
+            classYear: classYearForSemesterNumber(semesterNumber),
             termLabel: semesterWindowLabel(String(semester.term)),
             notes: input.notes,
             workingDays,
@@ -309,6 +336,12 @@ export class TimetableGeneratorService {
     }
 
     const warnings = [...settled.warnings];
+    const droppedCourses = courseDocsRaw.length - courseDocs.length;
+    if (droppedCourses > 0) {
+      warnings.push(
+        `${droppedCourses} course(s) skipped (not in the official B.Tech catalogue for this semester, or unverified codes EN711/EN714).`,
+      );
+    }
     if (!isGeminiConfigured()) {
       warnings.unshift(
         'AI is off or not configured (set ENABLE_AI=true and GEMINI_API_KEY). Timetable was built with the local scheduler.',

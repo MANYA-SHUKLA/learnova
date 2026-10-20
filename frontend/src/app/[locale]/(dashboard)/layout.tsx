@@ -51,49 +51,61 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
     }
   }, [isLoading, isAuthenticated, user, onChangePasswordPage, pathname, router, roleAllowed]);
 
-  if (!layoutMounted || isLoading || !isAuthenticated || !user) {
-    return <SessionLoadingShell message="Loading your session…" />;
+  const shell = (message: string) => (
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <SessionLoadingShell message={message} />
+    </div>
+  );
+
+  if (isLoading || !isAuthenticated || !user) {
+    return shell('Loading your session…');
   }
 
   if (user.mustChangePassword && !onChangePasswordPage) {
-    return <SessionLoadingShell message="Redirecting…" />;
+    return shell('Redirecting…');
   }
 
   if (!roleAllowed) {
     return (
-      <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-3 bg-background px-4">
-        <Card className="max-w-md rounded-2xl shadow-soft-md">
-          <CardContent className="space-y-2 pt-6 text-center">
-            <p className="text-base font-medium text-foreground">Access denied</p>
-            <p className="text-sm text-muted-foreground">
-              Your account does not have access to this area. Redirecting to your dashboard…
-            </p>
-            <Spinner size="md" className="mx-auto mt-2" />
-          </CardContent>
-        </Card>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-3 bg-background px-4">
+          <Card className="max-w-md rounded-2xl shadow-soft-md">
+            <CardContent className="space-y-2 pt-6 text-center">
+              <p className="text-base font-medium text-foreground">Access denied</p>
+              <p className="text-sm text-muted-foreground">
+                Your account does not have access to this area. Redirecting to your dashboard…
+              </p>
+              <Spinner size="md" className="mx-auto mt-2" />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   if (user.mustChangePassword && onChangePasswordPage) {
     return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <div className="flex-1">{children}</div>
-        <MadeWithLoveFooter />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-screen flex-col bg-background">
+          <div className="flex-1">{children}</div>
+          <MadeWithLoveFooter />
+        </div>
       </div>
     );
   }
 
   if (isSuperAdminArea) {
     return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <div className="flex-1">{children}</div>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-screen flex-col bg-background">
+          <div className="flex-1">{children}</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <AppShell className="min-h-0 flex-1">{children}</AppShell>
       <MadeWithLoveFooter />
     </div>

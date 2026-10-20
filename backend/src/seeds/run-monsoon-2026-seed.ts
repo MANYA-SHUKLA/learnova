@@ -424,7 +424,7 @@ async function main(): Promise<void> {
           continue;
         }
 
-        slotDocs.push({
+        const slotPayload = {
           institutionId: institutionOid,
           semesterId: semester.id,
           timetableId: timetable._id,
@@ -438,9 +438,23 @@ async function main(): Promise<void> {
           facultyId: faculty.id,
           facultyName: faculty.fullName,
           room,
-          status: 'active',
+          status: 'active' as const,
           deletedAt: null,
-        });
+        };
+        const mergeKey = `${day}|${period.startTime}|${period.endTime}|${faculty.id}|${String(courseId)}|${room.trim().toLowerCase()}`;
+        const existing = slotDocs.find(
+          (row) =>
+            `${row.dayOfWeek}|${row.startTime}|${row.endTime}|${row.facultyId}|${String(row.courseId)}|${String(row.room).trim().toLowerCase()}` ===
+            mergeKey,
+        );
+        if (existing) {
+          const names = String(existing.sectionName).split(' + ').map((s) => s.trim());
+          if (!names.includes(plan.sectionLabel)) {
+            existing.sectionName = `${existing.sectionName} + ${plan.sectionLabel}`;
+          }
+          continue;
+        }
+        slotDocs.push(slotPayload);
       }
     }
 
