@@ -636,8 +636,10 @@ export class InstitutionService {
       'batch.created',
     );
   }
-  listBatches = (query: OrgListQuery, actor: ActorContext) =>
-    this.listTenantResource(batchRepository, actor, query);
+  listBatches = async (query: OrgListQuery, actor: ActorContext) => {
+    if (actor.institutionId) await syncSemesterCalendar(actor.institutionId);
+    return this.listTenantResource(batchRepository, actor, query);
+  };
   getBatch = (id: string, actor: ActorContext) =>
     this.getTenantResource(batchRepository, actor, id);
   updateBatch = (id: string, input: UpdateBatchInput, actor: ActorContext) =>

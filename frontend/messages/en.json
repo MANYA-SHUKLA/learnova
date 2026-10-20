@@ -1237,12 +1237,12 @@
       "sections": {
         "title": "Sections",
         "singular": "Section",
-        "description": "Class sections by program and semester (e.g. B.Tech ECE Sem VII). Legacy “Year N” rows are removed automatically. Odd-term sections are active Jul–Dec; even-term sections activate in January."
+        "description": "One row per program + semester (e.g. B.Tech ECE Sem VII for 4th-year Monsoon). You only need B.Tech CSE/ECE for daily use — M.Tech/Ph.D rows are removed if empty. Current term sections show as Active."
       },
       "batches": {
         "title": "Batches",
         "singular": "Batch",
-        "description": "Student cohorts by program and intake year."
+        "description": "Optional intake cohort (e.g. B.Tech 2026). Create only when you assign students to a batch — not required for every program."
       },
       "settings": {
         "title": "Institution settings",

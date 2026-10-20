@@ -98,6 +98,15 @@ export class StudentRepository {
     }).exec();
   }
 
+  async findByIds(institutionId: string, ids: string[]): Promise<StudentDocument[]> {
+    if (ids.length === 0) return [];
+    return StudentModel.find({
+      _id: { $in: ids.map((id) => toObjectId(id)) },
+      institutionId: toObjectId(institutionId),
+      deletedAt: null,
+    }).exec();
+  }
+
   async findByIdIncludingDeleted(
     institutionId: string,
     id: string,

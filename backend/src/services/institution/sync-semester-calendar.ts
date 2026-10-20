@@ -5,6 +5,7 @@ import {
   termWindowsForDate,
 } from '../../utils/timetable/academic-calendar.js';
 import { archiveLegacyYearSections } from './archive-legacy-year-sections.js';
+import { pruneMinimalOrgStructure } from './prune-minimal-org-structure.js';
 
 /**
  * Marks the term that contains `now` as active and the other term as inactive.
@@ -76,6 +77,7 @@ export async function syncSemesterCalendar(
 
   await syncSectionTermStatus(term, institutionOid);
   await archiveLegacyYearSections(institutionId);
+  await pruneMinimalOrgStructure(institutionId);
 }
 
 /**

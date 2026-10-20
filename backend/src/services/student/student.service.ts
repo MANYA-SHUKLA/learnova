@@ -171,6 +171,43 @@ export class StudentService {
     }
   }
 
+  /** Section is scoped to one program + semester (e.g. B.Tech CSE Sem V, not ECE). */
+  private async assertSectionMatchesStudent(
+    institutionId: string,
+    sectionId: string | null | undefined,
+    student: { programId?: string | null; semesterId?: string | null },
+  ) {
+    if (!sectionId) return;
+    const section = await SectionModel.findOne({
+      _id: sectionId,
+      institutionId: new Types.ObjectId(institutionId),
+      deletedAt: null,
+      status: { $ne: 'archived' },
+    })
+      .select('programId semesterId name')
+      .lean()
+      .exec();
+    if (!section) {
+      throw new ValidationError('Invalid section');
+    }
+    if (
+      student.programId &&
+      String(section.programId) !== student.programId
+    ) {
+      throw new ValidationError(
+        `Section "${section.name}" is not for this student's degree program (e.g. CSE vs ECE)`,
+      );
+    }
+    if (
+      student.semesterId &&
+      String(section.semesterId) !== student.semesterId
+    ) {
+      throw new ValidationError(
+        `Section "${section.name}" is for a different semester — use the section for this student's term (e.g. 3rd year / Sem V)`,
+      );
+    }
+  }
+
   private async audit(
     event: Parameters<typeof studentRepository.logAudit>[0]['event'],
     actor: ActorContext,
@@ -202,6 +239,11 @@ export class StudentService {
         'Student with same student ID, admission number, or email already exists',
       );
     }
+
+    await this.assertSectionMatchesStudent(institutionId, input.sectionId, {
+      programId: input.programId ?? null,
+      semesterId: input.semesterId ?? null,
+    });
 
     const fullName = buildFullName(input.firstName, input.middleName, input.lastName);
     const doc = await studentRepository.create({
@@ -368,6 +410,25 @@ export class StudentService {
     }
     if (input.batchId !== undefined) {
       patch.batchId = input.batchId ? new Types.ObjectId(input.batchId) : null;
+    }
+
+    const resolvedProgramId =
+      input.programId !== undefined
+        ? input.programId
+        : existing.programId
+          ? String(existing.programId)
+          : null;
+    const resolvedSemesterId =
+      input.semesterId !== undefined
+        ? input.semesterId
+        : existing.semesterId
+          ? String(existing.semesterId)
+          : null;
+    if (input.sectionId !== undefined) {
+      await this.assertSectionMatchesStudent(institutionId, input.sectionId, {
+        programId: resolvedProgramId,
+        semesterId: resolvedSemesterId,
+      });
     }
 
     const firstName = input.firstName ?? existing.firstName;
@@ -666,6 +727,16 @@ export class StudentService {
 
   async bulkAssignSection(input: StudentBulkAssignSectionInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    const students = await studentRepository.findByIds(institutionId, input.ids);
+    if (students.length !== input.ids.length) {
+      throw new NotFoundError('One or more students not found');
+    }
+    for (const student of students) {
+      await this.assertSectionMatchesStudent(institutionId, input.sectionId, {
+        programId: student.programId ? String(student.programId) : null,
+        semesterId: student.semesterId ? String(student.semesterId) : null,
+      });
+    }
     const modified = await studentRepository.bulkAssignSection(
       institutionId,
       input.ids,

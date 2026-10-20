@@ -72,6 +72,7 @@ export default function BatchesPage() {
       columns={columns}
       fields={fields}
       listQuery={useBatches}
+      defaultStatusFilter="active"
       createMutation={useCreateBatchMutation}
       updateMutation={useUpdateBatchMutation}
       archiveMutation={useArchiveBatchMutation}

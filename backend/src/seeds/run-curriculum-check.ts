@@ -552,6 +552,7 @@ async function main(): Promise<void> {
   let occupied: OccupiedSlot[] = [];
   for (const semesterNumber of [7, 5, 3, 1]) {
     const semester = semesterByNumber.get(semesterNumber)!;
+    const year = Math.ceil(semesterNumber / 2);
     const courseDocs = await CourseModel.find({
       institutionId: institutionOid,
       semesterIds: semester._id,

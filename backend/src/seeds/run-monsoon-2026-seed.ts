@@ -35,7 +35,10 @@ import {
   type RawSlot,
   type SectionPlan,
 } from './monsoon-2026/constants.js';
-import { SECTION_PLANS } from './monsoon-2026/schedules.js';
+import { BTECH_SECTION_PLANS, SECTION_PLANS } from './monsoon-2026/schedules.js';
+
+const activeSectionPlans =
+  process.env.SEED_MONSOON_ALL_PROGRAMS === '1' ? SECTION_PLANS : BTECH_SECTION_PLANS;
 
 const ACADEMIC_YEAR_NAME = '2026-2027';
 
@@ -196,7 +199,9 @@ async function main(): Promise<void> {
     { $set: { isActive: false } },
   );
 
-  const semesterNumbers = [...new Set(SECTION_PLANS.map((p) => p.semesterNumber))].sort((a, b) => a - b);
+  const semesterNumbers = [...new Set(activeSectionPlans.map((p) => p.semesterNumber))].sort(
+    (a, b) => a - b,
+  );
   const semesterByNumber = new Map<number, { id: Types.ObjectId; name: string }>();
 
   for (const number of semesterNumbers) {
@@ -351,7 +356,7 @@ async function main(): Promise<void> {
   }
 
   const slotsBySemester = new Map<number, SectionPlan[]>();
-  for (const plan of SECTION_PLANS) {
+  for (const plan of activeSectionPlans) {
     const list = slotsBySemester.get(plan.semesterNumber) ?? [];
     list.push(plan);
     slotsBySemester.set(plan.semesterNumber, list);

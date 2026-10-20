@@ -302,6 +302,7 @@ const PHD_SEM1 = s(
   ['thu', 7, 'EN705', 'MS', 'RAMANUJAN'],
 );
 
+/** Full grid (B.Tech + M.Tech + Ph.D). Set SEED_MONSOON_ALL_PROGRAMS=1 to seed all. */
 export const SECTION_PLANS: SectionPlan[] = [
   { sectionLabel: 'B.Tech CSE Sem I', programCode: 'BT-CSE', semesterNumber: 1, slots: SEM1_CSE },
   { sectionLabel: 'B.Tech ECE Sem I', programCode: 'BT-ECE', semesterNumber: 1, slots: SEM1_ECE },
@@ -321,3 +322,8 @@ export const SECTION_PLANS: SectionPlan[] = [
   { sectionLabel: 'B.Tech CSE Sem IX', programCode: 'BT-CSE', semesterNumber: 9, slots: SEM9_CSE },
   { sectionLabel: 'B.Tech ECE Sem IX', programCode: 'BT-ECE', semesterNumber: 9, slots: SEM9_ECE },
 ];
+
+/** Default Monsoon seed: B.Tech CSE/ECE only (one section per running semester). */
+export const BTECH_SECTION_PLANS = SECTION_PLANS.filter((p) =>
+  p.programCode.startsWith('BT-'),
+);
