@@ -34,7 +34,6 @@ export default function FacultyStudentDirectoryPage() {
   const listFilters = useMemo(
     () => ({
       q: search || undefined,
-      status: 'active' as const,
       sortBy: 'fullName',
       sortOrder: 'asc' as const,
     }),
@@ -154,23 +153,44 @@ export default function FacultyStudentDirectoryPage() {
                     cell: (row) => <span className="tabular-nums">{row.studentId}</span>,
                   },
                   {
-                    id: 'phone',
-                    header: 'Phone',
-                    cell: (row) => row.phone ?? '—',
-                  },
-                  {
-                    id: 'guardian',
-                    header: 'Guardian',
+                    id: 'branch',
+                    header: tInst('columns.branch'),
                     cell: (row) => (
-                      <span className="text-sm text-muted-foreground">
-                        {row.guardianName ?? row.guardianPhone ?? '—'}
+                      <span className="text-sm">
+                        {row.programId ? labels.program(row.programId) : tInst('columns.unassigned')}
                       </span>
                     ),
                   },
                   {
+                    id: 'yearOfStudy',
+                    header: tInst('columns.yearOfStudy'),
+                    cell: (row) =>
+                      row.yearOfStudy != null ? (
+                        <span className="tabular-nums">Year {row.yearOfStudy}</span>
+                      ) : (
+                        tInst('columns.unassigned')
+                      ),
+                  },
+                  {
+                    id: 'semester',
+                    header: 'Sem',
+                    cell: (row) => {
+                      if (row.currentSemester != null) {
+                        return <span className="tabular-nums">Sem {row.currentSemester}</span>;
+                      }
+                      const term = labels.semester(row.semesterId);
+                      return term && term !== '—' ? term : tInst('columns.unassigned');
+                    },
+                  },
+                  {
+                    id: 'batch',
+                    header: 'Batch',
+                    cell: (row) => labels.batch(row.batchId) || tInst('columns.unassigned'),
+                  },
+                  {
                     id: 'section',
                     header: 'Section',
-                    cell: (row) => labels.section(row.sectionId) || '—',
+                    cell: (row) => labels.section(row.sectionId) || tInst('columns.unassigned'),
                   },
                   {
                     id: 'status',

@@ -2217,7 +2217,7 @@
         "title": "Students",
         "description": "Search learners in your courses by name, ID, phone, guardian, and other profile fields.",
         "directory": "Student directory",
-        "directoryDescription": "Results are limited to students enrolled in courses you teach.",
+        "directoryDescription": "All students in your institution with branch, year, semester, and batch.",
         "searchPlaceholder": "Search name, ID, email, phone, guardian…",
         "searchAction": "Search",
         "viewProfile": "View details",

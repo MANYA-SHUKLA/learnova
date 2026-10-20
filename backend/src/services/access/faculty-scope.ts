@@ -107,11 +107,18 @@ export async function facultyCanAccessCourse(
 
 export async function facultyCanAccessStudent(
   institutionId: string,
-  email: string,
+  _email: string,
   studentId: string,
 ): Promise<boolean> {
-  const allowed = await resolveFacultyEnrolledStudentIds(institutionId, email);
-  return allowed.some((id) => String(id) === studentId);
+  const student = await StudentModel.findOne({
+    _id: oid(studentId),
+    institutionId: oid(institutionId),
+    deletedAt: null,
+  })
+    .select('_id')
+    .lean()
+    .exec();
+  return Boolean(student);
 }
 
 export async function resolveStudentSelfObjectId(
@@ -192,20 +199,13 @@ export async function buildFacultyCourseFilter(
   return filter;
 }
 
-/** Faculty student list filter — enrolled in supervised courses only. */
+/** Faculty student list — full institution directory (tenant-scoped in repository). */
 export async function buildFacultyStudentFilter(
   filter: Record<string, unknown>,
   actor: { role: string; email: string },
-  institutionId: string,
+  _institutionId: string,
 ): Promise<Record<string, unknown>> {
   if (actor.role !== 'faculty') return filter;
-
-  const studentIds = await resolveFacultyEnrolledStudentIds(institutionId, actor.email);
-  if (studentIds.length === 0) {
-    return emptyScopeFilter(filter, '_id');
-  }
-
-  filter._id = { $in: studentIds };
   return filter;
 }
 
