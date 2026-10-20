@@ -38,6 +38,13 @@ import {
   JNU_SOE_MONSOON_PERIODS,
   JNU_UNVERIFIED_COURSE_CODES,
 } from './jnu-soe-monsoon-2026.js';
+import { JNU_BTECH_PROGRESSION_SEMESTERS } from './jnu-master-instructions.js';
+import {
+  buildJnuSourceDatabase,
+  mapOfficialSlotsToProposed,
+  sourceDatabaseSummaryForSemester,
+} from './jnu-timetable-source.js';
+import { formatValidationReport, validateJnuTimetable } from './jnu-timetable-validator.js';
 
 function requireTenant(actor: ActorContext): string {
   if (!actor.institutionId) throw new ForbiddenError('Institution context required');
@@ -99,6 +106,8 @@ function buildPrompt(input: {
     `Semester: ${input.semesterName} (number ${input.semesterNumber}). Class year ${input.classYear} of 4. Term: ${input.termLabel}. Academic year: ${input.academicYearName}.`,
     'Official course catalogue for this semester number:',
     catalogSummaryForSemester(input.semesterNumber),
+    'Official locked assignments from uploaded timetable (preserve these day/time/room/faculty rows):',
+    sourceDatabaseSummaryForSemester(input.semesterNumber),
     'Use only the provided ids. Do not invent ids, emails, or people.',
     'Your job is faculty assignment only. The server places day, time, and room and enforces no faculty/room conflicts.',
     'Return one assignment per course in the LMS catalog below. Use only courseId and facultyId from that catalog.',
@@ -137,8 +146,7 @@ export class TimetableGeneratorService {
     if (!semester) throw new NotFoundError('Semester not found');
 
     const semesterNumber = Number(semester.number);
-    const progressionSemesters = new Set([1, 3, 5, 7, 9]);
-    if (!progressionSemesters.has(semesterNumber)) {
+    if (!JNU_BTECH_PROGRESSION_SEMESTERS.includes(semesterNumber as (typeof JNU_BTECH_PROGRESSION_SEMESTERS)[number])) {
       throw new ValidationError(
         'JNU SOE generator supports B.Tech progression semesters I, III, V, VII and IX only',
       );
@@ -320,6 +328,9 @@ export class TimetableGeneratorService {
       }
     }
 
+    const officialProposed = mapOfficialSlotsToProposed(semesterNumber, courses, sections, faculty);
+    const sourceUncertainties = buildJnuSourceDatabase().uncertainties;
+
     const settled = settleTimetable({
       courses,
       faculty,
@@ -327,7 +338,7 @@ export class TimetableGeneratorService {
       workingDays,
       periods,
       geminiAssignments: proposal.assignments,
-      proposedSlots: proposal.slots,
+      proposedSlots: [...officialProposed, ...proposal.slots],
       occupied,
     });
 
@@ -380,6 +391,56 @@ export class TimetableGeneratorService {
     const timetableId = String(timetable._id);
     if (existingSlotCount > 0) {
       await timetableRepository.softDeleteSlotsForTimetable(timetableId, institutionId);
+    }
+
+    const progressionSemesterIds = await SemesterModel.find({
+      institutionId: oid(institutionId),
+      number: { $in: [...JNU_BTECH_PROGRESSION_SEMESTERS] },
+      deletedAt: null,
+    })
+      .select('_id')
+      .lean()
+      .exec();
+
+    const allInstitutionSlots = await TimetableSlotModel.find({
+      institutionId: oid(institutionId),
+      semesterId: { $in: progressionSemesterIds.map((row) => row._id) },
+      status: 'active',
+      deletedAt: null,
+    })
+      .select('dayOfWeek startTime endTime facultyId facultyName sectionId sectionName room courseTitle')
+      .lean()
+      .exec();
+
+    const validationInput = [
+      ...allInstitutionSlots.map((row) => ({
+        dayOfWeek: row.dayOfWeek as TimetableDayOfWeek,
+        startTime: row.startTime as string,
+        endTime: row.endTime as string,
+        facultyId: String(row.facultyId),
+        facultyName: row.facultyName as string,
+        sectionId: String(row.sectionId),
+        sectionName: row.sectionName as string,
+        room: row.room as string,
+        courseTitle: row.courseTitle as string,
+      })),
+      ...settled.slots.map((slot) => ({
+        dayOfWeek: slot.dayOfWeek,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        facultyId: slot.facultyId,
+        facultyName: slot.facultyName,
+        sectionId: slot.sectionId,
+        sectionName: slot.sectionName,
+        room: slot.room,
+        courseTitle: slot.courseTitle,
+      })),
+    ];
+
+    const validation = validateJnuTimetable(validationInput, { uncertainties: sourceUncertainties });
+    warnings.push(formatValidationReport(validation));
+    if (!validation.valid) {
+      warnings.unshift('PROVISIONAL: Generated timetable failed JNU hard-constraint validation. Use seed data or fix conflicts before publishing.');
     }
 
     const created = await timetableRepository.createSlots(

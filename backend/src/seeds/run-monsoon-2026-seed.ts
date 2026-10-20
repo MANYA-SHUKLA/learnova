@@ -24,6 +24,10 @@ import { hashPassword } from '../security/index.js';
 import { userRepository } from '../repositories/auth/index.js';
 import { provisionLoginUser } from '../services/users/provision-login-user.js';
 import { logger } from '../utils/logger/index.js';
+import { archiveLegacyYearSections } from '../services/institution/archive-legacy-year-sections.js';
+import { mergeJointTimetableSlots } from '../services/institution/merge-joint-timetable-slots.js';
+import { pruneMinimalOrgStructure } from '../services/institution/prune-minimal-org-structure.js';
+import { syncSemesterCalendar } from '../services/institution/sync-semester-calendar.js';
 import { seedInstitutionAdminUser } from './institution-admin.seed.js';
 import {
   COURSE_TITLES,
@@ -492,6 +496,15 @@ async function main(): Promise<void> {
     );
     await ensurePassword(STUDENT_LOGIN_EMAIL, 'Gunjan', 'Gera', 'student', institutionId);
   }
+
+  // Odd Monsoon term active; archive M.Tech/Ph.D clutter when seeding B.Tech-only.
+  await syncSemesterCalendar(institutionId, new Date('2026-09-15T12:00:00+05:30'));
+  await archiveLegacyYearSections(institutionId);
+  if (process.env.SEED_MONSOON_ALL_PROGRAMS !== '1') {
+    await pruneMinimalOrgStructure(institutionId);
+  }
+  const merged = await mergeJointTimetableSlots(institutionId);
+  logger.info({ mergedJointSlots: merged }, 'Post-seed timetable merge');
 
   logger.info('Monsoon 2026 seed complete');
   logger.info(`  Admin: (institution admin email) / ${DEMO_PASSWORD}`);

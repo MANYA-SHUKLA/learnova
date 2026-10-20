@@ -3,6 +3,8 @@
  * M.Tech / Ph.D are out of scope. Do not assign EN711 / EN714 without manual verification.
  */
 
+import { JNU_MASTER_TIMETABLE_INSTRUCTIONS } from './jnu-master-instructions.js';
+
 export const JNU_SOE_MONSOON_PERIODS = [
   { startTime: '09:00', endTime: '10:00' },
   { startTime: '10:00', endTime: '11:00' },
@@ -19,24 +21,14 @@ export const JNU_SOE_WORKING_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri'] as const
 /** Course codes that appeared without a clear B.Tech programme in the source extract. */
 export const JNU_UNVERIFIED_COURSE_CODES = new Set(['EN711', 'EN714']);
 
-export const JNU_SOE_GENERATION_RULES = `
-JNU School of Engineering — Monsoon Semester 2026 timetable rules
+/** Monsoon 2026 operational summary + full master instruction for AI. */
+export const JNU_SOE_GENERATION_RULES = `${JNU_MASTER_TIMETABLE_INSTRUCTIONS}
 
-Scope: B.Tech CSE and B.Tech ECE only — semesters I, III, V, VII, IX. Exclude all M.Tech and Ph.D.
-
-Working days: Monday–Friday only.
-Time slots (8 per day, rows): 09:00–10:00, 10:00–11:00, 11:00–12:00, 12:00–13:00, 14:15–15:15, 15:15–16:15, 16:15–17:15, 17:15–18:15.
-Lunch 13:00–14:15 — never schedule classes in this break.
-
-Scheduling:
-- Separate timetables per programme and semester (one generation run = one semester, sections = B.Tech CSE Sem N and/or B.Tech ECE Sem N).
-- Preserve course codes, subject titles, faculty, rooms, and lab/tutorial labels from the official catalog.
-- Lectures, tutorials, and laboratories are distinct activities; preserve Group I / Group II for labs where applicable.
-- No faculty double-booking, no room/lab double-booking, at most three parallel classes campus-wide (ELC rooms).
-- Shared CSE+ECE subjects use the same faculty and may be one combined session when room and time match.
-- Do not invent day/time placements; the server settler places times/rooms after faculty assignment.
-- Do not assign course codes EN711 or EN714 unless an admin explicitly verifies them for B.Tech.
-- If source day/time is unknown, assign faculty only and flag for manual placement — do not guess slots.
+Monsoon 2026 implementation notes:
+- Official locked day/time/room/faculty grid is embedded from the uploaded timetable (seed schedules).
+- Server settler preserves locked slots first, then fills remaining sessions without violating hard constraints.
+- LMS AI step assigns faculty only; do not return invented slot times unless they match locked source rows.
+- Do not assign EN711 or EN714 to B.Tech unless explicitly verified.
 `.trim();
 
 type CatalogRow = { code: string; subject: string; faculty: string };
