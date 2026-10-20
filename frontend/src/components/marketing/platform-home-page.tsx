@@ -23,6 +23,22 @@ import { ApiClientError } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
 import type { PlatformMarketingI18nOverlay } from '@/lib/platform-marketing-i18n';
 
+/** Expressive card hover — lift, glow, gradient sheen (respects reduced motion). */
+const marketingCardHover = cn(
+  'group relative overflow-hidden',
+  'transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+  'hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/15',
+  'motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-sm',
+  'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit]',
+  'before:bg-gradient-to-br before:from-primary/[0.12] before:via-primary/[0.04] before:to-transparent',
+  'before:opacity-0 before:transition-opacity before:duration-500 group-hover:before:opacity-100',
+  'after:pointer-events-none after:absolute after:-right-8 after:-top-8 after:size-32 after:rounded-full',
+  'after:bg-primary/20 after:blur-2xl after:opacity-0 after:transition-opacity after:duration-700',
+  'group-hover:after:opacity-100',
+);
+
+const marketingCardInner = 'relative z-[1]';
+
 const MODULE_ICONS: Record<string, LucideIcon> = {
   lms: BookOpen,
   erp: GraduationCap,
@@ -147,9 +163,20 @@ export function PlatformHomePage({
             { value: tPlatform('stat2Value'), label: tPlatform('stat2Label') },
             { value: tPlatform('stat3Value'), label: tPlatform('stat3Label') },
           ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className="font-display text-3xl font-bold text-foreground">{stat.value}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+            <div
+              key={stat.label}
+              className={cn(
+                'rounded-2xl border border-transparent px-4 py-5 text-center',
+                marketingCardHover,
+                'hover:scale-[1.03] motion-reduce:hover:scale-100',
+              )}
+            >
+              <div className={marketingCardInner}>
+                <p className="font-display text-3xl font-bold text-foreground transition-transform duration-500 group-hover:scale-105 motion-reduce:group-hover:scale-100">
+                  {stat.value}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -168,15 +195,26 @@ export function PlatformHomePage({
             return (
               <div
                 key={key}
-                className="group rounded-2xl border border-border/80 bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
+                className={cn(
+                  'rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                  marketingCardHover,
+                  'hover:scale-[1.02] motion-reduce:hover:scale-100',
+                )}
               >
-                <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-                  <Icon className="size-5" aria-hidden />
+                <div className={marketingCardInner}>
+                  <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-500 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-md group-hover:shadow-primary/20 motion-reduce:group-hover:scale-100">
+                    <Icon
+                      className="size-5 transition-transform duration-500 group-hover:-rotate-6 motion-reduce:group-hover:rotate-0"
+                      aria-hidden
+                    />
+                  </div>
+                  <h3 className="mt-4 font-display text-base font-semibold transition-colors duration-300 group-hover:text-primary">
+                    {t(`features.${key}.title`)}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {t(`features.${key}.description`)}
+                  </p>
                 </div>
-                <h3 className="mt-4 font-display text-base font-semibold">{t(`features.${key}.title`)}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {t(`features.${key}.description`)}
-                </p>
               </div>
             );
           })}
@@ -190,9 +228,20 @@ export function PlatformHomePage({
             <h2 className="font-display text-2xl font-bold sm:text-3xl">{tPlatform('highlightsTitle')}</h2>
             <div className="mt-10 grid gap-6 md:grid-cols-3">
               {highlightFeatures.map((feature) => (
-                <div key={feature.title} className="rounded-2xl bg-background p-8 shadow-soft-md">
-                  <h3 className="font-display text-lg font-semibold">{feature.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
+                <div
+                  key={feature.title}
+                  className={cn(
+                    'rounded-2xl border border-border/60 bg-background p-8 shadow-soft-md',
+                    marketingCardHover,
+                    'hover:scale-[1.02] motion-reduce:hover:scale-100',
+                  )}
+                >
+                  <div className={marketingCardInner}>
+                    <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
+                      {feature.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -208,12 +257,23 @@ export function PlatformHomePage({
         </div>
         <ol className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
           {(['step1', 'step2', 'step3'] as const).map((step, i) => (
-            <li key={step} className="relative rounded-2xl border border-border bg-card p-6 pt-8">
-              <span className="absolute -top-3 left-6 flex size-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+            <li
+              key={step}
+              className={cn(
+                'relative rounded-2xl border border-border bg-card p-6 pt-8 shadow-sm',
+                marketingCardHover,
+                'hover:scale-[1.03] motion-reduce:hover:scale-100',
+              )}
+            >
+              <span className="absolute -top-3 left-6 z-[2] flex size-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/30 motion-reduce:group-hover:scale-100">
                 {i + 1}
               </span>
-              <h3 className="font-semibold">{tPlatform(`${step}Title`)}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{tPlatform(`${step}Body`)}</p>
+              <div className={marketingCardInner}>
+                <h3 className="font-semibold transition-colors duration-300 group-hover:text-primary">
+                  {tPlatform(`${step}Title`)}
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">{tPlatform(`${step}Body`)}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -231,12 +291,20 @@ export function PlatformHomePage({
             {outcomeKeys.map((key) => (
               <div
                 key={key}
-                className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm"
+                className={cn(
+                  'rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                  marketingCardHover,
+                  'hover:scale-[1.02] motion-reduce:hover:scale-100',
+                )}
               >
-                <h3 className="font-display text-lg font-semibold">{tPlatform(`${key}Title`)}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {tPlatform(`${key}Body`)}
-                </p>
+                <div className={cn(marketingCardInner, 'border-l-2 border-primary/0 pl-0 transition-[border-color,padding] duration-500 group-hover:border-primary group-hover:pl-3 motion-reduce:group-hover:pl-0')}>
+                  <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
+                    {tPlatform(`${key}Title`)}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {tPlatform(`${key}Body`)}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -255,18 +323,29 @@ export function PlatformHomePage({
             {testimonialKeys.map((key) => (
               <figure
                 key={key}
-                className="flex h-full flex-col rounded-2xl border border-border/80 bg-card p-6 shadow-sm"
+                className={cn(
+                  'flex h-full flex-col rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                  marketingCardHover,
+                  'hover:scale-[1.02] hover:rotate-[0.35deg] motion-reduce:hover:scale-100 motion-reduce:hover:rotate-0',
+                )}
               >
-                <blockquote className="flex-1 text-sm leading-relaxed text-foreground">
-                  <span aria-hidden className="font-display text-2xl leading-none text-primary/40">
-                    “
-                  </span>
-                  {tPlatform(`${key}Quote`)}
-                </blockquote>
-                <figcaption className="mt-5 border-t border-border/60 pt-4">
-                  <p className="font-semibold text-foreground">{tPlatform(`${key}Name`)}</p>
-                  <p className="text-sm text-muted-foreground">{tPlatform(`${key}Role`)}</p>
-                </figcaption>
+                <div className={marketingCardInner}>
+                  <blockquote className="flex-1 text-sm leading-relaxed text-foreground">
+                    <span
+                      aria-hidden
+                      className="font-display text-3xl leading-none text-primary/30 transition-all duration-500 group-hover:text-primary/60 group-hover:scale-110 motion-reduce:group-hover:scale-100"
+                    >
+                      “
+                    </span>
+                    {tPlatform(`${key}Quote`)}
+                  </blockquote>
+                  <figcaption className="mt-5 border-t border-border/60 pt-4 transition-colors duration-300 group-hover:border-primary/30">
+                    <p className="font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
+                      {tPlatform(`${key}Name`)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">{tPlatform(`${key}Role`)}</p>
+                  </figcaption>
+                </div>
               </figure>
             ))}
           </div>
@@ -293,9 +372,14 @@ export function PlatformHomePage({
             {faqItems.map((item) => (
               <details
                 key={item.title}
-                className="group rounded-2xl border border-border bg-card px-6 py-4 open:shadow-sm"
+                className={cn(
+                  'group rounded-2xl border border-border bg-card px-6 py-4 open:shadow-md open:shadow-primary/10',
+                  'transition-[transform,box-shadow,border-color] duration-300 ease-out',
+                  'hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-primary/10',
+                  'motion-reduce:hover:translate-y-0',
+                )}
               >
-                <summary className="cursor-pointer list-none font-medium marker:content-none [&::-webkit-details-marker]:hidden">
+                <summary className="cursor-pointer list-none font-medium transition-colors duration-300 marker:content-none group-hover:text-primary [&::-webkit-details-marker]:hidden">
                   {item.title}
                 </summary>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
@@ -310,7 +394,14 @@ export function PlatformHomePage({
         <div className={siteContainer('mx-auto max-w-xl')}>
           <h2 className="font-display text-3xl font-bold text-center">{tPlatform('demoTitle')}</h2>
           <p className="mt-3 text-center text-muted-foreground">{tPlatform('demoSubtitle')}</p>
-          <div className="mt-10 rounded-2xl border border-border bg-card p-8 shadow-soft-md">
+          <div
+            className={cn(
+              'mt-10 rounded-2xl border border-border bg-card p-8 shadow-soft-md',
+              marketingCardHover,
+              'hover:scale-[1.01] motion-reduce:hover:scale-100',
+            )}
+          >
+            <div className={marketingCardInner}>
             {submitted ? (
               <p className="text-center font-medium text-primary">{tPlatform('demoThanks')}</p>
             ) : (
@@ -360,6 +451,7 @@ export function PlatformHomePage({
                 </Button>
               </form>
             )}
+            </div>
           </div>
         </div>
       </section>
