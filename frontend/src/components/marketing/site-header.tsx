@@ -10,6 +10,7 @@ import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { useAuth } from '@/providers/auth-provider';
+import { campusLoginPath } from '@/lib/campus-slugs';
 import { LogoMark } from './logo-mark';
 
 const SAAS_NAV_LINKS = [
@@ -71,7 +72,7 @@ export function SiteHeader({
       : campusPortal
         ? t('signIn')
         : t('institutionLogin');
-  const campusSignInHref = campusSlug ? `/${campusSlug.toLowerCase()}/login` : '/login';
+  const campusSignInHref = campusSlug ? campusLoginPath(campusSlug) : '/login';
   const primaryCtaHref = isAuthenticated
     ? dashboardHref
     : platformMarketing

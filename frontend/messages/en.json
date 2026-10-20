@@ -707,8 +707,7 @@
       "registeredMessage": "Institution registered. Sign in as Institution Admin to finish setup.",
       "errorMessage": "Unable to sign in. Try again.",
       "campusSubtitle": "Official sign-in for {campus} — use credentials issued by your institute.",
-      "genericSubtitle": "Open your campus sign-in link (for example /your-campus/login). Generic login is not shared across institutions.",
-      "campusUrlRequired": "Use your institution’s campus sign-in URL (for example /mahi-raj/login). Each campus has its own link.",
+      "genericSubtitle": "Sign in with the email and password from your institution. You’ll be taken to the right campus workspace after login.",
       "superAdminLogin": "Super admin login"
     },
     "changePassword": {

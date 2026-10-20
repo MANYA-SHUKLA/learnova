@@ -111,7 +111,9 @@ function InstitutionLoginFormInner({
   const loginTitle = portal?.portalSettings?.portalTitle || portal?.name || t('title');
   const loginSubtitle =
     portal?.portalSettings?.portalSubtitle ||
-    (campusSlug ? t('campusSubtitle', { campus: portal?.shortName ?? campusSlug }) : t('genericSubtitle'));
+    (campusSlug
+      ? t('campusSubtitle', { campus: portal?.shortName ?? campusSlug })
+      : t('genericSubtitle'));
 
   return (
     <AuthCardShell brand="company" icon={LogIn} title={loginTitle}>
@@ -128,9 +130,6 @@ function InstitutionLoginFormInner({
           ) : null}
           {loginSubtitle ? (
             <p className="mb-4 text-center text-sm text-muted-foreground">{loginSubtitle}</p>
-          ) : null}
-          {!campusSlug ? (
-            <AuthAlert variant="error">{t('campusUrlRequired')}</AuthAlert>
           ) : null}
           {registered ? (
             <AuthAlert variant="success">{t('registeredMessage')}</AuthAlert>
@@ -160,7 +159,7 @@ function InstitutionLoginFormInner({
                 type="email"
                 autoComplete="email"
                 placeholder={t('emailPlaceholder')}
-                disabled={loginMutation.isPending || !campusSlug}
+                disabled={loginMutation.isPending}
                 className={cn(authInputClassName, 'pl-10')}
                 name={emailName}
                 ref={emailRef}
@@ -192,7 +191,7 @@ function InstitutionLoginFormInner({
             <PasswordInput
               id="password"
               autoComplete="current-password"
-              disabled={loginMutation.isPending || !campusSlug}
+              disabled={loginMutation.isPending}
               className={authInputClassName}
               {...register('password')}
             />
@@ -205,7 +204,7 @@ function InstitutionLoginFormInner({
             <input
               type="checkbox"
               className="size-4 rounded border-input"
-              disabled={loginMutation.isPending || !campusSlug}
+              disabled={loginMutation.isPending}
               {...register('rememberMe')}
             />
             {t('rememberMe')}
@@ -217,7 +216,7 @@ function InstitutionLoginFormInner({
             <Button
               type="submit"
               className={authPrimaryButtonClassName}
-              disabled={loginMutation.isPending || !campusSlug}
+              disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? (
                 <>

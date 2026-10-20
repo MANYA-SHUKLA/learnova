@@ -8,7 +8,7 @@ interface CampusSlugPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
-/** Public campus root — each institution uses its own sign-in URL. */
+/** Public campus root — forwards to shared institution sign-in (optional campus branding). */
 export default async function CampusSlugPage({ params }: CampusSlugPageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);

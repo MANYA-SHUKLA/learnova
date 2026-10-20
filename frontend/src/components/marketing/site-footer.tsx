@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { marketingContainer } from '@/lib/marketing-design';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
+import { campusLoginPath } from '@/lib/campus-slugs';
 import { LogoMark } from './logo-mark';
 
 const PRODUCT_LINKS = [
@@ -53,7 +54,7 @@ function FooterColumn({
 }
 
 function campusPortalLinks(campusSlug?: string) {
-  const loginHref = campusSlug ? `/${campusSlug.toLowerCase()}/login` : '/login';
+  const loginHref = campusSlug ? campusLoginPath(campusSlug) : '/login';
   return [
     { href: loginHref, labelKey: 'companyLinks.institutionLogin' as const },
     { href: '/contact', labelKey: 'companyLinks.contact' as const },
