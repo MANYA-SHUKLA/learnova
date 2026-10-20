@@ -41,7 +41,9 @@ import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { Link, usePathname } from '@/lib/i18n/routing';
+import { PERMISSIONS } from '@learnova/constants';
 import { useAuth } from '@/providers/auth-provider';
+import { can } from '@/lib/auth/permissions';
 import { useUIStore } from '@/stores/ui-store';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { cn } from '@/lib/utils';
@@ -232,14 +234,17 @@ function SidebarNav({
 }) {
   const pathname = usePathname();
   const t = useTranslations('dashboard.sidebar');
-  const { user } = useAuth();
-  
+  const { user, permissions } = useAuth();
+
+  const institutionConsole =
+    Boolean(user?.institutionId) && can(permissions, PERMISSIONS.INSTITUTION_READ);
+
   const navGroups =
     user?.role === 'faculty'
       ? FACULTY_NAV_GROUPS
       : user?.role === 'student'
         ? STUDENT_NAV_GROUPS
-        : user?.role === 'institution_admin'
+        : user?.role === 'institution_admin' || institutionConsole
           ? NAV_GROUPS
           : [];
 

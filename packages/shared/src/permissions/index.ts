@@ -141,6 +141,10 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'users:read',
     'users:manage',
     'audit:read',
+    'student:read',
+    'student:manage',
+    'faculty:read',
+    'faculty:manage',
   ],
   teaching_assistant: [
     'project:read',

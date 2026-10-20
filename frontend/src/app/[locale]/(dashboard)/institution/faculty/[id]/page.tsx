@@ -25,13 +25,14 @@ import {
   formatEmploymentType,
   formatFacultyStatus,
   useActivateFacultyMutation,
+  useArchiveFacultyMutation,
   useDeactivateFacultyMutation,
   useFaculty,
   useFacultyAudit,
   useFacultyPhotoUploadMutation,
 } from '@/features/faculty';
 import { ApiClientError } from '@/lib/api/client';
-import { Link } from '@/lib/i18n/routing';
+import { Link, useRouter } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function FacultyDetailPage() {
@@ -43,8 +44,10 @@ export default function FacultyDetailPage() {
   const coursesQuery = useCourseList({ page: 1, limit: 200 });
   const auditQuery = useFacultyAudit(id);
   const photoMutation = useFacultyPhotoUploadMutation();
+  const router = useRouter();
   const activateMutation = useActivateFacultyMutation();
   const deactivateMutation = useDeactivateFacultyMutation();
+  const archiveMutation = useArchiveFacultyMutation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [passwordForm, setPasswordForm] = useState({
@@ -179,6 +182,20 @@ export default function FacultyDetailPage() {
                   Activate
                 </Button>
               )}
+              {!faculty.deletedAt ? (
+                <Button
+                  type="button"
+                  variant="danger"
+                  disabled={archiveMutation.isPending}
+                  onClick={() => {
+                    void archiveMutation.mutateAsync(faculty.id).then(() => {
+                      router.push(APP_ROUTES.INSTITUTION_FACULTY);
+                    });
+                  }}
+                >
+                  Archive (left institution)
+                </Button>
+              ) : null}
             </PermissionGate>
           </div>
         </div>

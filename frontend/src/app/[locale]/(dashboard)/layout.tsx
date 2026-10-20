@@ -3,7 +3,7 @@
 import { APP_ROUTES } from '@learnova/constants';
 import { Card, CardContent, Spinner } from '@learnova/ui';
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { MadeWithLoveFooter } from '@/components/shared/made-with-love-footer';
 import { SessionLoadingShell } from '@/components/shared/session-loading-shell';
@@ -13,9 +13,14 @@ import { usePathname, useRouter } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function DashboardGroupLayout({ children }: { children: ReactNode }) {
+  const [layoutMounted, setLayoutMounted] = useState(false);
   const { isLoading, user, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    setLayoutMounted(true);
+  }, []);
 
   const onChangePasswordPage =
     pathname === APP_ROUTES.CHANGE_PASSWORD ||
@@ -51,7 +56,7 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
     }
   }, [isLoading, isAuthenticated, user, onChangePasswordPage, pathname, router, roleAllowed]);
 
-  if (isLoading || !isAuthenticated || !user) {
+  if (!layoutMounted || isLoading || !isAuthenticated || !user) {
     return <SessionLoadingShell message="Loading your session…" />;
   }
 

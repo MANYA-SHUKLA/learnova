@@ -60,7 +60,7 @@ studentRoutes.get(
   ctrl.searchStudents,
 );
 
-studentRoutes.get('/students/stats', ...manageAuth, ctrl.getStudentStats);
+studentRoutes.get('/students/stats', ...readAuth, ctrl.getStudentStats);
 
 studentRoutes.get(
   '/students/export',

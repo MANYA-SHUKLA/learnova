@@ -17,6 +17,7 @@ import {
   updateFacultySchema,
 } from '@learnova/validation';
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
+import { tenantGuard } from '../../middlewares/scope.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/faculty/faculty.controller.js';
 
@@ -24,16 +25,19 @@ const facultyRoutes = Router();
 
 const readAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.FACULTY_READ),
 ] as RequestHandler[];
 
 const writeAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.FACULTY_WRITE),
 ] as RequestHandler[];
 
 const manageAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.FACULTY_MANAGE),
 ] as RequestHandler[];
 
@@ -51,7 +55,7 @@ facultyRoutes.get(
   ctrl.searchFaculty,
 );
 
-facultyRoutes.get('/faculty/stats', ...manageAuth, ctrl.getFacultyStats);
+facultyRoutes.get('/faculty/stats', ...readAuth, ctrl.getFacultyStats);
 
 facultyRoutes.get(
   '/faculty/export',

@@ -22,6 +22,8 @@ import {
   Sparkles,
   CheckCircle2,
   Circle,
+  Users,
+  UserRound,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
@@ -63,6 +65,8 @@ import {
   usePrograms,
   useSemesters,
 } from '@/features/institution';
+import { useFacultyStats } from '@/features/faculty';
+import { useStudentStats } from '@/features/student';
 import { Link } from '@/lib/i18n/routing';
 import { isInstitutionNotFound } from '@/lib/onboarding';
 import { cn } from '@/lib/utils';
@@ -96,6 +100,8 @@ export default function InstitutionDashboardPage() {
   const semestersQuery = useSemesters(LIST_PARAMS);
   const batchesQuery = useBatches(LIST_PARAMS);
   const calendarsQuery = useAcademicCalendars(LIST_PARAMS);
+  const studentStatsQuery = useStudentStats();
+  const facultyStatsQuery = useFacultyStats();
 
   const stats = [
     {
@@ -134,6 +140,24 @@ export default function InstitutionDashboardPage() {
       href: APP_ROUTES.INSTITUTION_SEMESTERS,
       loading: semestersQuery.isLoading,
     },
+    {
+      key: 'students' as const,
+      label: t('stats.students'),
+      chartLabel: t('chart.students'),
+      value: studentStatsQuery.data?.total ?? 0,
+      icon: Users,
+      href: APP_ROUTES.INSTITUTION_STUDENTS,
+      loading: studentStatsQuery.isLoading,
+    },
+    {
+      key: 'faculty' as const,
+      label: t('stats.faculty'),
+      chartLabel: t('chart.faculty'),
+      value: facultyStatsQuery.data?.total ?? 0,
+      icon: UserRound,
+      href: APP_ROUTES.INSTITUTION_FACULTY,
+      loading: facultyStatsQuery.isLoading,
+    },
   ];
 
   const quickActions = [
@@ -160,6 +184,18 @@ export default function InstitutionDashboardPage() {
       title: t('actions.calendar.title'),
       description: t('actions.calendar.description'),
       icon: CalendarDays,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_STUDENTS_IMPORT,
+      title: t('actions.students.title'),
+      description: t('actions.students.description'),
+      icon: Users,
+    },
+    {
+      href: APP_ROUTES.INSTITUTION_FACULTY_IMPORT,
+      title: t('actions.faculty.title'),
+      description: t('actions.faculty.description'),
+      icon: UserRound,
     },
   ] as const;
 
@@ -309,11 +345,31 @@ export default function InstitutionDashboardPage() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <DashboardCapacityMetric
                   label={t('students')}
-                  value={institution.maxStudents}
+                  value={studentStatsQuery.data?.total ?? 0}
+                  hint={t('capacityOfMax', {
+                    max: (institution.maxStudents ?? 0).toLocaleString(),
+                  })}
+                  percent={
+                    institution.maxStudents
+                      ? Math.round(
+                          ((studentStatsQuery.data?.total ?? 0) / institution.maxStudents) * 100,
+                        )
+                      : 0
+                  }
                 />
                 <DashboardCapacityMetric
                   label={t('faculty')}
-                  value={institution.maxFaculty}
+                  value={facultyStatsQuery.data?.total ?? 0}
+                  hint={t('capacityOfMax', {
+                    max: (institution.maxFaculty ?? 0).toLocaleString(),
+                  })}
+                  percent={
+                    institution.maxFaculty
+                      ? Math.round(
+                          ((facultyStatsQuery.data?.total ?? 0) / institution.maxFaculty) * 100,
+                        )
+                      : 0
+                  }
                 />
               </div>
             </div>

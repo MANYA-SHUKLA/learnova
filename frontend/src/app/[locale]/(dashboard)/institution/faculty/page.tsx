@@ -30,7 +30,9 @@ import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
 import {
   ErrorState,
+  useOrgLabels,
 } from '@/features/institution';
+import { useCourseList } from '@/features/course';
 import {
   formatDesignation,
   formatEmploymentType,
@@ -81,8 +83,15 @@ export default function FacultyListPage() {
     [search, status, includeDeleted, page],
   );
 
+  const labels = useOrgLabels();
+  const coursesQuery = useCourseList({ page: 1, limit: 500 });
   const listQuery = useFacultyList(params);
   const statsQuery = useFacultyStats();
+
+  const courseLabel = (courseId: string) => {
+    const course = coursesQuery.data?.items.find((row) => row.id === courseId);
+    return course ? `${course.courseCode} — ${course.title}` : null;
+  };
   const archiveMutation = useArchiveFacultyMutation();
   const restoreMutation = useRestoreFacultyMutation();
   const bulkArchive = useBulkArchiveFacultyMutation();
@@ -332,6 +341,42 @@ export default function FacultyListPage() {
                     cell: (row) => <span className="tabular-nums">{row.employeeId}</span>,
                   },
                   {
+                    id: 'department',
+                    header: t('columns.department'),
+                    sortable: true,
+                    sortValue: (row) => labels.department(row.departmentId),
+                    cell: (row) => (
+                      <span className="text-sm">{labels.department(row.departmentId)}</span>
+                    ),
+                  },
+                  {
+                    id: 'branches',
+                    header: t('columns.branches'),
+                    cell: (row) => (
+                      <span className="text-sm text-muted-foreground">
+                        {row.programIds?.length
+                          ? labels.programs(row.programIds)
+                          : t('columns.unassigned')}
+                      </span>
+                    ),
+                  },
+                  {
+                    id: 'courses',
+                    header: t('columns.courses'),
+                    cell: (row) => {
+                      const names =
+                        row.courseIds
+                          ?.map((id) => courseLabel(id))
+                          .filter(Boolean)
+                          .join(', ') || t('columns.unassigned');
+                      return (
+                        <span className="line-clamp-2 max-w-[14rem] text-sm text-muted-foreground">
+                          {names}
+                        </span>
+                      );
+                    },
+                  },
+                  {
                     id: 'designation',
                     header: 'Designation',
                     cell: (row) => formatDesignation(row.designation, row.customDesignation),
@@ -389,6 +434,12 @@ export default function FacultyListPage() {
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {row.employeeId} · {formatDesignation(row.designation, row.customDesignation)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {labels.department(row.departmentId)}
+                        {row.programIds?.length
+                          ? ` · ${labels.programs(row.programIds)}`
+                          : ''}
                       </p>
                       <Button asChild size="sm" variant="outline" className="w-full rounded-xl">
                         <Link href={`${APP_ROUTES.INSTITUTION_FACULTY}/${row.id}`}>

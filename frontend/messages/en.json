@@ -1312,8 +1312,14 @@
         "description": "Manage faculty records, employment status, and academic assignments.",
         "addFaculty": "Add faculty",
         "directory": "Directory",
-        "directoryDescription": "Search, filter, and run bulk actions.",
+        "directoryDescription": "All faculty (20 per page — use Next/Previous or Export for the full list). Open a row for full assignments; use Edit to set degree program, branches, and courses.",
         "searchPlaceholder": "Search name, employee ID, code, email…",
+        "columns": {
+          "department": "Degree program",
+          "branches": "Branches",
+          "courses": "Courses (subjects)",
+          "unassigned": "—"
+        },
         "stats": {
           "total": "Total",
           "active": "Active",
@@ -2027,6 +2033,7 @@
       "modulesHaveRecords": "{ready} of {total} modules have records",
       "students": "Students",
       "faculty": "Faculty",
+      "capacityOfMax": "of {max} platform limit",
       "planCapacity": "Capacity",
       "planBadge": "{plan} plan",
       "noInstitutionTitle": "No institution linked",
@@ -2053,14 +2060,18 @@
         "branches": "Branches",
         "programs": "Programs",
         "academicYears": "Academic Years",
-        "semesters": "Semesters"
+        "semesters": "Semesters",
+        "students": "Students",
+        "faculty": "Faculty"
       },
       "chart": {
         "departments": "Degree programs",
         "branches": "Branches",
         "programs": "Programs",
         "years": "Years",
-        "semesters": "Semesters"
+        "semesters": "Semesters",
+        "students": "Students",
+        "faculty": "Faculty"
       },
       "actions": {
         "departments": {
@@ -2082,6 +2093,14 @@
         "calendar": {
           "title": "Calendar",
           "description": "Key dates"
+        },
+        "students": {
+          "title": "Import students",
+          "description": "CSV upload — credentials emailed on first add"
+        },
+        "faculty": {
+          "title": "Import faculty",
+          "description": "CSV upload — credentials emailed on first add"
         }
       }
     },
