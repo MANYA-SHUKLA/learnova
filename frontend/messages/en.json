@@ -2259,11 +2259,12 @@
         "eyebrow": "Learning",
         "title": "Enrollments",
         "description": "View and manage course enrollments for your assigned courses.",
-        "directory": "Enrollment requests",
-        "directoryDescription": "Approve or reject pending enrollment requests.",
+        "descriptionWithYear": "Enrollments in your courses for {year}. Pending requests can be approved below.",
+        "directory": "Course enrollments",
+        "directoryDescription": "Students enrolled in courses you teach or coordinate this academic year.",
         "searchPlaceholder": "Search student, course, enrollment number…",
         "emptyTitle": "No enrollments yet",
-        "emptyDescription": "Course enrollments will appear here once students enroll."
+        "emptyDescription": "When students are registered in your courses for this year, they will appear here."
       },
       "progress": {
         "eyebrow": "Learning",

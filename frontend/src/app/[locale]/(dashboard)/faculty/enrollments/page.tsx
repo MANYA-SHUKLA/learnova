@@ -1,6 +1,6 @@
 'use client';
 
-import { PERMISSIONS } from '@learnova/constants';
+import { PAGINATION, PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,
@@ -18,7 +18,12 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
-import { displayName, ErrorState } from '@/features/institution';
+import {
+  displayName,
+  ErrorState,
+  resolveActiveAcademicYear,
+  useAcademicYears,
+} from '@/features/institution';
 import { useCourseList } from '@/features/course';
 import { useStudentList } from '@/features/student';
 import {
@@ -46,21 +51,28 @@ export default function FacultyEnrollmentsPage() {
   const [status, setStatus] = useState<EnrollmentStatus | 'all'>('all');
   const [page, setPage] = useState(1);
 
+  const yearsQuery = useAcademicYears({ page: 1, limit: PAGINATION.MAX_LIMIT, status: 'active' });
+  const academicYear = useMemo(
+    () => resolveActiveAcademicYear(yearsQuery.data?.items ?? []),
+    [yearsQuery.data?.items],
+  );
+
   const params = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
+      ...(academicYear?.id ? { academicYearId: academicYear.id } : {}),
       page,
-      limit: 20,
+      limit: PAGINATION.MAX_LIMIT,
       sortBy: 'enrollmentDate',
       sortOrder: 'desc' as const,
     }),
-    [search, status, page],
+    [search, status, page, academicYear?.id],
   );
 
-  const listQuery = useEnrollmentList(params);
-  const coursesQuery = useCourseList({ page: 1, limit: 100 });
-  const studentsQuery = useStudentList({ page: 1, limit: 100 });
+  const listQuery = useEnrollmentList(params, !yearsQuery.isLoading);
+  const coursesQuery = useCourseList({ page: 1, limit: PAGINATION.MAX_LIMIT, status: 'published' });
+  const studentsQuery = useStudentList({ page: 1, limit: PAGINATION.MAX_LIMIT });
   const courseLabel = (id: string) =>
     displayName(
       coursesQuery.data?.items,
@@ -75,11 +87,18 @@ export default function FacultyEnrollmentsPage() {
   const rows = listQuery.data?.items ?? [];
   const meta = listQuery.data?.meta;
   const pendingCount = rows.filter((r) => r.approvalStatus === 'pending').length;
+  const yearLabel = academicYear?.name ?? null;
 
   return (
     <PermissionGate permission={PERMISSIONS.ENROLLMENT_READ} enforce>
       <DashboardPage>
-        <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
+        <PageHeader
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={
+            yearLabel ? t('descriptionWithYear', { year: yearLabel }) : t('description')
+          }
+        />
 
         {pendingCount > 0 ? (
           <Card className="rounded-xl border-primary/30 bg-primary/5 shadow-soft-sm">

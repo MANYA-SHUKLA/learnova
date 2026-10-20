@@ -34,6 +34,8 @@ import { archiveLegacyYearSections } from '../services/institution/archive-legac
 import { mergeJointTimetableSlots } from '../services/institution/merge-joint-timetable-slots.js';
 import { pruneMinimalOrgStructure } from '../services/institution/prune-minimal-org-structure.js';
 import { syncSemesterCalendar } from '../services/institution/sync-semester-calendar.js';
+import { ensureMonsoonDemoSectionStudents } from '../services/institution/ensure-monsoon-demo-students.js';
+import { syncTimetableSectionEnrollments } from '../services/institution/sync-timetable-section-enrollments.js';
 import { seedInstitutionAdminUser } from './institution-admin.seed.js';
 import {
   COURSE_TITLES,
@@ -587,6 +589,8 @@ async function main(): Promise<void> {
     logger.info({ enrollments: sem7Courses.length }, 'Demo student Sem VII enrollments ensured');
   }
 
+  await ensureMonsoonDemoSectionStudents(institutionId);
+
   // Odd Monsoon term active; archive M.Tech/Ph.D clutter when seeding B.Tech-only.
   await syncSemesterCalendar(institutionId, new Date('2026-09-15T12:00:00+05:30'));
   await archiveLegacyYearSections(institutionId);
@@ -595,6 +599,9 @@ async function main(): Promise<void> {
   }
   const merged = await mergeJointTimetableSlots(institutionId);
   logger.info({ mergedJointSlots: merged }, 'Post-seed timetable merge');
+
+  const timetableEnrollments = await syncTimetableSectionEnrollments(institutionId);
+  logger.info(timetableEnrollments, 'Timetable section enrollments synced');
 
   logger.info('Monsoon 2026 seed complete');
   logger.info(`  Admin: (institution admin email) / ${DEMO_PASSWORD}`);
