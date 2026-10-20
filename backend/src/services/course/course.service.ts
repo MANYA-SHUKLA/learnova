@@ -611,6 +611,29 @@ export class CourseService {
     return { modified };
   }
 
+  private resolveImportIds(
+    row: Record<string, string>,
+    defaults: CourseImportConfirmInput['defaults'],
+  ) {
+    const programIds = [
+      ...(defaults?.programIds ?? []),
+      ...(row.programId?.trim() ? [row.programId.trim()] : []),
+      ...(row.programIds?.split('|').map((id) => id.trim()).filter(Boolean) ?? []),
+    ];
+    const semesterIds = [
+      ...(defaults?.semesterIds ?? []),
+      ...(row.semesterId?.trim() ? [row.semesterId.trim()] : []),
+      ...(row.semesterIds?.split('|').map((id) => id.trim()).filter(Boolean) ?? []),
+    ];
+    const departmentId =
+      row.departmentId?.trim() || defaults?.departmentId?.trim() || null;
+    return {
+      programIds: [...new Set(programIds)],
+      semesterIds: [...new Set(semesterIds)],
+      departmentId,
+    };
+  }
+
   previewImport(rows: Array<Record<string, string>>) {
     const errors: Array<{ row: number; field?: string; message: string }> = [];
     let validRows = 0;

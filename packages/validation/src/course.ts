@@ -182,9 +182,16 @@ export const courseBulkAssignSemesterSchema = z.object({
   mode: z.enum(['replace', 'append']).optional().default('append'),
 });
 
+export const courseImportDefaultsSchema = z.object({
+  programIds: z.array(objectIdField).max(20).optional(),
+  semesterIds: z.array(objectIdField).max(20).optional(),
+  departmentId: objectIdField.optional(),
+});
+
 export const courseImportConfirmSchema = z.object({
   rows: z.array(z.record(z.string(), z.string())).min(1).max(2000),
   dryRun: z.boolean().optional().default(false),
+  defaults: courseImportDefaultsSchema.optional(),
 });
 
 export const courseExportQuerySchema = z.object({
