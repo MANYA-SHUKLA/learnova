@@ -8,28 +8,45 @@ export function formatYearOfStudy(year: number | null | undefined): string | nul
 export function buildStudentAcademicSummary(
   student: Pick<
     Student,
-    'yearOfStudy' | 'currentSemester' | 'programId' | 'batchId' | 'semesterId'
+    | 'yearOfStudy'
+    | 'currentSemester'
+    | 'programId'
+    | 'batchId'
+    | 'semesterId'
+    | 'sectionId'
+    | 'academicYearId'
   > | null | undefined,
   labels: {
     program: (id: string | null | undefined) => string;
     batch: (id: string | null | undefined) => string;
     semester: (id: string | null | undefined) => string;
+    section: (id: string | null | undefined) => string;
+    year: (id: string | null | undefined) => string;
   },
 ): string | null {
   if (!student) return null;
   const parts: string[] = [];
-  const year = formatYearOfStudy(student.yearOfStudy);
-  if (year) parts.push(year);
+  const yearOfStudy = formatYearOfStudy(student.yearOfStudy);
+  if (yearOfStudy) parts.push(yearOfStudy);
+
+  const section = labels.section(student.sectionId);
+  if (section && section !== '—') parts.push(section);
+
   if (student.currentSemester != null) {
     parts.push(`Sem ${student.currentSemester}`);
+  } else {
+    const term = labels.semester(student.semesterId);
+    if (term && term !== '—') parts.push(term);
   }
+
+  const academicYear = labels.year(student.academicYearId);
+  if (academicYear && academicYear !== '—') parts.push(academicYear);
+
   const program = labels.program(student.programId);
   if (program && program !== '—') parts.push(program);
+
   const batch = labels.batch(student.batchId);
   if (batch && batch !== '—') parts.push(batch);
-  const term = labels.semester(student.semesterId);
-  if (term && term !== '—' && !parts.some((p) => p.includes(term))) {
-    parts.push(term);
-  }
+
   return parts.length > 0 ? parts.join(' · ') : null;
 }

@@ -37,6 +37,7 @@ import {
   type FormField,
   type ResourceColumn,
   useAcademicYears,
+  useOrgLabels,
   useSemesters,
   useSections,
 } from '@/features/institution';
@@ -113,6 +114,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const isStudentReader = !isAdmin && user?.role === 'student';
   const facultyProfileQuery = useMyFacultyProfile(isFacultyReader);
   const studentProfileQuery = useMyStudentProfile(isStudentReader);
+  const orgLabels = useOrgLabels();
   const t = useTranslations('dashboard.timetable');
   const tDays = useTranslations('dashboard.timetable.days');
   const tCommon = useTranslations('common');
@@ -128,24 +130,31 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const [generateResult, setGenerateResult] = useState<GenerateTimetableResult | null>(null);
 
-  const { data: yearsData } = useAcademicYears({ limit: 100, status: 'active' }, isAdmin);
+  const studentAcademicYearId = studentProfileQuery.data?.academicYearId ?? '';
+
+  const { data: yearsData } = useAcademicYears(
+    { limit: 100, status: 'active' },
+    isAdmin || isStudentReader,
+  );
   const selectedYearId = useMemo(() => {
+    if (isStudentReader && studentAcademicYearId) return studentAcademicYearId;
     if (academicYearId) return academicYearId;
     const years = yearsData?.items ?? [];
     return years.find((year) => year.isActive)?.id || years[0]?.id || '';
-  }, [academicYearId, yearsData?.items]);
+  }, [academicYearId, isStudentReader, studentAcademicYearId, yearsData?.items]);
 
   const { data: semestersData } = useSemesters(
     { limit: 100, status: 'active', academicYearId: selectedYearId || undefined },
-    isAdmin,
+    isAdmin || isStudentReader,
   );
 
   const publishedTimetablesQuery = useTimetables(
     { status: 'published', limit: 50 },
-    !isAdmin,
+    isFacultyReader,
   );
 
   const readerSemesterId = studentProfileQuery.data?.semesterId ?? '';
+  const readerSectionId = studentProfileQuery.data?.sectionId ?? '';
 
   useEffect(() => {
     if (!isStudentReader || !readerSemesterId) return;
@@ -153,13 +162,20 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   }, [isStudentReader, readerSemesterId]);
 
   useEffect(() => {
+    if (!isStudentReader || !studentAcademicYearId) return;
+    setAcademicYearId(studentAcademicYearId);
+  }, [isStudentReader, studentAcademicYearId]);
+
+  useEffect(() => {
     if (!isStudentReader) return;
-    const sectionId = studentProfileQuery.data?.sectionId;
-    if (sectionId) setSectionFilter(sectionId);
-  }, [isStudentReader, studentProfileQuery.data?.sectionId]);
+    if (readerSectionId) setSectionFilter(readerSectionId);
+  }, [isStudentReader, readerSectionId]);
 
   const selectedSemesterId = useMemo(() => {
     if (!isAdmin) {
+      if (isStudentReader) {
+        return readerSemesterId || semesterId || '';
+      }
       if (semesterId) return semesterId;
       if (readerSemesterId) return readerSemesterId;
       const published = publishedTimetablesQuery.data?.items ?? [];
@@ -175,7 +191,14 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       .sort((a, b) => a.number - b.number);
     if (inSession[0]) return inSession[0].id;
     return [...items].sort((a, b) => a.number - b.number)[0]?.id || '';
-  }, [semesterId, isAdmin, readerSemesterId, publishedTimetablesQuery.data?.items, semestersData?.items]);
+  }, [
+    semesterId,
+    isAdmin,
+    isStudentReader,
+    readerSemesterId,
+    publishedTimetablesQuery.data?.items,
+    semestersData?.items,
+  ]);
 
   const readerFacultyId = facultyProfileQuery.data?.id ?? '';
 
@@ -185,7 +208,11 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       limit: 1,
       ...(!isAdmin ? { status: 'published' as const } : {}),
     },
-    Boolean(selectedSemesterId) && (isAdmin || !publishedTimetablesQuery.isLoading || Boolean(semesterId)),
+    Boolean(selectedSemesterId) &&
+      (isAdmin ||
+        isStudentReader ||
+        !publishedTimetablesQuery.isLoading ||
+        Boolean(semesterId)),
   );
   const timetable = timetablesQuery.data?.items[0] ?? null;
 
@@ -513,7 +540,11 @@ export function TimetablePage({ mode }: TimetablePageProps) {
 
   const semesterOptions = isAdmin
     ? [...(semestersData?.items ?? [])].sort((a, b) => a.number - b.number)
-    : readSemesterOptions;
+    : isStudentReader
+      ? (semestersData?.items ?? [])
+          .filter((row) => row.id === readerSemesterId)
+          .map((row) => ({ id: row.id, name: row.name }))
+      : readSemesterOptions;
 
   const selectedSemesterName = useMemo(() => {
     const fromOptions = semesterOptions.find((s) => s.id === selectedSemesterId)?.name;
@@ -621,7 +652,12 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           <div className="min-w-0">
             <CardTitle>{t('gridTitle')}</CardTitle>
             <CardDescription>
-              {t('tableDescription')} {t('gridSchoolViewHint')}
+              {isStudentReader
+                ? t('studentClassViewHint', {
+                    section: orgLabels.section(readerSectionId) || t('yourSection'),
+                    year: selectedYearName || t('yourAcademicYear'),
+                  })
+                : `${t('tableDescription')} ${t('gridSchoolViewHint')}`}
             </CardDescription>
           </div>
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
@@ -659,27 +695,40 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               )}
             </select>
             ) : null}
-            <select
-              aria-label={t('selectSemester')}
-              className="flex h-10 w-56 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-              value={selectedSemesterId}
-              disabled={!isAdmin && publishedTimetablesQuery.isLoading}
-              onChange={(e) => {
-                setSemesterId(e.target.value);
-                setPage(1);
-                setGenerateResult(null);
-              }}
-            >
-              {semesterOptions.length === 0 ? (
-                <option value="">{t('selectSemester')}</option>
-              ) : (
-                semesterOptions.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))
-              )}
-            </select>
+            {isStudentReader ? (
+              <>
+                <div className="flex h-10 min-w-[9rem] shrink-0 items-center rounded-lg border border-input bg-muted/30 px-3 text-sm">
+                  <span className="truncate">{selectedYearName || t('yourAcademicYear')}</span>
+                </div>
+                <div className="flex h-10 min-w-[12rem] shrink-0 items-center rounded-lg border border-input bg-muted/30 px-3 text-sm">
+                  <span className="truncate font-medium">
+                    {selectedSemesterName || t('selectSemester')}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <select
+                aria-label={t('selectSemester')}
+                className="flex h-10 w-56 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                value={selectedSemesterId}
+                disabled={!isAdmin && publishedTimetablesQuery.isLoading}
+                onChange={(e) => {
+                  setSemesterId(e.target.value);
+                  setPage(1);
+                  setGenerateResult(null);
+                }}
+              >
+                {semesterOptions.length === 0 ? (
+                  <option value="">{t('selectSemester')}</option>
+                ) : (
+                  semesterOptions.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))
+                )}
+              </select>
+            )}
             {isAdmin ? (
               <select
                 aria-label={t('columns.day')}
@@ -698,23 +747,28 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                 ))}
               </select>
             ) : null}
-            <select
-              aria-label={t('allSections')}
-              className="flex h-10 w-40 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-              value={sectionFilter}
-              disabled={isStudentReader && Boolean(studentProfileQuery.data?.sectionId)}
-              onChange={(e) => {
-                setSectionFilter(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="">{t('allSections')}</option>
-              {sectionOptions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            {isStudentReader ? (
+              <div className="flex h-10 min-w-[10rem] shrink-0 items-center rounded-lg border border-input bg-muted/30 px-3 text-sm">
+                <span className="truncate">{orgLabels.section(readerSectionId) || t('yourSection')}</span>
+              </div>
+            ) : (
+              <select
+                aria-label={t('allSections')}
+                className="flex h-10 w-40 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                value={sectionFilter}
+                onChange={(e) => {
+                  setSectionFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">{t('allSections')}</option>
+                {sectionOptions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            )}
             <Input
               className="h-10 w-72 shrink-0"
               placeholder={t('searchPlaceholder')}
@@ -749,7 +803,14 @@ export function TimetablePage({ mode }: TimetablePageProps) {
             </div>
           ) : null}
 
-          {timetablesQuery.isLoading ? (
+          {isStudentReader &&
+          !studentProfileQuery.isLoading &&
+          (!readerSectionId || !readerSemesterId) ? (
+            <EmptyState
+              title={t('emptyTitle')}
+              description={t('studentProfileIncomplete')}
+            />
+          ) : timetablesQuery.isLoading ? (
             <Skeleton className="h-48 w-full rounded-xl" />
           ) : timetablesQuery.isError ? (
             <ErrorState message={t('loadFailed')} />

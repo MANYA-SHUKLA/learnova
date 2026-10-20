@@ -20,7 +20,9 @@ Each successful row runs the normal **create** path:
 
 ### Optional columns
 
-`rollNumber,registrationNumber,middleName,phone,campusId,schoolId,departmentId,programId,academicYearId,semesterId,sectionId,batchId,yearOfStudy,currentSemester,admissionDate,status,scholarship,hostelResident,transportRequired,guardianName,guardianPhone`
+`rollNumber,registrationNumber,middleName,phone,campusId,schoolId,departmentId,programId,programCode,academicYearId,academicYearName,semesterId,semesterName,sectionId,sectionName,batchId,batchName,yearOfStudy,currentSemester,admissionDate,status,scholarship,hostelResident,transportRequired,guardianName,guardianPhone`
+
+Human-readable columns (`sectionName`, `programCode`, `semesterName`, `academicYearName`, `batchName`) are matched case-insensitively within the institution. When `sectionName` or `semesterId` is set, `programId`, `semesterId`, `academicYearId`, `yearOfStudy`, and `currentSemester` are filled automatically when omitted.
 
 ### Duplicate detection
 

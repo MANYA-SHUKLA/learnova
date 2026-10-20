@@ -15,7 +15,7 @@ import type {
   UpdateStudentInput,
   UpdateStudentProfileInput,
 } from '@learnova/validation';
-import { INSTITUTION_MAX_STUDENTS } from '@learnova/constants';
+import { INSTITUTION_MAX_STUDENTS, REGEX } from '@learnova/constants';
 import { createStudentSchema } from '@learnova/validation';
 import { eventBus } from '../../events/index.js';
 import { DepartmentModel } from '../../models/department.model.js';
@@ -23,6 +23,7 @@ import { ProgramModel } from '../../models/program.model.js';
 import { BatchModel } from '../../models/batch.model.js';
 import { SectionModel } from '../../models/section.model.js';
 import { SemesterModel } from '../../models/semester.model.js';
+import { AcademicYearModel } from '../../models/academic-year.model.js';
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
 import {
@@ -824,8 +825,23 @@ export class StudentService {
     return { modified };
   }
 
-  private parseImportRow(row: Record<string, string>) {
-    return createStudentSchema.parse({
+  private escapeRegex(value: string) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private isObjectId(value: string | undefined | null): boolean {
+    const trimmed = value?.trim();
+    return Boolean(trimmed && REGEX.OBJECT_ID.test(trimmed));
+  }
+
+  private importOptionalObjectId(value: string | undefined): string | null {
+    const trimmed = value?.trim();
+    if (!trimmed) return null;
+    return REGEX.OBJECT_ID.test(trimmed) ? trimmed : null;
+  }
+
+  private importRowToCreatePayload(row: Record<string, string>) {
+    return {
       studentId: row.studentId?.trim() || undefined,
       admissionNumber: row.admissionNumber?.trim() || undefined,
       rollNumber: row.rollNumber || null,
@@ -835,14 +851,14 @@ export class StudentService {
       lastName: row.lastName,
       email: row.email,
       phone: row.phone || null,
-      campusId: row.campusId || null,
-      schoolId: row.schoolId || null,
-      departmentId: row.departmentId || null,
-      programId: row.programId || null,
-      academicYearId: row.academicYearId || null,
-      semesterId: row.semesterId || null,
-      sectionId: row.sectionId || null,
-      batchId: row.batchId || null,
+      campusId: this.importOptionalObjectId(row.campusId),
+      schoolId: this.importOptionalObjectId(row.schoolId),
+      departmentId: this.importOptionalObjectId(row.departmentId),
+      programId: this.importOptionalObjectId(row.programId),
+      academicYearId: this.importOptionalObjectId(row.academicYearId),
+      semesterId: this.importOptionalObjectId(row.semesterId),
+      sectionId: this.importOptionalObjectId(row.sectionId),
+      batchId: this.importOptionalObjectId(row.batchId),
       yearOfStudy: row.yearOfStudy ? Number(row.yearOfStudy) : null,
       currentSemester: row.currentSemester ? Number(row.currentSemester) : null,
       admissionDate: row.admissionDate || null,
@@ -852,7 +868,156 @@ export class StudentService {
       transportRequired: row.transportRequired === 'true' || row.transportRequired === '1',
       guardianName: row.guardianName || null,
       guardianPhone: row.guardianPhone || null,
-    });
+    };
+  }
+
+  private importResolutionErrors(
+    raw: Record<string, string>,
+    resolved: Record<string, string>,
+  ): string | null {
+    if (raw.sectionName?.trim() && !this.isObjectId(resolved.sectionId)) {
+      return `Unknown section: ${raw.sectionName.trim()}`;
+    }
+    if (raw.programCode?.trim() && !this.isObjectId(resolved.programId)) {
+      return `Unknown program code: ${raw.programCode.trim()}`;
+    }
+    if (raw.semesterName?.trim() && !this.isObjectId(resolved.semesterId)) {
+      return `Unknown semester: ${raw.semesterName.trim()}`;
+    }
+    if (raw.academicYearName?.trim() && !this.isObjectId(resolved.academicYearId)) {
+      return `Unknown academic year: ${raw.academicYearName.trim()}`;
+    }
+    if (raw.batchName?.trim() && !this.isObjectId(resolved.batchId)) {
+      return `Unknown batch: ${raw.batchName.trim()}`;
+    }
+    return null;
+  }
+
+  private async resolveImportRowAcademics(
+    institutionId: string,
+    row: Record<string, string>,
+  ): Promise<Record<string, string>> {
+    const out = { ...row };
+    const instOid = new Types.ObjectId(institutionId);
+
+    out.sectionId = this.importOptionalObjectId(out.sectionId) ?? '';
+    out.programId = this.importOptionalObjectId(out.programId) ?? '';
+    out.semesterId = this.importOptionalObjectId(out.semesterId) ?? '';
+    out.academicYearId = this.importOptionalObjectId(out.academicYearId) ?? '';
+    out.batchId = this.importOptionalObjectId(out.batchId) ?? '';
+
+    type SectionLean = {
+      _id: Types.ObjectId;
+      programId: Types.ObjectId;
+      semesterId: Types.ObjectId;
+    };
+
+    let section: SectionLean | null = null;
+    if (this.isObjectId(out.sectionId)) {
+      section = await SectionModel.findOne({
+        _id: out.sectionId,
+        institutionId: instOid,
+        deletedAt: null,
+      })
+        .select('_id programId semesterId')
+        .lean<SectionLean>()
+        .exec();
+    }
+    if (!section && out.sectionName?.trim()) {
+      const name = out.sectionName.trim();
+      section = await SectionModel.findOne({
+        institutionId: instOid,
+        deletedAt: null,
+        name: { $regex: new RegExp(`^${this.escapeRegex(name)}$`, 'i') },
+      })
+        .select('_id programId semesterId')
+        .lean<SectionLean>()
+        .exec();
+    }
+    if (section) {
+      out.sectionId = String(section._id);
+      if (!out.programId) out.programId = String(section.programId);
+      if (!out.semesterId) out.semesterId = String(section.semesterId);
+    }
+
+    if (!this.isObjectId(out.programId) && out.programCode?.trim()) {
+      const program = await ProgramModel.findOne({
+        institutionId: instOid,
+        deletedAt: null,
+        code: out.programCode.trim().toUpperCase(),
+      })
+        .select('_id')
+        .lean()
+        .exec();
+      if (program) out.programId = String(program._id);
+    }
+
+    if (!this.isObjectId(out.semesterId) && out.semesterName?.trim()) {
+      const semester = await SemesterModel.findOne({
+        institutionId: instOid,
+        deletedAt: null,
+        name: { $regex: new RegExp(`^${this.escapeRegex(out.semesterName.trim())}$`, 'i') },
+      })
+        .select('_id number academicYearId')
+        .lean()
+        .exec();
+      if (semester) out.semesterId = String(semester._id);
+    }
+
+    if (!this.isObjectId(out.academicYearId) && out.academicYearName?.trim()) {
+      const year = await AcademicYearModel.findOne({
+        institutionId: instOid,
+        deletedAt: null,
+        name: { $regex: new RegExp(`^${this.escapeRegex(out.academicYearName.trim())}$`, 'i') },
+      })
+        .select('_id')
+        .lean()
+        .exec();
+      if (year) out.academicYearId = String(year._id);
+    }
+
+    if (!this.isObjectId(out.batchId) && out.batchName?.trim()) {
+      const batchFilter: Record<string, unknown> = {
+        institutionId: instOid,
+        deletedAt: null,
+        name: { $regex: new RegExp(`^${this.escapeRegex(out.batchName.trim())}$`, 'i') },
+      };
+      if (this.isObjectId(out.programId)) {
+        batchFilter.programId = new Types.ObjectId(out.programId);
+      }
+      const batch = await BatchModel.findOne(batchFilter).select('_id').lean().exec();
+      if (batch) out.batchId = String(batch._id);
+    }
+
+    if (this.isObjectId(out.semesterId)) {
+      const semester = await SemesterModel.findOne({
+        _id: out.semesterId,
+        institutionId: instOid,
+        deletedAt: null,
+      })
+        .select('number academicYearId')
+        .lean()
+        .exec();
+      if (semester) {
+        if (!this.isObjectId(out.academicYearId)) {
+          out.academicYearId = String(semester.academicYearId);
+        }
+        if (!out.yearOfStudy?.trim()) {
+          out.yearOfStudy = String(
+            Math.min(10, Math.max(1, Math.ceil(semester.number / 2))),
+          );
+        }
+        if (!out.currentSemester?.trim()) {
+          out.currentSemester = String(semester.number);
+        }
+      }
+    }
+
+    return out;
+  }
+
+  private parseImportRow(row: Record<string, string>) {
+    return createStudentSchema.parse(this.importRowToCreatePayload(row));
   }
 
   async previewImport(
@@ -870,34 +1035,13 @@ export class StudentService {
 
     for (let index = 0; index < rows.length; index += 1) {
       const row = rows[index]!;
-      const parsed = createStudentSchema.safeParse({
-        studentId: row.studentId?.trim() || undefined,
-        admissionNumber: row.admissionNumber?.trim() || undefined,
-        rollNumber: row.rollNumber || null,
-        registrationNumber: row.registrationNumber || null,
-        firstName: row.firstName,
-        middleName: row.middleName || null,
-        lastName: row.lastName,
-        email: row.email,
-        phone: row.phone || null,
-        campusId: row.campusId || null,
-        schoolId: row.schoolId || null,
-        departmentId: row.departmentId || null,
-        programId: row.programId || null,
-        academicYearId: row.academicYearId || null,
-        semesterId: row.semesterId || null,
-        sectionId: row.sectionId || null,
-        batchId: row.batchId || null,
-        yearOfStudy: row.yearOfStudy ? Number(row.yearOfStudy) : null,
-        currentSemester: row.currentSemester ? Number(row.currentSemester) : null,
-        admissionDate: row.admissionDate || null,
-        status: row.status || 'active',
-        scholarship: row.scholarship === 'true' || row.scholarship === '1',
-        hostelResident: row.hostelResident === 'true' || row.hostelResident === '1',
-        transportRequired: row.transportRequired === 'true' || row.transportRequired === '1',
-        guardianName: row.guardianName || null,
-        guardianPhone: row.guardianPhone || null,
-      });
+      const resolved = await this.resolveImportRowAcademics(institutionId, row);
+      const resolutionError = this.importResolutionErrors(row, resolved);
+      if (resolutionError) {
+        errors.push({ row: index + 1, message: resolutionError });
+        continue;
+      }
+      const parsed = createStudentSchema.safeParse(this.importRowToCreatePayload(resolved));
 
       if (!parsed.success) {
         for (const issue of parsed.error.issues) {
@@ -1015,7 +1159,12 @@ export class StudentService {
     try {
       for (let i = 0; i < input.rows.length; i += 1) {
         const row = input.rows[i]!;
-        const parsed = this.parseImportRow(row);
+        const resolved = await this.resolveImportRowAcademics(institutionId, row);
+        const resolutionError = this.importResolutionErrors(row, resolved);
+        if (resolutionError) {
+          throw new ValidationError(resolutionError);
+        }
+        const parsed = this.parseImportRow(resolved);
 
         const byEmail = await studentRepository.findByEmail(institutionId, parsed.email);
         if (byEmail && mode === 'upsert') {

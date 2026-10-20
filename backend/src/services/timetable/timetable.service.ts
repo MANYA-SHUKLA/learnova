@@ -181,15 +181,47 @@ async function ensureTimetableAccess(
   return doc;
 }
 
+async function studentSemesterScope(
+  institutionId: string,
+  email: string,
+): Promise<{ semesterId: string; sectionId: string } | null> {
+  const student = await StudentModel.findOne({
+    institutionId: new Types.ObjectId(institutionId),
+    email: email.toLowerCase(),
+    deletedAt: null,
+  })
+    .select('semesterId sectionId')
+    .lean()
+    .exec();
+  if (!student?.semesterId || !student.sectionId) return null;
+  return {
+    semesterId: String(student.semesterId),
+    sectionId: String(student.sectionId),
+  };
+}
+
 export class TimetableService {
   async list(query: TimetableListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     if (actor.role === 'institution_admin') {
       await syncSemesterCalendar(institutionId);
     }
+
+    let semesterId = query.semesterId;
+    if (actor.role === 'student') {
+      const scope = await studentSemesterScope(institutionId, actor.email);
+      if (!scope) {
+        return { items: [], meta: pageMeta(0, query.page, query.limit) };
+      }
+      if (semesterId && semesterId !== scope.semesterId) {
+        return { items: [], meta: pageMeta(0, query.page, query.limit) };
+      }
+      semesterId = scope.semesterId;
+    }
+
     const skip = (query.page - 1) * query.limit;
     const { docs, total } = await timetableRepository.list(institutionId, {
-      semesterId: query.semesterId,
+      semesterId,
       status: query.status,
       skip,
       limit: query.limit,
@@ -245,13 +277,41 @@ export class TimetableService {
     if (actor.role === 'institution_admin') {
       await syncSemesterCalendar(institutionId);
     }
-    await ensureTimetableAccess(timetableId, institutionId, actor.role);
+    const timetable = await ensureTimetableAccess(timetableId, institutionId, actor.role);
+
+    let sectionId = query.sectionId;
+    let facultyId = query.facultyId;
+
+    if (actor.role === 'student') {
+      const scope = await studentSemesterScope(institutionId, actor.email);
+      if (!scope) {
+        return { items: [], meta: pageMeta(0, query.page, query.limit) };
+      }
+      if (String(timetable.semesterId) !== scope.semesterId) {
+        throw new ForbiddenError('This timetable is not for your current term');
+      }
+      sectionId = scope.sectionId;
+      facultyId = undefined;
+    } else if (actor.role === 'faculty') {
+      const faculty = await FacultyModel.findOne({
+        institutionId: new Types.ObjectId(institutionId),
+        email: actor.email.toLowerCase(),
+        deletedAt: null,
+      })
+        .select('_id')
+        .lean()
+        .exec();
+      if (!faculty) {
+        return { items: [], meta: pageMeta(0, query.page, query.limit) };
+      }
+      facultyId = String(faculty._id);
+    }
 
     const skip = (query.page - 1) * query.limit;
     const { docs, total } = await timetableRepository.listSlots(timetableId, institutionId, {
       dayOfWeek: query.dayOfWeek,
-      sectionId: query.sectionId,
-      facultyId: query.facultyId,
+      sectionId,
+      facultyId,
       courseId: query.courseId,
       status: query.status,
       skip,
