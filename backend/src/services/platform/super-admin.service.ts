@@ -1,5 +1,5 @@
 import type { ProvisionCampusInput, ResendAdminCredentialsInput } from '@learnova/validation';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { hashPassword } from '../../security/index.js';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors/index.js';
 import {
@@ -12,6 +12,7 @@ import { demoRequestService } from './demo-request.service.js';
 import type { ActorContext } from '../institution/institution.service.js';
 import { UserModel } from '../../models/user.model.js';
 import { institutionAuditRepository } from '../../repositories/institution/index.js';
+import { resolveProvisionIdentifiers } from './provision-campus.helpers.js';
 
 function assertSuperAdmin(actor: ActorContext) {
   if (actor.role !== 'super_admin') {
@@ -33,14 +34,18 @@ export class SuperAdminService {
 
     const institutionId = new Types.ObjectId();
     const passwordHash = await hashPassword(input.initialPassword);
+    const { slug, code } = await resolveProvisionIdentifiers(input.institutionName, {
+      slug: input.slug,
+      code: input.code,
+    });
 
     try {
       const institution = await institutionRepository.create({
         _id: institutionId,
         name: input.institutionName,
         shortName: input.institutionName.slice(0, 32),
-        slug: input.slug.toLowerCase(),
-        code: input.code.toUpperCase(),
+        slug,
+        code,
         email: input.contactEmail,
         phone: input.phone ?? null,
         status: 'active',
@@ -65,12 +70,13 @@ export class SuperAdminService {
         to: input.adminEmail,
         firstName: input.adminFirstName,
         institutionName: input.institutionName,
-        institutionSlug: input.slug.toLowerCase(),
+        institutionSlug: slug,
         temporaryPassword: input.initialPassword,
       });
 
-      if (input.demoRequestId) {
-        await demoRequestService.markProvisioned(input.demoRequestId, String(institutionId), actor);
+      const demoRequestId = input.demoRequestId?.trim();
+      if (demoRequestId && mongoose.isValidObjectId(demoRequestId)) {
+        await demoRequestService.markProvisioned(demoRequestId, String(institutionId), actor);
       }
 
       await institutionAuditRepository.log({
@@ -79,7 +85,8 @@ export class SuperAdminService {
         userId: actor.userId,
         email: actor.email,
         metadata: {
-          slug: input.slug.toLowerCase(),
+          slug,
+          code,
           adminEmail: input.adminEmail,
           demoRequestId: input.demoRequestId ?? null,
         },
@@ -88,6 +95,7 @@ export class SuperAdminService {
       return {
         institutionId: String(institution._id),
         institutionSlug: institution.slug as string,
+        institutionCode: institution.code as string,
         adminUserId: String(adminUser._id),
         credentialsEmailSent: true,
       };

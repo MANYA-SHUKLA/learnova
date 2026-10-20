@@ -42,22 +42,33 @@ export const declineDemoRequestSchema = z.object({
 
 export type DeclineDemoRequestInput = z.infer<typeof declineDemoRequestSchema>;
 
+const emptyToUndefined = (value: unknown) =>
+  typeof value === 'string' && value.trim() === '' ? undefined : value;
+
 export const provisionCampusSchema = z.object({
   institutionName: z.string().trim().min(2).max(200),
-  slug: slugSchema,
-  code: z
-    .string()
-    .trim()
-    .min(2)
-    .max(32)
-    .regex(/^[A-Za-z0-9_-]+$/, 'Invalid institution code'),
+  /** Optional — generated from institution name when omitted */
+  slug: z.preprocess(emptyToUndefined, slugSchema.optional()),
+  code: z.preprocess(
+    emptyToUndefined,
+    z
+      .string()
+      .trim()
+      .min(2)
+      .max(32)
+      .regex(/^[A-Za-z0-9_-]+$/, 'Invalid institution code')
+      .optional(),
+  ),
   contactEmail: emailSchema,
-  phone: z.string().trim().min(6).max(30).optional(),
+  phone: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(6).max(30).optional(),
+  ),
   adminFirstName: z.string().trim().min(1).max(80),
   adminLastName: z.string().trim().min(1).max(80),
   adminEmail: emailSchema,
   initialPassword: z.string().min(8).max(128),
-  demoRequestId: z.string().optional(),
+  demoRequestId: z.preprocess(emptyToUndefined, z.string().optional()),
 });
 
 export type ProvisionCampusInput = z.infer<typeof provisionCampusSchema>;

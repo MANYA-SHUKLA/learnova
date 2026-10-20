@@ -14,35 +14,21 @@ import {
   Spinner,
 } from '@learnova/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Building2,
-  CalendarClock,
-  FileJson,
-  Inbox,
-  Megaphone,
-  RefreshCw,
-} from 'lucide-react';
+import { Building2, CalendarClock, Inbox, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SuperAdminConsoleShell } from '@/components/superadmin/super-admin-console-shell';
+import {
+  SuperAdminConsoleSidebar,
+  type SuperAdminConsoleTab,
+} from '@/components/superadmin/super-admin-console-sidebar';
 import { superadminApi, type DemoRequestRow } from '@/features/superadmin/services/superadmin-api';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
-type ConsoleTab = 'requests' | 'campuses' | 'marketing';
-
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 48);
-}
-
-const TAB_CONFIG: { id: ConsoleTab; icon: typeof Inbox }[] = [
+const TAB_CONFIG: { id: SuperAdminConsoleTab; icon: typeof Inbox }[] = [
   { id: 'requests', icon: Inbox },
   { id: 'campuses', icon: Building2 },
-  { id: 'marketing', icon: Megaphone },
 ];
 
 function statusVariant(status: DemoRequestRow['status']): 'default' | 'secondary' | 'danger' | 'outline' {
@@ -61,7 +47,7 @@ function statusVariant(status: DemoRequestRow['status']): 'default' | 'secondary
 export function SuperAdminConsolePage() {
   const t = useTranslations('superadmin.console');
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<ConsoleTab>('requests');
+  const [tab, setTab] = useState<SuperAdminConsoleTab>('requests');
 
   const demoQuery = useQuery({
     queryKey: ['superadmin', 'demo-requests'],
@@ -71,19 +57,10 @@ export function SuperAdminConsolePage() {
   const campusesQuery = useQuery({
     queryKey: ['superadmin', 'campuses'],
     queryFn: () => superadminApi.listInstitutions(),
-    enabled: tab === 'campuses',
-  });
-
-  const marketingQuery = useQuery({
-    queryKey: ['superadmin', 'marketing'],
-    queryFn: () => superadminApi.getMarketing(),
-    enabled: tab === 'marketing',
   });
 
   const [provision, setProvision] = useState({
     institutionName: '',
-    slug: '',
-    code: '',
     contactEmail: '',
     adminFirstName: '',
     adminLastName: '',
@@ -93,24 +70,26 @@ export function SuperAdminConsolePage() {
   });
 
   const provisionMutation = useMutation({
-    mutationFn: () => superadminApi.provisionCampus(provision),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['superadmin'] });
-      alert(t('provisionSuccess'));
+    mutationFn: () => {
+      const { demoRequestId, ...body } = provision;
+      return superadminApi.provisionCampus({
+        ...body,
+        ...(demoRequestId.trim() ? { demoRequestId: demoRequestId.trim() } : {}),
+      });
     },
-  });
-
-  const [marketingDraft, setMarketingDraft] = useState('');
-
-  useEffect(() => {
-    if (marketingQuery.data && tab === 'marketing') {
-      setMarketingDraft(JSON.stringify(marketingQuery.data, null, 2));
-    }
-  }, [marketingQuery.data, tab]);
-
-  const marketingSave = useMutation({
-    mutationFn: (body: unknown) => superadminApi.updateMarketing(body as never),
-    onSuccess: () => alert(t('marketingSaved')),
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: ['superadmin'] });
+      const slug = data.institutionSlug;
+      const code = data.institutionCode;
+      alert(
+        slug
+          ? t('provisionSuccessWithIds', { slug, code: code ?? '' })
+          : t('provisionSuccess'),
+      );
+    },
+    onError: (err: Error) => {
+      alert(err.message || t('provisionError'));
+    },
   });
 
   const confirmMutation = useMutation({
@@ -130,55 +109,48 @@ export function SuperAdminConsolePage() {
     [demoQuery.data?.items],
   );
 
+  const campusCount = useMemo(() => {
+    const items = campusesQuery.data?.items as unknown[] | undefined;
+    return items?.length ?? 0;
+  }, [campusesQuery.data?.items]);
+
+  const navItems = useMemo(
+    () =>
+      TAB_CONFIG.map((item) => ({
+        ...item,
+        badge: item.id === 'requests' ? pendingCount : item.id === 'campuses' ? campusCount : undefined,
+      })),
+    [pendingCount, campusCount],
+  );
+
+  const requestItems = demoQuery.data?.items ?? [];
+  const requestsEmpty =
+    !demoQuery.isLoading && !demoQuery.isError && requestItems.length === 0;
+
   return (
-    <SuperAdminConsoleShell>
+    <SuperAdminConsoleShell
+      sidebar={
+        <SuperAdminConsoleSidebar
+          activeTab={tab}
+          onTabChange={setTab}
+          navItems={navItems}
+          pendingCount={pendingCount}
+          campusCount={campusCount}
+        />
+      }
+    >
       <PageHeader
-        eyebrow={t('eyebrow')}
-        title={t('title')}
-        description={t('description')}
+        title={t(`tabs.${tab}`)}
+        description={t(tab === 'requests' ? 'descriptionRequests' : 'descriptionCampuses')}
         meta={
-          pendingCount > 0 ? (
-            <Badge variant="secondary">
-              {t('pendingBadge', { count: pendingCount })}
-            </Badge>
+          pendingCount > 0 && tab === 'requests' ? (
+            <Badge variant="secondary">{t('pendingBadge', { count: pendingCount })}</Badge>
           ) : null
         }
         actions={
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/platform">{t('viewPlatformPage')}</Link>
-          </Button>
-        }
-      />
-
-      <div
-        className="mt-8 inline-flex w-full max-w-full flex-wrap gap-1 rounded-xl border border-border bg-muted/40 p-1 sm:w-auto"
-        role="tablist"
-        aria-label={t('tabsLabel')}
-      >
-        {TAB_CONFIG.map(({ id, icon: Icon }) => (
-          <Button
-            key={id}
-            role="tab"
-            aria-selected={tab === id}
-            variant={tab === id ? 'default' : 'ghost'}
-            size="sm"
-            className={cn('flex-1 sm:flex-none', tab !== id && 'text-muted-foreground')}
-            onClick={() => setTab(id)}
-          >
-            <Icon className="mr-1.5 size-4" aria-hidden />
-            {t(`tabs.${id}`)}
-          </Button>
-        ))}
-      </div>
-
-      {tab === 'requests' ? (
-        <section className="mt-8 space-y-4" aria-labelledby="demo-requests-heading">
-          <div className="flex items-center justify-between gap-2">
-            <h2 id="demo-requests-heading" className="text-lg font-semibold text-foreground">
-              {t('requestsHeading')}
-            </h2>
+          tab === 'requests' ? (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               disabled={demoQuery.isFetching}
               onClick={() => void demoQuery.refetch()}
@@ -186,64 +158,69 @@ export function SuperAdminConsolePage() {
               <RefreshCw className={cn('mr-1.5 size-4', demoQuery.isFetching && 'animate-spin')} />
               {t('refresh')}
             </Button>
-          </div>
+          ) : null
+        }
+      />
 
-          {demoQuery.isLoading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-28 w-full rounded-2xl" />
-              <Skeleton className="h-28 w-full rounded-2xl" />
+      {tab === 'requests' ? (
+        <section className="mt-8 space-y-4" aria-labelledby="demo-requests-heading">
+            <h2 id="demo-requests-heading" className="sr-only">
+              {t('requestsHeading')}
+            </h2>
+
+            {demoQuery.isLoading ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <Skeleton className="h-28 w-full rounded-2xl" />
+                <Skeleton className="h-28 w-full rounded-2xl" />
+              </div>
+            ) : null}
+
+            {demoQuery.isError ? (
+              <Card className="rounded-2xl border-dashed">
+                <CardContent className="py-10 text-center text-sm text-muted-foreground">
+                  {t('requestsError')}
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {requestsEmpty ? (
+              <Card className="rounded-2xl border-dashed bg-background shadow-soft-sm">
+                <CardContent className="flex min-h-[280px] flex-col items-center justify-center gap-3 px-6 py-12 text-center">
+                  <Inbox className="size-12 text-muted-foreground/50" aria-hidden />
+                  <p className="text-lg font-medium text-foreground">{t('requestsEmptyTitle')}</p>
+                  <p className="max-w-md text-sm text-muted-foreground">{t('requestsEmptyBody')}</p>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              {requestItems.map((row) => (
+                <DemoRequestCard
+                  key={row.id}
+                  row={row}
+                  onConfirm={(meetingAt, notes) =>
+                    confirmMutation.mutate({ id: row.id, meetingAt, meetingNotes: notes })
+                  }
+                  onAllocate={() => {
+                    setProvision((p) => ({
+                      ...p,
+                      institutionName: row.institutionName,
+                      contactEmail: row.contactEmail,
+                      adminEmail: row.contactEmail,
+                      demoRequestId: row.id,
+                    }));
+                    setTab('campuses');
+                  }}
+                  onDecline={(reason) => declineMutation.mutate({ id: row.id, reason })}
+                  busy={confirmMutation.isPending || declineMutation.isPending}
+                />
+              ))}
             </div>
-          ) : null}
-
-          {demoQuery.isError ? (
-            <Card className="rounded-2xl border-dashed">
-              <CardContent className="py-10 text-center text-sm text-muted-foreground">
-                {t('requestsError')}
-              </CardContent>
-            </Card>
-          ) : null}
-
-          {!demoQuery.isLoading && !demoQuery.isError && (demoQuery.data?.items ?? []).length === 0 ? (
-            <Card className="rounded-2xl border-dashed bg-muted/20">
-              <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
-                <Inbox className="size-10 text-muted-foreground/60" aria-hidden />
-                <p className="font-medium text-foreground">{t('requestsEmptyTitle')}</p>
-                <p className="max-w-sm text-sm text-muted-foreground">{t('requestsEmptyBody')}</p>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/platform">{t('viewPlatformPage')}</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ) : null}
-
-          {(demoQuery.data?.items ?? []).map((row) => (
-            <DemoRequestCard
-              key={row.id}
-              row={row}
-              onConfirm={(meetingAt, notes) =>
-                confirmMutation.mutate({ id: row.id, meetingAt, meetingNotes: notes })
-              }
-              onAllocate={() => {
-                setProvision((p) => ({
-                  ...p,
-                  institutionName: row.institutionName,
-                  contactEmail: row.contactEmail,
-                  adminEmail: row.contactEmail,
-                  slug: slugify(row.institutionName),
-                  code: slugify(row.institutionName).replace(/-/g, '_').toUpperCase().slice(0, 12),
-                  demoRequestId: row.id,
-                }));
-                setTab('campuses');
-              }}
-              onDecline={(reason) => declineMutation.mutate({ id: row.id, reason })}
-              busy={confirmMutation.isPending || declineMutation.isPending}
-            />
-          ))}
         </section>
       ) : null}
 
       {tab === 'campuses' ? (
-        <section className="mt-8 grid gap-6 lg:grid-cols-2 lg:gap-8">
+        <section className="mt-8 grid gap-6 xl:grid-cols-2 xl:gap-8">
           <Card className="rounded-2xl shadow-soft-sm">
             <CardHeader>
               <CardTitle className="text-lg">{t('allocateTitle')}</CardTitle>
@@ -257,11 +234,10 @@ export function SuperAdminConsolePage() {
                   void provisionMutation.mutateAsync();
                 }}
               >
+                <p className="text-xs text-muted-foreground">{t('allocateSlugHint')}</p>
                 {(
                   [
                     ['institutionName', t('fields.institutionName')],
-                    ['slug', t('fields.slug')],
-                    ['code', t('fields.code')],
                     ['contactEmail', t('fields.contactEmail')],
                     ['adminFirstName', t('fields.adminFirstName')],
                     ['adminLastName', t('fields.adminLastName')],
@@ -326,51 +302,6 @@ export function SuperAdminConsolePage() {
               {!campusesQuery.isLoading && !(campusesQuery.data?.items as unknown[] | undefined)?.length ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">{t('campusesEmpty')}</p>
               ) : null}
-            </CardContent>
-          </Card>
-        </section>
-      ) : null}
-
-      {tab === 'marketing' ? (
-        <section className="mt-8 max-w-3xl">
-          <Card className="rounded-2xl shadow-soft-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <FileJson className="size-5 text-primary" aria-hidden />
-                {t('marketingTitle')}
-              </CardTitle>
-              <CardDescription>{t('marketingDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {marketingQuery.isLoading ? (
-                <Skeleton className="min-h-[320px] w-full rounded-xl" />
-              ) : marketingQuery.data ? (
-                <>
-                  <textarea
-                    className="min-h-[320px] w-full rounded-xl border border-input bg-background p-4 font-mono text-xs leading-relaxed shadow-inner"
-                    value={marketingDraft}
-                    onChange={(e) => setMarketingDraft(e.target.value)}
-                    spellCheck={false}
-                  />
-                  <Button
-                    className="mt-4"
-                    disabled={marketingSave.isPending}
-                    onClick={() => {
-                      try {
-                        const parsed = JSON.parse(marketingDraft);
-                        void marketingSave.mutateAsync(parsed);
-                      } catch {
-                        alert(t('marketingInvalidJson'));
-                      }
-                    }}
-                  >
-                    {marketingSave.isPending ? <Spinner size="sm" className="mr-2" /> : null}
-                    {t('marketingSave')}
-                  </Button>
-                </>
-              ) : (
-                <p className="text-sm text-muted-foreground">{t('marketingLoadError')}</p>
-              )}
             </CardContent>
           </Card>
         </section>

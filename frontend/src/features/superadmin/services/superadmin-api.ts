@@ -40,7 +40,13 @@ export const superadminApi = {
   },
 
   provisionCampus(body: Record<string, unknown>) {
-    return apiClient.post('/super-admin/institutions', body);
+    return apiClient.post<{
+      institutionId: string;
+      institutionSlug: string;
+      institutionCode: string;
+      adminUserId: string;
+      credentialsEmailSent: boolean;
+    }>('/super-admin/institutions', body);
   },
 
   listInstitutions() {
