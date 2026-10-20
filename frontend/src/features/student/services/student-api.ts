@@ -38,8 +38,8 @@ function toQuery(params: StudentListParams = {}): string {
   const search = new URLSearchParams();
   if (params.q) search.set('q', params.q);
   if (params.status) search.set('status', params.status);
-  if (params.includeDeleted !== undefined) {
-    search.set('includeDeleted', String(params.includeDeleted));
+  if (params.includeDeleted) {
+    search.set('includeDeleted', 'true');
   }
   if (params.campusId) search.set('campusId', params.campusId);
   if (params.schoolId) search.set('schoolId', params.schoolId);
@@ -77,7 +77,7 @@ export const studentApi = {
     const { data, meta } = await apiClient.getWithMeta<{ items: Student[] }>(
       `${API_ROUTES.STUDENTS}${toQuery(params)}`,
     );
-    return { items: data.items, meta: meta ?? emptyMeta(params?.page, params?.limit) };
+    return { items: data?.items ?? [], meta: meta ?? emptyMeta(params?.page, params?.limit) };
   },
 
   stats: () => apiClient.get<StudentStats>(`${API_ROUTES.STUDENTS}/stats`),

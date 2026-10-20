@@ -71,7 +71,7 @@ studentRoutes.get(
 
 studentRoutes.get('/students/audit', ...manageAuth, ctrl.listStudentAudit);
 
-studentRoutes.get('/students/me', ...writeAuth, ctrl.getOwnStudentProfile);
+studentRoutes.get('/students/me', ...readAuth, ctrl.getOwnStudentProfile);
 
 studentRoutes.patch(
   '/students/me',

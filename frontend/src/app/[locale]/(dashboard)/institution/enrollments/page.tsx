@@ -201,7 +201,6 @@ export default function EnrollmentListPage() {
             ) : (
               <DataTable
                 caption={t('directory')}
-                className="[&_.card-static]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:max-h-[min(65vh,52rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10"
                 loading={listQuery.isLoading}
                 data={rows}
                 rowKey={(row) => row.id}

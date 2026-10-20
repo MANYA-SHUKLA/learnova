@@ -186,11 +186,11 @@ export function DataTable<T>({
 
           <div
             className={cn(
-              'card-static group overflow-hidden',
+              'overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-soft-md',
               mobileRow && 'hidden md:block',
             )}
           >
-            <div className="overflow-x-auto">
+            <div className="max-h-[min(70vh,56rem)] overflow-x-auto overflow-y-auto">
               <table className="w-full min-w-[640px] border-collapse text-left text-sm">
                 {caption ? <caption className="sr-only">{caption}</caption> : null}
                 <thead className="sticky top-0 z-10 bg-muted/50 backdrop-blur-sm">

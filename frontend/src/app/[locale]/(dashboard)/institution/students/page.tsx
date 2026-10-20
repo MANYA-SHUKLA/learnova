@@ -52,6 +52,8 @@ import { env } from '@/config/env';
 import { getAccessToken } from '@/lib/auth/jwt';
 import { cn } from '@/lib/utils';
 
+const TABLE_PAGE_SIZE = 50;
+
 const STATUS_FILTERS: (StudentStatus | 'all')[] = [
   'all',
   'active',
@@ -69,17 +71,17 @@ export default function StudentListPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StudentStatus | 'all'>('all');
   const [selected, setSelected] = useState<string[]>([]);
-  const [includeDeleted, setIncludeDeleted] = useState(false);
+  const [page, setPage] = useState(1);
 
   const listFilters = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
-      includeDeleted: includeDeleted || status === 'archived',
+      ...(status === 'archived' ? { includeDeleted: true as const } : {}),
       sortBy: 'createdAt',
       sortOrder: 'desc' as const,
     }),
-    [search, status, includeDeleted],
+    [search, status],
   );
 
   const labels = useOrgLabels();
@@ -101,6 +103,12 @@ export default function StudentListPage() {
 
   const rows = listQuery.data?.items ?? [];
   const directoryTotal = listQuery.data?.total ?? statsQuery.data?.total ?? 0;
+  const tableTotalPages = Math.max(1, Math.ceil(rows.length / TABLE_PAGE_SIZE));
+  const tablePage = Math.min(page, tableTotalPages);
+  const pagedRows = useMemo(() => {
+    const start = (tablePage - 1) * TABLE_PAGE_SIZE;
+    return rows.slice(start, start + TABLE_PAGE_SIZE);
+  }, [rows, tablePage]);
 
   const archiveSelected = () => {
     if (!selected.length) return;
@@ -220,9 +228,8 @@ export default function StudentListPage() {
             ) : (
               <DataTable
                 caption={t('directory')}
-                className="[&_.card-static]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:max-h-[min(65vh,52rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10"
                 loading={listQuery.isLoading}
-                data={rows}
+                data={pagedRows}
                 rowKey={(row) => row.id}
                 selectable
                 selectedIds={selected}
@@ -271,7 +278,8 @@ export default function StudentListPage() {
                         type="button"
                         onClick={() => {
                           setStatus(s);
-                          setIncludeDeleted(s === 'archived');
+                          setPage(1);
+                          setSelected([]);
                         }}
                         className={cn(
                           'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
@@ -297,6 +305,7 @@ export default function StudentListPage() {
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());
+                            setPage(1);
                           }
                         }}
                       />
@@ -307,11 +316,24 @@ export default function StudentListPage() {
                       className="rounded-xl"
                       onClick={() => {
                         setSearch(q.trim());
+                        setPage(1);
                       }}
                     >
                       Search
                     </Button>
                   </div>
+                }
+                pagination={
+                  rows.length > 0
+                    ? {
+                        page: tablePage,
+                        totalPages: tableTotalPages,
+                        total: rows.length,
+                        hasNextPage: tablePage < tableTotalPages,
+                        hasPrevPage: tablePage > 1,
+                        onPageChange: setPage,
+                      }
+                    : undefined
                 }
                 emptyTitle={t('emptyTitle')}
                 emptyDescription={t('emptyDescription')}

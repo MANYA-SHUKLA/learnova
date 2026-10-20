@@ -29,13 +29,16 @@ import { useStudentSemesterCourses } from '@/features/student';
 export default function StudentEnrollmentsPage() {
   const t = useTranslations('dashboard.student.enrollments');
   const semesterCourses = useStudentSemesterCourses();
-  const coursesQuery = useCourseList({
-    page: 1,
-    limit: PAGINATION.MAX_LIMIT,
-    status: 'published',
-    ...(semesterCourses.programId ? { programId: semesterCourses.programId } : {}),
-    ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
-  });
+  const coursesQuery = useCourseList(
+    {
+      page: 1,
+      limit: PAGINATION.MAX_LIMIT,
+      status: 'published',
+      ...(semesterCourses.programId ? { programId: semesterCourses.programId } : {}),
+      ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
+    },
+    Boolean(semesterCourses.semesterId) && !semesterCourses.isLoading,
+  );
   const courseLabel = (id: string) =>
     displayName(
       coursesQuery.data?.items,

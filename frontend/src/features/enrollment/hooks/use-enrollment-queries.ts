@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ApiClientError } from '@/lib/api/client';
 import { enrollmentApi } from '../services/enrollment-api';
 import type {
   EnrollmentBulkApproveBody,
@@ -55,6 +56,12 @@ export function useMyEnrollments(params?: EnrollmentListParams, enabled = true) 
     enabled,
     staleTime: 30_000,
     refetchOnMount: 'always',
+    retry: (failureCount, error) => {
+      if (error instanceof ApiClientError && (error.status === 401 || error.status === 403)) {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 }
 

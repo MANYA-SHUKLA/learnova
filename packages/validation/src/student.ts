@@ -27,7 +27,10 @@ export const studentGenderSchema = z.enum([
 export const studentListQuerySchema = z.object({
   q: z.string().trim().min(1).max(200).optional(),
   status: studentStatusSchema.optional(),
-  includeDeleted: z.coerce.boolean().optional().default(false),
+  includeDeleted: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
   campusId: objectIdField.optional(),
   schoolId: objectIdField.optional(),
   departmentId: objectIdField.optional(),
@@ -211,7 +214,10 @@ export const studentExportQuerySchema = z.object({
   batchId: objectIdField.optional(),
   yearOfStudy: z.coerce.number().int().min(1).max(10).optional(),
   scholarship: z.coerce.boolean().optional(),
-  includeDeleted: z.coerce.boolean().optional().default(false),
+  includeDeleted: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
 });
 
 export const studentPhotoUploadSchema = z.object({

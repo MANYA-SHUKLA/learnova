@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ApiClientError } from '@/lib/api/client';
 import { studentApi } from '../services/student-api';
 import type {
   StudentCreateBody,
@@ -53,6 +54,12 @@ export function useMyStudentProfile(enabled = true) {
     enabled,
     staleTime: 30_000,
     refetchOnMount: 'always',
+    retry: (failureCount, error) => {
+      if (error instanceof ApiClientError && (error.status === 401 || error.status === 403)) {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 }
 

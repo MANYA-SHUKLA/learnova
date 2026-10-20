@@ -2978,8 +2978,7 @@
           "averageProgress": "Average progress"
         },
         "gradesTitle": "Grades",
-        "gradesDescription": "Published course results from the gradebook.",
-        "attendanceNote": "Attendance"
+        "gradesDescription": "Published course results from the gradebook."
       },
       "certificates": {
         "eyebrow": "Academic credentials",

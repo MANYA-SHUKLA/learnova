@@ -17,6 +17,7 @@ import {
   enrollmentWaitlistJoinSchema,
 } from '@learnova/validation';
 import { authenticate, requirePermission } from '../../middlewares/auth.middleware.js';
+import { tenantGuard } from '../../middlewares/scope.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import * as ctrl from '../../controllers/enrollment/enrollment.controller.js';
 
@@ -24,16 +25,19 @@ const enrollmentRoutes = Router();
 
 const readAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.ENROLLMENT_READ),
 ] as RequestHandler[];
 
 const writeAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.ENROLLMENT_WRITE),
 ] as RequestHandler[];
 
 const manageAuth = [
   authenticate({ required: true }),
+  tenantGuard(),
   requirePermission(PERMISSIONS.ENROLLMENT_MANAGE),
 ] as RequestHandler[];
 
@@ -64,7 +68,7 @@ enrollmentRoutes.get('/enrollments/audit', ...readAuth, ctrl.listEnrollmentAudit
 
 enrollmentRoutes.get(
   '/enrollments/me',
-  ...writeAuth,
+  ...readAuth,
   validate(enrollmentListQuerySchema, 'query'),
   ctrl.getOwnEnrollments,
 );

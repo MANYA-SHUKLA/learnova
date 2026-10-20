@@ -65,11 +65,6 @@ export default function StudentReportsPage() {
                 ))}
               </div>
             </Card>
-
-            <Card className="rounded-2xl border-border/80 p-4">
-              <p className="text-sm text-muted-foreground">{t('attendanceNote')}</p>
-              <p className="mt-1 text-sm">{data?.attendanceNote}</p>
-            </Card>
           </>
         )}
       </div>

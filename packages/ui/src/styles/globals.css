@@ -356,20 +356,31 @@
     @apply xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)];
   }
 
-  /** List / directory page card shell */
+  /** List / directory page card shell (allow inner tables to scroll) */
   .directory-shell {
-    @apply rounded-xl border border-border/80 bg-card text-card-foreground shadow-soft-sm;
+    @apply overflow-visible rounded-xl border border-border/80 bg-card text-card-foreground shadow-soft-sm;
   }
 
   /** Shared card motion foundation */
   .card-static,
   .card-glass,
   .card-interactive,
-  .card-metric,
-  .directory-shell {
+  .card-metric {
     position: relative;
     isolation: isolate;
     overflow: hidden;
+    will-change: transform, box-shadow;
+    transition:
+      transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 340ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 280ms ease,
+      background-color 280ms ease;
+  }
+
+  .directory-shell {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
     will-change: transform, box-shadow;
     transition:
       transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -426,8 +437,7 @@
 
   .card-static::after,
   .card-glass::after,
-  .card-metric::after,
-  .directory-shell::after {
+  .card-metric::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -445,8 +455,7 @@
 
   .card-static:hover,
   .card-glass:hover,
-  .card-metric:hover,
-  .directory-shell:hover {
+  .card-metric:hover {
     transform: translateY(-5px) scale(1.01);
     border-color: hsl(var(--primary) / 0.32);
     box-shadow: var(--shadow-card-hover);
@@ -462,8 +471,7 @@
 
   .card-static:hover::after,
   .card-glass:hover::after,
-  .card-metric:hover::after,
-  .directory-shell:hover::after {
+  .card-metric:hover::after {
     transform: translateX(140%) skewX(-12deg);
   }
 

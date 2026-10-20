@@ -180,7 +180,6 @@ export default function CourseListPage() {
             ) : (
               <DataTable
                 caption={t('catalog')}
-                className="[&_.card-static>.overflow-x-auto]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10 [&_thead]:bg-muted/50"
                 loading={listQuery.isLoading}
                 data={pagedRows}
                 rowKey={(row) => row.id}

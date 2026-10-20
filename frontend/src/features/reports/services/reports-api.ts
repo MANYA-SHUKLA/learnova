@@ -72,8 +72,6 @@ export interface StudentReport {
     result: string | null;
   }[];
   completedCourseCount: number;
-  attendance: null;
-  attendanceNote: string;
 }
 
 export const reportsApi = {

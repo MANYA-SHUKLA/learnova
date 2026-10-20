@@ -390,8 +390,6 @@ export class ReportsRepository {
         earnedCredits: row.earnedCredits ?? 0,
       })),
       completedCourseCount: progressCounts.completedCourses,
-      attendance: null as null,
-      attendanceNote: 'Class attendance tracking is not enabled. Exam check-in attendance is recorded separately.',
     };
   }
 }

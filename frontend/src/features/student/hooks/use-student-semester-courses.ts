@@ -5,6 +5,7 @@ import type { CourseProgress, Enrollment } from '@learnova/types';
 import { useMemo } from 'react';
 import { useCourseList } from '@/features/course';
 import { useMyEnrollments } from '@/features/enrollment';
+import { useAuth } from '@/providers/auth-provider';
 import { useMyStudentProfile } from './use-student-queries';
 
 const LEARNING_STATUSES = new Set<Enrollment['status']>(['active', 'approved']);
@@ -30,11 +31,13 @@ function enrollmentMatchesStudentTerm(
 }
 
 export function useStudentSemesterCourses(enabled = true) {
-  const profileQuery = useMyStudentProfile(enabled);
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const sessionReady = enabled && isAuthenticated && !authLoading;
+
+  const profileQuery = useMyStudentProfile(sessionReady);
   const semesterId = profileQuery.data?.semesterId ?? null;
   const programId = profileQuery.data?.programId ?? null;
-  const profileSettled =
-    enabled && (profileQuery.isSuccess || profileQuery.isError);
+  const profileReady = sessionReady && profileQuery.isSuccess;
 
   const enrollmentsQuery = useMyEnrollments(
     {
@@ -43,9 +46,8 @@ export function useStudentSemesterCourses(enabled = true) {
       sortBy: 'enrollmentDate',
       sortOrder: 'desc',
       ...(semesterId ? { semesterId } : {}),
-      ...(programId ? { programId } : {}),
     },
-    profileSettled,
+    profileReady,
   );
 
   const catalogQuery = useCourseList(
@@ -56,7 +58,7 @@ export function useStudentSemesterCourses(enabled = true) {
       ...(programId ? { programId } : {}),
       ...(semesterId ? { semesterId } : {}),
     },
-    profileSettled && Boolean(semesterId),
+    profileReady && Boolean(semesterId),
   );
 
   const catalogCourseIds = useMemo(
@@ -66,11 +68,13 @@ export function useStudentSemesterCourses(enabled = true) {
 
   const enrollments = useMemo(() => {
     const items = enrollmentsQuery.data?.items ?? [];
-    return items
-      .filter(isCurrentLearningEnrollment)
-      .filter((row) =>
-        enrollmentMatchesStudentTerm(row, semesterId, programId, catalogCourseIds),
-      );
+    const learning = items.filter(isCurrentLearningEnrollment);
+    if (semesterId) {
+      return learning;
+    }
+    return learning.filter((row) =>
+      enrollmentMatchesStudentTerm(row, semesterId, programId, catalogCourseIds),
+    );
   }, [enrollmentsQuery.data, semesterId, programId, catalogCourseIds]);
 
   const courseIds = useMemo(
@@ -87,8 +91,8 @@ export function useStudentSemesterCourses(enabled = true) {
     catalogCourseIds,
     /** When true, only courses from the student's current semester should be shown. */
     restrictsToSemester: Boolean(semesterId),
-    isLoading: profileQuery.isLoading || enrollmentsQuery.isLoading,
-    isError: profileQuery.isError || enrollmentsQuery.isError || catalogQuery.isError,
+    isLoading: authLoading || profileQuery.isLoading || enrollmentsQuery.isLoading,
+    isError: profileQuery.isError || enrollmentsQuery.isError,
     refetchEnrollments: enrollmentsQuery.refetch,
   };
 }
