@@ -18,9 +18,11 @@ import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
 import { useCourse } from '@/features/course';
 import {
+  BookmarkTargetButton,
   formatLearningStatus,
   formatMinutes,
   formatPercent,
+  useBookmarks,
   useCompleteLessonMutation,
   useCourseProgress,
   useOpenLessonMutation,
@@ -39,6 +41,8 @@ export default function StudentCourseProgressPage() {
   const resumeQuery = useResumePoint(courseId);
   const openLesson = useOpenLessonMutation();
   const completeLesson = useCompleteLessonMutation();
+  const bookmarksQuery = useBookmarks({ courseId, page: 1, limit: 200 });
+  const courseBookmarks = bookmarksQuery.data?.items ?? [];
 
   const detail = courseQuery.data;
   const resume = resumeQuery.data;
@@ -159,13 +163,23 @@ export default function StudentCourseProgressPage() {
                               : '0%'}
                           </p>
                         </div>
-                        {module.progress ? (
-                          <Badge variant="outline">
-                            {formatLearningStatus(module.progress.status)}
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">{formatLearningStatus('not_started')}</Badge>
-                        )}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <BookmarkTargetButton
+                            courseId={courseId}
+                            targetType="module"
+                            moduleId={module.id}
+                            bookmarks={courseBookmarks}
+                          />
+                          {module.progress ? (
+                            <Badge variant="outline">
+                              {formatLearningStatus(module.progress.status)}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              {formatLearningStatus('not_started')}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       <ul className="space-y-2">
                         {module.lessons.map((lesson) => {
@@ -188,7 +202,14 @@ export default function StudentCourseProgressPage() {
                                     : ''}
                                 </p>
                               </div>
-                              <div className="flex shrink-0 gap-2">
+                              <div className="flex shrink-0 flex-wrap gap-2">
+                                <BookmarkTargetButton
+                                  courseId={courseId}
+                                  targetType="lesson"
+                                  moduleId={module.id}
+                                  lessonId={lesson.id}
+                                  bookmarks={courseBookmarks}
+                                />
                                 <Button
                                   size="sm"
                                   variant="outline"

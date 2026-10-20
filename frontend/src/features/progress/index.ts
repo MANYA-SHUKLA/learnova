@@ -44,4 +44,6 @@ export { ProgressStatCards } from './components/progress-stat-cards';
 export type { ProgressStatItem } from './components/progress-stat-cards';
 export { ActivityTimeline } from './components/activity-timeline';
 export { ProgressFilters } from './components/progress-filters';
+export { BookmarkTargetButton } from './components/bookmark-target-button';
+export { findBookmarkForTarget } from './lib/bookmark-match';
 export type * from './types';
