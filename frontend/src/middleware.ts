@@ -39,6 +39,7 @@ const PROTECTED_PATH_PREFIXES = [
   '/ideation',
   '/analytics',
   '/audit',
+  '/console',
   '/superadmin',
 ] as const;
 

@@ -13,7 +13,7 @@ const ACTIVE_ROLE_VALUES: readonly ActiveRole[] = [
   'super_admin',
 ];
 
-const SUPERADMIN_PREFIX = '/superadmin';
+const SUPERADMIN_PREFIX = '/console';
 
 export function parseActiveRole(value: string | null | undefined): ActiveRole | null {
   if (!value) return null;

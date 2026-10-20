@@ -24,20 +24,44 @@ const CAMPUS_NAV_LINKS = [
   { href: '/privacy', labelKey: 'privacy' },
 ] as const;
 
-export function SiteHeader({ campusPortal = false }: { campusPortal?: boolean }) {
+export function SiteHeader({
+  campusPortal = false,
+  platformMarketing = false,
+}: {
+  campusPortal?: boolean;
+  /** Learnova product site at / — no sign-in CTA */
+  platformMarketing?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('marketing.header');
   const tCommon = useTranslations('common');
   const { user, isAuthenticated, isLoading } = useAuth();
 
   const dashboardHref = dashboardPathForRole(user?.role);
+  const showSignIn = campusPortal && !platformMarketing;
   const primaryCtaLabel = isAuthenticated
     ? t('goToDashboard')
-    : campusPortal
-      ? t('signIn')
-      : t('institutionLogin');
-  const primaryCtaHref = isAuthenticated ? dashboardHref : '/login';
-  const navLinks = campusPortal ? CAMPUS_NAV_LINKS : SAAS_NAV_LINKS;
+    : platformMarketing
+      ? t('requestDemo')
+      : campusPortal
+        ? t('signIn')
+        : t('institutionLogin');
+  const primaryCtaHref = isAuthenticated
+    ? dashboardHref
+    : platformMarketing
+      ? '/#request-demo'
+      : '/login';
+  const navLinks = campusPortal
+    ? CAMPUS_NAV_LINKS
+    : platformMarketing
+      ? ([
+          { href: '/#modules', labelKey: 'features' as const },
+          { href: '/#pricing', labelKey: 'pricing' as const },
+          { href: '/#campuses', labelKey: 'campuses' as const },
+          { href: '/#faq', labelKey: 'faq' as const },
+          { href: '/contact', labelKey: 'contact' as const },
+        ] as const)
+      : SAAS_NAV_LINKS;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-[var(--glass-bg)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--glass-bg)]">
@@ -69,11 +93,15 @@ export function SiteHeader({ campusPortal = false }: { campusPortal?: boolean })
           <ThemeToggle />
           {isLoading ? (
             <Skeleton className="hidden h-9 w-28 rounded-md sm:inline-flex" />
-          ) : (
+          ) : showSignIn || platformMarketing || isAuthenticated ? (
             <Button asChild size="sm" className="hidden sm:inline-flex">
-              <Link href={primaryCtaHref}>{primaryCtaLabel}</Link>
+              {platformMarketing && !isAuthenticated ? (
+                <a href={primaryCtaHref}>{primaryCtaLabel}</a>
+              ) : (
+                <Link href={primaryCtaHref}>{primaryCtaLabel}</Link>
+              )}
             </Button>
-          )}
+          ) : null}
           <Button
             variant="ghost"
             size="icon"
@@ -110,16 +138,27 @@ export function SiteHeader({ campusPortal = false }: { campusPortal?: boolean })
             </nav>
             <div className="mt-4 flex items-center gap-2">
               <LanguageToggle className="shrink-0" />
-              {!isLoading ? (
+              {!isLoading && (showSignIn || platformMarketing || isAuthenticated) ? (
                 <Button asChild className="w-full">
-                  <Link
-                    href={primaryCtaHref}
-                    onClick={() => {
-                      setOpen(false);
-                    }}
-                  >
-                    {primaryCtaLabel}
-                  </Link>
+                  {platformMarketing && !isAuthenticated ? (
+                    <a
+                      href={primaryCtaHref}
+                      onClick={() => {
+                        setOpen(false);
+                      }}
+                    >
+                      {primaryCtaLabel}
+                    </a>
+                  ) : (
+                    <Link
+                      href={primaryCtaHref}
+                      onClick={() => {
+                        setOpen(false);
+                      }}
+                    >
+                      {primaryCtaLabel}
+                    </Link>
+                  )}
                 </Button>
               ) : null}
             </div>

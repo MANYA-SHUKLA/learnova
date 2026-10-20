@@ -11,7 +11,7 @@ const ACTIVE_ROLES: readonly EdgeActiveRole[] = [
   'super_admin',
 ];
 
-const SUPERADMIN_PREFIX = '/superadmin';
+const SUPERADMIN_PREFIX = '/console';
 
 const INSTITUTION_PREFIX = '/institution';
 const FACULTY_PREFIX = '/faculty';
@@ -42,7 +42,7 @@ export function requiredRoleForPath(pathWithoutLocale: string): EdgeActiveRole |
   if (normalized.startsWith(STUDENT_PREFIX)) {
     return 'student';
   }
-  if (normalized === `${SUPERADMIN_PREFIX}/login`) {
+  if (normalized === `${SUPERADMIN_PREFIX}/sign-in` || normalized === '/superadmin/login') {
     return null;
   }
   if (normalized === SUPERADMIN_PREFIX || normalized.startsWith(`${SUPERADMIN_PREFIX}/`)) {

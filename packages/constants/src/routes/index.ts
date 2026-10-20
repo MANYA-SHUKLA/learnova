@@ -187,9 +187,13 @@ export const APP_ROUTES = {
   VERIFY_CERTIFICATE: '/verify',
   CHANGE_PASSWORD: '/account/change-password',
   PLATFORM: '/platform',
-  SUPERADMIN_LOGIN: '/superadmin/login',
-  SUPERADMIN: '/superadmin',
-  SUPERADMIN_DASHBOARD: '/superadmin',
+  /** Private platform ops — not linked from public marketing */
+  CONSOLE_SIGN_IN: '/console/sign-in',
+  CONSOLE: '/console',
+  /** @deprecated use CONSOLE_* — redirects remain for old bookmarks */
+  SUPERADMIN_LOGIN: '/console/sign-in',
+  SUPERADMIN: '/console',
+  SUPERADMIN_DASHBOARD: '/console',
   CAMPUS: '/campus',
   CAMPUS_GUIDE: '/campus-guide',
 } as const;
