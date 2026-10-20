@@ -133,16 +133,68 @@ export function allowedCourseCodesForSemester(semesterNumber: number): Set<strin
   return entry?.codes ?? null;
 }
 
+export function sharedCourseCodesForSemester(semesterNumber: number): string[] {
+  const split = sharedSubjectsSummaryForSemester(semesterNumber);
+  const codes = split.shared.map((r) => r.code);
+  if (split.crossBranchPhysics) {
+    codes.push(split.crossBranchPhysics.cseCode, split.crossBranchPhysics.eceCode);
+  }
+  return [...new Set(codes)];
+}
+
+export function isSharedCourseCode(semesterNumber: number, courseCode: string): boolean {
+  const entry = JNU_BTECH_SEMESTER_CATALOG[semesterNumber];
+  if (!entry) return false;
+  const code = courseCode.toUpperCase();
+  if (entry.sharedCodes.has(code)) return true;
+  return code === JNU_PHYSICS_CROSS_BRANCH.cseCode || code === JNU_PHYSICS_CROSS_BRANCH.eceCode;
+}
+
+export function isCrossBranchPhysicsPair(codeA: string, codeB: string): boolean {
+  const a = codeA.toUpperCase();
+  const b = codeB.toUpperCase();
+  return (
+    (a === JNU_PHYSICS_CROSS_BRANCH.cseCode && b === JNU_PHYSICS_CROSS_BRANCH.eceCode) ||
+    (a === JNU_PHYSICS_CROSS_BRANCH.eceCode && b === JNU_PHYSICS_CROSS_BRANCH.cseCode)
+  );
+}
+
+export function sharedSubjectsSummaryForSemester(semesterNumber: number): {
+  shared: CatalogRow[];
+  cseOnly: CatalogRow[];
+  eceOnly: CatalogRow[];
+  crossBranchPhysics: typeof JNU_PHYSICS_CROSS_BRANCH | null;
+} {
+  const entry = JNU_BTECH_SEMESTER_CATALOG[semesterNumber];
+  if (!entry) {
+    return { shared: [], cseOnly: [], eceOnly: [], crossBranchPhysics: null };
+  }
+  const hasPhysics =
+    entry.cseOnly.some((r) => r.code === JNU_PHYSICS_CROSS_BRANCH.cseCode) ||
+    entry.eceOnly.some((r) => r.code === JNU_PHYSICS_CROSS_BRANCH.eceCode);
+  return {
+    shared: entry.shared,
+    cseOnly: entry.cseOnly,
+    eceOnly: entry.eceOnly,
+    crossBranchPhysics: hasPhysics ? JNU_PHYSICS_CROSS_BRANCH : null,
+  };
+}
+
 export function catalogSummaryForSemester(semesterNumber: number): string {
   const entry = JNU_BTECH_SEMESTER_CATALOG[semesterNumber];
   if (!entry) {
     return `No embedded catalog for semester number ${semesterNumber}; use only B.Tech courses linked to this semester in the LMS.`;
   }
+  const split = sharedSubjectsSummaryForSemester(semesterNumber);
   return JSON.stringify(
     {
       semesterNumber,
-      bTechCse: entry.cse,
-      bTechEce: entry.ece,
+      sharedCseAndEce: split.shared,
+      cseOnly: split.cseOnly,
+      eceOnly: split.eceOnly,
+      crossBranchPhysics: split.crossBranchPhysics,
+      schedulingRule:
+        'Shared rows use the same faculty and the same clock time/room for CSE and ECE when the official grid says so; show both section names as a combined class.',
       excludedUnlessVerified: [...JNU_UNVERIFIED_COURSE_CODES],
     },
     null,

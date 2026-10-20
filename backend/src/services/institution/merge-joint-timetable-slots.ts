@@ -12,7 +12,7 @@ export async function mergeJointTimetableSlots(institutionId: string): Promise<n
     deletedAt: null,
     status: 'active',
   })
-    .select('_id dayOfWeek startTime endTime facultyId courseId room sectionName')
+    .select('_id dayOfWeek startTime endTime facultyId courseId room sectionId sectionName')
     .lean()
     .exec();
 
@@ -24,6 +24,7 @@ export async function mergeJointTimetableSlots(institutionId: string): Promise<n
       slot.endTime,
       String(slot.facultyId),
       String(slot.courseId),
+      String(slot.sectionId),
       slot.room.trim().toLowerCase(),
     ].join('|');
     const list = groups.get(key) ?? [];

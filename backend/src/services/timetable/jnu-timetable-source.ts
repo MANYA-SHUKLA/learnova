@@ -20,6 +20,11 @@ import type {
 } from './timetable-settler.js';
 import type { TimetableDayOfWeek } from '@learnova/types';
 import { JNU_BTECH_PROGRESSION_SEMESTERS } from './jnu-master-instructions.js';
+import {
+  isCrossBranchPhysicsPair,
+  isSharedCourseCode,
+  sharedSubjectsSummaryForSemester,
+} from './jnu-soe-monsoon-2026.js';
 
 export type JnuActivityType = 'lecture' | 'tutorial' | 'lab';
 
@@ -234,6 +239,54 @@ function findCourseForOfficialRow(
   );
 }
 
+function courseCodeFromSlotTitle(courseTitle: string): string {
+  const match = courseTitle.match(/^([A-Z0-9]+):/);
+  return match?.[1]?.toUpperCase() ?? '';
+}
+
+function sectionsCombinedLabel(labels: string[]): string {
+  const unique = [...new Set(labels.map((s) => s.trim()).filter(Boolean))];
+  unique.sort();
+  return unique.join(' + ');
+}
+
+/** Same clock time + room + faculty for shared CSE/ECE subjects → one combined class label on each row. */
+function applySharedConcurrentLabels(semesterNumber: number, slots: SettledSlot[]): void {
+  const byConcurrent = new Map<string, SettledSlot[]>();
+  for (const slot of slots) {
+    const key = `${slot.dayOfWeek}|${slot.startTime}|${slot.endTime}|${slot.facultyId}|${slot.room.trim().toLowerCase()}`;
+    const list = byConcurrent.get(key) ?? [];
+    list.push(slot);
+    byConcurrent.set(key, list);
+  }
+
+  for (const group of byConcurrent.values()) {
+    if (group.length < 2) continue;
+    const codes = group.map((s) => courseCodeFromSlotTitle(s.courseTitle));
+    const physicsPair =
+      group.length === 2 && codes[0] && codes[1] && isCrossBranchPhysicsPair(codes[0], codes[1]);
+    const allShared =
+      physicsPair || codes.every((code) => isSharedCourseCode(semesterNumber, code));
+    if (!allShared) continue;
+
+    const hasCse = group.some((s) => s.sectionName.includes('B.Tech CSE'));
+    const hasEce = group.some((s) => s.sectionName.includes('B.Tech ECE'));
+    if (!hasCse || !hasEce) continue;
+
+    const csePart =
+      group.find((s) => s.sectionName.includes('B.Tech CSE'))?.sectionName.split(' + ')[0]?.trim() ??
+      '';
+    const ecePart =
+      group.find((s) => s.sectionName.includes('B.Tech ECE'))?.sectionName.split(' + ')[0]?.trim() ??
+      '';
+    const combined = sectionsCombinedLabel([csePart, ecePart].filter(Boolean));
+    if (!combined) continue;
+    for (const slot of group) {
+      slot.sectionName = combined;
+    }
+  }
+}
+
 function slotCountBySectionPrefix(slots: SettledSlot[], prefix: 'CSE' | 'ECE'): number {
   let count = 0;
   for (const slot of slots) {
@@ -308,10 +361,26 @@ export function buildOfficialSettledSlots(
         mergeKey,
     );
     if (existing) {
-      const names = existing.sectionName.split(' + ').map((s) => s.trim());
-      if (!names.includes(row.sourceSectionLabel)) {
-        existing.sectionName = `${existing.sectionName} + ${row.sourceSectionLabel}`;
+      if (existing.sectionId === section.id) {
+        continue;
       }
+      const combined = sectionsCombinedLabel([
+        ...existing.sectionName.split(' + '),
+        row.sourceSectionLabel,
+      ]);
+      existing.sectionName = combined;
+      slotDocs.push({
+        dayOfWeek: row.dayOfWeek,
+        startTime: row.startTime,
+        endTime: row.endTime,
+        courseId: course.id,
+        courseTitle,
+        sectionId: section.id,
+        sectionName: combined,
+        facultyId,
+        facultyName: facultyDisplayName(facultyById, facultyId),
+        room: row.room,
+      });
       continue;
     }
 
@@ -329,12 +398,27 @@ export function buildOfficialSettledSlots(
     });
   }
 
+  applySharedConcurrentLabels(semesterNumber, slotDocs);
+
   const cseSlotCount = slotCountBySectionPrefix(slotDocs, 'CSE');
   const eceSlotCount = slotCountBySectionPrefix(slotDocs, 'ECE');
   const gap = Math.abs(cseSlotCount - eceSlotCount);
   if (cseSlotCount > 0 && eceSlotCount > 0 && gap > 4) {
     warnings.push(
       `CSE/ECE slot count uneven (${cseSlotCount} CSE vs ${eceSlotCount} ECE). Official source expects similar weekly load; re-run Monsoon seed if ECE rows are missing.`,
+    );
+  }
+
+  const sharedSummary = sharedSubjectsSummaryForSemester(semesterNumber);
+  const sharedCodes = [
+    ...sharedSummary.shared.map((r) => r.code),
+    ...(sharedSummary.crossBranchPhysics
+      ? [sharedSummary.crossBranchPhysics.cseCode, sharedSummary.crossBranchPhysics.eceCode]
+      : []),
+  ];
+  if (sharedCodes.length > 0) {
+    warnings.push(
+      `Shared CSE+ECE this semester: ${[...new Set(sharedCodes)].join(', ')} — scheduled at the same time/room when the official grid matches.`,
     );
   }
 
