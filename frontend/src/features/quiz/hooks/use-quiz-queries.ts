@@ -1,6 +1,8 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ApiClientError } from '@/lib/api/client';
+import { useSessionQueryEnabled } from '@/lib/auth/use-session-query-enabled';
 import { quizApi } from '../services/quiz-api';
 import type {
   BulkActionBody,
@@ -33,22 +35,31 @@ export const quizKeys = {
   institutionDash: () => [...quizKeys.all, 'dash', 'institution'] as const,
 };
 
+function authQueryRetry(failureCount: number, error: unknown): boolean {
+  if (error instanceof ApiClientError && error.status === 401) return false;
+  return failureCount < 2;
+}
+
 export function useQuizList(params: QuizListParams = {}, enabled = true) {
+  const sessionReady = useSessionQueryEnabled(enabled);
   return useQuery({
     queryKey: quizKeys.list(params),
     queryFn: () => quizApi.list(params),
-    enabled,
+    enabled: sessionReady,
     staleTime: 30_000,
     refetchOnMount: 'always',
+    retry: authQueryRetry,
   });
 }
 
 export function useQuiz(id: string, enabled = true) {
+  const sessionReady = useSessionQueryEnabled(enabled && Boolean(id));
   return useQuery({
     queryKey: quizKeys.detail(id),
     queryFn: () => quizApi.get(id),
-    enabled: enabled && Boolean(id),
+    enabled: sessionReady,
     staleTime: 30_000,
+    retry: authQueryRetry,
   });
 }
 
@@ -80,29 +91,35 @@ export function useQuestionList(params: QuestionListParams = {}, enabled = true)
 }
 
 export function useFacultyQuizDashboard(enabled = true) {
+  const sessionReady = useSessionQueryEnabled(enabled);
   return useQuery({
     queryKey: quizKeys.facultyDash(),
     queryFn: () => quizApi.facultyDashboard(),
-    enabled,
+    enabled: sessionReady,
     staleTime: 60_000,
+    retry: authQueryRetry,
   });
 }
 
 export function useStudentQuizDashboard(enabled = true) {
+  const sessionReady = useSessionQueryEnabled(enabled);
   return useQuery({
     queryKey: quizKeys.studentDash(),
     queryFn: () => quizApi.studentDashboard(),
-    enabled,
+    enabled: sessionReady,
     staleTime: 60_000,
+    retry: authQueryRetry,
   });
 }
 
 export function useInstitutionQuizDashboard(enabled = true) {
+  const sessionReady = useSessionQueryEnabled(enabled);
   return useQuery({
     queryKey: quizKeys.institutionDash(),
     queryFn: () => quizApi.institutionDashboard(),
-    enabled,
+    enabled: sessionReady,
     staleTime: 60_000,
+    retry: authQueryRetry,
   });
 }
 
