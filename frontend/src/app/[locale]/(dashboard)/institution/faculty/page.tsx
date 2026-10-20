@@ -1,6 +1,6 @@
 'use client';
 
-import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
+import { APP_ROUTES, PAGINATION, PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,
@@ -19,7 +19,6 @@ import {
   ArrowRight,
   Download,
   Plus,
-  List,
   Search,
   Upload,
   UserMinus,
@@ -72,10 +71,8 @@ export default function FacultyListPage() {
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<FacultyStatus | 'all'>('all');
-  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
   const [includeDeleted, setIncludeDeleted] = useState(false);
-  const [viewAll, setViewAll] = useState(false);
 
   const listFilters = useMemo(
     () => ({
@@ -88,25 +85,17 @@ export default function FacultyListPage() {
     [search, status, includeDeleted],
   );
 
-  const pagedParams = useMemo(
-    () => ({ ...listFilters, page, limit: 20 }),
-    [listFilters, page],
-  );
-
   const labels = useOrgLabels();
   const coursesQuery = useCourseList({ page: 1, limit: 500 });
-  const pagedQuery = useFacultyList(pagedParams, !viewAll);
-  const allQuery = useQuery({
-    queryKey: [...facultyKeys.list(listFilters), 'all'] as const,
+  const listQuery = useQuery({
+    queryKey: [...facultyKeys.list(listFilters), 'directory'] as const,
     queryFn: () =>
       fetchAllListPages((p, limit) =>
         facultyApi.list({ ...listFilters, page: p, limit }),
       ),
-    enabled: viewAll,
     staleTime: 30_000,
+    refetchOnMount: 'always',
   });
-
-  const listQuery = viewAll ? allQuery : pagedQuery;
   const statsQuery = useFacultyStats();
 
   const courseLabel = (courseId: string) => {
@@ -119,13 +108,8 @@ export default function FacultyListPage() {
   const bulkActivate = useBulkActivateFacultyMutation();
   const bulkSuspend = useBulkSuspendFacultyMutation();
 
-  const rows = viewAll
-    ? (allQuery.data?.items ?? [])
-    : (pagedQuery.data?.items ?? []);
-  const meta = viewAll ? undefined : pagedQuery.data?.meta;
-  const allTotal = viewAll ? allQuery.data?.total : meta?.total;
-  const stats = statsQuery.data;
-  const directoryTotal = stats?.total ?? meta?.total ?? allTotal ?? 0;
+  const rows = listQuery.data?.items ?? [];
+  const directoryTotal = listQuery.data?.total ?? statsQuery.data?.total ?? 0;
 
   const archiveSelected = () => {
     if (!selected.length) return;
