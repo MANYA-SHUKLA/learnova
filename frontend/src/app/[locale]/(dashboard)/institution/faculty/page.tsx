@@ -44,7 +44,6 @@ import {
   useBulkArchiveFacultyMutation,
   useBulkSuspendFacultyMutation,
   facultyKeys,
-  useFacultyList,
   useFacultyStats,
   useRestoreFacultyMutation,
 } from '@/features/faculty';
@@ -259,6 +258,7 @@ export default function FacultyListPage() {
             ) : (
               <DataTable
                 caption={t('directory')}
+                className="[&_.card-static]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:max-h-[min(65vh,52rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10"
                 loading={listQuery.isLoading}
                 data={rows}
                 rowKey={(row) => row.id}
@@ -310,7 +310,6 @@ export default function FacultyListPage() {
                         onClick={() => {
                           setStatus(s);
                           setIncludeDeleted(s === 'archived');
-                          setPage(1);
                         }}
                         className={cn(
                           'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
@@ -336,7 +335,6 @@ export default function FacultyListPage() {
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());
-                            setPage(1);
                           }
                         }}
                       />
@@ -347,7 +345,6 @@ export default function FacultyListPage() {
                       className="rounded-xl"
                       onClick={() => {
                         setSearch(q.trim());
-                        setPage(1);
                       }}
                     >
                       Search
