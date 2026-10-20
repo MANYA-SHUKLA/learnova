@@ -234,7 +234,7 @@ export function CourseImportPanel() {
               <SemesterSelect
                 label={t('defaultSemester')}
                 value={defaults.semesterIds?.[0] ?? ''}
-                academicYearId={academicYearId || undefined}
+                listParams={academicYearId ? { academicYearId } : undefined}
                 onChange={(value) => {
                   setDefaults((prev) => ({
                     ...prev,
@@ -276,7 +276,7 @@ export function CourseImportPanel() {
               <SemesterSelect
                 label={t('defaultSemester')}
                 value={semesterId}
-                academicYearId={academicYearId || undefined}
+                listParams={academicYearId ? { academicYearId } : undefined}
                 onChange={setSemesterId}
               />
               <ProgramSelect
