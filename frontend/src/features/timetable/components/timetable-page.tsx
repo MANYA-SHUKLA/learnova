@@ -19,6 +19,7 @@ import {
   Skeleton,
 } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
+import { useQueries } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { useMyFacultyProfile } from '@/features/faculty';
@@ -43,6 +44,7 @@ import {
 } from '@/features/institution';
 import { getApiErrorMessage } from '@/lib/api/client';
 import {
+  timetableKeys,
   useCreateTimetableMutation,
   useCreateTimetableSlotMutation,
   useDeleteTimetableSlotMutation,
@@ -52,9 +54,19 @@ import {
   useTimetables,
   useUpdateTimetableSlotMutation,
 } from '../hooks/use-timetable-queries';
+import { timetableApi } from '../services/timetable-api';
 import { WeeklyTimetableGrid } from './weekly-timetable-grid';
 
 const DAY_VALUES: TimetableDayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+/** Faculty semester filter: merge published timetables where mySlotCount > 0. */
+const FACULTY_ALL_TEACHING_SEMESTERS = '__all_teaching__';
+
+function facultyDefaultSemesterKey(items: Timetable[]): string {
+  const teaching = items.filter((row) => (row.mySlotCount ?? 0) > 0);
+  if (teaching.length === 0) return items[0]?.semesterId ?? '';
+  if (teaching.length === 1) return teaching[0]!.semesterId;
+  return FACULTY_ALL_TEACHING_SEMESTERS;
+}
 const TIME_PATTERN = /^(\d{1,2}):(\d{2})$/;
 const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
 const CALENDAR_TIME_ZONE = 'Asia/Kolkata';
@@ -153,6 +165,30 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     isFacultyReader,
   );
 
+  const publishedTimetableItems = publishedTimetablesQuery.data?.items ?? [];
+
+  const facultyTeachingTimetables = useMemo(
+    () =>
+      isFacultyReader
+        ? publishedTimetableItems.filter((row) => (row.mySlotCount ?? 0) > 0)
+        : [],
+    [isFacultyReader, publishedTimetableItems],
+  );
+
+  const facultyAllTeaching =
+    isFacultyReader && semesterId === FACULTY_ALL_TEACHING_SEMESTERS;
+
+  useEffect(() => {
+    if (!isFacultyReader || semesterId) return;
+    if (!publishedTimetablesQuery.isSuccess || publishedTimetableItems.length === 0) return;
+    setSemesterId(facultyDefaultSemesterKey(publishedTimetableItems));
+  }, [
+    isFacultyReader,
+    semesterId,
+    publishedTimetablesQuery.isSuccess,
+    publishedTimetableItems,
+  ]);
+
   const readerSemesterId = studentProfileQuery.data?.semesterId ?? '';
   const readerSectionId = studentProfileQuery.data?.sectionId ?? '';
 
@@ -176,11 +212,20 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       if (isStudentReader) {
         return readerSemesterId || semesterId || '';
       }
+      if (isFacultyReader) {
+        if (semesterId === FACULTY_ALL_TEACHING_SEMESTERS) {
+          return facultyTeachingTimetables[0]?.semesterId ?? '';
+        }
+        if (semesterId) return semesterId;
+        if (publishedTimetableItems.length > 0) {
+          return facultyDefaultSemesterKey(publishedTimetableItems);
+        }
+        return '';
+      }
       if (semesterId) return semesterId;
       if (readerSemesterId) return readerSemesterId;
-      const published = publishedTimetablesQuery.data?.items ?? [];
-      if (published.length > 0) {
-        return published[0]?.semesterId ?? '';
+      if (publishedTimetableItems.length > 0) {
+        return publishedTimetableItems[0]?.semesterId ?? '';
       }
       return '';
     }
@@ -196,7 +241,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     isAdmin,
     isStudentReader,
     readerSemesterId,
-    publishedTimetablesQuery.data?.items,
+    isFacultyReader,
+    facultyTeachingTimetables,
+    publishedTimetableItems,
     semestersData?.items,
   ]);
 
@@ -243,6 +290,18 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     Boolean(timetable?.id) && isAdmin,
   );
 
+  const facultyMergedSlotsQuery = useQueries({
+    queries: facultyTeachingTimetables.map((tt) => ({
+      queryKey: timetableKeys.slots(tt.id, { limit: 500, sortBy: 'startTime', sortOrder: 'asc' }),
+      queryFn: () =>
+        timetableApi.listSlots(tt.id, { limit: 500, sortBy: 'startTime', sortOrder: 'asc' }),
+      enabled:
+        facultyAllTeaching &&
+        Boolean(tt.id) &&
+        (!isFacultyReader || Boolean(readerFacultyId) || facultyProfileQuery.isError),
+    })),
+  });
+
   const gridSlotsQuery = useTimetableSlots(
     timetable?.id ?? '',
     {
@@ -256,6 +315,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           : undefined,
     },
     Boolean(timetable?.id) &&
+      !facultyAllTeaching &&
       (!isFacultyReader || Boolean(readerFacultyId) || facultyProfileQuery.isError) &&
       (!isStudentReader || Boolean(studentProfileQuery.data?.sectionId) || studentProfileQuery.isError),
   );
@@ -282,7 +342,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   }, [isAdmin, sectionFilter, slotsQuery.data?.items, search]);
 
   const gridSlots = useMemo(() => {
-    let items = gridSlotsQuery.data?.items ?? [];
+    let items = facultyAllTeaching
+      ? facultyMergedSlotsQuery.flatMap((query) => query.data?.items ?? [])
+      : (gridSlotsQuery.data?.items ?? []);
     if (isFacultyReader && readerFacultyId) {
       items = items.filter((slot) => slot.facultyId === readerFacultyId);
     }
@@ -298,6 +360,8 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     }
     return filterSlotsBySearch(items, search);
   }, [
+    facultyAllTeaching,
+    facultyMergedSlotsQuery,
     gridSlotsQuery.data?.items,
     sectionFilter,
     dayFilter,
@@ -306,6 +370,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     readerFacultyId,
     isStudentReader,
     studentProfileQuery.data?.sectionId,
+    isAdmin,
   ]);
 
   const readSectionOptions = useMemo(() => {
@@ -527,7 +592,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
   );
 
   const readSemesterOptions = useMemo(() => {
-    const items = publishedTimetablesQuery.data?.items ?? [];
+    const items = publishedTimetableItems;
     const bySemester = new Map<string, string>();
     for (const tt of items) {
       if (!bySemester.has(tt.semesterId)) {
@@ -535,8 +600,15 @@ export function TimetablePage({ mode }: TimetablePageProps) {
         bySemester.set(tt.semesterId, label);
       }
     }
-    return [...bySemester.entries()].map(([id, name]) => ({ id, name }));
-  }, [publishedTimetablesQuery.data?.items]);
+    const semesterRows = [...bySemester.entries()].map(([id, name]) => ({ id, name }));
+    if (isFacultyReader && facultyTeachingTimetables.length > 1) {
+      return [
+        { id: FACULTY_ALL_TEACHING_SEMESTERS, name: t('facultyAllTeachingSemesters') },
+        ...semesterRows,
+      ];
+    }
+    return semesterRows;
+  }, [facultyTeachingTimetables.length, isFacultyReader, publishedTimetableItems, t]);
 
   const semesterOptions = isAdmin
     ? [...(semestersData?.items ?? [])].sort((a, b) => a.number - b.number)
@@ -547,13 +619,14 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       : readSemesterOptions;
 
   const selectedSemesterName = useMemo(() => {
-    const fromOptions = semesterOptions.find((s) => s.id === selectedSemesterId)?.name;
+    if (facultyAllTeaching) return t('facultyAllTeachingSemesters');
+    const fromOptions = semesterOptions.find((s) => s.id === semesterId || s.id === selectedSemesterId)?.name;
     if (fromOptions) return fromOptions;
     if (timetable?.name) {
       return timetable.name.replace(/\s+timetable$/i, '').trim() || timetable.name;
     }
     return '';
-  }, [semesterOptions, selectedSemesterId, timetable?.name]);
+  }, [facultyAllTeaching, semesterId, semesterOptions, selectedSemesterId, t, timetable?.name]);
 
   const selectedYearName = useMemo(() => {
     const years = yearsData?.items ?? [];
@@ -657,7 +730,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
                     section: orgLabels.section(readerSectionId) || t('yourSection'),
                     year: selectedYearName || t('yourAcademicYear'),
                   })
-                : `${t('tableDescription')} ${t('gridSchoolViewHint')}`}
+                : isFacultyReader
+                  ? t('facultyClassViewHint')
+                  : `${t('tableDescription')} ${t('gridSchoolViewHint')}`}
             </CardDescription>
           </div>
           <div className="flex shrink-0 flex-nowrap items-center gap-2">
@@ -710,7 +785,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               <select
                 aria-label={t('selectSemester')}
                 className="flex h-10 w-56 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                value={selectedSemesterId}
+                value={
+                  isFacultyReader && semesterId ? semesterId : selectedSemesterId
+                }
                 disabled={!isAdmin && publishedTimetablesQuery.isLoading}
                 onChange={(e) => {
                   setSemesterId(e.target.value);

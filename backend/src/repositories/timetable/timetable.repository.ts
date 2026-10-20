@@ -64,6 +64,15 @@ export const timetableRepository = {
     }).exec();
   },
 
+  async countSlotsForFaculty(timetableId: string, facultyId: string) {
+    return TimetableSlotModel.countDocuments({
+      timetableId: new Types.ObjectId(timetableId),
+      facultyId: new Types.ObjectId(facultyId),
+      deletedAt: null,
+      status: 'active',
+    }).exec();
+  },
+
   async listSlots(
     timetableId: string,
     institutionId: string,

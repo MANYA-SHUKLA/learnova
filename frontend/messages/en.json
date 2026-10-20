@@ -966,6 +966,8 @@
       "allDays": "All days",
       "allSections": "All B.Tech sections",
       "gridSchoolViewHint": "Each cell can show several classes at the same clock time for different sections (CSE vs ECE vs year). That is normal. Pick one section in the filter to see a single student’s day. One section cannot have two classes at once; one faculty cannot be double-booked on new edits.",
+      "facultyClassViewHint": "Only your assigned class slots are shown. During Monsoon, you may teach more than one progression semester (e.g. Sem 5 and Sem 7) — use “All my classes” or pick the semester you teach. An empty grid usually means that semester is not yours (e.g. Sem 9).",
+      "facultyAllTeachingSemesters": "All my classes (Monsoon)",
       "studentClassViewHint": "Showing your class timetable only — {section} · {year}.",
       "yourSection": "Your section",
       "yourAcademicYear": "Your academic year",

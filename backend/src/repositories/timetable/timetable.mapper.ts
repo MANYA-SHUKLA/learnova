@@ -12,7 +12,11 @@ function toIso(value: Date | string | null | undefined): string | null {
   return value instanceof Date ? value.toISOString() : String(value);
 }
 
-export function timetableToDto(doc: TimetableDocument, slotCount = 0): Timetable {
+export function timetableToDto(
+  doc: TimetableDocument,
+  slotCount = 0,
+  mySlotCount?: number,
+): Timetable {
   return {
     id: String(doc._id),
     institutionId: String(doc.institutionId),
@@ -22,6 +26,7 @@ export function timetableToDto(doc: TimetableDocument, slotCount = 0): Timetable
     status: doc.status as TimetableStatus,
     publishedAt: toIso(doc.publishedAt),
     slotCount,
+    ...(mySlotCount !== undefined ? { mySlotCount } : {}),
     createdAt: toIso(doc.createdAt) ?? new Date().toISOString(),
     updatedAt: toIso(doc.updatedAt) ?? new Date().toISOString(),
   };

@@ -227,12 +227,38 @@ export class TimetableService {
       limit: query.limit,
     });
 
+    let facultyIdForList: string | null = null;
+    if (actor.role === 'faculty') {
+      const faculty = await FacultyModel.findOne({
+        institutionId: new Types.ObjectId(institutionId),
+        email: actor.email.toLowerCase(),
+        deletedAt: null,
+      })
+        .select('_id')
+        .lean()
+        .exec();
+      facultyIdForList = faculty ? String(faculty._id) : null;
+    }
+
     const items = await Promise.all(
       docs.map(async (doc) => {
-        const slotCount = await timetableRepository.countSlots(String(doc._id));
-        return timetableRepository.toDto(doc, slotCount);
+        const timetableId = String(doc._id);
+        const slotCount = await timetableRepository.countSlots(timetableId);
+        const mySlotCount =
+          facultyIdForList != null
+            ? await timetableRepository.countSlotsForFaculty(timetableId, facultyIdForList)
+            : undefined;
+        return timetableRepository.toDto(doc, slotCount, mySlotCount);
       }),
     );
+
+    if (actor.role === 'faculty' && facultyIdForList) {
+      items.sort((a, b) => {
+        const mine = (b.mySlotCount ?? 0) - (a.mySlotCount ?? 0);
+        if (mine !== 0) return mine;
+        return b.updatedAt.localeCompare(a.updatedAt);
+      });
+    }
 
     return { items, meta: pageMeta(total, query.page, query.limit) };
   }

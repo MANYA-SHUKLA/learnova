@@ -22,6 +22,8 @@ export interface Timetable {
   status: TimetableStatus;
   publishedAt: string | null;
   slotCount?: number;
+  /** Published slots assigned to the logged-in faculty member (faculty list API only). */
+  mySlotCount?: number;
   createdAt: string;
   updatedAt: string;
 }
