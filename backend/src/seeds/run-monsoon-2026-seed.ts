@@ -464,6 +464,7 @@ async function main(): Promise<void> {
           lastName: 'Gera',
           fullName: 'Gunjan Gera',
           sectionId: cseSem1Section,
+          semesterId: sem1.id,
           yearOfStudy: 1,
           currentSemester: 1,
           isActive: true,
