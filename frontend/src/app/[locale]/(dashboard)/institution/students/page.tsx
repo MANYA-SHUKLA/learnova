@@ -189,7 +189,7 @@ export default function StudentListPage() {
               ))}
         </StatGrid>
 
-        <Card className="directory-shell">
+        <Card directory>
           <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
               <CardTitle className="text-card-title">{t('directory')}</CardTitle>

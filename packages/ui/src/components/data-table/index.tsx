@@ -185,8 +185,9 @@ export function DataTable<T>({
           ) : null}
 
           <div
+            data-directory-table
             className={cn(
-              'overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-soft-md',
+              'relative z-[2] overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-soft-md',
               mobileRow && 'hidden md:block',
             )}
           >

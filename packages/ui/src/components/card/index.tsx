@@ -6,19 +6,26 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
   /** Subtle glass surface */
   glass?: boolean;
+  /** Directory / data-table shell — no card-static shine layer over inner tables */
+  directory?: boolean;
 }
 
-export function Card({ className, interactive = false, glass = false, ...props }: CardProps) {
-  return (
-    <div
-      className={cn(
-        'group',
-        interactive ? 'card-interactive' : glass ? 'card-glass' : 'card-static',
-        className,
-      )}
-      {...props}
-    />
-  );
+export function Card({
+  className,
+  interactive = false,
+  glass = false,
+  directory = false,
+  ...props
+}: CardProps) {
+  const surface = directory
+    ? 'directory-shell'
+    : interactive
+      ? 'card-interactive'
+      : glass
+        ? 'card-glass'
+        : 'card-static';
+
+  return <div className={cn('group', surface, className)} {...props} />;
 }
 
 export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {

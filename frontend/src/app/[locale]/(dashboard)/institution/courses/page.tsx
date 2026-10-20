@@ -154,7 +154,7 @@ export default function CourseListPage() {
               ))}
         </StatGrid>
 
-        <Card className="directory-shell">
+        <Card directory>
           <CardHeader className="pb-3">
             <CardTitle className="text-card-title">{t('catalog')}</CardTitle>
             <CardDescription>

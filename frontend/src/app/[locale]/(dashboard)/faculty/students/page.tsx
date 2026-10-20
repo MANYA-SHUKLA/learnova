@@ -23,21 +23,39 @@ import { ErrorState, useOrgLabels } from '@/features/institution';
 import { formatStudentStatus, studentKeys } from '@/features/student';
 import { studentApi } from '@/features/student/services/student-api';
 import { fetchAllListPages } from '@/lib/api/fetch-all-pages';
+import type { StudentStatus } from '@/features/student';
 import { Link } from '@/lib/i18n/routing';
+import { cn } from '@/lib/utils';
+
+const TABLE_PAGE_SIZE = 50;
+
+const STATUS_FILTERS: (StudentStatus | 'all')[] = [
+  'all',
+  'active',
+  'inactive',
+  'suspended',
+  'graduated',
+  'dropped',
+  'archived',
+];
 
 export default function FacultyStudentDirectoryPage() {
   const t = useTranslations('dashboard.faculty.students');
   const tInst = useTranslations('dashboard.institution.students');
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<StudentStatus | 'all'>('all');
+  const [page, setPage] = useState(1);
 
   const listFilters = useMemo(
     () => ({
       q: search || undefined,
+      status: status === 'all' ? undefined : status,
+      ...(status === 'archived' ? { includeDeleted: true as const } : {}),
       sortBy: 'fullName',
       sortOrder: 'asc' as const,
     }),
-    [search],
+    [search, status],
   );
 
   const labels = useOrgLabels();
@@ -46,13 +64,21 @@ export default function FacultyStudentDirectoryPage() {
     queryFn: () =>
       fetchAllListPages((p, limit) => studentApi.list({ ...listFilters, page: p, limit })),
     staleTime: 30_000,
+    refetchOnMount: 'always',
   });
 
   const rows = listQuery.data?.items ?? [];
-  const total = listQuery.data?.total ?? 0;
+  const directoryTotal = listQuery.data?.total ?? 0;
+  const tableTotalPages = Math.max(1, Math.ceil(rows.length / TABLE_PAGE_SIZE));
+  const tablePage = Math.min(page, tableTotalPages);
+  const pagedRows = useMemo(() => {
+    const start = (tablePage - 1) * TABLE_PAGE_SIZE;
+    return rows.slice(start, start + TABLE_PAGE_SIZE);
+  }, [rows, tablePage]);
 
   const runSearch = () => {
     setSearch(q.trim());
+    setPage(1);
   };
 
   return (
@@ -62,21 +88,15 @@ export default function FacultyStudentDirectoryPage() {
           eyebrow={t('eyebrow')}
           title={t('title')}
           description={t('description')}
-          actions={
-            <Button type="button" className="rounded-xl" onClick={runSearch}>
-              <Search className="size-4" />
-              {t('searchAction')}
-            </Button>
-          }
         />
 
-        <Card className="directory-shell">
+        <Card directory>
           <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
               <CardTitle className="text-card-title">{t('directory')}</CardTitle>
               <CardDescription>
-                {listQuery.isSuccess && total > 0
-                  ? t('showingAll', { count: total })
+                {listQuery.isSuccess && directoryTotal > 0
+                  ? t('showingAll', { count: directoryTotal })
                   : t('directoryDescription')}
               </CardDescription>
             </div>
@@ -94,10 +114,31 @@ export default function FacultyStudentDirectoryPage() {
             ) : (
               <DataTable
                 caption={t('directory')}
-                className="[&_.card-static]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:max-h-[min(65vh,52rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10"
                 loading={listQuery.isLoading}
-                data={rows}
+                data={pagedRows}
                 rowKey={(row) => row.id}
+                filters={
+                  <div className="flex flex-wrap gap-2">
+                    {STATUS_FILTERS.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          setStatus(s);
+                          setPage(1);
+                        }}
+                        className={cn(
+                          'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                          status === s
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-border text-muted-foreground hover:bg-muted/60',
+                        )}
+                      >
+                        {s === 'all' ? 'All' : formatStudentStatus(s)}
+                      </button>
+                    ))}
+                  </div>
+                }
                 toolbar={
                   <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
                     <div className="relative min-w-0 flex-1 sm:w-72">
@@ -118,6 +159,18 @@ export default function FacultyStudentDirectoryPage() {
                       {t('searchAction')}
                     </Button>
                   </div>
+                }
+                pagination={
+                  rows.length > 0
+                    ? {
+                        page: tablePage,
+                        totalPages: tableTotalPages,
+                        total: rows.length,
+                        hasNextPage: tablePage < tableTotalPages,
+                        hasPrevPage: tablePage > 1,
+                        onPageChange: setPage,
+                      }
+                    : undefined
                 }
                 emptyTitle={t('emptyTitle')}
                 emptyDescription={t('emptyDescription')}

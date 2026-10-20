@@ -102,7 +102,7 @@ export default function FacultyAssignmentsPage() {
           ))}
         </StatGrid>
 
-        <Card className="directory-shell overflow-hidden">
+        <Card directory>
           <CardHeader className="pb-3">
             <CardTitle className="text-card-title">{t('listTitle')}</CardTitle>
             <CardDescription>{t('listDescription')}</CardDescription>

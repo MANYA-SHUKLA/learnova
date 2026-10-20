@@ -179,7 +179,7 @@ export default function EnrollmentListPage() {
               ))}
         </StatGrid>
 
-        <Card className="directory-shell">
+        <Card directory>
           <CardHeader className="pb-3">
             <CardTitle className="text-card-title">{t('directory')}</CardTitle>
             <CardDescription>

@@ -197,7 +197,7 @@ export default function FacultyListPage() {
               ))}
         </StatGrid>
 
-        <Card className="directory-shell">
+        <Card directory>
           <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
               <CardTitle className="text-card-title">{t('directory')}</CardTitle>
@@ -468,8 +468,7 @@ export default function FacultyListPage() {
                   </>
                 )}
                 mobileRow={(row) => (
-                  <Card className="rounded-xl">
-                    <CardContent className="space-y-3 p-4">
+                  <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-soft-sm">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="font-medium">{row.fullName}</p>
@@ -492,8 +491,7 @@ export default function FacultyListPage() {
                           <ArrowRight className="size-4" />
                         </Link>
                       </Button>
-                    </CardContent>
-                  </Card>
+                  </div>
                 )}
               />
             )}

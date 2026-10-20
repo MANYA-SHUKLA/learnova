@@ -361,8 +361,8 @@
     @apply overflow-visible rounded-xl border border-border/80 bg-card text-card-foreground shadow-soft-sm;
   }
 
-  /** Shared card motion foundation */
-  .card-static,
+  /** Shared card motion foundation (directory shells opt out — tables must stay visible) */
+  .card-static:not(.directory-shell),
   .card-glass,
   .card-interactive,
   .card-metric {
@@ -389,7 +389,20 @@
       background-color 280ms ease;
   }
 
-  .card-static > *,
+  /** Directory lists use plain shell styling — no card-static shine layer over the table */
+  .directory-shell.card-static::before,
+  .directory-shell.card-static::after {
+    content: none;
+    display: none;
+  }
+
+  .directory-shell.card-static:hover {
+    transform: none;
+    box-shadow: var(--shadow-soft-sm);
+    border-color: hsl(var(--border));
+  }
+
+  .card-static:not(.directory-shell) > *,
   .card-glass > *,
   .card-interactive > *,
   .card-metric > *,
@@ -398,7 +411,12 @@
     z-index: 1;
   }
 
-  .card-static {
+  .directory-shell > .p-6,
+  .directory-shell [data-directory-table] {
+    z-index: 2;
+  }
+
+  .card-static:not(.directory-shell) {
     @apply rounded-xl border border-border bg-card text-card-foreground shadow-soft-md;
   }
 
@@ -411,7 +429,7 @@
   }
 
   /** Accent rail + shine sweep — static / glass / metric / directory */
-  .card-static::before,
+  .card-static:not(.directory-shell)::before,
   .card-glass::before,
   .card-metric::before,
   .directory-shell::before {
@@ -435,7 +453,7 @@
       opacity 320ms ease;
   }
 
-  .card-static::after,
+  .card-static:not(.directory-shell)::after,
   .card-glass::after,
   .card-metric::after {
     content: '';
@@ -453,7 +471,7 @@
     transition: transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .card-static:hover,
+  .card-static:not(.directory-shell):hover,
   .card-glass:hover,
   .card-metric:hover {
     transform: translateY(-5px) scale(1.01);
@@ -461,7 +479,7 @@
     box-shadow: var(--shadow-card-hover);
   }
 
-  .card-static:hover::before,
+  .card-static:not(.directory-shell):hover::before,
   .card-glass:hover::before,
   .card-metric:hover::before,
   .directory-shell:hover::before {
@@ -469,7 +487,7 @@
     opacity: 1;
   }
 
-  .card-static:hover::after,
+  .card-static:not(.directory-shell):hover::after,
   .card-glass:hover::after,
   .card-metric:hover::after {
     transform: translateX(140%) skewX(-12deg);

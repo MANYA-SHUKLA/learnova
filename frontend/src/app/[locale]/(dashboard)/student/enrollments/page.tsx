@@ -57,7 +57,7 @@ export default function StudentEnrollmentsPage() {
       <DashboardPage>
         <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
 
-        <Card className="directory-shell overflow-hidden">
+        <Card directory>
           <CardHeader className="pb-3">
             <CardTitle className="text-card-title">{t('myEnrollments')}</CardTitle>
             <CardDescription>{t('myEnrollmentsDescription')}</CardDescription>
