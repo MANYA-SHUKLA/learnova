@@ -22,6 +22,7 @@ import { DepartmentModel } from '../../models/department.model.js';
 import { ProgramModel } from '../../models/program.model.js';
 import { BatchModel } from '../../models/batch.model.js';
 import { SectionModel } from '../../models/section.model.js';
+import { SemesterModel } from '../../models/semester.model.js';
 import { getStorage } from '../../storage/index.js';
 import { logger } from '../../utils/logger/index.js';
 import {
@@ -769,16 +770,39 @@ export class StudentService {
 
   async bulkAssignSemester(input: StudentBulkAssignSemesterInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    const semester = await SemesterModel.findOne({
+      _id: new Types.ObjectId(input.semesterId),
+      institutionId: new Types.ObjectId(institutionId),
+      deletedAt: null,
+    })
+      .select('number academicYearId')
+      .lean()
+      .exec();
+    if (!semester) throw new NotFoundError('Semester not found');
+
+    const derivedCurrentSemester =
+      input.currentSemester ?? (semester.number > 0 ? semester.number : null);
+    const derivedYearOfStudy =
+      input.yearOfStudy ??
+      (semester.number > 0 ? Math.min(10, Math.max(1, Math.ceil(semester.number / 2))) : null);
+    const academicYearId =
+      input.academicYearId !== undefined && input.academicYearId !== null
+        ? input.academicYearId
+        : String(semester.academicYearId);
+
     const modified = await studentRepository.bulkAssignSemester(institutionId, input.ids, {
       semesterId: input.semesterId,
-      academicYearId: input.academicYearId,
-      currentSemester: input.currentSemester,
+      academicYearId,
+      currentSemester: derivedCurrentSemester,
+      yearOfStudy: derivedYearOfStudy,
     });
     await this.audit('student.updated', actor, institutionId, null, {
       bulk: true,
       action: 'assign_semester',
       semesterId: input.semesterId,
-      academicYearId: input.academicYearId,
+      academicYearId,
+      yearOfStudy: derivedYearOfStudy,
+      currentSemester: derivedCurrentSemester,
       modified,
     });
     return { modified };

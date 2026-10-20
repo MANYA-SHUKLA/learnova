@@ -280,6 +280,7 @@ export class StudentRepository {
       semesterId: string;
       academicYearId?: string | null;
       currentSemester?: number | null;
+      yearOfStudy?: number | null;
     },
   ): Promise<number> {
     const $set: Record<string, unknown> = { semesterId: toObjectId(input.semesterId) };
@@ -290,6 +291,9 @@ export class StudentRepository {
     }
     if (input.currentSemester !== undefined) {
       $set.currentSemester = input.currentSemester;
+    }
+    if (input.yearOfStudy !== undefined) {
+      $set.yearOfStudy = input.yearOfStudy;
     }
     const res = await StudentModel.updateMany(
       {

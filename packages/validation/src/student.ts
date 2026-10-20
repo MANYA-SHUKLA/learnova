@@ -163,6 +163,8 @@ export const studentBulkAssignSemesterSchema = z.object({
   semesterId: objectIdField,
   academicYearId: objectIdField.optional().nullable(),
   currentSemester: z.coerce.number().int().min(1).max(20).optional().nullable(),
+  /** Program year (1 = first year). Auto-derived from semester number when omitted. */
+  yearOfStudy: z.coerce.number().int().min(1).max(10).optional().nullable(),
 });
 
 export const studentBulkAssignBatchSchema = z.object({
