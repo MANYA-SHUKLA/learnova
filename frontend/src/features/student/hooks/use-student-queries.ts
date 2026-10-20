@@ -51,6 +51,8 @@ export function useMyStudentProfile(enabled = true) {
     queryKey: studentKeys.me(),
     queryFn: () => studentApi.getMe(),
     enabled,
+    staleTime: 30_000,
+    refetchOnMount: 'always',
   });
 }
 

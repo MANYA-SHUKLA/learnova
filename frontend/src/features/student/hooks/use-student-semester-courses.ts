@@ -33,7 +33,8 @@ export function useStudentSemesterCourses(enabled = true) {
   const profileQuery = useMyStudentProfile(enabled);
   const semesterId = profileQuery.data?.semesterId ?? null;
   const programId = profileQuery.data?.programId ?? null;
-  const profileReady = enabled && !profileQuery.isLoading;
+  const profileSettled =
+    enabled && (profileQuery.isSuccess || profileQuery.isError);
 
   const enrollmentsQuery = useMyEnrollments(
     {
@@ -41,8 +42,10 @@ export function useStudentSemesterCourses(enabled = true) {
       limit: PAGINATION.MAX_LIMIT,
       sortBy: 'enrollmentDate',
       sortOrder: 'desc',
+      ...(semesterId ? { semesterId } : {}),
+      ...(programId ? { programId } : {}),
     },
-    profileReady,
+    profileSettled,
   );
 
   const catalogQuery = useCourseList(
@@ -53,7 +56,7 @@ export function useStudentSemesterCourses(enabled = true) {
       ...(programId ? { programId } : {}),
       ...(semesterId ? { semesterId } : {}),
     },
-    profileReady && Boolean(semesterId),
+    profileSettled && Boolean(semesterId),
   );
 
   const catalogCourseIds = useMemo(
@@ -84,10 +87,7 @@ export function useStudentSemesterCourses(enabled = true) {
     catalogCourseIds,
     /** When true, only courses from the student's current semester should be shown. */
     restrictsToSemester: Boolean(semesterId),
-    isLoading:
-      profileQuery.isLoading ||
-      enrollmentsQuery.isLoading ||
-      (Boolean(semesterId) && catalogQuery.isLoading),
+    isLoading: profileQuery.isLoading || enrollmentsQuery.isLoading,
     isError: profileQuery.isError || enrollmentsQuery.isError || catalogQuery.isError,
     refetchEnrollments: enrollmentsQuery.refetch,
   };

@@ -65,7 +65,7 @@ export const enrollmentApi = {
     const { data, meta } = await apiClient.getWithMeta<{ items: Enrollment[] }>(
       `${API_ROUTES.ENROLLMENTS}${toQuery(params)}`,
     );
-    return { items: data.items, meta: meta ?? emptyMeta(params?.page, params?.limit) };
+    return { items: data?.items ?? [], meta: meta ?? emptyMeta(params?.page, params?.limit) };
   },
 
   stats: () => apiClient.get<EnrollmentStats>(`${API_ROUTES.ENROLLMENTS}/stats`),
@@ -76,7 +76,7 @@ export const enrollmentApi = {
     const { data, meta } = await apiClient.getWithMeta<{ items: Enrollment[] }>(
       `${API_ROUTES.ENROLLMENTS}/me${toQuery(params)}`,
     );
-    return { items: data.items, meta: meta ?? emptyMeta(params?.page, params?.limit) };
+    return { items: data?.items ?? [], meta: meta ?? emptyMeta(params?.page, params?.limit) };
   },
 
   create: (body: EnrollmentCreateBody) =>
