@@ -30,7 +30,7 @@ export default function FacultyProgressPage() {
   const [courseId, setCourseId] = useState('');
 
   const coursesQuery = useCourseList({ page: 1, limit: 50, sortBy: 'title', sortOrder: 'asc' });
-  const studentsQuery = useStudentList({ page: 1, limit: 200 });
+  const studentsQuery = useStudentList({ page: 1, limit: 100 });
   const studentLabel = (id: string) =>
     displayName(studentsQuery.data?.items, id, (student) => student.fullName) ?? 'Student';
   const courses = coursesQuery.data?.items ?? [];

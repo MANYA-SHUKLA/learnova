@@ -1,5 +1,8 @@
 'use client';
 
+import { PERMISSIONS } from '@learnova/constants';
+import { canAny } from '@/lib/auth/permissions';
+import { useAuth } from '@/providers/auth-provider';
 import { displayName, displayNames } from '../utils/display-name';
 import {
   useAcademicYears,
@@ -12,17 +15,28 @@ import {
   useSemesters,
 } from './use-institution-queries';
 
-const LIMIT = 200;
+const LIST = { limit: 100, page: 1 } as const;
+
+const CATALOG_READ = [
+  PERMISSIONS.INSTITUTION_READ,
+  PERMISSIONS.ERP_READ,
+  PERMISSIONS.COURSE_READ,
+  PERMISSIONS.TIMETABLE_READ,
+] as const;
 
 export function useOrgLabels() {
-  const campuses = useCampuses({ limit: LIMIT });
-  const schools = useSchools({ limit: LIMIT });
-  const departments = useDepartments({ limit: LIMIT });
-  const programs = usePrograms({ limit: LIMIT });
-  const years = useAcademicYears({ limit: LIMIT });
-  const semesters = useSemesters({ limit: LIMIT });
-  const sections = useSections({ limit: LIMIT });
-  const batches = useBatches({ limit: LIMIT });
+  const { user, permissions } = useAuth();
+  const catalogEnabled =
+    Boolean(user?.institutionId) && canAny(permissions, CATALOG_READ);
+
+  const campuses = useCampuses(LIST, catalogEnabled);
+  const schools = useSchools(LIST, catalogEnabled);
+  const departments = useDepartments(LIST, catalogEnabled);
+  const programs = usePrograms(LIST, catalogEnabled);
+  const years = useAcademicYears(LIST, catalogEnabled);
+  const semesters = useSemesters(LIST, catalogEnabled);
+  const sections = useSections(LIST, catalogEnabled);
+  const batches = useBatches(LIST, catalogEnabled);
 
   return {
     campus: (id: string | null | undefined) =>

@@ -16,7 +16,6 @@ import type {
 import { eventBus } from '../../events/index.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { StudentModel } from '../../models/student.model.js';
-import { FacultyModel } from '../../models/faculty.model.js';
 import { CourseModel } from '../../models/course.model.js';
 import { CourseModuleModel } from '../../models/course-module.model.js';
 import {
@@ -33,7 +32,10 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { progressRepository } from '../../repositories/progress/index.js';
-import { facultyCanAccessStudent } from '../access/faculty-scope.js';
+import {
+  facultyCanAccessCourse,
+  facultyCanAccessStudent,
+} from '../access/faculty-scope.js';
 import {
   clampPercent,
   computeCompletionPercentage,
@@ -195,20 +197,8 @@ export class ProgressService {
   ) {
     if (actor.role !== 'faculty') return;
 
-    const faculty = await FacultyModel.findOne({
-      institutionId: new Types.ObjectId(institutionId),
-      email: actor.email.toLowerCase(),
-      deletedAt: null,
-    }).exec();
-    if (!faculty) throw new ForbiddenError('Faculty record not found');
-
-    const course = await CourseModel.findOne({
-      _id: courseId,
-      institutionId: new Types.ObjectId(institutionId),
-      deletedAt: null,
-      $or: [{ facultyIds: faculty._id }, { coordinatorId: faculty._id }],
-    }).exec();
-    if (!course) throw new ForbiddenError('Access denied');
+    const allowed = await facultyCanAccessCourse(institutionId, actor.email, courseId);
+    if (!allowed) throw new ForbiddenError('Access denied');
   }
 
   private async audit(

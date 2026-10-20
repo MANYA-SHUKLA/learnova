@@ -183,6 +183,7 @@ mountResource(
   ctrl.campusControllers,
   createCampusSchema,
   updateCampusSchema,
+  orgCatalogRead,
 );
 mountResource(
   institutionRoutes,
@@ -190,6 +191,7 @@ mountResource(
   ctrl.schoolControllers,
   createSchoolSchema,
   updateSchoolSchema,
+  orgCatalogRead,
 );
 mountResource(
   institutionRoutes,
@@ -197,6 +199,7 @@ mountResource(
   ctrl.departmentControllers,
   createDepartmentSchema,
   updateDepartmentSchema,
+  orgCatalogRead,
 );
 mountResource(
   institutionRoutes,

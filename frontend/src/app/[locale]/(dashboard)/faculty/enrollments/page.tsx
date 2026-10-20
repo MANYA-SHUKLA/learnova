@@ -59,8 +59,8 @@ export default function FacultyEnrollmentsPage() {
   );
 
   const listQuery = useEnrollmentList(params);
-  const coursesQuery = useCourseList({ page: 1, limit: 200 });
-  const studentsQuery = useStudentList({ page: 1, limit: 200 });
+  const coursesQuery = useCourseList({ page: 1, limit: 100 });
+  const studentsQuery = useStudentList({ page: 1, limit: 100 });
   const courseLabel = (id: string) =>
     displayName(
       coursesQuery.data?.items,

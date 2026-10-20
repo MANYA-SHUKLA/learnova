@@ -14,7 +14,7 @@ export default function FacultyReportsPage() {
   const t = useTranslations('dashboard.faculty.reports');
   const [courseId, setCourseId] = useState('');
   const reportQuery = useFacultyReport(courseId, Boolean(courseId));
-  const studentsQuery = useStudentList({ page: 1, limit: 200 });
+  const studentsQuery = useStudentList({ page: 1, limit: 100 });
   const data = reportQuery.data;
 
   return (
