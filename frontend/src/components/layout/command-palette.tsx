@@ -46,7 +46,7 @@ function navForRole(role: string | undefined): CommandItem[] {
     { id: 'sdash', label: 'Dashboard', href: APP_ROUTES.STUDENT_DASHBOARD, group: 'Student' },
     { id: 'stimetable', label: 'Timetable', href: APP_ROUTES.STUDENT_TIMETABLE, group: 'Student' },
     { id: 'scourses', label: 'Courses', href: APP_ROUTES.STUDENT_ENROLLMENTS, group: 'Student' },
-    { id: 'slearn', label: 'Learning', href: APP_ROUTES.STUDENT_PROGRESS, group: 'Student' },
+    { id: 'slearn', label: 'Learning', href: APP_ROUTES.STUDENT_DASHBOARD, group: 'Student' },
     { id: 'sassign', label: 'Assignments', href: APP_ROUTES.STUDENT_ASSIGNMENTS, group: 'Work' },
     { id: 'sgrades', label: 'Grades', href: APP_ROUTES.STUDENT_GRADES, group: 'Work' },
     { id: 'scert', label: 'Certificates', href: APP_ROUTES.STUDENT_CERTIFICATES, group: 'Work' },

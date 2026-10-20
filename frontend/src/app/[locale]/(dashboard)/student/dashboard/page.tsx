@@ -9,8 +9,6 @@ import {
   CalendarClock,
   Flame,
   GraduationCap,
-  PlayCircle,
-  Sparkles,
   TrendingUp,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -72,7 +70,6 @@ export default function StudentDashboardPage() {
   const exams = examDash.data;
   const projects = projectDash.data;
   const upcomingAssignments = assignmentsQuery.data?.items ?? [];
-  const continueCourse = progress?.continueLearning?.[0];
 
   const todayTasks: DashboardTaskItem[] = useMemo(
     () =>
@@ -127,53 +124,7 @@ export default function StudentDashboardPage() {
               ? t('modulesIntro')
               : t('academicStandingMissing')
         }
-        meta={
-          <div className="flex flex-wrap items-center gap-2">
-            {progress?.currentStreakDays ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-2.5 py-1 text-caption font-medium text-warning">
-                <Flame className="size-3.5" />
-                {progress.currentStreakDays} day streak
-              </span>
-            ) : null}
-          </div>
-        }
       />
-
-      {continueCourse ? (
-        <motion.div {...fadeUp} transition={{ duration: 0.35 }}>
-          <Card interactive glass className="overflow-hidden">
-            <CardContent className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-caption font-medium text-primary">
-                  <Sparkles className="size-3.5" />
-                  Continue learning
-                </div>
-                <div>
-                  <p className="text-section-title">{continueCourse.courseTitle}</p>
-                  <p className="mt-1 text-caption">
-                    {continueCourse.estimatedRemainingMinutes} min remaining ·{' '}
-                    {continueCourse.progressPercentage}% complete
-                  </p>
-                </div>
-                <div className="h-2 max-w-md overflow-hidden rounded-full bg-muted">
-                  <motion.div
-                    className="h-full rounded-full bg-brand-gradient"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${continueCourse.progressPercentage}%` }}
-                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                  />
-                </div>
-              </div>
-              <Button asChild size="lg" className="rounded-xl">
-                <Link href={`${APP_ROUTES.STUDENT_PROGRESS}/course/${continueCourse.courseId}`}>
-                  <PlayCircle className="size-4" />
-                  Resume lesson
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : null}
 
       <motion.div {...fadeUp} transition={{ duration: 0.35, delay: 0.04 }}>
         <StatGrid>
@@ -317,7 +268,7 @@ export default function StudentDashboardPage() {
               </div>
               <DashboardQuickActions
                 actions={[
-                  { label: 'Learning', href: APP_ROUTES.STUDENT_PROGRESS, icon: BookOpen },
+                  { label: 'Learning', href: APP_ROUTES.STUDENT_ENROLLMENTS, icon: BookOpen },
                   { label: 'Assignments', href: APP_ROUTES.STUDENT_ASSIGNMENTS, icon: CalendarClock },
                   { label: 'Grades', href: APP_ROUTES.STUDENT_GRADES, icon: Award },
                   { label: 'Certificates', href: APP_ROUTES.STUDENT_CERTIFICATES, icon: GraduationCap },

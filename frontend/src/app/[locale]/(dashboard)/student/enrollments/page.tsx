@@ -11,25 +11,20 @@ import {
   CardTitle,
   DataTable,
   PageHeader,
-  Spinner,
 } from '@learnova/ui';
 import { BookOpen, XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
-import { CourseSelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { displayName, ErrorState } from '@/features/institution';
 import { useCourseList } from '@/features/course';
 import {
   formatEnrollmentStatus,
   useLeaveWaitlistMutation,
-  useSelfEnrollMutation,
   useWaitlist,
   useWithdrawEnrollmentMutation,
 } from '@/features/enrollment';
 import { useStudentSemesterCourses } from '@/features/student';
-import { ApiClientError } from '@/lib/api/client';
 
 export default function StudentEnrollmentsPage() {
   const t = useTranslations('dashboard.student.enrollments');
@@ -48,87 +43,16 @@ export default function StudentEnrollmentsPage() {
       (course) => `${course.courseCode} — ${course.title}`,
     ) ?? '—';
   const waitlistQuery = useWaitlist();
-  const selfEnrollMutation = useSelfEnrollMutation();
   const withdrawMutation = useWithdrawEnrollmentMutation();
   const leaveWaitlistMutation = useLeaveWaitlistMutation();
 
-  const [courseId, setCourseId] = useState('');
-  const [error, setError] = useState<string | null>(null);
-
   const enrollments = semesterCourses.enrollments;
   const waitlist = waitlistQuery.data?.items ?? [];
-  const enrolledCourseIds = enrollments.map((row) => row.courseId);
-
-  const onSelfEnroll = async () => {
-    setError(null);
-    if (!courseId.trim()) {
-      setError('Please select a course');
-      return;
-    }
-    try {
-      await selfEnrollMutation.mutateAsync({ courseId: courseId.trim() });
-      setCourseId('');
-    } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : 'Self enrollment failed');
-    }
-  };
 
   return (
     <PermissionGate permission={PERMISSIONS.ENROLLMENT_READ} enforce>
       <DashboardPage>
         <PageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
-
-        <PermissionGate permission={PERMISSIONS.ENROLLMENT_WRITE}>
-          <Card className="rounded-xl border-border/80 shadow-soft-md">
-            <CardHeader>
-              <CardTitle className="text-card-title">{t('selfEnrollTitle')}</CardTitle>
-              <CardDescription>{t('selfEnrollDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {error ? (
-                <p className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
-                  {error}
-                </p>
-              ) : null}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <CourseSelect
-                  className="flex-1"
-                  label="Course"
-                  value={courseId}
-                  listParams={{
-                    status: 'published',
-                    ...(semesterCourses.programId
-                      ? { programId: semesterCourses.programId }
-                      : {}),
-                    ...(semesterCourses.semesterId
-                      ? { semesterId: semesterCourses.semesterId }
-                      : {}),
-                  }}
-                  filterSemesterIds={
-                    semesterCourses.semesterId ? [semesterCourses.semesterId] : undefined
-                  }
-                  excludeIds={enrolledCourseIds}
-                  disabled={selfEnrollMutation.isPending}
-                  onChange={setCourseId}
-                />
-                <Button
-                  className="rounded-xl sm:mb-0.5"
-                  onClick={() => void onSelfEnroll()}
-                  disabled={selfEnrollMutation.isPending || !courseId.trim()}
-                >
-                  {selfEnrollMutation.isPending ? (
-                    <>
-                      <Spinner size="sm" />
-                      Enrolling…
-                    </>
-                  ) : (
-                    'Enroll'
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </PermissionGate>
 
         <Card className="directory-shell overflow-hidden">
           <CardHeader className="pb-3">

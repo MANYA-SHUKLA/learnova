@@ -2587,15 +2587,13 @@
       "enrollments": {
         "eyebrow": "Learning",
         "title": "My Enrollments",
-        "description": "View your course enrollments and request new courses.",
-        "selfEnrollTitle": "Enroll in a course",
-        "selfEnrollDescription": "Enter a course ID to request enrollment. Approval may be required.",
+        "description": "View your course enrollments for the current semester.",
         "myEnrollments": "My enrollments",
         "myEnrollmentsDescription": "Your active and past course enrollments.",
         "waitlist": "Waitlist",
         "waitlistDescription": "Courses you are waiting to enroll in.",
         "emptyTitle": "No enrollments yet",
-        "emptyDescription": "Use the form above to enroll in your first course."
+        "emptyDescription": "Your institution will enroll you in semester courses. Check back after registration."
       },
       "progress": {
         "eyebrow": "Learning",

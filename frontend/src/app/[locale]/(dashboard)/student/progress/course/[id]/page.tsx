@@ -61,7 +61,7 @@ export default function StudentCourseProgressPage() {
       <div className="space-y-8">
         <div className="space-y-3">
           <Button asChild variant="ghost" size="sm">
-            <Link href={APP_ROUTES.STUDENT_PROGRESS}>
+            <Link href={APP_ROUTES.STUDENT_DASHBOARD}>
               <ArrowLeft className="size-4" />
               {t('back')}
             </Link>

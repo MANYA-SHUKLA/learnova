@@ -480,9 +480,9 @@ async function main(): Promise<void> {
     logger.info({ semesterNumber, slots: slotDocs.length, timetableId: String(timetable._id) }, 'Timetable seeded');
   }
 
-  const cseSem1Section = sectionCache.get('B.Tech CSE Sem I');
-  if (cseSem1Section) {
-    const sem1 = semesterByNumber.get(1)!;
+  const cseSem7Section = sectionCache.get('B.Tech CSE Sem VII');
+  if (cseSem7Section) {
+    const sem7 = semesterByNumber.get(7)!;
     const cseProgram = programs.get('BT-CSE')!;
     const cseDepartmentId = departments.get('CSE')!;
 
@@ -498,7 +498,7 @@ async function main(): Promise<void> {
           institutionId: institutionOid,
           programId: cseProgram.id,
           name: 'B.Tech CSE',
-          year: 2026,
+          year: 2022,
           status: 'active',
           deletedAt: null,
         })
@@ -507,9 +507,9 @@ async function main(): Promise<void> {
 
     const programDuration = DEFAULT_PROGRAM_DURATION_YEARS;
     const expectedGraduationDate = computeExpectedGraduationDate({
-      yearOfStudy: 1,
+      yearOfStudy: 4,
       programDuration,
-      admissionDate: new Date('2026-07-01'),
+      admissionDate: new Date('2022-07-01'),
     });
 
     const gunjanStudent = await StudentModel.findOneAndUpdate(
@@ -519,16 +519,16 @@ async function main(): Promise<void> {
           firstName: 'Gunjan',
           lastName: 'Gera',
           fullName: 'Gunjan Gera',
-          sectionId: cseSem1Section,
-          semesterId: sem1.id,
+          sectionId: cseSem7Section,
+          semesterId: sem7.id,
           academicYearId: year._id,
           programId: cseProgram.id,
           departmentId: cseDepartmentId,
           batchId: cseBatch._id,
           programDuration,
           expectedGraduationDate,
-          yearOfStudy: 1,
-          currentSemester: 1,
+          yearOfStudy: 4,
+          currentSemester: 7,
           isActive: true,
           status: 'active',
         },
@@ -543,9 +543,9 @@ async function main(): Promise<void> {
     );
     await ensurePassword(STUDENT_LOGIN_EMAIL, 'Gunjan', 'Gera', 'student', institutionId);
 
-    const sem1Courses = await CourseModel.find({
+    const sem7Courses = await CourseModel.find({
       institutionId: institutionOid,
-      semesterIds: sem1.id,
+      semesterIds: sem7.id,
       programIds: cseProgram.id,
       status: 'published',
       deletedAt: null,
@@ -554,8 +554,8 @@ async function main(): Promise<void> {
       .lean();
     const defaultFacultyId = facultyByCode.get('KR')?.id ?? null;
 
-    for (let index = 0; index < sem1Courses.length; index++) {
-      const courseId = sem1Courses[index]!._id;
+    for (let index = 0; index < sem7Courses.length; index++) {
+      const courseId = sem7Courses[index]!._id;
       await EnrollmentModel.findOneAndUpdate(
         {
           institutionId: institutionOid,
@@ -568,8 +568,8 @@ async function main(): Promise<void> {
             departmentId: cseDepartmentId,
             programId: cseProgram.id,
             academicYearId: year._id,
-            semesterId: sem1.id,
-            sectionId: cseSem1Section,
+            semesterId: sem7.id,
+            sectionId: cseSem7Section,
             facultyId: defaultFacultyId,
             status: 'active',
             approvalStatus: 'approved',
@@ -578,13 +578,13 @@ async function main(): Promise<void> {
             enrollmentDate: new Date(),
           },
           $setOnInsert: {
-            enrollmentNumber: `ENR-M26-${String(index + 1).padStart(3, '0')}`,
+            enrollmentNumber: `ENR-M26-S7-${String(index + 1).padStart(3, '0')}`,
           },
         },
         { upsert: true, setDefaultsOnInsert: true },
       );
     }
-    logger.info({ enrollments: sem1Courses.length }, 'Demo student Sem I enrollments ensured');
+    logger.info({ enrollments: sem7Courses.length }, 'Demo student Sem VII enrollments ensured');
   }
 
   // Odd Monsoon term active; archive M.Tech/Ph.D clutter when seeding B.Tech-only.
