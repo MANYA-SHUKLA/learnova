@@ -23,6 +23,7 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { displayName, EmptyState, ErrorState } from '@/features/institution';
+import { filterByStudentSemesterCourses, useStudentSemesterCourses } from '@/features/student';
 import { useCourseList } from '@/features/course';
 import {
   ActivityTimeline,
@@ -51,7 +52,12 @@ export default function StudentProgressPage() {
   const resetFilters = useProgressStore((s) => s.resetFilters);
 
   const [submittedSearch, setSubmittedSearch] = useState('');
-  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const semesterCourses = useStudentSemesterCourses();
+  const coursesQuery = useCourseList({
+    page: 1,
+    limit: 200,
+    ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
+  });
   const courseLabel = (id: string) =>
     displayName(coursesQuery.data?.items, id, (course) => `${course.courseCode} — ${course.title}`) ??
     'Course';
@@ -74,7 +80,11 @@ export default function StudentProgressPage() {
   const listQuery = useMyProgress(listParams);
 
   const dashboard = dashboardQuery.data;
-  const courses = listQuery.data?.items ?? [];
+  const courses = filterByStudentSemesterCourses(
+    listQuery.data?.items ?? [],
+    semesterCourses.courseIds,
+    semesterCourses.restrictsToSemester,
+  );
 
   const stats = [
     {

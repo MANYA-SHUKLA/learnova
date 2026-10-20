@@ -26,6 +26,11 @@ import {
   useNotes,
   useUpdateNoteMutation,
 } from '@/features/progress';
+import {
+  filterByStudentSemesterCourses,
+  semesterCoursePickerRows,
+  useStudentSemesterCourses,
+} from '@/features/student';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
@@ -44,7 +49,12 @@ export default function StudentNotesPage() {
   const [addCourseId, setAddCourseId] = useState('');
   const [addLessonId, setAddLessonId] = useState('');
   const [addText, setAddText] = useState('');
-  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const semesterCourses = useStudentSemesterCourses();
+  const coursesQuery = useCourseList({
+    page: 1,
+    limit: 200,
+    ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
+  });
   const myProgressQuery = useMyProgress({ page: 1, limit: 100 });
   const addCourseProgressQuery = useCourseProgress(addCourseId, Boolean(addCourseId));
   const courseLabel = (id: string) =>
@@ -66,8 +76,15 @@ export default function StudentNotesPage() {
   const updateMutation = useUpdateNoteMutation();
   const deleteMutation = useDeleteNoteMutation();
   const createMutation = useCreateNoteMutation();
-  const items = listQuery.data?.items ?? [];
-  const enrolledCourses = myProgressQuery.data?.items ?? [];
+  const items = filterByStudentSemesterCourses(
+    listQuery.data?.items ?? [],
+    semesterCourses.courseIds,
+    semesterCourses.restrictsToSemester,
+  );
+  const enrolledCourses = semesterCoursePickerRows(
+    semesterCourses.enrollments,
+    myProgressQuery.data?.items ?? [],
+  );
   const lessonOptions = useMemo(() => {
     const modules = addCourseProgressQuery.data?.modules ?? [];
     return modules.flatMap((mod) =>
@@ -150,7 +167,10 @@ export default function StudentNotesPage() {
               <Card className="rounded-xl border-primary/20 bg-muted/30">
                 <CardContent className="space-y-4 p-4">
                   <p className="text-sm text-muted-foreground">{t('addNoteHint')}</p>
-                  {myProgressQuery.isLoading ? (
+                  {semesterCourses.restrictsToSemester ? (
+                    <p className="text-xs text-muted-foreground">{t('semesterCoursesHint')}</p>
+                  ) : null}
+                  {semesterCourses.isLoading || myProgressQuery.isLoading ? (
                     <Skeleton className="h-9 w-full rounded-xl" />
                   ) : enrolledCourses.length === 0 ? (
                     <p className="text-sm text-muted-foreground">{t('noCoursesEnrolled')}</p>

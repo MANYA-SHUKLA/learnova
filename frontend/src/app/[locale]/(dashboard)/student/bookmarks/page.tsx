@@ -27,6 +27,11 @@ import {
   useDeleteBookmarkMutation,
   useMyProgress,
 } from '@/features/progress';
+import {
+  filterByStudentSemesterCourses,
+  semesterCoursePickerRows,
+  useStudentSemesterCourses,
+} from '@/features/student';
 import { cn } from '@/lib/utils';
 
 const selectClassName = cn(
@@ -45,7 +50,12 @@ export default function StudentBookmarksPage() {
   const [addLessonId, setAddLessonId] = useState('');
   const [addResourceId, setAddResourceId] = useState('');
   const [addNote, setAddNote] = useState('');
-  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const semesterCourses = useStudentSemesterCourses();
+  const coursesQuery = useCourseList({
+    page: 1,
+    limit: 200,
+    ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
+  });
   const myProgressQuery = useMyProgress({ page: 1, limit: 100 });
   const addCourseProgressQuery = useCourseProgress(addCourseId, Boolean(addCourseId));
   const courseLabel = (id: string) =>
@@ -66,8 +76,15 @@ export default function StudentBookmarksPage() {
   const listQuery = useBookmarks(params);
   const deleteMutation = useDeleteBookmarkMutation();
   const createMutation = useCreateBookmarkMutation();
-  const items = listQuery.data?.items ?? [];
-  const enrolledCourses = myProgressQuery.data?.items ?? [];
+  const items = filterByStudentSemesterCourses(
+    listQuery.data?.items ?? [],
+    semesterCourses.courseIds,
+    semesterCourses.restrictsToSemester,
+  );
+  const enrolledCourses = semesterCoursePickerRows(
+    semesterCourses.enrollments,
+    myProgressQuery.data?.items ?? [],
+  );
   const modules = addCourseProgressQuery.data?.modules ?? [];
   const selectedModule = modules.find((mod) => mod.id === addModuleId);
   const lessonOptions = useMemo(() => {
@@ -174,7 +191,10 @@ export default function StudentBookmarksPage() {
               <Card className="rounded-xl border-primary/20 bg-muted/30">
                 <CardContent className="space-y-4 p-4">
                   <p className="text-sm text-muted-foreground">{t('addBookmarkHint')}</p>
-                  {myProgressQuery.isLoading ? (
+                  {semesterCourses.restrictsToSemester ? (
+                    <p className="text-xs text-muted-foreground">{t('semesterCoursesHint')}</p>
+                  ) : null}
+                  {semesterCourses.isLoading || myProgressQuery.isLoading ? (
                     <Skeleton className="h-9 w-full rounded-xl" />
                   ) : enrolledCourses.length === 0 ? (
                     <p className="text-sm text-muted-foreground">{t('noCoursesEnrolled')}</p>

@@ -29,6 +29,7 @@ import {
   useWaitlist,
   useWithdrawEnrollmentMutation,
 } from '@/features/enrollment';
+import { useStudentSemesterCourses } from '@/features/student';
 import { ApiClientError } from '@/lib/api/client';
 
 export default function StudentEnrollmentsPage() {
