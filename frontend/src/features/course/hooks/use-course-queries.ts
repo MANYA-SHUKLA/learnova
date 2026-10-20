@@ -143,7 +143,10 @@ export function useBulkUnpublishCourseMutation() {
 export function useCourseImportMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (rows: Record<string, string>[]) => courseApi.import(rows, false),
+    mutationFn: (input: {
+      rows: Record<string, string>[];
+      defaults?: { programIds?: string[]; semesterIds?: string[]; departmentId?: string };
+    }) => courseApi.import(input.rows, false, input.defaults),
     onSuccess: () => { invalidateCourse(queryClient); },
   });
 }

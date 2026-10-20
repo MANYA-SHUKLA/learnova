@@ -6,7 +6,7 @@ import type {
   TimetableDayOfWeek,
   TimetableSlot,
 } from '@learnova/types';
-import { PERMISSIONS } from '@learnova/constants';
+import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,
@@ -18,7 +18,9 @@ import {
   Input,
   Skeleton,
 } from '@learnova/ui';
+import { Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/lib/i18n/routing';
 import { useQueries } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
@@ -660,6 +662,12 @@ export function TimetablePage({ mode }: TimetablePageProps) {
           isAdmin ? (
             <PermissionGate permission={PERMISSIONS.TIMETABLE_MANAGE}>
               <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={APP_ROUTES.INSTITUTION_COURSES_IMPORT}>
+                    <Upload className="size-4" />
+                    {t('importCourses')}
+                  </Link>
+                </Button>
                 {!timetable ? (
                   <Button
                     type="button"

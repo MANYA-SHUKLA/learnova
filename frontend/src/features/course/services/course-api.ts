@@ -116,10 +116,15 @@ export const courseApi = {
       dryRun: true,
     }),
 
-  import: (rows: Record<string, string>[], dryRun = false) =>
+  import: (
+    rows: Record<string, string>[],
+    dryRun = false,
+    defaults?: { programIds?: string[]; semesterIds?: string[]; departmentId?: string },
+  ) =>
     apiClient.post<CourseImportResult & CourseImportPreview>(`${API_ROUTES.COURSES}/import`, {
       rows,
       dryRun,
+      ...(defaults ? { defaults } : {}),
     }),
 
   uploadThumbnail: (id: string, body: CourseThumbnailUploadBody) =>
