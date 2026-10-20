@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { CourseSelect, SemesterSelect } from '@/components/shared/entity-selects';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { useCourseList } from '@/features/course';
+import { useEnrollmentList } from '@/features/enrollment';
 import { getApiErrorMessage } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
 import { useCreateAssignmentMutation, usePublishAssignmentMutation } from '../hooks/use-assignment-queries';
@@ -34,6 +35,13 @@ export function GiveAssignmentForm() {
     ...(semesterId ? { semesterId } : {}),
   });
 
+  const enrollmentQuery = useEnrollmentList(
+    courseId ? { courseId, page: 1, limit: 1 } : undefined,
+    Boolean(courseId),
+  );
+
+  const enrollmentCount = enrollmentQuery.data?.meta?.total ?? 0;
+
   const courseOptions = coursesQuery.data?.items ?? [];
 
   const reset = () => {
@@ -57,9 +65,19 @@ export function GiveAssignmentForm() {
         dueDate: dueDate ? new Date(dueDate).toISOString() : null,
         assignmentType: 'homework',
       });
-      await publishMutation.mutateAsync(created.id);
+      const published = await publishMutation.mutateAsync(created.id);
       reset();
-      setSuccess(t('given'));
+      const count =
+        published.activeEnrollmentCount ??
+        enrollmentQuery.data?.meta?.total ??
+        enrollmentCount;
+      if (published.noActiveEnrollments || count === 0) {
+        setSuccess(t('givenNoEnrollments'));
+      } else if (count === 1) {
+        setSuccess(t('givenWithCountOne'));
+      } else {
+        setSuccess(t('givenWithCount', { count }));
+      }
     } catch (err) {
       setError(getApiErrorMessage(err, t('giveError')));
     }
@@ -72,6 +90,14 @@ export function GiveAssignmentForm() {
     }
     return semesterId ? t('courseHintFiltered') : t('courseHint');
   }, [courseOptions.length, coursesQuery.isLoading, semesterId, t]);
+
+  const enrollmentHint = useMemo(() => {
+    if (!courseId) return null;
+    if (enrollmentQuery.isLoading) return null;
+    if (enrollmentCount === 0) return t('enrollmentNone');
+    if (enrollmentCount === 1) return t('enrollmentVisibleOne');
+    return t('enrollmentVisible', { count: enrollmentCount });
+  }, [courseId, enrollmentCount, enrollmentQuery.isLoading, t]);
 
   return (
     <PermissionGate permission={PERMISSIONS.ASSIGNMENT_WRITE} fallback={null}>
@@ -108,6 +134,7 @@ export function GiveAssignmentForm() {
                 setSuccess(null);
               }}
             />
+            <p className="text-xs text-muted-foreground sm:col-span-2">{t('semesterFilterHint')}</p>
             {courseOptions.length > 0 ? (
               <div className="space-y-2 sm:col-span-2">
                 <p className="text-xs font-medium text-muted-foreground">{t('yourCourses')}</p>
@@ -133,6 +160,16 @@ export function GiveAssignmentForm() {
                   ))}
                 </div>
               </div>
+            ) : null}
+            {enrollmentHint ? (
+              <p
+                className={cn(
+                  'text-sm sm:col-span-2',
+                  enrollmentCount === 0 ? 'text-destructive' : 'text-muted-foreground',
+                )}
+              >
+                {enrollmentHint}
+              </p>
             ) : null}
             <div className="space-y-1.5 sm:col-span-2">
               <label htmlFor="assignment-title" className="text-sm font-medium">
