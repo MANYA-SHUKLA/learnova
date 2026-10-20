@@ -59,10 +59,10 @@ export const backendEnvSchema = baseEnvSchema
       .enum(['true', 'false', '1', '0'])
       .default('false')
       .transform((v) => v === 'true' || v === '1'),
-    /** Inbox for demo confirmations and platform alerts */
+    /** SOE / institution ops inbox (demo meeting copies, campus admin alerts) */
     PLATFORM_ADMIN_EMAIL: z.string().email().default('work.shuklamanya@gmail.com'),
-    /** Seed target for super admin user (local/dev) */
-    SUPER_ADMIN_EMAIL: z.string().email().default('work.shuklamanya@gmail.com'),
+    /** Platform console super admin (seed user + new demo request notifications) */
+    SUPER_ADMIN_EMAIL: z.string().email().default('shuklamanya99@gmail.com'),
     SUPER_ADMIN_PASSWORD: z.string().min(8).optional(),
     DEFAULT_INSTITUTION_SLUG: z.string().optional(),
   });

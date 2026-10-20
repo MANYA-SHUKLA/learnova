@@ -57,7 +57,6 @@ export function SiteHeader({
       ? ([
           { href: '/#modules', labelKey: 'features' as const },
           { href: '/#pricing', labelKey: 'pricing' as const },
-          { href: '/#campuses', labelKey: 'campuses' as const },
           { href: '/#faq', labelKey: 'faq' as const },
           { href: '/contact', labelKey: 'contact' as const },
         ] as const)
@@ -84,7 +83,7 @@ export function SiteHeader({
               {'labelKey' in link && link.labelKey === 'privacy'
                 ? tCommon('privacy')
                 : t(
-                    link.labelKey as 'contact' | 'features' | 'pricing' | 'faq' | 'campuses',
+                    link.labelKey as 'contact' | 'features' | 'pricing' | 'faq',
                   )}
             </Link>
           ))}
@@ -135,7 +134,7 @@ export function SiteHeader({
                   {'labelKey' in link && link.labelKey === 'privacy'
                     ? tCommon('privacy')
                     : t(
-                    link.labelKey as 'contact' | 'features' | 'pricing' | 'faq' | 'campuses',
+                    link.labelKey as 'contact' | 'features' | 'pricing' | 'faq',
                   )}
                 </Link>
               ))}

@@ -64,7 +64,7 @@ pnpm verify:platform
 | `/{slug}` (e.g. `/soe`) | Per-campus trust portal — students/faculty sign in from there |
 
 ```bash
-pnpm --filter @learnova/backend seed:super-admin   # work.shuklamanya@gmail.com + SUPER_ADMIN_PASSWORD
+pnpm --filter @learnova/backend seed:super-admin   # shuklamanya99@gmail.com + SUPER_ADMIN_PASSWORD
 pnpm --filter @learnova/backend seed:jnu-portal    # SOE portal copy on primary institution
 ```
 

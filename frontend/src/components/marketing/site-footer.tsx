@@ -70,7 +70,7 @@ export async function SiteFooter({
 }) {
   const t = await getTranslations('marketing.footer');
   const tHeader = platformMarketing ? await getTranslations('marketing.header') : null;
-  const headerLabel = (key: 'pricing' | 'campuses' | 'requestDemo', fallback: string) =>
+  const headerLabel = (key: 'pricing' | 'requestDemo', fallback: string) =>
     tHeader?.has(key) ? tHeader(key) : fallback;
   const tCampus = campusPortal ? await getTranslations('marketing.campusPortal') : null;
   const tCommon = await getTranslations('common');
@@ -129,7 +129,6 @@ export async function SiteFooter({
                 links={[
                   { href: '/#modules', label: t('productLinks.features') },
                   { href: '/#pricing', label: headerLabel('pricing', 'Pricing') },
-                  { href: '/#campuses', label: headerLabel('campuses', 'Campuses') },
                   { href: '/#request-demo', label: headerLabel('requestDemo', 'Request a demo') },
                 ]}
               />

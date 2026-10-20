@@ -14,15 +14,14 @@ import {
   Sparkles,
   type LucideIcon,
 } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { publicApi } from '@/features/public/services/public-api';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass } from '@/lib/cta';
-import { campusPublicPath } from '@/lib/campus-slugs';
 import { ApiClientError } from '@/lib/api/client';
-import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
+import type { PlatformMarketingI18nOverlay } from '@/lib/platform-marketing-i18n';
 
 const MODULE_ICONS: Record<string, LucideIcon> = {
   lms: BookOpen,
@@ -35,13 +34,12 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   audit: ShieldCheck,
 };
 
-const LOCALIZED_MARKETING_LOCALES = ['te', 'hi'] as const;
-
-export function PlatformHomePage() {
-  const locale = useLocale();
-  const useLocalizedMarketing = LOCALIZED_MARKETING_LOCALES.includes(
-    locale as (typeof LOCALIZED_MARKETING_LOCALES)[number],
-  );
+export function PlatformHomePage({
+  marketingI18n,
+}: {
+  /** Resolved on the server from locale — overrides English CMS fields for hi/te. */
+  marketingI18n?: PlatformMarketingI18nOverlay;
+}) {
   const t = useTranslations('marketing.landing');
   const tPlatform = useTranslations('marketing.platformHome');
   const tCommon = useTranslations('common');
@@ -49,11 +47,6 @@ export function PlatformHomePage() {
   const { data: marketing, isLoading } = useQuery({
     queryKey: ['public', 'platform-marketing'],
     queryFn: () => publicApi.getPlatformMarketing(),
-  });
-
-  const { data: campuses } = useQuery({
-    queryKey: ['public', 'institutions'],
-    queryFn: () => publicApi.listInstitutions(),
   });
 
   const [form, setForm] = useState({
@@ -81,6 +74,19 @@ export function PlatformHomePage() {
     'audit',
   ] as const;
 
+  useEffect(() => {
+    if (isLoading || !marketing) return;
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) return;
+    const scrollToHash = () => {
+      const target = document.getElementById(hash);
+      if (!target) return;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    const t = window.setTimeout(scrollToHash, 80);
+    return () => window.clearTimeout(t);
+  }, [isLoading, marketing]);
+
   if (isLoading || !marketing) {
     return (
       <div className={siteContainer('flex min-h-[50vh] items-center justify-center text-muted-foreground')}>
@@ -89,27 +95,21 @@ export function PlatformHomePage() {
     );
   }
 
-  const heroTitle = useLocalizedMarketing ? tPlatform('heroTitle') : marketing.heroTitle;
-  const heroSubtitle = useLocalizedMarketing ? tPlatform('heroSubtitle') : marketing.heroSubtitle;
-  const heroCtaLabel = useLocalizedMarketing
-    ? tPlatform('requestDemo')
-    : (marketing.heroCtaLabel ?? tPlatform('requestDemo'));
+  const heroTitle = marketingI18n?.heroTitle ?? marketing.heroTitle;
+  const heroSubtitle = marketingI18n?.heroSubtitle ?? marketing.heroSubtitle;
+  const heroCtaLabel = marketingI18n?.heroCtaLabel ?? marketing.heroCtaLabel ?? tPlatform('requestDemo');
 
-  const highlightFeatures = useLocalizedMarketing
-    ? ([1, 2, 3] as const).map((i) => ({
-        title: tPlatform(`highlight${i}Title`),
-        body: tPlatform(`highlight${i}Body`),
-      }))
+  const highlightFeatures = marketingI18n?.highlights.length
+    ? marketingI18n.highlights
     : marketing.features;
 
-  const pricingTitle = useLocalizedMarketing
-    ? tPlatform('pricingTitle')
-    : (marketing.pricingTitle ?? tPlatform('pricingTitle'));
-  const pricingBody = useLocalizedMarketing ? tPlatform('pricingBody') : marketing.pricingBody;
+  const pricingTitle = marketingI18n?.pricingTitle ?? marketing.pricingTitle ?? tPlatform('pricingTitle');
+  const pricingBody = marketingI18n?.pricingBody ?? marketing.pricingBody;
 
-  const faqItems = useLocalizedMarketing
-    ? [{ title: tPlatform('faq1Title'), body: tPlatform('faq1Body') }]
-    : marketing.faq;
+  const faqItems = marketingI18n?.faq.length ? marketingI18n.faq : marketing.faq;
+
+  const outcomeKeys = ['outcome1', 'outcome2', 'outcome3', 'outcome4'] as const;
+  const testimonialKeys = ['testimonial1', 'testimonial2', 'testimonial3', 'testimonial4'] as const;
 
   return (
     <main className="overflow-x-clip font-body">
@@ -156,7 +156,7 @@ export function PlatformHomePage() {
       </section>
 
       {/* Eight modules */}
-      <section id="modules" className={siteContainer('py-20 sm:py-28')}>
+      <section id="modules" className={siteContainer('scroll-mt-24 py-20 sm:py-28')}>
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-wider text-primary">{t('features.eyebrow')}</p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">{t('features.title')}</h2>
@@ -219,9 +219,63 @@ export function PlatformHomePage() {
         </ol>
       </section>
 
+      <section className="border-y border-border/60 bg-background py-20 sm:py-24">
+        <div className={siteContainer('max-w-6xl')}>
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              {tPlatform('outcomesTitle')}
+            </h2>
+            <p className="mt-4 text-muted-foreground">{tPlatform('outcomesSubtitle')}</p>
+          </div>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2">
+            {outcomeKeys.map((key) => (
+              <div
+                key={key}
+                className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm"
+              >
+                <h3 className="font-display text-lg font-semibold">{tPlatform(`${key}Title`)}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {tPlatform(`${key}Body`)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border/60 bg-muted/25 py-20 sm:py-24">
+        <div className={siteContainer('max-w-6xl')}>
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              {tPlatform('testimonialsTitle')}
+            </h2>
+            <p className="mt-4 text-muted-foreground">{tPlatform('testimonialsSubtitle')}</p>
+          </div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            {testimonialKeys.map((key) => (
+              <figure
+                key={key}
+                className="flex h-full flex-col rounded-2xl border border-border/80 bg-card p-6 shadow-sm"
+              >
+                <blockquote className="flex-1 text-sm leading-relaxed text-foreground">
+                  <span aria-hidden className="font-display text-2xl leading-none text-primary/40">
+                    “
+                  </span>
+                  {tPlatform(`${key}Quote`)}
+                </blockquote>
+                <figcaption className="mt-5 border-t border-border/60 pt-4">
+                  <p className="font-semibold text-foreground">{tPlatform(`${key}Name`)}</p>
+                  <p className="text-sm text-muted-foreground">{tPlatform(`${key}Role`)}</p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       {pricingBody ? (
-        <section id="pricing" className="border-t border-border/60 bg-muted/20 py-20">
+        <section id="pricing" className="scroll-mt-24 border-t border-border/60 bg-muted/20 py-20">
           <div className={siteContainer('mx-auto max-w-3xl')}>
             <h2 className="font-display text-3xl font-bold">{pricingTitle}</h2>
             <p className="mt-6 whitespace-pre-wrap text-base leading-relaxed text-muted-foreground">
@@ -231,35 +285,8 @@ export function PlatformHomePage() {
         </section>
       ) : null}
 
-      {/* Campus portals — short URLs like /soe */}
-      <section id="campuses" className={siteContainer('py-20 sm:py-24')}>
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl font-bold">{tPlatform('campusesTitle')}</h2>
-          <p className="mt-4 text-muted-foreground">{tPlatform('campusesSubtitle')}</p>
-        </div>
-        <div className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-2">
-          {(campuses?.items ?? []).map((campus) => (
-            <Link
-              key={campus.slug}
-              href={campusPublicPath(campus.slug)}
-              className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md"
-            >
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 font-bold text-primary">
-                {campus.shortName.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="min-w-0 text-left">
-                <p className="truncate font-semibold">{campus.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {campusPublicPath(campus.slug)} · {tPlatform('openPortal')}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       {/* FAQ */}
-      <section id="faq" className="border-t border-border/60 bg-background py-20">
+      <section id="faq" className="scroll-mt-24 border-t border-border/60 bg-background py-20">
         <div className={siteContainer('mx-auto max-w-3xl')}>
           <h2 className="font-display text-3xl font-bold">{tPlatform('faqTitle')}</h2>
           <div className="mt-10 space-y-4">
@@ -279,7 +306,7 @@ export function PlatformHomePage() {
       </section>
 
       {/* Demo request — no login */}
-      <section id="request-demo" className="border-t border-border/60 bg-muted/30 py-20">
+      <section id="request-demo" className="scroll-mt-24 border-t border-border/60 bg-muted/30 py-20">
         <div className={siteContainer('mx-auto max-w-xl')}>
           <h2 className="font-display text-3xl font-bold text-center">{tPlatform('demoTitle')}</h2>
           <p className="mt-3 text-center text-muted-foreground">{tPlatform('demoSubtitle')}</p>

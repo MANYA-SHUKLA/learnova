@@ -11,6 +11,7 @@ import {
   sendDemoConfirmedEmails,
   sendDemoDeclinedEmail,
   sendDemoRequestAckEmail,
+  sendDemoRequestSuperAdminNotifyEmail,
 } from '../../mail/demo-request-email.js';
 import type { ActorContext } from '../institution/institution.service.js';
 
@@ -68,6 +69,14 @@ export class DemoRequestService {
       to: input.contactEmail,
       contactName: input.contactName,
       institutionName: input.institutionName,
+    });
+    void sendDemoRequestSuperAdminNotifyEmail({
+      institutionName: input.institutionName,
+      contactName: input.contactName,
+      contactEmail: input.contactEmail,
+      phone: input.phone,
+      message: input.message ?? null,
+      requestId: String(doc._id),
     });
     return toDto(doc);
   }

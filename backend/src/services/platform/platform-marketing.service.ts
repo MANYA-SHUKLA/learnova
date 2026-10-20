@@ -5,31 +5,47 @@ const SINGLETON_KEY = 'default';
 
 function defaultMarketing(): PlatformMarketingInput {
   return {
-    heroTitle: 'Learnova ERP for colleges and universities',
+    heroTitle: 'Learnova — campus ERP, LMS, and exams in one place',
     heroSubtitle:
-      'Academic structure, timetables, gradebook, examinations, and a trusted campus portal — one platform for your institution.',
+      'Run programs, sections, timetables, assignments, quizzes, examinations, and gradebook work on one stack. Each college gets a branded portal at a short URL (for example /soe) where students and faculty sign in with institute-issued accounts.',
     heroCtaLabel: 'Request a demo',
     features: [
       {
-        title: 'Academic operations',
-        body: 'Programs, sections, enrollments, and calendars aligned to your campus workflow.',
+        title: 'Registrar-friendly structure',
+        body: 'Departments, programs, academic years, semesters, batches, and sections — configured once and reused across timetables and enrollments.',
       },
       {
-        title: 'Faculty & student portals',
-        body: 'Role-based dashboards with official branding on every sign-in.',
+        title: 'Portals students actually use',
+        body: 'Campus home pages explain who may sign in; after login, role dashboards show timetable, courses, notices, and grades with your logo and contact details.',
       },
       {
-        title: 'Assessments & gradebook',
-        body: 'Assignments, quizzes, examinations, and transcripts in one place.',
+        title: 'Exams with audit trails',
+        body: 'Schedule exam windows, collect submissions, record results, and keep activity logs for academic offices that need traceability.',
       },
     ],
     pricingTitle: 'Pricing',
     pricingBody:
-      'Flexible campus licensing — contact us for a demo. Pricing is agreed after we understand your scale and modules; no self-serve checkout on this site.',
+      'Campus licensing is agreed after a demo — we scope modules (ERP, LMS, coding labs, examinations, analytics) to your size. There is no card checkout on this website; onboarding is human-led through the platform console.',
     faq: [
       {
         title: 'How do we get started?',
-        body: 'Request a demo, meet our team, and we allocate your campus with admin credentials by email.',
+        body: 'Submit the demo form on this page. We email you to schedule a call, walk through modules, then provision a campus URL and institution admin credentials when you are ready.',
+      },
+      {
+        title: 'Can anyone sign up on the open internet?',
+        body: 'No. Learnova is invite-only per campus. Institution admins create or import faculty and student records; the public marketing site is for discovery and demo requests only.',
+      },
+      {
+        title: 'Do you support our own campus URL and branding?',
+        body: 'Yes. After allocation you receive a short path such as /your-slug for the trust portal, plus an admin guide. Branding, support email, and portal copy are editable from institution settings.',
+      },
+      {
+        title: 'How long does go-live usually take?',
+        body: 'After the demo and scope alignment, initial provisioning is quick. Academic data entry (programs, sections, timetables) depends on your team; we start with admin access and a documented setup path.',
+      },
+      {
+        title: 'Is payment handled on this website?',
+        body: 'No. There is no Razorpay or self-serve checkout here. Commercial terms are discussed offline after we understand your modules and student volume.',
       },
     ],
     footerNote: 'Learnova — built for institutional trust.',

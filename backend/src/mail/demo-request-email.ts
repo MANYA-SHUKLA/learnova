@@ -14,6 +14,48 @@ function frontendBaseUrl(): string {
   return (env.CORS_ORIGINS ?? 'http://localhost:3000').split(',')[0]?.trim().replace(/\/$/, '') || 'http://localhost:3000';
 }
 
+export async function sendDemoRequestSuperAdminNotifyEmail(input: {
+  institutionName: string;
+  contactName: string;
+  contactEmail: string;
+  phone: string;
+  message?: string | null;
+  requestId: string;
+}): Promise<void> {
+  const consoleUrl = `${frontendBaseUrl()}/en/console/sign-in`;
+  const subject = `[Learnova] New demo request — ${input.institutionName}`;
+  const messageBlock = input.message
+    ? mailParagraph(`<strong>Message:</strong> ${mailEscape(input.message)}`)
+    : '';
+  const html = mailHtml(
+    [
+      mailParagraph('A new demo request was submitted on the public marketing site.'),
+      mailParagraph(`<strong>Institution:</strong> ${mailEscape(input.institutionName)}`),
+      mailParagraph(
+        `<strong>Contact:</strong> ${mailEscape(input.contactName)} · ${mailEscape(input.contactEmail)} · ${mailEscape(input.phone)}`,
+      ),
+      messageBlock,
+      mailParagraph(`Request ID: <code>${mailEscape(input.requestId)}</code>`),
+      mailParagraph('Review and confirm from the platform console.'),
+      mailButton(consoleUrl, 'Open platform console'),
+    ].join('\n'),
+    { preheader: subject },
+  );
+  const text = mailText(
+    `New demo request\n${input.institutionName}\n${input.contactName} ${input.contactEmail} ${input.phone}\n${input.message ?? ''}\n${consoleUrl}`,
+  );
+  try {
+    await sendMail({
+      to: env.SUPER_ADMIN_EMAIL,
+      subject,
+      html,
+      text,
+    });
+  } catch (err) {
+    logger.warn({ err, to: env.SUPER_ADMIN_EMAIL }, 'Demo request super-admin notify failed');
+  }
+}
+
 export async function sendDemoRequestAckEmail(input: {
   to: string;
   contactName: string;
