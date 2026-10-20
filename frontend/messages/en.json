@@ -318,6 +318,8 @@
       "tagline": "One connected platform for academic operations, learning, and assessment.",
       "copyright": "All rights reserved.",
       "builtBy": "Built by Manya Shukla · SOE JNU Minor Project",
+      "builtByBefore": "Built by",
+      "builtByAfter": "· SOE JNU Minor Project",
       "productLineModules": "ERP · LMS · Exams",
       "productLineLabs": "Coding labs · Analytics",
       "contactLabel": "Contact:",

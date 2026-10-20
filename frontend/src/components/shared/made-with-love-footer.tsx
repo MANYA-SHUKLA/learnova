@@ -2,6 +2,7 @@
 
 import { Heart } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { ManyaShuklaWhatsAppLink } from '@/components/shared/manya-shukla-whatsapp-link';
 import { siteGutter } from '@/lib/layout';
 import { cn } from '@/lib/utils';
 
@@ -27,14 +28,7 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
         </span>
         <span className="text-center">
           {t('by')}{' '}
-          <a
-            href="https://wa.me/918005586588"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-foreground underline-offset-2 hover:underline"
-          >
-            Manya Shukla
-          </a>
+          <ManyaShuklaWhatsAppLink className="font-medium text-foreground" />
           {' · '}
           {t('project')}
         </span>

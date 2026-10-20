@@ -4,6 +4,7 @@ import { marketingContainer } from '@/lib/marketing-design';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 import { campusLoginPath } from '@/lib/campus-slugs';
+import { ManyaShuklaWhatsAppLink } from '@/components/shared/manya-shukla-whatsapp-link';
 import { LogoMark } from './logo-mark';
 
 const PRODUCT_LINKS = [
@@ -193,7 +194,12 @@ export async function SiteFooter({
               © {year} {tCommon('appName')}. {t('copyright')}
             </p>
             {platformMarketing && t.has('builtBy') ? (
-              <p className="text-sm font-medium text-white/90">{t('builtBy')}</p>
+              <p className="text-sm font-medium text-white/90">
+                {t.has('builtByBefore') ? t('builtByBefore') : 'Built by'}{' '}
+                <ManyaShuklaWhatsAppLink className="font-semibold text-white hover:text-white/95" />
+                {' '}
+                {t.has('builtByAfter') ? t('builtByAfter') : '· SOE JNU Minor Project'}
+              </p>
             ) : campusPortal ? (
               <p className="text-sm text-white/75 sm:text-right">
                 {tCampus?.('poweredBy', { app: tCommon('appName') }) ??
@@ -205,14 +211,7 @@ export async function SiteFooter({
                 <Heart className="size-3.5 shrink-0 fill-rose-400 text-rose-400" aria-hidden />
                 <span>
                   {tLove('by')}{' '}
-                  <a
-                    href="https://wa.me/918005586588"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-white underline-offset-2 hover:text-white/95 hover:underline"
-                  >
-                    Manya Shukla
-                  </a>
+                  <ManyaShuklaWhatsAppLink className="font-semibold text-white hover:text-white/95" />
                   {' · '}
                   {tLove('project')}
                 </span>

@@ -8,6 +8,7 @@ import { ctaButtonClass } from '@/lib/cta';
 import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
 import { isSaasModeEnabled } from '@/lib/saas';
+import { MANYA_SHUKLA_WHATSAPP_URL } from '@/lib/manya-shukla-whatsapp';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -31,7 +32,7 @@ export default async function ContactPage({ params }: PageProps) {
       icon: Phone,
       title: t('whatsappTitle'),
       body: t('whatsappBody'),
-      href: 'https://wa.me/918005586588',
+      href: MANYA_SHUKLA_WHATSAPP_URL,
       external: true,
     },
     {
