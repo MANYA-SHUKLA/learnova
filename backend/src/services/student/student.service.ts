@@ -837,7 +837,6 @@ export class StudentService {
     input: { email: string; firstName: string; lastName: string },
     institutionId: string,
     studentId: string,
-    admissionNumber: string,
   ): Promise<boolean> {
     const { provisionLoginUser } = await import('../users/provision-login-user.js');
     const provisioned = await provisionLoginUser({
@@ -942,15 +941,7 @@ export class StudentService {
           updated += 1;
           touchedIds.push(id);
           const studentId = byEmail.studentId ?? parsed.studentId ?? '';
-          const admissionNumber = byEmail.admissionNumber ?? parsed.admissionNumber ?? '';
-          if (
-            await this.ensureStudentLoginEmail(
-              parsed,
-              institutionId,
-              studentId,
-              admissionNumber,
-            )
-          ) {
+          if (await this.ensureStudentLoginEmail(parsed, institutionId, studentId)) {
             emailed += 1;
           }
           continue;
