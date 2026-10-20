@@ -17,7 +17,7 @@ import {
 } from '../../utils/timetable/academic-calendar.js';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors/index.js';
 import { logger } from '../../utils/logger/index.js';
-import { generateGeminiJson, ensureGeminiEnabled } from '../ai/gemini.client.js';
+import { generateGeminiJson, isGeminiConfigured } from '../ai/gemini.client.js';
 import {
   type ActorContext,
 } from './timetable.service.js';
@@ -93,20 +93,18 @@ function buildPrompt(input: {
     'Honor assignedFacultyId. A year class is taught by several teachers. Do not give every subject in the year to one or two people.',
     'Odd and even terms run in different months, so a teacher may teach in both. The same term still cannot double-book a teacher.',
     'Use only the provided ids. Do not invent ids, emails, or people.',
-    'Place each course for every compatible section (matching programIds, or all sections if programIds is empty).',
-    'Sessions per course per section = max(2, min(4, credits or 2)).',
-    'No faculty, section, or room may overlap on the same day and time, except a combined class.',
-    'Courses with the same title for different programs (CSE and ECE) are one combined class: same day, time, room, and teacher, with one slot for each section.',
-    'Other class years in this same term already occupy the busy slots listed below.',
-    'Campus constraints are fixed. Do not change days, times, or venues.',
-    `Working days (Mon–Fri only): ${input.workingDays.join(', ')}.`,
-    `Periods (09:00–18:00, lunch 13:00–14:00 skipped): ${JSON.stringify(input.periods)}.`,
-    'Only 3 rooms are available: ELC Class 1, ELC Class 2, and ELC Class 3.',
-    'Theory and lab sessions share those 3 rooms. Never place more than 3 classes at the same time.',
-    'If admin notes name subjects that should keep labs, schedule those lab sessions in one of the 3 rooms at the times they give. If they omit a subject, do not add a lab for it.',
-    input.notes ? `Admin notes (honor if they do not break the campus constraints): ${input.notes}` : '',
-    'Return JSON only with shape:',
-    '{"assignments":[{"courseId":"","facultyId":""}],"slots":[{"dayOfWeek":"mon","startTime":"09:00","endTime":"10:00","courseId":"","sectionId":"","facultyId":"","room":"ELC Class 1"}]}',
+    'Your job is faculty assignment only. The server will place day, time, and room using campus rules.',
+    'Return one assignment per course in the catalog. Use only courseId and facultyId from the catalog.',
+    'Pick the best teacher for each course. Spread load across faculty. Honor assignedFacultyId unless admin notes say otherwise.',
+    'Courses with the same title for different programs (CSE and ECE) are one combined class and must use the same facultyId.',
+    'Sessions per course per section = max(2, min(4, credits or 2)). The server schedules that many weekly sessions.',
+    'Campus constraints for the server scheduler: Mon–Fri only;',
+    `periods ${JSON.stringify(input.periods)};`,
+    'only 3 rooms (ELC Class 1, ELC Class 2, ELC Class 3); no more than 3 classes at once;',
+    'no faculty double-booking in the same term.',
+    input.notes ? `Admin notes: ${input.notes}` : '',
+    'Return JSON only with shape: {"assignments":[{"courseId":"","facultyId":""}]}',
+    'Do not return slots, times, rooms, names, or invented ids.',
     'Catalog:',
     JSON.stringify({
       faculty: compactFaculty,
@@ -265,33 +263,34 @@ export class TimetableGeneratorService {
       facultyId,
     }));
 
-    ensureGeminiEnabled();
-
     let geminiUsed = false;
     let proposal = parseGeminiTimetableProposal(null);
-    try {
-      const raw = await generateGeminiJson({
-        prompt: buildPrompt({
-          semesterName: semester.name,
-          academicYearName: academicYear?.name ?? semesterYearId,
-          classYear: classYearForSemesterNumber(Number(semester.number)),
-          termLabel: semesterWindowLabel(String(semester.term)),
-          notes: input.notes,
-          workingDays,
-          periods,
-          courses,
-          faculty,
-          sections,
-          departments,
-          assigned,
-          occupied,
-        }),
-        maxOutputTokens: 8192,
-      });
-      proposal = parseGeminiTimetableProposal(raw);
-      geminiUsed = true;
-    } catch (err) {
-      logger.warn({ err }, 'Gemini timetable proposal failed; using local settler');
+    if (isGeminiConfigured()) {
+      try {
+        const raw = await generateGeminiJson({
+          prompt: buildPrompt({
+            semesterName: semester.name,
+            academicYearName: academicYear?.name ?? semesterYearId,
+            classYear: classYearForSemesterNumber(Number(semester.number)),
+            termLabel: semesterWindowLabel(String(semester.term)),
+            notes: input.notes,
+            workingDays,
+            periods,
+            courses,
+            faculty,
+            sections,
+            departments,
+            assigned,
+            occupied,
+          }),
+          maxOutputTokens: 4096,
+          timeoutMs: 120_000,
+        });
+        proposal = parseGeminiTimetableProposal(raw);
+        geminiUsed = proposal.assignments.length > 0;
+      } catch (err) {
+        logger.warn({ err }, 'Gemini timetable proposal failed; using local settler');
+      }
     }
 
     const settled = settleTimetable({
@@ -310,8 +309,16 @@ export class TimetableGeneratorService {
     }
 
     const warnings = [...settled.warnings];
-    if (!geminiUsed) {
-      warnings.unshift('AI was unavailable; timetable was generated with the local scheduler.');
+    if (!isGeminiConfigured()) {
+      warnings.unshift(
+        'AI is off or not configured (set ENABLE_AI=true and GEMINI_API_KEY). Timetable was built with the local scheduler.',
+      );
+    } else if (!geminiUsed) {
+      warnings.unshift(
+        'AI could not suggest faculty assignments; timetable was built with the local scheduler.',
+      );
+    } else {
+      warnings.unshift('AI suggested faculty assignments; times and rooms were placed by the local scheduler.');
     }
 
     let timetable = await timetableRepository.findByInstitutionSemester(institutionId, input.semesterId);

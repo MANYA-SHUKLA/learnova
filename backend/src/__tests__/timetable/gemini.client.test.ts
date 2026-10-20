@@ -48,6 +48,11 @@ describe('gemini client', () => {
     expect(parsed).toEqual({ slots: [] });
   });
 
+  it('repairs truncated JSON objects from the model', () => {
+    const parsed = parseJsonFromModelText('{"assignments":[{"courseId":"c1","facultyId":"f1"');
+    expect(parsed).toEqual({ assignments: [{ courseId: 'c1', facultyId: 'f1' }] });
+  });
+
   it('throws when ENABLE_AI is off', async () => {
     isFeatureEnabled.mockReturnValue(false);
     await expect(generateGeminiJson({ prompt: 'hi' })).rejects.toThrow(
