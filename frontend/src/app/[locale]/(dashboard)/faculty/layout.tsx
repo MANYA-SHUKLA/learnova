@@ -1,7 +1,8 @@
 'use client';
 
-import { Card, CardContent, Spinner } from '@learnova/ui';
+import { Card, CardContent } from '@learnova/ui';
 import { useEffect, type ReactNode } from 'react';
+import { RoleRouteLoading } from '@/components/shared/role-route-loading';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { isPathAllowedForRole } from '@/lib/auth/role-routes';
 import { usePathname, useRouter } from '@/lib/i18n/routing';
@@ -22,11 +23,7 @@ export default function FacultyLayout({ children }: { children: ReactNode }) {
   }, [isLoading, isAuthenticated, user, pathname, router]);
 
   if (isLoading || !user || !allowed) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <RoleRouteLoading>{children}</RoleRouteLoading>;
   }
 
   if (!allowed) {

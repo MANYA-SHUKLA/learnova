@@ -2,7 +2,11 @@
 
 import { DashboardRouteShell } from '@/components/shared/dashboard-route-shell';
 
-/** Same tree as `(dashboard)/layout.tsx` while auth resolves — avoids Suspense vs layout hydration drift. */
+/** Matches `(dashboard)/layout.tsx` outer shell while the page segment streams in. */
 export default function DashboardRouteLoading() {
-  return <DashboardRouteShell message="Loading your session…" />;
+  return (
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <DashboardRouteShell message="Loading your session…" />
+    </div>
+  );
 }

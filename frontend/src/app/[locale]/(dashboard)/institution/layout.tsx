@@ -1,7 +1,8 @@
 'use client';
 
 import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
-import { Card, CardContent, Spinner } from '@learnova/ui';
+import { Card, CardContent } from '@learnova/ui';
+import { RoleRouteLoading } from '@/components/shared/role-route-loading';
 import { useTranslations } from 'next-intl';
 import { useEffect, type ReactNode } from 'react';
 import { AcademicSessionChip } from '@/components/institution/academic-session-chip';
@@ -55,11 +56,7 @@ export default function InstitutionLayout({ children }: { children: ReactNode })
   }, [isLoading, isAuthenticated, user, allowed, router, pathname]);
 
   if (isLoading || !isAuthenticated || !user || (user && !allowed)) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <RoleRouteLoading>{children}</RoleRouteLoading>;
   }
 
   return (
