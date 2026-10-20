@@ -536,6 +536,55 @@ export class ProgressService {
     };
   }
 
+  /** One module + lesson so notes/bookmarks can attach to a lesson when builder was never run. */
+  private async ensureMinimalPublishedCourseContent(
+    institutionId: string,
+    courseId: string,
+  ): Promise<void> {
+    const institutionOid = new Types.ObjectId(institutionId);
+    const courseOid = new Types.ObjectId(courseId);
+    const existing = await CourseModuleModel.countDocuments({
+      institutionId: institutionOid,
+      courseId: courseOid,
+      status: 'published',
+      deletedAt: null,
+    }).exec();
+    if (existing > 0) return;
+
+    const moduleId = new Types.ObjectId();
+    await CourseModuleModel.create({
+      _id: moduleId,
+      institutionId: institutionOid,
+      courseId: courseOid,
+      title: 'Course overview',
+      slug: `overview-${courseId.slice(-8)}`,
+      description: 'Auto-created learning module',
+      moduleNumber: 1,
+      orderIndex: 0,
+      estimatedMinutes: 45,
+      visibility: 'enrolled',
+      status: 'published',
+      deletedAt: null,
+    });
+    await CourseLessonModel.create({
+      institutionId: institutionOid,
+      courseId: courseOid,
+      moduleId,
+      title: 'Introduction',
+      slug: `intro-${courseId.slice(-8)}`,
+      lessonNumber: 1,
+      orderIndex: 0,
+      description: 'Getting started',
+      summary: null,
+      content: 'Welcome to this course.',
+      estimatedMinutes: 15,
+      visibility: 'enrolled',
+      status: 'published',
+      lessonType: 'rich_text',
+      deletedAt: null,
+    });
+  }
+
   async getCourseDetail(courseId: string, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const studentId = await this.resolveStudentId(actor, institutionId);
