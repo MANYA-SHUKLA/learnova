@@ -19,7 +19,7 @@ export async function sendDemoRequestAckEmail(input: {
   contactName: string;
   institutionName: string;
 }): Promise<void> {
-  const platformUrl = `${frontendBaseUrl()}/en/platform`;
+  const platformUrl = `${frontendBaseUrl()}/en`;
   const subject = 'We received your Learnova demo request';
   const html = mailHtml(
     [
@@ -48,7 +48,7 @@ export async function sendDemoConfirmedEmails(input: {
   meetingAt: Date;
   meetingNotes?: string | null;
 }): Promise<void> {
-  const platformUrl = `${frontendBaseUrl()}/en/platform`;
+  const platformUrl = `${frontendBaseUrl()}/en`;
   const when = input.meetingAt.toLocaleString('en-IN', {
     dateStyle: 'full',
     timeStyle: 'short',

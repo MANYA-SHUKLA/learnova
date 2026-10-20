@@ -83,7 +83,9 @@ export function SiteHeader({
             >
               {'labelKey' in link && link.labelKey === 'privacy'
                 ? tCommon('privacy')
-                : t(link.labelKey as 'contact' | 'features' | 'pricing' | 'faq')}
+                : t(
+                    link.labelKey as 'contact' | 'features' | 'pricing' | 'faq' | 'campuses',
+                  )}
             </Link>
           ))}
         </nav>
@@ -132,7 +134,9 @@ export function SiteHeader({
                 >
                   {'labelKey' in link && link.labelKey === 'privacy'
                     ? tCommon('privacy')
-                    : t(link.labelKey as 'contact' | 'features' | 'pricing' | 'faq')}
+                    : t(
+                    link.labelKey as 'contact' | 'features' | 'pricing' | 'faq' | 'campuses',
+                  )}
                 </Link>
               ))}
             </nav>

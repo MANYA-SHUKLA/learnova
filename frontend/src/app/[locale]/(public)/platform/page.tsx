@@ -1,21 +1,10 @@
-import { setRequestLocale } from 'next-intl/server';
-import { PlatformMarketingPage } from '@/components/marketing/platform-marketing-page';
-import { SiteFooter } from '@/components/marketing/site-footer';
-import { SiteHeader } from '@/components/marketing/site-header';
+import { redirect } from 'next/navigation';
 
-interface PlatformPageProps {
+interface Props {
   params: Promise<{ locale: string }>;
 }
 
-export default async function PlatformPage({ params }: PlatformPageProps) {
+export default async function PlatformRedirect({ params }: Props) {
   const { locale } = await params;
-  setRequestLocale(locale);
-
-  return (
-    <>
-      <SiteHeader />
-      <PlatformMarketingPage />
-      <SiteFooter />
-    </>
-  );
+  redirect(`/${locale}`);
 }

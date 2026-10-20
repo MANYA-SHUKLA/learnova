@@ -53,20 +53,23 @@ function FooterColumn({
 const CAMPUS_PORTAL_LINKS = [
   { href: '/login', labelKey: 'companyLinks.institutionLogin' },
   { href: '/contact', labelKey: 'companyLinks.contact' },
-  { href: '/platform', labelKey: 'campusPortal.footerPlatformLink' },
+  { href: '/', labelKey: 'campusPortal.footerPlatformLink' },
 ] as const;
 
 export async function SiteFooter({
   campusPortal = false,
+  platformMarketing = false,
   campusName,
   campusTagline,
 }: {
   campusPortal?: boolean;
-  /** Override footer branding on /campus/[slug] */
+  platformMarketing?: boolean;
+  /** Override footer branding on /{slug} campus pages */
   campusName?: string;
   campusTagline?: string;
 }) {
   const t = await getTranslations('marketing.footer');
+  const tHeader = platformMarketing ? await getTranslations('marketing.header') : null;
   const tCampus = campusPortal ? await getTranslations('marketing.campusPortal') : null;
   const tCommon = await getTranslations('common');
   const year = new Date().getFullYear();
@@ -110,13 +113,32 @@ export async function SiteFooter({
             <FooterColumn
               title={tCampus?.('footerLinksTitle') ?? t('company')}
               links={CAMPUS_PORTAL_LINKS.map((link) => ({
-                href: link.href,
+                href: link.href === '/platform' ? '/' : link.href,
                 label:
                   link.labelKey === 'campusPortal.footerPlatformLink'
                     ? (tCampus?.('footerPlatformLink') ?? tCommon('appName'))
                     : t(link.labelKey),
               }))}
             />
+          ) : platformMarketing ? (
+            <>
+              <FooterColumn
+                title={t('product')}
+                links={[
+                  { href: '/#modules', label: t('productLinks.features') },
+                  { href: '/#pricing', label: tHeader?.('pricing') ?? 'Pricing' },
+                  { href: '/#campuses', label: tHeader?.('campuses') ?? 'Campuses' },
+                  { href: '/#request-demo', label: tHeader?.('requestDemo') ?? 'Request a demo' },
+                ]}
+              />
+              <FooterColumn
+                title={t('company')}
+                links={[
+                  { href: '/about', label: t('companyLinks.about') },
+                  { href: '/contact', label: t('companyLinks.contact') },
+                ]}
+              />
+            </>
           ) : (
             <>
               <FooterColumn

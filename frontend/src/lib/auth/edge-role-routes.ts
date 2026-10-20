@@ -48,6 +48,9 @@ export function requiredRoleForPath(pathWithoutLocale: string): EdgeActiveRole |
   if (normalized === SUPERADMIN_PREFIX || normalized.startsWith(`${SUPERADMIN_PREFIX}/`)) {
     return 'super_admin';
   }
+  if (normalized === '/superadmin' || normalized.startsWith('/superadmin/')) {
+    return 'super_admin';
+  }
   return null;
 }
 

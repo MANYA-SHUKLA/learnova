@@ -27,7 +27,7 @@ export function CampusPickerPage() {
           data?.items.map((campus) => (
             <Link
               key={campus.slug}
-              href={`/campus/${campus.slug}`}
+              href={`/${campus.slug}`}
               className="card-interactive flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-soft-md"
             >
               {campus.logo ? (

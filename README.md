@@ -58,10 +58,10 @@ pnpm verify:platform
 
 | URL | Purpose |
 | --- | --- |
-| `/platform` | Product marketing + **Request a demo** |
-| `/superadmin/login` | Super admin sign-in (not `/login`) |
-| `/superadmin` | Demo requests, allocate campuses, edit CMS |
-| `/campus/{slug}` | Per-campus trust portal for students/faculty |
+| `/` | Learnova product marketing + **Request a demo** (no sign-in) |
+| `/console/sign-in` | Private platform console (not linked publicly) |
+| `/console` | Demo requests, allocate campuses, edit CMS |
+| `/{slug}` (e.g. `/soe`) | Per-campus trust portal — students/faculty sign in from there |
 
 ```bash
 pnpm --filter @learnova/backend seed:super-admin   # work.shuklamanya@gmail.com + SUPER_ADMIN_PASSWORD

@@ -23,7 +23,7 @@ describe('RBAC route guards', () => {
     expect(requiredRoleForPath('/faculty/gradebook')).toBe('faculty');
     expect(requiredRoleForPath('/student/certificates')).toBe('student');
     expect(requiredRoleForPath('/account/sessions')).toBeNull();
-    expect(requiredRoleForPath('/superadmin')).toBe('super_admin');
+    expect(requiredRoleForPath('/console')).toBe('super_admin');
   });
 
   it('blocks students from faculty and institution areas', () => {
@@ -52,7 +52,7 @@ describe('RBAC route guards', () => {
     expect(dashboardPathForRole('student')).toBe('/student/dashboard');
     expect(dashboardPathForRole('faculty')).toBe('/faculty/dashboard');
     expect(dashboardPathForRole('institution_admin')).toBe('/institution/dashboard');
-    expect(dashboardPathForRole('super_admin')).toBe('/superadmin');
+    expect(dashboardPathForRole('super_admin')).toBe('/console');
   });
 });
 

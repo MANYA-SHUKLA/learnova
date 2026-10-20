@@ -15,7 +15,7 @@ export function dashboardPathForRole(role: ActiveRole | string | null | undefine
     case 'student':
       return APP_ROUTES.STUDENT_DASHBOARD;
     case 'super_admin':
-      return APP_ROUTES.SUPERADMIN_DASHBOARD;
+      return APP_ROUTES.CONSOLE;
     case 'institution_admin':
     default:
       return APP_ROUTES.INSTITUTION_DASHBOARD;

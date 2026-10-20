@@ -21,7 +21,10 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
     pathname.endsWith('/account/change-password');
 
   const isSuperAdminArea =
-    pathname === APP_ROUTES.SUPERADMIN || pathname.startsWith(`${APP_ROUTES.SUPERADMIN}/`);
+    pathname === APP_ROUTES.CONSOLE ||
+    pathname.startsWith(`${APP_ROUTES.CONSOLE}/`) ||
+    pathname === APP_ROUTES.SUPERADMIN ||
+    pathname.startsWith(`${APP_ROUTES.SUPERADMIN}/`);
 
   const roleAllowed = user ? isPathAllowedForRole(pathname, user.role) : true;
 

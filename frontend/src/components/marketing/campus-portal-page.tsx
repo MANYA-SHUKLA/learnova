@@ -170,7 +170,7 @@ export function CampusPortalPage({
         <p className="mt-2 text-center text-xs text-muted-foreground">{developerCredit}</p>
         {showPlatformLink ? (
           <p className="mt-4 text-center text-xs text-muted-foreground">
-            <Link href={APP_ROUTES.PLATFORM} className="text-primary hover:underline">
+            <Link href={APP_ROUTES.HOME} className="text-primary hover:underline">
               {t('aboutPlatform')}
             </Link>
           </p>

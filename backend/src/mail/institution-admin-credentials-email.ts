@@ -28,8 +28,8 @@ export async function sendInstitutionAdminCredentialsEmail(
 ): Promise<boolean> {
   const base = frontendBaseUrl();
   const loginUrl = `${base}/en/login?campus=${encodeURIComponent(input.institutionSlug)}`;
-  const guideUrl = `${base}/en/campus-guide/${encodeURIComponent(input.institutionSlug)}`;
-  const portalUrl = `${base}/en/campus/${encodeURIComponent(input.institutionSlug)}`;
+  const guideUrl = `${base}/en/${encodeURIComponent(input.institutionSlug)}/guide`;
+  const portalUrl = `${base}/en/${encodeURIComponent(input.institutionSlug)}`;
 
   const subject = `Your ${input.institutionName} campus admin account on Learnova`;
 

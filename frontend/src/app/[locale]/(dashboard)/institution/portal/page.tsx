@@ -58,7 +58,7 @@ export default function InstitutionPortalSettingsPage() {
 
   return (
     <PermissionGate permission={PERMISSIONS.INSTITUTION_MANAGE}>
-      <PageHeader title="Campus portal" description="Public trust page copy for /campus/{slug}" />
+      <PageHeader title="Campus portal" description="Public trust page at /{your-slug} (e.g. /soe)" />
       <form
         className="mx-auto mt-8 max-w-2xl space-y-4"
         onSubmit={(e) => {
@@ -92,8 +92,8 @@ export default function InstitutionPortalSettingsPage() {
         {institution.slug ? (
           <p className="text-sm text-muted-foreground">
             Preview:{' '}
-            <a className="text-primary hover:underline" href={`/campus/${institution.slug}`}>
-              /campus/{institution.slug}
+            <a className="text-primary hover:underline" href={`/${institution.slug}`}>
+              /{institution.slug}
             </a>
           </p>
         ) : null}
