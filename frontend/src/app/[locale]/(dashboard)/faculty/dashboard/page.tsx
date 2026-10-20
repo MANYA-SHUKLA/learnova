@@ -11,6 +11,7 @@ import {
   FolderKanban,
   GraduationCap,
   PenLine,
+  Search,
   ShieldCheck,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -121,12 +122,20 @@ export default function FacultyDashboardPage() {
         title={t('welcomeNamed', { name })}
         description={t('modulesIntro')}
         actions={
-          <Button asChild className="rounded-xl">
-            <Link href={APP_ROUTES.FACULTY_ASSIGNMENTS}>
-              <PenLine className="size-4" />
-              Review submissions
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link href={APP_ROUTES.FACULTY_STUDENTS}>
+                <Search className="size-4" />
+                Search students
+              </Link>
+            </Button>
+            <Button asChild className="rounded-xl">
+              <Link href={APP_ROUTES.FACULTY_ASSIGNMENTS}>
+                <PenLine className="size-4" />
+                Review submissions
+              </Link>
+            </Button>
+          </div>
         }
         meta={
           <>

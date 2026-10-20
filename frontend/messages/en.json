@@ -1420,7 +1420,7 @@
         "showingAll": "Showing all {count} students in one list.",
         "archiveSelected": "Archive selected (left)",
         "archiveConfirm": "Archive {count} student record(s)? They will be hidden from the active list (you can restore from Archived filter).",
-        "searchPlaceholder": "Search name, student ID, roll number, email…",
+        "searchPlaceholder": "Search name, ID, email, phone, guardian…",
         "columns": {
           "branch": "Branch",
           "yearOfStudy": "Year",
@@ -2165,6 +2165,10 @@
           "title": "Calendar",
           "description": "Key dates"
         },
+        "searchStudents": {
+          "title": "Search students",
+          "description": "Name, ID, guardian, phone, and more"
+        },
         "students": {
           "title": "Import students",
           "description": "CSV upload — credentials emailed on first add"
@@ -2208,6 +2212,18 @@
       }
     },
     "faculty": {
+      "students": {
+        "eyebrow": "People",
+        "title": "Students",
+        "description": "Search learners in your courses by name, ID, phone, guardian, and other profile fields.",
+        "directory": "Student directory",
+        "directoryDescription": "Results are limited to students enrolled in courses you teach.",
+        "searchPlaceholder": "Search name, ID, email, phone, guardian…",
+        "searchAction": "Search",
+        "viewProfile": "View details",
+        "emptyTitle": "No students found",
+        "emptyDescription": "Try another search term or check that students are enrolled in your courses."
+      },
       "enrollments": {
         "eyebrow": "Learning",
         "title": "Enrollments",

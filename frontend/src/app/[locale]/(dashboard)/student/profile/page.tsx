@@ -17,9 +17,11 @@ import { useState, useRef } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { SuccessPopup } from '@/components/shared/success-popup';
 import { ErrorState, useOrgLabels } from '@/features/institution';
+import type { StudentGender } from '@learnova/types';
 import {
   formatStudentStatus,
   formatStudentGender,
+  STUDENT_GENDER_LABELS,
   useMyStudentProfile,
   useUpdateMyStudentProfileMutation,
   useStudentPhotoUploadMutation,
@@ -41,6 +43,8 @@ export default function StudentProfilePage() {
   const [form, setForm] = useState<StudentUpdateProfileBody>({});
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [editingGuardian, setEditingGuardian] = useState(false);
+  const [editingBasic, setEditingBasic] = useState(false);
 
   if (query.isLoading) {
     return (
@@ -95,6 +99,8 @@ export default function StudentProfilePage() {
       await updateMutation.mutateAsync(form);
       showSuccess(t('savedSuccessfully'));
       setEditing(false);
+      setEditingGuardian(false);
+      setEditingBasic(false);
       setForm({});
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : 'Unable to update profile.');
@@ -172,27 +178,169 @@ export default function StudentProfilePage() {
         <Card className="rounded-2xl">
           <CardHeader>
             <CardTitle className="text-base">Basic information</CardTitle>
-            <CardDescription>Your identity and contact details (read-only).</CardDescription>
+            <CardDescription>
+              Student ID, admission number, and email are set by the institution. You can update your
+              name, roll number, gender, and date of birth.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2">
-            {[
-              ['Full name', student.fullName],
-              ['Student ID', student.studentId],
-              ['Admission number', student.admissionNumber],
-              ['Roll number', student.rollNumber],
-              ['Email', student.email],
-              ['Gender', student.gender ? formatStudentGender(student.gender) : '—'],
-              ['Date of birth', student.dateOfBirth?.slice(0, 10) ?? '—'],
-              ['Status', formatStudentStatus(student.status)],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {label}
-                </p>
-                <p className="mt-1 text-sm font-medium">{value}</p>
+          {!editingBasic ? (
+            <>
+              <CardContent className="grid gap-3 sm:grid-cols-2">
+                {[
+                  ['Full name', student.fullName],
+                  ['Student ID', student.studentId],
+                  ['Admission number', student.admissionNumber],
+                  ['Roll number', student.rollNumber],
+                  ['Email', student.email],
+                  ['Gender', student.gender ? formatStudentGender(student.gender) : '—'],
+                  ['Date of birth', student.dateOfBirth?.slice(0, 10) ?? '—'],
+                  ['Status', formatStudentStatus(student.status)],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {label}
+                    </p>
+                    <p className="mt-1 text-sm font-medium">{value || '—'}</p>
+                  </div>
+                ))}
+              </CardContent>
+              <CardContent>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEditing(false);
+                    setEditingGuardian(false);
+                    setEditingBasic(true);
+                  }}
+                >
+                  Edit basic details
+                </Button>
+              </CardContent>
+            </>
+          ) : (
+            <CardContent className="space-y-4">
+              {error ? <p className="text-sm text-danger">{error}</p> : null}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Student ID
+                  </p>
+                  <p className="mt-1 text-sm font-medium">{student.studentId}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Admission number
+                  </p>
+                  <p className="mt-1 text-sm font-medium">{student.admissionNumber}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Email
+                  </p>
+                  <p className="mt-1 text-sm font-medium">{student.email}</p>
+                </div>
               </div>
-            ))}
-          </CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">First name</label>
+                  <Input
+                    value={form.firstName ?? student.firstName}
+                    onChange={(e) => {
+                      set('firstName', e.target.value);
+                    }}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Middle name</label>
+                  <Input
+                    value={String(form.middleName ?? student.middleName ?? '')}
+                    onChange={(e) => {
+                      set('middleName', e.target.value || null);
+                    }}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Last name</label>
+                  <Input
+                    value={form.lastName ?? student.lastName}
+                    onChange={(e) => {
+                      set('lastName', e.target.value);
+                    }}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Roll number</label>
+                  <Input
+                    value={String(form.rollNumber ?? student.rollNumber ?? '')}
+                    onChange={(e) => {
+                      set('rollNumber', e.target.value || null);
+                    }}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Gender</label>
+                  <select
+                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
+                    value={form.gender ?? student.gender ?? ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      set('gender', value ? (value as StudentGender) : null);
+                    }}
+                  >
+                    <option value="">Not specified</option>
+                    {(Object.keys(STUDENT_GENDER_LABELS) as StudentGender[]).map((key) => (
+                      <option key={key} value={key}>
+                        {STUDENT_GENDER_LABELS[key]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Date of birth</label>
+                  <Input
+                    type="date"
+                    value={
+                      form.dateOfBirth !== undefined
+                        ? form.dateOfBirth ?? ''
+                        : student.dateOfBirth?.slice(0, 10) ?? ''
+                    }
+                    onChange={(e) => {
+                      set('dateOfBirth', e.target.value || null);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  disabled={updateMutation.isPending}
+                  onClick={() => void onSubmit()}
+                >
+                  {updateMutation.isPending ? (
+                    <>
+                      <Spinner size="sm" />
+                      Saving…
+                    </>
+                  ) : (
+                    'Save changes'
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={updateMutation.isPending}
+                  onClick={() => {
+                    setEditingBasic(false);
+                    setForm({});
+                    setError(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          )}
         </Card>
 
         {!editing ? (
@@ -223,7 +371,15 @@ export default function StudentProfilePage() {
               ))}
             </CardContent>
             <CardContent>
-              <Button onClick={() => { setEditing(true); }}>Edit contact details</Button>
+              <Button
+                onClick={() => {
+                  setEditingBasic(false);
+                  setEditingGuardian(false);
+                  setEditing(true);
+                }}
+              >
+                Edit contact details
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -296,27 +452,98 @@ export default function StudentProfilePage() {
           </Card>
         )}
 
-        <Card className="rounded-2xl">
-          <CardHeader>
-            <CardTitle className="text-base">Guardian details</CardTitle>
-            <CardDescription>Read-only guardian contact information.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2">
-            {[
-              ['Guardian name', student.guardianName],
-              ['Guardian relation', student.guardianRelation],
-              ['Guardian phone', student.guardianPhone],
-              ['Guardian email', student.guardianEmail],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {label}
-                </p>
-                <p className="mt-1 text-sm font-medium">{value || '—'}</p>
+        {!editingGuardian ? (
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-base">Guardian details</CardTitle>
+              <CardDescription>Parent or guardian contact information.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-2">
+              {[
+                ['Guardian name', student.guardianName],
+                ['Guardian relation', student.guardianRelation],
+                ['Guardian phone', student.guardianPhone],
+                ['Guardian email', student.guardianEmail],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {label}
+                  </p>
+                  <p className="mt-1 text-sm font-medium">{value || '—'}</p>
+                </div>
+              ))}
+            </CardContent>
+            <CardContent>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditingGuardian(true);
+                }}
+              >
+                Edit guardian details
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-base">Edit guardian details</CardTitle>
+              <CardDescription>Update parent or guardian contact information.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {error ? <p className="text-sm text-danger">{error}</p> : null}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {(
+                  [
+                    ['guardianName', 'Guardian name'],
+                    ['guardianRelation', 'Guardian relation'],
+                    ['guardianPhone', 'Guardian phone'],
+                    ['guardianEmail', 'Guardian email'],
+                  ] as const
+                ).map(([key, label]) => (
+                  <div key={key} className="space-y-1.5">
+                    <label className="text-sm font-medium">{label}</label>
+                    <Input
+                      value={String(form[key] ?? student[key] ?? '')}
+                      onChange={(e) => {
+                        set(key, e.target.value || null);
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </CardContent>
-        </Card>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  disabled={updateMutation.isPending}
+                  onClick={() => void onSubmit()}
+                >
+                  {updateMutation.isPending ? (
+                    <>
+                      <Spinner size="sm" />
+                      Saving…
+                    </>
+                  ) : (
+                    'Save changes'
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={updateMutation.isPending}
+                  onClick={() => {
+                    setEditingGuardian(false);
+                    setForm({});
+                    setError(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="rounded-2xl">
           <CardHeader>

@@ -126,6 +126,12 @@ export const createStudentSchema = studentObjectSchema;
 export const updateStudentSchema = studentObjectSchema.partial();
 
 export const updateStudentProfileSchema = z.object({
+  firstName: z.string().trim().min(1).max(80).optional(),
+  middleName: optionalString(80),
+  lastName: z.string().trim().min(1).max(80).optional(),
+  rollNumber: optionalString(64),
+  gender: studentGenderSchema.optional().nullable(),
+  dateOfBirth: z.coerce.date().optional().nullable(),
   phone: optionalString(30),
   alternatePhone: optionalString(30),
   alternateEmail: optionalEmail,
@@ -140,6 +146,8 @@ export const updateStudentProfileSchema = z.object({
   postalCode: optionalString(20),
   emergencyContactName: optionalString(120),
   emergencyContactPhone: optionalString(30),
+  guardianName: optionalString(120),
+  guardianRelation: optionalString(80),
   guardianPhone: optionalString(30),
   guardianEmail: optionalEmail,
 });

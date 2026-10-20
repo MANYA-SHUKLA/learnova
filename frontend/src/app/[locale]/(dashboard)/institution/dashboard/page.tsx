@@ -186,6 +186,12 @@ export default function InstitutionDashboardPage() {
       icon: CalendarDays,
     },
     {
+      href: APP_ROUTES.INSTITUTION_STUDENTS,
+      title: t('actions.searchStudents.title'),
+      description: t('actions.searchStudents.description'),
+      icon: Users,
+    },
+    {
       href: APP_ROUTES.INSTITUTION_STUDENTS_IMPORT,
       title: t('actions.students.title'),
       description: t('actions.students.description'),

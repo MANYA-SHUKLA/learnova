@@ -166,6 +166,7 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'dashboard', href: APP_ROUTES.FACULTY_DASHBOARD, icon: LayoutDashboard, exact: true },
       { id: 'courses', href: APP_ROUTES.FACULTY_COURSES, icon: BookOpen },
       { id: 'timetable', href: APP_ROUTES.FACULTY_TIMETABLE, icon: CalendarClock },
+      { id: 'students', href: APP_ROUTES.FACULTY_STUDENTS, icon: Users },
       { id: 'enrollments', href: APP_ROUTES.FACULTY_ENROLLMENTS, icon: ClipboardList },
       { id: 'progress', href: APP_ROUTES.FACULTY_PROGRESS, icon: BarChart3 },
       { id: 'assignments', href: APP_ROUTES.FACULTY_ASSIGNMENTS, icon: ClipboardCheck },

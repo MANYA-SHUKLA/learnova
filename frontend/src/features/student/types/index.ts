@@ -111,6 +111,12 @@ export interface StudentCreateBody {
 export type StudentUpdateBody = Partial<StudentCreateBody>;
 
 export interface StudentUpdateProfileBody {
+  firstName?: string;
+  middleName?: string | null;
+  lastName?: string;
+  rollNumber?: string | null;
+  gender?: StudentGender | null;
+  dateOfBirth?: string | null;
   phone?: string | null;
   alternatePhone?: string | null;
   alternateEmail?: string | null;

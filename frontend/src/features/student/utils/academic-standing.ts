@@ -17,11 +17,11 @@ export function buildStudentAcademicSummary(
     | 'academicYearId'
   > | null | undefined,
   labels: {
-    program: (id: string | null | undefined) => string;
-    batch: (id: string | null | undefined) => string;
-    semester: (id: string | null | undefined) => string;
-    section: (id: string | null | undefined) => string;
-    year: (id: string | null | undefined) => string;
+    program: (id: string | null | undefined) => string | null;
+    batch: (id: string | null | undefined) => string | null;
+    semester: (id: string | null | undefined) => string | null;
+    section: (id: string | null | undefined) => string | null;
+    year: (id: string | null | undefined) => string | null;
   },
 ): string | null {
   if (!student) return null;

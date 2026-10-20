@@ -16,7 +16,6 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import {
   AcademicYearSelect,
-  BatchSelect,
   ProgramSelect,
   SemesterSelect,
 } from '@/components/shared/entity-selects';
@@ -38,7 +37,6 @@ export default function FacultyCreatePracticeLabPage() {
 
   const [programId, setProgramId] = useState('');
   const [academicYearId, setAcademicYearId] = useState('');
-  const [batchId, setBatchId] = useState('');
   const [semesterId, setSemesterId] = useState('');
   const [courseId, setCourseId] = useState('');
   const [title, setTitle] = useState('');
@@ -53,32 +51,19 @@ export default function FacultyCreatePracticeLabPage() {
     if (active?.id) setAcademicYearId(active.id);
   }, [academicYearId, yearsQuery.data?.items, yearsQuery.isLoading]);
 
-  const coursesQuery = useCourseList(
-    {
-      page: 1,
-      limit: LIST_LIMIT,
-      sortBy: 'title',
-      sortOrder: 'asc',
-      includeDeleted: false,
-      programId: programId || undefined,
-      semesterId: semesterId || undefined,
-    },
-    Boolean(programId && academicYearId),
-  );
+  const coursesQuery = useCourseList({
+    page: 1,
+    limit: LIST_LIMIT,
+    sortBy: 'title',
+    sortOrder: 'asc',
+    includeDeleted: false,
+    programId: programId || undefined,
+    semesterId: semesterId || undefined,
+  });
 
-  const filteredCourses = useMemo(() => {
-    const items = coursesQuery.data?.items ?? [];
-    if (semesterId) return items;
-    if (!academicYearId) return items;
-    return items;
-  }, [academicYearId, coursesQuery.data?.items, semesterId]);
+  const filteredCourses = useMemo(() => coursesQuery.data?.items ?? [], [coursesQuery.data?.items]);
 
-  const coursePickerReady = Boolean(programId && academicYearId);
-  const courseEmptyMessage = !programId
-    ? t('courseSelectBranchFirst')
-    : !academicYearId
-      ? t('courseSelectYearFirst')
-      : t('courseEmpty');
+  const courseEmptyMessage = t('courseEmpty');
 
   return (
     <PermissionGate permission={PERMISSIONS.LAB_WRITE} enforce>
@@ -87,7 +72,7 @@ export default function FacultyCreatePracticeLabPage() {
           <p className="text-sm font-medium text-primary">Practice Labs</p>
           <h1 className="mt-1 font-display text-2xl font-semibold">Create practice lab</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Filter by branch, academic year, and batch, then pick a course for that cohort.
+            Pick a course you teach, or narrow the list with branch, academic year, and term.
           </p>
         </div>
 
@@ -95,11 +80,12 @@ export default function FacultyCreatePracticeLabPage() {
           <CardHeader>
             <CardTitle>Choose course</CardTitle>
             <CardDescription>
-              Select branch and year first. Courses you teach (including timetable) appear below.
+              Courses you teach (including timetable assignments) are listed below. Optional filters
+              help when you have many offerings.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               <ProgramSelect
                 label={t('filterBranch')}
                 value={programId}
@@ -107,7 +93,6 @@ export default function FacultyCreatePracticeLabPage() {
                 limit={LIST_LIMIT}
                 onChange={(id) => {
                   setProgramId(id);
-                  setBatchId('');
                   setSemesterId('');
                   setCourseId('');
                 }}
@@ -122,14 +107,6 @@ export default function FacultyCreatePracticeLabPage() {
                   setSemesterId('');
                   setCourseId('');
                 }}
-              />
-              <BatchSelect
-                label="Batch"
-                value={batchId}
-                programId={programId}
-                limit={LIST_LIMIT}
-                disabled={!programId}
-                onChange={setBatchId}
               />
               <SemesterSelect
                 label="Semester (term)"
@@ -147,9 +124,7 @@ export default function FacultyCreatePracticeLabPage() {
               />
             </div>
 
-            {!coursePickerReady ? (
-              <p className="text-sm text-muted-foreground">{courseEmptyMessage}</p>
-            ) : coursesQuery.isLoading || yearsQuery.isLoading ? (
+            {coursesQuery.isLoading || yearsQuery.isLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-16 w-full rounded-xl" />
                 <Skeleton className="h-16 w-full rounded-xl" />
@@ -174,7 +149,9 @@ export default function FacultyCreatePracticeLabPage() {
                       <li key={course.id}>
                         <button
                           type="button"
-                          onClick={() => { setCourseId(course.id); }}
+                          onClick={() => {
+                            setCourseId(course.id);
+                          }}
                           className={cn(
                             'flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left text-sm transition-colors',
                             selected
@@ -216,7 +193,9 @@ export default function FacultyCreatePracticeLabPage() {
               <label className="text-sm font-medium">Title</label>
               <Input
                 value={title}
-                onChange={(e) => { setTitle(e.target.value); }}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                }}
                 placeholder="Intro to Python"
               />
             </div>
@@ -225,7 +204,9 @@ export default function FacultyCreatePracticeLabPage() {
               <textarea
                 className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={description}
-                onChange={(e) => { setDescription(e.target.value); }}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                }}
               />
             </div>
             {error ? <p className="text-sm text-destructive">{error}</p> : null}

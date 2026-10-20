@@ -361,6 +361,15 @@ export default function StudentListPage() {
                     cell: (row) => row.rollNumber ?? '—',
                   },
                   {
+                    id: 'guardian',
+                    header: 'Guardian',
+                    cell: (row) => (
+                      <span className="text-sm text-muted-foreground">
+                        {row.guardianName ?? row.guardianPhone ?? '—'}
+                      </span>
+                    ),
+                  },
+                  {
                     id: 'branch',
                     header: t('columns.branch'),
                     cell: (row) => (

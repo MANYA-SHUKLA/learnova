@@ -488,10 +488,27 @@ export class StudentService {
     const existing = await studentRepository.findByEmail(institutionId, actor.email);
     if (!existing) throw new NotFoundError('Student profile not found for this account');
 
-    const doc = await studentRepository.updateById(institutionId, String(existing._id), {
+    const patch: Record<string, unknown> = {
       ...input,
       updatedBy: new Types.ObjectId(actor.userId),
-    });
+    };
+    if (input.guardianEmail !== undefined) {
+      patch.guardianEmail = input.guardianEmail
+        ? input.guardianEmail.toLowerCase()
+        : null;
+    }
+    if (
+      input.firstName !== undefined ||
+      input.middleName !== undefined ||
+      input.lastName !== undefined
+    ) {
+      patch.fullName = buildFullName(
+        input.firstName ?? existing.firstName,
+        input.middleName !== undefined ? input.middleName : existing.middleName,
+        input.lastName ?? existing.lastName,
+      );
+    }
+    const doc = await studentRepository.updateById(institutionId, String(existing._id), patch);
     if (!doc) throw new NotFoundError('Student not found');
 
     await this.audit('student.profile.updated', actor, institutionId, String(doc._id), {

@@ -47,9 +47,18 @@ export class StudentRepository {
         { firstName: regex },
         { lastName: regex },
         { email: regex },
+        { alternateEmail: regex },
+        { phone: regex },
         { studentId: regex },
         { admissionNumber: regex },
         { rollNumber: regex },
+        { registrationNumber: regex },
+        { guardianName: regex },
+        { guardianRelation: regex },
+        { guardianPhone: regex },
+        { guardianEmail: regex },
+        { emergencyContactName: regex },
+        { emergencyContactPhone: regex },
       ];
     }
 

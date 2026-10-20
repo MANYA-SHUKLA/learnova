@@ -108,6 +108,7 @@ export const APP_ROUTES = {
   INSTITUTION_ENROLLMENTS_CREATE: '/institution/enrollments/create',
   INSTITUTION_ENROLLMENTS_IMPORT: '/institution/enrollments/import',
   INSTITUTION_ENROLLMENTS_EXPORT: '/institution/enrollments/export',
+  FACULTY_STUDENTS: '/faculty/students',
   FACULTY_ENROLLMENTS: '/faculty/enrollments',
   FACULTY_TIMETABLE: '/faculty/timetable',
   STUDENT_ENROLLMENTS: '/student/enrollments',
