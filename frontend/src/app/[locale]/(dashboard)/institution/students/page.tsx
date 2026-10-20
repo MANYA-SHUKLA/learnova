@@ -426,11 +426,9 @@ export default function StudentListPage() {
                     header: t('columns.branch'),
                     cell: (row) => (
                       <span className="text-sm text-muted-foreground">
-                        {row.programIds?.length
-                          ? labels.programs(row.programIds)
-                          : row.programId
-                            ? labels.program(row.programId)
-                            : t('columns.unassigned')}
+                        {row.programId
+                          ? labels.program(row.programId)
+                          : t('columns.unassigned')}
                       </span>
                     ),
                   },
@@ -474,7 +472,7 @@ export default function StudentListPage() {
                           disabled={archiveMutation.isPending}
                           onClick={() => void archiveMutation.mutateAsync(row.id)}
                         >
-                          Archive
+                          {t('archiveSelected')}
                         </Button>
                       )}
                     </PermissionGate>
@@ -492,6 +490,10 @@ export default function StudentListPage() {
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {row.studentId} · {row.rollNumber ?? 'No roll'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {row.programId ? labels.program(row.programId) : ''}
+                        {row.yearOfStudy != null ? ` · Year ${row.yearOfStudy}` : ''}
                       </p>
                       <Button asChild size="sm" variant="outline" className="w-full rounded-xl">
                         <Link href={`${APP_ROUTES.INSTITUTION_STUDENTS}/${row.id}`}>

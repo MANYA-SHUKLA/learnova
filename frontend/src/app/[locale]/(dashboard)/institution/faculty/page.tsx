@@ -174,16 +174,18 @@ export default function FacultyListPage() {
               </Button>
               <Button
                 type="button"
-                variant={viewAll ? 'secondary' : 'outline'}
+                variant={viewAll ? 'secondary' : 'default'}
                 className="rounded-xl"
-                disabled={listQuery.isLoading}
+                disabled={listQuery.isLoading || directoryTotal === 0}
                 onClick={() => {
                   setViewAll((v) => !v);
                   setPage(1);
                 }}
               >
                 <List className="size-4" />
-                {viewAll ? t('viewPages') : t('viewAll')}
+                {viewAll
+                  ? t('viewPages')
+                  : t('viewAllFaculty', { count: directoryTotal })}
               </Button>
               <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
                 <Button asChild className="rounded-xl">
