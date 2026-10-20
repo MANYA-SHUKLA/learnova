@@ -19,7 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { publicApi } from '@/features/public/services/public-api';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass, platformHeroPrimaryClass, platformHeroSecondaryClass } from '@/lib/cta';
@@ -42,6 +42,40 @@ const marketingCardHover = cn(
 );
 
 const marketingCardInner = 'relative z-[1]';
+
+/** Full-width sections: intro column + content column (not narrow centered stacks). */
+const sectionGrid = 'grid w-full gap-10 lg:grid-cols-12 lg:gap-14 xl:gap-16';
+const sectionIntroCol = 'lg:col-span-4 lg:sticky lg:top-24 lg:self-start';
+const sectionBodyCol = 'lg:col-span-8';
+
+function SectionIntro({
+  eyebrow,
+  title,
+  subtitle,
+  children,
+}: {
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="max-w-lg text-left">
+      {eyebrow ? (
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{eyebrow}</p>
+      ) : null}
+      <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{title}</h2>
+      {subtitle ? <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">{subtitle}</p> : null}
+      {children}
+    </div>
+  );
+}
+
+function parseBuyerLine(raw: string) {
+  const dash = raw.indexOf(' — ');
+  if (dash < 0) return { label: raw, detail: '' };
+  return { label: raw.slice(0, dash), detail: raw.slice(dash + 3) };
+}
 
 const PLATFORM_FAQ_COUNT = 5;
 
@@ -169,40 +203,67 @@ export function PlatformHomePage({
             }}
           />
         </div>
-        <div className={siteContainer('relative mx-auto max-w-5xl text-center')}>
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.07] px-4 py-1.5 shadow-sm backdrop-blur-sm">
-            <Sparkles className="size-3.5 text-primary" aria-hidden />
-            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-              {heroEyebrow}
-            </span>
+        <div className={siteContainer('relative grid w-full items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20')}>
+          <div className="text-left">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.07] px-4 py-1.5 shadow-sm backdrop-blur-sm">
+              <Sparkles className="size-3.5 text-primary" aria-hidden />
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{heroEyebrow}</span>
+            </div>
+            <h1 className="mt-8 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.25rem] lg:leading-[1.06] xl:text-[3.5rem]">
+              <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/65 bg-clip-text text-transparent">
+                {heroTitle}
+              </span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">{heroSubtitle}</p>
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Button asChild size="lg" className={platformHeroPrimaryClass}>
+                <a href="#request-demo" className="group inline-flex items-center gap-2">
+                  {heroCtaLabel}
+                  <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
+                <a href="#modules" className="inline-flex items-center gap-2">
+                  <LayoutGrid className="size-4 opacity-80" aria-hidden />
+                  {tPlatform('exploreModules')}
+                </a>
+              </Button>
+            </div>
           </div>
-          <h1 className="mt-8 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.35rem] lg:leading-[1.06]">
-            <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/65 bg-clip-text text-transparent">
-              {heroTitle}
-            </span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl sm:leading-relaxed">
-            {heroSubtitle}
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
-            <Button asChild size="lg" className={platformHeroPrimaryClass}>
-              <a href="#request-demo" className="group inline-flex items-center gap-2">
-                {heroCtaLabel}
-                <ArrowRight
-                  className="size-4 transition-transform duration-300 group-hover:translate-x-1"
-                  aria-hidden
-                />
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
-              <a href="#modules" className="inline-flex items-center gap-2">
-                <LayoutGrid className="size-4 opacity-80" aria-hidden />
-                {tPlatform('exploreModules')}
-              </a>
-            </Button>
+          <div className="relative hidden lg:block">
+            {heroTagline ? (
+              <div className="rounded-3xl border border-border/70 bg-card/80 p-8 shadow-xl shadow-primary/5 backdrop-blur-md">
+                <p className="text-sm font-semibold uppercase tracking-wider text-primary">{tPlatform('buyerEyebrow')}</p>
+                <p className="mt-4 text-lg font-medium leading-relaxed text-foreground">{heroTagline}</p>
+                {buyerKeys.length > 0 ? (
+                  <ul className="mt-6 space-y-3 border-t border-border/60 pt-6">
+                    {buyerKeys.slice(0, 4).map((i) => {
+                      const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
+                      return (
+                        <li key={i} className="flex gap-3 text-sm">
+                          <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
+                          <span>
+                            <span className="font-semibold text-foreground">{line.label}</span>
+                            {line.detail ? (
+                              <span className="text-muted-foreground"> — {line.detail}</span>
+                            ) : null}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : null}
+                <Button asChild variant="link" className="mt-6 h-auto p-0 text-primary">
+                  <a href="#package" className="inline-flex items-center gap-1">
+                    {tPlatform('exploreModules')}
+                    <ArrowRight className="size-4" aria-hidden />
+                  </a>
+                </Button>
+              </div>
+            ) : null}
           </div>
           {heroTagline ? (
-            <p className="mx-auto mt-10 max-w-xl rounded-2xl border border-border/60 bg-card/50 px-5 py-3 text-sm font-medium leading-relaxed text-muted-foreground shadow-sm backdrop-blur-sm">
+            <p className="rounded-2xl border border-border/60 bg-card/50 px-5 py-3 text-sm font-medium leading-relaxed text-muted-foreground shadow-sm backdrop-blur-sm lg:col-span-2 lg:hidden">
               {heroTagline}
             </p>
           ) : null}
@@ -239,52 +300,59 @@ export function PlatformHomePage({
       {buyerKeys.length > 0 ? (
         <section
           id="package"
-          className="scroll-mt-24 border-b border-border/60 bg-gradient-to-b from-primary/[0.06] via-muted/25 to-background py-20 sm:py-24"
+          className="scroll-mt-24 border-b border-border/60 bg-gradient-to-br from-primary/[0.08] via-muted/30 to-background py-20 sm:py-24"
         >
-          <div className={siteContainer('max-w-6xl')}>
-            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-center lg:gap-16">
-              <div className="text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/80 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+          <div className={siteContainer('w-full')}>
+            <div className={sectionGrid}>
+              <div className={sectionIntroCol}>
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
                   <Package className="size-3.5" aria-hidden />
                   {tPlatform('buyerEyebrow')}
                 </div>
-                <h2 className="mt-5 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-                  {tPlatform('buyerTitle')}
-                </h2>
-                <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-                  {tPlatform('buyerSubtitle')}
-                </p>
-                <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
-                  <Button asChild size="lg" className={platformHeroPrimaryClass}>
-                    <a href="#request-demo" className="group inline-flex items-center gap-2">
-                      {tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}
-                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-                    </a>
-                  </Button>
-                  <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
-                    <a href="#modules">{tPlatform('exploreModules')}</a>
-                  </Button>
-                </div>
+                <SectionIntro title={tPlatform('buyerTitle')} subtitle={tPlatform('buyerSubtitle')}>
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    <Button asChild size="lg" className={platformHeroPrimaryClass}>
+                      <a href="#request-demo" className="group inline-flex items-center gap-2">
+                        {tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}
+                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+                      </a>
+                    </Button>
+                    <Button asChild variant="outline" size="lg" className={platformHeroSecondaryClass}>
+                      <a href="#modules">{tPlatform('exploreModules')}</a>
+                    </Button>
+                  </div>
+                </SectionIntro>
               </div>
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {buyerKeys.map((i) => (
-                  <li
-                    key={i}
-                    className={cn(
-                      'flex gap-3 rounded-2xl border border-border/80 bg-card/90 p-4 shadow-sm backdrop-blur-sm',
-                      marketingCardHover,
-                      'overflow-visible hover:scale-[1.02] motion-reduce:hover:scale-100',
-                    )}
-                  >
-                    <CheckCircle2
-                      className="mt-0.5 size-5 shrink-0 text-primary transition-transform duration-300 group-hover:scale-110 motion-reduce:group-hover:scale-100"
-                      aria-hidden
-                    />
-                    <span className="text-sm font-medium leading-snug text-foreground">
-                      {tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0])}
-                    </span>
-                  </li>
-                ))}
+              <ul className={cn(sectionBodyCol, 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3')}>
+                {buyerKeys.map((i) => {
+                  const raw = tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]);
+                  const line = parseBuyerLine(raw);
+                  return (
+                    <li
+                      key={i}
+                      className={cn(
+                        'flex min-h-[7.5rem] flex-col justify-between rounded-2xl border border-border/80 bg-card p-5 shadow-sm',
+                        marketingCardHover,
+                        'overflow-visible hover:scale-[1.02] motion-reduce:hover:scale-100',
+                      )}
+                    >
+                      <div className={marketingCardInner}>
+                        <div className="flex items-start justify-between gap-2">
+                          <CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden />
+                          <span className="font-display text-xs font-bold tabular-nums text-muted-foreground/80">
+                            {String(i).padStart(2, '0')}
+                          </span>
+                        </div>
+                        <p className="mt-3 font-display text-base font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+                          {line.label}
+                        </p>
+                        {line.detail ? (
+                          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{line.detail}</p>
+                        ) : null}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
