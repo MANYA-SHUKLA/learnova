@@ -17,7 +17,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Building2, CalendarClock, Inbox, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
+import { SuccessPopup } from '@/components/shared/success-popup';
 import { SuperAdminConsoleShell } from '@/components/superadmin/super-admin-console-shell';
+import { useSuccessPopup } from '@/hooks/use-success-popup';
 import {
   SuperAdminConsoleSidebar,
   type SuperAdminConsoleTab,
@@ -46,8 +48,10 @@ function statusVariant(status: DemoRequestRow['status']): 'default' | 'secondary
 
 export function SuperAdminConsolePage() {
   const t = useTranslations('superadmin.console');
+  const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<SuperAdminConsoleTab>('requests');
+  const { open, message, showSuccess, closeSuccess } = useSuccessPopup(t('emailSentSuccess'));
 
   const demoQuery = useQuery({
     queryKey: ['superadmin', 'demo-requests'],
@@ -81,10 +85,14 @@ export function SuperAdminConsolePage() {
       void queryClient.invalidateQueries({ queryKey: ['superadmin'] });
       const slug = data.institutionSlug;
       const code = data.institutionCode;
-      alert(
-        slug
-          ? t('provisionSuccessWithIds', { slug, code: code ?? '' })
-          : t('provisionSuccess'),
+      showSuccess(
+        data.credentialsEmailSent
+          ? slug
+            ? `${t('emailSentSuccess')} ${t('provisionSuccessWithIds', { slug, code: code ?? '' })}`
+            : t('emailSentSuccess')
+          : slug
+            ? t('provisionSuccessWithIds', { slug, code: code ?? '' })
+            : t('provisionSuccess'),
       );
     },
     onError: (err: Error) => {
@@ -95,13 +103,19 @@ export function SuperAdminConsolePage() {
   const confirmMutation = useMutation({
     mutationFn: ({ id, meetingAt, meetingNotes }: { id: string; meetingAt: string; meetingNotes?: string }) =>
       superadminApi.confirmDemoRequest(id, { meetingAt, meetingNotes }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['superadmin', 'demo-requests'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['superadmin', 'demo-requests'] });
+      showSuccess(t('emailSentMeetingConfirmed'));
+    },
   });
 
   const declineMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
       superadminApi.declineDemoRequest(id, reason ? { reason } : undefined),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['superadmin', 'demo-requests'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['superadmin', 'demo-requests'] });
+      showSuccess(t('emailSentDeclined'));
+    },
   });
 
   const pendingCount = useMemo(
@@ -128,6 +142,14 @@ export function SuperAdminConsolePage() {
     !demoQuery.isLoading && !demoQuery.isError && requestItems.length === 0;
 
   return (
+    <>
+    <SuccessPopup
+      open={open}
+      message={message}
+      onClose={closeSuccess}
+      placement="top-right"
+      dismissLabel={tCommon('dismissNotification')}
+    />
     <SuperAdminConsoleShell
       sidebar={
         <SuperAdminConsoleSidebar
@@ -290,7 +312,8 @@ export function SuperAdminConsolePage() {
                         onClick={() =>
                           void superadminApi
                             .resendCredentials(inst.id, { rotatePassword: true })
-                            .then(() => alert(t('credsQueued')))
+                            .then(() => showSuccess(t('emailSentSuccess')))
+                            .catch((err: Error) => alert(err.message || t('provisionError')))
                         }
                       >
                         {t('resendCreds')}

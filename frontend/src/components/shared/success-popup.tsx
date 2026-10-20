@@ -7,6 +7,8 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
+type SuccessPopupPlacement = 'top-center' | 'top-right';
+
 interface SuccessPopupProps {
   open: boolean;
   message: string;
@@ -14,6 +16,8 @@ interface SuccessPopupProps {
   dismissLabel?: string;
   durationMs?: number;
   className?: string;
+  /** Toast position — default top-center; use top-right for console / mail feedback */
+  placement?: SuccessPopupPlacement;
 }
 
 export function SuccessPopup({
@@ -23,6 +27,7 @@ export function SuccessPopup({
   dismissLabel = 'Dismiss',
   durationMs = 3500,
   className,
+  placement = 'top-center',
 }: SuccessPopupProps) {
   useEffect(() => {
     if (!open) return;
@@ -43,7 +48,10 @@ export function SuccessPopup({
           exit={{ opacity: 0, y: -12, scale: 0.96 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
           className={cn(
-            'fixed left-1/2 top-6 z-[100] flex w-[min(calc(100vw-2rem),24rem)] -translate-x-1/2 items-start gap-3 rounded-2xl border border-success/25 bg-background p-4 shadow-soft-lg',
+            'fixed top-4 z-[100] flex w-[min(calc(100vw-2rem),22rem)] items-start gap-3 rounded-xl border border-success/30 bg-background/95 p-3.5 shadow-soft-lg backdrop-blur-sm sm:top-6',
+            placement === 'top-right'
+              ? 'right-4 sm:right-6'
+              : 'left-1/2 -translate-x-1/2',
             className,
           )}
         >
