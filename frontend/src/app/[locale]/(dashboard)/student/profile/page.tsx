@@ -177,15 +177,29 @@ export default function StudentProfilePage() {
         </Card>
 
         <Card className="rounded-2xl">
-          <CardHeader>
-            <CardTitle className="text-base">Basic information</CardTitle>
-            <CardDescription>
-              Student ID, admission number, and email are set by the institution. You can update your
-              name, roll number, gender, and date of birth.
-            </CardDescription>
-          </CardHeader>
           {!editingBasic ? (
             <>
+              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1.5">
+                  <CardTitle className="text-base">Basic information</CardTitle>
+                  <CardDescription>
+                    Student ID, admission number, and email are managed by the institution. Update
+                    your name, roll number, gender, and date of birth below.
+                  </CardDescription>
+                </div>
+                <Button
+                  type="button"
+                  className="shrink-0 rounded-xl"
+                  onClick={() => {
+                    setEditing(false);
+                    setEditingGuardian(false);
+                    setEditingBasic(true);
+                  }}
+                >
+                  <Pencil className="size-4" />
+                  Update basic details
+                </Button>
+              </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
                 {[
                   ['Full name', student.fullName],
@@ -205,21 +219,15 @@ export default function StudentProfilePage() {
                   </div>
                 ))}
               </CardContent>
-              <CardContent>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setEditing(false);
-                    setEditingGuardian(false);
-                    setEditingBasic(true);
-                  }}
-                >
-                  Edit basic details
-                </Button>
-              </CardContent>
             </>
           ) : (
+            <>
+              <CardHeader>
+                <CardTitle className="text-base">Update basic information</CardTitle>
+                <CardDescription>
+                  Save when finished. ID, admission number, and login email stay unchanged.
+                </CardDescription>
+              </CardHeader>
             <CardContent className="space-y-4">
               {error ? <p className="text-sm text-danger">{error}</p> : null}
               <div className="grid gap-3 sm:grid-cols-2">
@@ -341,6 +349,7 @@ export default function StudentProfilePage() {
                 </Button>
               </div>
             </CardContent>
+            </>
           )}
         </Card>
 

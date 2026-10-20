@@ -611,19 +611,28 @@ export class StudentService {
     if (input.batchId !== undefined) {
       patch.batchId = input.batchId ? new Types.ObjectId(input.batchId) : null;
     }
+    for (const key of ['departmentId', 'programId', 'academicYearId', 'semesterId'] as const) {
+      if (input[key] === undefined && typeof patch[key] === 'string' && patch[key]) {
+        patch[key] = new Types.ObjectId(patch[key]);
+      }
+    }
 
     const resolvedProgramId =
-      input.programId !== undefined
-        ? input.programId
-        : existing.programId
-          ? String(existing.programId)
-          : null;
+      patch.programId != null
+        ? String(patch.programId)
+        : input.programId !== undefined
+          ? input.programId
+          : existing.programId
+            ? String(existing.programId)
+            : null;
     const resolvedSemesterId =
-      input.semesterId !== undefined
-        ? input.semesterId
-        : existing.semesterId
-          ? String(existing.semesterId)
-          : null;
+      patch.semesterId != null
+        ? String(patch.semesterId)
+        : input.semesterId !== undefined
+          ? input.semesterId
+          : existing.semesterId
+            ? String(existing.semesterId)
+            : null;
     if (input.sectionId !== undefined) {
       await this.assertSectionMatchesStudent(institutionId, input.sectionId, {
         programId: resolvedProgramId,
