@@ -8,10 +8,7 @@ interface DashboardRouteShellProps {
   className?: string;
 }
 
-/**
- * Single loading shell for `(dashboard)/layout` and `(dashboard)/loading.tsx`.
- * Keep markup identical in `(dashboard)/layout.tsx` and `(dashboard)/loading.tsx`.
- */
+/** Full-page session gate for `(dashboard)/layout.tsx` (auth / redirects). */
 export function DashboardRouteShell({
   message = 'Loading…',
   className,

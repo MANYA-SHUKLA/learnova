@@ -10,10 +10,12 @@ import { DashboardRouteShell } from '@/components/shared/dashboard-route-shell';
 import { HiddenRouteChildren } from '@/components/shared/hidden-route-children';
 import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { isPathAllowedForRole } from '@/lib/auth/role-routes';
+import { useIsClientHydrated } from '@/hooks/use-is-client-hydrated';
 import { usePathname, useRouter } from '@/lib/i18n/routing';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function DashboardGroupLayout({ children }: { children: ReactNode }) {
+  const isHydrated = useIsClientHydrated();
   const { isLoading, user, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -73,6 +75,15 @@ export default function DashboardGroupLayout({ children }: { children: ReactNode
   const sessionShellMessage = pendingPasswordRedirect
     ? 'Redirecting…'
     : 'Loading your session…';
+
+  if (!isHydrated) {
+    return (
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <DashboardRouteShell message="Loading your session…" />
+        <HiddenRouteChildren>{children}</HiddenRouteChildren>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">

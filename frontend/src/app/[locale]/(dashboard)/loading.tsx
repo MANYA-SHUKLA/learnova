@@ -1,12 +1,13 @@
 'use client';
 
-import { DashboardRouteShell } from '@/components/shared/dashboard-route-shell';
+import { Spinner } from '@learnova/ui';
 
-/** Matches `(dashboard)/layout.tsx` outer shell while the page segment streams in. */
+/** In-content loader only — session chrome lives in `(dashboard)/layout.tsx`. */
 export default function DashboardRouteLoading() {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DashboardRouteShell message="Loading your session…" />
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16">
+      <Spinner size="lg" />
+      <p className="text-sm text-muted-foreground">Loading…</p>
     </div>
   );
 }
