@@ -76,7 +76,7 @@ export default function FacultyStudentDirectoryPage() {
               <CardTitle className="text-card-title">{t('directory')}</CardTitle>
               <CardDescription>
                 {listQuery.isSuccess && total > 0
-                  ? tInst('showingAll', { count: total })
+                  ? t('showingAll', { count: total })
                   : t('directoryDescription')}
               </CardDescription>
             </div>
