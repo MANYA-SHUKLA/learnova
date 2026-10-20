@@ -291,18 +291,17 @@ async function main(): Promise<void> {
   const courseCache = new Map<string, Types.ObjectId>();
 
   async function ensureCourse(code: string, title: string, programCode: string, semesterNumber: number): Promise<Types.ObjectId> {
-    const cacheKey = `${programCode}|${semesterNumber}|${code}`;
-    const cached = courseCache.get(cacheKey);
+    const normalizedCode = code.toUpperCase();
+    const cached = courseCache.get(normalizedCode);
     if (cached) return cached;
 
     const program = programs.get(programCode)!;
     const semester = semesterByNumber.get(semesterNumber)!;
-    const slug = `${code}-${programCode}-S${semesterNumber}`.toLowerCase();
+    const slug = `${normalizedCode}-${programCode}-s${semesterNumber}`.toLowerCase();
 
     let course = await CourseModel.findOne({
       institutionId: institutionOid,
-      courseCode: code.toUpperCase(),
-      programIds: program.id,
+      courseCode: normalizedCode,
       deletedAt: null,
     }).lean();
 
@@ -312,7 +311,7 @@ async function main(): Promise<void> {
         departmentId: program.departmentId,
         programIds: [program.id],
         semesterIds: [semester.id],
-        courseCode: code.toUpperCase(),
+        courseCode: normalizedCode,
         title,
         slug,
         credits: title.toLowerCase().includes('lab') ? 2 : 3,
@@ -330,7 +329,7 @@ async function main(): Promise<void> {
         },
       );
     }
-    courseCache.set(cacheKey, course._id);
+    courseCache.set(normalizedCode, course._id);
     return course._id;
   }
 
