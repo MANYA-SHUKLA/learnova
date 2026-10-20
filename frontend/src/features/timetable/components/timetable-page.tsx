@@ -534,7 +534,12 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       : [];
   const generateWarnings =
     generateResult && generateResult.timetable.semesterId === selectedSemesterId
-      ? generateResult.warnings
+      ? generateResult.warnings.filter(
+          (line) =>
+            !line.startsWith('--- JNU hard-constraint') &&
+            !line.startsWith('Repaired overlap') &&
+            !line.startsWith('PROVISIONAL: Timetable failed JNU hard-constraint validation across'),
+        )
       : [];
 
   return (

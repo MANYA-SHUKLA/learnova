@@ -41,10 +41,12 @@ import {
 import { JNU_BTECH_PROGRESSION_SEMESTERS } from './jnu-master-instructions.js';
 import {
   buildJnuSourceDatabase,
-  mapOfficialSlotsToProposed,
+  buildOfficialSettledSlots,
   sourceDatabaseSummaryForSemester,
+  teachingAssignmentsFromSettledSlots,
 } from './jnu-timetable-source.js';
-import { formatValidationReport, validateJnuTimetable } from './jnu-timetable-validator.js';
+import { validateJnuTimetable } from './jnu-timetable-validator.js';
+import type { SettleResult } from './timetable-settler.js';
 
 function requireTenant(actor: ActorContext): string {
   if (!actor.institutionId) throw new ForbiddenError('Institution context required');
@@ -297,9 +299,14 @@ export class TimetableGeneratorService {
       facultyId,
     }));
 
+    const officialPreview = buildOfficialSettledSlots(semesterNumber, courses, sections, faculty);
+    const useOfficialGrid =
+      officialPreview.lockedCount > 0 &&
+      officialPreview.mappedCount >= Math.ceil(officialPreview.lockedCount * 0.85);
+
     let geminiUsed = false;
     let proposal = parseGeminiTimetableProposal(null);
-    if (isGeminiConfigured()) {
+    if (isGeminiConfigured() && !useOfficialGrid) {
       try {
         const raw = await generateGeminiJson({
           prompt: buildPrompt({
@@ -328,22 +335,32 @@ export class TimetableGeneratorService {
       }
     }
 
-    const officialProposed = mapOfficialSlotsToProposed(semesterNumber, courses, sections, faculty);
     const sourceUncertainties = buildJnuSourceDatabase().uncertainties;
 
-    const settled = settleTimetable({
-      courses,
-      faculty,
-      sections,
-      workingDays,
-      periods,
-      geminiAssignments: proposal.assignments,
-      proposedSlots: [...officialProposed, ...proposal.slots],
-      occupied,
-    });
+    let settled: SettleResult;
+    if (useOfficialGrid) {
+      settled = {
+        slots: officialPreview.slots,
+        assignments: teachingAssignmentsFromSettledSlots(officialPreview.slots, courses),
+        warnings: [...officialPreview.warnings],
+      };
+    } else {
+      settled = settleTimetable({
+        courses,
+        faculty,
+        sections,
+        workingDays,
+        periods,
+        geminiAssignments: proposal.assignments,
+        proposedSlots: proposal.slots,
+        occupied,
+      });
+    }
 
     if (settled.slots.length === 0) {
-      throw new ValidationError('Could not place any class slots for this semester');
+      throw new ValidationError(
+        'Could not place any class slots. Run Monsoon seed (seed:monsoon-2026) or add sections/courses matching the official catalogue.',
+      );
     }
 
     const warnings = [...settled.warnings];
@@ -353,16 +370,22 @@ export class TimetableGeneratorService {
         `${droppedCourses} course(s) skipped (not in the official B.Tech catalogue for this semester, or unverified codes EN711/EN714).`,
       );
     }
-    if (!isGeminiConfigured()) {
+    if (useOfficialGrid) {
       warnings.unshift(
-        'AI is off or not configured (set ENABLE_AI=true and GEMINI_API_KEY). Timetable was built with the local scheduler.',
+        `Loaded ${officialPreview.mappedCount} slots from the official Monsoon 2026 timetable (JC BOSE, labs, groups). AI auto-scheduler was not used.`,
+      );
+    } else if (!isGeminiConfigured()) {
+      warnings.unshift(
+        'Official grid could not be fully mapped — using the local scheduler with ELC demo rooms. Prefer: pnpm --filter @learnova/backend seed:monsoon-2026',
       );
     } else if (!geminiUsed) {
       warnings.unshift(
-        'AI could not suggest faculty assignments; timetable was built with the local scheduler.',
+        'Official grid could not be fully mapped — using the local scheduler. Prefer Monsoon seed for SOE JNU.',
       );
     } else {
-      warnings.unshift('AI suggested faculty assignments; times and rooms were placed by the local scheduler.');
+      warnings.unshift(
+        'Official grid could not be fully mapped — AI + local scheduler used. Prefer Monsoon seed for SOE JNU.',
+      );
     }
 
     let timetable = await timetableRepository.findByInstitutionSemester(institutionId, input.semesterId);
@@ -431,24 +454,45 @@ export class TimetableGeneratorService {
       .lean()
       .exec();
 
-    const validation = validateJnuTimetable(
-      allInstitutionSlots.map((row) => ({
-        dayOfWeek: row.dayOfWeek as TimetableDayOfWeek,
-        startTime: row.startTime as string,
-        endTime: row.endTime as string,
-        facultyId: String(row.facultyId),
-        facultyName: row.facultyName as string,
-        sectionId: String(row.sectionId),
-        sectionName: row.sectionName as string,
-        room: row.room as string,
-        courseTitle: row.courseTitle as string,
-      })),
+    const toValidationSlot = (row: {
+      dayOfWeek: string;
+      startTime: string;
+      endTime: string;
+      facultyId: Types.ObjectId | string;
+      facultyName?: string;
+      sectionId: Types.ObjectId | string;
+      sectionName: string;
+      room: string;
+      courseTitle?: string;
+    }) => ({
+      dayOfWeek: row.dayOfWeek as TimetableDayOfWeek,
+      startTime: row.startTime,
+      endTime: row.endTime,
+      facultyId: String(row.facultyId),
+      facultyName: row.facultyName,
+      sectionId: String(row.sectionId),
+      sectionName: row.sectionName,
+      room: row.room,
+      courseTitle: row.courseTitle,
+    });
+
+    const thisSemesterValidation = validateJnuTimetable(
+      created.map((row) => toValidationSlot(row)),
       { uncertainties: sourceUncertainties },
     );
-    warnings.push(formatValidationReport(validation));
-    if (!validation.valid) {
-      warnings.unshift(
-        'PROVISIONAL: Timetable failed JNU hard-constraint validation across B.Tech semesters. Prefer Monsoon seed or resolve conflicts before publishing.',
+    if (!thisSemesterValidation.valid) {
+      warnings.push(
+        `This semester: ${thisSemesterValidation.facultyClashes.length} faculty and ${thisSemesterValidation.roomClashes.length} room conflicts detected.`,
+      );
+    }
+
+    const globalValidation = validateJnuTimetable(
+      allInstitutionSlots.map((row) => toValidationSlot(row)),
+      { uncertainties: sourceUncertainties },
+    );
+    if (globalValidation.facultyClashes.length > 0) {
+      warnings.push(
+        `${globalValidation.facultyClashes.length} faculty time overlap(s) across B.Tech semesters (Years I–IX run in the same week). Re-run Monsoon seed for all semesters or adjust slots before publish.`,
       );
     }
 

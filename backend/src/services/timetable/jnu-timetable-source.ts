@@ -10,8 +10,14 @@ import {
 } from '../../seeds/monsoon-2026/constants.js';
 import type { SectionPlan } from '../../seeds/monsoon-2026/constants.js';
 import { BTECH_SECTION_PLANS } from '../../seeds/monsoon-2026/schedules.js';
-import type { ProposedSlot } from './timetable-settler.js';
-import type { CourseRecord, FacultyRecord, SectionRecord } from './timetable-settler.js';
+import type {
+  CourseRecord,
+  FacultyRecord,
+  ProposedSlot,
+  SectionRecord,
+  SettledSlot,
+  TeachingAssignment,
+} from './timetable-settler.js';
 import type { TimetableDayOfWeek } from '@learnova/types';
 import { JNU_BTECH_PROGRESSION_SEMESTERS } from './jnu-master-instructions.js';
 
@@ -211,6 +217,104 @@ function matchFacultyId(faculty: FacultyRecord[], facultyCode: string, facultyNa
 }
 
 /** Map official locked grid rows to settler proposed slots (course/section/faculty ids from LMS). */
+function facultyDisplayName(facultyById: Map<string, FacultyRecord>, facultyId: string): string {
+  return facultyById.get(facultyId)?.name ?? facultyId;
+}
+
+/** Official Monsoon grid → DB slots (merged CSE+ECE rows like monsoon seed). */
+export function buildOfficialSettledSlots(
+  semesterNumber: number,
+  courses: CourseRecord[],
+  sections: SectionRecord[],
+  faculty: FacultyRecord[],
+): {
+  slots: SettledSlot[];
+  warnings: string[];
+  mappedCount: number;
+  lockedCount: number;
+} {
+  const locked = officialLockedSlotsForSemester(semesterNumber);
+  const facultyById = new Map(faculty.map((row) => [row.id, row]));
+  const warnings: string[] = [];
+  const slotDocs: SettledSlot[] = [];
+  let mappedCount = 0;
+
+  for (const row of locked) {
+    const section = sections.find((s) => s.name === row.sourceSectionLabel);
+    if (!section) {
+      warnings.push(`No section "${row.sourceSectionLabel}" — skipped ${row.courseKey}.`);
+      continue;
+    }
+    const course = courses.find((c) => {
+      if ((c.courseCode ?? '').toUpperCase() !== row.courseCode) return false;
+      return c.programIds.length === 0 || c.programIds.includes(section.programId);
+    });
+    const facultyId = matchFacultyId(faculty, row.facultyCode, row.facultyName);
+    if (!course || !facultyId) {
+      warnings.push(
+        `Could not map ${row.courseKey} (${row.sourceSectionLabel}) — check course code and faculty in LMS.`,
+      );
+      continue;
+    }
+    mappedCount += 1;
+
+    const courseTitle = `${row.courseCode}: ${row.subject}`;
+    const mergeKey = `${row.dayOfWeek}|${row.startTime}|${row.endTime}|${facultyId}|${course.id}|${row.room.trim().toLowerCase()}`;
+    const existing = slotDocs.find(
+      (slot) =>
+        `${slot.dayOfWeek}|${slot.startTime}|${slot.endTime}|${slot.facultyId}|${slot.courseId}|${slot.room.trim().toLowerCase()}` ===
+        mergeKey,
+    );
+    if (existing) {
+      const names = existing.sectionName.split(' + ').map((s) => s.trim());
+      if (!names.includes(row.sourceSectionLabel)) {
+        existing.sectionName = `${existing.sectionName} + ${row.sourceSectionLabel}`;
+      }
+      continue;
+    }
+
+    slotDocs.push({
+      dayOfWeek: row.dayOfWeek,
+      startTime: row.startTime,
+      endTime: row.endTime,
+      courseId: course.id,
+      courseTitle,
+      sectionId: section.id,
+      sectionName: row.sourceSectionLabel,
+      facultyId,
+      facultyName: facultyDisplayName(facultyById, facultyId),
+      room: row.room,
+    });
+  }
+
+  return { slots: slotDocs, warnings, mappedCount, lockedCount: locked.length };
+}
+
+export function teachingAssignmentsFromSettledSlots(
+  slots: SettledSlot[],
+  courses: CourseRecord[],
+): TeachingAssignment[] {
+  const courseById = new Map(courses.map((c) => [c.id, c]));
+  const seen = new Map<string, TeachingAssignment>();
+  for (const slot of slots) {
+    const key = slot.courseId;
+    const existing = seen.get(key);
+    if (existing) {
+      existing.sessionsPerWeek += 1;
+      continue;
+    }
+    const course = courseById.get(slot.courseId);
+    seen.set(key, {
+      courseId: slot.courseId,
+      courseTitle: course?.title ?? slot.courseTitle,
+      facultyId: slot.facultyId,
+      facultyName: slot.facultyName,
+      sessionsPerWeek: 1,
+    });
+  }
+  return [...seen.values()];
+}
+
 export function mapOfficialSlotsToProposed(
   semesterNumber: number,
   courses: CourseRecord[],
