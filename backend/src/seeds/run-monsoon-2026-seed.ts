@@ -17,6 +17,7 @@ import {
   StudentModel,
   TimetableModel,
   TimetableSlotModel,
+  UserModel,
 } from '../models/index.js';
 import { connectMongo, disconnectMongo } from '../database/index.js';
 import { hashPassword } from '../security/index.js';
@@ -105,7 +106,11 @@ async function main(): Promise<void> {
   const adminRole = await roleRepository.findByName('institution_admin');
   if (!adminRole) throw new Error('Run seed:auth first');
 
-  const adminUser = await userRepository.findByInstitutionAndRole(institutionOid, adminRole._id);
+  const adminUser = await UserModel.findOne({
+    institutionId: institutionOid,
+    roleId: adminRole._id,
+    deletedAt: null,
+  }).lean();
   if (adminUser?.email) {
     await ensurePassword(
       adminUser.email,
@@ -117,14 +122,30 @@ async function main(): Promise<void> {
   }
 
   const departments = new Map<string, Types.ObjectId>();
-  for (const code of ['CSE', 'ECE', 'MATH']) {
-    const dept = await DepartmentModel.findOne({
+  for (const spec of [
+    { code: 'CSE', name: 'Computer Science' },
+    { code: 'ECE', name: 'Electronics' },
+    { code: 'MATH', name: 'Mathematics' },
+  ]) {
+    let dept = await DepartmentModel.findOne({
       institutionId: institutionOid,
-      code,
+      code: spec.code,
       deletedAt: null,
     }).lean();
-    if (!dept) throw new Error(`Department ${code} missing — run seed:enrollment-stack`);
-    departments.set(code, dept._id);
+    if (!dept) {
+      const school = await DepartmentModel.findOne({ institutionId: institutionOid, deletedAt: null }).lean();
+      if (!school) throw new Error('No school/department — run seed:enrollment-stack');
+      const created = await DepartmentModel.create({
+        institutionId: institutionOid,
+        schoolId: (school as { schoolId?: Types.ObjectId }).schoolId,
+        name: spec.name,
+        code: spec.code,
+        status: 'active',
+        deletedAt: null,
+      });
+      dept = created.toObject();
+    }
+    departments.set(spec.code, dept._id);
   }
 
   const programs = new Map<string, { id: Types.ObjectId; departmentId: Types.ObjectId }>();
@@ -271,7 +292,7 @@ async function main(): Promise<void> {
 
     let course = await CourseModel.findOne({
       institutionId: institutionOid,
-      code,
+      courseCode: code.toUpperCase(),
       programIds: program.id,
       deletedAt: null,
     }).lean();
@@ -282,13 +303,12 @@ async function main(): Promise<void> {
         departmentId: program.departmentId,
         programIds: [program.id],
         semesterIds: [semester.id],
-        code,
+        courseCode: code.toUpperCase(),
         title,
         slug,
         credits: title.toLowerCase().includes('lab') ? 2 : 3,
         category: 'general',
         status: 'published',
-        deliveryMode: title.toLowerCase().includes('lab') ? 'lab' : 'lecture',
         deletedAt: null,
       });
       course = created.toObject();
@@ -328,7 +348,6 @@ async function main(): Promise<void> {
         },
         $setOnInsert: {
           institutionId: institutionOid,
-          code: plan.sectionLabel.replace(/\s+/g, '-').toUpperCase(),
           name: plan.sectionLabel,
         },
       },
@@ -401,6 +420,7 @@ async function main(): Promise<void> {
 
         slotDocs.push({
           institutionId: institutionOid,
+          semesterId: semester.id,
           timetableId: timetable._id,
           dayOfWeek: day,
           startTime: period.startTime,

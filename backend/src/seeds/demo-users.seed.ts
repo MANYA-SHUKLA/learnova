@@ -18,9 +18,9 @@ import { logger } from '../utils/logger/index.js';
 import { getSeedCounts } from './seed-utils.js';
 
 export const DEMO_FACULTY_EMAIL = 'noreply@moonair.in';
-export const DEMO_FACULTY_PASSWORD = 'MANYAshukl@1';
+export const DEMO_FACULTY_PASSWORD = 'Pass1234';
 export const DEMO_STUDENT_EMAIL = 'geragunjan02@gmail.com';
-export const DEMO_STUDENT_PASSWORD = 'MANYAshukl@1';
+export const DEMO_STUDENT_PASSWORD = 'Pass1234';
 
 const LEGACY_DEMO_PASSWORD = 'Demo@12345';
 

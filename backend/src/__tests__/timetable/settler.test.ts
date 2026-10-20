@@ -215,7 +215,7 @@ describe('timetable settler', () => {
   it('keeps the SOE JNU grid: Mon–Fri, 09:00–18:00, and only 3 rooms', () => {
     expect(DEFAULT_WORKING_DAYS).toEqual(['mon', 'tue', 'wed', 'thu', 'fri']);
     expect(DEFAULT_PERIODS[0]).toEqual({ startTime: '09:00', endTime: '10:00' });
-    expect(DEFAULT_PERIODS.at(-1)).toEqual({ startTime: '17:00', endTime: '18:00' });
+    expect(DEFAULT_PERIODS.at(-1)).toEqual({ startTime: '17:15', endTime: '18:15' });
     expect(DEFAULT_PERIODS.some((period) => period.startTime === '13:00')).toBe(false);
     expect(DEFAULT_LECTURE_ROOMS).toEqual(['ELC Class 1', 'ELC Class 2', 'ELC Class 3']);
     expect(DEFAULT_LAB_ROOMS).toEqual(DEFAULT_LECTURE_ROOMS);

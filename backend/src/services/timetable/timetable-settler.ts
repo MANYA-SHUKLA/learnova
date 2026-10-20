@@ -98,10 +98,10 @@ export const DEFAULT_PERIODS: TimetablePeriod[] = [
   { startTime: '10:00', endTime: '11:00' },
   { startTime: '11:00', endTime: '12:00' },
   { startTime: '12:00', endTime: '13:00' },
-  { startTime: '14:00', endTime: '15:00' },
-  { startTime: '15:00', endTime: '16:00' },
-  { startTime: '16:00', endTime: '17:00' },
-  { startTime: '17:00', endTime: '18:00' },
+  { startTime: '14:15', endTime: '15:15' },
+  { startTime: '15:15', endTime: '16:15' },
+  { startTime: '16:15', endTime: '17:15' },
+  { startTime: '17:15', endTime: '18:15' },
 ];
 
 /** Three rooms for the whole campus. Theory and lab sessions share them. */
