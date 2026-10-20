@@ -30,6 +30,9 @@ export function isActiveRole(value: string | null | undefined): value is EdgeAct
 
 export function requiredRoleForPath(pathWithoutLocale: string): EdgeActiveRole | null {
   const normalized = pathWithoutLocale === '' ? '/' : pathWithoutLocale;
+  if (normalized === '/sessions' || normalized.startsWith('/sessions/')) {
+    return 'institution_admin';
+  }
   if (
     normalized === INSTITUTION_PREFIX ||
     normalized.startsWith(`${INSTITUTION_PREFIX}/`)

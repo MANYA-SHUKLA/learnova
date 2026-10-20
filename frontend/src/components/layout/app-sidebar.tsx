@@ -178,7 +178,6 @@ const FACULTY_NAV_GROUPS: NavGroup[] = [
       { id: 'certificates', href: APP_ROUTES.FACULTY_CERTIFICATES, icon: Award },
       { id: 'proctoring', href: APP_ROUTES.FACULTY_EXAMS_LIVE, icon: Shield },
       { id: 'profile', href: APP_ROUTES.FACULTY_PROFILE, icon: UserRound },
-      { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
     ],
   },
 ];
@@ -209,7 +208,6 @@ const STUDENT_NAV_GROUPS: NavGroup[] = [
       { id: 'notes', href: APP_ROUTES.STUDENT_NOTES, icon: NotebookPen },
       { id: 'activity', href: APP_ROUTES.STUDENT_ACTIVITY, icon: Activity },
       { id: 'profile', href: APP_ROUTES.STUDENT_PROFILE, icon: UserRound },
-      { id: 'sessions', href: SESSIONS_ROUTE, icon: Shield },
     ],
   },
 ];

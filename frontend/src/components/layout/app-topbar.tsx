@@ -195,16 +195,18 @@ export function AppTopbar() {
                   </p>
                 </div>
                 <div className="p-1">
-                  <Link
-                    href={SESSIONS_ROUTE}
-                    onClick={() => {
-                      setProfileOpen(false);
-                    }}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted"
-                  >
-                    <Shield className="size-4 text-muted-foreground" />
-                    {tItems('sessions')}
-                  </Link>
+                  {user?.role === 'institution_admin' ? (
+                    <Link
+                      href={SESSIONS_ROUTE}
+                      onClick={() => {
+                        setProfileOpen(false);
+                      }}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted"
+                    >
+                      <Shield className="size-4 text-muted-foreground" />
+                      {tItems('sessions')}
+                    </Link>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => void handleLogout()}

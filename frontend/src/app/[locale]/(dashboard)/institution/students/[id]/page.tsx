@@ -17,7 +17,7 @@ import { useParams } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { PasswordInput } from '@/components/shared/password-input';
-import { authApi, useSessions } from '@/features/auth';
+import { authApi } from '@/features/auth';
 import { ErrorState, useOrgLabels } from '@/features/institution';
 import {
   formatStudentStatus,
@@ -61,8 +61,6 @@ export default function StudentDetailPage() {
     Boolean(query.data?.email) &&
     Boolean(user?.email) &&
     query.data!.email.toLowerCase() === user!.email.toLowerCase();
-
-  const sessionsQuery = useSessions(isOwnProfile);
 
   if (query.isLoading) {
     return (
@@ -367,39 +365,6 @@ export default function StudentDetailPage() {
                 ) : (
                   'Update password'
                 )}
-              </Button>
-            </CardContent>
-          </Card>
-        ) : null}
-
-        {isOwnProfile ? (
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-base">Login history</CardTitle>
-              <CardDescription>Active sessions for your account.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {sessionsQuery.isLoading ? (
-                <Skeleton className="h-16 w-full" />
-              ) : (sessionsQuery.data?.length ?? 0) === 0 ? (
-                <p className="text-sm text-muted-foreground">No sessions found.</p>
-              ) : (
-                sessionsQuery.data?.map((session) => (
-                  <div
-                    key={session.id}
-                    className="rounded-xl border border-border/70 px-3 py-2 text-sm"
-                  >
-                    <p className="font-medium">
-                      {session.deviceType ?? 'Device'} · {session.ipAddress ?? 'IP unknown'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Last active {session.lastActivityAt ?? session.createdAt}
-                    </p>
-                  </div>
-                ))
-              )}
-              <Button asChild variant="outline" size="sm">
-                <Link href="/sessions">Manage all sessions</Link>
               </Button>
             </CardContent>
           </Card>
