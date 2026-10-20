@@ -202,6 +202,45 @@ function normalizeName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ');
 }
 
+const PHYSICS_CODE_ALIAS = new Set(['EN201', 'EN201N']);
+
+function findCourseForOfficialRow(
+  section: SectionRecord,
+  courseCode: string,
+  courses: CourseRecord[],
+): CourseRecord | undefined {
+  const normalized = courseCode.toUpperCase();
+  const forProgram = (code: string) =>
+    courses.find((c) => {
+      if ((c.courseCode ?? '').toUpperCase() !== code) return false;
+      return c.programIds.length === 0 || c.programIds.includes(section.programId);
+    });
+
+  const direct = forProgram(normalized);
+  if (direct) return direct;
+
+  if (PHYSICS_CODE_ALIAS.has(normalized)) {
+    for (const alt of PHYSICS_CODE_ALIAS) {
+      if (alt === normalized) continue;
+      const match = forProgram(alt);
+      if (match) return match;
+    }
+  }
+
+  return courses.find(
+    (c) =>
+      (c.courseCode ?? '').toUpperCase() === normalized &&
+      c.programIds.includes(section.programId),
+  );
+}
+
+function slotCountBySectionPrefix(slots: SettledSlot[], prefix: 'CSE' | 'ECE'): number {
+  return slots.filter((slot) => {
+    const name = slot.sectionName;
+    return name.includes(`B.Tech ${prefix}`) && !name.includes(`B.Tech ${prefix === 'CSE' ? 'ECE' : 'CSE'}`);
+  }).length;
+}
+
 function matchFacultyId(faculty: FacultyRecord[], facultyCode: string, facultyName: string): string | null {
   const meta = FACULTY_BY_CODE[facultyCode];
   const needles = [facultyName, meta?.fullName]
@@ -232,6 +271,8 @@ export function buildOfficialSettledSlots(
   warnings: string[];
   mappedCount: number;
   lockedCount: number;
+  cseSlotCount: number;
+  eceSlotCount: number;
 } {
   const locked = officialLockedSlotsForSemester(semesterNumber);
   const facultyById = new Map(faculty.map((row) => [row.id, row]));
