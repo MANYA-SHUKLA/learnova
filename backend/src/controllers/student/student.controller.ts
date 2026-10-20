@@ -254,7 +254,12 @@ export async function bulkAssignBatch(req: Request, res: Response, next: NextFun
 export async function previewStudentImport(req: Request, res: Response, next: NextFunction) {
   try {
     const body = req.body as StudentImportConfirmInput;
-    const data = studentService.previewImport(body.rows);
+    const actor = actorFrom(req);
+    const data = await studentService.previewImport(
+      body.rows,
+      actor.institutionId!,
+      body.mode ?? 'create_only',
+    );
     sendSuccess(res, data, { requestId: req.requestId });
   } catch (err) {
     next(err);

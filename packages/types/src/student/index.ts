@@ -112,13 +112,19 @@ export interface StudentImportPreview {
   validRows: number;
   invalidRows: number;
   duplicates: number;
+  /** Rows that would update an existing student (upsert mode only) */
+  updateRows?: number;
+  /** Rows that would create a new student */
+  createRows?: number;
   errors: StudentImportRowError[];
   sample: Array<Record<string, string>>;
 }
 
 export interface StudentImportResult {
   imported: number;
+  updated?: number;
   failed: number;
   errors: StudentImportRowError[];
   studentIds: string[];
+  credentialsEmailed?: number;
 }

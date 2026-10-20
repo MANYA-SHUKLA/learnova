@@ -129,16 +129,25 @@ export const studentApi = {
   bulkAssignSection: (body: StudentBulkAssignSectionBody) =>
     apiClient.post<{ modified: number }>(`${API_ROUTES.STUDENTS}/bulk/assign-section`, body),
 
-  previewImport: (rows: Record<string, string>[]) =>
+  previewImport: (
+    rows: Record<string, string>[],
+    mode: 'create_only' | 'upsert' = 'create_only',
+  ) =>
     apiClient.post<StudentImportPreview>(`${API_ROUTES.STUDENTS}/import/preview`, {
       rows,
       dryRun: true,
+      mode,
     }),
 
-  import: (rows: Record<string, string>[], dryRun = false) =>
+  import: (
+    rows: Record<string, string>[],
+    dryRun = false,
+    mode: 'create_only' | 'upsert' = 'create_only',
+  ) =>
     apiClient.post<StudentImportResult & StudentImportPreview>(`${API_ROUTES.STUDENTS}/import`, {
       rows,
       dryRun,
+      mode,
     }),
 
   uploadPhoto: (id: string, body: StudentPhotoUploadBody) =>

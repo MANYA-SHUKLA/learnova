@@ -157,7 +157,13 @@ export function useBulkSuspendStudentMutation() {
 export function useStudentImportMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (rows: Record<string, string>[]) => studentApi.import(rows, false),
+    mutationFn: ({
+      rows,
+      mode = 'create_only',
+    }: {
+      rows: Record<string, string>[];
+      mode?: 'create_only' | 'upsert';
+    }) => studentApi.import(rows, false, mode),
     onSuccess: () => { invalidateStudent(queryClient); },
   });
 }

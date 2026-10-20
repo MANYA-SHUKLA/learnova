@@ -42,7 +42,18 @@ export default function StudentImportPage() {
   const importMutation = useStudentImportMutation();
   const [preview, setPreview] = useState<StudentImportPreview | null>(null);
   const [rows, setRows] = useState<Record<string, string>[]>([]);
+  const [importMode, setImportMode] = useState<'create_only' | 'upsert'>('upsert');
   const [error, setError] = useState<string | null>(null);
+
+  const runPreview = async (parsed: Record<string, string>[], mode: 'create_only' | 'upsert') => {
+    try {
+      const result = await studentApi.previewImport(parsed, mode);
+      setPreview(result);
+    } catch (err) {
+      setPreview(null);
+      setError(err instanceof ApiClientError ? err.message : t('previewFailed'));
+    }
+  };
 
   const onFile = async (file: File | null) => {
     if (!file) return;
@@ -50,18 +61,21 @@ export default function StudentImportPage() {
     const text = await file.text();
     const parsed = parseCsv(text);
     setRows(parsed);
-    try {
-      const result = await studentApi.previewImport(parsed);
-      setPreview(result);
-    } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : t('previewFailed'));
+    await runPreview(parsed, importMode);
+  };
+
+  const onModeChange = (mode: 'create_only' | 'upsert') => {
+    setImportMode(mode);
+    if (rows.length > 0) {
+      setError(null);
+      void runPreview(rows, mode);
     }
   };
 
   const onImport = async () => {
     setError(null);
     try {
-      await importMutation.mutateAsync(rows);
+      await importMutation.mutateAsync({ rows, mode: importMode });
       router.push(APP_ROUTES.INSTITUTION_STUDENTS);
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : t('importFailed'));
@@ -87,6 +101,37 @@ export default function StudentImportPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">{t('modeLabel')}</legend>
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
+                <label className="flex cursor-pointer items-start gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="importMode"
+                    checked={importMode === 'upsert'}
+                    onChange={() => onModeChange('upsert')}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    <span className="font-medium">{t('modeUpsertTitle')}</span>
+                    <span className="mt-0.5 block text-muted-foreground">{t('modeUpsertHint')}</span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="importMode"
+                    checked={importMode === 'create_only'}
+                    onChange={() => onModeChange('create_only')}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    <span className="font-medium">{t('modeCreateTitle')}</span>
+                    <span className="mt-0.5 block text-muted-foreground">{t('modeCreateHint')}</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
             <input
               type="file"
               accept=".csv,text/csv"
@@ -97,6 +142,12 @@ export default function StudentImportPage() {
               <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4 text-sm">
                 <p>{t('totalRows', { count: preview.totalRows })}</p>
                 <p>{t('valid', { count: preview.validRows })}</p>
+                {importMode === 'upsert' && preview.createRows != null ? (
+                  <p>{t('toCreate', { count: preview.createRows })}</p>
+                ) : null}
+                {importMode === 'upsert' && preview.updateRows != null ? (
+                  <p>{t('toUpdate', { count: preview.updateRows })}</p>
+                ) : null}
                 <p>{t('invalid', { count: preview.invalidRows })}</p>
                 <p>{t('duplicates', { count: preview.duplicates })}</p>
                 {preview.errors.slice(0, 8).map((err) => (

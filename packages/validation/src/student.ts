@@ -178,9 +178,13 @@ export const studentBulkAssignDepartmentSchema = z.object({
   programId: objectIdField.optional().nullable(),
 });
 
+export const studentImportModeSchema = z.enum(['create_only', 'upsert']);
+
 export const studentImportConfirmSchema = z.object({
   rows: z.array(z.record(z.string(), z.string())).min(1).max(2000),
   dryRun: z.boolean().optional().default(false),
+  /** upsert: match by email — update year/semester; keep password; email only new logins */
+  mode: studentImportModeSchema.optional().default('create_only'),
 });
 
 export const studentExportQuerySchema = z.object({

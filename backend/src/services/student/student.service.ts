@@ -38,6 +38,7 @@ import {
   scopeStudentSelfFilter,
 } from '../access/faculty-scope.js';
 import { resolveStudentCreateIds } from '../id/entity-id.helpers.js';
+import { syncSemesterCalendar } from '../institution/sync-semester-calendar.js';
 
 export interface ActorContext {
   userId: string;
@@ -712,14 +713,52 @@ export class StudentService {
     return { modified };
   }
 
-  previewImport(rows: Array<Record<string, string>>) {
+  private parseImportRow(row: Record<string, string>) {
+    return createStudentSchema.parse({
+      studentId: row.studentId?.trim() || undefined,
+      admissionNumber: row.admissionNumber?.trim() || undefined,
+      rollNumber: row.rollNumber || null,
+      registrationNumber: row.registrationNumber || null,
+      firstName: row.firstName,
+      middleName: row.middleName || null,
+      lastName: row.lastName,
+      email: row.email,
+      phone: row.phone || null,
+      campusId: row.campusId || null,
+      schoolId: row.schoolId || null,
+      departmentId: row.departmentId || null,
+      programId: row.programId || null,
+      academicYearId: row.academicYearId || null,
+      semesterId: row.semesterId || null,
+      sectionId: row.sectionId || null,
+      batchId: row.batchId || null,
+      yearOfStudy: row.yearOfStudy ? Number(row.yearOfStudy) : null,
+      currentSemester: row.currentSemester ? Number(row.currentSemester) : null,
+      admissionDate: row.admissionDate || null,
+      status: row.status || 'active',
+      scholarship: row.scholarship === 'true' || row.scholarship === '1',
+      hostelResident: row.hostelResident === 'true' || row.hostelResident === '1',
+      transportRequired: row.transportRequired === 'true' || row.transportRequired === '1',
+      guardianName: row.guardianName || null,
+      guardianPhone: row.guardianPhone || null,
+    });
+  }
+
+  async previewImport(
+    rows: Array<Record<string, string>>,
+    institutionId: string,
+    mode: 'create_only' | 'upsert' = 'create_only',
+  ) {
     const errors: Array<{ row: number; field?: string; message: string }> = [];
     let validRows = 0;
     let duplicates = 0;
+    let updateRows = 0;
+    let createRows = 0;
     const seen = new Set<string>();
     const sample: Array<Record<string, string>> = [];
 
-    rows.forEach((row, index) => {
+    for (let index = 0; index < rows.length; index += 1) {
+      const row = rows[index]!;
       const parsed = createStudentSchema.safeParse({
         studentId: row.studentId?.trim() || undefined,
         admissionNumber: row.admissionNumber?.trim() || undefined,
@@ -757,40 +796,91 @@ export class StudentService {
             message: issue.message,
           });
         }
-        return;
+        continue;
       }
 
-      const key = `${parsed.data.email}|${parsed.data.studentId ?? ''}|${parsed.data.admissionNumber ?? ''}`;
-      if (seen.has(key)) {
+      const emailKey = parsed.data.email.toLowerCase();
+      if (seen.has(emailKey)) {
         duplicates += 1;
-        errors.push({ row: index + 1, message: 'Duplicate row in import file' });
-        return;
+        errors.push({ row: index + 1, message: 'Duplicate email in import file' });
+        continue;
       }
-      seen.add(key);
-      validRows += 1;
+      seen.add(emailKey);
+
+      const existing = await studentRepository.findByEmail(institutionId, parsed.data.email);
+      if (existing && mode === 'upsert') {
+        updateRows += 1;
+        validRows += 1;
+      } else if (existing) {
+        errors.push({ row: index + 1, message: 'Student with this email already exists' });
+        continue;
+      } else {
+        createRows += 1;
+        validRows += 1;
+      }
       if (sample.length < 5) sample.push(row);
-    });
+    }
 
     return {
       totalRows: rows.length,
       validRows,
       invalidRows: rows.length - validRows,
       duplicates,
+      updateRows,
+      createRows,
       errors,
       sample,
     };
   }
 
+  private async ensureStudentLoginEmail(
+    input: { email: string; firstName: string; lastName: string },
+    institutionId: string,
+    studentId: string,
+    admissionNumber: string,
+  ): Promise<boolean> {
+    const { provisionLoginUser } = await import('../users/provision-login-user.js');
+    const provisioned = await provisionLoginUser({
+      email: input.email,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      institutionId,
+      role: 'student',
+    });
+    if (provisioned.created && provisioned.temporaryPassword) {
+      const { sendCredentialsEmail } = await import('../../mail/credentials-email.js');
+      void sendCredentialsEmail({
+        to: input.email.toLowerCase(),
+        firstName: input.firstName,
+        role: 'student',
+        temporaryPassword: provisioned.temporaryPassword,
+        displayIdLabel: 'Student ID',
+        displayId: studentId,
+      });
+      return true;
+    }
+    return false;
+  }
+
   async importStudents(input: StudentImportConfirmInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    const mode = input.mode ?? 'create_only';
+    await syncSemesterCalendar(institutionId);
     await this.audit('student.import.started', actor, institutionId, null, {
       rows: input.rows.length,
       dryRun: input.dryRun,
+      mode,
     });
 
-    const preview = this.previewImport(input.rows);
+    const preview = await this.previewImport(input.rows, institutionId, mode);
     if (input.dryRun) {
-      return { ...preview, imported: 0, failed: preview.invalidRows, studentIds: [] };
+      return {
+        ...preview,
+        imported: 0,
+        updated: 0,
+        failed: preview.invalidRows,
+        studentIds: [],
+      };
     }
 
     if (preview.invalidRows > 0) {
@@ -804,60 +894,86 @@ export class StudentService {
       );
     }
 
-    await this.assertStudentCapacity(institutionId, input.rows.length);
+    const newRowCount = preview.createRows ?? input.rows.length;
+    await this.assertStudentCapacity(institutionId, newRowCount);
 
-    const createdIds: string[] = [];
+    const newCreatedIds: string[] = [];
+    const touchedIds: string[] = [];
+    let updated = 0;
     let emailed = 0;
 
     try {
       for (let i = 0; i < input.rows.length; i += 1) {
         const row = input.rows[i]!;
-        const parsed = createStudentSchema.parse({
-          studentId: row.studentId?.trim() || undefined,
-          admissionNumber: row.admissionNumber?.trim() || undefined,
-          rollNumber: row.rollNumber || null,
-          registrationNumber: row.registrationNumber || null,
-          firstName: row.firstName,
-          middleName: row.middleName || null,
-          lastName: row.lastName,
-          email: row.email,
-          phone: row.phone || null,
-          campusId: row.campusId || null,
-          schoolId: row.schoolId || null,
-          departmentId: row.departmentId || null,
-          programId: row.programId || null,
-          academicYearId: row.academicYearId || null,
-          semesterId: row.semesterId || null,
-          sectionId: row.sectionId || null,
-          batchId: row.batchId || null,
-          yearOfStudy: row.yearOfStudy ? Number(row.yearOfStudy) : null,
-          currentSemester: row.currentSemester ? Number(row.currentSemester) : null,
-          admissionDate: row.admissionDate || null,
-          status: row.status || 'active',
-          scholarship: row.scholarship === 'true' || row.scholarship === '1',
-          hostelResident: row.hostelResident === 'true' || row.hostelResident === '1',
-          transportRequired: row.transportRequired === 'true' || row.transportRequired === '1',
-          guardianName: row.guardianName || null,
-          guardianPhone: row.guardianPhone || null,
-        });
+        const parsed = this.parseImportRow(row);
+
+        const byEmail = await studentRepository.findByEmail(institutionId, parsed.email);
+        if (byEmail && mode === 'upsert') {
+          const id = String(byEmail._id);
+          await this.update(
+            id,
+            {
+              firstName: parsed.firstName,
+              middleName: parsed.middleName,
+              lastName: parsed.lastName,
+              phone: parsed.phone,
+              rollNumber: parsed.rollNumber,
+              registrationNumber: parsed.registrationNumber,
+              campusId: parsed.campusId,
+              schoolId: parsed.schoolId,
+              departmentId: parsed.departmentId,
+              programId: parsed.programId,
+              academicYearId: parsed.academicYearId,
+              semesterId: parsed.semesterId,
+              sectionId: parsed.sectionId,
+              batchId: parsed.batchId,
+              yearOfStudy: parsed.yearOfStudy,
+              currentSemester: parsed.currentSemester,
+              admissionDate: parsed.admissionDate,
+              status: parsed.status,
+              scholarship: parsed.scholarship,
+              hostelResident: parsed.hostelResident,
+              transportRequired: parsed.transportRequired,
+              guardianName: parsed.guardianName,
+              guardianPhone: parsed.guardianPhone,
+            },
+            actor,
+          );
+          updated += 1;
+          touchedIds.push(id);
+          const studentId = byEmail.studentId ?? parsed.studentId ?? '';
+          const admissionNumber = byEmail.admissionNumber ?? parsed.admissionNumber ?? '';
+          if (
+            await this.ensureStudentLoginEmail(
+              parsed,
+              institutionId,
+              studentId,
+              admissionNumber,
+            )
+          ) {
+            emailed += 1;
+          }
+          continue;
+        }
 
         const existing = await studentRepository.findDuplicates(institutionId, {
           studentId: parsed.studentId ?? '',
           admissionNumber: parsed.admissionNumber ?? '',
           email: parsed.email,
         });
-        if (existing.length > 0 && (parsed.studentId || parsed.admissionNumber)) {
+        if (existing.length > 0) {
           throw new ConflictError(`Duplicate student at row ${i + 1}`);
         }
 
         const created = await this.create(parsed, actor);
-        createdIds.push(created.id);
+        newCreatedIds.push(created.id);
+        touchedIds.push(created.id);
         if (created.credentials) {
           emailed += 1;
         }
       }
     } catch (err) {
-      for (const id of createdIds) {
+      for (const id of newCreatedIds) {
         const existing = await studentRepository.findByIdIncludingDeleted(institutionId, id);
         if (existing?.email) {
           try {
@@ -876,29 +992,36 @@ export class StudentService {
       throw err;
     }
 
+    const imported = newCreatedIds.length;
     await this.audit('student.import.completed', actor, institutionId, null, {
-      imported: createdIds.length,
+      imported,
+      updated,
       credentialsEmailed: emailed,
+      mode,
     });
     await this.audit('student.imported', actor, institutionId, null, {
-      imported: createdIds.length,
+      imported,
+      updated,
     });
     await eventBus.publish(
       EVENTS.STUDENT_IMPORTED,
-      { institutionId, count: createdIds.length },
+      { institutionId, count: imported + updated },
       { actorId: actor.userId },
     );
 
     return {
-      imported: createdIds.length,
+      imported,
+      updated,
       failed: 0,
       errors: [] as Array<{ row: number; message: string }>,
-      studentIds: createdIds,
+      studentIds: touchedIds,
       credentialsEmailed: emailed,
       totalRows: preview.totalRows,
       validRows: preview.validRows,
       invalidRows: preview.invalidRows,
       duplicates: preview.duplicates,
+      updateRows: preview.updateRows,
+      createRows: preview.createRows,
       sample: preview.sample,
     };
   }
