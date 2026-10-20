@@ -7,9 +7,9 @@ import { can } from '@/lib/auth/permissions';
 import { useAuth } from '@/providers/auth-provider';
 import {
   buildAcademicSessionLabel,
+  formatTermSemesterLabel,
   resolveActiveAcademicYear,
   resolveCurrentSemester,
-  semesterTermKey,
 } from '../utils/academic-session';
 import { useAcademicYears, useSemesters } from './use-institution-queries';
 
@@ -18,6 +18,7 @@ const LIST = { limit: 100, status: 'active' as const, page: 1 };
 export function useCurrentAcademicSession() {
   const { user, permissions } = useAuth();
   const t = useTranslations('dashboard.institution.session');
+  const tTerms = useTranslations('dashboard.institution.terms');
   const enabled =
     Boolean(user?.institutionId) && can(permissions, PERMISSIONS.INSTITUTION_READ);
 
@@ -38,7 +39,7 @@ export function useCurrentAcademicSession() {
   );
 
   const termLabel = currentSemester
-    ? t(semesterTermKey(currentSemester.term))
+    ? formatTermSemesterLabel(currentSemester.term, (term) => tTerms(term))
     : '';
 
   const label = useMemo(

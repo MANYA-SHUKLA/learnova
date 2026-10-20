@@ -90,7 +90,9 @@ export { useOrgLabels } from './hooks/use-org-labels';
 export { useCurrentAcademicSession } from './hooks/use-current-academic-session';
 export {
   buildAcademicSessionLabel,
+  defaultTermSemesterLabel,
   formatSemesterMonthRange,
+  formatTermSemesterLabel,
   resolveActiveAcademicYear,
   resolveCurrentSemester,
 } from './utils/academic-session';

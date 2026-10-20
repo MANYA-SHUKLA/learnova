@@ -55,10 +55,26 @@ export function formatSemesterMonthRange(
   return `${month(s)}–${month(e)}`;
 }
 
-export function semesterTermKey(term: SemesterTerm): 'oddSem' | 'evenSem' | 'summerSem' {
-  if (term === 'odd') return 'oddSem';
-  if (term === 'even') return 'evenSem';
-  return 'summerSem';
+const TERM_SEM_LABEL: Record<SemesterTerm, string> = {
+  odd: 'Odd sem',
+  even: 'Even sem',
+  summer: 'Summer sem',
+};
+
+/** Human label for odd/even/summer term (fallback when i18n key is missing). */
+export function defaultTermSemesterLabel(term: SemesterTerm): string {
+  return TERM_SEM_LABEL[term];
+}
+
+export function formatTermSemesterLabel(
+  term: SemesterTerm,
+  translateTerm: (term: SemesterTerm) => string,
+): string {
+  const translated = translateTerm(term);
+  if (!translated || translated.includes('dashboard.institution')) {
+    return defaultTermSemesterLabel(term);
+  }
+  return `${translated} sem`;
 }
 
 export function buildAcademicSessionLabel(input: {

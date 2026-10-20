@@ -4,7 +4,7 @@ import { APP_ROUTES } from '@learnova/constants';
 import { Badge, Skeleton } from '@learnova/ui';
 import { CalendarRange } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCurrentAcademicSession } from '@/features/institution';
+import { useCurrentAcademicSession } from '@/features/institution/hooks/use-current-academic-session';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 

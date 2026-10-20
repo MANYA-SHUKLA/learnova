@@ -1320,7 +1320,10 @@
         "description": "Manage faculty records, employment status, and academic assignments.",
         "addFaculty": "Add faculty",
         "directory": "Directory",
-        "directoryDescription": "All faculty (20 per page — use Next/Previous or Export for the full list). Open a row for full assignments; use Edit to set degree program, branches, and courses.",
+        "directoryDescription": "Search and filter the directory. Use View all to load everyone in one table.",
+        "viewAll": "View all",
+        "viewPages": "Paged view",
+        "showingAll": "Showing all {count}",
         "searchPlaceholder": "Search name, employee ID, code, email…",
         "columns": {
           "department": "Degree program",
@@ -1377,7 +1380,10 @@
         "description": "Manage student records, academic status, and enrollment details.",
         "addStudent": "Add student",
         "directory": "Directory",
-        "directoryDescription": "Search, filter, and run bulk actions.",
+        "directoryDescription": "Search and filter the directory. Use View all to load everyone in one table.",
+        "viewAll": "View all",
+        "viewPages": "Paged view",
+        "showingAll": "Showing all {count}",
         "searchPlaceholder": "Search name, student ID, roll number, email…",
         "stats": {
           "total": "Total",

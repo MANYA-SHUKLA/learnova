@@ -19,12 +19,14 @@ import {
   ArrowRight,
   Download,
   Plus,
+  List,
   Search,
   Upload,
   UserRound,
   Users,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { DashboardPage } from '@/components/dashboard';
 import { PermissionGate } from '@/components/shared/protected-route';
@@ -41,10 +43,13 @@ import {
   useBulkActivateFacultyMutation,
   useBulkArchiveFacultyMutation,
   useBulkSuspendFacultyMutation,
+  facultyKeys,
   useFacultyList,
   useFacultyStats,
   useRestoreFacultyMutation,
 } from '@/features/faculty';
+import { facultyApi } from '@/features/faculty/services/faculty-api';
+import { fetchAllListPages } from '@/lib/api/fetch-all-pages';
 import type { FacultyStatus } from '@/features/faculty';
 import { Link } from '@/lib/i18n/routing';
 import { env } from '@/config/env';
@@ -69,23 +74,38 @@ export default function FacultyListPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
   const [includeDeleted, setIncludeDeleted] = useState(false);
+  const [viewAll, setViewAll] = useState(false);
 
-  const params = useMemo(
+  const listFilters = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
       includeDeleted: includeDeleted || status === 'archived',
-      page,
-      limit: 20,
       sortBy: 'createdAt',
       sortOrder: 'desc' as const,
     }),
-    [search, status, includeDeleted, page],
+    [search, status, includeDeleted],
+  );
+
+  const pagedParams = useMemo(
+    () => ({ ...listFilters, page, limit: 20 }),
+    [listFilters, page],
   );
 
   const labels = useOrgLabels();
   const coursesQuery = useCourseList({ page: 1, limit: 500 });
-  const listQuery = useFacultyList(params);
+  const pagedQuery = useFacultyList(pagedParams, !viewAll);
+  const allQuery = useQuery({
+    queryKey: [...facultyKeys.list(listFilters), 'all'] as const,
+    queryFn: () =>
+      fetchAllListPages((p, limit) =>
+        facultyApi.list({ ...listFilters, page: p, limit }),
+      ),
+    enabled: viewAll,
+    staleTime: 30_000,
+  });
+
+  const listQuery = viewAll ? allQuery : pagedQuery;
   const statsQuery = useFacultyStats();
 
   const courseLabel = (courseId: string) => {
@@ -98,8 +118,11 @@ export default function FacultyListPage() {
   const bulkActivate = useBulkActivateFacultyMutation();
   const bulkSuspend = useBulkSuspendFacultyMutation();
 
-  const rows = listQuery.data?.items ?? [];
-  const meta = listQuery.data?.meta;
+  const rows = viewAll
+    ? (allQuery.data?.items ?? [])
+    : (pagedQuery.data?.items ?? []);
+  const meta = viewAll ? undefined : pagedQuery.data?.meta;
+  const allTotal = viewAll ? allQuery.data?.total : meta?.total;
   const stats = statsQuery.data;
 
   const downloadExport = async (format: 'csv' | 'excel' | 'pdf') => {
@@ -139,6 +162,19 @@ export default function FacultyListPage() {
                   {tCommon('export')}
                 </Link>
               </Button>
+              <Button
+                type="button"
+                variant={viewAll ? 'secondary' : 'outline'}
+                className="rounded-xl"
+                disabled={listQuery.isLoading}
+                onClick={() => {
+                  setViewAll((v) => !v);
+                  setPage(1);
+                }}
+              >
+                <List className="size-4" />
+                {viewAll ? t('viewPages') : t('viewAll')}
+              </Button>
               <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
                 <Button asChild className="rounded-xl">
                   <Link href={APP_ROUTES.INSTITUTION_FACULTY_CREATE}>
@@ -176,7 +212,11 @@ export default function FacultyListPage() {
         <Card className="directory-shell overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-card-title">{t('directory')}</CardTitle>
-            <CardDescription>{t('directoryDescription')}</CardDescription>
+            <CardDescription>
+              {viewAll && allTotal != null
+                ? t('showingAll', { count: allTotal })
+                : t('directoryDescription')}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {listQuery.isError ? (
