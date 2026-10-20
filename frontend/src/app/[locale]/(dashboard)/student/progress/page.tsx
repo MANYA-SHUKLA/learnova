@@ -1,6 +1,6 @@
 'use client';
 
-import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
+import { APP_ROUTES, PAGINATION, PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,

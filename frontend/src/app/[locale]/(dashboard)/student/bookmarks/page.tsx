@@ -1,6 +1,6 @@
 'use client';
 
-import { PERMISSIONS } from '@learnova/constants';
+import { PAGINATION, PERMISSIONS } from '@learnova/constants';
 import type { BookmarkTargetType } from '@learnova/types';
 import {
   Button,
