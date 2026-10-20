@@ -111,6 +111,7 @@ async function main(): Promise<void> {
     { code: 'CSE', name: 'Computer Science' },
     { code: 'ECE', name: 'Electronics' },
     { code: 'MATH', name: 'Mathematics' },
+    { code: 'PHD', name: 'Ph.D.' },
   ]) {
     let dept = await DepartmentModel.findOne({
       institutionId: institutionOid,

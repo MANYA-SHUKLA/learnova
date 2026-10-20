@@ -24,8 +24,20 @@ export default function DepartmentsPage() {
   ];
 
   const fields: FormField[] = [
-    { name: 'name', label: tf('name'), type: 'text', required: true },
-    { name: 'code', label: tf('code'), type: 'text', required: true },
+    {
+      name: 'name',
+      label: tf('name'),
+      type: 'text',
+      required: true,
+      placeholder: 'B.Tech, M.Tech, Ph.D., …',
+    },
+    {
+      name: 'code',
+      label: tf('code'),
+      type: 'text',
+      required: true,
+      placeholder: 'BTECH, MTECH, PHD',
+    },
     { name: 'description', label: tf('description'), type: 'textarea' },
     {
       name: 'status',
