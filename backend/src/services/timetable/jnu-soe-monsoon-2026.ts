@@ -35,22 +35,38 @@ Monsoon 2026 implementation notes:
 
 type CatalogRow = { code: string; subject: string; faculty: string };
 
+export type JnuSemesterCatalog = {
+  /** Same course code + faculty for both B.Tech CSE and B.Tech ECE — one combined class when time/room match. */
+  shared: CatalogRow[];
+  cseOnly: CatalogRow[];
+  eceOnly: CatalogRow[];
+  cse: CatalogRow[];
+  ece: CatalogRow[];
+  codes: Set<string>;
+  sharedCodes: Set<string>;
+};
+
+/** Physics uses EN201N (CSE) and EN201 (ECE) but is one shared subject in the official grid. */
+export const JNU_PHYSICS_CROSS_BRANCH = {
+  cseCode: 'EN201N',
+  eceCode: 'EN201',
+  subject: 'Physics',
+} as const;
+
 function semCatalog(
   shared: CatalogRow[],
   cseOnly: CatalogRow[] = [],
   eceOnly: CatalogRow[] = [],
-): { cse: CatalogRow[]; ece: CatalogRow[]; codes: Set<string> } {
+): JnuSemesterCatalog {
   const cse = [...shared, ...cseOnly];
   const ece = [...shared, ...eceOnly];
   const codes = new Set([...cse, ...ece].map((r) => r.code));
-  return { cse, ece, codes };
+  const sharedCodes = new Set(shared.map((r) => r.code));
+  return { shared, cseOnly, eceOnly, cse, ece, codes, sharedCodes };
 }
 
 /** Official B.Tech course codes per progression semester (1, 3, 5, 7, 9). */
-export const JNU_BTECH_SEMESTER_CATALOG: Record<
-  number,
-  { cse: CatalogRow[]; ece: CatalogRow[]; codes: Set<string> }
-> = {
+export const JNU_BTECH_SEMESTER_CATALOG: Record<number, JnuSemesterCatalog> = {
   1: semCatalog(
     [
       { code: 'EN104N', subject: 'Engineering Foundation-I (Computer Programming)', faculty: 'Dr. Ankit Kumar Jaiswal' },
