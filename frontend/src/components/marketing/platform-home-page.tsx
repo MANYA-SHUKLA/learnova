@@ -360,13 +360,17 @@ export function PlatformHomePage({
       ) : null}
 
       {/* Eight modules */}
-      <section id="modules" className={siteContainer('scroll-mt-24 py-20 sm:py-28')}>
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-primary">{t('features.eyebrow')}</p>
-          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">{t('features.title')}</h2>
-          <p className="mt-4 text-muted-foreground">{t('features.description')}</p>
-        </div>
-        <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <section id="modules" className="scroll-mt-24 border-b border-border/40 py-20 sm:py-28">
+        <div className={siteContainer('w-full')}>
+          <div className={sectionGrid}>
+            <div className={sectionIntroCol}>
+              <SectionIntro
+                eyebrow={t('features.eyebrow')}
+                title={t('features.title')}
+                subtitle={t('features.description')}
+              />
+            </div>
+            <div className={cn(sectionBodyCol, 'grid gap-5 sm:grid-cols-2 xl:grid-cols-2')}>
           {moduleKeys.map((key) => {
             const Icon = MODULE_ICONS[key] ?? BarChart3;
             return (
@@ -395,15 +399,20 @@ export function PlatformHomePage({
               </div>
             );
           })}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* CMS highlights */}
       {highlightFeatures.length > 0 ? (
-        <section className="border-y border-border/60 bg-muted/25 py-20">
-          <div className={siteContainer('max-w-6xl')}>
-            <h2 className="font-display text-2xl font-bold sm:text-3xl">{tPlatform('highlightsTitle')}</h2>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <section className="border-b border-border/60 bg-muted/25 py-20 sm:py-24">
+          <div className={siteContainer('w-full')}>
+            <div className={sectionGrid}>
+              <div className={sectionIntroCol}>
+                <SectionIntro title={tPlatform('highlightsTitle')} />
+              </div>
+              <div className={cn(sectionBodyCol, 'grid gap-6 md:grid-cols-2 xl:grid-cols-3')}>
               {highlightFeatures.map((feature) => (
                 <div
                   key={feature.title}
@@ -421,18 +430,23 @@ export function PlatformHomePage({
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </div>
         </section>
       ) : null}
 
       {/* How colleges onboard */}
-      <section className={siteContainer('py-20 sm:py-28')}>
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl font-bold">{tPlatform('howItWorksTitle')}</h2>
-          <p className="mt-4 text-muted-foreground">{tPlatform('howItWorksSubtitle')}</p>
-        </div>
-        <ol className="mx-auto mt-12 grid max-w-4xl list-none gap-6 sm:grid-cols-3">
+      <section className="py-20 sm:py-28">
+        <div className={siteContainer('w-full')}>
+          <div className={sectionGrid}>
+            <div className={sectionIntroCol}>
+              <SectionIntro
+                title={tPlatform('howItWorksTitle')}
+                subtitle={tPlatform('howItWorksSubtitle')}
+              />
+            </div>
+            <ol className={cn(sectionBodyCol, 'grid list-none gap-6')}>
           {(['step1', 'step2', 'step3'] as const).map((step, i) => (
             <li
               key={step}
@@ -460,18 +474,18 @@ export function PlatformHomePage({
               </div>
             </li>
           ))}
-        </ol>
+            </ol>
+          </div>
+        </div>
       </section>
 
       <section className="border-y border-border/60 bg-background py-20 sm:py-24">
-        <div className={siteContainer('max-w-6xl')}>
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              {tPlatform('outcomesTitle')}
-            </h2>
-            <p className="mt-4 text-muted-foreground">{tPlatform('outcomesSubtitle')}</p>
-          </div>
-          <div className="mt-12 grid gap-5 sm:grid-cols-2">
+        <div className={siteContainer('w-full')}>
+          <div className={sectionGrid}>
+            <div className={sectionIntroCol}>
+              <SectionIntro title={tPlatform('outcomesTitle')} subtitle={tPlatform('outcomesSubtitle')} />
+            </div>
+            <div className={cn(sectionBodyCol, 'grid gap-5 sm:grid-cols-2')}>
             {outcomeKeys.map((key) => (
               <div
                 key={key}
@@ -491,19 +505,21 @@ export function PlatformHomePage({
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>
 
       <section className="border-t border-border/60 bg-muted/25 py-20 sm:py-24">
-        <div className={siteContainer('max-w-6xl')}>
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              {tPlatform('testimonialsTitle')}
-            </h2>
-            <p className="mt-4 text-muted-foreground">{tPlatform('testimonialsSubtitle')}</p>
-          </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+        <div className={siteContainer('w-full')}>
+          <div className={sectionGrid}>
+            <div className={sectionIntroCol}>
+              <SectionIntro
+                title={tPlatform('testimonialsTitle')}
+                subtitle={tPlatform('testimonialsSubtitle')}
+              />
+            </div>
+            <div className={cn(sectionBodyCol, 'grid gap-6 sm:grid-cols-2')}>
             {testimonialKeys.map((key) => (
               <figure
                 key={key}
@@ -532,6 +548,7 @@ export function PlatformHomePage({
                 </div>
               </figure>
             ))}
+            </div>
           </div>
         </div>
       </section>
@@ -539,49 +556,57 @@ export function PlatformHomePage({
       {/* Pricing */}
       {pricingBody ? (
         <section id="pricing" className="scroll-mt-24 border-t border-border/60 bg-muted/20 py-20 sm:py-24">
-          <div className={siteContainer('mx-auto max-w-3xl')}>
+          <div className={siteContainer('w-full')}>
             <div
               className={cn(
-                'relative overflow-hidden rounded-3xl border-2 border-primary/25 bg-card p-8 shadow-xl shadow-primary/10 sm:p-10',
-                'ring-1 ring-primary/10',
+                'relative grid overflow-hidden rounded-3xl border-2 border-primary/25 bg-card shadow-xl shadow-primary/10 ring-1 ring-primary/10 lg:grid-cols-2',
               )}
             >
               <div
                 aria-hidden
                 className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-primary/15 blur-3xl"
               />
-              <div className="relative">
+              <div className="relative border-b border-border/60 p-8 sm:p-10 lg:border-b-0 lg:border-r">
                 <h2 className="font-display text-3xl font-bold tracking-tight">{pricingTitle}</h2>
                 <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">{pricingBody}</p>
-                {buyerKeys.length > 0 ? (
-                  <div className="mt-8 border-t border-border/60 pt-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                      {tPlatform('pricingIncludesLabel')}
-                    </p>
-                    <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-                      {buyerKeys.slice(0, 4).map((i) => (
-                        <li key={i} className="flex gap-2 text-sm text-muted-foreground">
-                          <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
-                          {tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0])}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
                 <Button asChild size="lg" className={cn('mt-8', platformHeroPrimaryClass)}>
                   <a href="#request-demo">{tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}</a>
                 </Button>
               </div>
+              {buyerKeys.length > 0 ? (
+                <div className="relative bg-muted/20 p-8 sm:p-10">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    {tPlatform('pricingIncludesLabel')}
+                  </p>
+                  <ul className="mt-5 space-y-3">
+                    {buyerKeys.map((i) => {
+                      const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
+                      return (
+                        <li key={i} className="flex gap-3 text-sm">
+                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                          <span>
+                            <span className="font-medium text-foreground">{line.label}</span>
+                            {line.detail ? <span className="text-muted-foreground"> — {line.detail}</span> : null}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ) : null}
             </div>
           </div>
         </section>
       ) : null}
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-24 border-t border-border/60 bg-background py-20">
-        <div className={siteContainer('mx-auto max-w-3xl')}>
-          <h2 className="font-display text-3xl font-bold">{tPlatform('faqTitle')}</h2>
-          <div className="mt-10 space-y-4">
+      <section id="faq" className="scroll-mt-24 border-t border-border/60 bg-background py-20 sm:py-24">
+        <div className={siteContainer('w-full')}>
+          <div className={sectionGrid}>
+            <div className={sectionIntroCol}>
+              <SectionIntro title={tPlatform('faqTitle')} />
+            </div>
+            <div className={cn(sectionBodyCol, 'space-y-4')}>
             {faqItems.map((item) => (
               <details
                 key={item.title}
@@ -598,6 +623,7 @@ export function PlatformHomePage({
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
               </details>
             ))}
+            </div>
           </div>
         </div>
       </section>
@@ -608,12 +634,16 @@ export function PlatformHomePage({
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/15 via-primary/5 to-violet-500/10"
           />
-          <div className={siteContainer('relative mx-auto max-w-3xl text-center')}>
-            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              {tPlatform('closingTitle')}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">{tPlatform('closingSubtitle')}</p>
-            <Button asChild size="lg" className={cn('mt-8', platformHeroPrimaryClass)}>
+          <div
+            className={siteContainer(
+              'relative flex w-full flex-col gap-8 text-left lg:flex-row lg:items-center lg:justify-between',
+            )}
+          >
+            <div className="max-w-2xl">
+              <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">{tPlatform('closingTitle')}</h2>
+              <p className="mt-4 text-lg text-muted-foreground">{tPlatform('closingSubtitle')}</p>
+            </div>
+            <Button asChild size="lg" className={cn('shrink-0', platformHeroPrimaryClass)}>
               <a href="#request-demo" className="group inline-flex items-center gap-2">
                 {tPlatform.has('closingCta') ? tPlatform('closingCta') : heroCtaLabel}
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
@@ -624,15 +654,18 @@ export function PlatformHomePage({
       ) : null}
 
       {/* Demo request — no login */}
-      <section id="request-demo" className="scroll-mt-24 border-t border-border/60 bg-muted/30 py-20">
-        <div className={siteContainer('mx-auto max-w-xl')}>
-          <h2 className="font-display text-3xl font-bold text-center">{tPlatform('demoTitle')}</h2>
-          <p className="mt-3 text-center text-muted-foreground">{tPlatform('demoSubtitle')}</p>
+      <section id="request-demo" className="scroll-mt-24 border-t border-border/60 bg-muted/30 py-20 sm:py-24">
+        <div className={siteContainer('w-full')}>
+          <div className={cn(sectionGrid, 'lg:items-start')}>
+            <div className={sectionIntroCol}>
+              <SectionIntro title={tPlatform('demoTitle')} subtitle={tPlatform('demoSubtitle')} />
+            </div>
+            <div className={sectionBodyCol}>
           <div
             className={cn(
-              'mt-10 rounded-2xl border border-border bg-card p-8 shadow-soft-md',
+              'rounded-2xl border border-border bg-card p-8 shadow-soft-md sm:p-10',
               marketingCardHover,
-              'hover:scale-[1.01] motion-reduce:hover:scale-100',
+              'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
             )}
           >
             <div className={marketingCardInner}>
