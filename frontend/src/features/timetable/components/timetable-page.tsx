@@ -19,8 +19,11 @@ import {
   Skeleton,
 } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
+import { useMyFacultyProfile } from '@/features/faculty';
+import { useMyStudentProfile } from '@/features/student';
+import { useAuth } from '@/providers/auth-provider';
 import { useCourseList } from '@/features/course';
 import { useFacultyList } from '@/features/faculty';
 import {
@@ -106,6 +109,11 @@ function TimetableStatusBadge({ status }: { status: Timetable['status'] }) {
 
 export function TimetablePage({ mode }: TimetablePageProps) {
   const isAdmin = mode === 'admin';
+  const { user } = useAuth();
+  const isFacultyReader = !isAdmin && user?.role === 'faculty';
+  const isStudentReader = !isAdmin && user?.role === 'student';
+  const facultyProfileQuery = useMyFacultyProfile(isFacultyReader);
+  const studentProfileQuery = useMyStudentProfile(isStudentReader);
   const t = useTranslations('dashboard.timetable');
   const tDays = useTranslations('dashboard.timetable.days');
   const tCommon = useTranslations('common');
@@ -139,9 +147,23 @@ export function TimetablePage({ mode }: TimetablePageProps) {
     !isAdmin,
   );
 
+  const readerSemesterId = studentProfileQuery.data?.semesterId ?? '';
+
+  useEffect(() => {
+    if (!isStudentReader || !readerSemesterId) return;
+    setSemesterId(readerSemesterId);
+  }, [isStudentReader, readerSemesterId]);
+
+  useEffect(() => {
+    if (!isStudentReader) return;
+    const sectionId = studentProfileQuery.data?.sectionId;
+    if (sectionId) setSectionFilter(sectionId);
+  }, [isStudentReader, studentProfileQuery.data?.sectionId]);
+
   const selectedSemesterId = useMemo(() => {
     if (!isAdmin) {
       if (semesterId) return semesterId;
+      if (readerSemesterId) return readerSemesterId;
       const published = publishedTimetablesQuery.data?.items ?? [];
       if (published.length > 0) {
         return published[0]?.semesterId ?? '';
@@ -155,7 +177,9 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       .sort((a, b) => a.number - b.number);
     if (inSession[0]) return inSession[0].id;
     return [...items].sort((a, b) => a.number - b.number)[0]?.id || '';
-  }, [semesterId, isAdmin, publishedTimetablesQuery.data?.items, semestersData?.items]);
+  }, [semesterId, isAdmin, readerSemesterId, publishedTimetablesQuery.data?.items, semestersData?.items]);
+
+  const readerFacultyId = facultyProfileQuery.data?.id ?? '';
 
   const timetablesQuery = useTimetables(
     {
@@ -196,8 +220,15 @@ export function TimetablePage({ mode }: TimetablePageProps) {
       limit: 500,
       sortBy: 'startTime',
       sortOrder: 'asc',
+      facultyId: isFacultyReader && readerFacultyId ? readerFacultyId : undefined,
+      sectionId:
+        isStudentReader && studentProfileQuery.data?.sectionId
+          ? studentProfileQuery.data.sectionId
+          : undefined,
     },
-    Boolean(timetable?.id),
+    Boolean(timetable?.id) &&
+      (!isFacultyReader || Boolean(readerFacultyId) || facultyProfileQuery.isError) &&
+      (!isStudentReader || Boolean(studentProfileQuery.data?.sectionId) || studentProfileQuery.isError),
   );
 
   const { data: sectionsData } = useSections({ limit: 100, status: 'active' }, isAdmin);
@@ -220,14 +251,28 @@ export function TimetablePage({ mode }: TimetablePageProps) {
 
   const gridSlots = useMemo(() => {
     let items = gridSlotsQuery.data?.items ?? [];
-    if (sectionFilter) {
+    if (isFacultyReader && readerFacultyId) {
+      items = items.filter((slot) => slot.facultyId === readerFacultyId);
+    }
+    if (isStudentReader && studentProfileQuery.data?.sectionId) {
+      items = items.filter((slot) => slot.sectionId === studentProfileQuery.data.sectionId);
+    } else if (sectionFilter) {
       items = items.filter((slot) => slot.sectionId === sectionFilter);
     }
     if (dayFilter) {
       items = items.filter((slot) => slot.dayOfWeek === dayFilter);
     }
     return filterSlotsBySearch(items, search);
-  }, [gridSlotsQuery.data?.items, sectionFilter, dayFilter, search]);
+  }, [
+    gridSlotsQuery.data?.items,
+    sectionFilter,
+    dayFilter,
+    search,
+    isFacultyReader,
+    readerFacultyId,
+    isStudentReader,
+    studentProfileQuery.data?.sectionId,
+  ]);
 
   const readSectionOptions = useMemo(() => {
     const items = gridSlotsQuery.data?.items ?? [];
@@ -641,6 +686,7 @@ export function TimetablePage({ mode }: TimetablePageProps) {
               aria-label={t('allSections')}
               className="flex h-10 w-40 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={sectionFilter}
+              disabled={isStudentReader && Boolean(studentProfileQuery.data?.sectionId)}
               onChange={(e) => {
                 setSectionFilter(e.target.value);
                 setPage(1);
