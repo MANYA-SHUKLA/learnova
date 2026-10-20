@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { progressApi } from '../services/progress-api';
 import type {
   ActivityListParams,
@@ -55,6 +55,17 @@ export function useCourseProgress(courseId: string, enabled = true) {
     queryFn: () => progressApi.getCourse(courseId),
     enabled: enabled && Boolean(courseId),
     staleTime: 30_000,
+  });
+}
+
+export function useCourseProgressForCourses(courseIds: string[]) {
+  const uniqueIds = [...new Set(courseIds.filter(Boolean))];
+  return useQueries({
+    queries: uniqueIds.map((courseId) => ({
+      queryKey: progressKeys.course(courseId),
+      queryFn: () => progressApi.getCourse(courseId),
+      staleTime: 30_000,
+    })),
   });
 }
 
@@ -168,8 +179,22 @@ export function useCreateBookmarkMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateBookmarkBody) => progressApi.createBookmark(body),
-    onSuccess: () => {
+    onSuccess: (created, variables) => {
+      queryClient.setQueriesData<BookmarkListResult>(
+        { queryKey: [...progressKeys.all, 'bookmarks'] },
+        (old) => {
+          if (!old) return old;
+          if (old.items.some((item) => item.id === created.id)) return old;
+          return {
+            ...old,
+            items: [created, ...old.items],
+            meta: { ...old.meta, total: old.meta.total + 1 },
+          };
+        },
+      );
+      void queryClient.invalidateQueries({ queryKey: progressKeys.course(variables.courseId) });
       void queryClient.invalidateQueries({ queryKey: [...progressKeys.all, 'bookmarks'] });
+      void queryClient.invalidateQueries({ queryKey: progressKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: progressKeys.studentDashboard() });
     },
   });

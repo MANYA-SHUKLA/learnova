@@ -1,4 +1,5 @@
 import type { BookmarkTargetType, LearningBookmark } from '@learnova/types';
+import type { CourseProgressDetail } from '../types';
 
 export function findBookmarkForTarget(
   items: LearningBookmark[],
@@ -22,4 +23,29 @@ export function findBookmarkForTarget(
     }
     return false;
   });
+}
+
+export function resolveBookmarkTargetLabel(
+  bookmark: LearningBookmark,
+  detail: CourseProgressDetail | undefined,
+): string | null {
+  if (!detail) return null;
+  if (bookmark.targetType === 'module' && bookmark.moduleId) {
+    return detail.modules.find((mod) => mod.id === bookmark.moduleId)?.title ?? null;
+  }
+  if (bookmark.targetType === 'lesson' && bookmark.lessonId) {
+    for (const mod of detail.modules) {
+      const lesson = mod.lessons.find((item) => item.id === bookmark.lessonId);
+      if (lesson) return lesson.title;
+    }
+  }
+  if (bookmark.targetType === 'resource' && bookmark.resourceId) {
+    for (const mod of detail.modules) {
+      for (const lesson of mod.lessons) {
+        const resource = lesson.resources?.find((item) => item.id === bookmark.resourceId);
+        if (resource) return resource.title;
+      }
+    }
+  }
+  return null;
 }

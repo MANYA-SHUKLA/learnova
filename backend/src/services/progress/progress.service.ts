@@ -23,6 +23,7 @@ import {
   LessonProgressModel,
 } from '../../models/lesson-progress.model.js';
 import { CourseLessonModel } from '../../models/course-lesson.model.js';
+import { CourseResourceModel } from '../../models/course-resource.model.js';
 import { LabProgressModel } from '../../models/lab-progress.model.js';
 import { PracticeLabModel } from '../../models/practice-lab.model.js';
 import { LabProblemModel } from '../../models/lab-problem.model.js';
@@ -555,7 +556,7 @@ export class ProgressService {
       );
     }
 
-    const [modules, lessons, moduleProgress, lessonProgress] = await Promise.all([
+    const [modules, lessons, resources, moduleProgress, lessonProgress] = await Promise.all([
       CourseModuleModel.find({
         institutionId: new Types.ObjectId(institutionId),
         courseId: new Types.ObjectId(courseId),
@@ -569,6 +570,14 @@ export class ProgressService {
         courseId: new Types.ObjectId(courseId),
         status: 'published',
         deletedAt: null,
+      })
+        .sort({ orderIndex: 1 })
+        .exec(),
+      CourseResourceModel.find({
+        institutionId: new Types.ObjectId(institutionId),
+        courseId: new Types.ObjectId(courseId),
+        deletedAt: null,
+        visibility: { $in: ['enrolled', 'public'] },
       })
         .sort({ orderIndex: 1 })
         .exec(),
@@ -600,6 +609,14 @@ export class ProgressService {
                 lessonType: l.lessonType,
                 estimatedMinutes: l.estimatedMinutes,
                 progress: lp ? toDto(lp) : null,
+                resources: resources
+                  .filter((r) => String(r.lessonId) === String(l._id))
+                  .map((r) => ({
+                    id: String(r._id),
+                    title: r.title,
+                    type: r.type,
+                    orderIndex: r.orderIndex,
+                  })),
               };
             }),
         };

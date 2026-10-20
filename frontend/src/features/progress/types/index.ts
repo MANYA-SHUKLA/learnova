@@ -93,6 +93,13 @@ export interface ActivityListResult {
   meta: PaginatedMeta;
 }
 
+export interface CourseLessonResourceItem {
+  id: string;
+  title: string;
+  type: string;
+  orderIndex: number;
+}
+
 export interface CourseLessonProgressItem {
   id: string;
   title: string;
@@ -100,6 +107,7 @@ export interface CourseLessonProgressItem {
   lessonType: string;
   estimatedMinutes: number;
   progress: LessonProgress | null;
+  resources?: CourseLessonResourceItem[];
 }
 
 export interface CourseModuleProgressItem {

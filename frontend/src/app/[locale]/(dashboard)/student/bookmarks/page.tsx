@@ -1,9 +1,8 @@
 'use client';
 
-import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
+import { PERMISSIONS } from '@learnova/constants';
 import type { BookmarkTargetType } from '@learnova/types';
 import {
-  Badge,
   Button,
   Card,
   CardContent,
@@ -14,21 +13,20 @@ import {
   Label,
   Skeleton,
 } from '@learnova/ui';
-import { Bookmark, Plus, Search, Trash2 } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { displayName, EmptyState, ErrorState } from '@/features/institution';
 import { useCourseList } from '@/features/course';
 import {
-  formatBookmarkTarget,
+  StudentBookmarksList,
   useBookmarks,
   useCourseProgress,
   useCreateBookmarkMutation,
   useDeleteBookmarkMutation,
   useMyProgress,
 } from '@/features/progress';
-import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
 const selectClassName = cn(
@@ -45,6 +43,7 @@ export default function StudentBookmarksPage() {
   const [addTargetType, setAddTargetType] = useState<BookmarkTargetType>('lesson');
   const [addModuleId, setAddModuleId] = useState('');
   const [addLessonId, setAddLessonId] = useState('');
+  const [addResourceId, setAddResourceId] = useState('');
   const [addNote, setAddNote] = useState('');
   const coursesQuery = useCourseList({ page: 1, limit: 200 });
   const myProgressQuery = useMyProgress({ page: 1, limit: 100 });
@@ -87,12 +86,22 @@ export default function StudentBookmarksPage() {
     );
   }, [addTargetType, addModuleId, selectedModule, modules]);
 
+  const resourceOptions = useMemo(() => {
+    if (addTargetType !== 'resource' || !addLessonId) return [];
+    for (const mod of modules) {
+      const lesson = mod.lessons.find((item) => item.id === addLessonId);
+      if (lesson?.resources?.length) return lesson.resources;
+    }
+    return [];
+  }, [addTargetType, addLessonId, modules]);
+
   const resetAddForm = () => {
     setAddOpen(false);
     setAddCourseId('');
     setAddTargetType('lesson');
     setAddModuleId('');
     setAddLessonId('');
+    setAddResourceId('');
     setAddNote('');
   };
 
@@ -107,7 +116,9 @@ export default function StudentBookmarksPage() {
     addCourseId &&
     (addTargetType === 'module'
       ? Boolean(addModuleId)
-      : Boolean(addLessonId));
+      : addTargetType === 'resource'
+        ? Boolean(addLessonId && addResourceId)
+        : Boolean(addLessonId));
 
   const submitBookmark = async () => {
     if (!canSubmit) return;
@@ -120,7 +131,9 @@ export default function StudentBookmarksPage() {
         targetType: addTargetType,
         moduleId:
           addTargetType === 'module' ? addModuleId : moduleIdForLesson || undefined,
-        lessonId: addTargetType === 'lesson' ? addLessonId : undefined,
+        lessonId:
+          addTargetType === 'lesson' || addTargetType === 'resource' ? addLessonId : undefined,
+        resourceId: addTargetType === 'resource' ? addResourceId : undefined,
         note: addNote.trim() || undefined,
       });
       resetAddForm();
@@ -199,10 +212,12 @@ export default function StudentBookmarksPage() {
                                 setAddTargetType(e.target.value as BookmarkTargetType);
                                 setAddModuleId('');
                                 setAddLessonId('');
+                                setAddResourceId('');
                               }}
                             >
                               <option value="lesson">{t('targetLesson')}</option>
                               <option value="module">{t('targetModule')}</option>
+                              <option value="resource">{t('targetResource')}</option>
                             </select>
                           </div>
                           {addCourseProgressQuery.isLoading ? (
@@ -228,7 +243,7 @@ export default function StudentBookmarksPage() {
                                     ))}
                                   </select>
                                 </div>
-                              ) : (
+                              ) : addTargetType === 'lesson' ? (
                                 <>
                                   <div className="space-y-2">
                                     <Label htmlFor="bookmark-module-filter">{t('module')}</Label>
@@ -271,6 +286,59 @@ export default function StudentBookmarksPage() {
                                       </select>
                                     )}
                                   </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="bookmark-resource-lesson">{t('lesson')}</Label>
+                                    <select
+                                      id="bookmark-resource-lesson"
+                                      className={selectClassName}
+                                      value={addLessonId}
+                                      onChange={(e) => {
+                                        setAddLessonId(e.target.value);
+                                        setAddResourceId('');
+                                        setAddModuleId(
+                                          modules.find((mod) =>
+                                            mod.lessons.some((lesson) => lesson.id === e.target.value),
+                                          )?.id ?? '',
+                                        );
+                                      }}
+                                    >
+                                      <option value="">{t('selectLesson')}</option>
+                                      {modules.flatMap((mod) =>
+                                        mod.lessons.map((lesson) => (
+                                          <option key={lesson.id} value={lesson.id}>
+                                            {mod.title} — {lesson.title}
+                                          </option>
+                                        )),
+                                      )}
+                                    </select>
+                                  </div>
+                                  {addLessonId ? (
+                                    <div className="space-y-2">
+                                      <Label htmlFor="bookmark-resource">{t('resource')}</Label>
+                                      {resourceOptions.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground">
+                                          {t('noResources')}
+                                        </p>
+                                      ) : (
+                                        <select
+                                          id="bookmark-resource"
+                                          className={selectClassName}
+                                          value={addResourceId}
+                                          onChange={(e) => { setAddResourceId(e.target.value); }}
+                                        >
+                                          <option value="">{t('selectResource')}</option>
+                                          {resourceOptions.map((resource) => (
+                                            <option key={resource.id} value={resource.id}>
+                                              {resource.title}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      )}
+                                    </div>
+                                  ) : null}
                                 </>
                               )}
                             </>
@@ -349,46 +417,12 @@ export default function StudentBookmarksPage() {
                 }
               />
             ) : (
-              <div className="space-y-3">
-                {items.map((item) => {
-                  const href = APP_ROUTES.STUDENT_PROGRESS_COURSE.replace(':id', item.courseId);
-                  return (
-                    <Card key={item.id} className="rounded-2xl">
-                      <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="min-w-0 space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Bookmark className="size-4 text-primary" />
-                            <p className="font-medium">{courseLabel(item.courseId)}</p>
-                            <Badge variant="secondary">
-                              {formatBookmarkTarget(item.targetType)}
-                            </Badge>
-                          </div>
-                          {item.note ? (
-                            <p className="text-sm text-muted-foreground">{item.note}</p>
-                          ) : null}
-                          <p className="text-xs text-muted-foreground">
-                            {item.createdAt.slice(0, 10)}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button asChild size="sm" variant="outline">
-                            <Link href={href}>{t('open')}</Link>
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={deleteMutation.isPending}
-                            onClick={() => void deleteMutation.mutateAsync(item.id)}
-                          >
-                            <Trash2 className="size-4" />
-                            {t('remove')}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+              <StudentBookmarksList
+                items={items}
+                courseLabel={courseLabel}
+                removePending={deleteMutation.isPending}
+                onRemove={(id) => void deleteMutation.mutateAsync(id)}
+              />
             )}
           </CardContent>
         </Card>

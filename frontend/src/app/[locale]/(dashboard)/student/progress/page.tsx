@@ -203,10 +203,13 @@ export default function StudentProgressPage() {
                                 <Hourglass className="size-3.5" />
                                 {formatMinutes(row.timeSpentMinutes)} learned
                               </span>
-                              <span className="inline-flex items-center gap-1">
+                              <Link
+                                href={APP_ROUTES.STUDENT_BOOKMARKS}
+                                className="inline-flex items-center gap-1 underline-offset-2 hover:text-foreground hover:underline"
+                              >
                                 <BookMarked className="size-3.5" />
                                 {row.bookmarksCount}
-                              </span>
+                              </Link>
                               <span className="inline-flex items-center gap-1">
                                 <NotebookPen className="size-3.5" />
                                 {row.notesCount}

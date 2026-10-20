@@ -189,58 +189,86 @@ export default function StudentCourseProgressPage() {
                             <li
                               key={lesson.id}
                               className={cn(
-                                'flex flex-col gap-2 rounded-lg border border-border/60 bg-background/70 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between',
+                                'flex flex-col gap-2 rounded-lg border border-border/60 bg-background/70 px-3 py-2.5',
                                 active && 'border-primary/40 bg-primary/5',
                               )}
                             >
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-medium">{lesson.title}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {lesson.lessonType} · {formatMinutes(lesson.estimatedMinutes)}
-                                  {lesson.progress
-                                    ? ` · ${formatLearningStatus(lesson.progress.status)}`
-                                    : ''}
-                                </p>
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-medium">{lesson.title}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {lesson.lessonType} · {formatMinutes(lesson.estimatedMinutes)}
+                                    {lesson.progress
+                                      ? ` · ${formatLearningStatus(lesson.progress.status)}`
+                                      : ''}
+                                  </p>
+                                </div>
+                                <div className="flex shrink-0 flex-wrap gap-2">
+                                  <BookmarkTargetButton
+                                    courseId={courseId}
+                                    targetType="lesson"
+                                    moduleId={module.id}
+                                    lessonId={lesson.id}
+                                    bookmarks={courseBookmarks}
+                                  />
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={openLesson.isPending}
+                                    onClick={() =>
+                                      void openLesson.mutateAsync({
+                                        courseId,
+                                        moduleId: module.id,
+                                        lessonId: lesson.id,
+                                      })
+                                    }
+                                  >
+                                    <PlayCircle className="size-3.5" />
+                                    {t('open')}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant={done ? 'secondary' : 'default'}
+                                    disabled={done || completeLesson.isPending}
+                                    onClick={() =>
+                                      void completeLesson.mutateAsync({
+                                        courseId,
+                                        moduleId: module.id,
+                                        lessonId: lesson.id,
+                                      })
+                                    }
+                                  >
+                                    <CheckCircle2 className="size-3.5" />
+                                    {done ? t('completed') : t('complete')}
+                                  </Button>
+                                </div>
                               </div>
-                              <div className="flex shrink-0 flex-wrap gap-2">
-                                <BookmarkTargetButton
-                                  courseId={courseId}
-                                  targetType="lesson"
-                                  moduleId={module.id}
-                                  lessonId={lesson.id}
-                                  bookmarks={courseBookmarks}
-                                />
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={openLesson.isPending}
-                                  onClick={() =>
-                                    void openLesson.mutateAsync({
-                                      courseId,
-                                      moduleId: module.id,
-                                      lessonId: lesson.id,
-                                    })
-                                  }
-                                >
-                                  <PlayCircle className="size-3.5" />
-                                  {t('open')}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant={done ? 'secondary' : 'default'}
-                                  disabled={done || completeLesson.isPending}
-                                  onClick={() =>
-                                    void completeLesson.mutateAsync({
-                                      courseId,
-                                      moduleId: module.id,
-                                      lessonId: lesson.id,
-                                    })
-                                  }
-                                >
-                                  <CheckCircle2 className="size-3.5" />
-                                  {done ? t('completed') : t('complete')}
-                                </Button>
-                              </div>
+                              {lesson.resources && lesson.resources.length > 0 ? (
+                                <ul className="space-y-1.5 border-l border-border/60 pl-3">
+                                  {lesson.resources.map((resource) => (
+                                    <li
+                                      key={resource.id}
+                                      className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                                    >
+                                      <p className="text-xs text-muted-foreground">
+                                        {resource.title}{' '}
+                                        <span className="text-muted-foreground/70">
+                                          ({resource.type})
+                                        </span>
+                                      </p>
+                                      <BookmarkTargetButton
+                                        courseId={courseId}
+                                        targetType="resource"
+                                        moduleId={module.id}
+                                        lessonId={lesson.id}
+                                        resourceId={resource.id}
+                                        bookmarks={courseBookmarks}
+                                        variant="ghost"
+                                      />
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
                             </li>
                           );
                         })}
