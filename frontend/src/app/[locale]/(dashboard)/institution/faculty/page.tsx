@@ -22,6 +22,7 @@ import {
   List,
   Search,
   Upload,
+  UserMinus,
   UserRound,
   Users,
 } from 'lucide-react';
@@ -124,6 +125,15 @@ export default function FacultyListPage() {
   const meta = viewAll ? undefined : pagedQuery.data?.meta;
   const allTotal = viewAll ? allQuery.data?.total : meta?.total;
   const stats = statsQuery.data;
+  const directoryTotal = stats?.total ?? meta?.total ?? allTotal ?? 0;
+
+  const archiveSelected = () => {
+    if (!selected.length) return;
+    if (!window.confirm(t('archiveConfirm', { count: selected.length }))) return;
+    void bulkArchive.mutateAsync(selected).then(() => {
+      setSelected([]);
+    });
+  };
 
   const downloadExport = async (format: 'csv' | 'excel' | 'pdf') => {
     const token = getAccessToken();
@@ -210,13 +220,45 @@ export default function FacultyListPage() {
         </StatGrid>
 
         <Card className="directory-shell overflow-hidden">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-card-title">{t('directory')}</CardTitle>
-            <CardDescription>
-              {viewAll && allTotal != null
-                ? t('showingAll', { count: allTotal })
-                : t('directoryDescription')}
-            </CardDescription>
+          <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 space-y-1">
+              <CardTitle className="text-card-title">{t('directory')}</CardTitle>
+              <CardDescription>
+                {viewAll && allTotal != null
+                  ? t('showingAll', { count: allTotal })
+                  : t('directoryDescription')}
+              </CardDescription>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Button
+                type="button"
+                variant={viewAll ? 'secondary' : 'default'}
+                className="rounded-xl"
+                disabled={listQuery.isLoading || directoryTotal === 0}
+                onClick={() => {
+                  setViewAll((v) => !v);
+                  setPage(1);
+                }}
+              >
+                <List className="size-4" />
+                {viewAll
+                  ? t('viewPages')
+                  : t('viewAllFaculty', { count: directoryTotal })}
+              </Button>
+              <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl border-danger/40 text-danger hover:bg-danger/10"
+                  disabled={!selected.length || bulkArchive.isPending}
+                  onClick={archiveSelected}
+                >
+                  <UserMinus className="size-4" />
+                  {t('archiveSelected')}
+                  {selected.length > 0 ? ` (${selected.length})` : ''}
+                </Button>
+              </PermissionGate>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {listQuery.isError ? (
@@ -263,9 +305,9 @@ export default function FacultyListPage() {
                         variant="danger"
                         className="rounded-xl"
                         disabled={bulkArchive.isPending}
-                        onClick={() => void bulkArchive.mutateAsync(selected).then(() => { setSelected([]); })}
+                        onClick={archiveSelected}
                       >
-                        Archive
+                        {t('archiveSelected')}
                       </Button>
                     </PermissionGate>
                     <Button size="sm" variant="ghost" className="rounded-xl" onClick={() => void downloadExport('csv')}>
