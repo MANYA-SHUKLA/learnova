@@ -75,6 +75,7 @@
     "institution": "సంస్థ",
     "departments": "విభాగాలు",
     "programs": "కార్యక్రమాలు",
+    "branches": "శాఖలు",
     "academicYears": "విద్యా సంవత్సరాలు",
     "semesters": "సెమిస్టర్లు",
     "campuses": "క్యాంపస్‌లు",
@@ -853,6 +854,7 @@
         "institution": "సంస్థ",
         "campusPortal": "క్యాంపస్ పోర్టల్",
         "departments": "విభాగాలు",
+        "branches": "శాఖలు",
         "programs": "కార్యక్రమాలు",
         "academicYears": "విద్యా సంవత్సరాలు",
         "semesters": "సెమిస్టర్లు",
@@ -1166,7 +1168,12 @@
       "departments": {
         "title": "విభాగాలు",
         "singular": "శాఖ",
-        "description": "డిపార్ట్‌మెంట్‌లు సంస్థలోని పాఠశాలకు చెందినవి."
+        "description": "మీ సంస్థను విభాగాలుగా నిర్వహించండి (ఉదా: Engineering)."
+      },
+      "branches": {
+        "title": "శాఖలు",
+        "singular": "శాఖ",
+        "description": "విభాగం కింద డిగ్రీ శాఖలు — ఉదా. CSE, ECE."
       },
       "programs": {
         "title": "కార్యక్రమాలు",
@@ -1701,8 +1708,8 @@
       "noInstitutionTitle": "సంస్థ లింక్ చేయబడలేదు",
       "noInstitutionDescription": "అకడమిక్ వర్క్‌స్పేస్‌ను అన్‌లాక్ చేయడానికి సంస్థ ప్రొఫైల్‌ను కనెక్ట్ చేయండి లేదా సృష్టించండి.",
       "emptyStructureTitle": "మీ అకడమిక్ నిర్మాణం ఖాళీగా ఉంది",
-      "emptyStructureDescription": "ఈ డాష్‌బోర్డ్‌ను సజీవం చేయడానికి క్యాంపస్‌లు, స్కూల్స్ మరియు ప్రోగ్రామ్‌లను జోడించడం ప్రారంభించండి.",
-      "addCampus": "క్యాంపస్ జోడించండి",
+      "emptyStructureDescription": "ఈ డాష్‌బోర్డ్‌ను సజీవం చేయడానికి విభాగాలు మరియు శాఖలు (ఉదా. CSE) జోడించడం ప్రారంభించండి.",
+      "addDepartment": "విభాగం జోడించండి",
       "moduleDistribution": "మాడ్యూల్ పంపిణీ",
       "moduleDistributionDescription": "మీ సంస్థ వర్క్‌స్పేస్‌లో లెక్కలు",
       "calendarSummary": "క్యాలెండర్ సారాంశం",
@@ -1718,33 +1725,27 @@
       "quickActionsTitle": "త్వరిత చర్యలు",
       "quickActionsDescription": "మీరు తరచుగా నిర్వహించే మాడ్యూల్స్‌కు వెళ్లండి.",
       "stats": {
-        "campuses": "క్యాంపస్‌లు",
-        "schools": "స్కూల్స్",
         "departments": "డిపార్ట్‌మెంట్‌లు",
+        "branches": "శాఖలు",
         "programs": "ప్రోగ్రామ్‌లు",
         "academicYears": "అకడమిక్ సంవత్సరాలు",
         "semesters": "సెమిస్టర్‌లు"
       },
       "chart": {
-        "campuses": "క్యాంపస్‌లు",
-        "schools": "స్కూల్స్",
         "departments": "డిపార్ట్‌మెంట్‌లు",
+        "branches": "శాఖలు",
         "programs": "ప్రోగ్రామ్‌లు",
         "years": "సంవత్సరాలు",
         "semesters": "సెమిస్టర్‌లు"
       },
       "actions": {
-        "campuses": {
-          "title": "క్యాంపస్‌లు",
-          "description": "స్థానాలను నిర్వహించండి"
-        },
-        "schools": {
-          "title": "స్కూల్స్",
-          "description": "ఫ్యాకల్టీలు & స్కూల్స్"
-        },
         "departments": {
           "title": "డిపార్ట్‌మెంట్‌లు",
           "description": "సంస్థ నిర్మాణం"
+        },
+        "branches": {
+          "title": "శాఖలు",
+          "description": "CSE, ECE మరియు ఇతర శాఖలు"
         },
         "programs": {
           "title": "ప్రోగ్రామ్‌లు",

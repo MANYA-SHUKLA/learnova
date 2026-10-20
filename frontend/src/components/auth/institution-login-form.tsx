@@ -118,25 +118,27 @@ function InstitutionLoginFormInner({
       ? t('campusSubtitle', { campus: portal?.shortName ?? campusSlug })
       : t('genericSubtitle'));
 
+  const institutionBrand = portal ? (
+    <InstitutionMark
+      branding={{
+        name: portal.name,
+        shortName: portal.shortName ?? portal.name,
+        logo: portal.logo,
+        favicon: null,
+      }}
+      size="lg"
+    />
+  ) : null;
+
   return (
-    <AuthCardShell brand="company" icon={LogIn} title={loginTitle}>
+    <AuthCardShell
+      brand={institutionBrand ? 'custom' : 'icon'}
+      brandNode={institutionBrand ?? undefined}
+      icon={LogIn}
+      title={loginTitle}
+    >
       <form onSubmit={onSubmit} noValidate>
         <CardContent className={authContentClassName}>
-          <div className="mx-auto mb-2 flex justify-center">
-            <InstitutionMark
-              branding={
-                portal
-                  ? {
-                      name: portal.name,
-                      shortName: portal.shortName ?? portal.name,
-                      logo: portal.logo,
-                      favicon: null,
-                    }
-                  : null
-              }
-              size="lg"
-            />
-          </div>
           {loginSubtitle ? (
             <p className="mb-4 text-center text-sm text-muted-foreground">{loginSubtitle}</p>
           ) : null}
@@ -242,7 +244,7 @@ function InstitutionLoginFormInner({
 
 function LoginFallback() {
   return (
-    <AuthCardShell brand="company" icon={LogIn} title="…" description="">
+    <AuthCardShell brand="icon" icon={LogIn} title="…" description="">
       <CardContent className="flex min-h-[200px] items-center justify-center py-10">
         <Spinner size="lg" />
       </CardContent>

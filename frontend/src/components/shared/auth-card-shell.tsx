@@ -20,6 +20,7 @@ export function AuthCardShell({
   maxWidthClass = 'max-w-md',
   className,
   brand = 'icon',
+  brandNode,
 }: {
   icon: LucideIcon;
   title: string;
@@ -28,8 +29,10 @@ export function AuthCardShell({
   children: ReactNode;
   maxWidthClass?: string;
   className?: string;
-  /** Company mark on auth pages; icon for in-app password flows */
-  brand?: 'company' | 'icon';
+  /** Company mark on auth pages; icon for in-app password flows; custom for tenant branding */
+  brand?: 'company' | 'icon' | 'custom';
+  /** Rendered in the header when brand is custom (e.g. institution logo on campus login) */
+  brandNode?: ReactNode;
 }) {
   return (
     <div
@@ -73,6 +76,8 @@ export function AuthCardShell({
               >
                 {brand === 'company' ? (
                   <CompanyLogo href={undefined} size="lg" showName={false} />
+                ) : brand === 'custom' && brandNode ? (
+                  brandNode
                 ) : (
                   <Icon className="size-6" strokeWidth={1.75} />
                 )}

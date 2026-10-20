@@ -257,6 +257,7 @@ export class InstitutionService {
     const listed = await schoolRepository.list(institutionId, {
       page: 1,
       limit: 1,
+      includeDeleted: false,
       sortBy: 'createdAt',
       sortOrder: 'asc',
     });
@@ -277,7 +278,7 @@ export class InstitutionService {
       description: null,
       status: 'active',
       deletedAt: null,
-    });
+    } as never);
     return String(doc._id);
   }
 

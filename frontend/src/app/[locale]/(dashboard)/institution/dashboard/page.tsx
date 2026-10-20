@@ -86,6 +86,8 @@ export default function InstitutionDashboardPage() {
   const t = useTranslations('dashboard.home');
   const tCommon = useTranslations('common');
   const tNav = useTranslations('nav');
+  const tBranches = useTranslations('dashboard.institution.branches');
+  const branchesLabel = tNav('branches');
 
   const institutionQuery = useMyInstitution();
   const departmentsQuery = useDepartments(LIST_PARAMS);
@@ -107,8 +109,8 @@ export default function InstitutionDashboardPage() {
     },
     {
       key: 'branches' as const,
-      label: t('stats.branches'),
-      chartLabel: t('chart.branches'),
+      label: branchesLabel,
+      chartLabel: branchesLabel,
       value: countFromQuery(branchesQuery.data),
       icon: BookOpen,
       href: APP_ROUTES.INSTITUTION_PROGRAMS,
@@ -143,8 +145,8 @@ export default function InstitutionDashboardPage() {
     },
     {
       href: APP_ROUTES.INSTITUTION_PROGRAMS,
-      title: t('actions.branches.title'),
-      description: t('actions.branches.description'),
+      title: tBranches('title'),
+      description: tBranches('description'),
       icon: BookOpen,
     },
     {
