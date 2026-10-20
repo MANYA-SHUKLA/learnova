@@ -50,25 +50,37 @@ function FooterColumn({
   );
 }
 
-export async function SiteFooter() {
+const CAMPUS_PORTAL_LINKS = [
+  { href: '/login', labelKey: 'companyLinks.institutionLogin' },
+  { href: '/contact', labelKey: 'companyLinks.contact' },
+] as const;
+
+export async function SiteFooter({ campusPortal = false }: { campusPortal?: boolean }) {
   const t = await getTranslations('marketing.footer');
+  const tCampus = campusPortal ? await getTranslations('marketing.campusPortal') : null;
   const tCommon = await getTranslations('common');
   const year = new Date().getFullYear();
 
   return (
     <footer className="w-full border-t border-border bg-muted/40">
       <div className={siteContainer('py-14 sm:py-16')}>
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-16">
-          <div className="sm:col-span-2 lg:col-span-1">
+        <div
+          className={
+            campusPortal
+              ? 'grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
+              : 'grid gap-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-16'
+          }
+        >
+          <div className={campusPortal ? 'sm:col-span-2' : 'sm:col-span-2 lg:col-span-1'}>
             <Link
               href="/"
               className="inline-flex items-center gap-2.5 font-display text-xl font-bold tracking-tight text-foreground"
             >
               <LogoMark />
-              {tCommon('appName')}
+              {campusPortal ? tCampus?.('footerCampusName') ?? tCommon('appName') : tCommon('appName')}
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {t('tagline')}
+              {campusPortal ? tCampus?.('footerTagline') : t('tagline')}
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
               {t('contactLabel')}{' '}
@@ -80,14 +92,26 @@ export async function SiteFooter() {
               </a>
             </p>
           </div>
-          <FooterColumn
-            title={t('product')}
-            links={PRODUCT_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
-          />
-          <FooterColumn
-            title={t('company')}
-            links={COMPANY_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
-          />
+          {campusPortal ? (
+            <FooterColumn
+              title={tCampus?.('footerLinksTitle') ?? t('company')}
+              links={CAMPUS_PORTAL_LINKS.map((link) => ({
+                href: link.href,
+                label: t(link.labelKey),
+              }))}
+            />
+          ) : (
+            <>
+              <FooterColumn
+                title={t('product')}
+                links={PRODUCT_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
+              />
+              <FooterColumn
+                title={t('company')}
+                links={COMPANY_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}
+              />
+            </>
+          )}
           <FooterColumn
             title={t('legal')}
             links={LEGAL_LINKS.map((link) => ({ href: link.href, label: t(link.labelKey) }))}

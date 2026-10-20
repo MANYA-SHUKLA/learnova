@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { siteContainer } from '@/lib/layout';
+import { isSaasModeEnabled } from '@/lib/saas';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
@@ -29,10 +30,11 @@ export async function LegalPageShell({
 }: LegalPageShellProps) {
   const t = await getTranslations('marketing.legal.shell');
   const updatedLabel = t('lastUpdated', { date: updated ?? t('updatedDate') });
+  const campusPortal = !isSaasModeEnabled();
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader campusPortal={campusPortal} />
       <main className="w-full font-body">
         <section className="relative w-full overflow-hidden border-b border-border">
           <div
@@ -81,7 +83,7 @@ export async function LegalPageShell({
           </div>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter campusPortal={campusPortal} />
     </>
   );
 }

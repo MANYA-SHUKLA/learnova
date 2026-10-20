@@ -12,22 +12,32 @@ import { dashboardPathForRole } from '@/lib/auth/redirects';
 import { useAuth } from '@/providers/auth-provider';
 import { LogoMark } from './logo-mark';
 
-const NAV_LINKS = [
+const SAAS_NAV_LINKS = [
   { href: '/features', labelKey: 'features' },
   { href: '/#pricing', labelKey: 'pricing' },
   { href: '/#faq', labelKey: 'faq' },
   { href: '/contact', labelKey: 'contact' },
 ] as const;
 
-export function SiteHeader() {
+const CAMPUS_NAV_LINKS = [
+  { href: '/contact', labelKey: 'contact' },
+  { href: '/privacy', labelKey: 'privacy' },
+] as const;
+
+export function SiteHeader({ campusPortal = false }: { campusPortal?: boolean }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('marketing.header');
   const tCommon = useTranslations('common');
   const { user, isAuthenticated, isLoading } = useAuth();
 
   const dashboardHref = dashboardPathForRole(user?.role);
-  const primaryCtaLabel = isAuthenticated ? t('goToDashboard') : t('institutionLogin');
+  const primaryCtaLabel = isAuthenticated
+    ? t('goToDashboard')
+    : campusPortal
+      ? t('signIn')
+      : t('institutionLogin');
   const primaryCtaHref = isAuthenticated ? dashboardHref : '/login';
+  const navLinks = campusPortal ? CAMPUS_NAV_LINKS : SAAS_NAV_LINKS;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-[var(--glass-bg)] backdrop-blur-xl supports-[backdrop-filter]:bg-[var(--glass-bg)]">
@@ -41,13 +51,15 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              {t(link.labelKey)}
+              {'labelKey' in link && link.labelKey === 'privacy'
+                ? tCommon('privacy')
+                : t(link.labelKey as 'contact' | 'features' | 'pricing' | 'faq')}
             </Link>
           ))}
         </nav>
@@ -81,7 +93,7 @@ export function SiteHeader() {
         <div className="border-t border-border/60 bg-background/95 backdrop-blur-xl lg:hidden">
           <div className={siteContainer('py-4')}>
             <nav className="flex flex-col gap-1" aria-label="Mobile">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -90,7 +102,9 @@ export function SiteHeader() {
                     setOpen(false);
                   }}
                 >
-                  {t(link.labelKey)}
+                  {'labelKey' in link && link.labelKey === 'privacy'
+                    ? tCommon('privacy')
+                    : t(link.labelKey as 'contact' | 'features' | 'pricing' | 'faq')}
                 </Link>
               ))}
             </nav>

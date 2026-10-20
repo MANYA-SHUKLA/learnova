@@ -13,6 +13,7 @@ import { SiteHeader } from '@/components/marketing/site-header';
 import { siteContainer } from '@/lib/layout';
 import { ctaButtonClass, ctaOutlineClass } from '@/lib/cta';
 import { Link } from '@/lib/i18n/routing';
+import { isSaasModeEnabled } from '@/lib/saas';
 
 interface AboutPageProps {
   params: Promise<{ locale: string }>;
@@ -55,10 +56,11 @@ export default async function AboutPage({ params }: AboutPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('marketing.about');
+  const campusPortal = !isSaasModeEnabled();
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader campusPortal={campusPortal} />
       <main className="w-full font-body">
         <section className="relative w-full overflow-hidden">
           <div
@@ -133,7 +135,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
           </div>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter campusPortal={campusPortal} />
     </>
   );
 }

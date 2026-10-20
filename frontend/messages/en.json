@@ -108,7 +108,46 @@
       "faq": "FAQ",
       "contact": "Contact",
       "institutionLogin": "Institution Login",
+      "signIn": "Sign in",
       "goToDashboard": "Go to dashboard"
+    },
+    "campusPortal": {
+      "eyebrow": "School of Engineering, JNU",
+      "title": "Campus academic portal",
+      "subtitle": "Use the email and password issued by the institute office. After sign-in you will see your timetable, courses, assignments, grades, and notices — this page is only the entry gate, not your workspace.",
+      "signInCta": "Sign in",
+      "contactHelp": "Need help?",
+      "footerCampusName": "SOE JNU Portal",
+      "footerTagline": "Official academic portal for students, faculty, and institute administrators.",
+      "footerLinksTitle": "Portal",
+      "poweredBy": "Powered by {app}",
+      "notices": {
+        "title": "Campus notices",
+        "item1": "Monsoon semester 2026 — timetables are available after you sign in.",
+        "item2": "Accounts are created by the institute; there is no public student registration.",
+        "item3": "Forgot your password? Contact the academic office or use Forgot password on the sign-in page."
+      },
+      "help": {
+        "title": "Academic office",
+        "description": "For login issues, section changes, or timetable corrections, reach out to the SOE office."
+      },
+      "roles": {
+        "student": {
+          "title": "Students",
+          "description": "View your class timetable, submit assignments, attempt quizzes and exams, and track grades and certificates.",
+          "cta": "Student sign in"
+        },
+        "faculty": {
+          "title": "Faculty",
+          "description": "Manage your teaching timetable, course content, assessments, gradebook, and class reports.",
+          "cta": "Faculty sign in"
+        },
+        "admin": {
+          "title": "Institute admin",
+          "description": "Configure programs, enrollments, timetables, faculty and student records, and institution-wide reports.",
+          "cta": "Admin sign in"
+        }
+      }
     },
     "verify": {
       "eyebrow": "Learnova verification",

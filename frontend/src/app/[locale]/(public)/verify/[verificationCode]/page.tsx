@@ -8,6 +8,7 @@ import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { useVerifyCertificateQuery } from '@/features/certificate';
 import { siteContainer } from '@/lib/layout';
+import { isSaasModeEnabled } from '@/lib/saas';
 
 export default function VerifyCertificatePage() {
   const t = useTranslations('marketing.verify');
@@ -16,10 +17,11 @@ export default function VerifyCertificatePage() {
   const verifyQuery = useVerifyCertificateQuery(code, code.length >= 8);
   const result = verifyQuery.data;
   const empty = t('empty');
+  const campusPortal = !isSaasModeEnabled();
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader campusPortal={campusPortal} />
       <main className="relative w-full flex-1 font-body">
         <div
           aria-hidden
@@ -73,7 +75,7 @@ export default function VerifyCertificatePage() {
           </div>
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter campusPortal={campusPortal} />
     </>
   );
 }

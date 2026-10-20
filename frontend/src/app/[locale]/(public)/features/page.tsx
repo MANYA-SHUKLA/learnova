@@ -14,6 +14,7 @@ import { SiteHeader } from '@/components/marketing/site-header';
 import { ctaButtonClass } from '@/lib/cta';
 import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
+import { isSaasModeEnabled } from '@/lib/saas';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -56,10 +57,11 @@ export default async function FeaturesPage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('marketing.features');
+  const campusPortal = !isSaasModeEnabled();
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader campusPortal={campusPortal} />
       <main className="w-full font-body">
         <section className="relative overflow-hidden border-b border-border">
           <div
@@ -107,7 +109,7 @@ export default async function FeaturesPage({ params }: PageProps) {
           </div>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter campusPortal={campusPortal} />
     </>
   );
 }
