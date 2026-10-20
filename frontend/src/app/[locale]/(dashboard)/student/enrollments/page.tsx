@@ -34,8 +34,15 @@ import { ApiClientError } from '@/lib/api/client';
 
 export default function StudentEnrollmentsPage() {
   const t = useTranslations('dashboard.student.enrollments');
-  const myQuery = useMyEnrollments();
-  const coursesQuery = useCourseList({ page: 1, limit: 200 });
+  const semesterCourses = useStudentSemesterCourses();
+  const myQuery = useMyEnrollments(
+    semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId, page: 1, limit: 200 } : undefined,
+  );
+  const coursesQuery = useCourseList({
+    page: 1,
+    limit: 200,
+    ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
+  });
   const courseLabel = (id: string) =>
     displayName(
       coursesQuery.data?.items,
@@ -90,7 +97,15 @@ export default function StudentEnrollmentsPage() {
                   className="flex-1"
                   label="Course"
                   value={courseId}
-                  listParams={{ status: 'published' }}
+                  listParams={{
+                    status: 'published',
+                    ...(semesterCourses.semesterId
+                      ? { semesterId: semesterCourses.semesterId }
+                      : {}),
+                  }}
+                  filterSemesterIds={
+                    semesterCourses.semesterId ? [semesterCourses.semesterId] : undefined
+                  }
                   excludeIds={enrolledCourseIds}
                   disabled={selfEnrollMutation.isPending}
                   onChange={setCourseId}
