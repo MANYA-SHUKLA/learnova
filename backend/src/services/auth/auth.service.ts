@@ -54,10 +54,6 @@ import {
   getInstitutionCampusState,
   INSTITUTION_SUSPENDED_MESSAGE,
 } from '../platform/institution-access.js';
-import {
-  getInstitutionCampusState,
-  INSTITUTION_SUSPENDED_MESSAGE,
-} from '../platform/institution-access.js';
 import { logger } from '../../utils/logger/index.js';
 import {
   auditAuthLogRepository,
