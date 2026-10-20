@@ -113,7 +113,7 @@ export async function SiteFooter({
             <FooterColumn
               title={tCampus?.('footerLinksTitle') ?? t('company')}
               links={CAMPUS_PORTAL_LINKS.map((link) => ({
-                href: link.href === '/platform' ? '/' : link.href,
+                href: link.href,
                 label:
                   link.labelKey === 'campusPortal.footerPlatformLink'
                     ? (tCampus?.('footerPlatformLink') ?? tCommon('appName'))
