@@ -943,10 +943,14 @@ export class EnrollmentService {
    * Ensures the logged-in student is enrolled in every published course for their
    * current program + semester (e.g. B.Tech CSE Sem I). Idempotent — safe on every /me load.
    */
-  private async ensureStudentSemesterEnrollments(actor: ActorContext, institutionId: string) {
+  async ensureStudentSemesterCatalogEnrollments(
+    institutionId: string,
+    studentId: string,
+    createdByUserId: string,
+  ) {
     const student = await StudentModel.findOne({
+      _id: new Types.ObjectId(studentId),
       institutionId: new Types.ObjectId(institutionId),
-      email: actor.email.toLowerCase(),
       deletedAt: null,
     }).exec();
     if (!student?.programId || !student.semesterId) return;
@@ -989,7 +993,7 @@ export class EnrollmentService {
         enrollmentNumber: generateEnrollmentNumber(),
         enrollmentMethod: 'manual',
         enrollmentDate: new Date(),
-        createdBy: new Types.ObjectId(actor.userId),
+        createdBy: new Types.ObjectId(createdByUserId),
       });
       created += 1;
     }
@@ -1009,7 +1013,21 @@ export class EnrollmentService {
     }
 
     const institutionId = requireTenant(actor);
-    await this.ensureStudentSemesterEnrollments(actor, institutionId);
+    const student = await StudentModel.findOne({
+      institutionId: new Types.ObjectId(institutionId),
+      email: actor.email.toLowerCase(),
+      deletedAt: null,
+    })
+      .select('_id')
+      .lean()
+      .exec();
+    if (student) {
+      await this.ensureStudentSemesterCatalogEnrollments(
+        institutionId,
+        String(student._id),
+        actor.userId,
+      );
+    }
 
     const resolved: EnrollmentListQuery = {
       page: query.page ?? 1,

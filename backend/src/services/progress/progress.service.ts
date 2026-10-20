@@ -34,6 +34,7 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { progressRepository } from '../../repositories/progress/index.js';
+import { enrollmentService } from '../enrollment/enrollment.service.js';
 import {
   facultyCanAccessCourse,
   facultyCanAccessStudent,
@@ -1482,6 +1483,12 @@ export class ProgressService {
 
   /** Create not_started course progress rows for active enrollments (LMS tracks progress separately). */
   private async syncEnrollmentCourseProgress(institutionId: string, studentId: string) {
+    await enrollmentService.ensureStudentSemesterCatalogEnrollments(
+      institutionId,
+      studentId,
+      studentId,
+    );
+
     const enrollments = await EnrollmentModel.find({
       institutionId: new Types.ObjectId(institutionId),
       studentId: new Types.ObjectId(studentId),
