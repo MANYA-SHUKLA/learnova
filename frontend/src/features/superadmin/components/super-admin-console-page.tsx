@@ -38,6 +38,16 @@ const TAB_CONFIG: { id: SuperAdminConsoleTab; icon: typeof Inbox }[] = [
   { id: 'adminLogins', icon: LogIn },
 ];
 
+const EMPTY_PROVISION = {
+  institutionName: '',
+  contactEmail: '',
+  adminFirstName: '',
+  adminLastName: '',
+  adminEmail: '',
+  initialPassword: '',
+  demoRequestId: '',
+} as const;
+
 function statusVariant(status: DemoRequestRow['status']): 'default' | 'secondary' | 'danger' | 'outline' {
   switch (status) {
     case 'pending':
@@ -74,15 +84,7 @@ export function SuperAdminConsolePage() {
     enabled: tab === 'adminLogins',
   });
 
-  const [provision, setProvision] = useState({
-    institutionName: '',
-    contactEmail: '',
-    adminFirstName: '',
-    adminLastName: '',
-    adminEmail: '',
-    initialPassword: '',
-    demoRequestId: '',
-  });
+  const [provision, setProvision] = useState({ ...EMPTY_PROVISION });
 
   const provisionMutation = useMutation({
     mutationFn: () => {
@@ -105,6 +107,9 @@ export function SuperAdminConsolePage() {
             ? t('provisionSuccessWithIds', { slug, code: code ?? '' })
             : t('provisionSuccess'),
       );
+      if (data.credentialsEmailSent) {
+        setProvision({ ...EMPTY_PROVISION });
+      }
     },
     onError: (err: Error) => {
       alert(err.message || t('provisionError'));
