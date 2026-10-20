@@ -25,13 +25,15 @@ export function useStudentSemesterCourses(enabled = true) {
       sortOrder: 'desc',
       ...(semesterId ? { semesterId } : {}),
     },
-    enabled && profileQuery.isSuccess,
+    enabled && !profileQuery.isLoading,
   );
 
   const enrollments = useMemo(() => {
-    const items = enrollmentsQuery.data?.data?.items ?? [];
-    return items.filter(isCurrentLearningEnrollment);
-  }, [enrollmentsQuery.data]);
+    const items = enrollmentsQuery.data?.items ?? [];
+    return items
+      .filter(isCurrentLearningEnrollment)
+      .filter((row) => !semesterId || !row.semesterId || row.semesterId === semesterId);
+  }, [enrollmentsQuery.data, semesterId]);
 
   const courseIds = useMemo(
     () => new Set(enrollments.map((row) => row.courseId)),

@@ -314,7 +314,10 @@ export async function listEnrollmentAudit(req: Request, res: Response, next: Nex
 
 export async function getOwnEnrollments(req: Request, res: Response, next: NextFunction) {
   try {
-    const result = await enrollmentService.getOwnEnrollments(actorFrom(req));
+    const result = await enrollmentService.getOwnEnrollments(
+      req.query as unknown as EnrollmentListQuery,
+      actorFrom(req),
+    );
     sendSuccess(res, { items: result.items }, { meta: result.meta, requestId: req.requestId });
   } catch (err) {
     next(err);

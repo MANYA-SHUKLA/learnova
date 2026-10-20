@@ -51,11 +51,7 @@ export default function StudentBookmarksPage() {
   const [addResourceId, setAddResourceId] = useState('');
   const [addNote, setAddNote] = useState('');
   const semesterCourses = useStudentSemesterCourses();
-  const coursesQuery = useCourseList({
-    page: 1,
-    limit: 200,
-    ...(semesterCourses.semesterId ? { semesterId: semesterCourses.semesterId } : {}),
-  });
+  const coursesQuery = useCourseList({ page: 1, limit: 200, status: 'published' });
   const myProgressQuery = useMyProgress({ page: 1, limit: 100 });
   const addCourseProgressQuery = useCourseProgress(addCourseId, Boolean(addCourseId));
   const courseLabel = (id: string) =>

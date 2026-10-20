@@ -72,10 +72,12 @@ export const enrollmentApi = {
 
   get: (id: string) => apiClient.get<Enrollment>(`${API_ROUTES.ENROLLMENTS}/${id}`),
 
-  getMyEnrollments: (params?: EnrollmentListParams) =>
-    apiClient.getWithMeta<{ items: Enrollment[] }>(
+  getMyEnrollments: async (params?: EnrollmentListParams): Promise<EnrollmentListResult> => {
+    const { data, meta } = await apiClient.getWithMeta<{ items: Enrollment[] }>(
       `${API_ROUTES.ENROLLMENTS}/me${toQuery(params)}`,
-    ),
+    );
+    return { items: data.items, meta: meta ?? emptyMeta(params?.page, params?.limit) };
+  },
 
   create: (body: EnrollmentCreateBody) =>
     apiClient.post<Enrollment>(API_ROUTES.ENROLLMENTS, body),

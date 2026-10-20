@@ -939,14 +939,27 @@ export class EnrollmentService {
     }));
   }
 
-  async getOwnEnrollments(actor: ActorContext) {
+  async getOwnEnrollments(query: EnrollmentListQuery, actor: ActorContext) {
     requireTenant(actor);
     if (actor.role !== 'student') {
       throw new ForbiddenError('Only students can view own enrollments');
     }
 
-    const query = { page: 1, limit: 1000, sortBy: 'createdAt', sortOrder: 'desc' } as EnrollmentListQuery;
-    return this.list(query, actor);
+    const resolved: EnrollmentListQuery = {
+      page: query.page ?? 1,
+      limit: query.limit ?? 200,
+      sortBy: query.sortBy ?? 'enrollmentDate',
+      sortOrder: query.sortOrder ?? 'desc',
+      q: query.q,
+      status: query.status,
+      approvalStatus: query.approvalStatus,
+      completionStatus: query.completionStatus,
+      courseId: query.courseId,
+      academicYearId: query.academicYearId,
+      semesterId: query.semesterId,
+      sectionId: query.sectionId,
+    };
+    return this.list(resolved, actor);
   }
 }
 

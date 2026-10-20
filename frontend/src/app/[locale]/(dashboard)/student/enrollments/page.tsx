@@ -57,7 +57,7 @@ export default function StudentEnrollmentsPage() {
   const [courseId, setCourseId] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const enrollments = myQuery.data?.data.items ?? [];
+  const enrollments = myQuery.data?.items ?? [];
   const waitlist = waitlistQuery.data?.items ?? [];
   const enrolledCourseIds = enrollments.map((row) => row.courseId);
 

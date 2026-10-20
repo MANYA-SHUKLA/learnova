@@ -62,7 +62,12 @@ enrollmentRoutes.get(
 
 enrollmentRoutes.get('/enrollments/audit', ...readAuth, ctrl.listEnrollmentAudit);
 
-enrollmentRoutes.get('/enrollments/me', ...writeAuth, ctrl.getOwnEnrollments);
+enrollmentRoutes.get(
+  '/enrollments/me',
+  ...writeAuth,
+  validate(enrollmentListQuerySchema, 'query'),
+  ctrl.getOwnEnrollments,
+);
 
 enrollmentRoutes.get('/enrollments/waitlist', ...readAuth, ctrl.getWaitlist);
 
