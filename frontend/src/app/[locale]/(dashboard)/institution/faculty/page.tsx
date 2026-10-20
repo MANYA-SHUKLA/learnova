@@ -1,6 +1,6 @@
 'use client';
 
-import { APP_ROUTES, PAGINATION, PERMISSIONS } from '@learnova/constants';
+import { APP_ROUTES, PERMISSIONS } from '@learnova/constants';
 import {
   Badge,
   Button,
@@ -155,21 +155,6 @@ export default function FacultyListPage() {
                   {tCommon('export')}
                 </Link>
               </Button>
-              <Button
-                type="button"
-                variant={viewAll ? 'secondary' : 'default'}
-                className="rounded-xl"
-                disabled={listQuery.isLoading || directoryTotal === 0}
-                onClick={() => {
-                  setViewAll((v) => !v);
-                  setPage(1);
-                }}
-              >
-                <List className="size-4" />
-                {viewAll
-                  ? t('viewPages')
-                  : t('viewAllFaculty', { count: directoryTotal })}
-              </Button>
               <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
                 <Button asChild className="rounded-xl">
                   <Link href={APP_ROUTES.INSTITUTION_FACULTY_CREATE}>
@@ -188,12 +173,12 @@ export default function FacultyListPage() {
                 <StatCard key={i} label="…" value="—" loading />
               ))
             : [
-                { label: t('stats.total'), value: stats?.total ?? 0 },
-                { label: t('stats.active'), value: stats?.active ?? 0 },
-                { label: t('stats.inactive'), value: stats?.inactive ?? 0 },
-                { label: t('stats.onLeave'), value: stats?.onLeave ?? 0 },
-                { label: t('stats.departments'), value: stats?.departments ?? 0 },
-                { label: t('stats.newThisMonth'), value: stats?.newThisMonth ?? 0 },
+                { label: t('stats.total'), value: statsQuery.data?.total ?? 0 },
+                { label: t('stats.active'), value: statsQuery.data?.active ?? 0 },
+                { label: t('stats.inactive'), value: statsQuery.data?.inactive ?? 0 },
+                { label: t('stats.onLeave'), value: statsQuery.data?.onLeave ?? 0 },
+                { label: t('stats.departments'), value: statsQuery.data?.departments ?? 0 },
+                { label: t('stats.newThisMonth'), value: statsQuery.data?.newThisMonth ?? 0 },
               ].map((card) => (
                 <StatCard
                   key={card.label}
@@ -204,32 +189,17 @@ export default function FacultyListPage() {
               ))}
         </StatGrid>
 
-        <Card className="directory-shell overflow-hidden">
+        <Card className="directory-shell">
           <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
               <CardTitle className="text-card-title">{t('directory')}</CardTitle>
               <CardDescription>
-                {viewAll && allTotal != null
-                  ? t('showingAll', { count: allTotal })
+                {listQuery.isSuccess && directoryTotal > 0
+                  ? t('showingAll', { count: directoryTotal })
                   : t('directoryDescription')}
               </CardDescription>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
-              <Button
-                type="button"
-                variant={viewAll ? 'secondary' : 'default'}
-                className="rounded-xl"
-                disabled={listQuery.isLoading || directoryTotal === 0}
-                onClick={() => {
-                  setViewAll((v) => !v);
-                  setPage(1);
-                }}
-              >
-                <List className="size-4" />
-                {viewAll
-                  ? t('viewPages')
-                  : t('viewAllFaculty', { count: directoryTotal })}
-              </Button>
               <PermissionGate permission={PERMISSIONS.FACULTY_MANAGE}>
                 <Button
                   type="button"
