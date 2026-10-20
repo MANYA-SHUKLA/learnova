@@ -220,9 +220,10 @@ export function mapOfficialSlotsToProposed(
 
   for (const row of locked) {
     const section = sections.find((s) => s.name === row.sourceSectionLabel);
-    const course = courses.find(
-      (c) => (c.courseCode ?? '').toUpperCase() === row.courseCode && c.programIds.includes(section?.programId ?? ''),
-    );
+    const course = courses.find((c) => {
+      if ((c.courseCode ?? '').toUpperCase() !== row.courseCode) return false;
+      return c.programIds.length === 0 || c.programIds.includes(section.programId);
+    });
     const facultyId = matchFacultyId(faculty, row.facultyCode, row.facultyName);
     if (!section || !course || !facultyId) continue;
 
