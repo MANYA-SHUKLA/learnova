@@ -2,7 +2,7 @@
 
 import { PERMISSIONS } from '@learnova/constants';
 import { Button, Input, Spinner } from '@learnova/ui';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { PageHeader, useMyInstitution } from '@/features/institution';
@@ -25,13 +25,13 @@ export default function InstitutionPortalSettingsPage() {
     const ps = (institution as { portalSettings?: Record<string, unknown> } | undefined)?.portalSettings;
     if (!ps) return;
     setForm({
-      portalTitle: (ps.portalTitle as string) ?? '',
-      portalSubtitle: (ps.portalSubtitle as string) ?? '',
-      termLabel: (ps.termLabel as string) ?? '',
-      supportEmail: (ps.supportEmail as string) ?? '',
-      officialCredit: (ps.officialCredit as string) ?? '',
-      developerCredit: (ps.developerCredit as string) ?? '',
-      noticesText: Array.isArray(ps.notices) ? (ps.notices as string[]).join('\n') : '',
+      portalTitle: (ps['portalTitle'] as string) ?? '',
+      portalSubtitle: (ps['portalSubtitle'] as string) ?? '',
+      termLabel: (ps['termLabel'] as string) ?? '',
+      supportEmail: (ps['supportEmail'] as string) ?? '',
+      officialCredit: (ps['officialCredit'] as string) ?? '',
+      developerCredit: (ps['developerCredit'] as string) ?? '',
+      noticesText: Array.isArray(ps['notices']) ? (ps['notices'] as string[]).join('\n') : '',
     });
   }, [institution]);
 

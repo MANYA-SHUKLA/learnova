@@ -70,6 +70,12 @@ export default function SuperAdminDashboardPage() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['superadmin', 'demo-requests'] }),
   });
 
+  const declineMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+      superadminApi.declineDemoRequest(id, reason ? { reason } : undefined),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['superadmin', 'demo-requests'] }),
+  });
+
   return (
     <div className={siteContainer('py-10')}>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -99,7 +105,7 @@ export default function SuperAdminDashboardPage() {
               onConfirm={(meetingAt, notes) =>
                 confirmMutation.mutate({ id: row.id, meetingAt, meetingNotes: notes })
               }
-              onAllocate={() =>
+              onAllocate={() => {
                 setProvision((p) => ({
                   ...p,
                   institutionName: row.institutionName,
@@ -108,7 +114,11 @@ export default function SuperAdminDashboardPage() {
                   slug: slugify(row.institutionName),
                   code: slugify(row.institutionName).replace(/-/g, '_').toUpperCase().slice(0, 12),
                   demoRequestId: row.id,
-                }))
+                }));
+                setTab('campuses');
+              }}
+              onDecline={(reason) =>
+                declineMutation.mutate({ id: row.id, reason })
               }
             />
           ))}
@@ -143,7 +153,7 @@ export default function SuperAdminDashboardPage() {
                   placeholder={label}
                   value={provision[key]}
                   onChange={(e) => setProvision((p) => ({ ...p, [key]: e.target.value }))}
-                  required={key !== 'demoRequestId'}
+                  required
                 />
               ))}
               <Button type="submit" disabled={provisionMutation.isPending}>
@@ -205,13 +215,16 @@ function DemoRequestCard({
   row,
   onConfirm,
   onAllocate,
+  onDecline,
 }: {
   row: DemoRequestRow;
   onConfirm: (meetingAt: string, notes?: string) => void;
   onAllocate: () => void;
+  onDecline: (reason?: string) => void;
 }) {
   const [when, setWhen] = useState('');
   const [notes, setNotes] = useState('');
+  const [declineReason, setDeclineReason] = useState('');
   return (
     <div className="rounded-xl border border-border p-4 text-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -234,6 +247,18 @@ function DemoRequestCard({
                 disabled={!when}
               >
                 Confirm meet
+              </Button>
+              <Input
+                placeholder="Decline reason (optional)"
+                value={declineReason}
+                onChange={(e) => setDeclineReason(e.target.value)}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onDecline(declineReason || undefined)}
+              >
+                Decline
               </Button>
             </>
           ) : null}

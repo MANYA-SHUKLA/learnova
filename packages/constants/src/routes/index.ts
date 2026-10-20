@@ -76,6 +76,7 @@ export const APP_ROUTES = {
   INSTITUTION: '/institution',
   INSTITUTION_SETUP: '/institution/setup',
   INSTITUTION_PROFILE: '/institution/profile',
+  INSTITUTION_PORTAL: '/institution/portal',
   INSTITUTION_CAMPUSES: '/institution/campuses',
   INSTITUTION_SCHOOLS: '/institution/schools',
   INSTITUTION_DEPARTMENTS: '/institution/departments',

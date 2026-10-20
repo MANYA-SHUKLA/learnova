@@ -23,6 +23,7 @@ Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
 | `NEXT_PUBLIC_API_URL` | no | `http://localhost:4000/api/v1` | API base |
 | `NEXT_PUBLIC_WS_URL` | no | `http://localhost:4000` | Socket.io origin |
 | `NEXT_PUBLIC_DEFAULT_LOCALE` | no | `en` | `en` \| `hi` \| `te` |
+| `NEXT_PUBLIC_DEFAULT_INSTITUTION_SLUG` | no | — | When set, `/` redirects to `/campus/{slug}` |
 | `LOG_LEVEL` | no | `info` | Logging level |
 
 ---
@@ -56,6 +57,10 @@ Production deploy (Vercel + Render): see [Deploy.md](./Deploy.md).
 | `MAIL_DRIVER` | no | `console` | `console` \| `smtp` \| `ses` |
 | `MAIL_FROM` | no | `shuklamanya99@gmail.com` | From address |
 | `SMTP_HOST` | no | — | SMTP host when driver=smtp |
+| `PLATFORM_ADMIN_EMAIL` | no | `work.shuklamanya@gmail.com` | Demo confirmation copies |
+| `SUPER_ADMIN_EMAIL` | no | `work.shuklamanya@gmail.com` | Super admin seed user |
+| `SUPER_ADMIN_PASSWORD` | no | — | Local seed password (default `Pass1234` in seed script if unset) |
+| `DEFAULT_INSTITUTION_SLUG` | no | — | Default slug for `GET /public/portal` without `?slug=` |
 
 ### Feature flags (optional)
 

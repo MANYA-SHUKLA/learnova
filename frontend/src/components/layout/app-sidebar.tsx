@@ -36,6 +36,7 @@ import {
   ListChecks,
   Library,
   ShieldCheck,
+  Globe,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -58,6 +59,7 @@ type SidebarItemId =
   | 'academicYears'
   | 'semesters'
   | 'settings'
+  | 'campusPortal'
   | 'campuses'
   | 'schools'
   | 'sections'
@@ -113,6 +115,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: 'dashboard', href: APP_ROUTES.INSTITUTION_DASHBOARD, icon: LayoutDashboard, exact: true },
       { id: 'institution', href: APP_ROUTES.INSTITUTION_PROFILE, icon: Building2, exact: true },
+      { id: 'campusPortal', href: APP_ROUTES.INSTITUTION_PORTAL, icon: Globe, exact: true },
       { id: 'departments', href: APP_ROUTES.INSTITUTION_DEPARTMENTS, icon: Network },
       { id: 'programs', href: APP_ROUTES.INSTITUTION_PROGRAMS, icon: BookOpen },
       { id: 'academicYears', href: APP_ROUTES.INSTITUTION_ACADEMIC_YEARS, icon: CalendarRange },

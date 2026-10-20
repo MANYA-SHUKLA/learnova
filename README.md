@@ -54,6 +54,22 @@ pnpm seed:complete
 pnpm verify:platform
 ```
 
+### Platform admin (campus allocation + `/platform` marketing)
+
+| URL | Purpose |
+| --- | --- |
+| `/platform` | Product marketing + **Request a demo** |
+| `/superadmin/login` | Super admin sign-in (not `/login`) |
+| `/superadmin` | Demo requests, allocate campuses, edit CMS |
+| `/campus/{slug}` | Per-campus trust portal for students/faculty |
+
+```bash
+pnpm --filter @learnova/backend seed:super-admin   # work.shuklamanya@gmail.com + SUPER_ADMIN_PASSWORD
+pnpm --filter @learnova/backend seed:jnu-portal    # SOE portal copy on primary institution
+```
+
+Set `NEXT_PUBLIC_DEFAULT_INSTITUTION_SLUG` in `frontend/.env.local` to send `/` straight to your campus URL.
+
 ---
 
 ## Scripts

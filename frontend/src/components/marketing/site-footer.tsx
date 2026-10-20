@@ -53,9 +53,19 @@ function FooterColumn({
 const CAMPUS_PORTAL_LINKS = [
   { href: '/login', labelKey: 'companyLinks.institutionLogin' },
   { href: '/contact', labelKey: 'companyLinks.contact' },
+  { href: '/platform', labelKey: 'campusPortal.footerPlatformLink' },
 ] as const;
 
-export async function SiteFooter({ campusPortal = false }: { campusPortal?: boolean }) {
+export async function SiteFooter({
+  campusPortal = false,
+  campusName,
+  campusTagline,
+}: {
+  campusPortal?: boolean;
+  /** Override footer branding on /campus/[slug] */
+  campusName?: string;
+  campusTagline?: string;
+}) {
   const t = await getTranslations('marketing.footer');
   const tCampus = campusPortal ? await getTranslations('marketing.campusPortal') : null;
   const tCommon = await getTranslations('common');
@@ -77,10 +87,14 @@ export async function SiteFooter({ campusPortal = false }: { campusPortal?: bool
               className="inline-flex items-center gap-2.5 font-display text-xl font-bold tracking-tight text-foreground"
             >
               <LogoMark />
-              {campusPortal ? tCampus?.('footerCampusName') ?? tCommon('appName') : tCommon('appName')}
+              {campusPortal
+                ? (campusName ?? tCampus?.('footerCampusName') ?? tCommon('appName'))
+                : tCommon('appName')}
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {campusPortal ? tCampus?.('footerTagline') : t('tagline')}
+              {campusPortal
+                ? (campusTagline ?? tCampus?.('footerTagline'))
+                : t('tagline')}
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
               {t('contactLabel')}{' '}
@@ -97,7 +111,10 @@ export async function SiteFooter({ campusPortal = false }: { campusPortal?: bool
               title={tCampus?.('footerLinksTitle') ?? t('company')}
               links={CAMPUS_PORTAL_LINKS.map((link) => ({
                 href: link.href,
-                label: t(link.labelKey),
+                label:
+                  link.labelKey === 'campusPortal.footerPlatformLink'
+                    ? (tCampus?.('footerPlatformLink') ?? tCommon('appName'))
+                    : t(link.labelKey),
               }))}
             />
           ) : (

@@ -1,13 +1,15 @@
-import { connectDatabase, disconnectDatabase } from '../database/index.js';
+import '../config/load-env.js';
+import { connectMongo, disconnectMongo } from '../database/index.js';
+import { logger } from '../utils/logger/index.js';
 import { seedAuth } from './auth.seed.js';
 import { seedSuperAdminUser } from './super-admin.seed.js';
 
 async function main() {
-  await connectDatabase();
+  await connectMongo();
   await seedAuth();
   await seedSuperAdminUser();
-  console.log('Super admin seed complete');
-  await disconnectDatabase();
+  logger.info('Super admin seed complete');
+  await disconnectMongo();
 }
 
 main().catch((err) => {

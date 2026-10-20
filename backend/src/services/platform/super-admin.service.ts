@@ -11,6 +11,7 @@ import { sendInstitutionAdminCredentialsEmail } from '../../mail/institution-adm
 import { demoRequestService } from './demo-request.service.js';
 import type { ActorContext } from '../institution/institution.service.js';
 import { UserModel } from '../../models/user.model.js';
+import { institutionAuditRepository } from '../../repositories/institution/index.js';
 
 function assertSuperAdmin(actor: ActorContext) {
   if (actor.role !== 'super_admin') {
@@ -58,7 +59,6 @@ export class SuperAdminService {
         isEmailVerified: true,
         mustChangePassword: true,
         passwordHistory: [],
-        lastPasswordChangedAt: null,
       });
 
       void sendInstitutionAdminCredentialsEmail({
@@ -72,6 +72,18 @@ export class SuperAdminService {
       if (input.demoRequestId) {
         await demoRequestService.markProvisioned(input.demoRequestId, String(institutionId), actor);
       }
+
+      await institutionAuditRepository.log({
+        event: 'institution.provisioned',
+        institutionId: String(institutionId),
+        userId: actor.userId,
+        email: actor.email,
+        metadata: {
+          slug: input.slug.toLowerCase(),
+          adminEmail: input.adminEmail,
+          demoRequestId: input.demoRequestId ?? null,
+        },
+      });
 
       return {
         institutionId: String(institution._id),

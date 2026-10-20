@@ -19,6 +19,7 @@
     "clean": "rimraf dist",
     "seed:auth": "tsx --env-file=.env src/seeds/run-auth-seed.ts",
     "seed:super-admin": "tsx --env-file=.env src/seeds/run-super-admin-seed.ts",
+    "seed:jnu-portal": "tsx --env-file=.env src/seeds/run-jnu-portal-seed.ts",
     "seed:students": "tsx --env-file=.env src/seeds/run-student-seed.ts",
     "seed:courses": "tsx --env-file=.env src/seeds/run-course-seed.ts",
     "seed:course-builder": "tsx --env-file=.env src/seeds/run-course-builder-seed.ts",

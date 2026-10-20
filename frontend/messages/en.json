@@ -120,6 +120,7 @@
       "footerCampusName": "SOE JNU Portal",
       "footerTagline": "Official academic portal for students, faculty, and institute administrators.",
       "footerLinksTitle": "Portal",
+      "footerPlatformLink": "About Learnova platform",
       "poweredBy": "Powered by {app}",
       "aboutPlatform": "About Learnova platform",
       "credit": {
@@ -568,7 +569,8 @@
       "loginButton": "Login",
       "signingIn": "Signing in…",
       "registeredMessage": "Institution registered. Sign in as Institution Admin to finish setup.",
-      "errorMessage": "Unable to sign in. Try again."
+      "errorMessage": "Unable to sign in. Try again.",
+      "campusSubtitle": "Official sign-in for {campus} — use credentials issued by your institute."
     },
     "changePassword": {
       "brand": "Learnova",
@@ -661,6 +663,7 @@
       "items": {
         "dashboard": "Dashboard",
         "institution": "Institution",
+        "campusPortal": "Campus portal",
         "departments": "Departments",
         "programs": "Programs",
         "academicYears": "Academic Years",

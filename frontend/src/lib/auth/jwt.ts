@@ -4,9 +4,9 @@
  * A lightweight presence cookie is set on the app origin so Next middleware can gate routes.
  */
 
-import type { ActiveRole, JwtPayload } from '@learnova/types';
+import type { JwtPayload } from '@learnova/types';
 import { AUTH } from '@learnova/constants';
-import { isActiveRole } from '@/lib/auth/role-routes';
+import { isActiveRole, type EdgeActiveRole } from '@/lib/auth/edge-role-routes';
 
 const ACCESS_TOKEN_KEY = 'learnova_access_token';
 const REFRESH_TOKEN_KEY = 'learnova_refresh_token';
@@ -40,7 +40,7 @@ export function syncRoleCookieFromHint(roleHint: string | null | undefined): voi
 }
 
 /** @deprecated Prefer syncRoleCookieFromHint from API login/refresh responses. */
-export function setRoleCookieFromRole(role: ActiveRole, maxAgeSeconds = cookieMaxAgeSeconds()): void {
+export function setRoleCookieFromRole(role: EdgeActiveRole, maxAgeSeconds = cookieMaxAgeSeconds()): void {
   if (typeof document === 'undefined') return;
   document.cookie = `${AUTH.ROLE_COOKIE_NAME}=${encodeURIComponent(role)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
 }
@@ -57,7 +57,7 @@ export function syncRoleCookieFromToken(token: string | null | undefined): void 
   }
   const payload = decodeJwtPayload(token);
   if (payload?.role && isActiveRole(payload.role)) {
-    setRoleCookieFromRole(payload.role);
+    setRoleCookieFromRole(payload.role as EdgeActiveRole);
     return;
   }
   clearRoleCookie();
@@ -73,7 +73,7 @@ export function hasSignedRoleCookie(): boolean {
   return value.split('.').length === 3;
 }
 
-export function syncRoleCookieFromUser(role: ActiveRole | string | null | undefined): void {
+export function syncRoleCookieFromUser(role: EdgeActiveRole | string | null | undefined): void {
   // Never downgrade a signed cookie to an unsigned role — middleware rejects unsigned cookies in production.
   if (hasSignedRoleCookie()) return;
   if (role && isActiveRole(role)) {

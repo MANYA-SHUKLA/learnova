@@ -24,12 +24,21 @@ export default async function CampusHomePage({ params }: CampusPageProps) {
   setRequestLocale(locale);
   const portal = await fetchPortal(slug);
   if (!portal) notFound();
+  const p = portal as {
+    name: string;
+    shortName: string;
+    portalSettings?: { portalSubtitle?: string | null; officialCredit?: string | null };
+  };
 
   return (
     <>
       <SiteHeader campusPortal />
       <CampusPortalPage portal={portal as never} campusSlug={slug} />
-      <SiteFooter campusPortal />
+      <SiteFooter
+        campusPortal
+        campusName={p.name}
+        campusTagline={p.portalSettings?.officialCredit ?? p.portalSettings?.portalSubtitle ?? undefined}
+      />
     </>
   );
 }
