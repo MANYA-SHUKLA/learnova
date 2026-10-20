@@ -129,12 +129,6 @@ export default function StudentDashboardPage() {
         }
         meta={
           <div className="flex flex-wrap items-center gap-2">
-            {academicSummary ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-caption font-medium text-primary">
-                <GraduationCap className="size-3.5" />
-                {academicSummary}
-              </span>
-            ) : null}
             {progress?.currentStreakDays ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-2.5 py-1 text-caption font-medium text-warning">
                 <Flame className="size-3.5" />
