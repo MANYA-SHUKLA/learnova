@@ -335,7 +335,8 @@
         "about": "About",
         "features": "Features",
         "contact": "Contact",
-        "institutionLogin": "Institution Login"
+        "institutionLogin": "Institution Login",
+        "superAdminLogin": "Super admin login"
       },
       "legalLinks": {
         "privacy": "Privacy",
@@ -705,7 +706,8 @@
       "signingIn": "Signing in…",
       "registeredMessage": "Institution registered. Sign in as Institution Admin to finish setup.",
       "errorMessage": "Unable to sign in. Try again.",
-      "campusSubtitle": "Official sign-in for {campus} — use credentials issued by your institute."
+      "campusSubtitle": "Official sign-in for {campus} — use credentials issued by your institute.",
+      "superAdminLogin": "Super admin login"
     },
     "changePassword": {
       "brand": "Learnova",

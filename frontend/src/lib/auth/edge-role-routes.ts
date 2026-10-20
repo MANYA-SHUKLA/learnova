@@ -42,7 +42,11 @@ export function requiredRoleForPath(pathWithoutLocale: string): EdgeActiveRole |
   if (normalized.startsWith(STUDENT_PREFIX)) {
     return 'student';
   }
-  if (normalized === `${SUPERADMIN_PREFIX}/sign-in` || normalized === '/superadmin/login') {
+  if (
+    normalized === '/superadmin/signin' ||
+    normalized === '/superadmin/login' ||
+    normalized === `${SUPERADMIN_PREFIX}/sign-in`
+  ) {
     return null;
   }
   if (normalized === SUPERADMIN_PREFIX || normalized.startsWith(`${SUPERADMIN_PREFIX}/`)) {

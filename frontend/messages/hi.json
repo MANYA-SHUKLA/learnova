@@ -336,7 +336,8 @@
         "about": "हमारे बारे में",
         "features": "सुविधाएं",
         "contact": "संपर्क करें",
-        "institutionLogin": "संस्थान लॉगिन"
+        "institutionLogin": "संस्थान लॉगिन",
+        "superAdminLogin": "सुपर एडमिन लॉगिन"
       },
       "legalLinks": {
         "privacy": "गोपनीयता",
@@ -706,7 +707,8 @@
       "signingIn": "साइन इन हो रहा है…",
       "registeredMessage": "संस्थान पंजीकृत। संस्थान सेटअप समाप्त करने के लिए साइन इन करें।",
       "errorMessage": "साइन इन करने में असमर्थ। फिर से प्रयास करें।",
-      "campusSubtitle": "{campus} के लिए आधिकारिक साइन इन — संस्थान द्वारा जारी पहुंच के साथ।"
+      "campusSubtitle": "{campus} के लिए आधिकारिक साइन इन — संस्थान द्वारा जारी पहुंच के साथ।",
+      "superAdminLogin": "सुपर एडमिन लॉगिन"
     },
     "registerInstitution": {
       "title": "अपना संस्थान पंजीकृत करें",

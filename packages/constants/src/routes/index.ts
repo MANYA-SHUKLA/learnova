@@ -187,11 +187,12 @@ export const APP_ROUTES = {
   VERIFY_CERTIFICATE: '/verify',
   CHANGE_PASSWORD: '/account/change-password',
   PLATFORM: '/platform',
-  /** Private platform ops — not linked from public marketing */
-  CONSOLE_SIGN_IN: '/console/sign-in',
+  /** Super-admin sign-in (direct URL; institutions use `/login` from footer) */
+  SUPERADMIN_SIGN_IN: '/superadmin/signin',
   CONSOLE: '/console',
-  /** @deprecated use CONSOLE_* — redirects remain for old bookmarks */
-  SUPERADMIN_LOGIN: '/console/sign-in',
+  /** @deprecated aliases — middleware redirects to SUPERADMIN_SIGN_IN */
+  CONSOLE_SIGN_IN: '/superadmin/signin',
+  SUPERADMIN_LOGIN: '/superadmin/signin',
   SUPERADMIN: '/console',
   SUPERADMIN_DASHBOARD: '/console',
   CAMPUS: '/campus',

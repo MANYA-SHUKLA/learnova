@@ -1,3 +1,4 @@
+import { APP_ROUTES } from '@learnova/constants';
 import createMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -43,9 +44,15 @@ const PROTECTED_PATH_PREFIXES = [
   '/superadmin',
 ] as const;
 
+/** Guest sign-in under protected prefixes (e.g. /superadmin/signin) */
+const PUBLIC_AUTH_ROUTES = [APP_ROUTES.SUPERADMIN_SIGN_IN] as const;
+
+const LEGACY_SUPERADMIN_SIGN_IN = ['/superadmin/login', '/console/sign-in'] as const;
+
 /** Auth-only routes (guest) */
 const AUTH_PATH_PREFIXES = [
   '/login',
+  APP_ROUTES.SUPERADMIN_SIGN_IN,
   '/register',
   '/register-institution',
   '/forgot-password',
@@ -68,6 +75,10 @@ function matchesPrefix(path: string, prefixes: readonly string[]): boolean {
   );
 }
 
+function isPublicAuthRoute(pathWithoutLocale: string): boolean {
+  return PUBLIC_AUTH_ROUTES.some((route) => pathWithoutLocale === route);
+}
+
 export default async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const pathWithoutLocale = stripLocale(pathname);
@@ -78,10 +89,16 @@ export default async function middleware(request: NextRequest) {
   const roleCookie = request.cookies.get(MIDDLEWARE_AUTH.ROLE_COOKIE_NAME)?.value ?? null;
   const activeRole = await parseRoleCookie(roleCookie);
 
+  if (LEGACY_SUPERADMIN_SIGN_IN.includes(pathWithoutLocale as (typeof LEGACY_SUPERADMIN_SIGN_IN)[number])) {
+    return NextResponse.redirect(
+      new URL(`/${locale}${APP_ROUTES.SUPERADMIN_SIGN_IN}`, request.url),
+    );
+  }
+
   const isProtected = matchesPrefix(pathWithoutLocale, PROTECTED_PATH_PREFIXES);
   const isAuthRoute = matchesPrefix(pathWithoutLocale, AUTH_PATH_PREFIXES);
 
-  if (isProtected && !isAuthenticated) {
+  if (isProtected && !isAuthenticated && !isPublicAuthRoute(pathWithoutLocale)) {
     const loginUrl = new URL(`/${locale}/login`, request.url);
     loginUrl.searchParams.set('next', pathWithoutLocale);
     return NextResponse.redirect(loginUrl);

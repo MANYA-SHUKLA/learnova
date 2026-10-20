@@ -22,7 +22,7 @@ export async function sendDemoRequestSuperAdminNotifyEmail(input: {
   message?: string | null;
   requestId: string;
 }): Promise<void> {
-  const consoleUrl = `${frontendBaseUrl()}/en/console/sign-in`;
+  const consoleUrl = `${frontendBaseUrl()}/en/superadmin/signin`;
   const subject = `[Learnova] New demo request — ${input.institutionName}`;
   const messageBlock = input.message
     ? mailParagraph(`<strong>Message:</strong> ${mailEscape(input.message)}`)

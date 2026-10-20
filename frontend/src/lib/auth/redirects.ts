@@ -25,11 +25,23 @@ export function dashboardPathForRole(role: ActiveRole | string | null | undefine
 /**
  * Institution admins without a completed profile go to /institution/setup.
  */
+function normalizeLoginNextPath(nextPath: string): string {
+  if (
+    nextPath === '/superadmin/login' ||
+    nextPath.startsWith('/superadmin/login?') ||
+    nextPath === '/console/sign-in' ||
+    nextPath.startsWith('/console/sign-in?')
+  ) {
+    return APP_ROUTES.SUPERADMIN_SIGN_IN;
+  }
+  return nextPath;
+}
+
 export async function resolvePostLoginPath(
   role: ActiveRole | string | null | undefined,
   nextPath?: string | null,
 ): Promise<string> {
-  if (nextPath) return nextPath;
+  if (nextPath) return normalizeLoginNextPath(nextPath);
 
   if (role === 'institution_admin') {
     try {
