@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { MarketingProductPreview } from '@/components/marketing/marketing-product-preview';
 import { PlatformDashboardPreview } from '@/components/marketing/platform-dashboard-preview';
 import { publicApi } from '@/features/public/services/public-api';
 import { ApiClientError } from '@/lib/api/client';
@@ -348,7 +349,7 @@ export function PlatformHomePage({
                 <p className="mt-6 text-sm leading-relaxed text-[#64748B] dark:text-[#94a3b8]">{heroTrust}</p>
               ) : null}
             </div>
-            <PlatformDashboardPreview className="w-full lg:max-w-none" />
+            <MarketingProductPreview className="w-full lg:max-w-none" />
           </div>
         </div>
       </section>

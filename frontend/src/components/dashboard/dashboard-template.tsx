@@ -200,23 +200,28 @@ export function DashboardCapacityMetric({
   percent = 100,
 }: {
   label: string;
-  value: number;
+  value: number | null | undefined;
   hint?: string;
   /** Visual fill; defaults to full bar for plan limits display */
   percent?: number;
 }) {
+  const hasValue = value != null && Number.isFinite(Number(value));
+  const displayValue = hasValue ? Number(value).toLocaleString() : '—';
+
   return (
     <div className="rounded-xl border border-border/60 bg-background/75 p-4 backdrop-blur-sm card-metric">
       <p className="text-meta">{label}</p>
       <p className="mt-2 font-display text-2xl font-semibold tabular-nums tracking-tight">
-        {value.toLocaleString()}
+        {displayValue}
       </p>
       {hint ? <p className="mt-0.5 text-caption">{hint}</p> : null}
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
         <motion.div
           className="h-full rounded-full bg-brand-gradient"
           initial={{ width: 0 }}
-          animate={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+          animate={{
+            width: `${hasValue ? Math.min(100, Math.max(0, percent)) : 0}%`,
+          }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>
