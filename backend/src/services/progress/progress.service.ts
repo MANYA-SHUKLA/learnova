@@ -556,7 +556,7 @@ export class ProgressService {
       );
     }
 
-    const [modules, lessons, resources, moduleProgress, lessonProgress] = await Promise.all([
+    let [modules, lessons, resources, moduleProgress, lessonProgress] = await Promise.all([
       CourseModuleModel.find({
         institutionId: new Types.ObjectId(institutionId),
         courseId: new Types.ObjectId(courseId),
@@ -584,6 +584,28 @@ export class ProgressService {
       progressRepository.listModuleProgress(institutionId, studentId, courseId),
       progressRepository.listLessonProgress(institutionId, studentId, courseId),
     ]);
+
+    if (modules.length === 0) {
+      await this.ensureMinimalPublishedCourseContent(institutionId, courseId);
+      [modules, lessons] = await Promise.all([
+        CourseModuleModel.find({
+          institutionId: new Types.ObjectId(institutionId),
+          courseId: new Types.ObjectId(courseId),
+          status: 'published',
+          deletedAt: null,
+        })
+          .sort({ orderIndex: 1 })
+          .exec(),
+        CourseLessonModel.find({
+          institutionId: new Types.ObjectId(institutionId),
+          courseId: new Types.ObjectId(courseId),
+          status: 'published',
+          deletedAt: null,
+        })
+          .sort({ orderIndex: 1 })
+          .exec(),
+      ]);
+    }
 
     const moduleProgressById = new Map(moduleProgress.map((m) => [String(m.moduleId), m]));
     const lessonProgressById = new Map(lessonProgress.map((l) => [String(l.lessonId), l]));

@@ -939,11 +939,77 @@ export class EnrollmentService {
     }));
   }
 
+  /**
+   * Ensures the logged-in student is enrolled in every published course for their
+   * current program + semester (e.g. B.Tech CSE Sem I). Idempotent — safe on every /me load.
+   */
+  private async ensureStudentSemesterEnrollments(actor: ActorContext, institutionId: string) {
+    const student = await StudentModel.findOne({
+      institutionId: new Types.ObjectId(institutionId),
+      email: actor.email.toLowerCase(),
+      deletedAt: null,
+    }).exec();
+    if (!student?.programId || !student.semesterId) return;
+
+    const courses = await CourseModel.find({
+      institutionId: new Types.ObjectId(institutionId),
+      deletedAt: null,
+      status: 'published',
+      programIds: student.programId,
+      semesterIds: student.semesterId,
+    })
+      .select('_id')
+      .lean()
+      .exec();
+
+    if (courses.length === 0) return;
+
+    let created = 0;
+    for (const course of courses) {
+      const courseId = String(course._id);
+      const existing = await enrollmentRepository.findActiveByStudentCourse(
+        institutionId,
+        String(student._id),
+        courseId,
+      );
+      if (existing) continue;
+
+      await enrollmentRepository.create({
+        institutionId: new Types.ObjectId(institutionId),
+        studentId: student._id,
+        courseId: course._id,
+        departmentId: student.departmentId,
+        programId: student.programId,
+        academicYearId: student.academicYearId ?? null,
+        semesterId: student.semesterId,
+        sectionId: student.sectionId,
+        status: 'active',
+        approvalStatus: 'approved',
+        completionStatus: 'not_started',
+        enrollmentNumber: generateEnrollmentNumber(),
+        enrollmentMethod: 'manual',
+        enrollmentDate: new Date(),
+        createdBy: new Types.ObjectId(actor.userId),
+      });
+      created += 1;
+    }
+
+    if (created > 0) {
+      logger.info(
+        { studentId: String(student._id), created, semesterId: String(student.semesterId) },
+        'Auto-enrolled student in semester catalog courses',
+      );
+    }
+  }
+
   async getOwnEnrollments(query: EnrollmentListQuery, actor: ActorContext) {
     requireTenant(actor);
     if (actor.role !== 'student') {
       throw new ForbiddenError('Only students can view own enrollments');
     }
+
+    const institutionId = requireTenant(actor);
+    await this.ensureStudentSemesterEnrollments(actor, institutionId);
 
     const resolved: EnrollmentListQuery = {
       page: query.page ?? 1,
