@@ -37,7 +37,13 @@ import {
   ValidationError,
 } from '../../utils/errors/index.js';
 import { syncSemesterCalendar } from './sync-semester-calendar.js';
-import { btechProgramListFilter, isOptionalSoeProgram } from './soe-org-filters.js';
+import {
+  btechProgramListFilter,
+  isExcludedSoeDegreeDepartment,
+  isOptionalSoeProgram,
+  soeDegreeDepartmentListFilter,
+} from './soe-org-filters.js';
+import { pruneMinimalOrgStructure } from './prune-minimal-org-structure.js';
 import { cache } from '../../cache/cache.service.js';
 import {
   academicCalendarRepository,

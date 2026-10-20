@@ -3,11 +3,13 @@ import {
   BatchModel,
   DepartmentModel,
   EnrollmentModel,
+  FacultyModel,
   ProgramModel,
   SectionModel,
   StudentModel,
   TimetableSlotModel,
 } from '../../models/index.js';
+import { SOE_EXCLUDED_DEGREE_DEPARTMENT_CODES } from './soe-org-filters.js';
 
 /** Demo / stack seed clutter — not used in SOE JNU minimal setup. */
 const DEMO_SECTION_NAME = /^Section [A-Z]$/;
@@ -65,7 +67,7 @@ const optionalProgramQuery = () => ({
 
 /** Degree-type rows on the “Degree programs” page — not used while B.Tech-only. */
 const EXCLUDED_DEGREE_DEPARTMENT_FILTER = {
-  $or: [{ code: /^PHD$/i }, { name: /^\s*ph\.?\s*d\.?\s*$/i }],
+  code: { $in: [...SOE_EXCLUDED_DEGREE_DEPARTMENT_CODES] },
 };
 
 const POSTGRAD_SLOT_SECTION_NAME = /^(M\.Tech|Ph\.D)\b/i;
@@ -77,17 +79,32 @@ async function softArchiveDepartment(institutionOid: Types.ObjectId, id: Types.O
   ).exec();
 }
 
-async function archivePhdDegreeDepartments(institutionOid: Types.ObjectId): Promise<void> {
-  const phdDepartments = await DepartmentModel.find({
+async function archiveExcludedDegreeDepartments(institutionOid: Types.ObjectId): Promise<void> {
+  const cseDept = await DepartmentModel.findOne({
     institutionId: institutionOid,
+    code: 'CSE',
     deletedAt: null,
-    ...EXCLUDED_DEGREE_DEPARTMENT_FILTER,
   })
     .select('_id')
     .lean()
     .exec();
 
-  for (const dept of phdDepartments) {
+  const excludedDepartments = await DepartmentModel.find({
+    institutionId: institutionOid,
+    deletedAt: null,
+    ...EXCLUDED_DEGREE_DEPARTMENT_FILTER,
+  })
+    .select('_id code')
+    .lean()
+    .exec();
+
+  for (const dept of excludedDepartments) {
+    if (cseDept && dept.code?.toUpperCase() === 'MATH') {
+      await FacultyModel.updateMany(
+        { institutionId: institutionOid, departmentId: dept._id, deletedAt: null },
+        { $set: { departmentId: cseDept._id } },
+      ).exec();
+    }
     const programs = await ProgramModel.find({
       institutionId: institutionOid,
       departmentId: dept._id,
@@ -138,7 +155,7 @@ async function removePostgraduateTimetableSlots(institutionOid: Types.ObjectId) 
 export async function pruneMinimalOrgStructure(institutionId: string): Promise<void> {
   const institutionOid = new Types.ObjectId(institutionId);
 
-  await archivePhdDegreeDepartments(institutionOid);
+  await archiveExcludedDegreeDepartments(institutionOid);
 
   const optionalPrograms = await ProgramModel.find({
     institutionId: institutionOid,
