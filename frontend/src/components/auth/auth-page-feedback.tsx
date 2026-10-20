@@ -1,6 +1,5 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
 import {
   createContext,
@@ -26,11 +25,6 @@ const ERROR_DISMISS_MS = 8000;
 
 export function AuthPageFeedbackProvider({ children }: { children: ReactNode }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const clear = useCallback(() => {
     setErrorMessage(null);
@@ -56,46 +50,48 @@ export function AuthPageFeedbackProvider({ children }: { children: ReactNode }) 
   return (
     <AuthPageFeedbackContext.Provider value={value}>
       {children}
-      {mounted ? createPortal(<AuthPageFeedbackToast />, document.body) : null}
+      <AuthPageFeedbackToastHost message={errorMessage} onDismiss={clear} />
     </AuthPageFeedbackContext.Provider>
   );
 }
 
-function AuthPageFeedbackToast() {
-  const ctx = useContext(AuthPageFeedbackContext);
-  const message = ctx?.errorMessage;
+/** Renders the toast only on the client after mount — avoids hydration mismatches. */
+function AuthPageFeedbackToastHost({
+  message,
+  onDismiss,
+}: {
+  message: string | null;
+  onDismiss: () => void;
+}) {
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <AnimatePresence>
-      {message ? (
-        <motion.div
-          key={message}
-          role="alert"
-          aria-live="assertive"
-          initial={{ opacity: 0, y: -12, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8, scale: 0.98 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className={cn(
-            'fixed z-[200] flex w-[min(calc(100vw-1.5rem),22rem)] items-start gap-2.5 rounded-xl border border-danger/40',
-            'bg-background px-3.5 py-3 shadow-soft-lg ring-1 ring-danger/15',
-            'right-3 top-3 sm:right-6 sm:top-5',
-          )}
-        >
-          <AlertCircle className="mt-0.5 size-5 shrink-0 text-danger" aria-hidden />
-          <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-danger">{message}</p>
-          <button
-            type="button"
-            className="shrink-0 text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-            onClick={() => {
-              ctx?.clear();
-            }}
-          >
-            Dismiss
-          </button>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !message) return null;
+
+  return createPortal(
+    <div
+      role="alert"
+      aria-live="assertive"
+      className={cn(
+        'fixed z-[200] flex w-[min(calc(100vw-1.5rem),22rem)] items-start gap-2.5 rounded-xl border border-danger/40',
+        'bg-background px-3.5 py-3 shadow-soft-lg ring-1 ring-danger/15',
+        'right-3 top-3 sm:right-6 sm:top-5',
+      )}
+    >
+      <AlertCircle className="mt-0.5 size-5 shrink-0 text-danger" aria-hidden />
+      <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-danger">{message}</p>
+      <button
+        type="button"
+        className="shrink-0 text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        onClick={onDismiss}
+      >
+        Dismiss
+      </button>
+    </div>,
+    document.body,
   );
 }
 
