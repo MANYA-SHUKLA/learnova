@@ -539,12 +539,6 @@ export class StudentService {
       patch.isActive = input.status === 'active';
     }
 
-    const resolvedProgramId =
-      input.programId !== undefined
-        ? input.programId
-        : existing.programId
-          ? String(existing.programId)
-          : null;
     const resolvedDuration = await this.resolveProgramDurationYears(
       institutionId,
       resolvedProgramId,
