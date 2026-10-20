@@ -282,26 +282,26 @@ export function PlatformHomePage({
         <div className={siteContainer('w-full')}>
           <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
             {[
-            { value: tPlatform('stat1Value'), label: tPlatform('stat1Label') },
-            { value: tPlatform('stat2Value'), label: tPlatform('stat2Label') },
-            { value: tPlatform('stat3Value'), label: tPlatform('stat3Label') },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className={cn(
-                'rounded-2xl border border-border/50 bg-card/60 px-6 py-5 text-left',
-                marketingCardHover,
-                'hover:scale-[1.02] motion-reduce:hover:scale-100',
-              )}
-            >
-              <div className={marketingCardInner}>
-                <p className="font-display text-3xl font-bold text-foreground transition-transform duration-500 group-hover:scale-105 motion-reduce:group-hover:scale-100">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+              { value: tPlatform('stat1Value'), label: tPlatform('stat1Label') },
+              { value: tPlatform('stat2Value'), label: tPlatform('stat2Label') },
+              { value: tPlatform('stat3Value'), label: tPlatform('stat3Label') },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className={cn(
+                  'rounded-2xl border border-border/50 bg-card/60 px-6 py-5 text-left',
+                  marketingCardHover,
+                  'hover:scale-[1.02] motion-reduce:hover:scale-100',
+                )}
+              >
+                <div className={marketingCardInner}>
+                  <p className="font-display text-3xl font-bold text-foreground transition-transform duration-500 group-hover:scale-105 motion-reduce:group-hover:scale-100">
+                    {stat.value}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         </div>
       </section>
