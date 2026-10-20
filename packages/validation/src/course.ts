@@ -65,7 +65,10 @@ export const courseListQuerySchema = z.object({
   facultyId: objectIdField.optional(),
   creditsMin: z.coerce.number().min(0).max(50).optional(),
   creditsMax: z.coerce.number().min(0).max(50).optional(),
-  includeDeleted: z.coerce.boolean().optional().default(false),
+  includeDeleted: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
   page: z.coerce.number().int().min(1).default(PAGINATION.DEFAULT_PAGE),
   limit: z.coerce
     .number()
@@ -204,7 +207,10 @@ export const courseExportQuerySchema = z.object({
   departmentId: objectIdField.optional(),
   programId: objectIdField.optional(),
   facultyId: objectIdField.optional(),
-  includeDeleted: z.coerce.boolean().optional().default(false),
+  includeDeleted: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
 });
 
 export const courseThumbnailUploadSchema = z.object({

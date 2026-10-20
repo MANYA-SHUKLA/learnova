@@ -41,6 +41,8 @@ import type { CourseStatus } from '@/features/course';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
+const TABLE_PAGE_SIZE = 50;
+
 const STATUS_FILTERS: (CourseStatus | 'all')[] = [
   'all',
   'draft',
@@ -55,15 +57,16 @@ export default function CourseListPage() {
   const tCommon = useTranslations('common');
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<CourseStatus | 'all'>('all');
+  const [status, setStatus] = useState<CourseStatus | 'all'>('published');
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
 
   const listFilters = useMemo(
     () => ({
       q: search || undefined,
       status: status === 'all' ? undefined : status,
-      /** Include soft-deleted rows for All + Archived so the full catalog (e.g. 125) is visible. */
-      includeDeleted: status === 'all' || status === 'archived',
+      /** Include soft-deleted rows for All + Archived so archived catalog rows are visible. */
+      ...(status === 'all' || status === 'archived' ? { includeDeleted: true as const } : {}),
       sortBy: 'createdAt',
       sortOrder: 'desc' as const,
     }),
@@ -89,6 +92,12 @@ export default function CourseListPage() {
   const rows = listQuery.data?.items ?? [];
   const catalogTotal = listQuery.isSuccess ? rows.length : (statsQuery.data?.total ?? 0);
   const activeCatalogTotal = statsQuery.data?.total ?? 0;
+  const tableTotalPages = Math.max(1, Math.ceil(rows.length / TABLE_PAGE_SIZE));
+  const tablePage = Math.min(page, tableTotalPages);
+  const pagedRows = useMemo(() => {
+    const start = (tablePage - 1) * TABLE_PAGE_SIZE;
+    return rows.slice(start, start + TABLE_PAGE_SIZE);
+  }, [rows, tablePage]);
 
   return (
     <PermissionGate permission={PERMISSIONS.COURSE_READ} enforce>
@@ -156,7 +165,9 @@ export default function CourseListPage() {
                       active: activeCatalogTotal,
                       archived: statsQuery.data?.archived ?? 0,
                     })
-                  : t('showingFiltered', { count: catalogTotal })
+                  : status === 'published'
+                    ? t('showingPublished', { count: catalogTotal })
+                    : t('showingFiltered', { count: catalogTotal })
                 : t('catalogDescription')}
             </CardDescription>
           </CardHeader>
@@ -169,9 +180,9 @@ export default function CourseListPage() {
             ) : (
               <DataTable
                 caption={t('catalog')}
-                className="[&_.card-static]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:max-h-[min(65vh,52rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10"
+                className="[&_.card-static>.overflow-x-auto]:max-h-[min(70vh,56rem)] [&_.card-static>.overflow-x-auto]:overflow-y-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10 [&_thead]:bg-muted/50"
                 loading={listQuery.isLoading}
-                data={rows}
+                data={pagedRows}
                 rowKey={(row) => row.id}
                 selectable
                 selectedIds={selected}
@@ -215,6 +226,8 @@ export default function CourseListPage() {
                         type="button"
                         onClick={() => {
                           setStatus(st);
+                          setPage(1);
+                          setSelected([]);
                         }}
                         className={cn(
                           'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
@@ -240,6 +253,7 @@ export default function CourseListPage() {
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             setSearch(q.trim());
+                            setPage(1);
                           }
                         }}
                       />
@@ -250,6 +264,7 @@ export default function CourseListPage() {
                       className="rounded-xl"
                       onClick={() => {
                         setSearch(q.trim());
+                        setPage(1);
                       }}
                     >
                       {tCommon('search')}
@@ -261,7 +276,9 @@ export default function CourseListPage() {
                       onClick={() => {
                         setQ('');
                         setSearch('');
-                        setStatus('all');
+                        setStatus('published');
+                        setPage(1);
+                        setSelected([]);
                       }}
                     >
                       {tCommon('clear')}
@@ -270,6 +287,27 @@ export default function CourseListPage() {
                 }
                 emptyTitle={t('emptyTitle')}
                 emptyDescription={t('emptyDescription')}
+                pagination={
+                  rows.length > TABLE_PAGE_SIZE
+                    ? {
+                        page: tablePage,
+                        totalPages: tableTotalPages,
+                        total: rows.length,
+                        hasNextPage: tablePage < tableTotalPages,
+                        hasPrevPage: tablePage > 1,
+                        onPageChange: setPage,
+                      }
+                    : rows.length > 0
+                      ? {
+                          page: 1,
+                          totalPages: 1,
+                          total: rows.length,
+                          hasNextPage: false,
+                          hasPrevPage: false,
+                          onPageChange: setPage,
+                        }
+                      : undefined
+                }
                 emptyAction={
                   <PermissionGate permission={PERMISSIONS.COURSE_MANAGE}>
                     <Button asChild className="rounded-xl">

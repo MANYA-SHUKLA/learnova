@@ -40,8 +40,8 @@ function toQuery(params: CourseListParams = {}): string {
   if (params.visibility) search.set('visibility', params.visibility);
   if (params.category) search.set('category', params.category);
   if (params.difficulty) search.set('difficulty', params.difficulty);
-  if (params.includeDeleted !== undefined) {
-    search.set('includeDeleted', String(params.includeDeleted));
+  if (params.includeDeleted) {
+    search.set('includeDeleted', 'true');
   }
   if (params.campusId) search.set('campusId', params.campusId);
   if (params.schoolId) search.set('schoolId', params.schoolId);
@@ -62,7 +62,7 @@ export const courseApi = {
     const { data, meta } = await apiClient.getWithMeta<{ items: Course[] }>(
       `${API_ROUTES.COURSES}${toQuery(params)}`,
     );
-    return { items: data.items, meta: meta ?? emptyMeta(params?.page, params?.limit) };
+    return { items: data?.items ?? [], meta: meta ?? emptyMeta(params?.page, params?.limit) };
   },
 
   stats: () => apiClient.get<CourseStats>(`${API_ROUTES.COURSES}/stats`),
