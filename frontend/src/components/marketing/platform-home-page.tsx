@@ -723,6 +723,7 @@ export function PlatformHomePage({
               </form>
             )}
             </div>
+            </div>
           </div>
         </div>
       </section>
