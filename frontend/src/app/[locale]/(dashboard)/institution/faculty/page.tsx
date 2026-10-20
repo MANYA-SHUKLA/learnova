@@ -469,28 +469,26 @@ export default function FacultyListPage() {
                 )}
                 mobileRow={(row) => (
                   <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-soft-sm">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-medium">{row.fullName}</p>
-                          <p className="text-xs text-muted-foreground">{row.email}</p>
-                        </div>
-                        <Badge variant="secondary">{formatFacultyStatus(row.status)}</Badge>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium">{row.fullName}</p>
+                        <p className="text-xs text-muted-foreground">{row.email}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {row.employeeId} · {formatDesignation(row.designation, row.customDesignation)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {labels.department(row.departmentId)}
-                        {row.programIds?.length
-                          ? ` · ${labels.programs(row.programIds)}`
-                          : ''}
-                      </p>
-                      <Button asChild size="sm" variant="outline" className="w-full rounded-xl">
-                        <Link href={`${APP_ROUTES.INSTITUTION_FACULTY}/${row.id}`}>
-                          Open profile
-                          <ArrowRight className="size-4" />
-                        </Link>
-                      </Button>
+                      <Badge variant="secondary">{formatFacultyStatus(row.status)}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {row.employeeId} · {formatDesignation(row.designation, row.customDesignation)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {labels.department(row.departmentId)}
+                      {row.programIds?.length ? ` · ${labels.programs(row.programIds)}` : ''}
+                    </p>
+                    <Button asChild size="sm" variant="outline" className="w-full rounded-xl">
+                      <Link href={`${APP_ROUTES.INSTITUTION_FACULTY}/${row.id}`}>
+                        Open profile
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
                   </div>
                 )}
               />
