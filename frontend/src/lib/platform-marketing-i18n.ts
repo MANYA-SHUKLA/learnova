@@ -20,7 +20,7 @@ export async function getPlatformMarketingI18nOverlay(
   const t = await getTranslations('marketing.platformHome');
 
   const faq: PlatformMarketingI18nOverlay['faq'] = [];
-  for (let i = 1; i <= 8; i += 1) {
+  for (let i = 1; i <= 5; i += 1) {
     const titleKey = `faq${i}Title` as Parameters<typeof t>[0];
     const bodyKey = `faq${i}Body` as Parameters<typeof t>[0];
     if (!t.has(titleKey) || !t.has(bodyKey)) break;

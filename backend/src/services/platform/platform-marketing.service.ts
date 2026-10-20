@@ -25,15 +25,15 @@ function defaultMarketing(): PlatformMarketingInput {
     ],
     pricingTitle: 'Pricing',
     pricingBody:
-      'Campus licensing is agreed after a demo — we scope modules (ERP, LMS, coding labs, examinations, analytics) to your size. There is no card checkout on this website; onboarding is human-led through the platform console.',
+      'We scope ERP, LMS, labs, and exams on a demo call, then send a campus quote by email once intake and modules are clear. Onboarding runs through the platform console with your academic or IT lead.',
     faq: [
       {
         title: 'How do we get started?',
         body: 'Submit the demo form on this page. We email you to schedule a call, walk through modules, then provision a campus URL and institution admin credentials when you are ready.',
       },
       {
-        title: 'Can anyone sign up on the open internet?',
-        body: 'No. Learnova is invite-only per campus. Institution admins create or import faculty and student records; the public marketing site is for discovery and demo requests only.',
+        title: 'Who creates logins for students and faculty?',
+        body: 'Your institute admin or academic office. They add users, assign roles, and reset passwords from the admin dashboard — the same discipline as issuing college email IDs.',
       },
       {
         title: 'Do you support our own campus URL and branding?',
@@ -44,8 +44,8 @@ function defaultMarketing(): PlatformMarketingInput {
         body: 'After the demo and scope alignment, initial provisioning is quick. Academic data entry (programs, sections, timetables) depends on your team; we start with admin access and a documented setup path.',
       },
       {
-        title: 'Is payment handled on this website?',
-        body: 'No. There is no Razorpay or self-serve checkout here. Commercial terms are discussed offline after we understand your modules and student volume.',
+        title: 'How does licensing work?',
+        body: 'We quote after a demo when we know your programs, modules, and rough headcount. The agreement is handled by email — this form only books the first conversation.',
       },
     ],
     footerNote: 'Learnova — built for institutional trust.',

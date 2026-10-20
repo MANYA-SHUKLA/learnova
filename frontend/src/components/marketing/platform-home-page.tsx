@@ -39,6 +39,21 @@ const marketingCardHover = cn(
 
 const marketingCardInner = 'relative z-[1]';
 
+const PLATFORM_FAQ_COUNT = 5;
+
+function platformFaqFromMessages(
+  tPlatform: ReturnType<typeof useTranslations<'marketing.platformHome'>>,
+) {
+  const items: { title: string; body: string }[] = [];
+  for (let i = 1; i <= PLATFORM_FAQ_COUNT; i += 1) {
+    const titleKey = `faq${i}Title` as Parameters<typeof tPlatform>[0];
+    const bodyKey = `faq${i}Body` as Parameters<typeof tPlatform>[0];
+    if (!tPlatform.has(titleKey) || !tPlatform.has(bodyKey)) continue;
+    items.push({ title: tPlatform(titleKey), body: tPlatform(bodyKey) });
+  }
+  return items;
+}
+
 const MODULE_ICONS: Record<string, LucideIcon> = {
   lms: BookOpen,
   erp: GraduationCap,
@@ -122,7 +137,8 @@ export function PlatformHomePage({
   const pricingTitle = marketingI18n?.pricingTitle ?? marketing.pricingTitle ?? tPlatform('pricingTitle');
   const pricingBody = marketingI18n?.pricingBody ?? marketing.pricingBody;
 
-  const faqItems = marketingI18n?.faq.length ? marketingI18n.faq : marketing.faq;
+  const messageFaqs = platformFaqFromMessages(tPlatform);
+  const faqItems = messageFaqs.length > 0 ? messageFaqs : marketing.faq;
 
   const outcomeKeys = ['outcome1', 'outcome2', 'outcome3', 'outcome4'] as const;
   const testimonialKeys = ['testimonial1', 'testimonial2', 'testimonial3', 'testimonial4'] as const;
