@@ -43,7 +43,6 @@ import {
   isOptionalSoeProgram,
   soeDegreeDepartmentListFilter,
 } from './soe-org-filters.js';
-import { pruneMinimalOrgStructure } from './prune-minimal-org-structure.js';
 import { cache } from '../../cache/cache.service.js';
 import {
   academicCalendarRepository,
@@ -470,6 +469,11 @@ export class InstitutionService {
   // Departments
   async createDepartment(input: CreateDepartmentInput, actor: ActorContext) {
     const institutionId = requireTenant(actor);
+    if (isExcludedSoeDegreeDepartment(input.code)) {
+      throw new ValidationError(
+        'Mathematics and Ph.D degree types are not used at SOE JNU. Use CSE and ECE only.',
+      );
+    }
     const schoolId = input.schoolId?.trim()
       ? input.schoolId
       : await this.ensureDefaultSchool(institutionId);
@@ -483,8 +487,20 @@ export class InstitutionService {
     );
   }
   listDepartments = async (query: OrgListQuery, actor: ActorContext) => {
-    if (actor.institutionId) await syncSemesterCalendar(actor.institutionId);
-    return this.listTenantResource(departmentRepository, actor, query);
+    if (actor.institutionId) {
+      await syncSemesterCalendar(actor.institutionId);
+      await pruneMinimalOrgStructure(actor.institutionId);
+    }
+    const institutionId = requireTenant(actor);
+    const result = await departmentRepository.list(
+      institutionId,
+      query,
+      soeDegreeDepartmentListFilter(),
+    );
+    return {
+      items: result.items.map((d) => toDto(d)),
+      meta: pageMeta(result.total, result.page, result.limit),
+    };
   };
   getDepartment = (id: string, actor: ActorContext) =>
     this.getTenantResource(departmentRepository, actor, id);
@@ -498,8 +514,15 @@ export class InstitutionService {
     );
   archiveDepartment = (id: string, actor: ActorContext) =>
     this.archiveTenantResource(departmentRepository, actor, id, 'department');
-  restoreDepartment = (id: string, actor: ActorContext) =>
-    this.restoreTenantResource(departmentRepository, actor, id, 'department');
+  restoreDepartment = async (id: string, actor: ActorContext) => {
+    const institutionId = requireTenant(actor);
+    const existing = await departmentRepository.findByIdIncludingDeleted(institutionId, id);
+    const code = String((existing as { code?: string } | null)?.code ?? '');
+    if (isExcludedSoeDegreeDepartment(code)) {
+      throw new ValidationError('Mathematics and Ph.D degree types are not used at SOE JNU.');
+    }
+    return this.restoreTenantResource(departmentRepository, actor, id, 'department');
+  };
 
   // Programs
   async createProgram(input: CreateProgramInput, actor: ActorContext) {

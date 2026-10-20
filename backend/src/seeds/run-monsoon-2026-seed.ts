@@ -122,9 +122,11 @@ async function main(): Promise<void> {
   const departmentSpecs = [
     { code: 'CSE', name: 'Computer Science' },
     { code: 'ECE', name: 'Electronics' },
-    { code: 'MATH', name: 'Mathematics' },
     ...(process.env.SEED_MONSOON_ALL_PROGRAMS === '1'
-      ? [{ code: 'PHD', name: 'Ph.D.' }]
+      ? [
+          { code: 'MATH', name: 'Mathematics' },
+          { code: 'PHD', name: 'Ph.D.' },
+        ]
       : []),
   ];
   for (const spec of departmentSpecs) {
@@ -260,7 +262,8 @@ async function main(): Promise<void> {
     facultyIndex += 1;
     const email =
       code === 'KR' ? FACULTY_LOGIN_EMAIL : `${code.toLowerCase().replace(/[^a-z0-9]+/g, '.')}@learnova.test`;
-    const deptId = departments.get(meta.department)!;
+    const deptKey = meta.department === 'MATH' ? 'CSE' : meta.department;
+    const deptId = departments.get(deptKey)!;
     const faculty = await FacultyModel.findOneAndUpdate(
       { institutionId: institutionOid, email },
       {

@@ -63,6 +63,7 @@ export default function DepartmentsPage() {
       updateMutation={useUpdateDepartmentMutation}
       archiveMutation={useArchiveDepartmentMutation}
       restoreMutation={useRestoreDepartmentMutation}
+      defaultStatusFilter="active"
       getEditValues={(row) => ({
         name: row.name,
         code: row.code,
