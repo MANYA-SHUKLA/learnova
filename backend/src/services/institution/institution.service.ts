@@ -487,10 +487,7 @@ export class InstitutionService {
     );
   }
   listDepartments = async (query: OrgListQuery, actor: ActorContext) => {
-    if (actor.institutionId) {
-      await syncSemesterCalendar(actor.institutionId);
-      await pruneMinimalOrgStructure(actor.institutionId);
-    }
+    if (actor.institutionId) await syncSemesterCalendar(actor.institutionId);
     const institutionId = requireTenant(actor);
     const result = await departmentRepository.list(
       institutionId,
