@@ -12,6 +12,7 @@ import {
   DepartmentModel,
   FacultyModel,
   ProgramModel,
+  SchoolModel,
   SectionModel,
   SemesterModel,
   StudentModel,
@@ -133,11 +134,19 @@ async function main(): Promise<void> {
       deletedAt: null,
     }).lean();
     if (!dept) {
-      const school = await DepartmentModel.findOne({ institutionId: institutionOid, deletedAt: null }).lean();
-      if (!school) throw new Error('No school/department — run seed:enrollment-stack');
+      const school =
+        (await SchoolModel.findOne({ institutionId: institutionOid, deletedAt: null }).lean()) ??
+        (await DepartmentModel.findOne({ institutionId: institutionOid, deletedAt: null })
+          .select('schoolId')
+          .lean());
+      const schoolId =
+        school && '_id' in school && !('schoolId' in school)
+          ? school._id
+          : (school as { schoolId?: Types.ObjectId })?.schoolId;
+      if (!schoolId) throw new Error('No school — run seed:enrollment-stack');
       const created = await DepartmentModel.create({
         institutionId: institutionOid,
-        schoolId: (school as { schoolId?: Types.ObjectId }).schoolId,
+        schoolId,
         name: spec.name,
         code: spec.code,
         status: 'active',
