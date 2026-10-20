@@ -228,7 +228,7 @@ export default function StudentProfilePage() {
                   Save when finished. ID, admission number, and login email stay unchanged.
                 </CardDescription>
               </CardHeader>
-            <CardContent className="space-y-4">
+              <CardContent className="space-y-4">
               {error ? <p className="text-sm text-danger">{error}</p> : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
@@ -348,7 +348,7 @@ export default function StudentProfilePage() {
                   Cancel
                 </Button>
               </div>
-            </CardContent>
+              </CardContent>
             </>
           )}
         </Card>
