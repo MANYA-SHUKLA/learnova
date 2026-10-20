@@ -146,6 +146,9 @@ export interface AssignmentSubmission {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  /** Populated for faculty/admin submission lists. */
+  studentFullName?: string | null;
+  studentRollNumber?: string | null;
 }
 
 export interface AssignmentRubricScore {

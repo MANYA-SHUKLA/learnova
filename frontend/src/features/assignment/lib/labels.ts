@@ -1,4 +1,9 @@
-import type { AssignmentStatus, AssignmentSubmissionStatus, AssignmentType } from '@learnova/types';
+import type {
+  AssignmentStatus,
+  AssignmentSubmission,
+  AssignmentSubmissionStatus,
+  AssignmentType,
+} from '@learnova/types';
 
 const STATUS_LABELS: Record<AssignmentStatus, string> = {
   draft: 'Draft',
@@ -48,4 +53,13 @@ export function formatDueDate(iso: string | null | undefined) {
   } catch {
     return iso;
   }
+}
+
+export function formatSubmissionStudentLabel(submission: AssignmentSubmission): string {
+  const name = submission.studentFullName?.trim();
+  if (name) {
+    const roll = submission.studentRollNumber?.trim();
+    return roll ? `${name} (${roll})` : name;
+  }
+  return submission.studentId;
 }

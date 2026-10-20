@@ -12,16 +12,18 @@ import {
   Skeleton,
 } from '@learnova/ui';
 import { useTranslations } from 'next-intl';
-import { use, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/shared/protected-route';
 import { EmptyState, ErrorState } from '@/features/institution';
 import {
   formatAssignmentType,
   formatDueDate,
+  formatSubmissionStatus,
   useAddCommentMutation,
   useAssignment,
   useAssignmentComments,
   useSaveDraftMutation,
+  useSubmissionList,
   useSubmitAssignmentMutation,
 } from '@/features/assignment';
 import { Link } from '@/lib/i18n/routing';
@@ -37,6 +39,13 @@ export default function StudentAssignmentDetailPage({
   const [comment, setComment] = useState('');
 
   const assignmentQuery = useAssignment(id);
+  const submissionsQuery = useSubmissionList({
+    assignmentId: id,
+    page: 1,
+    limit: 5,
+    sortBy: 'updatedAt',
+    sortOrder: 'desc',
+  });
   const commentsQuery = useAssignmentComments(id);
   const saveDraft = useSaveDraftMutation();
   const submit = useSubmitAssignmentMutation();
@@ -44,6 +53,20 @@ export default function StudentAssignmentDetailPage({
 
   const assignment = assignmentQuery.data;
   const comments = commentsQuery.data?.items ?? [];
+
+  const latestSubmission = useMemo(() => {
+    const items = submissionsQuery.data?.items ?? [];
+    if (items.length === 0) return null;
+    return items[0] ?? null;
+  }, [submissionsQuery.data?.items]);
+
+  const isLocked = latestSubmission?.status === 'graded';
+
+  useEffect(() => {
+    if (latestSubmission?.textSubmission != null) {
+      setText(latestSubmission.textSubmission);
+    }
+  }, [latestSubmission?.id, latestSubmission?.textSubmission]);
 
   return (
     <PermissionGate permission={PERMISSIONS.ASSIGNMENT_WRITE} enforce>
@@ -63,6 +86,9 @@ export default function StudentAssignmentDetailPage({
                   {assignment.title}
                 </h1>
                 <Badge variant="outline">{formatAssignmentType(assignment.assignmentType)}</Badge>
+                {latestSubmission ? (
+                  <Badge variant="secondary">{formatSubmissionStatus(latestSubmission.status)}</Badge>
+                ) : null}
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 {t('due')}: {formatDueDate(assignment.dueDate)} · {assignment.totalMarks}{' '}
@@ -89,44 +115,52 @@ export default function StudentAssignmentDetailPage({
             <Card className="rounded-2xl border-border/80">
               <CardHeader>
                 <CardTitle className="text-base">{t('submitTitle')}</CardTitle>
-                <CardDescription>{t('submitDescription')}</CardDescription>
+                <CardDescription>
+                  {isLocked ? t('submitLockedDescription') : t('submitDescription')}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <textarea
-                  className="min-h-[160px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="min-h-[160px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70"
                   rows={8}
                   value={text}
+                  readOnly={isLocked}
+                  disabled={isLocked}
                   onChange={(e) => { setText(e.target.value); }}
                   placeholder={t('textPlaceholder')}
                 />
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    disabled={saveDraft.isPending || !text.trim()}
-                    onClick={() =>
-                      void saveDraft.mutateAsync({
-                        assignmentId: id,
-                        submissionType: 'text',
-                        textSubmission: text,
-                      })
-                    }
-                  >
-                    {t('saveDraft')}
-                  </Button>
-                  <Button
-                    disabled={submit.isPending || !text.trim()}
-                    onClick={() =>
-                      void submit.mutateAsync({
-                        assignmentId: id,
-                        submissionType: 'text',
-                        textSubmission: text,
-                      })
-                    }
-                  >
-                    {t('submit')}
-                  </Button>
-                </div>
-                {submit.isSuccess ? (
+                {isLocked ? (
+                  <p className="text-sm text-muted-foreground">{t('submitLockedHint')}</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      disabled={saveDraft.isPending || !text.trim()}
+                      onClick={() =>
+                        void saveDraft.mutateAsync({
+                          assignmentId: id,
+                          submissionType: 'text',
+                          textSubmission: text,
+                        })
+                      }
+                    >
+                      {t('saveDraft')}
+                    </Button>
+                    <Button
+                      disabled={submit.isPending || !text.trim()}
+                      onClick={() =>
+                        void submit.mutateAsync({
+                          assignmentId: id,
+                          submissionType: 'text',
+                          textSubmission: text,
+                        })
+                      }
+                    >
+                      {t('submit')}
+                    </Button>
+                  </div>
+                )}
+                {submit.isSuccess && !isLocked ? (
                   <p className="text-sm text-primary">{t('submitSuccess')}</p>
                 ) : null}
               </CardContent>

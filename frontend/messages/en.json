@@ -2787,6 +2787,8 @@
         "noInstructions": "No instructions provided.",
         "submitTitle": "Your submission",
         "submitDescription": "Write your response, save a draft, or submit for grading.",
+        "submitLockedDescription": "Your work has been graded. You can view your submission but cannot change it.",
+        "submitLockedHint": "This assignment is closed for editing after grading.",
         "textPlaceholder": "Write your submission…",
         "saveDraft": "Save draft",
         "submit": "Submit",

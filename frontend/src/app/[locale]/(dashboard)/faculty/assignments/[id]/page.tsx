@@ -25,6 +25,7 @@ import {
   formatAssignmentType,
   formatDueDate,
   formatSubmissionStatus,
+  formatSubmissionStudentLabel,
   useArchiveAssignmentMutation,
   useAssignment,
   useCloseAssignmentMutation,
@@ -270,7 +271,7 @@ export default function FacultyAssignmentDetailPage({
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Badge variant="outline">{formatSubmissionStatus(sub.status)}</Badge>
                       <span className="text-xs text-muted-foreground">
-                        {t('studentId')}: {sub.studentId} · #{sub.attemptNumber}
+                        {formatSubmissionStudentLabel(sub)} · #{sub.attemptNumber}
                       </span>
                     </div>
                     {sub.textSubmission ? (

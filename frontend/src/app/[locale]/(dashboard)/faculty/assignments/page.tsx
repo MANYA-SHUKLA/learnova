@@ -27,6 +27,7 @@ import {
   formatAssignmentType,
   formatDueDate,
   formatSubmissionStatus,
+  formatSubmissionStudentLabel,
   GiveAssignmentForm,
   useAssignmentList,
   useDeleteAssignmentMutation,
@@ -176,7 +177,7 @@ export default function FacultyAssignmentsPage() {
             },
             {
               label: t('stats.submissionRate'),
-              value: dash ? `${Math.round(dash.submissionRate * 100)}%` : '—',
+              value: dash ? `${Math.round(dash.submissionRate)}%` : '—',
             },
           ].map((stat) => (
             <StatCard
@@ -341,7 +342,7 @@ export default function FacultyAssignmentsPage() {
                     <div className="flex items-center justify-between gap-2">
                       <Badge variant="outline">{formatSubmissionStatus(sub.status)}</Badge>
                       <span className="text-xs text-muted-foreground">
-                        {t('studentId')}: {sub.studentId} · #{sub.attemptNumber}
+                        {formatSubmissionStudentLabel(sub)} · #{sub.attemptNumber}
                       </span>
                     </div>
                     <Input

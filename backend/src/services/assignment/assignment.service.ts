@@ -161,6 +161,52 @@ export class AssignmentService {
     return resolveFacultySupervisedCourseObjectIds(institutionId, actor.email);
   }
 
+  private async enrichSubmissionDtos(
+    items: Array<{ studentId: Types.ObjectId; toObject?: () => Record<string, unknown>; _id: Types.ObjectId }>,
+  ): Promise<Record<string, unknown>[]> {
+    if (items.length === 0) return [];
+    const studentIds = [...new Set(items.map((item) => String(item.studentId)))];
+    const students = await StudentModel.find({ _id: { $in: studentIds.map(oid) } })
+      .select('fullName firstName lastName rollNumber')
+      .lean()
+      .exec();
+    const byId = new Map(
+      students.map((s) => [
+        String(s._id),
+        {
+          fullName:
+            (s.fullName as string | undefined)?.trim() ||
+            [s.firstName, s.lastName].filter(Boolean).join(' ').trim() ||
+            null,
+          rollNumber: (s.rollNumber as string | null | undefined) ?? null,
+        },
+      ]),
+    );
+    return items.map((doc) => {
+      const dto = toDto(doc);
+      const student = byId.get(String(doc.studentId));
+      return {
+        ...dto,
+        studentFullName: student?.fullName ?? null,
+        studentRollNumber: student?.rollNumber ?? null,
+      };
+    });
+  }
+
+  /** Blocks edits after faculty has finalized a grade (status graded). */
+  private async assertStudentCanEditSubmission(
+    assignmentId: string,
+    studentId: Types.ObjectId,
+  ): Promise<void> {
+    const latest = await assignmentRepository.findLatestSubmission(
+      assignmentId,
+      String(studentId),
+    );
+    if (latest?.status === 'graded') {
+      throw new ForbiddenError('This submission has been graded and can no longer be edited');
+    }
+  }
+
   private async countActiveEnrollmentsForCourse(
     institutionId: string,
     courseId: Types.ObjectId,
@@ -866,8 +912,12 @@ export class AssignmentService {
     }
 
     const result = await assignmentRepository.listSubmissions(filter, query);
+    const items =
+      actor.role === 'student'
+        ? result.items.map(toDto)
+        : await this.enrichSubmissionDtos(result.items);
     return {
-      items: result.items.map(toDto),
+      items,
       meta: pageMeta(result.total, result.page, result.limit),
     };
   }
@@ -910,6 +960,7 @@ export class AssignmentService {
       throw new ForbiddenError('Assignment is not open for submissions');
     }
     await this.assertEnrollment(institutionId, student._id, assignment.courseId);
+    await this.assertStudentCanEditSubmission(input.assignmentId, student._id);
 
     const existing = await assignmentRepository.findDraftSubmission(
       input.assignmentId,
@@ -971,6 +1022,7 @@ export class AssignmentService {
     );
     if (!assignment) throw new NotFoundError('Assignment not found');
     await this.assertEnrollment(institutionId, student._id, assignment.courseId);
+    await this.assertStudentCanEditSubmission(input.assignmentId, student._id);
 
     const window = evaluateSubmissionWindow({
       status: assignment.status,
