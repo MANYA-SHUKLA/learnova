@@ -21,9 +21,11 @@ export function MadeWithLoveFooter({ className }: MadeWithLoveFooterProps) {
       )}
     >
       <p className="inline-flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground sm:text-sm">
-        <span>{t('madeWith')}</span>
-        <Heart className="size-3.5 fill-danger text-danger" aria-hidden />
-        <span>
+        <span className="inline-flex items-center gap-1 whitespace-nowrap">
+          {t('madeWith')}
+          <Heart className="size-3.5 shrink-0 fill-danger text-danger" aria-hidden />
+        </span>
+        <span className="text-center">
           {t('by')}{' '}
           <a
             href="https://wa.me/918005586588"
