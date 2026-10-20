@@ -11,6 +11,7 @@ import {
   BatchModel,
   CourseModel,
   DepartmentModel,
+  EnrollmentModel,
   FacultyModel,
   ProgramModel,
   SchoolModel,
@@ -511,7 +512,7 @@ async function main(): Promise<void> {
       admissionDate: new Date('2026-07-01'),
     });
 
-    await StudentModel.findOneAndUpdate(
+    const gunjanStudent = await StudentModel.findOneAndUpdate(
       { institutionId: institutionOid, email: STUDENT_LOGIN_EMAIL, deletedAt: null },
       {
         $set: {
@@ -541,6 +542,49 @@ async function main(): Promise<void> {
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
     await ensurePassword(STUDENT_LOGIN_EMAIL, 'Gunjan', 'Gera', 'student', institutionId);
+
+    const sem1Courses = await CourseModel.find({
+      institutionId: institutionOid,
+      semesterIds: sem1.id,
+      programIds: cseProgram.id,
+      status: 'published',
+      deletedAt: null,
+    })
+      .select('_id')
+      .lean();
+    const defaultFacultyId = facultyByCode.get('KR')?.id ?? null;
+
+    for (let index = 0; index < sem1Courses.length; index++) {
+      const courseId = sem1Courses[index]!._id;
+      await EnrollmentModel.findOneAndUpdate(
+        {
+          institutionId: institutionOid,
+          studentId: gunjanStudent._id,
+          courseId,
+          deletedAt: null,
+        },
+        {
+          $set: {
+            departmentId: cseDepartmentId,
+            programId: cseProgram.id,
+            academicYearId: year._id,
+            semesterId: sem1.id,
+            sectionId: cseSem1Section,
+            facultyId: defaultFacultyId,
+            status: 'active',
+            approvalStatus: 'approved',
+            completionStatus: 'not_started',
+            enrollmentMethod: 'manual',
+            enrollmentDate: new Date(),
+          },
+          $setOnInsert: {
+            enrollmentNumber: `ENR-M26-${String(index + 1).padStart(3, '0')}`,
+          },
+        },
+        { upsert: true, setDefaultsOnInsert: true },
+      );
+    }
+    logger.info({ enrollments: sem1Courses.length }, 'Demo student Sem I enrollments ensured');
   }
 
   // Odd Monsoon term active; archive M.Tech/Ph.D clutter when seeding B.Tech-only.

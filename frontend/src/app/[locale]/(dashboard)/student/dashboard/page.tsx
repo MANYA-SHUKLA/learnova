@@ -204,8 +204,14 @@ export default function StudentDashboardPage() {
           />
           <StatCard
             label="Courses active"
-            value={progress?.coursesInProgress ?? '—'}
-            hint={`${progress?.lessonsCompleted ?? 0} lessons done`}
+            value={progress?.coursesEnrolled ?? progress?.coursesInProgress ?? '—'}
+            hint={
+              progress != null &&
+              progress.coursesEnrolled > 0 &&
+              progress.coursesInProgress > 0
+                ? `${progress.coursesInProgress} in progress · ${progress.lessonsCompleted} lessons done`
+                : `${progress?.lessonsCompleted ?? 0} lessons done`
+            }
             icon={BookOpen}
             accent="primary"
             loading={progressDash.isLoading}

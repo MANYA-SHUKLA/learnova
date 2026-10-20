@@ -615,9 +615,9 @@ export class ProgressRepository {
 
     const continueLearning = await CourseProgressModel.find({
       ...match,
-      status: { $in: ['in_progress', 'paused'] },
+      status: { $in: ['in_progress', 'paused', 'not_started'] },
     })
-      .sort({ lastAccessedAt: -1 })
+      .sort({ lastAccessedAt: -1, updatedAt: -1 })
       .limit(5)
       .exec();
 

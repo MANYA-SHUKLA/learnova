@@ -157,6 +157,7 @@ export interface LearningSession {
 }
 
 export interface StudentProgressDashboard {
+  coursesEnrolled: number;
   coursesInProgress: number;
   completedCourses: number;
   hoursLearned: number;

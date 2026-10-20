@@ -13,6 +13,7 @@ import type {
   NoteListQuery,
   ActivityListQuery,
 } from '@learnova/validation';
+import { ASSESSMENT_ENROLLMENT_STATUSES } from '@learnova/constants';
 import { eventBus } from '../../events/index.js';
 import { EnrollmentModel } from '../../models/enrollment.model.js';
 import { StudentModel } from '../../models/student.model.js';
@@ -525,6 +526,7 @@ export class ProgressService {
   async listMine(query: ProgressListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const studentId = await this.resolveStudentId(actor, institutionId, query.studentId);
+    await this.syncEnrollmentCourseProgress(institutionId, studentId);
     await this.syncLabProgressForStudent(institutionId, studentId);
     const result = await progressRepository.listCourseProgress(institutionId, studentId, query);
     return {
@@ -1390,6 +1392,29 @@ export class ProgressService {
     });
   }
 
+  /** Create not_started course progress rows for active enrollments (LMS tracks progress separately). */
+  private async syncEnrollmentCourseProgress(institutionId: string, studentId: string) {
+    const enrollments = await EnrollmentModel.find({
+      institutionId: new Types.ObjectId(institutionId),
+      studentId: new Types.ObjectId(studentId),
+      deletedAt: null,
+      status: { $in: [...ASSESSMENT_ENROLLMENT_STATUSES] },
+    })
+      .select('_id courseId')
+      .lean()
+      .exec();
+
+    for (const enrollment of enrollments) {
+      if (!enrollment.courseId) continue;
+      await this.ensureCourseProgress(
+        institutionId,
+        studentId,
+        String(enrollment.courseId),
+        String(enrollment._id),
+      );
+    }
+  }
+
   private async syncLabProgressForStudent(institutionId: string, studentId: string) {
     const progressRows = await LabProgressModel.find({
       institutionId,
@@ -1665,11 +1690,18 @@ export class ProgressService {
   async studentDashboard(actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const studentId = await this.resolveStudentId(actor, institutionId);
+    await this.syncEnrollmentCourseProgress(institutionId, studentId);
     await this.syncLabProgressForStudent(institutionId, studentId);
     const counts = await progressRepository.getStudentDashboardCounts(
       institutionId,
       studentId,
     );
+    const coursesEnrolled = await EnrollmentModel.countDocuments({
+      institutionId: new Types.ObjectId(institutionId),
+      studentId: new Types.ObjectId(studentId),
+      deletedAt: null,
+      status: { $in: [...ASSESSMENT_ENROLLMENT_STATUSES] },
+    }).exec();
 
     const courseIds = counts.continueLearning.map((c) => c.courseId);
     const courses = await CourseModel.find({
@@ -1710,6 +1742,7 @@ export class ProgressService {
     }
 
     return {
+      coursesEnrolled,
       coursesInProgress: counts.coursesInProgress,
       completedCourses: counts.completedCourses,
       hoursLearned: counts.hoursLearned,
