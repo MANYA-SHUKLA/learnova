@@ -175,17 +175,22 @@ export function PlatformHomePage({
   const highlightFeatures =
     marketingI18n.highlights.length > 0 ? marketingI18n.highlights : marketing.features;
 
+  const buyerKeys = ([1, 2, 3, 4, 5, 6] as const).filter((i) =>
+    tPlatform.has(`buyer${i}` as Parameters<typeof tPlatform>[0]),
+  );
+
   const pricingTitle = marketingI18n.pricingTitle ?? marketing.pricingTitle ?? tPlatform('pricingTitle');
-  const pricingBody = marketingI18n.pricingBody ?? marketing.pricingBody;
+  const pricingBody =
+    marketingI18n.pricingBody ??
+    marketing.pricingBody ??
+    (tPlatform.has('pricingBody') ? tPlatform('pricingBody') : '');
+  const pricingIncludeKeys = buyerKeys.slice(0, 4);
 
   const messageFaqs = platformFaqFromMessages(tPlatform);
   const faqItems = messageFaqs.length > 0 ? messageFaqs : marketing.faq;
 
   const outcomeKeys = ['outcome1', 'outcome2', 'outcome3', 'outcome4'] as const;
   const testimonialKeys = ['testimonial1', 'testimonial2', 'testimonial3', 'testimonial4'] as const;
-  const buyerKeys = ([1, 2, 3, 4, 5, 6] as const).filter((i) =>
-    tPlatform.has(`buyer${i}` as Parameters<typeof tPlatform>[0]),
-  );
 
   return (
     <main className="overflow-x-clip font-body">
@@ -276,7 +281,7 @@ export function PlatformHomePage({
       <section className="border-b border-border/60 bg-muted/20 py-10 sm:py-12">
         <div className={siteContainer('w-full')}>
           <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
-          {[
+            {[
             { value: tPlatform('stat1Value'), label: tPlatform('stat1Label') },
             { value: tPlatform('stat2Value'), label: tPlatform('stat2Label') },
             { value: tPlatform('stat3Value'), label: tPlatform('stat3Label') },
@@ -375,34 +380,34 @@ export function PlatformHomePage({
               />
             </div>
             <div className={cn(sectionBodyCol, 'grid gap-5 sm:grid-cols-2 xl:grid-cols-2')}>
-          {moduleKeys.map((key) => {
-            const Icon = MODULE_ICONS[key] ?? BarChart3;
-            return (
-              <div
-                key={key}
-                className={cn(
-                  'rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
-                  marketingCardHover,
-                  'hover:scale-[1.02] motion-reduce:hover:scale-100',
-                )}
-              >
-                <div className={marketingCardInner}>
-                  <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-500 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-md group-hover:shadow-primary/20 motion-reduce:group-hover:scale-100">
-                    <Icon
-                      className="size-5 transition-transform duration-500 group-hover:-rotate-6 motion-reduce:group-hover:rotate-0"
-                      aria-hidden
-                    />
+              {moduleKeys.map((key) => {
+                const Icon = MODULE_ICONS[key] ?? BarChart3;
+                return (
+                  <div
+                    key={key}
+                    className={cn(
+                      'rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                      marketingCardHover,
+                      'hover:scale-[1.02] motion-reduce:hover:scale-100',
+                    )}
+                  >
+                    <div className={marketingCardInner}>
+                      <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-500 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-md group-hover:shadow-primary/20 motion-reduce:group-hover:scale-100">
+                        <Icon
+                          className="size-5 transition-transform duration-500 group-hover:-rotate-6 motion-reduce:group-hover:rotate-0"
+                          aria-hidden
+                        />
+                      </div>
+                      <h3 className="mt-4 font-display text-base font-semibold transition-colors duration-300 group-hover:text-primary">
+                        {t(`features.${key}.title`)}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {t(`features.${key}.description`)}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="mt-4 font-display text-base font-semibold transition-colors duration-300 group-hover:text-primary">
-                    {t(`features.${key}.title`)}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {t(`features.${key}.description`)}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -417,23 +422,23 @@ export function PlatformHomePage({
                 <SectionIntro title={tPlatform('highlightsTitle')} />
               </div>
               <div className={cn(sectionBodyCol, 'grid gap-6 md:grid-cols-2 xl:grid-cols-3')}>
-              {highlightFeatures.map((feature) => (
-                <div
-                  key={feature.title}
-                  className={cn(
-                    'rounded-2xl border border-border/60 bg-background p-8 shadow-soft-md',
-                    marketingCardHover,
-                    'hover:scale-[1.02] motion-reduce:hover:scale-100',
-                  )}
-                >
-                  <div className={marketingCardInner}>
-                    <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
-                      {feature.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
+                {highlightFeatures.map((feature) => (
+                  <div
+                    key={feature.title}
+                    className={cn(
+                      'rounded-2xl border border-border/60 bg-background p-8 shadow-soft-md',
+                      marketingCardHover,
+                      'hover:scale-[1.02] motion-reduce:hover:scale-100',
+                    )}
+                  >
+                    <div className={marketingCardInner}>
+                      <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
+                        {feature.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
               </div>
             </div>
           </div>
@@ -451,33 +456,33 @@ export function PlatformHomePage({
               />
             </div>
             <ol className={cn(sectionBodyCol, 'grid list-none gap-6')}>
-          {(['step1', 'step2', 'step3'] as const).map((step, i) => (
-            <li
-              key={step}
-              className={cn(
-                'rounded-2xl border border-border bg-card p-6 shadow-sm',
-                marketingCardHover,
-                'overflow-visible hover:scale-[1.03] motion-reduce:hover:scale-100',
-              )}
-            >
-              <div className={cn(marketingCardInner, 'flex gap-4')}>
-                <span
-                  className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary font-display text-lg font-bold text-primary-foreground shadow-md ring-4 ring-background transition-transform duration-500 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/25 motion-reduce:group-hover:scale-100"
-                  aria-hidden
+              {(['step1', 'step2', 'step3'] as const).map((step, i) => (
+                <li
+                  key={step}
+                  className={cn(
+                    'rounded-2xl border border-border bg-card p-6 shadow-sm',
+                    marketingCardHover,
+                    'overflow-visible hover:scale-[1.03] motion-reduce:hover:scale-100',
+                  )}
                 >
-                  {i + 1}
-                </span>
-                <div className="min-w-0 pt-0.5">
-                  <h3 className="font-semibold leading-snug transition-colors duration-300 group-hover:text-primary">
-                    {tPlatform(`${step}Title`)}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {tPlatform(`${step}Body`)}
-                  </p>
-                </div>
-              </div>
-            </li>
-          ))}
+                  <div className={cn(marketingCardInner, 'flex gap-4')}>
+                    <span
+                      className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary font-display text-lg font-bold text-primary-foreground shadow-md ring-4 ring-background transition-transform duration-500 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/25 motion-reduce:group-hover:scale-100"
+                      aria-hidden
+                    >
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0 pt-0.5">
+                      <h3 className="font-semibold leading-snug transition-colors duration-300 group-hover:text-primary">
+                        {tPlatform(`${step}Title`)}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {tPlatform(`${step}Body`)}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
             </ol>
           </div>
         </div>
@@ -490,25 +495,30 @@ export function PlatformHomePage({
               <SectionIntro title={tPlatform('outcomesTitle')} subtitle={tPlatform('outcomesSubtitle')} />
             </div>
             <div className={cn(sectionBodyCol, 'grid gap-5 sm:grid-cols-2')}>
-            {outcomeKeys.map((key) => (
-              <div
-                key={key}
-                className={cn(
-                  'rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
-                  marketingCardHover,
-                  'hover:scale-[1.02] motion-reduce:hover:scale-100',
-                )}
-              >
-                <div className={cn(marketingCardInner, 'border-l-2 border-primary/0 pl-0 transition-[border-color,padding] duration-500 group-hover:border-primary group-hover:pl-3 motion-reduce:group-hover:pl-0')}>
-                  <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
-                    {tPlatform(`${key}Title`)}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {tPlatform(`${key}Body`)}
-                  </p>
+              {outcomeKeys.map((key) => (
+                <div
+                  key={key}
+                  className={cn(
+                    'rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                    marketingCardHover,
+                    'hover:scale-[1.02] motion-reduce:hover:scale-100',
+                  )}
+                >
+                  <div
+                    className={cn(
+                      marketingCardInner,
+                      'border-l-2 border-primary/0 pl-0 transition-[border-color,padding] duration-500 group-hover:border-primary group-hover:pl-3 motion-reduce:group-hover:pl-0',
+                    )}
+                  >
+                    <h3 className="font-display text-lg font-semibold transition-colors duration-300 group-hover:text-primary">
+                      {tPlatform(`${key}Title`)}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {tPlatform(`${key}Body`)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
             </div>
           </div>
         </div>
@@ -524,78 +534,89 @@ export function PlatformHomePage({
               />
             </div>
             <div className={cn(sectionBodyCol, 'grid gap-6 sm:grid-cols-2')}>
-            {testimonialKeys.map((key) => (
-              <figure
-                key={key}
-                className={cn(
-                  'flex h-full flex-col rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
-                  marketingCardHover,
-                  'hover:scale-[1.02] hover:rotate-[0.35deg] motion-reduce:hover:scale-100 motion-reduce:hover:rotate-0',
-                )}
-              >
-                <div className={marketingCardInner}>
-                  <blockquote className="flex-1 text-sm leading-relaxed text-foreground">
-                    <span
-                      aria-hidden
-                      className="font-display text-3xl leading-none text-primary/30 transition-all duration-500 group-hover:text-primary/60 group-hover:scale-110 motion-reduce:group-hover:scale-100"
-                    >
-                      “
-                    </span>
-                    {tPlatform(`${key}Quote`)}
-                  </blockquote>
-                  <figcaption className="mt-5 border-t border-border/60 pt-4 transition-colors duration-300 group-hover:border-primary/30">
-                    <p className="font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
-                      {tPlatform(`${key}Name`)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{tPlatform(`${key}Role`)}</p>
-                  </figcaption>
-                </div>
-              </figure>
-            ))}
+              {testimonialKeys.map((key) => (
+                <figure
+                  key={key}
+                  className={cn(
+                    'flex h-full flex-col rounded-2xl border border-border/80 bg-card p-6 shadow-sm',
+                    marketingCardHover,
+                    'hover:scale-[1.02] hover:rotate-[0.35deg] motion-reduce:hover:scale-100 motion-reduce:hover:rotate-0',
+                  )}
+                >
+                  <div className={marketingCardInner}>
+                    <blockquote className="flex-1 text-sm leading-relaxed text-foreground">
+                      <span
+                        aria-hidden
+                        className="font-display text-3xl leading-none text-primary/30 transition-all duration-500 group-hover:text-primary/60 group-hover:scale-110 motion-reduce:group-hover:scale-100"
+                      >
+                        “
+                      </span>
+                      {tPlatform(`${key}Quote`)}
+                    </blockquote>
+                    <figcaption className="mt-5 border-t border-border/60 pt-4 transition-colors duration-300 group-hover:border-primary/30">
+                      <p className="font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
+                        {tPlatform(`${key}Name`)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{tPlatform(`${key}Role`)}</p>
+                    </figcaption>
+                  </div>
+                </figure>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Pricing — full-width left intro + right checklist (not a centered card) */}
       {pricingBody ? (
         <section id="pricing" className="scroll-mt-24 border-t border-border/60 bg-muted/20 py-20 sm:py-24">
           <div className={siteContainer('w-full')}>
-            <div
-              className={cn(
-                'relative grid overflow-hidden rounded-3xl border-2 border-primary/25 bg-card shadow-xl shadow-primary/10 ring-1 ring-primary/10 lg:grid-cols-2',
-              )}
-            >
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-primary/15 blur-3xl"
-              />
-              <div className="relative border-b border-border/60 p-8 sm:p-10 lg:border-b-0 lg:border-r">
-                <h2 className="font-display text-3xl font-bold tracking-tight">{pricingTitle}</h2>
-                <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">{pricingBody}</p>
-                <Button asChild size="lg" className={cn('mt-8', platformHeroPrimaryClass)}>
-                  <a href="#request-demo">{tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}</a>
-                </Button>
+            <div className={cn(sectionGrid, 'lg:items-start')}>
+              <div className={sectionIntroCol}>
+                <SectionIntro title={pricingTitle} subtitle={pricingBody}>
+                  <Button asChild size="lg" className={cn('mt-8', platformHeroPrimaryClass)}>
+                    <a href="#request-demo" className="group inline-flex items-center gap-2">
+                      {tPlatform.has('pricingCta') ? tPlatform('pricingCta') : heroCtaLabel}
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+                    </a>
+                  </Button>
+                </SectionIntro>
               </div>
-              {buyerKeys.length > 0 ? (
-                <div className="relative bg-muted/20 p-8 sm:p-10">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                    {tPlatform('pricingIncludesLabel')}
-                  </p>
-                  <ul className="mt-5 space-y-3">
-                    {buyerKeys.map((i) => {
-                      const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
-                      return (
-                        <li key={i} className="flex gap-3 text-sm">
-                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                          <span>
-                            <span className="font-medium text-foreground">{line.label}</span>
-                            {line.detail ? <span className="text-muted-foreground"> — {line.detail}</span> : null}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+              {pricingIncludeKeys.length > 0 ? (
+                <div className={sectionBodyCol}>
+                  <div
+                    className={cn(
+                      'relative overflow-hidden rounded-2xl border border-border/80 bg-card p-8 shadow-sm sm:p-10',
+                      marketingCardHover,
+                      'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
+                    )}
+                  >
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-primary/10 blur-3xl"
+                    />
+                    <div className={marketingCardInner}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                        {tPlatform('pricingIncludesLabel')}
+                      </p>
+                      <ul className="mt-6 space-y-4">
+                        {pricingIncludeKeys.map((i) => {
+                          const line = parseBuyerLine(tPlatform(`buyer${i}` as Parameters<typeof tPlatform>[0]));
+                          return (
+                            <li key={i} className="flex gap-3 border-b border-border/50 pb-4 last:border-0 last:pb-0">
+                              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
+                              <span className="text-base leading-snug">
+                                <span className="font-semibold text-foreground">{line.label}</span>
+                                {line.detail ? (
+                                  <span className="text-muted-foreground"> — {line.detail}</span>
+                                ) : null}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -611,22 +632,22 @@ export function PlatformHomePage({
               <SectionIntro title={tPlatform('faqTitle')} />
             </div>
             <div className={cn(sectionBodyCol, 'space-y-4')}>
-            {faqItems.map((item) => (
-              <details
-                key={item.title}
-                className={cn(
-                  'group rounded-2xl border border-border bg-card px-6 py-4 open:shadow-md open:shadow-primary/10',
-                  'transition-[transform,box-shadow,border-color] duration-300 ease-out',
-                  'hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-primary/10',
-                  'motion-reduce:hover:translate-y-0',
-                )}
-              >
-                <summary className="cursor-pointer list-none font-medium transition-colors duration-300 marker:content-none group-hover:text-primary [&::-webkit-details-marker]:hidden">
-                  {item.title}
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
-              </details>
-            ))}
+              {faqItems.map((item) => (
+                <details
+                  key={item.title}
+                  className={cn(
+                    'group rounded-2xl border border-border bg-card px-6 py-4 open:shadow-md open:shadow-primary/10',
+                    'transition-[transform,box-shadow,border-color] duration-300 ease-out',
+                    'hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-primary/10',
+                    'motion-reduce:hover:translate-y-0',
+                  )}
+                >
+                  <summary className="cursor-pointer list-none font-medium transition-colors duration-300 marker:content-none group-hover:text-primary [&::-webkit-details-marker]:hidden">
+                    {item.title}
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                </details>
+              ))}
             </div>
           </div>
         </div>
@@ -665,64 +686,65 @@ export function PlatformHomePage({
               <SectionIntro title={tPlatform('demoTitle')} subtitle={tPlatform('demoSubtitle')} />
             </div>
             <div className={sectionBodyCol}>
-          <div
-            className={cn(
-              'rounded-2xl border border-border bg-card p-8 shadow-soft-md sm:p-10',
-              marketingCardHover,
-              'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
-            )}
-          >
-            <div className={marketingCardInner}>
-            {submitted ? (
-              <p className="text-center font-medium text-primary">{tPlatform('demoThanks')}</p>
-            ) : (
-              <form
-                className="space-y-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void demoMutation.mutateAsync();
-                }}
+              <div
+                className={cn(
+                  'rounded-2xl border border-border bg-card p-8 shadow-soft-md sm:p-10',
+                  marketingCardHover,
+                  'overflow-visible hover:scale-[1.01] motion-reduce:hover:scale-100',
+                )}
               >
-                <Input
-                  placeholder={tPlatform('fieldInstitution')}
-                  value={form.institutionName}
-                  onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value }))}
-                  required
-                />
-                <Input
-                  placeholder={tPlatform('fieldContact')}
-                  value={form.contactName}
-                  onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
-                  required
-                />
-                <Input
-                  type="email"
-                  placeholder={tPlatform('fieldEmail')}
-                  value={form.contactEmail}
-                  onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
-                  required
-                />
-                <Input
-                  placeholder={tPlatform('fieldPhone')}
-                  value={form.phone}
-                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                  required
-                />
-                <textarea
-                  className="flex min-h-[96px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
-                  placeholder={tPlatform('fieldMessage')}
-                  value={form.message}
-                  onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                />
-                {demoMutation.error instanceof ApiClientError ? (
-                  <p className="text-sm text-destructive">{demoMutation.error.message}</p>
-                ) : null}
-                <Button type="submit" className={cn('w-full', ctaButtonClass)} disabled={demoMutation.isPending}>
-                  {demoMutation.isPending ? tPlatform('sending') : tPlatform('submitDemo')}
-                </Button>
-              </form>
-            )}
-            </div>
+                <div className={marketingCardInner}>
+                  {submitted ? (
+                    <p className="font-medium text-primary">{tPlatform('demoThanks')}</p>
+                  ) : (
+                    <form
+                      className="space-y-4"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        void demoMutation.mutateAsync();
+                      }}
+                    >
+                      <Input
+                        placeholder={tPlatform('fieldInstitution')}
+                        value={form.institutionName}
+                        onChange={(e) => setForm((f) => ({ ...f, institutionName: e.target.value }))}
+                        required
+                      />
+                      <Input
+                        placeholder={tPlatform('fieldContact')}
+                        value={form.contactName}
+                        onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
+                        required
+                      />
+                      <Input
+                        type="email"
+                        placeholder={tPlatform('fieldEmail')}
+                        value={form.contactEmail}
+                        onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
+                        required
+                      />
+                      <Input
+                        placeholder={tPlatform('fieldPhone')}
+                        value={form.phone}
+                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                        required
+                      />
+                      <textarea
+                        className="flex min-h-[96px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
+                        placeholder={tPlatform('fieldMessage')}
+                        value={form.message}
+                        onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                      />
+                      {demoMutation.error instanceof ApiClientError ? (
+                        <p className="text-sm text-destructive">{demoMutation.error.message}</p>
+                      ) : null}
+                      <Button type="submit" className={cn('w-full', ctaButtonClass)} disabled={demoMutation.isPending}>
+                        {demoMutation.isPending ? tPlatform('sending') : tPlatform('submitDemo')}
+                      </Button>
+                    </form>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
