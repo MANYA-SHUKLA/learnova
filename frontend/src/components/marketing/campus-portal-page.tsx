@@ -3,7 +3,7 @@
 import { Button } from '@learnova/ui';
 import { CalendarDays, GraduationCap, Shield, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
+import { InstitutionMark } from '@/components/institution/institution-mark';
 import { useEffect } from 'react';
 import type { PublicPortalPayload } from '@learnova/types';
 import { APP_ROUTES } from '@learnova/constants';
@@ -65,15 +65,21 @@ export function CampusPortalPage({
 
         <div className={siteContainer('relative pb-16 pt-16 sm:pb-24 sm:pt-20 lg:pt-24')}>
           <div className="mx-auto max-w-3xl text-center">
-            {portal?.logo ? (
-              <Image
-                src={portal.logo}
-                alt=""
-                width={72}
-                height={72}
-                className="mx-auto mb-4 size-[72px] rounded-xl object-contain"
+            <div className="mx-auto mb-4 flex justify-center">
+              <InstitutionMark
+                branding={
+                  portal
+                    ? {
+                        name: portal.name,
+                        shortName: portal.shortName ?? portal.name,
+                        logo: portal.logo,
+                        favicon: null,
+                      }
+                    : null
+                }
+                size="lg"
               />
-            ) : null}
+            </div>
             <p className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-primary">
               {eyebrow}
             </p>

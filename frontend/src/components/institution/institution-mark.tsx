@@ -1,6 +1,7 @@
 'use client';
 
 import type { InstitutionBranding } from '@learnova/types';
+import { LogoMark } from '@/components/marketing/logo-mark';
 import { cn } from '@/lib/utils';
 
 function isLikelyUrl(value: string): boolean {
@@ -22,7 +23,6 @@ export function InstitutionMark({ branding, size = 'md', className }: Institutio
   const dims = size === 'lg' ? 'size-14' : size === 'sm' ? 'size-7' : 'size-9';
   const text = size === 'lg' ? 'text-lg' : size === 'sm' ? 'text-[10px]' : 'text-xs';
   const logo = branding?.logo;
-  const shortName = branding?.shortName ?? 'LN';
 
   if (logo && isLikelyUrl(logo)) {
     return (
@@ -35,16 +35,5 @@ export function InstitutionMark({ branding, size = 'md', className }: Institutio
     );
   }
 
-  return (
-    <span
-      className={cn(
-        dims,
-        text,
-        'inline-flex shrink-0 items-center justify-center rounded-xl bg-brand-gradient font-bold text-white shadow-glow',
-        className,
-      )}
-    >
-      {shortName.slice(0, 2).toUpperCase()}
-    </span>
-  );
+  return <LogoMark className={cn(dims, text, 'shrink-0 rounded-xl', className)} />;
 }

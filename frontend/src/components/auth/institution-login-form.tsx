@@ -12,7 +12,6 @@ import { APP_ROUTES } from '@learnova/constants';
 import type { PublicPortalPayload } from '@learnova/types';
 import { LogIn, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -36,6 +35,7 @@ import {
 import { useAuthPageFeedback } from '@/components/auth/auth-page-feedback';
 import { resolvePostLoginPath, dashboardPathForRole } from '@/lib/auth/redirects';
 import { Link, useRouter } from '@/lib/i18n/routing';
+import { InstitutionMark } from '@/components/institution/institution-mark';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -122,15 +122,21 @@ function InstitutionLoginFormInner({
     <AuthCardShell brand="company" icon={LogIn} title={loginTitle}>
       <form onSubmit={onSubmit} noValidate>
         <CardContent className={authContentClassName}>
-          {portal?.logo ? (
-            <Image
-              src={portal.logo}
-              alt=""
-              width={56}
-              height={56}
-              className="mx-auto mb-2 size-14 rounded-lg object-contain"
+          <div className="mx-auto mb-2 flex justify-center">
+            <InstitutionMark
+              branding={
+                portal
+                  ? {
+                      name: portal.name,
+                      shortName: portal.shortName ?? portal.name,
+                      logo: portal.logo,
+                      favicon: null,
+                    }
+                  : null
+              }
+              size="lg"
             />
-          ) : null}
+          </div>
           {loginSubtitle ? (
             <p className="mb-4 text-center text-sm text-muted-foreground">{loginSubtitle}</p>
           ) : null}

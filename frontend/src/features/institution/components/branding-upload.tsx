@@ -4,6 +4,7 @@ import { Input } from '@learnova/ui';
 import { ImageIcon, LayoutTemplate, MonitorSmartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useId, useState } from 'react';
+import { LogoMark } from '@/components/marketing/logo-mark';
 import { cn } from '@/lib/utils';
 
 interface BrandingUploadProps {
@@ -27,15 +28,13 @@ function isLikelyUrl(value: string): boolean {
 
 function Mark({
   logo,
-  shortName,
   size = 'md',
 }: {
   logo?: string | null;
-  shortName?: string;
   size?: 'sm' | 'md' | 'lg';
 }) {
   const dims = size === 'lg' ? 'size-14' : size === 'sm' ? 'size-7' : 'size-10';
-  const text = size === 'lg' ? 'text-lg' : size === 'sm' ? 'text-[10px]' : 'text-xs';
+  const text = size === 'lg' ? 'text-sm' : size === 'sm' ? 'text-[9px]' : 'text-[11px]';
 
   if (logo && isLikelyUrl(logo)) {
     return (
@@ -48,17 +47,7 @@ function Mark({
     );
   }
 
-  return (
-    <span
-      className={cn(
-        dims,
-        text,
-        'inline-flex items-center justify-center rounded-xl bg-brand-gradient font-bold text-white shadow-glow',
-      )}
-    >
-      {(shortName ?? 'LN').slice(0, 2).toUpperCase()}
-    </span>
-  );
+  return <LogoMark className={cn(dims, text, 'rounded-xl')} />;
 }
 
 export function BrandingUpload({
@@ -116,7 +105,7 @@ export function BrandingUpload({
         <div className="grid min-h-[180px] sm:grid-cols-[140px_minmax(0,1fr)]">
           <aside className="hidden border-r border-border bg-sidebar p-3 sm:block">
             <div className="mb-4 flex items-center gap-2">
-              <Mark logo={logoOk ? logoDraft : null} shortName={shortName} size="sm" />
+              <Mark logo={logoOk ? logoDraft : null} size="sm" />
               <span className="truncate text-xs font-semibold">{shortName}</span>
             </div>
             <div className="space-y-1.5">
@@ -139,7 +128,7 @@ export function BrandingUpload({
           <div className="bg-hero p-4 sm:p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <Mark logo={logoOk ? logoDraft : null} shortName={shortName} size="md" />
+                <Mark logo={logoOk ? logoDraft : null} size="md" />
                 <div className="min-w-0">
                   <p className="truncate font-display text-sm font-semibold tracking-tight sm:text-base">
                     {institutionName}

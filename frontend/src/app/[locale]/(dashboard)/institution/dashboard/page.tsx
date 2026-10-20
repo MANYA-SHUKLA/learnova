@@ -52,6 +52,7 @@ import {
   DASHBOARD_CHART_TOOLTIP,
   dashboardFadeUp,
 } from '@/components/dashboard';
+import { InstitutionMark } from '@/components/institution/institution-mark';
 import {
   EmptyState,
   ErrorState,
@@ -301,18 +302,15 @@ export default function InstitutionDashboardPage() {
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
               <div className="min-w-0 space-y-4">
                 <div className="flex flex-wrap items-start gap-4">
-                  {institution.logo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={institution.logo}
-                      alt=""
-                      className="size-14 shrink-0 rounded-xl border border-border/70 bg-background object-contain p-1.5 shadow-soft-sm"
-                    />
-                  ) : (
-                    <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-brand-gradient text-lg font-bold text-white shadow-glow">
-                      {institution.shortName.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
+                  <InstitutionMark
+                    branding={{
+                      name: institution.name,
+                      shortName: institution.shortName,
+                      logo: institution.logo,
+                      favicon: institution.favicon,
+                    }}
+                    size="lg"
+                  />
                   <div className="min-w-0 flex-1">
                     <h2 className="truncate text-section-title">{institution.name}</h2>
                     <p className="mt-0.5 text-caption">
