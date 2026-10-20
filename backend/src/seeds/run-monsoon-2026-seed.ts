@@ -42,7 +42,7 @@ const activeSectionPlans =
 
 const ACADEMIC_YEAR_NAME = '2026-2027';
 
-const PROGRAM_SPECS = [
+const ALL_PROGRAM_SPECS = [
   { code: 'BT-CSE', name: 'B.Tech CSE', department: 'CSE', durationYears: 4, level: 'undergraduate' as const },
   { code: 'BT-ECE', name: 'B.Tech ECE', department: 'ECE', durationYears: 4, level: 'undergraduate' as const },
   { code: 'MT-CSE', name: 'M.Tech CSE', department: 'CSE', durationYears: 2, level: 'postgraduate' as const },
@@ -50,6 +50,11 @@ const PROGRAM_SPECS = [
   { code: 'MT-MST', name: 'M.Tech MST', department: 'ECE', durationYears: 2, level: 'postgraduate' as const },
   { code: 'PHD', name: 'Ph.D', department: 'CSE', durationYears: 4, level: 'doctoral' as const },
 ];
+
+const PROGRAM_SPECS =
+  process.env.SEED_MONSOON_ALL_PROGRAMS === '1'
+    ? ALL_PROGRAM_SPECS
+    : ALL_PROGRAM_SPECS.filter((p) => p.code.startsWith('BT-'));
 
 function courseCodeFromKey(key: string): string {
   const base = key.replace(/\s*\(.*\)$/, '').replace(/\s*—.*$/, '').trim();
@@ -110,12 +115,15 @@ async function main(): Promise<void> {
   await seedInstitutionAdminUser(institutionId);
 
   const departments = new Map<string, Types.ObjectId>();
-  for (const spec of [
+  const departmentSpecs = [
     { code: 'CSE', name: 'Computer Science' },
     { code: 'ECE', name: 'Electronics' },
     { code: 'MATH', name: 'Mathematics' },
-    { code: 'PHD', name: 'Ph.D.' },
-  ]) {
+    ...(process.env.SEED_MONSOON_ALL_PROGRAMS === '1'
+      ? [{ code: 'PHD', name: 'Ph.D.' }]
+      : []),
+  ];
+  for (const spec of departmentSpecs) {
     let dept = await DepartmentModel.findOne({
       institutionId: institutionOid,
       code: spec.code,

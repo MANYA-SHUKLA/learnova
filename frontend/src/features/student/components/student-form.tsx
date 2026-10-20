@@ -108,6 +108,23 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const onProgramChange = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      programId: value,
+      sectionId: '',
+      batchId: '',
+    }));
+  };
+
+  const onSemesterChange = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      semesterId: value,
+      sectionId: '',
+    }));
+  };
+
   const onSubmit = async () => {
     setError(null);
     const body: StudentCreateBody = {
@@ -241,7 +258,8 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
         <CardHeader>
           <CardTitle>{mode === 'create' ? 'Create student' : 'Edit student'}</CardTitle>
           <CardDescription>
-            Capture identity, academic, guardian, and contact details for the student.
+            Choose degree program and semester first — the section list only shows matching
+            classes (e.g. B.Tech CSE Sem V for 3rd-year CSE, not ECE).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -282,11 +300,30 @@ export function StudentForm({ mode, initial }: StudentFormProps) {
             <CampusSelect id="campusId" value={form.campusId} disabled={pending} onChange={(value) => { set('campusId', value); }} />
             <SchoolSelect id="schoolId" value={form.schoolId} disabled={pending} onChange={(value) => { set('schoolId', value); }} />
             <DepartmentSelect id="departmentId" value={form.departmentId} disabled={pending} onChange={(value) => { set('departmentId', value); }} />
-            <ProgramSelect id="programId" value={form.programId} disabled={pending} onChange={(value) => { set('programId', value); }} />
+            <ProgramSelect
+              id="programId"
+              btechOnly
+              value={form.programId}
+              disabled={pending}
+              onChange={onProgramChange}
+            />
             <AcademicYearSelect id="academicYearId" value={form.academicYearId} disabled={pending} onChange={(value) => { set('academicYearId', value); }} />
-            <SemesterSelect id="semesterId" value={form.semesterId} disabled={pending} onChange={(value) => { set('semesterId', value); }} />
-            <SectionSelect id="sectionId" value={form.sectionId} disabled={pending} onChange={(value) => { set('sectionId', value); }} />
-            <BatchSelect id="batchId" value={form.batchId} disabled={pending} onChange={(value) => { set('batchId', value); }} />
+            <SemesterSelect id="semesterId" value={form.semesterId} disabled={pending} onChange={onSemesterChange} />
+            <SectionSelect
+              id="sectionId"
+              value={form.sectionId}
+              programId={form.programId}
+              semesterId={form.semesterId}
+              disabled={pending}
+              onChange={(value) => { set('sectionId', value); }}
+            />
+            <BatchSelect
+              id="batchId"
+              value={form.batchId}
+              programId={form.programId}
+              disabled={pending}
+              onChange={(value) => { set('batchId', value); }}
+            />
             {field('admissionDate', 'Admission date', { type: 'date' })}
             {field('expectedGraduationDate', 'Expected graduation date', { type: 'date' })}
             {field('programDuration', 'Program duration (years)', { type: 'number' })}

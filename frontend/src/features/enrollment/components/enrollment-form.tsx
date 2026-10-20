@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@learnova/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AcademicYearSelect,
   CourseSelect,
@@ -33,6 +33,7 @@ import {
   type EnrollmentCreateBody,
   type EnrollmentMethod,
 } from '@/features/enrollment';
+import { useStudent } from '@/features/student';
 import { useFormDraft } from '@/hooks/use-form-draft';
 import { ApiClientError } from '@/lib/api/client';
 import { useRouter } from '@/lib/i18n/routing';
@@ -80,6 +81,36 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
 
   const set = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const { data: selectedStudent } = useStudent(form.studentId, Boolean(form.studentId.trim()));
+
+  useEffect(() => {
+    if (!selectedStudent) return;
+    setForm((prev) => ({
+      ...prev,
+      departmentId: selectedStudent.departmentId ?? prev.departmentId,
+      programId: selectedStudent.programId ?? prev.programId,
+      academicYearId: selectedStudent.academicYearId ?? prev.academicYearId,
+      semesterId: selectedStudent.semesterId ?? prev.semesterId,
+      sectionId: selectedStudent.sectionId ?? prev.sectionId,
+    }));
+  }, [selectedStudent?.id, selectedStudent, setForm]);
+
+  const onEnrollmentProgramChange = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      programId: value,
+      sectionId: '',
+    }));
+  };
+
+  const onEnrollmentSemesterChange = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      semesterId: value,
+      sectionId: '',
+    }));
   };
 
   const canProceed =
@@ -174,9 +205,10 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
               />
               <ProgramSelect
                 id="programId"
+                btechOnly
                 value={form.programId}
                 disabled={pending}
-                onChange={(value) => { set('programId', value); }}
+                onChange={onEnrollmentProgramChange}
               />
               <AcademicYearSelect
                 id="academicYearId"
@@ -188,11 +220,13 @@ export function EnrollmentForm(_props: EnrollmentFormProps) {
                 id="semesterId"
                 value={form.semesterId}
                 disabled={pending}
-                onChange={(value) => { set('semesterId', value); }}
+                onChange={onEnrollmentSemesterChange}
               />
               <SectionSelect
                 id="sectionId"
                 value={form.sectionId}
+                programId={form.programId}
+                semesterId={form.semesterId}
                 disabled={pending}
                 onChange={(value) => { set('sectionId', value); }}
               />

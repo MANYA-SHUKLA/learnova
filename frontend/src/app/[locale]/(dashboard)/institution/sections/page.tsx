@@ -23,7 +23,9 @@ export default function SectionsPage() {
   const { data: semestersData } = useSemesters({ limit: 100 });
 
   const programOptions =
-    programsData?.items.map((p) => ({ value: p.id, label: `${p.name} (${p.code})` })) ?? [];
+    programsData?.items
+      .filter((p) => p.code.startsWith('BT-') && p.status === 'active')
+      .map((p) => ({ value: p.id, label: `${p.name} (${p.code})` })) ?? [];
   const activeSemesters =
     semestersData?.items.filter((s) => s.status === 'active' && s.deletedAt == null) ?? [];
   const semesterOptions =

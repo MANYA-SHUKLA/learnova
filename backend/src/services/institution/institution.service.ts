@@ -504,8 +504,10 @@ export class InstitutionService {
       'program.created',
     );
   }
-  listPrograms = (query: OrgListQuery, actor: ActorContext) =>
-    this.listTenantResource(programRepository, actor, query);
+  listPrograms = async (query: OrgListQuery, actor: ActorContext) => {
+    if (actor.institutionId) await syncSemesterCalendar(actor.institutionId);
+    return this.listTenantResource(programRepository, actor, query);
+  };
   getProgram = (id: string, actor: ActorContext) =>
     this.getTenantResource(programRepository, actor, id);
   updateProgram = (id: string, input: UpdateProgramInput, actor: ActorContext) =>

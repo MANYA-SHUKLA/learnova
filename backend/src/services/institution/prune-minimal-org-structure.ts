@@ -44,8 +44,20 @@ async function sectionIsUnused(
   return students === 0 && enrollments === 0;
 }
 
+async function softArchiveProgram(institutionOid: Types.ObjectId, id: Types.ObjectId) {
+  await ProgramModel.updateOne(
+    { _id: id, institutionId: institutionOid },
+    { $set: { deletedAt: new Date(), status: 'archived' } },
+  ).exec();
+}
+
+/** M.Tech / Ph.D — SOE JNU uses B.Tech CSE & ECE only for now. */
+const optionalProgramQuery = () => ({
+  $or: [{ code: /^MT-/ as RegExp }, { code: 'PHD' }],
+});
+
 /**
- * Keeps org structure lean: drop unused optional-program sections, demo rows, and empty batches.
+ * Keeps org structure lean: archive M.Tech/Ph.D, demo sections, and empty demo batches.
  * Safe to run on every calendar sync (idempotent).
  */
 export async function pruneMinimalOrgStructure(institutionId: string): Promise<void> {
@@ -54,22 +66,53 @@ export async function pruneMinimalOrgStructure(institutionId: string): Promise<v
   const optionalPrograms = await ProgramModel.find({
     institutionId: institutionOid,
     deletedAt: null,
-    $or: [{ code: /^MT-/ }, { code: 'PHD' }],
+    status: { $ne: 'archived' },
+    ...optionalProgramQuery(),
   })
-    .select('_id')
+    .select('_id code')
     .lean()
     .exec();
 
   const optionalProgramIds = optionalPrograms.map((p) => p._id);
 
+  if (optionalProgramIds.length > 0) {
+    await SectionModel.updateMany(
+      {
+        institutionId: institutionOid,
+        programId: { $in: optionalProgramIds },
+        deletedAt: null,
+        status: { $ne: 'archived' },
+      },
+      { $set: { deletedAt: new Date(), status: 'archived' } },
+    ).exec();
+
+    await BatchModel.updateMany(
+      {
+        institutionId: institutionOid,
+        programId: { $in: optionalProgramIds },
+        deletedAt: null,
+        status: { $ne: 'archived' },
+      },
+      { $set: { deletedAt: new Date(), status: 'archived' } },
+    ).exec();
+
+    for (const program of optionalPrograms) {
+      const studentsOnProgram = await StudentModel.countDocuments({
+        institutionId: institutionOid,
+        programId: program._id,
+        deletedAt: null,
+      }).exec();
+      if (studentsOnProgram === 0) {
+        await softArchiveProgram(institutionOid, program._id);
+      }
+    }
+  }
+
   const sectionCandidates = await SectionModel.find({
     institutionId: institutionOid,
     deletedAt: null,
     status: { $ne: 'archived' },
-    $or: [
-      ...(optionalProgramIds.length > 0 ? [{ programId: { $in: optionalProgramIds } }] : []),
-      { name: DEMO_SECTION_NAME },
-    ],
+    name: DEMO_SECTION_NAME,
   })
     .select('_id')
     .lean()

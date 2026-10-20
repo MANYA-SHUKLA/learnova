@@ -249,16 +249,32 @@ export function DepartmentSelect({
 export function ProgramSelect({
   label = 'Program',
   listParams,
+  btechOnly = false,
   limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
   ...props
-}: EntitySelectProps & { value: string; onChange: (value: string) => void }) {
-  const query = usePrograms({ page: 1, limit, ...listParams });
-  const options = useListOptions(query.data?.items, (program) => ({
-    value: program.id,
-    label: `${program.code} — ${program.name}`,
-  }));
+}: EntitySelectProps & {
+  value: string;
+  onChange: (value: string) => void;
+  /** Hide M.Tech / Ph.D — B.Tech CSE & ECE only */
+  btechOnly?: boolean;
+}) {
+  const query = usePrograms({
+    page: 1,
+    limit: btechOnly ? 100 : limit,
+    status: btechOnly ? 'active' : undefined,
+    ...listParams,
+  });
+  const options = useMemo(() => {
+    const items = (query.data?.items ?? []).filter(
+      (program) => !btechOnly || program.code.startsWith('BT-'),
+    );
+    return items.map((program) => ({
+      value: program.id,
+      label: `${program.code} — ${program.name}`,
+    }));
+  }, [btechOnly, query.data?.items]);
 
   return (
     <SearchableSelect
@@ -401,12 +417,27 @@ export function SemesterSelect({
 export function BatchSelect({
   label = 'Batch',
   listParams,
+  programId,
   limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
+  disabled,
   ...props
-}: EntitySelectProps & { value: string; onChange: (value: string) => void }) {
-  const query = useBatches({ page: 1, limit, ...listParams });
+}: EntitySelectProps & {
+  value: string;
+  onChange: (value: string) => void;
+  programId?: string;
+}) {
+  const mergedParams = useMemo(
+    () => ({
+      ...listParams,
+      ...(programId?.trim()
+        ? { programId: programId.trim(), status: 'active' as const }
+        : {}),
+    }),
+    [listParams, programId],
+  );
+  const query = useBatches({ page: 1, limit, ...mergedParams });
   const options = useListOptions(query.data?.items, (batch) => ({
     value: batch.id,
     label: batch.name,
@@ -420,6 +451,7 @@ export function BatchSelect({
       onChange={onChange}
       options={options}
       loading={query.isLoading}
+      disabled={disabled}
       allowEmpty
       emptyLabel="No batch"
       placeholder="Select a batch"
@@ -431,12 +463,38 @@ export function BatchSelect({
 export function SectionSelect({
   label = 'Section',
   listParams,
+  programId,
+  semesterId,
   limit = DEFAULT_LIST_LIMIT,
   value,
   onChange,
+  disabled,
   ...props
-}: EntitySelectProps & { value: string; onChange: (value: string) => void }) {
-  const query = useSections({ page: 1, limit, ...listParams });
+}: EntitySelectProps & {
+  value: string;
+  onChange: (value: string) => void;
+  /** When set, only sections for this degree program (e.g. B.Tech CSE) are listed. */
+  programId?: string;
+  /** When set, only sections for this semester term are listed. */
+  semesterId?: string;
+}) {
+  const scoped = programId !== undefined || semesterId !== undefined;
+  const missingScope = scoped && (!programId?.trim() || !semesterId?.trim());
+
+  const mergedParams = useMemo(
+    () => ({
+      ...listParams,
+      ...(programId?.trim() ? { programId: programId.trim() } : {}),
+      ...(semesterId?.trim() ? { semesterId: semesterId.trim() } : {}),
+      ...(scoped ? { status: 'active' as const } : {}),
+    }),
+    [listParams, programId, semesterId, scoped],
+  );
+
+  const query = useSections(
+    { page: 1, limit: scoped ? 100 : limit, ...mergedParams },
+    !missingScope,
+  );
   const options = useListOptions(query.data?.items, (section) => ({
     value: section.id,
     label: section.name,
@@ -450,9 +508,12 @@ export function SectionSelect({
       onChange={onChange}
       options={options}
       loading={query.isLoading}
+      disabled={disabled || missingScope}
       allowEmpty
       emptyLabel="No section"
-      placeholder="Select a section"
+      placeholder={
+        missingScope ? 'Choose program and semester first' : 'Select a section'
+      }
       searchPlaceholder="Search sections…"
     />
   );
