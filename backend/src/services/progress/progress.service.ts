@@ -528,7 +528,7 @@ export class ProgressService {
   async listMine(query: ProgressListQuery, actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const studentId = await this.resolveStudentId(actor, institutionId, query.studentId);
-    await this.syncEnrollmentCourseProgress(institutionId, studentId);
+    await this.syncEnrollmentCourseProgress(institutionId, studentId, actor.userId);
     await this.syncLabProgressForStudent(institutionId, studentId);
     const result = await progressRepository.listCourseProgress(institutionId, studentId, query);
     return {
@@ -1482,11 +1482,15 @@ export class ProgressService {
   }
 
   /** Create not_started course progress rows for active enrollments (LMS tracks progress separately). */
-  private async syncEnrollmentCourseProgress(institutionId: string, studentId: string) {
+  private async syncEnrollmentCourseProgress(
+    institutionId: string,
+    studentId: string,
+    actorUserId: string,
+  ) {
     await enrollmentService.ensureStudentSemesterCatalogEnrollments(
       institutionId,
       studentId,
-      studentId,
+      actorUserId,
     );
 
     const enrollments = await EnrollmentModel.find({
@@ -1785,7 +1789,7 @@ export class ProgressService {
   async studentDashboard(actor: ActorContext) {
     const institutionId = requireTenant(actor);
     const studentId = await this.resolveStudentId(actor, institutionId);
-    await this.syncEnrollmentCourseProgress(institutionId, studentId);
+    await this.syncEnrollmentCourseProgress(institutionId, studentId, actor.userId);
     await this.syncLabProgressForStudent(institutionId, studentId);
     const counts = await progressRepository.getStudentDashboardCounts(
       institutionId,
