@@ -463,6 +463,30 @@ export class AuthService {
         return fail(INSTITUTION_SUSPENDED_MESSAGE, 'forbidden');
       }
     }
+
+    const campusSlug = input.campusSlug?.trim().toLowerCase();
+    if (campusSlug) {
+      const campusInst = await InstitutionModel.findOne({
+        slug: campusSlug,
+        deletedAt: null,
+      })
+        .select('_id status')
+        .lean()
+        .exec();
+      if (!campusInst || campusInst.status !== 'active') {
+        return fail('This campus portal is not available.', 'forbidden');
+      }
+      if (!activeUser.institutionId) {
+        return fail('This account is not registered for this campus.', 'forbidden');
+      }
+      if (String(campusInst._id) !== String(activeUser.institutionId)) {
+        return fail(
+          'This account belongs to a different campus. Use the sign-in link from your institution.',
+          'forbidden',
+        );
+      }
+    }
+
     const issued = await issueSessionTokens(activeUser, role, permissions, ctx);
 
     await loginAttemptRepository.create({
@@ -484,6 +508,7 @@ export class AuthService {
         sessionId: issued.session.id,
         role,
         institutionId: activeUser.institutionId ? String(activeUser.institutionId) : null,
+        campusSlug: campusSlug ?? null,
       },
     });
 

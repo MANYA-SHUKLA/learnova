@@ -34,7 +34,8 @@ export function useLoginMutation() {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
-    mutationFn: (body: { email: string; password: string }) => authApi.login(body),
+    mutationFn: (body: { email: string; password: string; campusSlug?: string }) =>
+      authApi.login(body),
     onSuccess: (data) => {
       storeAccessToken(data.accessToken);
       setAuth({

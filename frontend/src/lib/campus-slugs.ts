@@ -34,6 +34,11 @@ export function campusPublicPath(slug: string): string {
   return `/${slug.toLowerCase()}`;
 }
 
+/** Campus-scoped sign-in (one URL per institution). */
+export function campusLoginPath(slug: string): string {
+  return `/${slug.toLowerCase()}/login`;
+}
+
 export function campusGuidePath(slug: string): string {
   return `/${slug.toLowerCase()}/guide`;
 }

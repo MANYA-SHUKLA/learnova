@@ -29,6 +29,7 @@ import {
   type CampusListItem,
   type DemoRequestRow,
 } from '@/features/superadmin/services/superadmin-api';
+import { campusLoginPath } from '@/lib/campus-slugs';
 import { Link } from '@/lib/i18n/routing';
 import { cn } from '@/lib/utils';
 
@@ -502,8 +503,8 @@ function CampusListRow({
           {portalDisabled ? (
             <p className="text-sm text-muted-foreground">/{inst.slug}</p>
           ) : (
-            <Link href={`/${inst.slug}`} className="text-sm text-primary hover:underline">
-              /{inst.slug}
+            <Link href={campusLoginPath(inst.slug)} className="text-sm text-primary hover:underline">
+              /{inst.slug}/login
             </Link>
           )}
         </div>

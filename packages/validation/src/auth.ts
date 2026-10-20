@@ -37,6 +37,12 @@ export const registerInstitutionSchema = z.object({
 export const loginSchema = z.object({
   email: emailField,
   password: z.string().min(1).max(128),
+  campusSlug: z
+    .string()
+    .regex(REGEX.SLUG, 'Invalid campus slug')
+    .toLowerCase()
+    .trim()
+    .optional(),
 });
 
 export const forgotPasswordSchema = z.object({

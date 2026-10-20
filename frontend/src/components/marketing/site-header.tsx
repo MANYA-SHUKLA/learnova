@@ -48,10 +48,14 @@ function headerNavLabel(
 export function SiteHeader({
   campusPortal = false,
   platformMarketing = false,
+  campusSlug,
+  campusName,
 }: {
   campusPortal?: boolean;
   /** Learnova product site at / — no sign-in CTA */
   platformMarketing?: boolean;
+  campusSlug?: string;
+  campusName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('marketing.header');
@@ -67,11 +71,14 @@ export function SiteHeader({
       : campusPortal
         ? t('signIn')
         : t('institutionLogin');
+  const campusSignInHref = campusSlug ? `/${campusSlug.toLowerCase()}/login` : '/login';
   const primaryCtaHref = isAuthenticated
     ? dashboardHref
     : platformMarketing
       ? '/#request-demo'
-      : '/login';
+      : campusPortal
+        ? campusSignInHref
+        : '/login';
   const navLinks = campusPortal
     ? CAMPUS_NAV_LINKS
     : platformMarketing
@@ -99,11 +106,11 @@ export function SiteHeader({
         }
       >
         <Link
-          href="/"
+          href={campusPortal && campusSlug ? campusSignInHref : '/'}
           className="flex min-w-0 items-center gap-2.5 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl"
         >
-          <LogoMark />
-          {tCommon('appName')}
+          {campusPortal && campusSlug ? null : <LogoMark />}
+          {campusPortal && campusName ? campusName : tCommon('appName')}
         </Link>
 
         <nav

@@ -10,7 +10,7 @@ import type {
 const BASE = '/auth';
 
 export const authApi = {
-  login(body: { email: string; password: string }) {
+  login(body: { email: string; password: string; campusSlug?: string }) {
     return apiClient.post<AuthSessionResponse>(`${BASE}/login`, body, { auth: false });
   },
 

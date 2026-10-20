@@ -52,23 +52,30 @@ function FooterColumn({
   );
 }
 
-const CAMPUS_PORTAL_LINKS = [
-  { href: '/login', labelKey: 'companyLinks.institutionLogin' },
-  { href: '/contact', labelKey: 'companyLinks.contact' },
-  { href: '/', labelKey: 'campusPortal.footerPlatformLink' },
-] as const;
+function campusPortalLinks(campusSlug?: string) {
+  const loginHref = campusSlug ? `/${campusSlug.toLowerCase()}/login` : '/login';
+  return [
+    { href: loginHref, labelKey: 'companyLinks.institutionLogin' as const },
+    { href: '/contact', labelKey: 'companyLinks.contact' as const },
+    { href: '/', labelKey: 'campusPortal.footerPlatformLink' as const },
+  ] as const;
+}
 
 export async function SiteFooter({
   campusPortal = false,
   platformMarketing = false,
   campusName,
   campusTagline,
+  campusSlug,
+  supportEmail,
 }: {
   campusPortal?: boolean;
   platformMarketing?: boolean;
   /** Override footer branding on /{slug} campus pages */
   campusName?: string;
   campusTagline?: string;
+  campusSlug?: string;
+  supportEmail?: string | null;
 }) {
   const t = await getTranslations('marketing.footer');
   const tHeader = platformMarketing ? await getTranslations('marketing.header') : null;
@@ -104,21 +111,23 @@ export async function SiteFooter({
                 ? (campusTagline ?? tCampus?.('footerTagline'))
                 : t('tagline')}
             </p>
-            <p className="mt-2 text-sm text-white/75">
-              {t('contactLabel')}{' '}
-              <a
-                href="mailto:shuklamanya99@gmail.com"
-                className="font-medium text-white underline-offset-2 hover:underline"
-              >
-                shuklamanya99@gmail.com
-              </a>
-            </p>
+            {supportEmail?.includes('@') || !campusPortal ? (
+              <p className="mt-2 text-sm text-white/75">
+                {t('contactLabel')}{' '}
+                <a
+                  href={`mailto:${supportEmail?.includes('@') ? supportEmail : 'shuklamanya99@gmail.com'}`}
+                  className="font-medium text-white underline-offset-2 hover:underline"
+                >
+                  {supportEmail?.includes('@') ? supportEmail : 'shuklamanya99@gmail.com'}
+                </a>
+              </p>
+            ) : null}
           </div>
           {campusPortal ? (
             <div className="grid gap-6 sm:col-span-2 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-2 lg:gap-8">
               <FooterColumn
                 title={tCampus?.('footerLinksTitle') ?? t('company')}
-                links={CAMPUS_PORTAL_LINKS.map((link) => ({
+                links={campusPortalLinks(campusSlug).map((link) => ({
                   href: link.href,
                   label:
                     link.labelKey === 'campusPortal.footerPlatformLink'
@@ -184,6 +193,11 @@ export async function SiteFooter({
             </p>
             {platformMarketing && t.has('builtBy') ? (
               <p className="text-sm font-medium text-white/90">{t('builtBy')}</p>
+            ) : campusPortal ? (
+              <p className="text-sm text-white/75 sm:text-right">
+                {tCampus?.('poweredBy', { app: tCommon('appName') }) ??
+                  `Powered by ${tCommon('appName')}`}
+              </p>
             ) : (
               <p className="inline-flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5 text-sm text-white/85 sm:justify-end">
                 <span>{tLove('madeWith')}</span>

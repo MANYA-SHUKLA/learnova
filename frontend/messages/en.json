@@ -244,12 +244,12 @@
       }
     },
     "campusPortal": {
-      "eyebrow": "School of Engineering, JNU",
-      "title": "Campus academic portal",
-      "subtitle": "Use the email and password issued by the institute office. After sign-in you will see your timetable, courses, assignments, grades, and notices — this page is only the entry gate, not your workspace.",
+      "eyebrow": "Academic portal",
+      "title": "Campus sign-in",
+      "subtitle": "Use the email and password issued by your institute office.",
       "signInCta": "Sign in",
       "contactHelp": "Need help?",
-      "footerCampusName": "SOE JNU Portal",
+      "footerCampusName": "Campus portal",
       "footerTagline": "Official academic portal for students, faculty, and institute administrators.",
       "footerLinksTitle": "Portal",
       "footerPlatformLink": "About Learnova platform",
@@ -278,7 +278,7 @@
       },
       "help": {
         "title": "Academic office",
-        "description": "For login issues, section changes, or timetable corrections, reach out to the SOE office.",
+        "description": "For login issues, section changes, or timetable corrections, contact your academic office.",
         "emailFallback": "Contact your academic office"
       },
       "roles": {
@@ -707,6 +707,8 @@
       "registeredMessage": "Institution registered. Sign in as Institution Admin to finish setup.",
       "errorMessage": "Unable to sign in. Try again.",
       "campusSubtitle": "Official sign-in for {campus} — use credentials issued by your institute.",
+      "genericSubtitle": "Open your campus sign-in link (for example /your-campus/login). Generic login is not shared across institutions.",
+      "campusUrlRequired": "Use your institution’s campus sign-in URL (for example /mahi-raj/login). Each campus has its own link.",
       "superAdminLogin": "Super admin login"
     },
     "changePassword": {

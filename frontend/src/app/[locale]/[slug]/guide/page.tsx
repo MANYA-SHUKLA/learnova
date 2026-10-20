@@ -5,18 +5,8 @@ import { SiteFooter } from '@/components/marketing/site-footer';
 import { SiteHeader } from '@/components/marketing/site-header';
 import { siteContainer } from '@/lib/layout';
 import { Link } from '@/lib/i18n/routing';
-import { env } from '@/config/env';
-import { campusPublicPath, isReservedCampusSlug } from '@/lib/campus-slugs';
-
-async function fetchPortal(slug: string) {
-  const base = env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
-  const res = await fetch(`${base}/public/portal?slug=${encodeURIComponent(slug)}`, {
-    next: { revalidate: 120 },
-  });
-  if (!res.ok) return null;
-  const json = (await res.json()) as { data: { name: string; slug: string } };
-  return json.data;
-}
+import { campusLoginPath, isReservedCampusSlug } from '@/lib/campus-slugs';
+import { fetchPublicPortal } from '@/lib/campus-portal';
 
 const MODULES = [
   'Academic structure (programs, sections, batches)',
@@ -37,12 +27,12 @@ export default async function CampusGuideBySlugPage({ params }: GuidePageProps) 
 
   if (isReservedCampusSlug(slug)) notFound();
 
-  const portal = await fetchPortal(slug);
+  const portal = await fetchPublicPortal(slug);
   if (!portal) notFound();
 
   return (
     <>
-      <SiteHeader campusPortal />
+      <SiteHeader campusPortal campusSlug={portal.slug} campusName={portal.name} />
       <main className={siteContainer('py-16')}>
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Campus admin guide</p>
         <h1 className="mt-2 font-display text-3xl font-bold">{portal.name}</h1>
@@ -57,14 +47,17 @@ export default async function CampusGuideBySlugPage({ params }: GuidePageProps) 
         </ul>
         <div className="mt-10 flex flex-wrap gap-3">
           <Button asChild>
-            <Link href={`/login?campus=${encodeURIComponent(portal.slug)}`}>Admin sign in</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href={campusPublicPath(portal.slug)}>View public portal</Link>
+            <Link href={campusLoginPath(portal.slug)}>Admin sign in</Link>
           </Button>
         </div>
       </main>
-      <SiteFooter campusPortal campusName={portal.name} />
+      <SiteFooter
+        campusPortal
+        campusName={portal.name}
+        campusSlug={portal.slug}
+        campusTagline={portal.portalSettings?.officialCredit ?? portal.portalSettings?.portalSubtitle ?? undefined}
+        supportEmail={portal.portalSettings?.supportEmail}
+      />
     </>
   );
 }
